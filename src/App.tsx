@@ -6,6 +6,8 @@ import Articles from './pages/Articles';
 import WelcomePopup from './components/WelcomePopup';
 import DefaultLayout from './layouts/DefaultLayout';
 import Materials from "./pages/Materials.tsx";
+import Projects from "./pages/Projects.tsx";
+import ProjectDetails from "./pages/ProjectDetails.tsx";
 
 function TitleUpdater() {
     const location = useLocation();
@@ -14,6 +16,7 @@ function TitleUpdater() {
         '/materials': 'Materials',
         '/products': 'Products',
         '/articles': 'Articles',
+        '/projects': 'Projects',
     };
     const currentTitle = pageTitles[location.pathname] || 'Urblo';
     return (
@@ -59,6 +62,22 @@ function App() {
                         element={
                             <DefaultLayout bgImage="https://urblo.com.au/wp-content/uploads/2024/12/bg-materials.jpg">
                                 <Materials />
+                            </DefaultLayout>
+                        }
+                    />
+                    <Route
+                        path="/projects"
+                        element={
+                            <DefaultLayout bgImage="https://urblo.com.au/wp-content/uploads/2024/12/bg-products.jpg">
+                                <Projects />
+                            </DefaultLayout>
+                        }
+                    />
+                    <Route
+                        path="projects/:slug"
+                        element={
+                            <DefaultLayout bgImage="https://urblo.com.au/wp-content/uploads/2024/12/bg-project-details.jpg">
+                                <ProjectDetails />
                             </DefaultLayout>
                         }
                     />

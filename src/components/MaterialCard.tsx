@@ -11,7 +11,7 @@ export default function MaterialCard({ slug, name, category, img }: Material) {
     return (
         <Link
             to={`/materials/${slug}`}       // details page in future
-            className="group block overflow-hidden rounded-2xl bg-white shadow-sm transition hover:shadow-xl"
+            className="group block overflow-hidden bg-white shadow-sm transition hover:shadow-xl"
         >
             <div className="aspect-square overflow-hidden">
                 <img
