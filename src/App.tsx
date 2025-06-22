@@ -5,11 +5,13 @@ import Products from './pages/Products';
 import Articles from './pages/Articles';
 import WelcomePopup from './components/WelcomePopup';
 import DefaultLayout from './layouts/DefaultLayout';
+import Materials from "./pages/Materials.tsx";
 
 function TitleUpdater() {
     const location = useLocation();
     const pageTitles: Record<string, string> = {
         '/': 'Home',
+        '/materials': 'Materials',
         '/products': 'Products',
         '/articles': 'Articles',
     };
@@ -49,6 +51,14 @@ function App() {
                         element={
                             <DefaultLayout bgImage="https://urblo.com.au/wp-content/uploads/2024/12/bg-articles.jpg">
                                 <Articles />
+                            </DefaultLayout>
+                        }
+                    />
+                    <Route
+                        path="/materials"
+                        element={
+                            <DefaultLayout bgImage="https://urblo.com.au/wp-content/uploads/2024/12/bg-materials.jpg">
+                                <Materials />
                             </DefaultLayout>
                         }
                     />
