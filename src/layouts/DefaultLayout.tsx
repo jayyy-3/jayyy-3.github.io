@@ -9,10 +9,10 @@ interface Props {
 
 export default function DefaultLayout({ children }: Props) {
     return (
-        <>
+        <div className="flex min-h-screen flex-col">
             <Header />
-            <main>{children}</main>
+            <main className="flex-1">{children}</main>
             <Footer />
-        </>
+        </div>
     );
 }

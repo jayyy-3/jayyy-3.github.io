@@ -1,32 +1,25 @@
 import { Link } from "react-router-dom";
+import type { MaterialItem } from "../data/materialData";
 
-interface Material {
-    slug: string;          // Jump Details Page in future
-    name: string;
-    category: string;
-    img: string;
+interface Props extends MaterialItem {
+    link: string;
 }
 
-export default function MaterialCard({ slug, name, category, img }: Material) {
+export default function MaterialCard({ name, img, link }: Props) {
     return (
         <Link
-            to={`/materials/${slug}`}       // details page in future
-            className="group block overflow-hidden bg-white shadow-sm transition hover:shadow-xl"
+            to={link}
+            className="group block overflow-hidden shadow transition-shadow hover:shadow-lg"
         >
-            <div className="aspect-square overflow-hidden">
-                <img
-                    src={img}
-                    alt={name}
-                    className="h-full w-full object-cover transition group-hover:scale-105"
-                />
-            </div>
-            <div className="flex items-center justify-between p-4">
-                <div>
-                    <h3 className="text-base font-semibold">{name}</h3>
-                    <p className="text-xs text-gray-500">{category}</p>
-                </div>
-                {/* arrow icon can be added here  / add to favorites icon can be added here */}
-            </div>
+            <img
+                src={img}
+                alt={name}
+                className="h-56 w-full object-cover transition-opacity duration-300 group-hover:opacity-80"
+                loading="lazy"
+            />
+            <h3 className="mt-3 px-2 pb-4 text-lg font-normal text-primary-80">
+                {name}
+            </h3>
         </Link>
     );
 }

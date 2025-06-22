@@ -81,4 +81,22 @@ export const projects: ProjectData[] = [
             Address: "55 Parkview Rd, Alphington, VIC 3078",
         },
     },
+    {
+        slug: "moon-gate-woolley-street",
+        name: "Moon Gate | Woolley Street",
+        images: [
+            "https://urblo.com.au/wp-content/uploads/2024/12/Moon-Garden-4-Web-Sized-Matthew-Sherren-Photography.jpg",
+            "https://urblo.com.au/wp-content/uploads/2024/12/Moon-Garden-9-Web-Sized-Matthew-Sherren-Photography.jpg",
+        ],
+        details: {
+            Stone: ["New Grey", "Angola Black (granite)"],
+            Finish: "Polished",
+            Quantity: "5 Units",
+            "Carbon Offset": "Yes",
+            "Landscape Architect": "Aecom",
+            Contractor: "Complex Co.",
+            Date: "2023",
+            Address: "Woolley Street, Dickson, ACT 2602",
+        },
+    }
 ];

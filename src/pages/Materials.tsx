@@ -76,7 +76,7 @@ export default function Materials() {
 
                     <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                         {materials.map((m) => (
-                            <MaterialCard key={m.slug} {...m} />
+                            <MaterialCard link={""} key={m.slug} {...m} />
                         ))}
                     </div>
                 </div>
