@@ -1,3 +1,12 @@
+// src/pages/Home.tsx
+import "swiper/css";
+import FeatureSection from "../components/FutureSection.tsx"; // Import Swiper styles if Swiper is enabled
+
 export default function Home() {
-    return <div className="p-10 text-xl font-bold">Home Page</div>;
+    return (
+        <>
+            <FeatureSection />
+
+        </>
+    );
 }
