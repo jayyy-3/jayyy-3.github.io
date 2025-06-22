@@ -7,10 +7,10 @@ interface Props {
     bgImage?: string;
 }
 
-export default function DefaultLayout({ children, bgImage }: Props) {
+export default function DefaultLayout({ children }: Props) {
     return (
         <>
-            <Header bgImage="" />
+            <Header />
             <main>{children}</main>
             <Footer />
         </>

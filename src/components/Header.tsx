@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
-interface HeaderProps {
-    bgImage?: string;
-}
+// interface HeaderProps {
+//     bgImage?: string;
+// }
 
-export default function Header({ bgImage }: HeaderProps) {
+export default function Header() {
     const [menuOpen, setMenuOpen] = useState(false);
 
     const navItems = [

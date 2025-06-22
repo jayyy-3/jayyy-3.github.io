@@ -31,34 +31,32 @@ export default function FeatureSection() {
 
     return (
         <section className="bg-white py-16">
-            {/* ---- CONTENT AREA (Fixed Width) ---- */}
+            {/* ---- CONTENT AREA ---- */}
             <div className="relative mx-auto max-w-6xl px-4">
                 {active === "carbon" && <CarbonNeutral />}
                 {active === "install" && <InstallSteps />}
                 {active === "cost" && <CostComparison />}
                 {active === "process" && <ProcessSlider />}
             </div>
-
-            {/* ---- TAB ICONS (Full Width with Centered Content) ---- */}
-            <div className="w-full bg-gray-50">
-                <div className="mx-auto flex max-w-5xl justify-center gap-6 px-4 py-10">
-                    {FEATURES.map(({ key, icon, label }) => (
-                        <button
-                            key={key}
-                            onClick={() => setActive(key)}
-                            className={`group flex flex-col items-center gap-2
-                    transition ${active === key ? "opacity-100" : "opacity-60 hover:opacity-80"}`}
-                        >
-                            <img src={icon} alt={label} className="h-16 w-16 rounded-full object-cover" />
-                            <span className="text-sm font-medium">{label}</span>
-                            <div
-                                className={`h-0.5 w-6 rounded-full bg-emerald-500 transition-all
-                      ${active === key ? "scale-100" : "scale-0 group-hover:scale-50"}`}
-                            />
-                        </button>
-                    ))}
-                </div>
+            {/* ---- TAB ICONS ---- */}
+            <div className="mx-auto mb-10 flex max-w-5xl justify-center gap-6 px-4 py-10">
+                {FEATURES.map(({ key, icon, label }) => (
+                    <button
+                        key={key}
+                        onClick={() => setActive(key)}
+                        className={`group flex flex-col items-center gap-2
+                        transition ${active === key ? "opacity-100" : "opacity-60 hover:opacity-80"}`}
+                    >
+                        <img src={icon} alt={label} className="h-16 w-16 rounded-full object-cover" />
+                        <span className="text-sm font-medium">{label}</span>
+                        <div
+                            className={`h-0.5 w-6 rounded-full bg-emerald-500 transition-all
+                          ${active === key ? "scale-100" : "scale-0 group-hover:scale-50"}`}
+                        />
+                    </button>
+                ))}
             </div>
+
         </section>
     );
 }
@@ -222,31 +220,17 @@ function ProcessSlider() {
     ];
     return (
         <div className="overflow-hidden py-10">
-            <div className="animate-marquee flex w-[200%] gap-6">
+            <div className="flex w-[200%] gap-6 animate-marquee">
                 {steps.concat(steps).map((title, i) => (
                     <div
                         key={i}
                         className={`flex h-28 w-64 shrink-0 items-center justify-center rounded-xl
-                        ${i % 2 ? "bg-gray-100" : "bg-emerald-50"}`}
+        ${i % 2 ? "bg-gray-100" : "bg-emerald-50"}`}
                     >
                         <span className="text-center text-sm font-medium">{title}</span>
                     </div>
                 ))}
             </div>
-            {/* keyframes */}
-            <style jsx>{`
-        .animate-marquee {
-          animation: marquee 45s linear infinite;
-        }
-        @keyframes marquee {
-          from {
-            transform: translateX(0);
-          }
-          to {
-            transform: translateX(-50%);
-          }
-        }
-      `}</style>
         </div>
     );
 }
