@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { HashRouter, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
 import Products from './pages/Products';
 import Articles from './pages/Articles';
@@ -9,7 +9,7 @@ function App() {
     return (
         <>
             <WelcomePopup />
-            <BrowserRouter>
+            <HashRouter>
                 <Routes>
                     <Route
                         path="/"
@@ -36,7 +36,7 @@ function App() {
                         }
                     />
                 </Routes>
-            </BrowserRouter>
+            </HashRouter>
         </>
     );
 }
