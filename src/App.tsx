@@ -11,6 +11,7 @@ import ProjectDetails from "./pages/ProjectDetails.tsx";
 import MaterialsHome from "./pages/MaterialsHome.tsx";
 import CategoryPage from "./pages/CategoryPage.tsx";
 import MaterialDetailPage from "./pages/MaterialDetailPage.tsx";
+import OurStory from "./pages/OurStory.tsx";
 
 function TitleUpdater() {
     const location = useLocation();
@@ -112,6 +113,14 @@ function App() {
                         element={
                             <DefaultLayout bgImage="https://urblo.com.au/wp-content/uploads/2024/12/bg-404.jpg">
                                 <Home />
+                            </DefaultLayout>
+                        }
+                    />
+                    <Route
+                        path="our-story"
+                        element={
+                            <DefaultLayout bgImage="https://urblo.com.au/wp-content/uploads/2024/12/bg-our-story.jpg">
+                                <OurStory />
                             </DefaultLayout>
                         }
                     />
