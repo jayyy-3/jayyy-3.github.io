@@ -44,34 +44,42 @@ export default function OurStory() {
                 "With 17 years of stone‑sourcing expertise, Cameron helps clients across Australia find the perfect material for every project."
         }
     ];
+    team.push(...team);
 
     return (
         <div className="space-y-10">
             {/* Intro */}
             <motion.section
-                className="max-w-5xl mx-auto px-6 text-center space-y-8"
+                className="max-w-6xl mx-auto px-6 py-18 md:py-24"
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true, amount: 0.2 }}
                 variants={{ hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0 } }}
                 transition={{ duration: 0.6 }}
             >
-                <h3 className="text-2xl md:text-3xl font-medium">
-                    At Urblo, we believe in the transformative power of stone to shape urban
-                    environments.
-                </h3>
-                <p className="text-lg leading-relaxed max-w-3xl mx-auto">
-                    Urblo was conceived as a response to the growing demand for greener alternatives
-                    to concrete street furniture. Our work fuses contemporary design with timeless
-                    durability—seamlessly integrating stone into modern cityscapes while respecting
-                    both <span className="font-semibold">People</span> and <span className="font-semibold">Planet</span>.
-                    <br />
-                    <br />
-                    Join us as we redefine our urban landscape with the strength and beauty of stone.
-                </p>
-            </motion.section>
+                <div className="flex flex-col md:flex-row justify-between gap-10 items-start">
+                    {/* 左侧标题 */}
+                    <h3 className="text-2xl md:text-3xl font-large md:w-1/3">
+                        At Urblo, we believe in the transformative power of stone to shape urban environments.
+                    </h3>
 
-            {/* Milestones */}
+                    {/* 右侧正文，右对齐 */}
+                    <div className="text-lg leading-relaxed md:w-2/3 space-y-4">
+                        <p>
+                            Urblo was conceived as a response to the growing demand
+                            for greener alternatives to concrete seats. From this point,
+                            Urblo is rooted in the fusion of contemporary design and timeless durability,
+                            seamlessly integrating stone blocks into modern cityscapes.
+                        </p>
+                        <p>
+                            We create products that enhance urban spaces while respecting the People
+                            and Environment.
+                            Join us in our mission to redefine urban landscapes with the strength
+                            and beauty of stone.
+                        </p>
+                    </div>
+                </div>
+            </motion.section>            {/* Milestones */}
             <section className="bg-slate-900 text-white py-20">
                 <div className="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-12 px-6 text-center">
                     {[
@@ -122,12 +130,15 @@ export default function OurStory() {
             </motion.section>
 
             {/* Team Carousel */}
-            <section className="max-w-full mx-auto px-6 bg-black">
-                <h2 className="text-3xl font-semibold text-center mb-8">Meet Our Team</h2>
+            <section className="max-w-full mx-auto px-6 bg-black pt-6">
+                <div className="text-left mb-8 px-6 mx-auto max-w-5xl">
+                    <h2 className="text-3xl font-semibold text-white">Meet our team</h2>
+                    <h3 className="text-xl text-slate-400 mt-2">Our team members</h3>
+                </div>
                 <Swiper
                     spaceBetween={24}
                     slidesPerView={1}
-                    breakpoints={{ 640: { slidesPerView: 2 }, 1024: { slidesPerView: 3 } }}
+                    breakpoints={{ 640: { slidesPerView: 2 }, 1024: { slidesPerView: 3.5 } }}
                     autoplay={{ delay: 5000, disableOnInteraction: true }}
                     loop
                 >
