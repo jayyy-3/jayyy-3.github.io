@@ -130,15 +130,15 @@ export default function OurStory() {
             </motion.section>
 
             {/* Team Carousel */}
-            <section className="max-w-full mx-auto px-6 bg-black pt-6">
-                <div className="text-left mb-8 px-6 mx-auto max-w-5xl">
+            <section className="mx-auto px-[360px] bg-black pt-6">
+                <div className="text-left mb-8 px-6 mx-auto max-w-xl">
                     <h2 className="text-3xl font-semibold text-white">Meet our team</h2>
                     <h3 className="text-xl text-slate-400 mt-2">Our team members</h3>
                 </div>
                 <Swiper
                     spaceBetween={24}
                     slidesPerView={1}
-                    breakpoints={{ 640: { slidesPerView: 2 }, 1024: { slidesPerView: 3.5 } }}
+                    breakpoints={{ 640: { slidesPerView: 2 }, 1024: { slidesPerView: 4 } }}
                     autoplay={{ delay: 5000, disableOnInteraction: true }}
                     loop
                 >
@@ -146,7 +146,7 @@ export default function OurStory() {
                         <SwiperSlide key={member.name} className="group">
                             <div className="relative overflow-hidden shadow-lg">
                                 <img src={member.img} alt={member.name}
-                                     className="w-full aspect-[323/495] object-cover" />
+                                     className="aspect-[2/3] object-cover" />
                                 <div className="absolute inset-0 bg-slate-950/80 flex items-center justify-center text-white text-sm p-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                     {member.bio}
                                 </div>
