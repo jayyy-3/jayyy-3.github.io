@@ -2,7 +2,6 @@ import { HashRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import Home from './pages/Home';
 import Products from './pages/Products';
-import Articles from './pages/Articles';
 import WelcomePopup from './components/WelcomePopup';
 import DefaultLayout from './layouts/DefaultLayout';
 import Materials from "./pages/Materials.tsx";
@@ -12,6 +11,8 @@ import MaterialsHome from "./pages/MaterialsHome.tsx";
 import CategoryPage from "./pages/CategoryPage.tsx";
 import MaterialDetailPage from "./pages/MaterialDetailPage.tsx";
 import OurStory from "./pages/OurStory.tsx";
+import ArticlesPage from "./pages/ArticlesPage.tsx";
+import ArticlePage from "./pages/ArticlePage.tsx";
 
 function TitleUpdater() {
     const location = useLocation();
@@ -50,14 +51,6 @@ function App() {
                         element={
                             <DefaultLayout bgImage="https://urblo.com.au/wp-content/uploads/2024/12/bg-products.jpg">
                                 <Products />
-                            </DefaultLayout>
-                        }
-                    />
-                    <Route
-                        path="/articles"
-                        element={
-                            <DefaultLayout bgImage="https://urblo.com.au/wp-content/uploads/2024/12/bg-articles.jpg">
-                                <Articles />
                             </DefaultLayout>
                         }
                     />
@@ -124,6 +117,23 @@ function App() {
                             </DefaultLayout>
                         }
                     />
+                    <Route
+                        path="/articles"
+                        element={
+                            <DefaultLayout bgImage="https://urblo.com.au/wp-content/uploads/2024/12/bg-articles.jpg">
+                                <ArticlesPage />
+                            </DefaultLayout>
+                        }
+                    />
+                    <Route
+                        path="/articles/:slug"
+                        element={
+                            <DefaultLayout bgImage="https://urblo.com.au/wp-content/uploads/2024/12/bg-article-details.jpg">
+                                <ArticlePage />
+                            </DefaultLayout>
+                        }
+                    />
+
                 </Routes>
             </HashRouter>
         </>

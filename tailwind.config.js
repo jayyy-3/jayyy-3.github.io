@@ -6,6 +6,6 @@ export default {
         primary: '#00FF19',
     },
   },
-  plugins: [],
+  plugins: [require("@tailwindcss/typography")],
 }
 

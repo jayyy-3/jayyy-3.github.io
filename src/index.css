@@ -5,3 +5,18 @@
 html {
     overflow-y: scroll;
 }
+
+.article-wrapper {
+    display: flex;
+    justify-content: center;
+    padding: 2rem;
+    background-color: #CFFF81;
+}
+
+.article-wrapper #newsletter-email {
+    background: transparent !important;
+}
+
+.article-wrapper {
+    font-family: inherit !important;
+}
