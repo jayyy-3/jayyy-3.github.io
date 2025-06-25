@@ -4,6 +4,10 @@ import ArticleCard from "../components/ArticleCard";
 import { motion } from "framer-motion";
 
 export default function ArticlesPage() {
+    // Sort articles by date (newest first)
+    const sortedArticles = [...articles].sort(
+        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
     return (
         <section className="py-16 bg-slate-50">
             <div className="max-w-6xl mx-auto px-4">
@@ -17,7 +21,7 @@ export default function ArticlesPage() {
                 </motion.h1>
 
                 <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
-                    {articles.map((meta) => (
+                    {sortedArticles.map((meta) => (
                         <ArticleCard key={meta.slug} meta={meta} />
                     ))}
                 </div>
