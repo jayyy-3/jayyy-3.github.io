@@ -56,7 +56,7 @@ export default function ArticlePage() {
                                 : `${import.meta.env.BASE_URL}${meta.cover.replace(/^\/+/, "")}`
                         }
                         alt={meta.title}
-                        className="w-full h-80 object-cover opacity-70"
+                        className="overflow-hidden w-full h-80 object-cover opacity-70"
                         loading="lazy"
                     />
                 )}

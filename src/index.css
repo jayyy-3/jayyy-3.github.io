@@ -2,6 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
+.article-wrapper img[src*=".gif" i] {
+    max-width: 100%;
+    height: auto;
+    display: block;
+
+    /* 防止黑边的关键两句 */
+    image-rendering: pixelated !important;
+    image-rendering: -moz-crisp-edges !important;
+}
+
+
 html {
     overflow-y: scroll;
 }

@@ -18,11 +18,13 @@ export default function ArticleCard({ meta }: Props) {
         >
             <Link to={`/articles/${meta.slug}`} className="block">
                 {meta.cover && (
-                    <img
-                        src={meta.cover}
-                        alt={meta.title}
-                        className="w-full h-48 object-cover"
-                    />
+                    <div className="aspect-[3/2] overflow-hidden">
+                        <img
+                            src={meta.cover}
+                            alt={meta.title}
+                            className="block w-full h-full object-cover"
+                        />
+                    </div>
                 )}
                 <div className="p-4">
                     <h3 className="text-lg font-semibold mb-1">{meta.title}</h3>
