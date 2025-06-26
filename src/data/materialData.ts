@@ -128,8 +128,8 @@ export const materialCategories: MaterialCategory[] = [
                 title: "Classic Blue Stone",
                 items: [
                     {
-                        slug: "antlin",
-                        name: "Antlin",
+                        slug: "antline",
+                        name: "Antline",
                         img: "https://urblo.com.au/wp-content/uploads/2024/12/Antline-scaled-1.jpg",
                     },
                     {

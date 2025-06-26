@@ -51,8 +51,8 @@ const materials = [
         img: "https://urblo.com.au/wp-content/uploads/2024/12/Belgium-Blue-1.jpg",
     },
     {
-        slug: "antlin",
-        name: "Antlin",
+        slug: "antline",
+        name: "Antline",
         category: "Blue Stone",
         img: "https://urblo.com.au/wp-content/uploads/2024/12/Antline-scaled-1.jpg",
     },
