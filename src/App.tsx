@@ -1,7 +1,7 @@
 import { HashRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import Home from './pages/Home';
-import Products from './pages/Products';
+import Products from './pages/ProductsPage.tsx';
 import WelcomePopup from './components/WelcomePopup';
 import DefaultLayout from './layouts/DefaultLayout';
 import Materials from "./pages/Materials.tsx";
@@ -13,6 +13,7 @@ import MaterialDetailPage from "./pages/MaterialDetailPage.tsx";
 import OurStory from "./pages/OurStory.tsx";
 import ArticlesPage from "./pages/ArticlesPage.tsx";
 import ArticlePage from "./pages/ArticlePage.tsx";
+import ProductDetailPage from "./pages/ProductDetailPage.tsx";
 
 function TitleUpdater() {
     const location = useLocation();
@@ -75,8 +76,6 @@ function App() {
                         </DefaultLayout>
                     } />
 
-
-                     具体石材详情（可后续补）
                     <Route
                         path="/materials/:category/:subcategory/:slug"
                         element={
@@ -130,6 +129,22 @@ function App() {
                         element={
                             <DefaultLayout bgImage="https://urblo.com.au/wp-content/uploads/2024/12/bg-article-details.jpg">
                                 <ArticlePage />
+                            </DefaultLayout>
+                        }
+                    />
+                    <Route
+                        path="/products"
+                        element={
+                            <DefaultLayout bgImage="https://urblo.com.au/wp-content/uploads/2024/12/bg-products.jpg">
+                                <Products />
+                            </DefaultLayout>
+                        }
+                    />
+                    <Route
+                        path="/products/:slug"
+                        element={
+                            <DefaultLayout bgImage="https://urblo.com.au/wp-content/uploads/2024/12/bg-materials.jpg">
+                                <ProductDetailPage />
                             </DefaultLayout>
                         }
                     />

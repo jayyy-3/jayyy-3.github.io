@@ -14,6 +14,7 @@ export default function Header() {
         { name: 'New Materials', href: '/materials-home' },
         { name: 'Our Story', href: '/our-story' },
         { name: 'Articles', href: '/articles' },
+        { name: 'Products', href: '/products' },
         { name: 'Sample Request', href: '/sample-request' },
         { name: 'Contact Us', href: '/contact' },
     ];

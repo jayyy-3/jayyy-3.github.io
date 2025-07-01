@@ -155,3 +155,8 @@ export interface MaterialItem {
     sizes?: string[];           // e.g. ["Random Length 600 mm x 400 mm", "Custom"]
 }
 
+export const stoneMaterials: readonly MaterialItem[] =
+    materialCategories.flatMap((cat) =>
+        cat.subCategories.flatMap((sub) => sub.items)
+    );
+
