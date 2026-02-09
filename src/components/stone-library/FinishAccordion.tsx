@@ -3,8 +3,6 @@ import type { FinishVM } from '../../types/stone-library';
 interface FinishAccordionProps {
     finishes: FinishVM[];
     activeFinishKey: string | null;
-    onHover: (finishKey: string) => void;
-    onLeave: () => void;
     onSelect: (finishKey: string) => void;
 }
 
@@ -15,14 +13,12 @@ function capabilityLabel(capability: FinishVM['capability']): string {
 export default function FinishAccordion({
     finishes,
     activeFinishKey,
-    onHover,
-    onLeave,
     onSelect,
 }: FinishAccordionProps) {
     return (
-        <section className="space-y-2" onMouseLeave={onLeave}>
+        <section className="space-y-2">
             <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">
-                Image Accordion · Hover to preview, click to lock
+                Finish Selector · Click to select
             </p>
 
             <div className="divide-y divide-neutral-200 border border-neutral-200 bg-white">
@@ -33,9 +29,6 @@ export default function FinishAccordion({
                         <div key={finish.finishKey}>
                             <button
                                 type="button"
-                                onMouseEnter={() => onHover(finish.finishKey)}
-                                onFocus={() => onHover(finish.finishKey)}
-                                onBlur={onLeave}
                                 onClick={() => onSelect(finish.finishKey)}
                                 className={[
                                     'flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition',

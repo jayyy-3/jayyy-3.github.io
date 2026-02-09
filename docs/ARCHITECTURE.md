@@ -37,7 +37,7 @@ Last updated: 2026-02-09
 |---|---|---|
 | `/` | `Home` | Wrapped by `DefaultLayout`. |
 | `/stone-library` | `StoneLibraryPage` | Stone list and filter surface. |
-| `/stone-library/:stoneGroupId` | `StoneLibraryDetailPage` | Stone detail with variant switch + finish accordion. |
+| `/stone-library/:stoneGroupId` | `StoneLibraryDetailPage` | Stone detail with variant switch, synchronized finish controls, and lightbox preview. |
 | `/products` | `ProductsPage` | Bench/system product listing. |
 | `/products/:slug` | `ProductDetailPage` | Product detail and material options. |
 | `/projects` | `Projects` | Project listing page. |
@@ -57,6 +57,22 @@ Last updated: 2026-02-09
 - `/sample-request` is not declared in router.
 - `/contact` is not declared in router.
 - Footer internal links use raw anchors and are inconsistent with `HashRouter` contract.
+
+## Stone Library Detail Interaction Contract (`src/pages/StoneLibraryDetailPage.tsx`)
+- State composition:
+  - Effective active finish resolves by precedence: `previewFinishKey` -> `lockedFinishKey` -> `defaultFinishKey`.
+  - Variant changes reset finish preview/lock state.
+- Left media contract (`src/components/stone-library/ImageStage.tsx`):
+  - Desktop: hover/focus previews finish, click locks finish.
+  - Mobile: tap locks finish.
+  - Active panel maintains fixed 3:2 ratio; collapsed panels stay narrow and horizontally scrollable.
+- Right finish selector contract (`src/components/stone-library/FinishAccordion.tsx`):
+  - Click (or keyboard activation on focused button) is the only state-changing selection action.
+  - Hover/focus does not alter active finish state.
+- Large-image inspection contract (`src/components/stone-library/FinishLightbox.tsx`):
+  - Open via active-panel zoom action; close via button, backdrop, or `Esc`.
+  - Supports previous/next finish navigation with buttons and arrow keys.
+  - Supports 1x/2x zoom with 2x drag-pan and body-scroll lock while open.
 
 ## Data Contracts
 

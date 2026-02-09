@@ -52,6 +52,20 @@ For any user-facing layout/copy/IA task:
   - `/Users/lee/Documents/SAI/urblo/urblo-react/src/service/StoneLibraryService.ts`
   - `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/ProductDetailPage.tsx`
 
+### DONE-STONELIB-UX-ACC-001
+- Scope:
+  - Reworked Stone Library detail into synchronized dual-control interaction:
+    - Left image accordion keeps hover preview + click lock.
+    - Right finish list is click-select only (no hover-triggered switching).
+  - Removed heavy dark image overlays and in-image active caption block.
+  - Added full-screen finish lightbox with keyboard navigation and 2x zoom/pan for texture inspection.
+  - Stabilized active panel rendering with fixed 3:2 ratio and narrow collapsed panels.
+- Key files:
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/ImageStage.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/FinishAccordion.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/FinishLightbox.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/StoneLibraryDetailPage.tsx`
+
 ## Now
 
 ### NOW-STONELIB-IMG-FASTTRACK-001
@@ -218,6 +232,27 @@ For any user-facing layout/copy/IA task:
   - `npm run lint`
   - `npx tsc -b`
 
+### NEXT-STONELIB-IMG-002
+- Objective: Define and implement how secondary finish frames (`_2`) should be shown without breaking current comparison flow.
+- Problem statement: Multiple finishes now have paired assets (`_1` + `_2`), but runtime currently uses `_1` only and has no UX contract for exposing `_2`.
+- Affected files:
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/data/stoneFinishImages.ts`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/ImageStage.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/FinishAccordion.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/docs/NEXT_STEPS.md`
+- Implementation notes:
+  - Keep `_1` as default visual for all finishes unless user explicitly switches view.
+  - Decide one explicit `_2` interaction model (e.g., alternate frame toggle, detail lens, or split compare) and avoid mixing patterns.
+  - Define authoring rules for future pairs (naming, fallback, and when `_2` is optional vs required).
+- Definition of Done:
+  - `_2` rendering behavior is documented and implemented with clear trigger rules.
+  - Interaction works on desktop and mobile without desynchronizing active finish state.
+  - Missing `_2` assets degrade gracefully to `_1` without placeholder regression.
+- Verification commands:
+  - `npm run build`
+  - `npm run lint`
+  - `npx tsc -b`
+
 ### NEXT-STONELIB-DATA-001
 - Objective: Replace generic finish behavior text with approved product/engineering notes.
 - Problem statement: Current behavior copy is a general fallback table and not project-calibrated.
@@ -229,30 +264,6 @@ For any user-facing layout/copy/IA task:
   - Ensure wording remains non-absolute and context-safe.
 - Definition of Done:
   - Finish behavior notes are reviewed and specific enough for designer decision support.
-- Verification commands:
-  - `npm run build`
-  - `npm run lint`
-  - `npx tsc -b`
-
-### NEXT-STONELIB-UX-ACC-001
-- Objective: Upgrade Stone Library detail visual interaction from single image stage to true dual-side synchronized image accordion.
-- Problem statement: Current detail page supports finish hover/click sync on the right list only. Left media stage is still a single static panel and does not support accordion panel interaction.
-- Affected files:
-  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/StoneLibraryDetailPage.tsx`
-  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/ImageStage.tsx`
-  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/FinishAccordion.tsx`
-  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/data/stoneFinishImages.ts`
-- Implementation notes:
-  - Replace left-side single image with horizontal multi-panel image accordion.
-  - Default state: all panels collapsed-narrow; active panel expands.
-  - Interaction contract: hover/click on either side (left panel or right finish list) must synchronize active finish.
-  - Desktop: hover preview + click lock; mobile: tap lock.
-  - Expanded panel supports overlay content (title/subtitle/CTA); collapsed panel shows compact label/icon.
-  - Keep smooth width/opacity transitions and keyboard accessibility.
-- Definition of Done:
-  - Left and right controls remain state-consistent in all interaction modes.
-  - Accordion animation is smooth and layout remains stable on desktop/mobile.
-  - No regression in finish metadata rendering.
 - Verification commands:
   - `npm run build`
   - `npm run lint`

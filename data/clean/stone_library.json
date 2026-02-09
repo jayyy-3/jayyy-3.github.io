@@ -1415,15 +1415,6 @@
               ]
             },
             {
-              "finishId": "rippling",
-              "finishVariantId": null,
-              "capability": "yes",
-              "sources": [
-                "samples",
-                "spec"
-              ]
-            },
-            {
               "finishId": "rock_face",
               "finishVariantId": null,
               "capability": "yes",

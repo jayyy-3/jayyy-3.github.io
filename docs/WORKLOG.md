@@ -126,6 +126,41 @@ Last updated: 2026-02-09
 - `NEXT-STONELIB-IMG-001`
 - `NEXT-STONELIB-DATA-001`
 
+## Entry - 2026-02-09 (Stone Library UI Interaction Closure)
+
+### Scope
+- Finalized Stone Library detail interaction contract for selection stability and texture inspection:
+  - Right-side finish list switched to click-only selection (no hover-triggered active changes).
+  - Left image accordion retained hover preview + click lock behavior.
+- Removed heavy in-image dark overlay/caption treatment on active panels and kept cleaner finish-first visual treatment.
+- Enforced active panel 3:2 presentation with narrow collapsed panels and horizontal overflow-safe behavior.
+- Added finish lightbox for deep visual review:
+  - full-screen open/close, prev/next, keyboard shortcuts, and 1x/2x zoom with drag-pan.
+- Updated architecture/backlog docs to reflect new runtime interaction contract and completed UX task.
+
+### Changed Files
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/ImageStage.tsx`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/FinishAccordion.tsx`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/FinishLightbox.tsx`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/StoneLibraryDetailPage.tsx`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/ARCHITECTURE.md`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/NEXT_STEPS.md`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/WORKLOG.md`
+
+### Verification Results
+- `npm run build`: pass
+- `npm run lint`: pass
+- `npx tsc -b`: pass
+
+### Risks and Gaps
+- Bundle size warning (`>500kB`) remains and is unchanged by this scope.
+- `react-helmet` strict-mode lifecycle warning remains unrelated and is not addressed in this session.
+
+### Next Handoff
+- `NEXT-STONELIB-LAYOUT-001`
+- `NEXT-STONELIB-PRICE-001`
+- `NEXT-STONELIB-IMG-002`
+
 ## Entry Template (Use for Every Future Session)
 
 ### Date

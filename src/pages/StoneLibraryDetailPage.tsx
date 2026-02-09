@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 import FinishAccordion from '../components/stone-library/FinishAccordion';
+import FinishLightbox from '../components/stone-library/FinishLightbox';
 import ImageStage from '../components/stone-library/ImageStage';
 import SpecsPanel from '../components/stone-library/SpecsPanel';
 import VariantSwitch from '../components/stone-library/VariantSwitch';
@@ -16,6 +17,7 @@ export default function StoneLibraryDetailPage() {
     const [selectedVariantId, setSelectedVariantId] = useState<string>('');
     const [lockedFinishKey, setLockedFinishKey] = useState<string | null>(null);
     const [previewFinishKey, setPreviewFinishKey] = useState<string | null>(null);
+    const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
     const detail = useMemo(
         () =>
@@ -43,6 +45,7 @@ export default function StoneLibraryDetailPage() {
         setSelectedVariantId(variantId);
         setLockedFinishKey(null);
         setPreviewFinishKey(null);
+        setIsLightboxOpen(false);
     }
 
     function handleFinishHover(finishKey: string) {
@@ -56,6 +59,15 @@ export default function StoneLibraryDetailPage() {
     function handleFinishSelect(finishKey: string) {
         setLockedFinishKey(finishKey);
         setPreviewFinishKey(finishKey);
+    }
+
+    function handleOpenLightbox(finishKey: string) {
+        handleFinishSelect(finishKey);
+        setIsLightboxOpen(true);
+    }
+
+    function handleCloseLightbox() {
+        setIsLightboxOpen(false);
     }
 
     return (
@@ -93,19 +105,20 @@ export default function StoneLibraryDetailPage() {
                         onChange={handleVariantChange}
                     />
 
-                    <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(320px,1fr)]">
+                    <div className="grid gap-6 lg:items-start lg:grid-cols-[minmax(0,2fr)_minmax(320px,1fr)]">
                         <ImageStage
                             stoneName={detail.name}
-                            finishLabel={activeFinish?.label}
-                            imageUrl={activeFinish?.imageUrl}
-                            imageAlt={activeFinish?.imageAlt}
+                            finishes={detail.finishes}
+                            activeFinishKey={activeFinish?.finishKey || null}
+                            onHover={handleFinishHover}
+                            onLeave={handleFinishLeave}
+                            onSelect={handleFinishSelect}
+                            onOpenLightbox={handleOpenLightbox}
                         />
 
                         <FinishAccordion
                             finishes={detail.finishes}
                             activeFinishKey={activeFinish?.finishKey || null}
-                            onHover={handleFinishHover}
-                            onLeave={handleFinishLeave}
                             onSelect={handleFinishSelect}
                         />
                     </div>
@@ -147,6 +160,15 @@ export default function StoneLibraryDetailPage() {
                     </div>
                 </section>
             </main>
+
+            <FinishLightbox
+                isOpen={isLightboxOpen}
+                finishes={detail.finishes}
+                activeFinishKey={activeFinish?.finishKey || null}
+                stoneName={detail.name}
+                onClose={handleCloseLightbox}
+                onSelectFinish={handleFinishSelect}
+            />
         </>
     );
 }
