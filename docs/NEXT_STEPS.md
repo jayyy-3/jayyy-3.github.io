@@ -3,7 +3,7 @@
 Last updated: 2026-02-09
 
 ## Current Objective
-Close remaining route integrity gaps after Stone Library migration, keep docs and code contracts synchronized, and then continue performance and data-quality improvements.
+Raise delivery readiness baseline (brand assets + UI completeness), close route integrity gaps, and align high-impact pages with approved Figma/WordPress references before later performance and data-quality refinements.
 
 ## Blocking Quality Gate Policy
 A task touching runtime behavior is not complete unless all three pass:
@@ -54,6 +54,69 @@ For any user-facing layout/copy/IA task:
 
 ## Now
 
+### NOW-STONELIB-IMG-FASTTRACK-001
+- Objective: Fast-track replacement of Stone Library placeholder images using user-provided finish assets.
+- Problem statement: Most finish assets are now available from stakeholder handoff, but list/detail still display placeholder states for unmapped entries.
+- Affected files:
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/data/stoneFinishImages.ts`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/service/StoneLibraryService.ts`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/StoneCard.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/ImageStage.tsx`
+- Implementation notes:
+  - Prioritize direct mapping of handed-over finish images to existing stone group/variant/finish keys.
+  - Keep placeholder fallback only for truly missing assets and track those residual gaps explicitly.
+  - Treat this as Phase 1 delivery, with `NEXT-STONELIB-IMG-001` continuing as Phase 2 full coverage/QA.
+- Definition of Done:
+  - All provided finish images are mapped and visible in Stone Library list/detail where keys exist.
+  - Placeholder usage is reduced to only not-yet-provided assets.
+  - Residual unmapped finish list is recorded under `NEXT-STONELIB-IMG-001`.
+- Verification commands:
+  - `npm run build`
+  - `npm run lint`
+  - `npx tsc -b`
+
+### NOW-DELIVERY-READINESS-001
+- Objective: Remove template/default assets and visible placeholder UI that block production handoff.
+- Problem statement: The app shell and several surfaces still show non-delivery defaults or placeholders (e.g. Vite favicon/title, empty feature icons, placeholder icon slots, dead social links).
+- Affected files:
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/index.html`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/FeatureSection.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/panels/ProcessSliderPanel.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/Footer.tsx`
+- Implementation notes:
+  - Replace default Vite shell metadata (`/vite.svg`, `Vite + React + TS`) with Urblo brand assets and title contract.
+  - Replace empty icon stubs with approved icon set.
+  - Resolve dead footer social anchors (`href="#"`) with real links or explicit hide rule.
+- Definition of Done:
+  - No user-visible template defaults remain in app shell.
+  - No empty/placeholder icon containers remain in active UI.
+  - Footer contains no dead external social links.
+- Verification commands:
+  - `npm run build`
+  - `npm run lint`
+  - `npx tsc -b`
+
+### NOW-ASSET-STRATEGY-001
+- Objective: Decide and document image hosting strategy for current phase and delivery phase.
+- Problem statement: Runtime currently depends on many hard-coded external `urblo.com.au/wp-content/uploads/...` assets, which creates coupling and delivery risk if source URLs change.
+- Affected files:
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/docs/ARCHITECTURE.md`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/docs/NEXT_STEPS.md`
+  - runtime references under `/Users/lee/Documents/SAI/urblo/urblo-react/src/**` and `/Users/lee/Documents/SAI/urblo/urblo-react/data/**`
+- Implementation notes:
+  - Make an explicit phase decision:
+    - Phase A (current): keep WordPress-hosted assets with fallback and broken-link checks.
+    - Phase B (delivery): mirror critical assets to controlled storage (`public/` or CDN bucket) and update references.
+  - Record ownership and migration trigger (what condition forces Phase B start).
+- Definition of Done:
+  - Image hosting policy is explicitly approved and recorded in docs.
+  - A migration trigger and owner are documented.
+  - If Phase B is selected now, migration scope is converted into executable tasks.
+- Verification commands:
+  - `npm run build` (if code references changed)
+  - `npm run lint` (if code references changed)
+  - `npx tsc -b` (if code references changed)
+
 ### NOW-ROUTE-002
 - Objective: Finish route/CTA integrity by removing unresolved footer destinations.
 - Problem statement: Footer still points to `/sample-request` and `/contact`, but both routes are undeclared.
@@ -91,17 +154,65 @@ For any user-facing layout/copy/IA task:
 
 ## Next
 
+### NEXT-UI-PARITY-001
+- Objective: Reproduce approved Home / Our Story / Articles / Contact Us UI from existing Figma and WordPress implementations.
+- Problem statement: Current React pages are functionally present but not yet aligned to approved design/system parity for delivery.
+- Affected files:
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/Home.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/OurStory.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/ArticlesPage.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/ArticlePage.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/App.tsx` (for Contact route declaration)
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/Header.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/Footer.tsx`
+- Implementation notes:
+  - Use Figma as source-of-truth for spacing/typography/component behavior.
+  - Use WordPress UI as behavior/content reference where Figma omits details.
+  - Split delivery into page-by-page checkpoints: Home -> Our Story -> Articles -> Contact Us.
+  - Keep responsive parity (desktop/tablet/mobile) and route-safe navigation contracts.
+- Definition of Done:
+  - The four target pages reach agreed parity versus design/reference baseline.
+  - Contact Us has explicit route and UX contract in router + nav surfaces.
+  - Parity evidence (before/after screenshots + gap list) is captured in worklog.
+- Verification commands:
+  - `npm run build`
+  - `npm run lint`
+  - `npx tsc -b`
+
+### NEXT-SAMPLE-REQUEST-001
+- Objective: Define and stage Sample Request capability for later implementation.
+- Problem statement: Sample Request is needed for product flow but implementation path (form stack, submission target, notification, storage) is not yet decided.
+- Affected files:
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/App.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/Footer.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/docs/ARCHITECTURE.md`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/docs/NEXT_STEPS.md`
+- Implementation notes:
+  - Run decision spike first: `mailto` fallback vs third-party form backend vs custom API/serverless.
+  - Define minimum contract: required fields, anti-spam, consent, analytics event, and success/error UX.
+  - Keep route/CTA inactive or explicitly marked until contract is approved.
+- Definition of Done:
+  - Chosen implementation path is documented with constraints and owner.
+  - Route and CTA behavior for pre-launch phase is explicit and non-broken.
+  - Follow-up build task exists with implementation-ready acceptance criteria.
+- Verification commands:
+  - `npm run build` (if runtime behavior changed)
+  - `npm run lint` (if runtime behavior changed)
+  - `npx tsc -b` (if runtime behavior changed)
+
 ### NEXT-STONELIB-IMG-001
-- Objective: Integrate production HD finish imagery into Stone Library accordion.
-- Problem statement: Current image mapping is partial and relies on fallback placeholders.
+- Objective: Complete Stone Library finish imagery coverage after fast-track ingestion.
+- Problem statement: After `NOW-STONELIB-IMG-FASTTRACK-001`, remaining finishes still require full HD coverage, QA validation, and long-tail mapping closure.
 - Affected files:
   - `/Users/lee/Documents/SAI/urblo/urblo-react/src/data/stoneFinishImages.ts`
   - `/Users/lee/Documents/SAI/urblo/urblo-react/src/service/StoneLibraryService.ts`
 - Implementation notes:
-  - Add per-variant and per-finish image mappings.
-  - Keep graceful fallback behavior for missing assets.
+  - Close long-tail per-variant/per-finish mapping gaps left after fast-track.
+  - Validate resolution, crop behavior, and consistency across list/detail breakpoints.
+  - Keep graceful fallback behavior for missing assets until all approved images arrive.
 - Definition of Done:
   - All priority stones/finishes display intended HD images in list and detail views.
+  - No approved finish remains on placeholder imagery.
 - Verification commands:
   - `npm run build`
   - `npm run lint`
@@ -142,6 +253,27 @@ For any user-facing layout/copy/IA task:
   - Left and right controls remain state-consistent in all interaction modes.
   - Accordion animation is smooth and layout remains stable on desktop/mobile.
   - No regression in finish metadata rendering.
+- Verification commands:
+  - `npm run build`
+  - `npm run lint`
+  - `npx tsc -b`
+
+### NEXT-STONELIB-LAYOUT-001
+- Objective: Fix Stone Library detail layout coupling that stretches left media when finish count grows.
+- Problem statement: On `/stone-library/:stoneGroupId`, when the right-side finish list becomes long, the left image stage can be stretched to match right-column height, which introduces visible black edge artifacts under the image.
+- Affected files:
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/StoneLibraryDetailPage.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/ImageStage.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/FinishAccordion.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/index.css` (if layout constraint updates are needed)
+- Implementation notes:
+  - Decouple left media container height from right finish list content height.
+  - Keep stable media aspect ratio and prevent image stretch/compression.
+  - Make right-side overflow behavior explicit (scroll/clamp) instead of forcing left panel growth.
+- Definition of Done:
+  - Increasing finish items does not stretch or distort the left image area.
+  - No black edge appears below the active image on desktop or mobile breakpoints.
+  - Existing finish hover/click sync behavior remains correct.
 - Verification commands:
   - `npm run build`
   - `npm run lint`
@@ -208,7 +340,8 @@ For any user-facing layout/copy/IA task:
   - route source `/Users/lee/Documents/SAI/urblo/urblo-react/src/App.tsx`
 
 ## Exit Criteria for Current Cycle
-- `NOW-ROUTE-002` and `NOW-DOCS-002` are complete.
+- `NOW-STONELIB-IMG-FASTTRACK-001`, `NOW-DELIVERY-READINESS-001`, `NOW-ASSET-STRATEGY-001`, `NOW-ROUTE-002`, and `NOW-DOCS-002` are complete.
 - All three quality gates pass.
 - Navigation and route contracts are consistent with `src/App.tsx` and `src/components/Footer.tsx`.
+- Delivery shell is free of template/default app metadata and dead social links.
 - Stone Library data/image follow-ups are explicitly tracked, not implied complete.
