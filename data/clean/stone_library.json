@@ -1,0 +1,1948 @@
+{
+  "generatedAt": "2026-02-05T01:40:18+00:00",
+  "finishes": [
+    {
+      "finishId": "flamed",
+      "finishVariantId": null,
+      "displayName": "Flamed",
+      "sourceNames": [
+        "Flamed"
+      ],
+      "sortOrder": 10
+    },
+    {
+      "finishId": "sawn",
+      "finishVariantId": null,
+      "displayName": "Sawn",
+      "sourceNames": [
+        "Sawn",
+        "Diamond Sawn"
+      ],
+      "sortOrder": 20
+    },
+    {
+      "finishId": "honed",
+      "finishVariantId": null,
+      "displayName": "Honed",
+      "sourceNames": [
+        "Honed"
+      ],
+      "sortOrder": 30
+    },
+    {
+      "finishId": "polished",
+      "finishVariantId": null,
+      "displayName": "Polished",
+      "sourceNames": [
+        "Polished"
+      ],
+      "sortOrder": 40
+    },
+    {
+      "finishId": "bush_hammered",
+      "finishVariantId": null,
+      "displayName": "Bush Hammered",
+      "sourceNames": [
+        "Bush Hammered",
+        "Bush Hammer (___)"
+      ],
+      "sortOrder": 50
+    },
+    {
+      "finishId": "combed",
+      "finishVariantId": null,
+      "displayName": "Combed",
+      "sourceNames": [
+        "Combed"
+      ],
+      "sortOrder": 60
+    },
+    {
+      "finishId": "rippling",
+      "finishVariantId": null,
+      "displayName": "Rippling",
+      "sourceNames": [
+        "Rippling"
+      ],
+      "sortOrder": 70
+    },
+    {
+      "finishId": "rippling",
+      "finishVariantId": "fine",
+      "displayName": "Rippling (Fine)",
+      "sourceNames": [
+        "Rippling Fine"
+      ],
+      "sortOrder": 71
+    },
+    {
+      "finishId": "rippling",
+      "finishVariantId": "rough",
+      "displayName": "Rippling (Rough)",
+      "sourceNames": [
+        "Rippling Rough"
+      ],
+      "sortOrder": 72
+    },
+    {
+      "finishId": "rock_face",
+      "finishVariantId": null,
+      "displayName": "Rock Face",
+      "sourceNames": [
+        "Rock Face",
+        "Rock Face (___)"
+      ],
+      "sortOrder": 80
+    },
+    {
+      "finishId": "sparrow_peck",
+      "finishVariantId": null,
+      "displayName": "Sparrow Peck",
+      "sourceNames": [
+        "Sparrow Peck",
+        "Sparrow peck"
+      ],
+      "sortOrder": 90
+    },
+    {
+      "finishId": "sandblasted",
+      "finishVariantId": null,
+      "displayName": "Sandblasted",
+      "sourceNames": [
+        "Sandblasted",
+        "Sandblasted (___)"
+      ],
+      "sortOrder": 100
+    }
+  ],
+  "stones": [
+    {
+      "stoneGroupId": "alpine-white",
+      "displayName": "Alpine White",
+      "sourceName": "Alpine White",
+      "status": "active",
+      "dlName": null,
+      "type": {
+        "source": "Granite",
+        "display": "Granite"
+      },
+      "origin": {
+        "source": "Liaoning, China",
+        "regionDisplay": "Liaoning",
+        "countryDisplay": "China"
+      },
+      "price": {
+        "source": "$",
+        "tier": 1
+      },
+      "rawBlock": {
+        "source": "2000x1000x750",
+        "lengthMm": 2000,
+        "widthMm": 1000,
+        "heightMm": 750
+      },
+      "cutOptions": [],
+      "variants": [
+        {
+          "stoneVariantId": "alpine-white",
+          "displayVariant": null,
+          "sourceVariant": null,
+          "variantType": "none",
+          "status": "active",
+          "sortOrder": 0,
+          "finishCapabilities": [
+            {
+              "finishId": "flamed",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "sawn",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "honed",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "polished",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "bush_hammered",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "combed",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "rippling",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "rock_face",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "sparrow_peck",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "sandblasted",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "derived"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "stoneGroupId": "angola-black",
+      "displayName": "Angola Black",
+      "sourceName": "Angola Black",
+      "status": "active",
+      "dlName": null,
+      "type": {
+        "source": "Granite",
+        "display": "Granite"
+      },
+      "origin": {
+        "source": "Angola",
+        "regionDisplay": null,
+        "countryDisplay": "Angola"
+      },
+      "price": {
+        "source": "$$",
+        "tier": 2
+      },
+      "rawBlock": {
+        "source": "3000x2000x1500",
+        "lengthMm": 3000,
+        "widthMm": 2000,
+        "heightMm": 1500
+      },
+      "cutOptions": [],
+      "variants": [
+        {
+          "stoneVariantId": "angola-black",
+          "displayVariant": null,
+          "sourceVariant": null,
+          "variantType": "none",
+          "status": "active",
+          "sortOrder": 0,
+          "finishCapabilities": [
+            {
+              "finishId": "flamed",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "sawn",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "honed",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "polished",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "bush_hammered",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "combed",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "rippling",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "rock_face",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "sparrow_peck",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "sandblasted",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "derived"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "stoneGroupId": "blueocean",
+      "displayName": "Blueocean",
+      "sourceName": "Blueocean",
+      "status": "active",
+      "dlName": null,
+      "type": {
+        "source": "Bluestone",
+        "display": "Bluestone"
+      },
+      "origin": {
+        "source": "Hainan, China",
+        "regionDisplay": "Hainan",
+        "countryDisplay": "China"
+      },
+      "price": {
+        "source": "$$",
+        "tier": 2
+      },
+      "rawBlock": {
+        "source": "1800x900x700",
+        "lengthMm": 1800,
+        "widthMm": 900,
+        "heightMm": 700
+      },
+      "cutOptions": [],
+      "variants": [
+        {
+          "stoneVariantId": "blueocean",
+          "displayVariant": null,
+          "sourceVariant": null,
+          "variantType": "none",
+          "status": "active",
+          "sortOrder": 0,
+          "finishCapabilities": [
+            {
+              "finishId": "flamed",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "sawn",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "honed",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "polished",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "bush_hammered",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "combed",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "rippling",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "rock_face",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "sparrow_peck",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "sandblasted",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "derived"
+              ]
+            },
+            {
+              "finishId": "rippling",
+              "finishVariantId": "fine",
+              "capability": "yes",
+              "sources": [
+                "samples"
+              ]
+            },
+            {
+              "finishId": "rippling",
+              "finishVariantId": "rough",
+              "capability": "yes",
+              "sources": [
+                "samples"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "stoneGroupId": "golden-crust",
+      "displayName": "Golden Crust",
+      "sourceName": "Golden Crust",
+      "status": "active",
+      "dlName": null,
+      "type": {
+        "source": "Granite",
+        "display": "Granite"
+      },
+      "origin": {
+        "source": "Fujian, China",
+        "regionDisplay": "Fujian",
+        "countryDisplay": "China"
+      },
+      "price": {
+        "source": "$",
+        "tier": 1
+      },
+      "rawBlock": {
+        "source": "2000x1000x750",
+        "lengthMm": 2000,
+        "widthMm": 1000,
+        "heightMm": 750
+      },
+      "cutOptions": [],
+      "variants": [
+        {
+          "stoneVariantId": "golden-crust--light",
+          "displayVariant": "Light",
+          "sourceVariant": "light",
+          "variantType": "color",
+          "status": "active",
+          "sortOrder": 10,
+          "finishCapabilities": [
+            {
+              "finishId": "flamed",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "sawn",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "honed",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "polished",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "bush_hammered",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "combed",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "rippling",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "rock_face",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "sparrow_peck",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "sandblasted",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "derived"
+              ]
+            }
+          ]
+        },
+        {
+          "stoneVariantId": "golden-crust--dark",
+          "displayVariant": "Dark",
+          "sourceVariant": "dark",
+          "variantType": "color",
+          "status": "active",
+          "sortOrder": 20,
+          "finishCapabilities": [
+            {
+              "finishId": "flamed",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "sawn",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "honed",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "polished",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "bush_hammered",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "combed",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "rippling",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "rock_face",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "sparrow_peck",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "sandblasted",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "derived"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "stoneGroupId": "harcourt",
+      "displayName": "Harcourt",
+      "sourceName": "Harcourt",
+      "status": "tbc",
+      "dlName": "G688",
+      "type": {
+        "source": "Granite",
+        "display": "Granite"
+      },
+      "origin": {
+        "source": "Hunan, China",
+        "regionDisplay": "Hunan",
+        "countryDisplay": "China"
+      },
+      "price": {
+        "source": "$",
+        "tier": 1
+      },
+      "rawBlock": {
+        "source": "2400x1200x750",
+        "lengthMm": 2400,
+        "widthMm": 1200,
+        "heightMm": 750
+      },
+      "cutOptions": [],
+      "variants": [
+        {
+          "stoneVariantId": "harcourt",
+          "displayVariant": null,
+          "sourceVariant": null,
+          "variantType": "none",
+          "status": "tbc",
+          "sortOrder": 0,
+          "finishCapabilities": [
+            {
+              "finishId": "flamed",
+              "finishVariantId": null,
+              "capability": "tbc",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "sawn",
+              "finishVariantId": null,
+              "capability": "tbc",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "honed",
+              "finishVariantId": null,
+              "capability": "tbc",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "polished",
+              "finishVariantId": null,
+              "capability": "tbc",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "bush_hammered",
+              "finishVariantId": null,
+              "capability": "tbc",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "combed",
+              "finishVariantId": null,
+              "capability": "tbc",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "rippling",
+              "finishVariantId": null,
+              "capability": "tbc",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "rock_face",
+              "finishVariantId": null,
+              "capability": "tbc",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "sparrow_peck",
+              "finishVariantId": null,
+              "capability": "tbc",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "sandblasted",
+              "finishVariantId": null,
+              "capability": "tbc",
+              "sources": [
+                "derived"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "stoneGroupId": "honey-comb",
+      "displayName": "Honey Comb",
+      "sourceName": "Honey Comb",
+      "status": "active",
+      "dlName": null,
+      "type": {
+        "source": "Bluestone",
+        "display": "Bluestone"
+      },
+      "origin": {
+        "source": "Hainan, China",
+        "regionDisplay": "Hainan",
+        "countryDisplay": "China"
+      },
+      "price": {
+        "source": "$$",
+        "tier": 2
+      },
+      "rawBlock": {
+        "source": "1300x1000x600",
+        "lengthMm": 1300,
+        "widthMm": 1000,
+        "heightMm": 600
+      },
+      "cutOptions": [],
+      "variants": [
+        {
+          "stoneVariantId": "honey-comb",
+          "displayVariant": null,
+          "sourceVariant": null,
+          "variantType": "none",
+          "status": "active",
+          "sortOrder": 0,
+          "finishCapabilities": [
+            {
+              "finishId": "flamed",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "sawn",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "honed",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "polished",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "bush_hammered",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "combed",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "rippling",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "rock_face",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "sparrow_peck",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "sandblasted",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "derived"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "stoneGroupId": "ivory-sand",
+      "displayName": "Ivory Sand",
+      "sourceName": "Ivory Sand",
+      "status": "active",
+      "dlName": null,
+      "type": {
+        "source": "Sandstone",
+        "display": "Sandstone"
+      },
+      "origin": {
+        "source": "Yuannan, China",
+        "regionDisplay": "Yunnan",
+        "countryDisplay": "China"
+      },
+      "price": {
+        "source": "$",
+        "tier": 1
+      },
+      "rawBlock": {
+        "source": "2000x1000x750",
+        "lengthMm": 2000,
+        "widthMm": 1000,
+        "heightMm": 750
+      },
+      "cutOptions": [],
+      "variants": [
+        {
+          "stoneVariantId": "ivory-sand",
+          "displayVariant": null,
+          "sourceVariant": null,
+          "variantType": "none",
+          "status": "active",
+          "sortOrder": 0,
+          "finishCapabilities": [
+            {
+              "finishId": "flamed",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "sawn",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "honed",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "polished",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "bush_hammered",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "combed",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "rippling",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "rock_face",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "sparrow_peck",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "sandblasted",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "derived"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "stoneGroupId": "juparana",
+      "displayName": "Juparana",
+      "sourceName": "Juparana",
+      "status": "active",
+      "dlName": null,
+      "type": {
+        "source": "Granite",
+        "display": "Granite"
+      },
+      "origin": {
+        "source": "Fujian, China",
+        "regionDisplay": "Fujian",
+        "countryDisplay": "China"
+      },
+      "price": {
+        "source": "$",
+        "tier": 1
+      },
+      "rawBlock": {
+        "source": "2000x1000x750",
+        "lengthMm": 2000,
+        "widthMm": 1000,
+        "heightMm": 750
+      },
+      "cutOptions": [],
+      "variants": [
+        {
+          "stoneVariantId": "juparana",
+          "displayVariant": null,
+          "sourceVariant": null,
+          "variantType": "none",
+          "status": "active",
+          "sortOrder": 0,
+          "finishCapabilities": [
+            {
+              "finishId": "flamed",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "sawn",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "honed",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "polished",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "bush_hammered",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "combed",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "rippling",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "rock_face",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "sparrow_peck",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "sandblasted",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "derived"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "stoneGroupId": "new-grey",
+      "displayName": "New Grey",
+      "sourceName": "New Grey",
+      "status": "active",
+      "dlName": "G654",
+      "type": {
+        "source": "Granite",
+        "display": "Granite"
+      },
+      "origin": {
+        "source": "Fujian, China",
+        "regionDisplay": "Fujian",
+        "countryDisplay": "China"
+      },
+      "price": {
+        "source": "$",
+        "tier": 1
+      },
+      "rawBlock": {
+        "source": "2000x1000x750",
+        "lengthMm": 2000,
+        "widthMm": 1000,
+        "heightMm": 750
+      },
+      "cutOptions": [],
+      "variants": [
+        {
+          "stoneVariantId": "new-grey",
+          "displayVariant": null,
+          "sourceVariant": null,
+          "variantType": "none",
+          "status": "active",
+          "sortOrder": 0,
+          "finishCapabilities": [
+            {
+              "finishId": "flamed",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "sawn",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "honed",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "polished",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "bush_hammered",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "combed",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "rippling",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "rock_face",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "sparrow_peck",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "sandblasted",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "derived"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "stoneGroupId": "steel-blue",
+      "displayName": "Steel Blue",
+      "sourceName": "Steel Blue",
+      "status": "active",
+      "dlName": null,
+      "type": {
+        "source": "Bluestone",
+        "display": "Bluestone"
+      },
+      "origin": {
+        "source": "Guangdong, China",
+        "regionDisplay": "Guangdong",
+        "countryDisplay": "China"
+      },
+      "price": {
+        "source": "$",
+        "tier": 1
+      },
+      "rawBlock": {
+        "source": "1800x900x700",
+        "lengthMm": 1800,
+        "widthMm": 900,
+        "heightMm": 700
+      },
+      "cutOptions": [],
+      "variants": [
+        {
+          "stoneVariantId": "steel-blue",
+          "displayVariant": null,
+          "sourceVariant": null,
+          "variantType": "none",
+          "status": "active",
+          "sortOrder": 0,
+          "finishCapabilities": [
+            {
+              "finishId": "flamed",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "sawn",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "honed",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "polished",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "bush_hammered",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "combed",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "rippling",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "rock_face",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "sparrow_peck",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "sandblasted",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "derived"
+              ]
+            },
+            {
+              "finishId": "rippling",
+              "finishVariantId": "fine",
+              "capability": "yes",
+              "sources": [
+                "samples"
+              ]
+            },
+            {
+              "finishId": "rippling",
+              "finishVariantId": "rough",
+              "capability": "yes",
+              "sources": [
+                "samples"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "stoneGroupId": "tan-brown",
+      "displayName": "Tan Brown",
+      "sourceName": "Tan Brown",
+      "status": "active",
+      "dlName": null,
+      "type": {
+        "source": "Granite",
+        "display": "Granite"
+      },
+      "origin": {
+        "source": "India",
+        "regionDisplay": null,
+        "countryDisplay": "India"
+      },
+      "price": {
+        "source": "$",
+        "tier": 1
+      },
+      "rawBlock": {
+        "source": "2800x2000x1500",
+        "lengthMm": 2800,
+        "widthMm": 2000,
+        "heightMm": 1500
+      },
+      "cutOptions": [],
+      "variants": [
+        {
+          "stoneVariantId": "tan-brown",
+          "displayVariant": null,
+          "sourceVariant": null,
+          "variantType": "none",
+          "status": "active",
+          "sortOrder": 0,
+          "finishCapabilities": [
+            {
+              "finishId": "flamed",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "sawn",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "honed",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "polished",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "bush_hammered",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "combed",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "rippling",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "rock_face",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "sparrow_peck",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "sandblasted",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "derived"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "stoneGroupId": "tuscany",
+      "displayName": "Tuscany",
+      "sourceName": "Toscany",
+      "status": "active",
+      "dlName": null,
+      "type": {
+        "source": "Trvertine",
+        "display": "Travertine"
+      },
+      "origin": {
+        "source": "Iran",
+        "regionDisplay": null,
+        "countryDisplay": "Iran"
+      },
+      "price": {
+        "source": "$$$",
+        "tier": 3
+      },
+      "rawBlock": {
+        "source": "2500*1500*1500",
+        "lengthMm": 2500,
+        "widthMm": 1500,
+        "heightMm": 1500
+      },
+      "cutOptions": [
+        {
+          "cutOrientation": "cross",
+          "available": true,
+          "sources": [
+            "samples",
+            "spec"
+          ]
+        },
+        {
+          "cutOrientation": "vein",
+          "available": true,
+          "sources": [
+            "samples",
+            "spec"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "stoneVariantId": "tuscany--vein-cut",
+          "displayVariant": "Vein Cut",
+          "sourceVariant": "vein cut",
+          "variantType": "cut_orientation",
+          "status": "active",
+          "sortOrder": 10,
+          "finishCapabilities": [
+            {
+              "finishId": "flamed",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "sawn",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "honed",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "polished",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "bush_hammered",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "combed",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "rippling",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "rock_face",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "sparrow_peck",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "sandblasted",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples"
+              ]
+            }
+          ]
+        },
+        {
+          "stoneVariantId": "tuscany--cross-cut",
+          "displayVariant": "Cross Cut",
+          "sourceVariant": "cross cut",
+          "variantType": "cut_orientation",
+          "status": "active",
+          "sortOrder": 20,
+          "finishCapabilities": [
+            {
+              "finishId": "flamed",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "sawn",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "honed",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "polished",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "bush_hammered",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "combed",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "rippling",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "rock_face",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "sparrow_peck",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "sandblasted",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "stoneGroupId": "zen-grey",
+      "displayName": "Zen Grey",
+      "sourceName": "Zen Grey",
+      "status": "active",
+      "dlName": null,
+      "type": {
+        "source": "Granite",
+        "display": "Granite"
+      },
+      "origin": {
+        "source": "Shandong, China",
+        "regionDisplay": "Shandong",
+        "countryDisplay": "China"
+      },
+      "price": {
+        "source": "$$",
+        "tier": 2
+      },
+      "rawBlock": {
+        "source": "2400x1200x1000",
+        "lengthMm": 2400,
+        "widthMm": 1200,
+        "heightMm": 1000
+      },
+      "cutOptions": [],
+      "variants": [
+        {
+          "stoneVariantId": "zen-grey",
+          "displayVariant": null,
+          "sourceVariant": null,
+          "variantType": "none",
+          "status": "active",
+          "sortOrder": 0,
+          "finishCapabilities": [
+            {
+              "finishId": "flamed",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "sawn",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "honed",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "polished",
+              "finishVariantId": null,
+              "capability": "yes",
+              "sources": [
+                "samples",
+                "spec"
+              ]
+            },
+            {
+              "finishId": "bush_hammered",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "combed",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "rippling",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "rock_face",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "sparrow_peck",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "spec"
+              ]
+            },
+            {
+              "finishId": "sandblasted",
+              "finishVariantId": null,
+              "capability": "no",
+              "sources": [
+                "derived"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

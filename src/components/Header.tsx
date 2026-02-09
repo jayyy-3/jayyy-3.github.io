@@ -1,74 +1,59 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
-// interface HeaderProps {
-//     bgImage?: string;
-// }
+interface NavItem {
+    name: string;
+    href: string;
+    external?: boolean;
+}
 
 export default function Header() {
     const [menuOpen, setMenuOpen] = useState(false);
 
-    const navItems = [
+    const navItems: NavItem[] = [
         { name: 'Projects', href: '/projects' },
-        { name: 'Materials', href: '/materials' },
-        { name: 'New Materials', href: '/materials-home' },
+        { name: 'Stone Library', href: '/stone-library' },
         { name: 'Our Story', href: '/our-story' },
         { name: 'Articles', href: '/articles' },
         { name: 'Products', href: '/products' },
-        { name: 'Sample Request', href: '/sample-request' },
-        { name: 'Contact Us', href: '/contact' },
+        { name: 'Contact Us', href: 'mailto:info@urblo.com.au', external: true },
     ];
+
+    function renderNavItem(item: NavItem, className: string) {
+        if (item.external) {
+            return (
+                <a key={item.name} href={item.href} className={className}>
+                    {item.name}
+                </a>
+            );
+        }
+
+        return (
+            <Link key={item.name} to={item.href} className={className}>
+                {item.name}
+            </Link>
+        );
+    }
 
     return (
         <header className="relative z-50 bg-black">
-            {/* 🔥 Background Video */}
-            {/*{!bgImage && (*/}
-            {/*    <video*/}
-            {/*        autoPlay*/}
-            {/*        muted*/}
-            {/*        loop*/}
-            {/*        playsInline*/}
-            {/*        className="absolute top-0 left-0 w-full h-full object-cover object-top -z-10"*/}
-            {/*    >*/}
-            {/*        <source src="https://urblo.com.au/urblo/" type="video/mp4" />*/}
-            {/*        Your browser does not support the video tag.*/}
-            {/*    </video>*/}
-            {/*)}*/}
-
-            {/*/!* 🖼️ Image Fallback *!/*/}
-            {/*{bgImage && (*/}
-            {/*    <div*/}
-            {/*        className="absolute top-0 left-0 w-full h-full object-cover object-top -z-10"*/}
-            {/*        style={{*/}
-            {/*            backgroundImage: `url(${bgImage})`,*/}
-            {/*            backgroundSize: 'cover',*/}
-            {/*            backgroundPosition: 'top',*/}
-            {/*            backgroundRepeat: 'no-repeat',*/}
-            {/*        }}*/}
-            {/*    />*/}
-            {/*)}*/}
-            <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-                {/* Logo */}
+            <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
                 <Link to="/">
                     <img
                         src="https://urblo.com.au/wp-content/uploads/2024/12/logo.png"
-                        alt="Logo"
+                        alt="Urblo logo"
                         className="h-10 w-auto"
                     />
                 </Link>
 
-                {/* Desktop Menu */}
-                <nav className="hidden md:flex space-x-6 text-white text-sm font-medium">
-                    {navItems.map((item) => (
-                        <Link key={item.name} to={item.href} className="hover:text-gray-300">
-                            {item.name}
-                        </Link>
-                    ))}
+                <nav className="hidden space-x-6 text-sm font-medium text-white md:flex">
+                    {navItems.map((item) =>
+                        renderNavItem(item, 'hover:text-gray-300 transition'),
+                    )}
                 </nav>
 
-                {/* Hamburger for Mobile */}
                 <div className="md:hidden">
-                    <button onClick={() => setMenuOpen(!menuOpen)}>
+                    <button type="button" onClick={() => setMenuOpen(!menuOpen)}>
                         {menuOpen ? (
                             <img
                                 src="https://urblo.com.au/wp-content/uploads/2024/12/Group-228.svg"
@@ -86,19 +71,33 @@ export default function Header() {
                 </div>
             </div>
 
-            {/* Mobile Menu */}
             {menuOpen && (
-                <div className="md:hidden bg-black bg-opacity-90 text-white px-4 pb-4 space-y-3 text-center">
-                    {navItems.map((item) => (
-                        <Link
-                            key={item.name}
-                            to={item.href}
-                            className="block text-lg font-medium hover:text-gray-300"
-                            onClick={() => setMenuOpen(false)}
-                        >
-                            {item.name}
-                        </Link>
-                    ))}
+                <div className="space-y-3 bg-black bg-opacity-90 px-4 pb-4 text-center text-white md:hidden">
+                    {navItems.map((item) => {
+                        if (item.external) {
+                            return (
+                                <a
+                                    key={item.name}
+                                    href={item.href}
+                                    className="block text-lg font-medium hover:text-gray-300"
+                                    onClick={() => setMenuOpen(false)}
+                                >
+                                    {item.name}
+                                </a>
+                            );
+                        }
+
+                        return (
+                            <Link
+                                key={item.name}
+                                to={item.href}
+                                className="block text-lg font-medium hover:text-gray-300"
+                                onClick={() => setMenuOpen(false)}
+                            >
+                                {item.name}
+                            </Link>
+                        );
+                    })}
                 </div>
             )}
         </header>

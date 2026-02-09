@@ -4,7 +4,7 @@ export type MaterialCategory = 'body' | 'frame' | 'battens';
 export type SelectedMaterials = Partial<Record<MaterialCategory, string>>;
 
 export interface MaterialRef {
-    /** 对应 materialData.ts 里的 slug */
+    /** 对应 StoneLibraryService 提供的 stoneGroupId */
     slug: string;
     label: string;
     category: MaterialCategory;

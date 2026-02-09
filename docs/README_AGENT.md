@@ -38,9 +38,16 @@ Minimum required updates for major changes:
 - `/Users/lee/Documents/SAI/urblo/urblo-react/docs/WORKLOG.md`
 - `/Users/lee/Documents/SAI/urblo/urblo-react/docs/ARCHITECTURE.md` (if contracts changed)
 
+## Delivery Closure Guardrail (New)
+Before declaring implementation complete, verify all checks below:
+- Code gates passed (`build`, `lint`, `tsc`).
+- Contract docs reflect current routes and runtime data sources.
+- `WORKLOG.md` includes scope, verification evidence, and residual risks.
+- `NEXT_STEPS.md` marks completed items and leaves explicit follow-ups.
+
 ## Current Critical Risk Snapshot (Measured 2026-02-09)
-- `lint` gate is red. `eslint .` scans `.vite/deps/react-router-dom.js` and reports missing rule definitions, and there is one hook dependency warning in `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/ProductDetailPage.tsx`.
-- Navigation-to-route mismatch exists. Header/Footer/section CTAs include paths such as `/sample-request`, `/contact`, and `/en-au/contact-us`, but these routes are not implemented in `/Users/lee/Documents/SAI/urblo/urblo-react/src/App.tsx`.
-- HashRouter consistency risk exists. Some internal navigation uses raw `<a href="/...">` rather than router links, which can bypass hash-based routing behavior.
-- Duplicate route definition exists for `/products` in `/Users/lee/Documents/SAI/urblo/urblo-react/src/App.tsx`.
-- Popup persistence behavior is incomplete. `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/WelcomePopup.tsx` reads `seenPopup` but does not write it (write line is commented).
+- Stone Library migration is complete: old `/materials*` route family has been removed and replaced with `/stone-library` + `/stone-library/:stoneGroupId`.
+- Quality gates are green (`npm run build`, `npm run lint`, `npx tsc -b` all pass).
+- Footer route mismatch remains: `/sample-request` and `/contact` links still exist in `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/Footer.tsx`, but those routes are not declared in `/Users/lee/Documents/SAI/urblo/urblo-react/src/App.tsx`.
+- Popup persistence behavior remains incomplete: `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/WelcomePopup.tsx` reads `seenPopup` but does not write it (write line is commented).
+- Bundle size warning (`>500kB` chunk) remains and should be addressed with code splitting.

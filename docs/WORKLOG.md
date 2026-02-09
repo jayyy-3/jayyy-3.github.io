@@ -36,6 +36,96 @@ Last updated: 2026-02-09
   - `NOW-RUNBOOK-001`
 - Keep brand baseline advisory linkage in all user-facing tasks.
 
+## Entry - 2026-02-09 (Stone Library Refactor + Docs Closure)
+
+### Scope
+- Replaced legacy Material/New Material route family with a unified Stone Library experience:
+  - `/stone-library`
+  - `/stone-library/:stoneGroupId`
+- Introduced Stone Library typed contracts, service layer, filters, detail variant switching, and finish accordion UX.
+- Migrated product body-stone options from removed `materialData.ts` to `StoneLibraryService` output.
+- Removed obsolete material pages/components/data that were no longer referenced.
+- Updated docs to match post-refactor route/data contracts and quality gate reality.
+
+### Changed Files (This Session)
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/App.tsx`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/Header.tsx`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/StoneLibraryPage.tsx`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/StoneLibraryDetailPage.tsx`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/FilterBar.tsx`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/StoneCard.tsx`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/VariantSwitch.tsx`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/ImageStage.tsx`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/FinishAccordion.tsx`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/SpecsPanel.tsx`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/types/stone-library.ts`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/service/StoneLibraryService.ts`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/data/finishBehaviorMeta.ts`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/data/stoneFinishImages.ts`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/ProductDetailPage.tsx`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/data/productData.ts`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/types/product.ts`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/tsconfig.app.json`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/eslint.config.js`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/README_AGENT.md`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/ARCHITECTURE.md`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/NEXT_STEPS.md`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/WORKLOG.md`
+
+### Verification Results
+- `npm run build`: pass
+- `npm run lint`: pass
+- `npx tsc -b`: pass
+
+### Risks and Gaps
+- Footer still links to undeclared in-app routes (`/sample-request`, `/contact`) and needs route-safe remediation.
+- Stone finish HD imagery mapping is still partial and currently falls back to placeholders/defaults where missing.
+- Finish behavior notes are currently generic defaults and should be replaced with approved production copy.
+- Bundle warning (`>500kB`) remains and requires code-splitting work.
+
+### Next Handoff
+- `NOW-ROUTE-002`
+- `NOW-DOCS-002`
+- `NEXT-STONELIB-IMG-001`
+- `NEXT-STONELIB-DATA-001`
+
+## Entry - 2026-02-09 (Variant Correction + Product Group Mode)
+
+### Scope
+- Corrected Stone Library variant behavior to match business rules:
+  - Golden Crust: only Light/Dark
+  - Harcourt: no variant switch (single base stone)
+  - Tuscany: only Vein Cut/Cross Cut
+- Applied fixes in both clean runtime data and service-layer normalization to prevent future source regression from leaking into UI.
+- Updated Products body-stone selector to group-level options only (no variant-level entries in selector UI).
+- Deferred dual-side accordion and price-tier visualization to documented backlog with explicit acceptance criteria.
+
+### Changed Files
+- `/Users/lee/Documents/SAI/urblo/urblo-react/data/clean/stone_library.json`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/data/clean/stone_variants.csv`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/service/StoneLibraryService.ts`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/ProductDetailPage.tsx`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/types/product.ts`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/data/productData.ts`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/NEXT_STEPS.md`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/WORKLOG.md`
+
+### Verification Results
+- `npm run build`: pass
+- `npm run lint`: pass
+- `npx tsc -b`: pass
+
+### Risks and Gaps
+- Sample-related clean files (`sample_catalog.json`, `sample_items.csv`, `stone_finish_capabilities.csv`) still contain legacy variant entries by design for this scope and may diverge from Stone Library display rules.
+- Left-side media on detail page is not yet a true image accordion; right list still drives current active preview.
+- Price range display remains textual (`$ / $$ / $$$`) and is pending tier-meter redesign.
+
+### Next Handoff
+- `NEXT-STONELIB-UX-ACC-001`
+- `NEXT-STONELIB-PRICE-001`
+- `NEXT-STONELIB-IMG-001`
+- `NEXT-STONELIB-DATA-001`
+
 ## Entry Template (Use for Every Future Session)
 
 ### Date

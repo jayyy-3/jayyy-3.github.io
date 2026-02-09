@@ -26,21 +26,23 @@ Last updated: 2026-02-09
   - `npm run build` => `tsc -b && vite build`
   - `npm run lint` => `eslint .`
   - typecheck path => `npx tsc -b`
+- TypeScript contract update:
+  - `resolveJsonModule: true` enabled in `/Users/lee/Documents/SAI/urblo/urblo-react/tsconfig.app.json` to support `stone_library.json` imports.
+- Lint scope contract update:
+  - `.vite/**` ignored in `/Users/lee/Documents/SAI/urblo/urblo-react/eslint.config.js`.
 
 ## Route Interface Contract (`src/App.tsx`)
 
 | Route pattern | Page component | Notes |
 |---|---|---|
 | `/` | `Home` | Wrapped by `DefaultLayout`. |
-| `/products` | `ProductsPage` | Defined twice in router (duplicate declaration). |
-| `/products/:slug` | `ProductDetailPage` | Product details via slug. |
-| `/materials` | `Materials` | Featured stone range page. |
-| `/materials-home` | `MaterialsHome` | Category landing page. |
-| `/materials/:category` | `CategoryPage` | Category detail listing. |
-| `/materials/:category/:subcategory/:slug` | `MaterialDetailPage` | Material detail page. |
+| `/stone-library` | `StoneLibraryPage` | Stone list and filter surface. |
+| `/stone-library/:stoneGroupId` | `StoneLibraryDetailPage` | Stone detail with variant switch + finish accordion. |
+| `/products` | `ProductsPage` | Bench/system product listing. |
+| `/products/:slug` | `ProductDetailPage` | Product detail and material options. |
 | `/projects` | `Projects` | Project listing page. |
-| `/projects/:slug` | `ProjectDetails` | Declared as `projects/:slug` in code; resolves as project detail route. |
-| `/our-story` | `OurStory` | Declared as `our-story` in code. |
+| `/projects/:slug` | `ProjectDetails` | Project detail page. |
+| `/our-story` | `OurStory` | About page. |
 | `/articles` | `ArticlesPage` | Article list page. |
 | `/articles/:slug` | `ArticlePage` | Article detail page. |
 | `*` | `Home` | Fallback to home content. |
@@ -48,19 +50,29 @@ Last updated: 2026-02-09
 ## Navigation Contract vs Implemented Routes
 
 ### Implemented navigation surfaces
-- Header links: `/projects`, `/materials`, `/materials-home`, `/our-story`, `/articles`, `/products`, `/sample-request`, `/contact`
+- Header links: `/projects`, `/stone-library`, `/our-story`, `/articles`, `/products`, `mailto:info@urblo.com.au`
 - Footer links: `/sample-request`, `/contact`
-- CTA links:
-  - `src/pages/Materials.tsx` -> `/sample-request`
-  - `src/components/EnquiryStrip.tsx` -> `/en-au/contact-us`
 
 ### Gaps
 - `/sample-request` is not declared in router.
 - `/contact` is not declared in router.
-- `/en-au/contact-us` is not declared in router.
-- Internal links using raw anchors (`<a href="/...">`) are inconsistent with `HashRouter` navigation behavior.
+- Footer internal links use raw anchors and are inconsistent with `HashRouter` contract.
 
 ## Data Contracts
+
+### Stone Library Data Contract (Primary for Materials)
+- Source JSON: `/Users/lee/Documents/SAI/urblo/urblo-react/data/clean/stone_library.json`
+- Type contract: `/Users/lee/Documents/SAI/urblo/urblo-react/src/types/stone-library.ts`
+  - `StoneLibraryRaw`, `StoneFinishRaw`, `StoneGroupRaw`, `StoneVariantRaw`
+  - `StoneCardVM`, `StoneDetailVM`, `FinishVM`, `StoneStatus`
+- Service contract: `/Users/lee/Documents/SAI/urblo/urblo-react/src/service/StoneLibraryService.ts`
+  - `getStoneCards(filters)`
+  - `getStoneDetail(stoneGroupId, variantId?)`
+  - `getFilterFacets()`
+  - `getStoneOptionsForProducts()`
+- Supplemental metadata:
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/data/finishBehaviorMeta.ts`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/data/stoneFinishImages.ts`
 
 ### Product Data Contract
 - Source of product records: `/Users/lee/Documents/SAI/urblo/urblo-react/src/data/productData.ts`
@@ -69,17 +81,8 @@ Last updated: 2026-02-09
   - `getBySlug(slug): Promise<Product | undefined>`
 - Type contract: `/Users/lee/Documents/SAI/urblo/urblo-react/src/types/product.ts`
   - `Product`, `ProductModel`, `MaterialCategory`, `SelectedMaterials`, `OptionItem`
-
-### Material Data Contract
-- Source: `/Users/lee/Documents/SAI/urblo/urblo-react/src/data/materialData.ts`
-  - Category tree: `materialCategories`
-  - Flattened list: `stoneMaterials`
-- Consumer routes:
-  - `/materials` page and category/detail routes
-  - product detail option selectors
-- Additional option datasets:
-  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/data/frameFinishData.ts`
-  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/data/battenData.ts`
+- Runtime note:
+  - `ProductDetailPage` material options now come from `StoneLibraryService.getStoneOptionsForProducts()`.
 
 ### Project Data Contract
 - Listing source in page module: `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/Projects.tsx`
@@ -115,26 +118,20 @@ Last updated: 2026-02-09
   - `seenPopup` read by `WelcomePopup`; not currently written due commented line
 - Dangerous HTML render points:
   - `ArticlePage` renders sanitized article HTML
-  - `MaterialDetailPage` renders `item.description` as HTML
 - Runtime fetches:
   - Static JSON/HTML from `public/articles`
   - No authenticated or server API fetches
 
 ## Quality Gate Status (Measured 2026-02-09)
 - `npm run build`: pass
-- `npm run lint`: fail
-  - 3 errors from linting `.vite/deps/react-router-dom.js`
-  - 1 warning in `src/pages/ProductDetailPage.tsx` (`react-hooks/exhaustive-deps`)
+- `npm run lint`: pass
 - `npx tsc -b`: pass
 
 ## Known Architecture Risks
-- Duplicate `/products` route declaration in `src/App.tsx` increases maintenance risk.
-- Router/navigation contract mismatch: existing nav points to undeclared routes.
-- HashRouter consistency risk from raw anchor links for internal navigation.
-- Lint scope includes generated dependency output under `.vite`, causing non-source gate failures.
-- Product detail hook dependency warning indicates effect contract ambiguity.
+- Footer contains undeclared in-app routes (`/sample-request`, `/contact`).
+- `WelcomePopup` persistence (`seenPopup`) write is commented, causing repeat popups.
 - Project list data and project detail data are maintained in separate sources.
-- Bundle size warning (`> 500kB`) indicates code-splitting and chunk strategy debt.
+- Bundle size warning (`>500kB`) indicates code-splitting and chunk strategy debt.
 
 ## Brand Linkage Rule
 For UI/copy/IA changes, architecture and implementation decisions must be reviewed against `/Users/lee/Documents/SAI/urblo/urblo-react/docs/brand-baseline.md`. Brand linkage is advisory in execution flow, but required in task notes for high-impact user-facing changes.

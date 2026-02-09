@@ -3,7 +3,7 @@
 Last updated: 2026-02-09
 
 ## Current Objective
-Stabilize route/CTA integrity and engineering gates first, then progressively align IA/content execution with the brand baseline while preserving code-truth documentation.
+Close remaining route integrity gaps after Stone Library migration, keep docs and code contracts synchronized, and then continue performance and data-quality improvements.
 
 ## Blocking Quality Gate Policy
 A task touching runtime behavior is not complete unless all three pass:
@@ -13,7 +13,7 @@ A task touching runtime behavior is not complete unless all three pass:
 
 ## Current Baseline (Measured 2026-02-09)
 - `npm run build`: pass
-- `npm run lint`: fail (3 errors from `.vite/deps/react-router-dom.js`, 1 hook warning in `src/pages/ProductDetailPage.tsx`)
+- `npm run lint`: pass
 - `npx tsc -b`: pass
 
 ## Advisory Brand Gate (Non-Blocking)
@@ -22,63 +22,68 @@ For any user-facing layout/copy/IA task:
 - Include a short brand alignment note in task delivery.
 - If implementation cannot satisfy baseline yet, record explicit gap and follow-up ID.
 
+## Completed This Cycle
+
+### DONE-STONELIB-001
+- Scope:
+  - Removed legacy materials route family.
+  - Introduced Stone Library list/detail experience with filter + variant + finish accordion UX.
+  - Migrated product body-stone options to Stone Library service output.
+- Key files:
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/App.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/StoneLibraryPage.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/StoneLibraryDetailPage.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/service/StoneLibraryService.ts`
+
+### DONE-LINT-001
+- Scope:
+  - Resolved lint gate by excluding generated `.vite/**` output from ESLint scope.
+- Key file:
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/eslint.config.js`
+
+### DONE-STONELIB-002
+- Scope:
+  - Corrected Stone Library variant rules for Golden Crust, Harcourt, and Tuscany.
+  - Applied variant normalization guard in service layer to prevent future source drift from leaking to UI.
+  - Switched Products Body Stone selector to group-level options (no variant options).
+- Key files:
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/data/clean/stone_library.json`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/data/clean/stone_variants.csv`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/service/StoneLibraryService.ts`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/ProductDetailPage.tsx`
+
 ## Now
 
-### NOW-ROUTE-001
-- Objective: Restore route and CTA integrity so all primary navigation and key CTAs resolve to valid in-app behavior.
-- Problem statement: Current nav/CTA links include undeclared paths (`/sample-request`, `/contact`, `/en-au/contact-us`) and internal raw anchors that are inconsistent with `HashRouter`.
+### NOW-ROUTE-002
+- Objective: Finish route/CTA integrity by removing unresolved footer destinations.
+- Problem statement: Footer still points to `/sample-request` and `/contact`, but both routes are undeclared.
 - Affected files:
-  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/App.tsx`
-  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/Header.tsx`
   - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/Footer.tsx`
-  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/Materials.tsx`
-  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/EnquiryStrip.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/App.tsx` (if adding explicit contact route)
 - Implementation notes:
-  - Decide for each unresolved destination: implement route, remap to existing route, or disable CTA with explicit copy.
-  - Replace internal `<a href="/...">` usage with router-safe navigation approach compatible with `HashRouter`.
-  - Remove duplicate `/products` route declaration in `App.tsx`.
+  - Choose one approach and keep contract explicit: convert to `mailto/tel`, add real route(s), or remove links.
+  - Replace raw in-app anchors with router-safe links where route exists.
 - Definition of Done:
-  - Header/footer/section CTAs no longer point to missing routes.
-  - Internal navigation is router-consistent.
-  - No duplicate route declarations in router config.
+  - Footer no longer links to undeclared in-app paths.
+  - Navigation contract in `ARCHITECTURE.md` matches code.
 - Verification commands:
   - `npm run build`
   - `npm run lint`
   - `npx tsc -b`
 
-### NOW-LINT-001
-- Objective: Unblock lint gate and make lint results reflect repository source code only.
-- Problem statement: `eslint .` currently scans generated `.vite/deps` output and fails with missing-rule-definition errors; there is also a React hook dependency warning in product detail page.
-- Affected files:
-  - `/Users/lee/Documents/SAI/urblo/urblo-react/eslint.config.js`
-  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/ProductDetailPage.tsx`
-- Implementation notes:
-  - Update lint ignore scope to exclude generated runtime/build outputs (at minimum `.vite/**`, keep `dist/**` ignored).
-  - Resolve hook dependency warning with a stable, explicit dependency strategy.
-  - Re-run lint and ensure no hidden config regressions.
-- Definition of Done:
-  - `npm run lint` exits with code 0.
-  - Lint output concerns only repository source files.
-- Verification commands:
-  - `npm run lint`
-  - `npm run build`
-  - `npx tsc -b`
-
-### NOW-RUNBOOK-001
-- Objective: Align engineering runbook and handoff instructions with actual Vite contracts.
-- Problem statement: Legacy command assumptions and route expectations can cause agents to run incorrect checks or chase non-existent contracts.
+### NOW-DOCS-002
+- Objective: Enforce docs closure discipline after contract-level code changes.
+- Problem statement: Large route/data refactors can be shipped without synchronized docs unless closure is explicit.
 - Affected files:
   - `/Users/lee/Documents/SAI/urblo/urblo-react/docs/README_AGENT.md`
   - `/Users/lee/Documents/SAI/urblo/urblo-react/docs/ARCHITECTURE.md`
   - `/Users/lee/Documents/SAI/urblo/urblo-react/docs/NEXT_STEPS.md`
   - `/Users/lee/Documents/SAI/urblo/urblo-react/docs/WORKLOG.md`
 - Implementation notes:
-  - Keep command contract explicitly tied to `package.json` and current repo scripts.
-  - Keep quality gate order and blocking policy explicit.
-  - Keep no-backend-API statement explicit until backend exists.
+  - Keep a mandatory “Delivery Closure Guardrail” checklist in README_AGENT.
+  - Add worklog entry for every contract change session with gate evidence.
 - Definition of Done:
-  - Startup instructions are reproducible by a fresh agent session.
-  - All docs share one consistent command contract.
+  - Docs and code route/data contracts remain synchronized at handoff.
 - Verification commands:
   - `npm run build`
   - `npm run lint`
@@ -86,22 +91,75 @@ For any user-facing layout/copy/IA task:
 
 ## Next
 
-### NEXT-BRAND-001
-- Objective: Align homepage feature modules with brand baseline pillars and proof framing.
-- Problem statement: Existing home feature implementation partially reflects pillar topics but lacks explicit proof structure, claim context, and CTA funnel clarity expected by brand baseline.
+### NEXT-STONELIB-IMG-001
+- Objective: Integrate production HD finish imagery into Stone Library accordion.
+- Problem statement: Current image mapping is partial and relies on fallback placeholders.
 - Affected files:
-  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/FeatureSection.tsx`
-  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/panels/SustainabilityPanel.tsx`
-  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/panels/InstallStepsPanel.tsx`
-  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/panels/CostComparePanel.tsx`
-  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/panels/ProcessSliderPanel.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/data/stoneFinishImages.ts`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/service/StoneLibraryService.ts`
 - Implementation notes:
-  - Add explicit claim context/assumptions where percentages or comparative statements are used.
-  - Ensure each panel has outcome -> method -> proof -> next-step pattern.
-  - Keep tone and claim style aligned with baseline guardrails.
+  - Add per-variant and per-finish image mappings.
+  - Keep graceful fallback behavior for missing assets.
 - Definition of Done:
-  - Homepage modules have evidence-backed narrative blocks and actionable next steps.
-  - Claim language avoids universal/absolute framing.
+  - All priority stones/finishes display intended HD images in list and detail views.
+- Verification commands:
+  - `npm run build`
+  - `npm run lint`
+  - `npx tsc -b`
+
+### NEXT-STONELIB-DATA-001
+- Objective: Replace generic finish behavior text with approved product/engineering notes.
+- Problem statement: Current behavior copy is a general fallback table and not project-calibrated.
+- Affected files:
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/data/finishBehaviorMeta.ts`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/FinishAccordion.tsx`
+- Implementation notes:
+  - Add validated slip/glare/maintenance notes by finish.
+  - Ensure wording remains non-absolute and context-safe.
+- Definition of Done:
+  - Finish behavior notes are reviewed and specific enough for designer decision support.
+- Verification commands:
+  - `npm run build`
+  - `npm run lint`
+  - `npx tsc -b`
+
+### NEXT-STONELIB-UX-ACC-001
+- Objective: Upgrade Stone Library detail visual interaction from single image stage to true dual-side synchronized image accordion.
+- Problem statement: Current detail page supports finish hover/click sync on the right list only. Left media stage is still a single static panel and does not support accordion panel interaction.
+- Affected files:
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/StoneLibraryDetailPage.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/ImageStage.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/FinishAccordion.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/data/stoneFinishImages.ts`
+- Implementation notes:
+  - Replace left-side single image with horizontal multi-panel image accordion.
+  - Default state: all panels collapsed-narrow; active panel expands.
+  - Interaction contract: hover/click on either side (left panel or right finish list) must synchronize active finish.
+  - Desktop: hover preview + click lock; mobile: tap lock.
+  - Expanded panel supports overlay content (title/subtitle/CTA); collapsed panel shows compact label/icon.
+  - Keep smooth width/opacity transitions and keyboard accessibility.
+- Definition of Done:
+  - Left and right controls remain state-consistent in all interaction modes.
+  - Accordion animation is smooth and layout remains stable on desktop/mobile.
+  - No regression in finish metadata rendering.
+- Verification commands:
+  - `npm run build`
+  - `npm run lint`
+  - `npx tsc -b`
+
+### NEXT-STONELIB-PRICE-001
+- Objective: Replace plain `$ / $$ / $$$` display with a clearer visual price tier representation.
+- Problem statement: Current price range text is semantically correct but weak in scanability and decision support.
+- Affected files:
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/SpecsPanel.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/service/StoneLibraryService.ts`
+- Implementation notes:
+  - Introduce 3-level tier meter UI (Budget / Balanced / Premium) mapped from existing tier/source data.
+  - Preserve original `$` symbol text as secondary annotation for traceability.
+  - Ensure `tbc` or missing tier values degrade gracefully to “Price on request”.
+- Definition of Done:
+  - Price information is visually scannable and still traceable to source data.
+  - No assumptions are implied beyond available source metadata.
 - Verification commands:
   - `npm run build`
   - `npm run lint`
@@ -125,78 +183,32 @@ For any user-facing layout/copy/IA task:
   - `npm run lint`
   - `npx tsc -b`
 
-### NEXT-CONTENT-001
-- Objective: Harden article content pipeline and metadata integrity.
-- Problem statement: Articles rely on static public JSON/HTML and manual consistency, with potential mismatch between metadata and content folders.
-- Affected files:
-  - `/Users/lee/Documents/SAI/urblo/urblo-react/public/articles/index.json`
-  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/scripts/generate-article-index.ts`
-  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/ArticlesPage.tsx`
-  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/ArticlePage.tsx`
-- Implementation notes:
-  - Normalize generation workflow for `index.json` and add checks for missing content/meta pairs.
-  - Keep slug/date ordering deterministic.
-- Definition of Done:
-  - Article list and detail contracts are generated and validated from one repeatable process.
-- Verification commands:
-  - `npm run build`
-  - `npm run lint`
-  - `npx tsc -b`
-
 ## Later
 
-### LATER-IA-001
-- Objective: Implement persona-aware routing and CTA funnels (designer, contractor, government) per brand baseline.
-- Problem statement: Current IA does not provide role-based pathways and intent-specific CTA routing.
+### LATER-BRAND-001
+- Objective: Align homepage feature modules with brand baseline pillars and proof framing.
 - Affected files:
-  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/Header.tsx`
-  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/Home.tsx`
-  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/ProductsPage.tsx`
-  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/Projects.tsx`
-- Implementation notes:
-  - Add routing strategy for persona entry points and conversion-specific destination pages.
-  - Keep advisory brand gate notes attached during design.
-- Definition of Done:
-  - Distinct persona pathways and CTAs exist and are testable.
-- Verification commands:
-  - `npm run build`
-  - `npm run lint`
-  - `npx tsc -b`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/FeatureSection.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/panels/SustainabilityPanel.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/panels/InstallStepsPanel.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/panels/CostComparePanel.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/panels/ProcessSliderPanel.tsx`
 
 ### LATER-PERF-001
 - Objective: Reduce client bundle size and improve chunk strategy.
 - Problem statement: Current build emits a large JS chunk warning (`>500kB`).
 - Affected files:
   - `/Users/lee/Documents/SAI/urblo/urblo-react/vite.config.ts`
-  - Route/page modules under `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages`
-- Implementation notes:
-  - Introduce route-level code splitting and manual chunk strategy where appropriate.
-  - Validate no routing regressions under `HashRouter`.
-- Definition of Done:
-  - Large chunk warning is removed or reduced to accepted documented threshold.
-- Verification commands:
-  - `npm run build`
-  - `npm run lint`
-  - `npx tsc -b`
+  - route/page modules under `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages`
 
 ### LATER-QA-001
 - Objective: Add automated route smoke coverage for declared routes and key CTAs.
-- Problem statement: Route/CTA validation is currently manual and easy to regress.
 - Affected files:
   - test tooling to be introduced under repo root
   - route source `/Users/lee/Documents/SAI/urblo/urblo-react/src/App.tsx`
-- Implementation notes:
-  - Start with smoke checks for route render, nav integrity, and key CTA click paths.
-  - Attach test evidence policy in docs when tooling is introduced.
-- Definition of Done:
-  - Automated smoke checks run locally and in CI for route/CTA critical paths.
-- Verification commands:
-  - `npm run build`
-  - `npm run lint`
-  - `npx tsc -b`
 
 ## Exit Criteria for Current Cycle
-- `NOW-ROUTE-001`, `NOW-LINT-001`, and `NOW-RUNBOOK-001` are complete.
+- `NOW-ROUTE-002` and `NOW-DOCS-002` are complete.
 - All three quality gates pass.
-- Navigation and route contracts are consistent with `src/App.tsx`.
-- Brand-related non-aligned areas are tracked as explicit backlog items, not implied as complete.
+- Navigation and route contracts are consistent with `src/App.tsx` and `src/components/Footer.tsx`.
+- Stone Library data/image follow-ups are explicitly tracked, not implied complete.

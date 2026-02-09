@@ -1,0 +1,16 @@
+stone_variant_id,stone_group_id,source_variant,display_variant,variant_type,status,sort_order
+alpine-white,alpine-white,,,none,active,0
+angola-black,angola-black,,,none,active,0
+blueocean,blueocean,,,none,active,0
+golden-crust--light,golden-crust,light,Light,color,active,10
+golden-crust--dark,golden-crust,dark,Dark,color,active,20
+harcourt,harcourt,,,none,tbc,0
+honey-comb,honey-comb,,,none,active,0
+ivory-sand,ivory-sand,,,none,active,0
+juparana,juparana,,,none,active,0
+new-grey,new-grey,,,none,active,0
+steel-blue,steel-blue,,,none,active,0
+tan-brown,tan-brown,,,none,active,0
+tuscany--vein-cut,tuscany,vein cut,Vein Cut,cut_orientation,active,10
+tuscany--cross-cut,tuscany,cross cut,Cross Cut,cut_orientation,active,20
+zen-grey,zen-grey,,,none,active,0

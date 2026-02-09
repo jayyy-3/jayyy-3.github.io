@@ -14,7 +14,7 @@ export const products: Product[] = [
             {key: 'timberFlushP', label: 'Timber Flush +', img: '/products/primeBlock/timberFlushP.png'},
         ],
         defaultMaterials: {
-            body: 'ken-black',         // ← 对应 materialData.ts 的 slug
+            body: 'new-grey',         // ← 对应 Stone Library stoneGroupId
             frame: 'stainless-finish',
             battens: 'spotted-gum'
         },
@@ -38,7 +38,7 @@ export const products: Product[] = [
             {key: 'timberFlushP', label: 'Timber Flush +', img: '/products/primeLume/timberFlushP.png'},
         ],
         defaultMaterials: {
-            body: 'ken-black',         // ← 对应 materialData.ts 的 slug
+            body: 'new-grey',         // ← 对应 Stone Library stoneGroupId
             frame: 'stainless-finish',
             battens: 'spotted-gum'
         },
@@ -62,7 +62,7 @@ export const products: Product[] = [
             {key: 'timberFlushP', label: 'Timber Flush +', img: '/products/terraLine/timberFlushP.png'},
         ],
         defaultMaterials: {
-            body: 'ken-black',         // ← 对应 materialData.ts 的 slug
+            body: 'new-grey',         // ← 对应 Stone Library stoneGroupId
             frame: 'stainless-finish',
             battens: 'spotted-gum'
         },
@@ -85,7 +85,7 @@ export const products: Product[] = [
             {key: 'timberSpanP', label: 'Timber Span +', img: '/products/strataBench/timberSpanP.jpg'},
         ],
         defaultMaterials: {
-            body: 'ken-black',         // ← 对应 materialData.ts 的 slug
+            body: 'new-grey',         // ← 对应 Stone Library stoneGroupId
             frame: 'stainless-finish',
             battens: 'spotted-gum'
         },
@@ -109,7 +109,7 @@ export const products: Product[] = [
             {key: 'timberFlushP', label: 'Timber Flush +', img: '/products/primeCurve/timberFlushP.png'},
         ],
         defaultMaterials: {
-            body: 'ken-black',         // ← 对应 materialData.ts 的 slug
+            body: 'new-grey',         // ← 对应 Stone Library stoneGroupId
             frame: 'stainless-finish',
             battens: 'spotted-gum'
         },
@@ -133,7 +133,7 @@ export const products: Product[] = [
             {key: 'timberFlushP', label: 'Timber Flush +', img: '/products/terraArc/timberFlushP.png'},
         ],
         defaultMaterials: {
-            body: 'ken-black',         // ← 对应 materialData.ts 的 slug
+            body: 'new-grey',         // ← 对应 Stone Library stoneGroupId
             frame: 'stainless-finish',
             battens: 'spotted-gum'
         },
