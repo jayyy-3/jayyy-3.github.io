@@ -55,7 +55,7 @@ For any user-facing layout/copy/IA task:
 ### DONE-STONELIB-UX-ACC-001
 - Scope:
   - Reworked Stone Library detail into synchronized dual-control interaction:
-    - Left image accordion keeps hover preview + click lock.
+    - Left image accordion switched to click-select behavior.
     - Right finish list is click-select only (no hover-triggered switching).
   - Removed heavy dark image overlays and in-image active caption block.
   - Added full-screen finish lightbox with keyboard navigation and 2x zoom/pan for texture inspection.
@@ -65,6 +65,41 @@ For any user-facing layout/copy/IA task:
   - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/FinishAccordion.tsx`
   - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/FinishLightbox.tsx`
   - `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/StoneLibraryDetailPage.tsx`
+
+### DONE-STONELIB-UX-CENTER-001
+- Scope:
+  - Updated Stone Library detail finish interaction to left/right click-only selection.
+  - Removed left-stage hover/focus finish state mutation and simplified page state to lock/default precedence.
+  - Added finish selection centering behavior so each finish click re-centers the active left-stage panel with smooth horizontal scroll.
+- Key files:
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/ImageStage.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/StoneLibraryDetailPage.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/docs/ARCHITECTURE.md`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/docs/NEXT_STEPS.md`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/docs/WORKLOG.md`
+
+### DONE-STONELIB-UX-FILL-001
+- Scope:
+  - Added low-finish stage fill behavior so non-active finish panels expand to remove unused viewport space.
+  - Kept active finish panel fixed at 3:2 while distributing remaining width to non-active panels.
+  - Added single-finish centering rule (3:2 panel centered instead of stretching full width).
+  - Kept existing visibility-guarded scroll policy (no movement when active panel is fully visible).
+- Key files:
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/ImageStage.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/docs/ARCHITECTURE.md`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/docs/NEXT_STEPS.md`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/docs/WORKLOG.md`
+
+### DONE-STONELIB-UX-REFINE-001
+- Scope:
+  - Refactored ImageStage width/scroll behavior into stable single-pass flows to remove occasional non-centering regressions.
+  - Kept click-only selection with visibility-check scroll policy, but changed motion style to immediate width updates plus smooth scroll only when clipped.
+  - Added strict-mode guard so one center token triggers one effective scroll decision.
+- Key files:
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/ImageStage.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/docs/ARCHITECTURE.md`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/docs/NEXT_STEPS.md`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/docs/WORKLOG.md`
 
 ## Now
 
@@ -284,7 +319,7 @@ For any user-facing layout/copy/IA task:
 - Definition of Done:
   - Increasing finish items does not stretch or distort the left image area.
   - No black edge appears below the active image on desktop or mobile breakpoints.
-  - Existing finish hover/click sync behavior remains correct.
+  - Existing finish click sync behavior remains correct.
 - Verification commands:
   - `npm run build`
   - `npm run lint`

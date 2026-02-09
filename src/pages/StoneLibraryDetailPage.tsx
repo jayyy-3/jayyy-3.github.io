@@ -16,7 +16,7 @@ export default function StoneLibraryDetailPage() {
 
     const [selectedVariantId, setSelectedVariantId] = useState<string>('');
     const [lockedFinishKey, setLockedFinishKey] = useState<string | null>(null);
-    const [previewFinishKey, setPreviewFinishKey] = useState<string | null>(null);
+    const [centerRequestToken, setCenterRequestToken] = useState(0);
     const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
     const detail = useMemo(
@@ -32,8 +32,7 @@ export default function StoneLibraryDetailPage() {
         return <Navigate to="/stone-library" replace />;
     }
 
-    const effectiveFinishKey =
-        previewFinishKey || lockedFinishKey || detail.defaultFinishKey;
+    const effectiveFinishKey = lockedFinishKey || detail.defaultFinishKey;
 
     const activeFinish = detail.finishes.find(
         (finish) => finish.finishKey === effectiveFinishKey,
@@ -44,21 +43,12 @@ export default function StoneLibraryDetailPage() {
     function handleVariantChange(variantId: string) {
         setSelectedVariantId(variantId);
         setLockedFinishKey(null);
-        setPreviewFinishKey(null);
         setIsLightboxOpen(false);
-    }
-
-    function handleFinishHover(finishKey: string) {
-        setPreviewFinishKey(finishKey);
-    }
-
-    function handleFinishLeave() {
-        setPreviewFinishKey(null);
     }
 
     function handleFinishSelect(finishKey: string) {
         setLockedFinishKey(finishKey);
-        setPreviewFinishKey(finishKey);
+        setCenterRequestToken((current) => current + 1);
     }
 
     function handleOpenLightbox(finishKey: string) {
@@ -110,8 +100,7 @@ export default function StoneLibraryDetailPage() {
                             stoneName={detail.name}
                             finishes={detail.finishes}
                             activeFinishKey={activeFinish?.finishKey || null}
-                            onHover={handleFinishHover}
-                            onLeave={handleFinishLeave}
+                            centerRequestToken={centerRequestToken}
                             onSelect={handleFinishSelect}
                             onOpenLightbox={handleOpenLightbox}
                         />

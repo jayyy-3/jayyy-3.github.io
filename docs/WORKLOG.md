@@ -161,6 +161,142 @@ Last updated: 2026-02-09
 - `NEXT-STONELIB-PRICE-001`
 - `NEXT-STONELIB-IMG-002`
 
+## Entry - 2026-02-09 (Stone Library Click-Only + Finish Centering)
+
+### Scope
+- Converted Stone Library left image accordion from hover-preview behavior to click-only finish selection.
+- Added active finish centering behavior so each finish selection click re-centers the left-stage active panel.
+- Simplified finish state composition in detail page by removing preview state and adding a center-request token.
+- Updated architecture and backlog docs to match the new interaction contract.
+
+### Changed Files
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/StoneLibraryDetailPage.tsx`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/ImageStage.tsx`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/ARCHITECTURE.md`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/NEXT_STEPS.md`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/WORKLOG.md`
+
+### Verification Results
+- `npm run build`: pass (chunk size warning `>500kB` unchanged; Browserslist data staleness notice shown)
+- `npm run lint`: pass
+- `npx tsc -b`: pass
+
+### Risks and Gaps
+- Bundle size warning (`>500kB`) remains and is not addressed in this scope.
+- Left-stage centering behavior currently assumes smooth scrolling; reduced-motion preference handling is not yet added.
+
+### Next Handoff
+- `NEXT-STONELIB-LAYOUT-001`
+- `NEXT-STONELIB-PRICE-001`
+- `NEXT-STONELIB-IMG-002`
+
+## Entry - 2026-02-09 (Stone Library Finish Visibility Guard)
+
+### Scope
+- Added a visibility guard to Stone Library left-stage auto-scroll behavior.
+- Finish selection now keeps current scroll position when the active panel is fully visible in the horizontal viewport.
+- Auto-scroll executes only when active panel is clipped or out of frame, then uses best-effort smooth centering.
+- Updated architecture contract wording to match the new “visible then no-move” rule.
+
+### Changed Files
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/ImageStage.tsx`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/ARCHITECTURE.md`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/WORKLOG.md`
+
+### Verification Results
+- `npm run build`: pass (chunk size warning `>500kB` unchanged; Browserslist data staleness notice shown)
+- `npm run lint`: pass
+- `npx tsc -b`: pass
+
+### Risks and Gaps
+- Bundle size warning (`>500kB`) remains and is not addressed in this scope.
+
+### Next Handoff
+- `NEXT-STONELIB-LAYOUT-001`
+- `NEXT-STONELIB-PRICE-001`
+- `NEXT-STONELIB-IMG-002`
+
+## Entry - 2026-02-09 (Stone Library Low-Finish Viewport Fill)
+
+### Scope
+- Added low-finish viewport fill behavior to Stone Library left media stage.
+- Kept active panel fixed at 3:2 while expanding non-active panel widths when default widths do not fill the stage viewport.
+- Added single-finish layout behavior that keeps the lone 3:2 panel centered instead of stretching full width.
+- Kept existing visibility-guarded scrolling policy: no scroll movement when active panel is fully visible.
+- Updated architecture/backlog docs to reflect this interaction contract.
+
+### Changed Files
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/ImageStage.tsx`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/ARCHITECTURE.md`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/NEXT_STEPS.md`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/WORKLOG.md`
+
+### Verification Results
+- `npm run build`: pass (chunk size warning `>500kB` unchanged; Browserslist data staleness notice shown)
+- `npm run lint`: pass
+- `npx tsc -b`: pass
+
+### Risks and Gaps
+- Bundle size warning (`>500kB`) remains and is not addressed in this scope.
+- Fill-width computation depends on runtime measurement and may need tuning if panel gap token changes in future style updates.
+
+### Next Handoff
+- `NEXT-STONELIB-LAYOUT-001`
+- `NEXT-STONELIB-PRICE-001`
+- `NEXT-STONELIB-IMG-002`
+
+## Entry - 2026-02-09 (Stone Library Motion Debounce Tuning)
+
+### Scope
+- Tuned ImageStage interaction to remove perceived “second tug” after finish selection.
+- Removed delayed second-pass centering and replaced resize-driven width recompute with debounced scheduling.
+- Added fill-width state change guard to avoid redundant updates when measured width drift is negligible.
+
+### Changed Files
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/ImageStage.tsx`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/WORKLOG.md`
+
+### Verification Results
+- `npm run build`: pass (chunk size warning `>500kB` unchanged; Browserslist data staleness notice shown)
+- `npm run lint`: pass
+- `npx tsc -b`: pass
+
+### Risks and Gaps
+- Bundle size warning (`>500kB`) remains and is not addressed in this scope.
+
+### Next Handoff
+- `NEXT-STONELIB-LAYOUT-001`
+- `NEXT-STONELIB-PRICE-001`
+- `NEXT-STONELIB-IMG-002`
+
+## Entry - 2026-02-09 (Stone Library Width/Center Motion Refactor)
+
+### Scope
+- Refactored Stone Library ImageStage motion system to stabilize centering and remove race conditions between width recompute and scroll decisions.
+- Separated layout engine (inactive fill width computation) from scroll engine (click-token visibility-check scroll).
+- Replaced width animation with immediate width updates; retained smooth scrolling only when active panel is clipped.
+- Added strict-mode guard using center token tracking to prevent duplicate scroll decisions from effect double-invocation.
+
+### Changed Files
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/ImageStage.tsx`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/ARCHITECTURE.md`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/NEXT_STEPS.md`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/WORKLOG.md`
+
+### Verification Results
+- `npm run build`: pass (chunk size warning `>500kB` unchanged; Browserslist data staleness notice shown)
+- `npm run lint`: pass
+- `npx tsc -b`: pass
+
+### Risks and Gaps
+- Bundle size warning (`>500kB`) remains and is not addressed in this scope.
+- Runtime width measurement still depends on current gap token values and should be re-checked if stage spacing styles change.
+
+### Next Handoff
+- `NEXT-STONELIB-LAYOUT-001`
+- `NEXT-STONELIB-PRICE-001`
+- `NEXT-STONELIB-IMG-002`
+
 ## Entry Template (Use for Every Future Session)
 
 ### Date

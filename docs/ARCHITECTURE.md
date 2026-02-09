@@ -60,15 +60,21 @@ Last updated: 2026-02-09
 
 ## Stone Library Detail Interaction Contract (`src/pages/StoneLibraryDetailPage.tsx`)
 - State composition:
-  - Effective active finish resolves by precedence: `previewFinishKey` -> `lockedFinishKey` -> `defaultFinishKey`.
-  - Variant changes reset finish preview/lock state.
+  - Effective active finish resolves by precedence: `lockedFinishKey` -> `defaultFinishKey`.
+  - Each finish selection click increments a center-request token used by left media for one-shot visibility-check scroll handling.
+  - Variant changes reset locked finish state and close lightbox state.
 - Left media contract (`src/components/stone-library/ImageStage.tsx`):
-  - Desktop: hover/focus previews finish, click locks finish.
-  - Mobile: tap locks finish.
-  - Active panel maintains fixed 3:2 ratio; collapsed panels stay narrow and horizontally scrollable.
+  - Desktop/mobile: click (or keyboard activation) selects finish; hover/focus does not mutate active finish.
+  - Width/layout computation and scroll decision are decoupled into separate single-pass flows to avoid race conditions.
+  - Width updates are immediate (no width transition); smooth motion is provided only by scroll when needed.
+  - Any finish selection click (left media or right selector) runs visibility check once: if active panel is fully visible, keep scroll position; if clipped/out of frame, smooth-scroll to a best-effort centered position.
+  - Strict-mode duplicate effect calls are guarded so one token triggers one effective scroll decision.
+  - Active panel maintains fixed 3:2 ratio.
+  - When finish count is low and default panel widths do not fill the stage viewport, non-active panels expand to consume remaining width.
+  - Single-finish states keep the lone 3:2 panel centered in the stage viewport (no forced full-bleed stretch).
 - Right finish selector contract (`src/components/stone-library/FinishAccordion.tsx`):
   - Click (or keyboard activation on focused button) is the only state-changing selection action.
-  - Hover/focus does not alter active finish state.
+  - Selection updates active finish and triggers the left-stage visibility-check scroll policy.
 - Large-image inspection contract (`src/components/stone-library/FinishLightbox.tsx`):
   - Open via active-panel zoom action; close via button, backdrop, or `Esc`.
   - Supports previous/next finish navigation with buttons and arrow keys.

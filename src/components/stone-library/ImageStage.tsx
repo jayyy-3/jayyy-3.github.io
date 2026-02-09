@@ -1,12 +1,12 @@
-import type { CSSProperties, FocusEvent } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import type { CSSProperties } from 'react';
 import type { FinishVM } from '../../types/stone-library';
 
 interface ImageStageProps {
     stoneName: string;
     finishes: FinishVM[];
     activeFinishKey: string | null;
-    onHover: (finishKey: string) => void;
-    onLeave: () => void;
+    centerRequestToken: number;
     onSelect: (finishKey: string) => void;
     onOpenLightbox: (finishKey: string) => void;
 }
@@ -15,26 +15,254 @@ export default function ImageStage({
     stoneName,
     finishes,
     activeFinishKey,
-    onHover,
-    onLeave,
+    centerRequestToken,
     onSelect,
     onOpenLightbox,
 }: ImageStageProps) {
+    const trackRef = useRef<HTMLDivElement | null>(null);
+    const panelRefs = useRef<Record<string, HTMLDivElement | null>>({});
+    const [inactiveFillWidth, setInactiveFillWidth] = useState<number | null>(null);
+    const resizeDebounceRef = useRef<number | null>(null);
+    const frameRef = useRef<number | null>(null);
+    const lastHandledCenterTokenRef = useRef<number | null>(null);
+
     const effectiveActiveKey = activeFinishKey || finishes[0]?.finishKey || null;
     const activeFinish =
         finishes.find((finish) => finish.finishKey === effectiveActiveKey) ||
         finishes[0];
+    const isSingleFinish = finishes.length === 1;
     const trackStyle: CSSProperties = {
         ['--panel-h' as string]: 'clamp(220px, 34vw, 420px)',
         ['--panel-collapsed' as string]: 'clamp(44px, 6vw, 64px)',
     };
+    const isDev = import.meta.env.DEV;
 
-    function handleBlurCapture(event: FocusEvent<HTMLDivElement>) {
-        const nextTarget = event.relatedTarget as Node | null;
-        if (!nextTarget || !event.currentTarget.contains(nextTarget)) {
-            onLeave();
+    const logCenterDecision = useCallback((
+        reason: 'skip-token' | 'ref-miss' | 'visible' | 'clipped',
+        details: Record<string, unknown> = {},
+    ) => {
+        if (!isDev) {
+            return;
         }
+        console.debug('[ImageStage:center]', {
+            stoneName,
+            activeKey: effectiveActiveKey,
+            token: centerRequestToken,
+            reason,
+            ...details,
+        });
+    }, [centerRequestToken, effectiveActiveKey, isDev, stoneName]);
+
+    function measureCollapsedWidth(track: HTMLDivElement): number {
+        const probe = document.createElement('div');
+        probe.style.position = 'absolute';
+        probe.style.visibility = 'hidden';
+        probe.style.pointerEvents = 'none';
+        probe.style.width = 'var(--panel-collapsed)';
+        probe.style.height = '0';
+        probe.style.overflow = 'hidden';
+        track.appendChild(probe);
+        const width = probe.getBoundingClientRect().width;
+        track.removeChild(probe);
+        return width;
     }
+
+    function setInactiveWidthIfChanged(nextWidth: number | null) {
+        setInactiveFillWidth((current) => {
+            if (current === null && nextWidth === null) {
+                return current;
+            }
+
+            if (current !== null && nextWidth !== null) {
+                const epsilon = 0.1;
+                if (Math.abs(current - nextWidth) <= epsilon) {
+                    return current;
+                }
+            }
+
+            return nextWidth;
+        });
+    }
+
+    function getTrackGap(track: HTMLDivElement): number {
+        const styles = window.getComputedStyle(track);
+        const columnGap = Number.parseFloat(styles.columnGap);
+        const fallbackGap = Number.parseFloat(styles.gap);
+
+        if (Number.isFinite(columnGap)) {
+            return columnGap;
+        }
+
+        if (Number.isFinite(fallbackGap)) {
+            return fallbackGap;
+        }
+
+        return 0;
+    }
+
+    const computeInactiveFillWidth = useCallback((activeKey: string): number | null => {
+        const track = trackRef.current;
+        const activePanel = panelRefs.current[activeKey];
+        if (!track || !activePanel || finishes.length < 2) {
+            return null;
+        }
+
+        const activeWidth = activePanel.getBoundingClientRect().width;
+        const inactiveCount = finishes.length - 1;
+        const gap = getTrackGap(track);
+        const collapsedWidth = measureCollapsedWidth(track);
+
+        const defaultTotalWidth =
+            activeWidth + collapsedWidth * inactiveCount + gap * inactiveCount;
+
+        if (defaultTotalWidth >= track.clientWidth) {
+            return null;
+        }
+
+        const computedFillWidth =
+            (track.clientWidth - activeWidth - gap * inactiveCount) /
+            inactiveCount;
+        const normalizedFillWidth = Math.round(computedFillWidth * 100) / 100;
+
+        if (!Number.isFinite(normalizedFillWidth) || normalizedFillWidth <= 0) {
+            return null;
+        }
+
+        return normalizedFillWidth;
+    }, [finishes]);
+
+    useLayoutEffect(() => {
+        if (!effectiveActiveKey) {
+            setInactiveWidthIfChanged(null);
+            return;
+        }
+        const activeKey = effectiveActiveKey;
+
+        const nextWidth = computeInactiveFillWidth(activeKey);
+        setInactiveWidthIfChanged(nextWidth);
+    }, [effectiveActiveKey, computeInactiveFillWidth]);
+
+    useEffect(() => {
+        if (!effectiveActiveKey) {
+            setInactiveWidthIfChanged(null);
+            return;
+        }
+        const activeKey = effectiveActiveKey;
+        const track = trackRef.current;
+        if (!track) {
+            return;
+        }
+
+        if (typeof ResizeObserver === 'undefined') {
+            return;
+        }
+
+        const resizeObserver = new ResizeObserver(() => {
+            if (resizeDebounceRef.current !== null) {
+                window.clearTimeout(resizeDebounceRef.current);
+            }
+
+            resizeDebounceRef.current = window.setTimeout(() => {
+                const nextWidth = computeInactiveFillWidth(activeKey);
+                setInactiveWidthIfChanged(nextWidth);
+                resizeDebounceRef.current = null;
+            }, 100);
+        });
+
+        resizeObserver.observe(track);
+
+        return () => {
+            if (resizeDebounceRef.current !== null) {
+                window.clearTimeout(resizeDebounceRef.current);
+                resizeDebounceRef.current = null;
+            }
+            resizeObserver.disconnect();
+        };
+    }, [effectiveActiveKey, computeInactiveFillWidth]);
+
+    useEffect(() => {
+        if (!effectiveActiveKey || lastHandledCenterTokenRef.current === centerRequestToken) {
+            if (effectiveActiveKey && lastHandledCenterTokenRef.current === centerRequestToken) {
+                logCenterDecision('skip-token');
+            }
+            return;
+        }
+        const activeKey = effectiveActiveKey;
+        const tokenForThisRun = centerRequestToken;
+        let attempt = 0;
+
+        if (frameRef.current !== null) {
+            window.cancelAnimationFrame(frameRef.current);
+        }
+
+        function runCenterCheck() {
+            attempt += 1;
+            const track = trackRef.current;
+            const panel = panelRefs.current[activeKey];
+            if (!track || !panel) {
+                if (attempt < 2) {
+                    frameRef.current = window.requestAnimationFrame(runCenterCheck);
+                    return;
+                }
+                logCenterDecision('ref-miss', { attempt });
+                lastHandledCenterTokenRef.current = tokenForThisRun;
+                frameRef.current = null;
+                return;
+            }
+
+            const trackRect = track.getBoundingClientRect();
+            const panelRect = panel.getBoundingClientRect();
+            const panelLeft = panelRect.left - trackRect.left + track.scrollLeft;
+            const panelRight = panelLeft + panelRect.width;
+            const viewportLeft = track.scrollLeft;
+            const viewportRight = viewportLeft + track.clientWidth;
+            const visibilityTolerance = 1;
+            const isFullyVisible =
+                panelLeft >= viewportLeft - visibilityTolerance &&
+                panelRight <= viewportRight + visibilityTolerance;
+
+            if (isFullyVisible) {
+                logCenterDecision('visible', {
+                    panelLeft,
+                    panelRight,
+                    viewportLeft,
+                    viewportRight,
+                });
+                lastHandledCenterTokenRef.current = tokenForThisRun;
+                frameRef.current = null;
+                return;
+            }
+
+            const panelCenter = panelLeft + panelRect.width / 2;
+            const targetLeft = panelCenter - track.clientWidth / 2;
+            const maxLeft = Math.max(track.scrollWidth - track.clientWidth, 0);
+            const nextLeft = Math.min(Math.max(targetLeft, 0), maxLeft);
+
+            track.scrollTo({
+                left: nextLeft,
+                behavior: 'smooth',
+            });
+            logCenterDecision('clipped', {
+                panelLeft,
+                panelRight,
+                viewportLeft,
+                viewportRight,
+                targetLeft,
+                nextLeft,
+            });
+            lastHandledCenterTokenRef.current = tokenForThisRun;
+            frameRef.current = null;
+        }
+
+        frameRef.current = window.requestAnimationFrame(runCenterCheck);
+
+        return () => {
+            if (frameRef.current !== null) {
+                window.cancelAnimationFrame(frameRef.current);
+                frameRef.current = null;
+            }
+        };
+    }, [centerRequestToken, effectiveActiveKey, inactiveFillWidth, logCenterDecision]);
 
     if (!finishes.length) {
         return (
@@ -49,25 +277,35 @@ export default function ImageStage({
     }
 
     return (
-        <section
-            className="space-y-2 self-start"
-            onMouseLeave={onLeave}
-            onBlurCapture={handleBlurCapture}
-        >
+        <section className="space-y-2 self-start">
             <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">
-                Image Accordion · Hover to preview, click to lock
+                Image Accordion · Click to select
             </p>
 
             <div className="overflow-hidden border border-neutral-300 bg-neutral-100 p-2">
-                <div className="flex gap-2 overflow-x-auto pb-1" style={trackStyle}>
+                <div
+                    ref={trackRef}
+                    className={[
+                        'flex gap-2 overflow-x-auto pb-1',
+                        isSingleFinish ? 'justify-center' : '',
+                    ].join(' ')}
+                    style={trackStyle}
+                >
                     {finishes.map((finish) => {
                         const isActive = finish.finishKey === effectiveActiveKey;
+                        const inactiveWidth =
+                            inactiveFillWidth !== null
+                                ? `${inactiveFillWidth}px`
+                                : 'var(--panel-collapsed)';
 
                         return (
                             <div
                                 key={finish.finishKey}
+                                ref={(node) => {
+                                    panelRefs.current[finish.finishKey] = node;
+                                }}
                                 className={[
-                                    'group relative flex-none overflow-hidden border bg-neutral-950 transition-[width,border-color,box-shadow] duration-300 ease-out',
+                                    'group relative flex-none overflow-hidden border bg-neutral-950',
                                     isActive
                                         ? 'border-neutral-900 shadow-[0_0_0_1px_rgba(0,0,0,0.15)]'
                                         : 'border-neutral-800 hover:border-neutral-700',
@@ -76,13 +314,11 @@ export default function ImageStage({
                                     height: 'var(--panel-h)',
                                     width: isActive
                                         ? 'calc(var(--panel-h) * 1.5)'
-                                        : 'var(--panel-collapsed)',
+                                        : inactiveWidth,
                                 }}
                             >
                                 <button
                                     type="button"
-                                    onMouseEnter={() => onHover(finish.finishKey)}
-                                    onFocus={() => onHover(finish.finishKey)}
                                     onClick={() => onSelect(finish.finishKey)}
                                     aria-pressed={isActive}
                                     aria-label={`${stoneName} ${finish.label}`}
