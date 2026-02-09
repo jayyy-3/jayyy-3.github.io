@@ -1,5 +1,6 @@
 // src/pages/Home.tsx
-import FeatureSection from "../components/FutureSection.tsx"; // Import Swiper styles if Swiper is enabled
+
+import FeatureSection from "../components/FeatureSection.tsx";
 
 export default function Home() {
     return (

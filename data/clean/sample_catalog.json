@@ -1,0 +1,2089 @@
+{
+  "generatedAt": "2026-02-05T01:40:18+00:00",
+  "items": [
+    {
+      "stoneVariantId": "new-grey",
+      "finishId": "flamed",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "new-grey",
+      "finishId": "flamed",
+      "finishVariantId": null,
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "juparana",
+      "finishId": "flamed",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "juparana",
+      "finishId": "flamed",
+      "finishVariantId": null,
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "alpine-white",
+      "finishId": "flamed",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "alpine-white",
+      "finishId": "flamed",
+      "finishVariantId": null,
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "zen-grey",
+      "finishId": "flamed",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "zen-grey",
+      "finishId": "flamed",
+      "finishVariantId": null,
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "angola-black",
+      "finishId": "flamed",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "angola-black",
+      "finishId": "flamed",
+      "finishVariantId": null,
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "golden-crust--light",
+      "finishId": "flamed",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "golden-crust--light",
+      "finishId": "flamed",
+      "finishVariantId": null,
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "golden-crust--dark",
+      "finishId": "flamed",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "golden-crust--dark",
+      "finishId": "flamed",
+      "finishVariantId": null,
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "tan-brown",
+      "finishId": "flamed",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "tan-brown",
+      "finishId": "flamed",
+      "finishVariantId": null,
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "harcourt--similar",
+      "finishId": "flamed",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "harcourt--similar",
+      "finishId": "flamed",
+      "finishVariantId": null,
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "new-grey",
+      "finishId": "sawn",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "new-grey",
+      "finishId": "sawn",
+      "finishVariantId": null,
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "juparana",
+      "finishId": "sawn",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "juparana",
+      "finishId": "sawn",
+      "finishVariantId": null,
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "alpine-white",
+      "finishId": "sawn",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "alpine-white",
+      "finishId": "sawn",
+      "finishVariantId": null,
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "zen-grey",
+      "finishId": "sawn",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "zen-grey",
+      "finishId": "sawn",
+      "finishVariantId": null,
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "angola-black",
+      "finishId": "sawn",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "angola-black",
+      "finishId": "sawn",
+      "finishVariantId": null,
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "steel-blue",
+      "finishId": "sawn",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "steel-blue",
+      "finishId": "sawn",
+      "finishVariantId": null,
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "golden-crust--light",
+      "finishId": "sawn",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "golden-crust--light",
+      "finishId": "sawn",
+      "finishVariantId": null,
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "golden-crust--dark",
+      "finishId": "sawn",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "golden-crust--dark",
+      "finishId": "sawn",
+      "finishVariantId": null,
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "tan-brown",
+      "finishId": "sawn",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "tan-brown",
+      "finishId": "sawn",
+      "finishVariantId": null,
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "harcourt--similar",
+      "finishId": "sawn",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "harcourt--similar",
+      "finishId": "sawn",
+      "finishVariantId": null,
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "honey-comb",
+      "finishId": "sawn",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "honey-comb",
+      "finishId": "sawn",
+      "finishVariantId": null,
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "blueocean",
+      "finishId": "sawn",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "blueocean",
+      "finishId": "sawn",
+      "finishVariantId": null,
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "new-grey",
+      "finishId": "honed",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "new-grey",
+      "finishId": "honed",
+      "finishVariantId": null,
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "juparana",
+      "finishId": "honed",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "juparana",
+      "finishId": "honed",
+      "finishVariantId": null,
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "alpine-white",
+      "finishId": "honed",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "alpine-white",
+      "finishId": "honed",
+      "finishVariantId": null,
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "zen-grey",
+      "finishId": "honed",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "zen-grey",
+      "finishId": "honed",
+      "finishVariantId": null,
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "angola-black",
+      "finishId": "honed",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "angola-black",
+      "finishId": "honed",
+      "finishVariantId": null,
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "ivory-sand",
+      "finishId": "honed",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "ivory-sand",
+      "finishId": "honed",
+      "finishVariantId": null,
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "steel-blue",
+      "finishId": "honed",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "steel-blue",
+      "finishId": "honed",
+      "finishVariantId": null,
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "golden-crust--light",
+      "finishId": "honed",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "golden-crust--light",
+      "finishId": "honed",
+      "finishVariantId": null,
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "golden-crust--dark",
+      "finishId": "honed",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "golden-crust--dark",
+      "finishId": "honed",
+      "finishVariantId": null,
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "tan-brown",
+      "finishId": "honed",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "tan-brown",
+      "finishId": "honed",
+      "finishVariantId": null,
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "harcourt--similar",
+      "finishId": "honed",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "harcourt--similar",
+      "finishId": "honed",
+      "finishVariantId": null,
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "honey-comb",
+      "finishId": "honed",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "honey-comb",
+      "finishId": "honed",
+      "finishVariantId": null,
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "tuscany--vein-cut",
+      "finishId": "honed",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "tuscany--cross-cut",
+      "finishId": "honed",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "blueocean",
+      "finishId": "honed",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "blueocean",
+      "finishId": "honed",
+      "finishVariantId": null,
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "new-grey",
+      "finishId": "polished",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "new-grey",
+      "finishId": "polished",
+      "finishVariantId": null,
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "juparana",
+      "finishId": "polished",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "juparana",
+      "finishId": "polished",
+      "finishVariantId": null,
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "alpine-white",
+      "finishId": "polished",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "alpine-white",
+      "finishId": "polished",
+      "finishVariantId": null,
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "zen-grey",
+      "finishId": "polished",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "zen-grey",
+      "finishId": "polished",
+      "finishVariantId": null,
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "angola-black",
+      "finishId": "polished",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "angola-black",
+      "finishId": "polished",
+      "finishVariantId": null,
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "golden-crust--light",
+      "finishId": "polished",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "golden-crust--light",
+      "finishId": "polished",
+      "finishVariantId": null,
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "golden-crust--dark",
+      "finishId": "polished",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "golden-crust--dark",
+      "finishId": "polished",
+      "finishVariantId": null,
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "tan-brown",
+      "finishId": "polished",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "tan-brown",
+      "finishId": "polished",
+      "finishVariantId": null,
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "harcourt--similar",
+      "finishId": "polished",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "harcourt--similar",
+      "finishId": "polished",
+      "finishVariantId": null,
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "tuscany--vein-cut",
+      "finishId": "polished",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "tuscany--cross-cut",
+      "finishId": "polished",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "angola-black",
+      "finishId": "bush_hammered",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "angola-black",
+      "finishId": "bush_hammered",
+      "finishVariantId": null,
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "ivory-sand",
+      "finishId": "bush_hammered",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "ivory-sand",
+      "finishId": "bush_hammered",
+      "finishVariantId": null,
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "steel-blue",
+      "finishId": "bush_hammered",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "steel-blue",
+      "finishId": "bush_hammered",
+      "finishVariantId": null,
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "blueocean",
+      "finishId": "bush_hammered",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "blueocean",
+      "finishId": "bush_hammered",
+      "finishVariantId": null,
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "ivory-sand",
+      "finishId": "sparrow_peck",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 200,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "ivory-sand",
+      "finishId": "sparrow_peck",
+      "finishVariantId": null,
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "steel-blue",
+      "finishId": "rock_face",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 200,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "steel-blue",
+      "finishId": "rock_face",
+      "finishVariantId": null,
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "blueocean",
+      "finishId": "rock_face",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 200,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "blueocean",
+      "finishId": "rock_face",
+      "finishVariantId": null,
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "steel-blue",
+      "finishId": "rippling",
+      "finishVariantId": "fine",
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "steel-blue",
+      "finishId": "rippling",
+      "finishVariantId": "fine",
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "blueocean",
+      "finishId": "rippling",
+      "finishVariantId": "fine",
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "blueocean",
+      "finishId": "rippling",
+      "finishVariantId": "fine",
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "steel-blue",
+      "finishId": "rippling",
+      "finishVariantId": "rough",
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "steel-blue",
+      "finishId": "rippling",
+      "finishVariantId": "rough",
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "blueocean",
+      "finishId": "rippling",
+      "finishVariantId": "rough",
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "blueocean",
+      "finishId": "rippling",
+      "finishVariantId": "rough",
+      "sizeWidthMm": 400,
+      "sizeLengthMm": 600,
+      "qty": 2,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "tuscany--vein-cut",
+      "finishId": "sandblasted",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    },
+    {
+      "stoneVariantId": "tuscany--cross-cut",
+      "finishId": "sandblasted",
+      "finishVariantId": null,
+      "sizeWidthMm": 100,
+      "sizeLengthMm": 100,
+      "qty": 10,
+      "unit": "pcs"
+    }
+  ],
+  "byStoneVariant": {
+    "new-grey": [
+      {
+        "stoneVariantId": "new-grey",
+        "finishId": "flamed",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "new-grey",
+        "finishId": "flamed",
+        "finishVariantId": null,
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "new-grey",
+        "finishId": "sawn",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "new-grey",
+        "finishId": "sawn",
+        "finishVariantId": null,
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "new-grey",
+        "finishId": "honed",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "new-grey",
+        "finishId": "honed",
+        "finishVariantId": null,
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "new-grey",
+        "finishId": "polished",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "new-grey",
+        "finishId": "polished",
+        "finishVariantId": null,
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      }
+    ],
+    "juparana": [
+      {
+        "stoneVariantId": "juparana",
+        "finishId": "flamed",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "juparana",
+        "finishId": "flamed",
+        "finishVariantId": null,
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "juparana",
+        "finishId": "sawn",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "juparana",
+        "finishId": "sawn",
+        "finishVariantId": null,
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "juparana",
+        "finishId": "honed",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "juparana",
+        "finishId": "honed",
+        "finishVariantId": null,
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "juparana",
+        "finishId": "polished",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "juparana",
+        "finishId": "polished",
+        "finishVariantId": null,
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      }
+    ],
+    "alpine-white": [
+      {
+        "stoneVariantId": "alpine-white",
+        "finishId": "flamed",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "alpine-white",
+        "finishId": "flamed",
+        "finishVariantId": null,
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "alpine-white",
+        "finishId": "sawn",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "alpine-white",
+        "finishId": "sawn",
+        "finishVariantId": null,
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "alpine-white",
+        "finishId": "honed",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "alpine-white",
+        "finishId": "honed",
+        "finishVariantId": null,
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "alpine-white",
+        "finishId": "polished",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "alpine-white",
+        "finishId": "polished",
+        "finishVariantId": null,
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      }
+    ],
+    "zen-grey": [
+      {
+        "stoneVariantId": "zen-grey",
+        "finishId": "flamed",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "zen-grey",
+        "finishId": "flamed",
+        "finishVariantId": null,
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "zen-grey",
+        "finishId": "sawn",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "zen-grey",
+        "finishId": "sawn",
+        "finishVariantId": null,
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "zen-grey",
+        "finishId": "honed",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "zen-grey",
+        "finishId": "honed",
+        "finishVariantId": null,
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "zen-grey",
+        "finishId": "polished",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "zen-grey",
+        "finishId": "polished",
+        "finishVariantId": null,
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      }
+    ],
+    "angola-black": [
+      {
+        "stoneVariantId": "angola-black",
+        "finishId": "flamed",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "angola-black",
+        "finishId": "flamed",
+        "finishVariantId": null,
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "angola-black",
+        "finishId": "sawn",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "angola-black",
+        "finishId": "sawn",
+        "finishVariantId": null,
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "angola-black",
+        "finishId": "honed",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "angola-black",
+        "finishId": "honed",
+        "finishVariantId": null,
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "angola-black",
+        "finishId": "polished",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "angola-black",
+        "finishId": "polished",
+        "finishVariantId": null,
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "angola-black",
+        "finishId": "bush_hammered",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "angola-black",
+        "finishId": "bush_hammered",
+        "finishVariantId": null,
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      }
+    ],
+    "golden-crust--light": [
+      {
+        "stoneVariantId": "golden-crust--light",
+        "finishId": "flamed",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "golden-crust--light",
+        "finishId": "flamed",
+        "finishVariantId": null,
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "golden-crust--light",
+        "finishId": "sawn",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "golden-crust--light",
+        "finishId": "sawn",
+        "finishVariantId": null,
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "golden-crust--light",
+        "finishId": "honed",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "golden-crust--light",
+        "finishId": "honed",
+        "finishVariantId": null,
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "golden-crust--light",
+        "finishId": "polished",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "golden-crust--light",
+        "finishId": "polished",
+        "finishVariantId": null,
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      }
+    ],
+    "golden-crust--dark": [
+      {
+        "stoneVariantId": "golden-crust--dark",
+        "finishId": "flamed",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "golden-crust--dark",
+        "finishId": "flamed",
+        "finishVariantId": null,
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "golden-crust--dark",
+        "finishId": "sawn",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "golden-crust--dark",
+        "finishId": "sawn",
+        "finishVariantId": null,
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "golden-crust--dark",
+        "finishId": "honed",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "golden-crust--dark",
+        "finishId": "honed",
+        "finishVariantId": null,
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "golden-crust--dark",
+        "finishId": "polished",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "golden-crust--dark",
+        "finishId": "polished",
+        "finishVariantId": null,
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      }
+    ],
+    "tan-brown": [
+      {
+        "stoneVariantId": "tan-brown",
+        "finishId": "flamed",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "tan-brown",
+        "finishId": "flamed",
+        "finishVariantId": null,
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "tan-brown",
+        "finishId": "sawn",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "tan-brown",
+        "finishId": "sawn",
+        "finishVariantId": null,
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "tan-brown",
+        "finishId": "honed",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "tan-brown",
+        "finishId": "honed",
+        "finishVariantId": null,
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "tan-brown",
+        "finishId": "polished",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "tan-brown",
+        "finishId": "polished",
+        "finishVariantId": null,
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      }
+    ],
+    "harcourt--similar": [
+      {
+        "stoneVariantId": "harcourt--similar",
+        "finishId": "flamed",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "harcourt--similar",
+        "finishId": "flamed",
+        "finishVariantId": null,
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "harcourt--similar",
+        "finishId": "sawn",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "harcourt--similar",
+        "finishId": "sawn",
+        "finishVariantId": null,
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "harcourt--similar",
+        "finishId": "honed",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "harcourt--similar",
+        "finishId": "honed",
+        "finishVariantId": null,
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "harcourt--similar",
+        "finishId": "polished",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "harcourt--similar",
+        "finishId": "polished",
+        "finishVariantId": null,
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      }
+    ],
+    "steel-blue": [
+      {
+        "stoneVariantId": "steel-blue",
+        "finishId": "sawn",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "steel-blue",
+        "finishId": "sawn",
+        "finishVariantId": null,
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "steel-blue",
+        "finishId": "honed",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "steel-blue",
+        "finishId": "honed",
+        "finishVariantId": null,
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "steel-blue",
+        "finishId": "bush_hammered",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "steel-blue",
+        "finishId": "bush_hammered",
+        "finishVariantId": null,
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "steel-blue",
+        "finishId": "rock_face",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 200,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "steel-blue",
+        "finishId": "rock_face",
+        "finishVariantId": null,
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "steel-blue",
+        "finishId": "rippling",
+        "finishVariantId": "fine",
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "steel-blue",
+        "finishId": "rippling",
+        "finishVariantId": "fine",
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "steel-blue",
+        "finishId": "rippling",
+        "finishVariantId": "rough",
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "steel-blue",
+        "finishId": "rippling",
+        "finishVariantId": "rough",
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      }
+    ],
+    "honey-comb": [
+      {
+        "stoneVariantId": "honey-comb",
+        "finishId": "sawn",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "honey-comb",
+        "finishId": "sawn",
+        "finishVariantId": null,
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "honey-comb",
+        "finishId": "honed",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "honey-comb",
+        "finishId": "honed",
+        "finishVariantId": null,
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      }
+    ],
+    "blueocean": [
+      {
+        "stoneVariantId": "blueocean",
+        "finishId": "sawn",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "blueocean",
+        "finishId": "sawn",
+        "finishVariantId": null,
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "blueocean",
+        "finishId": "honed",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "blueocean",
+        "finishId": "honed",
+        "finishVariantId": null,
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "blueocean",
+        "finishId": "bush_hammered",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "blueocean",
+        "finishId": "bush_hammered",
+        "finishVariantId": null,
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "blueocean",
+        "finishId": "rock_face",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 200,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "blueocean",
+        "finishId": "rock_face",
+        "finishVariantId": null,
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "blueocean",
+        "finishId": "rippling",
+        "finishVariantId": "fine",
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "blueocean",
+        "finishId": "rippling",
+        "finishVariantId": "fine",
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "blueocean",
+        "finishId": "rippling",
+        "finishVariantId": "rough",
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "blueocean",
+        "finishId": "rippling",
+        "finishVariantId": "rough",
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      }
+    ],
+    "ivory-sand": [
+      {
+        "stoneVariantId": "ivory-sand",
+        "finishId": "honed",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "ivory-sand",
+        "finishId": "honed",
+        "finishVariantId": null,
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "ivory-sand",
+        "finishId": "bush_hammered",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "ivory-sand",
+        "finishId": "bush_hammered",
+        "finishVariantId": null,
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "ivory-sand",
+        "finishId": "sparrow_peck",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 200,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "ivory-sand",
+        "finishId": "sparrow_peck",
+        "finishVariantId": null,
+        "sizeWidthMm": 400,
+        "sizeLengthMm": 600,
+        "qty": 2,
+        "unit": "pcs"
+      }
+    ],
+    "tuscany--vein-cut": [
+      {
+        "stoneVariantId": "tuscany--vein-cut",
+        "finishId": "honed",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "tuscany--vein-cut",
+        "finishId": "polished",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "tuscany--vein-cut",
+        "finishId": "sandblasted",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      }
+    ],
+    "tuscany--cross-cut": [
+      {
+        "stoneVariantId": "tuscany--cross-cut",
+        "finishId": "honed",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "tuscany--cross-cut",
+        "finishId": "polished",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      },
+      {
+        "stoneVariantId": "tuscany--cross-cut",
+        "finishId": "sandblasted",
+        "finishVariantId": null,
+        "sizeWidthMm": 100,
+        "sizeLengthMm": 100,
+        "qty": 10,
+        "unit": "pcs"
+      }
+    ]
+  }
+}

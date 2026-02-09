@@ -1,0 +1,13 @@
+finish_id,finish_variant_id,source_names,display_name,sort_order
+flamed,,Flamed,Flamed,10
+sawn,,Sawn|Diamond Sawn,Sawn,20
+honed,,Honed,Honed,30
+polished,,Polished,Polished,40
+bush_hammered,,Bush Hammered|Bush Hammer (___),Bush Hammered,50
+combed,,Combed,Combed,60
+rippling,,Rippling,Rippling,70
+rippling,fine,Rippling Fine,Rippling (Fine),71
+rippling,rough,Rippling Rough,Rippling (Rough),72
+rock_face,,Rock Face|Rock Face (___),Rock Face,80
+sparrow_peck,,Sparrow Peck|Sparrow peck,Sparrow Peck,90
+sandblasted,,Sandblasted|Sandblasted (___),Sandblasted,100
