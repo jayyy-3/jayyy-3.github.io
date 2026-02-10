@@ -119,6 +119,9 @@ export default function StoneLibraryDetailPage() {
                         dlName={detail.dlName}
                         availabilityLabel={detail.availabilityLabel}
                         priceRange={detail.priceRange}
+                        priceTierLevel={detail.priceTierLevel}
+                        priceTierLabel={detail.priceTierLabel}
+                        pricePrimaryLabel={detail.pricePrimaryLabel}
                         finishCapabilities={detail.finishCapabilities}
                         cutOptions={detail.cutOptions}
                     />

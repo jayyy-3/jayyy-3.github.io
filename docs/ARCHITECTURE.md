@@ -87,11 +87,19 @@ Last updated: 2026-02-09
 - Type contract: `/Users/lee/Documents/SAI/urblo/urblo-react/src/types/stone-library.ts`
   - `StoneLibraryRaw`, `StoneFinishRaw`, `StoneGroupRaw`, `StoneVariantRaw`
   - `StoneCardVM`, `StoneDetailVM`, `FinishVM`, `StoneStatus`
+  - Price presentation fields on `StoneDetailVM`:
+    - `priceRange` (source notation, e.g. `$ / $$ / $$$`)
+    - `priceTierLevel` (`1 | 2 | 3 | null`)
+    - `priceTierLabel` (`Budget | Balanced | Premium | null`)
+    - `pricePrimaryLabel` (`Budget | Balanced | Premium | Price on request`)
 - Service contract: `/Users/lee/Documents/SAI/urblo/urblo-react/src/service/StoneLibraryService.ts`
   - `getStoneCards(filters)`
   - `getStoneDetail(stoneGroupId, variantId?)`
   - `getFilterFacets()`
   - `getStoneOptionsForProducts()`
+  - Price mapping contract in `getStoneDetail`:
+    - Active stones with valid tier (`1/2/3`) map to `Budget/Balanced/Premium`.
+    - `tbc` status or missing/invalid tier degrades to `Price on request`.
 - Supplemental metadata:
   - `/Users/lee/Documents/SAI/urblo/urblo-react/src/data/finishBehaviorMeta.ts`
   - `/Users/lee/Documents/SAI/urblo/urblo-react/src/data/stoneFinishImages.ts`
@@ -137,7 +145,7 @@ Last updated: 2026-02-09
 ## Storage and Side-Effect Contract
 - Local storage keys:
   - `urblo:feat` written by `FeatureSection` tab changes
-  - `seenPopup` read by `WelcomePopup`; not currently written due commented line
+  - `seenPopup` read and written by `WelcomePopup` on first display
 - Dangerous HTML render points:
   - `ArticlePage` renders sanitized article HTML
 - Runtime fetches:
@@ -151,7 +159,6 @@ Last updated: 2026-02-09
 
 ## Known Architecture Risks
 - Footer contains undeclared in-app routes (`/sample-request`, `/contact`).
-- `WelcomePopup` persistence (`seenPopup`) write is commented, causing repeat popups.
 - Project list data and project detail data are maintained in separate sources.
 - Bundle size warning (`>500kB`) indicates code-splitting and chunk strategy debt.
 

@@ -49,5 +49,4 @@ Before declaring implementation complete, verify all checks below:
 - Stone Library migration is complete: old `/materials*` route family has been removed and replaced with `/stone-library` + `/stone-library/:stoneGroupId`.
 - Quality gates are green (`npm run build`, `npm run lint`, `npx tsc -b` all pass).
 - Footer route mismatch remains: `/sample-request` and `/contact` links still exist in `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/Footer.tsx`, but those routes are not declared in `/Users/lee/Documents/SAI/urblo/urblo-react/src/App.tsx`.
-- Popup persistence behavior remains incomplete: `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/WelcomePopup.tsx` reads `seenPopup` but does not write it (write line is commented).
 - Bundle size warning (`>500kB` chunk) remains and should be addressed with code splitting.

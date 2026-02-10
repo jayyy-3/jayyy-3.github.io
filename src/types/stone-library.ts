@@ -1,6 +1,8 @@
 export type StoneStatus = 'active' | 'tbc';
 export type FinishCapability = 'yes' | 'no' | 'tbc';
 export type FinishKey = string;
+export type StonePriceTierLevel = 1 | 2 | 3;
+export type StonePriceTierLabel = 'Budget' | 'Balanced' | 'Premium';
 
 export interface StoneFinishRaw {
     finishId: string;
@@ -126,6 +128,9 @@ export interface StoneDetailVM {
     rawBlockLabel: string;
     dlName: string | null;
     priceRange: string;
+    priceTierLevel: StonePriceTierLevel | null;
+    priceTierLabel: StonePriceTierLabel | null;
+    pricePrimaryLabel: string;
     availabilityLabel: string;
     cutOptions: StoneCutOptionRaw[];
     variants: StoneVariantVM[];

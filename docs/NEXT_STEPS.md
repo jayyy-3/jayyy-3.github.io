@@ -101,6 +101,39 @@ For any user-facing layout/copy/IA task:
   - `/Users/lee/Documents/SAI/urblo/urblo-react/docs/NEXT_STEPS.md`
   - `/Users/lee/Documents/SAI/urblo/urblo-react/docs/WORKLOG.md`
 
+### DONE-STONELIB-LAYOUT-001
+- Scope:
+  - Closed Stone Library detail layout stretch issue after user acceptance of the implemented behavior.
+  - Removed `NEXT-STONELIB-LAYOUT-001` from active backlog and kept completion trace in docs.
+- Key files:
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/StoneLibraryDetailPage.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/ImageStage.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/FinishAccordion.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/docs/NEXT_STEPS.md`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/docs/WORKLOG.md`
+
+### DONE-STONELIB-PRICE-001
+- Scope:
+  - Replaced plain `$ / $$ / $$$` price text with a scannable 3-level tier meter (`Budget / Balanced / Premium`).
+  - Kept original `$` source notation as secondary trace text and added graceful fallback to `Price on request` for `tbc` or missing tier values.
+- Key files:
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/SpecsPanel.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/service/StoneLibraryService.ts`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/types/stone-library.ts`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/StoneLibraryDetailPage.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/docs/NEXT_STEPS.md`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/docs/WORKLOG.md`
+
+### DONE-POPUP-001
+- Scope:
+  - Fixed welcome popup persistence so first display writes `seenPopup=true` and subsequent visits do not re-show the popup.
+  - Added timer cleanup to prevent delayed state updates after unmount.
+- Key files:
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/WelcomePopup.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/docs/ARCHITECTURE.md`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/docs/README_AGENT.md`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/docs/WORKLOG.md`
+
 ## Now
 
 ### NOW-STONELIB-IMG-FASTTRACK-001
@@ -299,45 +332,6 @@ For any user-facing layout/copy/IA task:
   - Ensure wording remains non-absolute and context-safe.
 - Definition of Done:
   - Finish behavior notes are reviewed and specific enough for designer decision support.
-- Verification commands:
-  - `npm run build`
-  - `npm run lint`
-  - `npx tsc -b`
-
-### NEXT-STONELIB-LAYOUT-001
-- Objective: Fix Stone Library detail layout coupling that stretches left media when finish count grows.
-- Problem statement: On `/stone-library/:stoneGroupId`, when the right-side finish list becomes long, the left image stage can be stretched to match right-column height, which introduces visible black edge artifacts under the image.
-- Affected files:
-  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/StoneLibraryDetailPage.tsx`
-  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/ImageStage.tsx`
-  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/FinishAccordion.tsx`
-  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/index.css` (if layout constraint updates are needed)
-- Implementation notes:
-  - Decouple left media container height from right finish list content height.
-  - Keep stable media aspect ratio and prevent image stretch/compression.
-  - Make right-side overflow behavior explicit (scroll/clamp) instead of forcing left panel growth.
-- Definition of Done:
-  - Increasing finish items does not stretch or distort the left image area.
-  - No black edge appears below the active image on desktop or mobile breakpoints.
-  - Existing finish click sync behavior remains correct.
-- Verification commands:
-  - `npm run build`
-  - `npm run lint`
-  - `npx tsc -b`
-
-### NEXT-STONELIB-PRICE-001
-- Objective: Replace plain `$ / $$ / $$$` display with a clearer visual price tier representation.
-- Problem statement: Current price range text is semantically correct but weak in scanability and decision support.
-- Affected files:
-  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/SpecsPanel.tsx`
-  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/service/StoneLibraryService.ts`
-- Implementation notes:
-  - Introduce 3-level tier meter UI (Budget / Balanced / Premium) mapped from existing tier/source data.
-  - Preserve original `$` symbol text as secondary annotation for traceability.
-  - Ensure `tbc` or missing tier values degrade gracefully to “Price on request”.
-- Definition of Done:
-  - Price information is visually scannable and still traceable to source data.
-  - No assumptions are implied beyond available source metadata.
 - Verification commands:
   - `npm run build`
   - `npm run lint`

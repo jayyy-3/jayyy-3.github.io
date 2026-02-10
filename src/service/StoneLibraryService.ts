@@ -17,6 +17,8 @@ import type {
     StoneFinishRaw,
     StoneGroupRaw,
     StoneLibraryRaw,
+    StonePriceTierLabel,
+    StonePriceTierLevel,
     StoneStatus,
     StoneVariantRaw,
 } from '../types/stone-library';
@@ -102,6 +104,44 @@ function toRawBlockLabel(stone: StoneGroupRaw): string {
     }
 
     return 'Raw block size on request';
+}
+
+function isPriceTierLevel(value: number | null): value is StonePriceTierLevel {
+    return value === 1 || value === 2 || value === 3;
+}
+
+const priceTierLabelByLevel: Record<StonePriceTierLevel, StonePriceTierLabel> = {
+    1: 'Budget',
+    2: 'Balanced',
+    3: 'Premium',
+};
+
+function toPricePresentation(stone: StoneGroupRaw): {
+    priceRange: string;
+    priceTierLevel: StonePriceTierLevel | null;
+    priceTierLabel: StonePriceTierLabel | null;
+    pricePrimaryLabel: string;
+} {
+    const priceRange = stone.price.source?.trim() || 'Price on request';
+
+    if (stone.status !== 'active' || !isPriceTierLevel(stone.price.tier)) {
+        return {
+            priceRange,
+            priceTierLevel: null,
+            priceTierLabel: null,
+            pricePrimaryLabel: 'Price on request',
+        };
+    }
+
+    const priceTierLevel = stone.price.tier;
+    const priceTierLabel = priceTierLabelByLevel[priceTierLevel];
+
+    return {
+        priceRange,
+        priceTierLevel,
+        priceTierLabel,
+        pricePrimaryLabel: priceTierLabel,
+    };
 }
 
 function compareBySortOrder<T extends { sortOrder: number }>(a: T, b: T): number {
@@ -400,6 +440,7 @@ class StoneLibraryService {
         ).map(mapFinishCapabilityVM);
 
         const defaultFinishKey = availableFinishes[0]?.finishKey || null;
+        const pricePresentation = toPricePresentation(stone);
 
         return {
             stoneGroupId: stone.stoneGroupId,
@@ -409,7 +450,10 @@ class StoneLibraryService {
             originLabel: toOriginLabel(stone),
             rawBlockLabel: toRawBlockLabel(stone),
             dlName: stone.dlName,
-            priceRange: stone.price.source || 'Price on request',
+            priceRange: pricePresentation.priceRange,
+            priceTierLevel: pricePresentation.priceTierLevel,
+            priceTierLabel: pricePresentation.priceTierLabel,
+            pricePrimaryLabel: pricePresentation.pricePrimaryLabel,
             availabilityLabel: toAvailabilityLabel(stone.status),
             cutOptions: stone.cutOptions,
             variants: sortedVariants.map((variant) => ({

@@ -297,6 +297,49 @@ Last updated: 2026-02-09
 - `NEXT-STONELIB-PRICE-001`
 - `NEXT-STONELIB-IMG-002`
 
+## Entry - 2026-02-09 (Popup Persistence Fix + Price Tier Meter + Backlog Closure)
+
+### Scope
+- Fixed welcome popup persistence behavior so first display writes `seenPopup` and prevents repeat display on later visits.
+- Replaced plain stone detail price text with a 3-level visual tier meter (`Budget / Balanced / Premium`) while preserving source notation (`$ / $$ / $$$`) for traceability.
+- Applied graceful fallback to `Price on request` for `tbc` stones or missing/invalid tier values.
+- Closed `NEXT-STONELIB-LAYOUT-001` by user acceptance and moved both layout/price tasks from `Next` to `Done` in backlog docs.
+- Updated architecture and execution docs to keep runtime contracts synchronized.
+
+### Changed Files
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/WelcomePopup.tsx`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/types/stone-library.ts`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/service/StoneLibraryService.ts`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/SpecsPanel.tsx`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/StoneLibraryDetailPage.tsx`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/README_AGENT.md`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/ARCHITECTURE.md`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/NEXT_STEPS.md`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/WORKLOG.md`
+
+### Verification Results
+- `npm run build`: pass (chunk size warning `>500kB` unchanged; Browserslist data staleness notice shown)
+- `npm run lint`: pass
+- `npx tsc -b`: pass
+
+### Risks and Gaps
+- Footer still links to undeclared routes (`/sample-request`, `/contact`) until `NOW-ROUTE-002` closes.
+- Bundle size warning (`>500kB`) remains and is not addressed in this scope.
+- Stone Library image and finish-data completion work remains open under existing now/next tasks.
+
+### Next Handoff
+- `NOW-STONELIB-IMG-FASTTRACK-001`
+- `NOW-DELIVERY-READINESS-001`
+- `NOW-ASSET-STRATEGY-001`
+- `NOW-ROUTE-002`
+- `NOW-DOCS-002`
+- `NEXT-UI-PARITY-001`
+- `NEXT-SAMPLE-REQUEST-001`
+- `NEXT-STONELIB-IMG-001`
+- `NEXT-STONELIB-IMG-002`
+- `NEXT-STONELIB-DATA-001`
+- `NEXT-DATA-001`
+
 ## Entry Template (Use for Every Future Session)
 
 ### Date

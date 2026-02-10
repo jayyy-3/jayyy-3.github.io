@@ -1,4 +1,9 @@
-import type { FinishCapabilityVM, StoneCutOptionRaw } from '../../types/stone-library';
+import type {
+    FinishCapabilityVM,
+    StoneCutOptionRaw,
+    StonePriceTierLabel,
+    StonePriceTierLevel,
+} from '../../types/stone-library';
 
 interface SpecsPanelProps {
     stoneType: string;
@@ -7,6 +12,9 @@ interface SpecsPanelProps {
     dlName: string | null;
     availabilityLabel: string;
     priceRange: string;
+    priceTierLevel: StonePriceTierLevel | null;
+    priceTierLabel: StonePriceTierLabel | null;
+    pricePrimaryLabel: string;
     finishCapabilities: FinishCapabilityVM[];
     cutOptions: StoneCutOptionRaw[];
 }
@@ -34,6 +42,9 @@ export default function SpecsPanel({
     dlName,
     availabilityLabel,
     priceRange,
+    priceTierLevel,
+    priceTierLabel,
+    pricePrimaryLabel,
     finishCapabilities,
     cutOptions,
 }: SpecsPanelProps) {
@@ -74,7 +85,29 @@ export default function SpecsPanel({
                     <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">
                         Price Range
                     </p>
-                    <p className="mt-2 text-base text-neutral-900">{priceRange}</p>
+                    <p className="mt-2 text-base font-semibold text-neutral-900">{pricePrimaryLabel}</p>
+                    <div
+                        className="mt-3 flex items-center gap-2"
+                        role="img"
+                        aria-label={priceTierLabel ? `${priceTierLabel} price tier` : 'Price on request'}
+                    >
+                        {[1, 2, 3].map((level) => (
+                            <span
+                                key={level}
+                                className={[
+                                    'h-2 flex-1 rounded-sm transition-colors',
+                                    priceTierLevel !== null && level <= priceTierLevel
+                                        ? 'bg-[#00FF19]'
+                                        : 'bg-neutral-200',
+                                ].join(' ')}
+                            />
+                        ))}
+                    </div>
+                    {priceRange && priceRange !== pricePrimaryLabel ? (
+                        <p className="mt-3 text-[11px] uppercase tracking-[0.08em] text-neutral-500">
+                            Source notation: {priceRange}
+                        </p>
+                    ) : null}
                 </div>
             </div>
 
