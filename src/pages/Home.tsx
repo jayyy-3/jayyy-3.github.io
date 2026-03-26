@@ -1,12 +1,5 @@
-// src/pages/Home.tsx
-
-import FeatureSection from "../components/FeatureSection.tsx";
+import HomepageSections from '../components/homepage/HomepageSections';
 
 export default function Home() {
-    return (
-        <>
-            <FeatureSection />
-
-        </>
-    );
+  return <HomepageSections />;
 }

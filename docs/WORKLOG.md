@@ -1,6 +1,50 @@
 # WORKLOG - Urblo Execution Log
 
-Last updated: 2026-02-09
+Last updated: 2026-03-26
+
+## Entry - 2026-03-26 (Homepage Rebuild + Local Font Hosting)
+
+### Scope
+- Rebuilt the homepage from the legacy tabbed `FeatureSection` into a dedicated long-form landing page composed of:
+  - hero
+  - sustainability
+  - trusted partner banner
+  - product showcase
+  - metrics
+  - latest projects
+  - stone showcase
+  - manifesto
+  - video CTA
+- Added a homepage-only layout so the new Figma-style header/footer does not change non-home routes.
+- Localized homepage fonts into `/Users/lee/Documents/SAI/urblo/urblo-react/public/fonts/urblo`:
+  - `Avenir LT Std`
+  - `Didot LT Std`
+  - `Space Grotesk`
+- Removed the old home-only tab/panel component stack after confirming it was no longer referenced.
+- Kept homepage images/video remote for this phase; only fonts were moved on-platform.
+
+### Changed Files
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/App.tsx`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/Home.tsx`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/index.css`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/layouts/HomepageLayout.tsx`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/homepage/HomepageHeader.tsx`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/homepage/HomepageFooter.tsx`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/homepage/HomepageSections.tsx`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/data/homepage.ts`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/public/fonts/urblo/*`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/ARCHITECTURE.md`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/WORKLOG.md`
+
+### Verification Results
+- `npm run build`: pass
+- `npm run lint`: pass
+- `npx tsc -b`: pass
+
+### Risks and Gaps
+- Homepage still depends on remote WordPress-hosted image/video assets by design for this phase.
+- Bundle size warning (`>500kB`) remains unchanged from prior sessions.
+- `docs/NEXT_STEPS.md` already had user-side uncommitted changes and was left untouched in this session.
 
 ## Baseline Entry - 2026-02-09 (Docs Reset)
 

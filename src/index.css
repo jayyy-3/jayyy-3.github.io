@@ -2,6 +2,111 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+    font-family: 'Avenir LT Std';
+    font-style: normal;
+    font-weight: 300;
+    font-display: swap;
+    src: url('/fonts/urblo/Avenir-LT-Std-35-Light.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'Avenir LT Std';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('/fonts/urblo/Avenir-LT-Std-45-Book.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'Avenir LT Std';
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url('/fonts/urblo/Avenir-LT-Std-55-Roman.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'Avenir LT Std';
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url('/fonts/urblo/Avenir-LT-Std-65-Medium.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'Avenir LT Std';
+    font-style: normal;
+    font-weight: 800;
+    font-display: swap;
+    src: url('/fonts/urblo/Avenir-LT-Std-85-Heavy.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'Didot LT Std';
+    font-style: italic;
+    font-weight: 400;
+    font-display: swap;
+    src: url('/fonts/urblo/Didot-LT-Std-Italic.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'Didot LT Std';
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url('/fonts/urblo/Didot-LT-Std-Bold.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'Space Grotesk';
+    font-style: normal;
+    font-weight: 300 700;
+    font-display: swap;
+    src: url('/fonts/urblo/SpaceGrotesk-Latin.woff2') format('woff2');
+}
+
+:root {
+    --urblo-black: #000000;
+    --urblo-text: #33363f;
+    --urblo-lime: #00ff19;
+    --urblo-warm: rgba(239, 239, 239, 0.6);
+    --urblo-font-sans: 'Avenir LT Std', 'Avenir Next', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    --urblo-font-display: 'Space Grotesk', 'Avenir LT Std', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    --urblo-font-accent: 'Didot LT Std', 'Iowan Old Style', 'Times New Roman', serif;
+}
+
+html,
+body,
+#root {
+    min-height: 100%;
+}
+
+body {
+    margin: 0;
+    background: #ffffff;
+    color: var(--urblo-text);
+    font-family: var(--urblo-font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+    color: inherit;
+}
+
+.font-sans {
+    font-family: var(--urblo-font-sans);
+}
+
+.font-display {
+    font-family: var(--urblo-font-display);
+}
+
+.font-accent {
+    font-family: var(--urblo-font-accent);
+}
+
 .article-wrapper img[src*=".gif" i] {
     max-width: 100%;
     height: auto;
@@ -42,4 +147,3 @@ html {
 }
 .animate-marquee        { animation: marquee 30s linear infinite; }
 .animate-marquee-reverse{ animation: marquee-reverse 30s linear infinite; }
-

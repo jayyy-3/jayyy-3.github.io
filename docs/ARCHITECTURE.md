@@ -1,6 +1,6 @@
 # Urblo Web - Architecture and Contracts
 
-Last updated: 2026-02-09
+Last updated: 2026-03-26
 
 ## System Boundary
 - Frontend-only React application shipped as static assets.
@@ -35,7 +35,7 @@ Last updated: 2026-02-09
 
 | Route pattern | Page component | Notes |
 |---|---|---|
-| `/` | `Home` | Wrapped by `DefaultLayout`. |
+| `/` | `Home` | Wrapped by `HomepageLayout` with homepage-specific header/footer. |
 | `/stone-library` | `StoneLibraryPage` | Stone list and filter surface. |
 | `/stone-library/:stoneGroupId` | `StoneLibraryDetailPage` | Stone detail with variant switch, synchronized finish controls, and lightbox preview. |
 | `/products` | `ProductsPage` | Bench/system product listing. |
@@ -45,13 +45,15 @@ Last updated: 2026-02-09
 | `/our-story` | `OurStory` | About page. |
 | `/articles` | `ArticlesPage` | Article list page. |
 | `/articles/:slug` | `ArticlePage` | Article detail page. |
-| `*` | `Home` | Fallback to home content. |
+| `*` | `Home` | Fallback to homepage content wrapped by `HomepageLayout`. |
 
 ## Navigation Contract vs Implemented Routes
 
 ### Implemented navigation surfaces
 - Header links: `/projects`, `/stone-library`, `/our-story`, `/articles`, `/products`, `mailto:info@urblo.com.au`
 - Footer links: `/sample-request`, `/contact`
+- Homepage-only header links: `/products`, `/projects`, `/our-story`, `mailto:info@urblo.com.au?subject=Sample%20Request`, `mailto:info@urblo.com.au?subject=Contact%20Us`
+- Homepage-only footer links: `mailto:info@urblo.com.au?subject=Sample%20Request`, `mailto:info@urblo.com.au?subject=Contact%20Us`
 
 ### Gaps
 - `/sample-request` is not declared in router.
@@ -144,7 +146,6 @@ Last updated: 2026-02-09
 
 ## Storage and Side-Effect Contract
 - Local storage keys:
-  - `urblo:feat` written by `FeatureSection` tab changes
   - `seenPopup` read and written by `WelcomePopup` on first display
 - Dangerous HTML render points:
   - `ArticlePage` renders sanitized article HTML
@@ -152,7 +153,16 @@ Last updated: 2026-02-09
   - Static JSON/HTML from `public/articles`
   - No authenticated or server API fetches
 
-## Quality Gate Status (Measured 2026-02-09)
+## Homepage Contract
+- Homepage structure is driven by dedicated internal config in `src/data/homepage.ts`, not the legacy tabbed `FeatureSection`.
+- Homepage uses `HomepageLayout` so Figma-specific header/footer behavior does not affect non-home routes.
+- Homepage typography is self-hosted from local static assets under `/public/fonts/urblo`:
+  - `Avenir LT Std` weights `300/400/500/600/800`
+  - `Didot LT Std` italic `400` and normal `600`
+  - `Space Grotesk` local WOFF2
+- Homepage runtime no longer depends on remote WordPress font CSS/TTF/WOFF assets.
+
+## Quality Gate Status (Measured 2026-03-26)
 - `npm run build`: pass
 - `npm run lint`: pass
 - `npx tsc -b`: pass

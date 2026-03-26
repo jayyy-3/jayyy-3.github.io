@@ -2,6 +2,7 @@ import { HashRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import WelcomePopup from './components/WelcomePopup';
 import DefaultLayout from './layouts/DefaultLayout';
+import HomepageLayout from './layouts/HomepageLayout';
 import Home from './pages/Home';
 import ProductsPage from './pages/ProductsPage';
 import ProductDetailPage from './pages/ProductDetailPage';
@@ -43,9 +44,9 @@ export default function App() {
                     <Route
                         path="/"
                         element={
-                            <DefaultLayout bgImage="https://urblo.com.au/wp-content/uploads/2024/12/bg-home.jpg">
+                            <HomepageLayout>
                                 <Home />
-                            </DefaultLayout>
+                            </HomepageLayout>
                         }
                     />
 
@@ -133,9 +134,9 @@ export default function App() {
                     <Route
                         path="*"
                         element={
-                            <DefaultLayout bgImage="https://urblo.com.au/wp-content/uploads/2024/12/bg-404.jpg">
+                            <HomepageLayout>
                                 <Home />
-                            </DefaultLayout>
+                            </HomepageLayout>
                         }
                     />
                 </Routes>
