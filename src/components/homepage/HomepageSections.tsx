@@ -6,6 +6,7 @@ import {
   type HomepageCollaborationCard,
   type HomepageCostComparisonRow,
   type HomepageFeaturePanelId,
+  type HomepageLogo,
   type HomepageMetric,
   type HomepageProject,
   type HomepageStoneCard,
@@ -982,36 +983,78 @@ function StoneShowcaseSection() {
 
 function ManifestoSection() {
   return (
-    <section className="overflow-hidden bg-black px-6 py-20 text-white md:px-10 lg:px-[92px]">
-      <div className="mx-auto max-w-[1440px]">
-        <div className="relative overflow-hidden rounded-[4px] border-y border-white/20 py-10 md:py-16">
-          <Reveal className="pointer-events-none absolute right-[18%] top-[26%] hidden h-[170px] w-[323px] overflow-hidden rounded-full md:block">
-            <img
-              src={homepageData.manifesto.image}
-              alt=""
-              className="h-full w-full object-cover"
-            />
-          </Reveal>
+    <section className="overflow-hidden bg-white pb-0 pt-20 text-white">
+      <Reveal>
+        <div
+          className="relative overflow-hidden bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: `url('${homepageData.manifesto.backgroundImage}')` }}
+        >
+          <div className="absolute inset-0 bg-black/75" />
 
-          <div className="space-y-2 text-center uppercase leading-none tracking-[0.08em] md:space-y-4">
-            {homepageData.manifesto.lines.map((line, index) => (
-              <Reveal
-                key={line}
-                delay={0.06 * index}
-                className={`text-[60px] font-semibold md:text-[110px] xl:text-[150px] ${
-                  index === 3 ? 'text-transparent' : 'text-white'
-                }`}
-              >
-                <span style={index === 3 ? { WebkitTextStroke: '1px white' } : undefined}>
-                  {line}
-                </span>
-              </Reveal>
-            ))}
+          <div className="relative z-[1] w-full">
+            <h2 className="flex items-center justify-center px-4 py-6 text-center text-[40px] font-bold uppercase leading-none sm:text-[56px] md:text-[100px] xl:text-[140px]">
+              {homepageData.manifesto.lines[0]}
+            </h2>
+            <div className="h-px w-full bg-[#565555]" />
+
+            <div className="flex w-full flex-col items-center justify-center gap-0 sm:flex-row sm:gap-[30px]">
+              <h2 className="flex min-h-[85px] items-center justify-center px-4 py-4 text-center text-[40px] font-bold uppercase leading-none sm:min-h-[100px] md:px-6 md:py-6 md:text-[100px] xl:text-[140px]">
+                {homepageData.manifesto.lines[1]}
+              </h2>
+              <div className="mb-8 h-[80px] w-[140px] overflow-hidden rounded-[100px] sm:mb-0 sm:h-[150px] sm:w-[300px]">
+                <img
+                  src={homepageData.manifesto.image}
+                  alt=""
+                  className="h-full w-full object-cover"
+                />
+              </div>
+            </div>
+
+            <div className="h-px w-full bg-[#565555]" />
+
+            <div className="flex w-full flex-col items-center justify-center gap-0 px-4 py-4 sm:flex-row sm:gap-5 sm:px-0 sm:py-0 md:gap-[60px]">
+              <p className="mb-8 mt-6 w-full max-w-[300px] text-center text-[14px] font-light leading-[1.2] text-white/88 sm:mb-0 sm:mt-0 sm:text-right sm:text-[18px] sm:leading-[1.8]">
+                {homepageData.manifesto.supportingText}
+              </p>
+              <h2 className="flex min-h-[85px] items-center justify-center px-4 py-4 text-center text-[40px] font-bold uppercase leading-none sm:min-h-[100px] md:px-6 md:py-6 md:text-[100px] xl:text-[140px]">
+                {homepageData.manifesto.lines[2]}
+              </h2>
+            </div>
+
+            <div className="h-px w-full bg-[#565555]" />
+
+            <h2
+              className="flex min-h-[85px] items-center justify-center px-4 py-4 text-center text-[40px] font-bold uppercase leading-none text-transparent sm:min-h-[100px] md:px-6 md:py-6 md:text-[100px] xl:text-[140px]"
+              style={{ WebkitTextStroke: '2px var(--urblo-lime)' }}
+            >
+              {homepageData.manifesto.lines[3]}
+            </h2>
           </div>
+        </div>
+      </Reveal>
+    </section>
+  );
+}
 
-          <Reveal className="mt-10 max-w-[22rem] text-right text-[18px] leading-[1.7] text-white/88 md:ml-[5%]">
-            {homepageData.manifesto.supportingText}
-          </Reveal>
+function LogoCarouselItem({ logo }: { logo: HomepageLogo }) {
+  return (
+    <div className="flex h-[110px] w-[240px] shrink-0 items-center justify-center px-8 md:w-[320px] lg:w-[360px] xl:w-[489.5px]">
+      <img src={logo.image} alt={logo.alt} className="max-h-[52px] w-auto max-w-full object-contain" />
+    </div>
+  );
+}
+
+function LogoCarouselSection() {
+  const logos = homepageData.logoCarousel;
+  const marqueeLogos = [...logos, ...logos, ...logos];
+
+  return (
+    <section className="overflow-hidden bg-white py-16 md:py-20">
+      <div className="overflow-hidden">
+        <div className="animate-marquee flex w-max items-center">
+          {marqueeLogos.map((logo, index) => (
+            <LogoCarouselItem key={`${logo.alt}-${index}`} logo={logo} />
+          ))}
         </div>
       </div>
     </section>
@@ -1117,6 +1160,7 @@ export default function HomepageSections() {
       <LatestProjectsSection />
       <StoneShowcaseSection />
       <ManifestoSection />
+      <LogoCarouselSection />
       <VideoCTASection />
     </>
   );

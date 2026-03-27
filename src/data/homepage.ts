@@ -32,6 +32,11 @@ export interface HomepageProductCategory {
   to?: string;
 }
 
+export interface HomepageLogo {
+  alt: string;
+  image: string;
+}
+
 export type HomepageFeaturePanelId =
   | 'sustainability'
   | 'installation'
@@ -322,12 +327,32 @@ export const homepageData = {
       'mailto:info@urblo.com.au?subject=Sample%20Request&body=Hi%20Urblo%2C%20I%20would%20like%20to%20request%20stone%20samples.',
   },
   manifesto: {
+    backgroundImage:
+      'https://urblo.com.au/wp-content/uploads/2025/01/WhatsApp-Image-2024-12-18-at-13.19.23-scaled-1.png',
     image:
-      'https://urblo.com.au/wp-content/uploads/2024/12/Moon-Garden-9-Web-Sized-Matthew-Sherren-Photography.jpg',
+      'https://urblo.com.au/wp-content/uploads/2025/01/stone-block-design-scaled-1.jpg',
     supportingText:
       'At Urblo, we believe in the transformative power of stone to shape urban environments.',
     lines: ['Natural', 'Stone', 'Blocks', 'design'],
   },
+  logoCarousel: [
+    {
+      alt: 'Delta',
+      image: 'https://urblo.com.au/wp-content/uploads/2024/12/logo1-1.png',
+    },
+    {
+      alt: 'Aspect Studios',
+      image: 'https://urblo.com.au/wp-content/uploads/2024/12/ASPECTStudios_logo-1.png',
+    },
+    {
+      alt: 'Wamara',
+      image: 'https://urblo.com.au/wp-content/uploads/2024/12/logo-1.png',
+    },
+    {
+      alt: 'Symal logo',
+      image: 'https://urblo.com.au/wp-content/uploads/2024/12/symal-logo.D2MsYZMB_ZxdUqU-1.png',
+    },
+  ] satisfies HomepageLogo[],
   videoCta: {
     backgroundImage:
       'https://urblo.com.au/wp-content/uploads/2024/12/WhatsApp-Image-2024-12-18-at-15.47.49.jpeg',
