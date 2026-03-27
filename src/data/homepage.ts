@@ -32,6 +32,46 @@ export interface HomepageProductCategory {
   to?: string;
 }
 
+export type HomepageFeaturePanelId =
+  | 'sustainability'
+  | 'installation'
+  | 'cost-saving'
+  | 'design-collaboration';
+
+export interface HomepageFeatureTab {
+  id: HomepageFeaturePanelId;
+  title: string;
+}
+
+export interface HomepageInstallationStep {
+  id: string;
+  index: string;
+  label: string;
+  title: string;
+  image: string;
+}
+
+export interface HomepageCostComparisonRow {
+  label: string;
+  leftPercentage: number;
+  rightPercentage: number;
+}
+
+export type HomepageCollaborationCardIcon =
+  | 'product-development'
+  | 'cost-control'
+  | 'specification'
+  | 'off-site'
+  | 'installation';
+
+export interface HomepageCollaborationCard {
+  index: string;
+  title: string;
+  variant: 'dark' | 'light';
+  image?: string;
+  icon?: HomepageCollaborationCardIcon;
+}
+
 export const homepageNavLinks: HomepageNavLink[] = [
   { label: 'Product', to: '/products' },
   { label: 'Project', to: '/projects' },
@@ -49,7 +89,11 @@ export const homepageNavLinks: HomepageNavLink[] = [
 ];
 
 export const homepageSocialLinks: HomepageNavLink[] = [
-  { label: 'Instagram', href: 'https://www.instagram.com/urb.lo?igsh=MThyZ3g1NnoyMXc0cg%3D%3D&utm_source=qr', external: true },
+  {
+    label: 'Instagram',
+    href: 'https://www.instagram.com/urb.lo?igsh=MThyZ3g1NnoyMXc0cg%3D%3D&utm_source=qr',
+    external: true,
+  },
   { label: 'LinkedIn', href: 'https://au.linkedin.com/company/urblo', external: true },
 ];
 
@@ -59,37 +103,122 @@ export const homepageData = {
   hero: {
     videoUrl: 'https://urblo.com.au/wp-content/uploads/stream/video.php/urblo.mp4',
     posterUrl: 'https://urblo.com.au/wp-content/uploads/revslider/video-media/urblo_1.jpeg',
-    eyebrow:
-      'A trusted partner for your next streetscapes & civil landscape project.',
+    eyebrow: 'A trusted partner for your next streetscapes & civil landscape project.',
   },
   sustainability: {
     footprintUrl: 'https://urblo.com.au/wp-content/uploads/2025/01/co2-footprint.png',
-    intro:
-      'At Urblo, we are unwavering in our commitment to long-term sustainability with project-based carbon neutral offers. Urblo was created by SAI Stone to provide a greener alternative to concrete seating.',
-    body:
-      'We now supply full life-cycle carbon dioxide offsets covering production, ocean freight, local freight, and end-of-life crush-and-reuse as road base. We replace polluting building materials and restore quarries responsibly to build a future where every action contributes positively to the planet.',
-    features: [
-      {
-        title: 'Sustainability',
-        description: 'Green, environment-friendly',
-      },
-      {
-        title: 'Streamline Installation',
-        description: 'Factory-led precision, faster on site',
-      },
-      {
-        title: 'Cost Saving',
-        description: 'Lower risk across the full project cost',
-      },
-      {
-        title: 'Design Collaboration',
-        description: 'Documentation and detailing support',
-      },
+    tabs: [
+      { id: 'sustainability', title: 'Sustainability' },
+      { id: 'installation', title: 'Streamline Installation' },
+      { id: 'cost-saving', title: 'Cost Saving' },
+      { id: 'design-collaboration', title: 'Design Collaboration' },
+    ] satisfies HomepageFeatureTab[],
+    paragraphs: [
+      'At Urblo, we are unwavering in our commitment to long-term sustainability with project bused **carbon neutral offer**. Urblo was created by SAl Stone, along with a novice request, greener alternative to concrete seats. We have decided to carry this idea further by offering **FULL LIFE CIRCLE** carbon dioxide offsets, this includes the production, ocean freight, local freight and energy for end of product line crush/reuse as road base.',
+      'We actively offset life cycle carbon emissions management, replace polluting building materials, and dedicate ourselves to the responsible restoration of quarries. Our goal is not just to provide stone blocks but to **build a future** where our actions contribute positively to the planet.',
     ],
+    installation: {
+      duration: 'Typically 2-3 weeks',
+      steps: [
+        {
+          id: 'step_0',
+          index: '01',
+          label: 'First step',
+          title: 'Off-site pre-Assembly',
+          image: 'https://urblo.com.au/wp-content/uploads/2024/12/step1-scaled.jpg',
+        },
+        {
+          id: 'step_1',
+          index: '02',
+          label: 'Second step',
+          title: 'Delivery to site',
+          image: 'https://urblo.com.au/wp-content/uploads/2024/12/step2.jpg',
+        },
+        {
+          id: 'step_2',
+          index: '03',
+          label: 'Third step',
+          title: 'Sling & Place',
+          image: 'https://urblo.com.au/wp-content/uploads/2024/12/step3-scaled.jpg',
+        },
+      ] satisfies HomepageInstallationStep[],
+    },
+    costSaving: {
+      leftTitle: 'Concrete',
+      rightTitle: 'Stone',
+      leftImage: 'https://urblo.com.au/wp-content/uploads/2024/12/concrete.jpeg',
+      rightImage: 'https://urblo.com.au/wp-content/uploads/2024/12/stone.jpeg',
+      note: 'This is a comparison of total cost between insitu concrete and customized stone solution in general circumstances. In regards of special circumstances, please refer to additional documents.',
+      rows: [
+        { label: 'Preparation cost', leftPercentage: 30, rightPercentage: 25 },
+        { label: 'Material cost', leftPercentage: 35, rightPercentage: 60 },
+        { label: 'Labour cost', leftPercentage: 70, rightPercentage: 30 },
+        { label: 'Problem solving', leftPercentage: 35, rightPercentage: 5 },
+        { label: 'Maintenance cost', leftPercentage: 30, rightPercentage: 6 },
+        { label: 'Total', leftPercentage: 100, rightPercentage: 55 },
+      ] satisfies HomepageCostComparisonRow[],
+    },
+    designCollaboration: {
+      cards: [
+        {
+          index: '01',
+          title: 'Sketch & concept design',
+          variant: 'dark',
+          image: 'https://urblo.com.au/wp-content/uploads/2024/12/sketch-concept-design.jpeg',
+        },
+        {
+          index: '02',
+          title: 'Product development',
+          variant: 'light',
+          icon: 'product-development',
+        },
+        {
+          index: '03',
+          title: 'Engineering design',
+          variant: 'dark',
+          image: 'https://urblo.com.au/wp-content/uploads/2024/12/engineering-design.jpeg',
+        },
+        {
+          index: '04',
+          title: 'Cost control & budgeting',
+          variant: 'light',
+          icon: 'cost-control',
+        },
+        {
+          index: '05',
+          title: 'Specification',
+          variant: 'light',
+          icon: 'specification',
+        },
+        {
+          index: '06',
+          title: 'Shop drawing',
+          variant: 'dark',
+          image: 'https://urblo.com.au/wp-content/uploads/2024/12/shop-drawing.jpeg',
+        },
+        {
+          index: '07',
+          title: 'Off site pre-assembly',
+          variant: 'light',
+          icon: 'off-site',
+        },
+        {
+          index: '08',
+          title: 'Manufacture',
+          variant: 'dark',
+          image: 'https://urblo.com.au/wp-content/uploads/2024/12/manufacture.jpeg',
+        },
+        {
+          index: '09',
+          title: 'Installation',
+          variant: 'light',
+          icon: 'installation',
+        },
+      ] satisfies HomepageCollaborationCard[],
+    },
   },
   partnerBanner: {
-    image:
-      'https://urblo.com.au/wp-content/uploads/2024/12/IMGP0028-scaled-1.jpg',
+    image: 'https://urblo.com.au/wp-content/uploads/2024/12/IMGP0028-scaled-1.jpg',
     text: 'A trusted partner for your next streetscapes & civil landscape project.',
   },
   productShowcase: {
@@ -112,8 +241,7 @@ export const homepageData = {
       { index: '04', title: 'Sculpture' },
     ] satisfies HomepageProductCategory[],
   },
-  metricsIntro:
-    'There’s a team always ready to assist you on your next project.',
+  metricsIntro: 'There’s a team always ready to assist you on your next project.',
   metrics: [
     { value: '30', label: 'Indoor / outdoor projects' },
     { value: '430+', label: 'Clients' },
@@ -129,16 +257,14 @@ export const homepageData = {
       title: 'Artisan Park',
       excerpt:
         'Deakin University student accomodation was organised back in July 2016 with a focus on practical, durable, and design-led streetscape outcomes.',
-      image:
-        'https://urblo.com.au/wp-content/uploads/2024/12/P1090007-1-scaled-2-1024x657.jpg',
+      image: 'https://urblo.com.au/wp-content/uploads/2024/12/P1090007-1-scaled-2-1024x657.jpg',
     } satisfies HomepageProject,
     gallery: [
       {
         slug: 'australian-catholic-university',
         title: 'Australian Catholic University',
         excerpt: 'Precision-built bluestone seating with calm civic character.',
-        image:
-          'https://urblo.com.au/wp-content/uploads/2024/12/IMGP0028-scaled-1.jpg',
+        image: 'https://urblo.com.au/wp-content/uploads/2024/12/IMGP0028-scaled-1.jpg',
       },
       {
         slug: 'moon-gate-woolley-street',
@@ -172,28 +298,24 @@ export const homepageData = {
         index: '01',
         title: 'Antline',
         finish: 'Sawn',
-        image:
-          'https://urblo.com.au/wp-content/uploads/2024/12/Antline-scaled-1.jpg',
+        image: 'https://urblo.com.au/wp-content/uploads/2024/12/Antline-scaled-1.jpg',
       },
       {
         index: '02',
         title: 'Zen Grey',
-        image:
-          'https://urblo.com.au/wp-content/uploads/2024/12/New-Grey-1-1.jpg',
+        image: 'https://urblo.com.au/wp-content/uploads/2024/12/New-Grey-1-1.jpg',
       },
       {
         index: '03',
         title: 'Ash Grey',
         finish: 'Flamed',
-        image:
-          'https://urblo.com.au/wp-content/uploads/2024/12/Ash-Grey-1.jpg',
+        image: 'https://urblo.com.au/wp-content/uploads/2024/12/Ash-Grey-1.jpg',
       },
       {
         index: '04',
         title: 'Ken Black',
         finish: 'Flamed',
-        image:
-          'https://urblo.com.au/wp-content/uploads/2024/12/Ken-Black-1.jpg',
+        image: 'https://urblo.com.au/wp-content/uploads/2024/12/Ken-Black-1.jpg',
       },
     ] satisfies HomepageStoneCard[],
     sampleCta:

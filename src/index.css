@@ -147,3 +147,29 @@ html {
 }
 .animate-marquee        { animation: marquee 30s linear infinite; }
 .animate-marquee-reverse{ animation: marquee-reverse 30s linear infinite; }
+
+@keyframes homepage-collaboration-left {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+}
+
+@keyframes homepage-collaboration-right {
+    0% { transform: translateX(-50%); }
+    100% { transform: translateX(0); }
+}
+
+.homepage-collaboration-track-left {
+    animation: homepage-collaboration-left 40s linear infinite;
+}
+
+.homepage-collaboration-track-right {
+    animation: homepage-collaboration-right 40s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .homepage-collaboration-track-left,
+    .homepage-collaboration-track-right {
+        animation: none;
+        transform: translateX(0);
+    }
+}
