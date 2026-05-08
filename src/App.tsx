@@ -13,6 +13,7 @@ import StoneLibraryDetailPage from './pages/StoneLibraryDetailPage';
 import OurStoryPage from './pages/OurStory';
 import ArticlesPage from './pages/ArticlesPage';
 import ArticlePage from './pages/ArticlePage';
+import ContactPage from './pages/ContactPage';
 
 function TitleUpdater() {
     const location = useLocation();
@@ -35,6 +36,8 @@ function TitleUpdater() {
         currentTitle = 'Projects';
     } else if (location.pathname === '/our-story') {
         currentTitle = 'Our Story';
+    } else if (location.pathname === '/contact') {
+        currentTitle = 'Contact Us';
     } else if (location.pathname.startsWith('/articles/')) {
         currentTitle = 'Article';
     } else if (location.pathname === '/articles') {
@@ -123,6 +126,15 @@ export default function App() {
                         element={
                             <DefaultLayout bgImage="https://urblo.com.au/wp-content/uploads/2024/12/bg-our-story.jpg">
                                 <OurStoryPage />
+                            </DefaultLayout>
+                        }
+                    />
+
+                    <Route
+                        path="/contact"
+                        element={
+                            <DefaultLayout bgImage="https://urblo.com.au/wp-content/uploads/2024/12/IMGP0028-scaled-1.jpg">
+                                <ContactPage />
                             </DefaultLayout>
                         }
                     />

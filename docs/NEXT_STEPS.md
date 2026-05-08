@@ -1,9 +1,9 @@
 # NEXT_STEPS - Urblo Execution Backlog
 
-Last updated: 2026-02-09
+Last updated: 2026-05-08
 
 ## Current Objective
-Raise delivery readiness baseline (brand assets + UI completeness), close route integrity gaps, and align high-impact pages with approved Figma/WordPress references before later performance and data-quality refinements.
+Raise delivery readiness baseline (brand assets + UI completeness), keep route integrity explicit, and align high-impact pages with approved Figma/WordPress references before later performance and data-quality refinements.
 
 ## Blocking Quality Gate Policy
 A task touching runtime behavior is not complete unless all three pass:
@@ -11,7 +11,7 @@ A task touching runtime behavior is not complete unless all three pass:
 - `npm run lint`
 - `npx tsc -b`
 
-## Current Baseline (Measured 2026-02-09)
+## Current Baseline (Measured 2026-05-08)
 - `npm run build`: pass
 - `npm run lint`: pass
 - `npx tsc -b`: pass
@@ -134,6 +134,24 @@ For any user-facing layout/copy/IA task:
   - `/Users/lee/Documents/SAI/urblo/urblo-react/docs/README_AGENT.md`
   - `/Users/lee/Documents/SAI/urblo/urblo-react/docs/WORKLOG.md`
 
+### DONE-CONTACT-ROUTE-001
+- Scope:
+  - Added an explicit `/contact` route with a no-backend contact surface and local `mailto:` project-brief composer.
+  - Updated shared header/footer navigation so Contact Us points to `/contact`.
+  - Kept Sample Request as a deliberate `mailto:` fallback until a backend/form path is approved.
+  - Removed stale route-mismatch documentation that claimed `/contact` and footer links were undeclared.
+  - Removed Bob Lu and Hunter from Our Story and replaced the four-slide team carousel with a two-person responsive grid.
+- Key files:
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/App.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/ContactPage.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/OurStory.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/data/siteChrome.ts`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/site/SiteFooter.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/docs/README_AGENT.md`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/docs/ARCHITECTURE.md`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/docs/NEXT_STEPS.md`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/docs/WORKLOG.md`
+
 ## Now
 
 ### NOW-STONELIB-IMG-FASTTRACK-001
@@ -162,17 +180,19 @@ For any user-facing layout/copy/IA task:
 - Problem statement: The app shell and several surfaces still show non-delivery defaults or placeholders (e.g. Vite favicon/title, empty feature icons, placeholder icon slots, dead social links).
 - Affected files:
   - `/Users/lee/Documents/SAI/urblo/urblo-react/index.html`
-  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/FeatureSection.tsx`
-  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/panels/ProcessSliderPanel.tsx`
-  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/Footer.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/homepage/HomepageSections.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/site/SiteFooter.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/data/siteChrome.ts`
 - Implementation notes:
   - Replace default Vite shell metadata (`/vite.svg`, `Vite + React + TS`) with Urblo brand assets and title contract.
   - Replace empty icon stubs with approved icon set.
   - Resolve dead footer social anchors (`href="#"`) with real links or explicit hide rule.
+  - Add `rel=\"noopener noreferrer\"` to all external links using `target=\"_blank\"`.
 - Definition of Done:
   - No user-visible template defaults remain in app shell.
   - No empty/placeholder icon containers remain in active UI.
   - Footer contains no dead external social links.
+  - External `_blank` links satisfy link-security baseline.
 - Verification commands:
   - `npm run build`
   - `npm run lint`
@@ -199,23 +219,6 @@ For any user-facing layout/copy/IA task:
   - `npm run lint` (if code references changed)
   - `npx tsc -b` (if code references changed)
 
-### NOW-ROUTE-002
-- Objective: Finish route/CTA integrity by removing unresolved footer destinations.
-- Problem statement: Footer still points to `/sample-request` and `/contact`, but both routes are undeclared.
-- Affected files:
-  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/Footer.tsx`
-  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/App.tsx` (if adding explicit contact route)
-- Implementation notes:
-  - Choose one approach and keep contract explicit: convert to `mailto/tel`, add real route(s), or remove links.
-  - Replace raw in-app anchors with router-safe links where route exists.
-- Definition of Done:
-  - Footer no longer links to undeclared in-app paths.
-  - Navigation contract in `ARCHITECTURE.md` matches code.
-- Verification commands:
-  - `npm run build`
-  - `npm run lint`
-  - `npx tsc -b`
-
 ### NOW-DOCS-002
 - Objective: Enforce docs closure discipline after contract-level code changes.
 - Problem statement: Large route/data refactors can be shipped without synchronized docs unless closure is explicit.
@@ -234,19 +237,43 @@ For any user-facing layout/copy/IA task:
   - `npm run lint`
   - `npx tsc -b`
 
+### NOW-DEPLOY-PAGES-HARDEN-001
+- Objective: Harden GitHub Pages deployment reliability and credential safety.
+- Problem statement: Current deployment workflow depends on `PERSONAL_TOKEN`, only gates on build, has no manual dispatch path, and keeps older Node runtime defaults.
+- Affected files:
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/.github/workflows/deploy.yml`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/docs/ARCHITECTURE.md`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/README.md`
+- Implementation notes:
+  - Replace `secrets.PERSONAL_TOKEN` with `${{ secrets.GITHUB_TOKEN }}` and add explicit workflow permission: `contents: write`.
+  - Add `workflow_dispatch` for manual redeploy and `concurrency` guard to avoid overlapping publish runs.
+  - Upgrade workflow Node runtime to current LTS and enable lockfile-based npm cache.
+  - Extend deployment gate to include `npm run lint` and `npx tsc -b` before publish.
+  - Keep explicit `publish_branch: gh-pages` in workflow to avoid implicit branch behavior.
+- Definition of Done:
+  - Deploy workflow publishes successfully without personal PAT dependency.
+  - Lint/typecheck failures block deploy.
+  - Manual redeploy is available from Actions UI.
+  - Architecture/runbook docs reflect the final deployment contract.
+- Verification commands:
+  - `npm run build`
+  - `npm run lint`
+  - `npx tsc -b`
+  - Push one test commit to `main` and confirm `gh-pages` receives fresh `dist`.
+
 ## Next
 
 ### NEXT-UI-PARITY-001
 - Objective: Reproduce approved Home / Our Story / Articles / Contact Us UI from existing Figma and WordPress implementations.
-- Problem statement: Current React pages are functionally present but not yet aligned to approved design/system parity for delivery.
+- Problem statement: Current React pages are functionally present, and Contact Us now has a route-safe baseline page, but final visual parity against approved references is still pending.
 - Affected files:
   - `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/Home.tsx`
   - `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/OurStory.tsx`
   - `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/ArticlesPage.tsx`
   - `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/ArticlePage.tsx`
-  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/App.tsx` (for Contact route declaration)
-  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/Header.tsx`
-  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/Footer.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/ContactPage.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/site/SiteHeader.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/site/SiteFooter.tsx`
 - Implementation notes:
   - Use Figma as source-of-truth for spacing/typography/component behavior.
   - Use WordPress UI as behavior/content reference where Figma omits details.
@@ -254,7 +281,7 @@ For any user-facing layout/copy/IA task:
   - Keep responsive parity (desktop/tablet/mobile) and route-safe navigation contracts.
 - Definition of Done:
   - The four target pages reach agreed parity versus design/reference baseline.
-  - Contact Us has explicit route and UX contract in router + nav surfaces.
+  - Contact Us route remains explicit and reaches agreed design/reference parity.
   - Parity evidence (before/after screenshots + gap list) is captured in worklog.
 - Verification commands:
   - `npm run build`
@@ -266,7 +293,8 @@ For any user-facing layout/copy/IA task:
 - Problem statement: Sample Request is needed for product flow but implementation path (form stack, submission target, notification, storage) is not yet decided.
 - Affected files:
   - `/Users/lee/Documents/SAI/urblo/urblo-react/src/App.tsx`
-  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/Footer.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/ContactPage.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/data/siteChrome.ts`
   - `/Users/lee/Documents/SAI/urblo/urblo-react/docs/ARCHITECTURE.md`
   - `/Users/lee/Documents/SAI/urblo/urblo-react/docs/NEXT_STEPS.md`
 - Implementation notes:
@@ -355,16 +383,37 @@ For any user-facing layout/copy/IA task:
   - `npm run lint`
   - `npx tsc -b`
 
+### NEXT-ROUTER-SEO-001
+- Objective: Decide and implement final GitHub Pages routing strategy with explicit SEO tradeoff.
+- Problem statement: Runtime currently relies on `HashRouter`; this avoids refresh 404 on Pages but produces hash URLs and weaker canonical route semantics.
+- Affected files:
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/App.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/vite.config.ts`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/index.html`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/public/404.html` (if BrowserRouter path is selected)
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/docs/ARCHITECTURE.md`
+- Implementation notes:
+  - Compare two explicit options and record decision:
+    - Option A: Keep `HashRouter` for simplest Pages compatibility.
+    - Option B: Switch to `BrowserRouter` with Pages fallback strategy (`404.html` redirect/rewrite pattern).
+  - If Option B is selected, verify deep-link refresh behavior for all declared routes.
+  - Record canonical URL and analytics implications in architecture docs.
+- Definition of Done:
+  - Routing strategy is explicitly chosen, implemented, and documented.
+  - No refresh 404 regressions for declared routes under Pages hosting.
+  - SEO/URL tradeoff is visible in handoff docs.
+- Verification commands:
+  - `npm run build`
+  - `npm run lint`
+  - `npx tsc -b`
+
 ## Later
 
 ### LATER-BRAND-001
 - Objective: Align homepage feature modules with brand baseline pillars and proof framing.
 - Affected files:
-  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/FeatureSection.tsx`
-  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/panels/SustainabilityPanel.tsx`
-  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/panels/InstallStepsPanel.tsx`
-  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/panels/CostComparePanel.tsx`
-  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/panels/ProcessSliderPanel.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/homepage/HomepageSections.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/data/homepage.ts`
 
 ### LATER-PERF-001
 - Objective: Reduce client bundle size and improve chunk strategy.
@@ -380,8 +429,8 @@ For any user-facing layout/copy/IA task:
   - route source `/Users/lee/Documents/SAI/urblo/urblo-react/src/App.tsx`
 
 ## Exit Criteria for Current Cycle
-- `NOW-STONELIB-IMG-FASTTRACK-001`, `NOW-DELIVERY-READINESS-001`, `NOW-ASSET-STRATEGY-001`, `NOW-ROUTE-002`, and `NOW-DOCS-002` are complete.
+- `NOW-STONELIB-IMG-FASTTRACK-001`, `NOW-DELIVERY-READINESS-001`, `NOW-ASSET-STRATEGY-001`, and `NOW-DOCS-002` are complete.
 - All three quality gates pass.
-- Navigation and route contracts are consistent with `src/App.tsx` and `src/components/Footer.tsx`.
+- Navigation and route contracts are consistent with `src/App.tsx`, `src/data/siteChrome.ts`, and `src/components/site/SiteFooter.tsx`.
 - Delivery shell is free of template/default app metadata and dead social links.
 - Stone Library data/image follow-ups are explicitly tracked, not implied complete.

@@ -28,11 +28,7 @@ export const siteNavLinks: SiteNavLink[] = [
   { label: 'Our Story', to: '/our-story' },
   { label: 'Articles', to: '/articles' },
   { label: 'Products', to: '/products' },
-  {
-    label: 'Contact Us',
-    href: 'mailto:info@urblo.com.au?subject=Contact%20Us',
-    external: true,
-  },
+  { label: 'Contact Us', to: '/contact' },
 ];
 
 export const siteFooterLinks: SiteNavLink[] = [
@@ -43,8 +39,7 @@ export const siteFooterLinks: SiteNavLink[] = [
   },
   {
     label: 'Contact Us',
-    href: 'mailto:info@urblo.com.au?subject=Contact%20Us',
-    external: true,
+    to: '/contact',
   },
 ];
 

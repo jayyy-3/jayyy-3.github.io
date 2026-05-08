@@ -1,6 +1,49 @@
 # WORKLOG - Urblo Execution Log
 
-Last updated: 2026-03-26
+Last updated: 2026-05-08
+
+## Entry - 2026-05-08 (Contact Route + Our Story Team Update + Docs Contract Sync)
+
+### Scope
+- Removed Bob Lu and Hunter from the Our Story team section.
+- Replaced the four-person Swiper carousel with a stable two-person responsive grid for Natalie and Cameron.
+- Added a `/contact` route with direct email/phone/address contact channels and a no-backend project-brief form that opens a prefilled email draft.
+- Updated shared header/footer navigation so Contact Us points to `/contact`; Sample Request remains a `mailto:` fallback.
+- Updated active harness docs to remove stale footer route mismatch claims and old component references in the backlog.
+
+### Changed Files
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/App.tsx`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/ContactPage.tsx`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/OurStory.tsx`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/data/siteChrome.ts`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/site/SiteFooter.tsx`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/README_AGENT.md`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/ARCHITECTURE.md`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/NEXT_STEPS.md`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/WORKLOG.md`
+
+### Verification Results
+- `npm run build`: pass (chunk size warning `>500kB` unchanged; Browserslist data staleness notice shown)
+- `npm run lint`: pass
+- `npx tsc -b`: pass
+- Playwright CLI smoke check:
+  - `/contact`: route loads with title `Urblo - Contact Us`; header/footer Contact links resolve to `#/contact`; Sample Request resolves to `mailto:info@urblo.com.au?subject=Sample%20Request`.
+  - `/contact` mobile viewport: header collapses to the existing toggle menu and Contact Us remains available in the expanded menu.
+  - `/our-story`: route loads with title `Urblo - Our Story`; team section renders only Natalie and Cameron.
+
+### Risks and Gaps
+- Contact form is intentionally not a backend submission; it opens a prefilled email draft through `mailto:`.
+- React Helmet still emits the known strict-mode `UNSAFE_componentWillMount` console warning via `SideEffect(NullComponent2)`.
+- Bundle size warning (`>500kB`) remains and is not addressed in this scope.
+
+### Next Handoff
+- `NOW-STONELIB-IMG-FASTTRACK-001`
+- `NOW-DELIVERY-READINESS-001`
+- `NOW-ASSET-STRATEGY-001`
+- `NOW-DOCS-002`
+- `NOW-DEPLOY-PAGES-HARDEN-001`
+- `NEXT-UI-PARITY-001`
+- `NEXT-SAMPLE-REQUEST-001`
 
 ## Entry - 2026-03-26 (Homepage Rebuild + Local Font Hosting)
 

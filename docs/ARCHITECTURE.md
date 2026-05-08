@@ -1,6 +1,6 @@
 # Urblo Web - Architecture and Contracts
 
-Last updated: 2026-03-26
+Last updated: 2026-05-08
 
 ## System Boundary
 - Frontend-only React application shipped as static assets.
@@ -35,7 +35,7 @@ Last updated: 2026-03-26
 
 | Route pattern | Page component | Notes |
 |---|---|---|
-| `/` | `Home` | Wrapped by `HomepageLayout` with homepage-specific header/footer. |
+| `/` | `Home` | Wrapped by `HomepageLayout`; shared site chrome is used through homepage proxy components. |
 | `/stone-library` | `StoneLibraryPage` | Stone list and filter surface. |
 | `/stone-library/:stoneGroupId` | `StoneLibraryDetailPage` | Stone detail with variant switch, synchronized finish controls, and lightbox preview. |
 | `/products` | `ProductsPage` | Bench/system product listing. |
@@ -43,6 +43,7 @@ Last updated: 2026-03-26
 | `/projects` | `Projects` | Project listing page. |
 | `/projects/:slug` | `ProjectDetails` | Project detail page. |
 | `/our-story` | `OurStory` | About page. |
+| `/contact` | `ContactPage` | Contact surface with direct contact channels and a local mailto project-brief composer. |
 | `/articles` | `ArticlesPage` | Article list page. |
 | `/articles/:slug` | `ArticlePage` | Article detail page. |
 | `*` | `Home` | Fallback to homepage content wrapped by `HomepageLayout`. |
@@ -50,15 +51,12 @@ Last updated: 2026-03-26
 ## Navigation Contract vs Implemented Routes
 
 ### Implemented navigation surfaces
-- Header links: `/projects`, `/stone-library`, `/our-story`, `/articles`, `/products`, `mailto:info@urblo.com.au`
-- Footer links: `/sample-request`, `/contact`
-- Homepage-only header links: `/products`, `/projects`, `/our-story`, `mailto:info@urblo.com.au?subject=Sample%20Request`, `mailto:info@urblo.com.au?subject=Contact%20Us`
-- Homepage-only footer links: `mailto:info@urblo.com.au?subject=Sample%20Request`, `mailto:info@urblo.com.au?subject=Contact%20Us`
+- Shared header links: `/projects`, `/stone-library`, `/our-story`, `/articles`, `/products`, `/contact`
+- Shared footer links: `mailto:info@urblo.com.au?subject=Sample%20Request`, `/contact`
+- Shared footer social links: Instagram and LinkedIn use external links with `target="_blank"` plus `rel="noopener noreferrer"`; Facebook and YouTube are rendered as non-linked labels until real destinations are available.
 
 ### Gaps
-- `/sample-request` is not declared in router.
-- `/contact` is not declared in router.
-- Footer internal links use raw anchors and are inconsistent with `HashRouter` contract.
+- Sample Request is intentionally a `mailto:` fallback until a backend/form submission path is approved.
 
 ## Stone Library Detail Interaction Contract (`src/pages/StoneLibraryDetailPage.tsx`)
 - State composition:
@@ -131,6 +129,15 @@ Last updated: 2026-03-26
   - detail page fetches index then HTML content
   - HTML is sanitized via DOMPurify before render
 
+### Contact Page Contract
+- Route: `/contact`
+- Page module: `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/ContactPage.tsx`
+- Runtime behavior:
+  - No backend submission is attempted.
+  - Direct contact channels use `mailto:` and `tel:` links.
+  - The project-brief form is local React state only; submit builds a prefilled `mailto:info@urblo.com.au` draft through `window.location.href`.
+  - The page links back to `/stone-library` as a material discovery path.
+
 ## State Contract (`src/store/productStore.ts`)
 - Store keys:
   - `selectedMaterials: Partial<Record<MaterialCategory, string>>`
@@ -152,23 +159,25 @@ Last updated: 2026-03-26
 - Runtime fetches:
   - Static JSON/HTML from `public/articles`
   - No authenticated or server API fetches
+- Contact side effects:
+  - Contact page submit opens a local email draft via `mailto:`; no form payload is stored in this application.
 
 ## Homepage Contract
 - Homepage structure is driven by dedicated internal config in `src/data/homepage.ts`, not the legacy tabbed `FeatureSection`.
-- Homepage uses `HomepageLayout` so Figma-specific header/footer behavior does not affect non-home routes.
+- Homepage uses `HomepageLayout` with `HomepageHeader`/`HomepageFooter` proxy components that currently render the shared `SiteHeader`/`SiteFooter`.
 - Homepage typography is self-hosted from local static assets under `/public/fonts/urblo`:
   - `Avenir LT Std` weights `300/400/500/600/800`
   - `Didot LT Std` italic `400` and normal `600`
   - `Space Grotesk` local WOFF2
 - Homepage runtime no longer depends on remote WordPress font CSS/TTF/WOFF assets.
 
-## Quality Gate Status (Measured 2026-03-26)
+## Quality Gate Status (Measured 2026-05-08)
 - `npm run build`: pass
 - `npm run lint`: pass
 - `npx tsc -b`: pass
 
 ## Known Architecture Risks
-- Footer contains undeclared in-app routes (`/sample-request`, `/contact`).
+- Sample Request has no backend/form workflow yet and remains a `mailto:` fallback.
 - Project list data and project detail data are maintained in separate sources.
 - Bundle size warning (`>500kB`) indicates code-splitting and chunk strategy debt.
 

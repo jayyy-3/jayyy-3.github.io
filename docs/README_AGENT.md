@@ -1,6 +1,6 @@
 # README_AGENT - Urblo Execution Entry
 
-Last updated: 2026-02-09
+Last updated: 2026-05-08
 
 ## Project Mission
 Urblo web exists to communicate a design-led, engineering-backed, proof-driven stone solution system for streetscapes and civil landscapes. For any decision touching positioning, copy, UX intent, or visual direction, use `/Users/lee/Documents/SAI/urblo/urblo-react/docs/brand-baseline.md` as the brand decision rubric.
@@ -45,8 +45,8 @@ Before declaring implementation complete, verify all checks below:
 - `WORKLOG.md` includes scope, verification evidence, and residual risks.
 - `NEXT_STEPS.md` marks completed items and leaves explicit follow-ups.
 
-## Current Critical Risk Snapshot (Measured 2026-02-09)
+## Current Critical Risk Snapshot (Measured 2026-05-08)
 - Stone Library migration is complete: old `/materials*` route family has been removed and replaced with `/stone-library` + `/stone-library/:stoneGroupId`.
+- Contact route is declared at `/contact`; shared header/footer navigation points to declared routes, with Sample Request remaining a `mailto:` fallback until a backend/form path is chosen.
 - Quality gates are green (`npm run build`, `npm run lint`, `npx tsc -b` all pass).
-- Footer route mismatch remains: `/sample-request` and `/contact` links still exist in `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/Footer.tsx`, but those routes are not declared in `/Users/lee/Documents/SAI/urblo/urblo-react/src/App.tsx`.
 - Bundle size warning (`>500kB` chunk) remains and should be addressed with code splitting.

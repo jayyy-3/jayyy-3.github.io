@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import {
   siteBrandStatement,
   siteFooterContact,
@@ -22,7 +23,7 @@ export default function SiteFooter() {
                   href={item.href}
                   className="transition-colors hover:text-[var(--urblo-lime)]"
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                 >
                   {item.label}
                 </a>
@@ -48,15 +49,23 @@ export default function SiteFooter() {
         </div>
 
         <div className="space-y-4 text-[18px] leading-[1.9] text-white/85">
-          {siteFooterLinks.map((item) => (
-            <a
-              key={item.label}
-              href={item.href}
-              className="block transition-colors hover:text-[var(--urblo-lime)]"
-            >
-              {item.label}
-            </a>
-          ))}
+          {siteFooterLinks.map((item) => {
+            const className = 'block transition-colors hover:text-[var(--urblo-lime)]';
+
+            if (item.to) {
+              return (
+                <Link key={item.label} to={item.to} className={className}>
+                  {item.label}
+                </Link>
+              );
+            }
+
+            return (
+              <a key={item.label} href={item.href} className={className}>
+                {item.label}
+              </a>
+            );
+          })}
           <div className="pt-2 text-[16px] text-white/55">
             <p>All rights reserved</p>
             <p>{siteFooterContact.copyright}</p>

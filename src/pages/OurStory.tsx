@@ -1,9 +1,5 @@
 import { motion } from 'framer-motion';
 import CountUp from 'react-countup';
-import { Autoplay } from 'swiper/modules';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import 'swiper/css';
-import 'swiper/css/autoplay';
 
 export default function OurStory() {
   const counterVariants = {
@@ -17,25 +13,11 @@ export default function OurStory() {
 
   const team = [
     {
-      name: 'Bob Lu',
-      role: 'Co-Founder',
-      img: 'https://urblo.com.au/wp-content/uploads/2024/12/Bob-Lu.jpg',
-      bio:
-        'Bob has notched up more than 15 years in the natural-stone industry across quarry, manufacture, logistics, and installation.',
-    },
-    {
       name: 'Natalie',
       role: 'Co-Founder',
       img: 'https://urblo.com.au/wp-content/uploads/2025/01/Natalie-Ma-1-1.jpg',
       bio:
         'Natalie founded Urblo with SAI Stone to bridge the gap between designers and suppliers through natural materials.',
-    },
-    {
-      name: 'Hunter',
-      role: 'Operations Manager',
-      img: 'https://urblo.com.au/wp-content/uploads/2025/01/Hunter-Li-scaled-1.jpg',
-      bio:
-        'Hunter brings environmental engineering and carbon accounting expertise into every stage of delivery and planning.',
     },
     {
       name: 'Cameron',
@@ -149,20 +131,13 @@ export default function OurStory() {
           <div className="mb-10 max-w-[38rem]">
             <p className="urblo-eyebrow text-white/70">Our Team</p>
             <h2 className="mt-4 font-display text-[34px] font-semibold uppercase leading-[1.08] tracking-[0.03em] md:text-[48px]">
-              Meet the team behind Urblo
+              Meet the people behind Urblo
             </h2>
           </div>
 
-          <Swiper
-            modules={[Autoplay]}
-            spaceBetween={24}
-            slidesPerView={1}
-            breakpoints={{ 640: { slidesPerView: 2 }, 1024: { slidesPerView: 4 } }}
-            autoplay={{ delay: 4500, disableOnInteraction: false }}
-            loop
-          >
+          <div className="grid max-w-[920px] gap-6 md:grid-cols-2">
             {team.map((member) => (
-              <SwiperSlide key={member.name} className="group">
+              <article key={member.name} className="group">
                 <div className="overflow-hidden rounded-[4px] border border-white/10 bg-white/5">
                   <div className="relative overflow-hidden">
                     <img src={member.img} alt={member.name} className="aspect-[2/3] w-full object-cover" />
@@ -175,9 +150,9 @@ export default function OurStory() {
                     <div className="text-[13px] uppercase tracking-[0.12em] text-white/55">{member.role}</div>
                   </div>
                 </div>
-              </SwiperSlide>
+              </article>
             ))}
-          </Swiper>
+          </div>
         </div>
       </section>
     </div>
