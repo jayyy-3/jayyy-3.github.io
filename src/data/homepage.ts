@@ -27,9 +27,7 @@ export interface HomepageStoneCard {
 export interface HomepageProductCategory {
   index: string;
   title: string;
-  body?: string;
-  ctaLabel?: string;
-  to?: string;
+  body: string;
 }
 
 export interface HomepageLogo {
@@ -233,17 +231,31 @@ export const homepageData = {
     backgroundImage:
       'https://urblo.com.au/wp-content/uploads/2024/12/P1090007-1-scaled-2.jpg',
     categories: [
-      { index: '01', title: 'Seat' },
-      { index: '02', title: 'Bollard' },
+      {
+        index: '01',
+        title: 'Seat',
+        body: 'Freestanding stone seats ...',
+      },
+      {
+        index: '02',
+        title: 'Bollard',
+        body: 'Natural stone bollards in any shape...',
+      },
       {
         index: '03',
         title: 'Planter',
-        body:
-          'Our extensive network of suppliers enables us to source the finest natural stone from around the world.',
-        ctaLabel: 'Take a look',
-        to: '/products',
+        body: 'Retaining wall blocks in solid natural stone ...',
       },
-      { index: '04', title: 'Sculpture' },
+      {
+        index: '04',
+        title: 'Sculpture',
+        body: 'Natural stone sculpture in any size ...',
+      },
+      {
+        index: '05',
+        title: 'Engraved Stone Inlays',
+        body: 'Engraving on any of our stone street furnitures...',
+      },
     ] satisfies HomepageProductCategory[],
   },
   metricsIntro: 'There’s a team always ready to assist you on your next project.',

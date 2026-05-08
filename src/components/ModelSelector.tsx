@@ -2,29 +2,34 @@ import { useProductStore } from '../store/productStore';
 import type { ProductModel } from '../types/product';
 
 interface Props {
-    models: ProductModel[];
+  models: ProductModel[];
 }
 
 export default function ModelSelector({ models }: Props) {
-    const current = useProductStore((s) => s.currentModelKey);
-    const setModel = useProductStore((s) => s.selectModel);
+  const current = useProductStore((state) => state.currentModelKey);
+  const setModel = useProductStore((state) => state.selectModel);
 
-    return (
-        <div className="flex gap-4 flex-wrap mb-6">
-            {models.map((m) => (
-                    <button
-                        key={m.key}
-                onClick={() => setModel(m.key)}
-    className={`rounded border px-3 py-1 text-sm transition
-            ${
-        current === m.key
-            ? 'border-emerald-600 bg-emerald-50'
-            : 'border-gray-300 hover:bg-gray-50'
-    }`}
->
-    {m.label}
-    </button>
-))}
+  return (
+    <div className="mb-8 flex flex-wrap gap-3">
+      {models.map((model) => {
+        const active = current === model.key;
+
+        return (
+          <button
+            key={model.key}
+            type="button"
+            onClick={() => setModel(model.key)}
+            className={[
+              'rounded-[4px] border px-4 py-2 text-sm font-semibold uppercase tracking-[0.08em] transition',
+              active
+                ? 'border-black bg-black text-white'
+                : 'border-black/15 bg-white text-black hover:border-black/35',
+            ].join(' ')}
+          >
+            {model.label}
+          </button>
+        );
+      })}
     </div>
-);
+  );
 }

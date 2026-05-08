@@ -1,43 +1,38 @@
-// ──────────────────────────────────────────────────────────────
-//  4‑1  ArticleCard – 列表页单卡片
-// --------------------------------------------------------------
-//  src/components/ArticleCard.tsx
-import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
-import type {ArticleMeta} from "../types/article";
+import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import type { ArticleMeta } from '../types/article';
 
-interface Props { meta: ArticleMeta; }
+interface Props {
+  meta: ArticleMeta;
+}
+
 export default function ArticleCard({ meta }: Props) {
-    return (
-        <motion.article
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-            whileHover={{ y: -4, boxShadow: "0 8px 24px rgba(0,0,0,.12)" }}
-            className="bg-white overflow-hidden shadow-sm"
-        >
-            <Link to={`/articles/${meta.slug}`} className="block">
-                {meta.cover && (
-                    <div className="aspect-[3/2] overflow-hidden">
-                        <img
-                            src={meta.cover}
-                            alt={meta.title}
-                            className="block w-full h-full object-cover"
-                        />
-                    </div>
-                )}
-                <div className="p-4">
-                    <h3 className="text-lg font-semibold mb-1">{meta.title}</h3>
-                    <p className="text-sm text-slate-500">
-                        {new Date(meta.date).toLocaleDateString()}
-                    </p>
-                    {meta.excerpt && (
-                        <p className="mt-2 text-sm text-slate-700 line-clamp-3">
-                            {meta.excerpt}
-                        </p>
-                    )}
-                </div>
-            </Link>
-        </motion.article>
-    );
+  return (
+    <motion.article
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      whileHover={{ y: -4 }}
+      className="urblo-card overflow-hidden"
+    >
+      <Link to={`/articles/${meta.slug}`} className="block">
+        {meta.cover ? (
+          <div className="aspect-[3/2] overflow-hidden bg-black/5">
+            <img src={meta.cover} alt={meta.title} className="h-full w-full object-cover" />
+          </div>
+        ) : null}
+        <div className="space-y-3 p-6">
+          <p className="urblo-meta">{new Date(meta.date).toLocaleDateString()}</p>
+          <h3 className="font-display text-[28px] font-semibold uppercase leading-[1.08] text-black">
+            {meta.title}
+          </h3>
+          {meta.excerpt ? (
+            <p className="line-clamp-3 text-[16px] leading-7 text-[var(--urblo-text)]">
+              {meta.excerpt}
+            </p>
+          ) : null}
+        </div>
+      </Link>
+    </motion.article>
+  );
 }

@@ -107,6 +107,107 @@ a {
     font-family: var(--urblo-font-accent);
 }
 
+.urblo-page-container {
+    width: min(100%, 1440px);
+    margin: 0 auto;
+    padding-inline: 24px;
+}
+
+.urblo-section {
+    padding-block: 72px;
+}
+
+.urblo-section-tight {
+    padding-block: 48px;
+}
+
+.urblo-eyebrow {
+    margin: 0;
+    color: var(--urblo-lime);
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.4;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+}
+
+.urblo-page-title {
+    margin: 16px 0 0;
+    color: var(--urblo-black);
+    font-family: var(--urblo-font-display);
+    font-size: clamp(2.25rem, 2rem + 1vw, 4rem);
+    font-weight: 600;
+    line-height: 1.05;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+.urblo-page-copy {
+    margin-top: 24px;
+    max-width: 44rem;
+    color: var(--urblo-text);
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 1.6;
+}
+
+.urblo-card {
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 4px;
+    background: #fff;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.06);
+}
+
+.urblo-button,
+.urblo-button-inverse {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 48px;
+    padding: 0 18px;
+    border: 1px solid var(--urblo-black);
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    transition:
+        background-color 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.urblo-button {
+    background: transparent;
+    color: var(--urblo-black);
+}
+
+.urblo-button:hover {
+    background: var(--urblo-black);
+    color: #fff;
+}
+
+.urblo-button-inverse {
+    background: var(--urblo-black);
+    color: #fff;
+}
+
+.urblo-button-inverse:hover {
+    border-color: var(--urblo-lime);
+    background: var(--urblo-lime);
+    color: var(--urblo-black);
+}
+
+.urblo-meta {
+    color: rgba(51, 54, 63, 0.8);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
 .article-wrapper img[src*=".gif" i] {
     max-width: 100%;
     height: auto;
@@ -125,8 +226,9 @@ html {
 .article-wrapper {
     display: flex;
     justify-content: center;
-    padding: 2rem;
-    background-color: #CFFF81;
+    width: 100%;
+    padding: 0;
+    background: transparent;
 }
 
 .article-wrapper #newsletter-email {
@@ -166,10 +268,47 @@ html {
     animation: homepage-collaboration-right 40s linear infinite;
 }
 
+.homepage-product-display .swiper-pagination-bullet {
+    width: 8px;
+    height: 8px;
+    margin: 0 6px !important;
+    background: rgba(255, 255, 255, 0.65);
+    opacity: 1;
+}
+
+.homepage-product-display .swiper-pagination-bullet-active {
+    background: var(--urblo-lime);
+}
+
+.homepage-product-nav.swiper-button-disabled {
+    opacity: 0.35;
+    pointer-events: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
     .homepage-collaboration-track-left,
     .homepage-collaboration-track-right {
         animation: none;
         transform: translateX(0);
+    }
+}
+
+@media (min-width: 768px) {
+    .urblo-page-container {
+        padding-inline: 40px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .urblo-page-container {
+        padding-inline: 94px;
+    }
+
+    .urblo-section {
+        padding-block: 96px;
+    }
+
+    .urblo-section-tight {
+        padding-block: 64px;
     }
 }

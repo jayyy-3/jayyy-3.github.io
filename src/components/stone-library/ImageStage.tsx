@@ -266,9 +266,9 @@ export default function ImageStage({
 
     if (!finishes.length) {
         return (
-            <section className="self-start overflow-hidden border border-neutral-300 bg-neutral-950">
-                <div className="flex h-[460px] items-center justify-center bg-gradient-to-br from-neutral-800 to-neutral-600 px-6 text-center">
-                    <p className="text-sm font-semibold uppercase tracking-[0.12em] text-[#00FF19]">
+            <section className="urblo-card self-start overflow-hidden border-black/10 shadow-none">
+                <div className="flex h-[460px] items-center justify-center bg-gradient-to-br from-black to-[#33363f] px-6 text-center">
+                    <p className="urblo-meta text-[var(--urblo-lime)]">
                         Image coming soon
                     </p>
                 </div>
@@ -278,11 +278,9 @@ export default function ImageStage({
 
     return (
         <section className="space-y-2 self-start">
-            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">
-                Image Accordion · Click to select
-            </p>
+            <p className="urblo-meta text-black/65">Image Accordion · Click to select</p>
 
-            <div className="overflow-hidden border border-neutral-300 bg-neutral-100 p-2">
+            <div className="urblo-card overflow-hidden border-black/10 bg-white p-2 shadow-none">
                 <div
                     ref={trackRef}
                     className={[
@@ -305,10 +303,10 @@ export default function ImageStage({
                                     panelRefs.current[finish.finishKey] = node;
                                 }}
                                 className={[
-                                    'group relative flex-none overflow-hidden border bg-neutral-950',
+                                    'group relative flex-none overflow-hidden border bg-black',
                                     isActive
-                                        ? 'border-neutral-900 shadow-[0_0_0_1px_rgba(0,0,0,0.15)]'
-                                        : 'border-neutral-800 hover:border-neutral-700',
+                                        ? 'border-black shadow-[0_0_0_1px_rgba(0,0,0,0.12)]'
+                                        : 'border-black/75 hover:border-black',
                                 ].join(' ')}
                                 style={{
                                     height: 'var(--panel-h)',
@@ -340,8 +338,8 @@ export default function ImageStage({
                                             loading="eager"
                                         />
                                     ) : (
-                                        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-neutral-800 to-neutral-600 px-3 text-center">
-                                            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#00FF19]">
+                                        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-black to-[#33363f] px-3 text-center">
+                                            <p className="urblo-meta text-[10px] text-[var(--urblo-lime)]">
                                                 Image soon
                                             </p>
                                         </div>
@@ -352,7 +350,7 @@ export default function ImageStage({
                                     <button
                                         type="button"
                                         onClick={() => onOpenLightbox(finish.finishKey)}
-                                        className="absolute right-2 top-2 border border-neutral-900/80 bg-white/90 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-neutral-900 transition hover:bg-white"
+                                        className="absolute right-2 top-2 rounded-[4px] border border-black/70 bg-white/92 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-black transition hover:bg-white"
                                         aria-label={`Open ${finish.label} in large view`}
                                     >
                                         Zoom
@@ -366,7 +364,7 @@ export default function ImageStage({
                                     ].join(' ')}
                                 >
                                     <span
-                                        className="rounded border border-neutral-200 bg-white/90 px-1 py-2 text-[9px] font-semibold uppercase tracking-[0.08em] text-neutral-800"
+                                        className="rounded border border-black/10 bg-white/92 px-1 py-2 text-[9px] font-semibold uppercase tracking-[0.08em] text-black"
                                         style={{
                                             writingMode: 'vertical-rl',
                                             textOrientation: 'mixed',
@@ -381,7 +379,7 @@ export default function ImageStage({
                 </div>
             </div>
 
-            <div className="flex items-center justify-between border border-neutral-300 bg-white px-4 py-3 text-xs uppercase tracking-[0.12em] text-neutral-600">
+            <div className="urblo-card flex items-center justify-between border-black/10 bg-white px-4 py-3 text-xs uppercase tracking-[0.12em] text-black/65 shadow-none">
                 <span>{stoneName}</span>
                 {activeFinish ? <span>{activeFinish.label}</span> : null}
             </div>

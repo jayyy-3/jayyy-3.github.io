@@ -1,24 +1,35 @@
 import { useEffect, useState } from 'react';
-import ProductService from "../service/ProductService.ts";
+import ProductService from '../service/ProductService';
 import ProductCard from '../components/ProductCard';
 import type { Product } from '../types/product';
 
 export default function ProductsPage() {
-    const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
 
-    useEffect(() => {
-        ProductService.getAll().then(setProducts);
-    }, []);
+  useEffect(() => {
+    ProductService.getAll().then(setProducts);
+  }, []);
 
-    return (
-        <div className="mx-auto max-w-7xl px-4 py-12">
-            <h1 className="text-3xl font-bold mb-8">Products</h1>
-
-            <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                {products.map((p) => (
-                    <ProductCard key={p.slug} product={p} />
-                ))}
-            </div>
+  return (
+    <div className="bg-white">
+      <section className="urblo-section-tight border-b border-black/10">
+        <div className="urblo-page-container">
+          <p className="urblo-eyebrow">Streetscape Collection</p>
+          <h1 className="urblo-page-title">Products</h1>
+          <p className="urblo-page-copy">
+            Explore Urblo seating, bollards, planters, sculpture pieces, and custom details built for
+            streetscapes and civil landscape projects.
+          </p>
         </div>
-    );
+      </section>
+
+      <section className="urblo-section bg-[rgba(239,239,239,0.28)]">
+        <div className="urblo-page-container grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+          {products.map((product) => (
+            <ProductCard key={product.slug} product={product} />
+          ))}
+        </div>
+      </section>
+    </div>
+  );
 }

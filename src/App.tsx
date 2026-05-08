@@ -17,15 +17,29 @@ import ArticlePage from './pages/ArticlePage';
 function TitleUpdater() {
     const location = useLocation();
 
-    const pageTitles: Record<string, string> = {
-        '/': 'Home',
-        '/stone-library': 'Stone Library',
-        '/products': 'Products',
-        '/articles': 'Articles',
-        '/projects': 'Projects',
-    };
+    let currentTitle = 'Urblo';
 
-    const currentTitle = pageTitles[location.pathname] || 'Urblo';
+    if (location.pathname === '/') {
+        currentTitle = 'Home';
+    } else if (location.pathname.startsWith('/stone-library/')) {
+        currentTitle = 'Stone Detail';
+    } else if (location.pathname === '/stone-library') {
+        currentTitle = 'Stone Library';
+    } else if (location.pathname.startsWith('/products/')) {
+        currentTitle = 'Product Detail';
+    } else if (location.pathname === '/products') {
+        currentTitle = 'Products';
+    } else if (location.pathname.startsWith('/projects/')) {
+        currentTitle = 'Project Detail';
+    } else if (location.pathname === '/projects') {
+        currentTitle = 'Projects';
+    } else if (location.pathname === '/our-story') {
+        currentTitle = 'Our Story';
+    } else if (location.pathname.startsWith('/articles/')) {
+        currentTitle = 'Article';
+    } else if (location.pathname === '/articles') {
+        currentTitle = 'Articles';
+    }
 
     return (
         <Helmet>

@@ -51,41 +51,41 @@ export default function SpecsPanel({
     return (
         <section className="space-y-8">
             <div className="grid gap-4 md:grid-cols-3">
-                <div className="border border-neutral-200 bg-white p-4">
-                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">
+                <div className="urblo-card p-4 shadow-none">
+                    <p className="urblo-meta text-black/55">
                         Type
                     </p>
-                    <p className="mt-2 text-base text-neutral-900">{stoneType}</p>
+                    <p className="mt-2 text-base text-black">{stoneType}</p>
                 </div>
-                <div className="border border-neutral-200 bg-white p-4">
-                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">
+                <div className="urblo-card p-4 shadow-none">
+                    <p className="urblo-meta text-black/55">
                         Origin
                     </p>
-                    <p className="mt-2 text-base text-neutral-900">{originLabel}</p>
+                    <p className="mt-2 text-base text-black">{originLabel}</p>
                 </div>
-                <div className="border border-neutral-200 bg-white p-4">
-                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">
+                <div className="urblo-card p-4 shadow-none">
+                    <p className="urblo-meta text-black/55">
                         Availability
                     </p>
-                    <p className="mt-2 text-base text-neutral-900">{availabilityLabel}</p>
+                    <p className="mt-2 text-base text-black">{availabilityLabel}</p>
                 </div>
-                <div className="border border-neutral-200 bg-white p-4">
-                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">
+                <div className="urblo-card p-4 shadow-none">
+                    <p className="urblo-meta text-black/55">
                         Raw Block
                     </p>
-                    <p className="mt-2 text-base text-neutral-900">{rawBlockLabel}</p>
+                    <p className="mt-2 text-base text-black">{rawBlockLabel}</p>
                 </div>
-                <div className="border border-neutral-200 bg-white p-4">
-                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">
+                <div className="urblo-card p-4 shadow-none">
+                    <p className="urblo-meta text-black/55">
                         DL Name
                     </p>
-                    <p className="mt-2 text-base text-neutral-900">{dlName || 'TBC'}</p>
+                    <p className="mt-2 text-base text-black">{dlName || 'TBC'}</p>
                 </div>
-                <div className="border border-neutral-200 bg-white p-4">
-                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">
+                <div className="urblo-card p-4 shadow-none">
+                    <p className="urblo-meta text-black/55">
                         Price Range
                     </p>
-                    <p className="mt-2 text-base font-semibold text-neutral-900">{pricePrimaryLabel}</p>
+                    <p className="mt-2 text-base font-semibold text-black">{pricePrimaryLabel}</p>
                     <div
                         className="mt-3 flex items-center gap-2"
                         role="img"
@@ -98,13 +98,13 @@ export default function SpecsPanel({
                                     'h-2 flex-1 rounded-sm transition-colors',
                                     priceTierLevel !== null && level <= priceTierLevel
                                         ? 'bg-[#00FF19]'
-                                        : 'bg-neutral-200',
+                                        : 'bg-black/10',
                                 ].join(' ')}
                             />
                         ))}
                     </div>
                     {priceRange && priceRange !== pricePrimaryLabel ? (
-                        <p className="mt-3 text-[11px] uppercase tracking-[0.08em] text-neutral-500">
+                        <p className="mt-3 text-[11px] uppercase tracking-[0.08em] text-black/55">
                             Source notation: {priceRange}
                         </p>
                     ) : null}
@@ -112,22 +112,24 @@ export default function SpecsPanel({
             </div>
 
             <div className="space-y-3">
-                <h2 className="text-lg font-semibold text-neutral-900">Finish Capability</h2>
-                <div className="divide-y divide-neutral-200 border border-neutral-200 bg-white">
+                <h2 className="font-display text-[28px] font-semibold uppercase leading-[1.08] text-black">
+                    Finish Capability
+                </h2>
+                <div className="urblo-card divide-y divide-black/10 overflow-hidden shadow-none">
                     {finishCapabilities.map((finish) => (
                         <div
                             key={finish.finishKey}
                             className="flex items-center justify-between gap-3 px-4 py-3 text-sm"
                         >
-                            <span className="text-neutral-900">{finish.label}</span>
+                            <span className="text-black">{finish.label}</span>
                             <span
                                 className={[
                                     'rounded-full px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.08em]',
                                     finish.capability === 'yes'
                                         ? 'bg-[#00FF19] text-black'
                                         : finish.capability === 'tbc'
-                                          ? 'bg-neutral-200 text-neutral-700'
-                                          : 'bg-neutral-100 text-neutral-500',
+                                          ? 'bg-black/6 text-black/65'
+                                          : 'bg-black/4 text-black/50',
                                 ].join(' ')}
                             >
                                 {capabilityBadge(finish.capability)}
@@ -138,15 +140,17 @@ export default function SpecsPanel({
             </div>
 
             <div className="space-y-3">
-                <h2 className="text-lg font-semibold text-neutral-900">Cut Options</h2>
+                <h2 className="font-display text-[28px] font-semibold uppercase leading-[1.08] text-black">
+                    Cut Options
+                </h2>
                 {cutOptions.length ? (
-                    <div className="divide-y divide-neutral-200 border border-neutral-200 bg-white">
+                    <div className="urblo-card divide-y divide-black/10 overflow-hidden shadow-none">
                         {cutOptions.map((cut) => (
                             <div
                                 key={cut.cutOrientation}
                                 className="flex items-center justify-between gap-3 px-4 py-3 text-sm"
                             >
-                                <span className="text-neutral-900">
+                                <span className="text-black">
                                     {cutOrientationLabel(cut.cutOrientation)}
                                 </span>
                                 <span
@@ -154,7 +158,7 @@ export default function SpecsPanel({
                                         'rounded-full px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.08em]',
                                         cut.available
                                             ? 'bg-[#00FF19] text-black'
-                                            : 'bg-neutral-100 text-neutral-500',
+                                            : 'bg-black/4 text-black/50',
                                     ].join(' ')}
                                 >
                                     {cut.available ? 'Available' : 'No'}
@@ -163,7 +167,7 @@ export default function SpecsPanel({
                         ))}
                     </div>
                 ) : (
-                    <p className="text-sm text-neutral-600">No specific cut option listed for this stone.</p>
+                    <p className="text-sm text-[var(--urblo-text)]">No specific cut option listed for this stone.</p>
                 )}
             </div>
         </section>

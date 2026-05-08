@@ -20,10 +20,8 @@ export default function VariantSwitch({
     }
 
     return (
-        <section aria-label="Variant selector" className="space-y-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">
-                Variant
-            </p>
+        <section aria-label="Variant selector" className="space-y-3">
+            <p className="urblo-meta text-black/65">Variant</p>
             <div className="flex flex-wrap gap-2">
                 {variants.map((variant) => {
                     const isActive = variant.stoneVariantId === activeVariantId;
@@ -34,10 +32,10 @@ export default function VariantSwitch({
                             type="button"
                             onClick={() => onChange(variant.stoneVariantId)}
                             className={[
-                                'inline-flex items-center gap-2 border px-3 py-2 text-sm transition',
+                                'inline-flex items-center gap-2 rounded-[4px] border px-4 py-2 text-sm font-semibold uppercase tracking-[0.08em] transition',
                                 isActive
                                     ? 'border-black bg-black text-white'
-                                    : 'border-neutral-300 bg-white text-neutral-900 hover:border-black',
+                                    : 'border-black/12 bg-white text-black hover:border-black/40',
                             ].join(' ')}
                         >
                             <span>{variant.label}</span>
@@ -46,11 +44,11 @@ export default function VariantSwitch({
                                     'rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em]',
                                     variant.status === 'tbc'
                                         ? isActive
-                                            ? 'bg-neutral-700 text-white'
-                                            : 'bg-neutral-100 text-neutral-700'
+                                            ? 'bg-white/12 text-white'
+                                            : 'bg-black/6 text-black/65'
                                         : isActive
                                           ? 'bg-[#00FF19] text-black'
-                                          : 'bg-neutral-100 text-neutral-700',
+                                          : 'bg-[rgba(0,255,25,0.12)] text-black',
                                 ].join(' ')}
                             >
                                 {variantStatusLabel(variant.status)}

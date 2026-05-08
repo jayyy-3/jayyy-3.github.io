@@ -16,12 +16,10 @@ export default function FinishAccordion({
     onSelect,
 }: FinishAccordionProps) {
     return (
-        <section className="space-y-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">
-                Finish Selector · Click to select
-            </p>
+        <section className="space-y-3">
+            <p className="urblo-meta text-black/65">Finish Selector · Click to select</p>
 
-            <div className="divide-y divide-neutral-200 border border-neutral-200 bg-white">
+            <div className="urblo-card divide-y divide-black/10 overflow-hidden border-black/10 shadow-none">
                 {finishes.map((finish) => {
                     const isActive = finish.finishKey === activeFinishKey;
 
@@ -33,8 +31,8 @@ export default function FinishAccordion({
                                 className={[
                                     'flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition',
                                     isActive
-                                        ? 'bg-neutral-950 text-white'
-                                        : 'bg-white text-neutral-900 hover:bg-neutral-100',
+                                        ? 'bg-black text-white'
+                                        : 'bg-white text-black hover:bg-[rgba(239,239,239,0.55)]',
                                 ].join(' ')}
                                 aria-pressed={isActive}
                             >
@@ -44,11 +42,11 @@ export default function FinishAccordion({
                                         'rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em]',
                                         finish.capability === 'tbc'
                                             ? isActive
-                                                ? 'bg-neutral-700 text-white'
-                                                : 'bg-neutral-200 text-neutral-700'
+                                                ? 'bg-white/10 text-white'
+                                                : 'bg-black/6 text-black/65'
                                             : isActive
                                               ? 'bg-[#00FF19] text-black'
-                                              : 'bg-neutral-200 text-neutral-700',
+                                              : 'bg-[rgba(0,255,25,0.12)] text-black',
                                     ].join(' ')}
                                 >
                                     {capabilityLabel(finish.capability)}
@@ -56,9 +54,9 @@ export default function FinishAccordion({
                             </button>
 
                             {isActive ? (
-                                <div className="space-y-2 border-t border-neutral-800 bg-neutral-950 px-4 pb-4 text-sm text-neutral-300">
+                                <div className="space-y-2 border-t border-white/10 bg-black px-4 pb-4 text-sm text-white/72">
                                     <p>{finish.behavior.summary}</p>
-                                    <ul className="space-y-1 text-xs uppercase tracking-[0.08em] text-neutral-400">
+                                    <ul className="space-y-1 text-xs uppercase tracking-[0.08em] text-white/52">
                                         <li>Slip: {finish.behavior.slip}</li>
                                         <li>Glare: {finish.behavior.glare}</li>
                                         <li>Maintenance: {finish.behavior.maintenance}</li>

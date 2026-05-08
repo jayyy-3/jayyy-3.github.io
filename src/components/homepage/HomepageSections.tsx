@@ -1,6 +1,12 @@
 import { Fragment, useEffect, useState, type ReactNode } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { Autoplay, Navigation, Pagination } from 'swiper/modules';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import 'swiper/css';
+import 'swiper/css/autoplay';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
 import {
   homepageData,
   type HomepageCollaborationCard,
@@ -48,6 +54,22 @@ function ArrowIcon({ light = false }: { light?: boolean }) {
         strokeLinecap="round"
         strokeLinejoin="round"
       />
+    </svg>
+  );
+}
+
+function ProductCarouselArrowIcon({ direction }: { direction: 'prev' | 'next' }) {
+  if (direction === 'prev') {
+    return (
+      <svg viewBox="0 0 1000 1000" fill="currentColor" className="h-7 w-7" aria-hidden="true">
+        <path d="M263 546L421 708C446 733 446 771 421 796 396 821 358 821 333 796L63 517C38 492 38 454 63 429L329 167C354 137 392 142 417 167 442 192 442 229 417 254L246 421 896 417C929 417 958 446 958 479 958 512 929 542 896 542L263 546Z" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg viewBox="0 0 1000 1000" fill="currentColor" className="h-7 w-7" aria-hidden="true">
+      <path d="M738 546L579 708C554 733 554 771 579 796S642 821 667 796L938 517C963 492 963 454 938 429L671 167C646 142 608 142 583 167 558 192 558 229 583 254L754 421 104 417C71 417 42 446 42 479 42 512 71 542 104 542L738 546Z" />
     </svg>
   );
 }
@@ -619,17 +641,19 @@ function SustainabilitySection() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -12 }}
               transition={{ duration: 0.28, ease: 'easeOut' }}
-              className="lg:absolute lg:inset-0"
+              className="lg:absolute lg:inset-0 lg:flex lg:items-center"
               role="tabpanel"
               id={`panel-${activePanel}`}
               aria-labelledby={`tab-${activePanel}`}
             >
-              {activePanel === 'sustainability' ? <SustainabilityOverviewPanel /> : null}
-              {activePanel === 'installation' ? (
-                <InstallationPanel activeStepId={activeStepId} onStepChange={setActiveStepId} />
-              ) : null}
-              {activePanel === 'cost-saving' ? <CostSavingPanel active /> : null}
-              {activePanel === 'design-collaboration' ? <DesignCollaborationPanel /> : null}
+              <div className="w-full">
+                {activePanel === 'sustainability' ? <SustainabilityOverviewPanel /> : null}
+                {activePanel === 'installation' ? (
+                  <InstallationPanel activeStepId={activeStepId} onStepChange={setActiveStepId} />
+                ) : null}
+                {activePanel === 'cost-saving' ? <CostSavingPanel active /> : null}
+                {activePanel === 'design-collaboration' ? <DesignCollaborationPanel /> : null}
+              </div>
             </motion.div>
           </AnimatePresence>
         </Reveal>
@@ -695,9 +719,11 @@ function PartnerBannerSection() {
 }
 
 function ProductShowcaseSection() {
+  const [focusedProduct, setFocusedProduct] = useState<string | null>(null);
+
   return (
-    <section className="bg-white px-6 py-20 md:px-10 lg:px-[94px] lg:py-24">
-      <div className="mx-auto max-w-[1440px]">
+    <section className="bg-white py-20 lg:py-24">
+      <div className="mx-auto max-w-[1440px] px-6 md:px-10 lg:px-[94px]">
         <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
           <Reveal>
             <h2 className="font-display text-[34px] font-semibold uppercase leading-[1.45] text-black md:text-[44px]">
@@ -714,58 +740,107 @@ function ProductShowcaseSection() {
           </Reveal>
         </div>
 
-        <Reveal delay={0.15} className="mt-10 overflow-hidden rounded-[4px]">
+      </div>
+
+      <Reveal delay={0.15} className="mt-10">
+        <div className="relative left-1/2 w-screen -translate-x-1/2">
           <div
-            className="relative min-h-[640px] bg-cover bg-center"
+            className="homepage-product-display relative overflow-hidden rounded-[4px] bg-cover bg-center bg-no-repeat"
             style={{
-              backgroundImage: `linear-gradient(180deg, rgba(0, 0, 0, 0.18), rgba(0, 0, 0, 0.42)), url('${homepageData.productShowcase.backgroundImage}')`,
+              backgroundImage: `url('${homepageData.productShowcase.backgroundImage}')`,
             }}
           >
-            <div className="grid min-h-[640px] grid-cols-1 md:grid-cols-2 xl:grid-cols-4">
-              {homepageData.productShowcase.categories.map((category, index) => {
-                const active = index === 2;
+            <div className="absolute inset-0 bg-black/25" />
+
+            <Swiper
+              modules={[Autoplay, Navigation, Pagination]}
+              slidesPerView={1}
+              loop
+              speed={500}
+              autoplay={{ delay: 1000, pauseOnMouseEnter: true }}
+              navigation={{
+                prevEl: '.homepage-product-prev',
+                nextEl: '.homepage-product-next',
+              }}
+              pagination={{
+                el: '.homepage-product-pagination',
+                clickable: true,
+              }}
+              breakpoints={{
+                640: { slidesPerView: 2 },
+                768: { slidesPerView: 3 },
+                1024: { slidesPerView: 4 },
+              }}
+              className="relative h-[620px]"
+            >
+              {homepageData.productShowcase.categories.map((category) => {
+                const focused = focusedProduct === category.index;
 
                 return (
-                  <div
-                    key={category.title}
-                    className="relative flex min-h-[180px] flex-col justify-end border-b border-white/30 px-8 py-8 text-white xl:min-h-full xl:border-b-0 xl:border-l xl:border-white/30"
-                  >
-                    {active ? (
-                      <div className="mb-2 max-w-[302px] rounded-[4px] bg-black px-8 py-10 shadow-[0_14px_40px_rgba(0,0,0,0.3)]">
-                        <div className="text-[70px] font-semibold leading-none text-white">
-                          {category.index}
-                        </div>
-                        <div className="mt-4 text-[36px] font-semibold leading-[1.1] text-white">
-                          {category.title}
-                        </div>
-                        <p className="mt-4 text-[18px] font-bold leading-[1.5] text-white/92">
-                          {category.body}
-                        </p>
-                        <Link
-                          to={category.to ?? '/products'}
-                          className="mt-8 inline-flex items-center gap-3 text-[18px] font-semibold text-[var(--urblo-lime)]"
+                  <SwiperSlide key={category.index} className="!h-[620px]">
+                    <div
+                      className="relative h-full"
+                      tabIndex={0}
+                      onMouseEnter={() => setFocusedProduct(category.index)}
+                      onMouseLeave={() => setFocusedProduct(null)}
+                      onFocus={() => setFocusedProduct(category.index)}
+                      onBlur={() => setFocusedProduct(null)}
+                    >
+                      <div className="absolute inset-y-0 right-0 z-[1] w-px bg-white/85" />
+
+                      <div className="relative h-full">
+                        <div
+                          className={`absolute bottom-0 z-[2] w-full px-8 pt-8 text-white transition-all duration-200 ease-in-out ${
+                            focused ? 'translate-y-0 bg-black' : 'translate-y-[70px] bg-transparent'
+                          }`}
                         >
-                          <span>{category.ctaLabel}</span>
-                          <ArrowIcon />
-                        </Link>
+                          <div
+                            className="mb-3 text-[70px] font-[800] leading-none text-transparent transition-all duration-200"
+                            style={{
+                              WebkitTextStroke: focused
+                                ? '2px var(--urblo-lime)'
+                                : '2px rgba(255, 255, 255, 0.8)',
+                            }}
+                          >
+                            {category.index}
+                          </div>
+                          <div className="text-[36px] font-semibold leading-[1.1] text-white">
+                            {category.title}
+                          </div>
+                          <div
+                            className={`h-[132px] text-[17px] font-semibold leading-[1.5] text-white transition-all duration-200 ease-in-out ${
+                              focused ? 'pb-8 pt-4' : 'pb-8 pt-[62px]'
+                            }`}
+                          >
+                            {category.body}
+                          </div>
+                        </div>
                       </div>
-                    ) : (
-                      <>
-                        <div className="text-[70px] font-semibold leading-none text-white">
-                          {category.index}
-                        </div>
-                        <div className="mt-4 text-[36px] font-semibold leading-[1.1] text-white">
-                          {category.title}
-                        </div>
-                      </>
-                    )}
-                  </div>
+                    </div>
+                  </SwiperSlide>
                 );
               })}
-            </div>
+            </Swiper>
+
+            <div className="homepage-product-pagination absolute bottom-6 left-1/2 z-[3] -translate-x-1/2" />
+
+            <button
+              type="button"
+              className="homepage-product-prev homepage-product-nav absolute left-4 top-1/2 z-[3] -translate-y-1/2 text-white transition-opacity md:left-6"
+              aria-label="Previous slide"
+            >
+              <ProductCarouselArrowIcon direction="prev" />
+            </button>
+            <button
+              type="button"
+              className="homepage-product-next homepage-product-nav absolute right-4 top-1/2 z-[3] -translate-y-1/2 text-white transition-opacity md:right-6"
+              aria-label="Next slide"
+            >
+              <ProductCarouselArrowIcon direction="next" />
+            </button>
           </div>
-        </Reveal>
-      </div>
+        </div>
+      </Reveal>
     </section>
   );
 }

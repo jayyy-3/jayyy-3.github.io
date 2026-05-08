@@ -167,9 +167,9 @@ export default function FinishLightbox({
             }}
         >
             <div className="mx-auto flex h-full w-full max-w-7xl flex-col px-4 py-4">
-                <div className="flex items-center justify-between border border-white/20 bg-black/60 px-4 py-3 text-white">
+                <div className="flex items-center justify-between rounded-[4px] border border-white/20 bg-black/60 px-4 py-3 text-white">
                     <div>
-                        <p className="text-xs uppercase tracking-[0.12em] text-neutral-300">
+                        <p className="urblo-meta text-white/55">
                             {stoneName}
                         </p>
                         <p className="text-sm font-semibold uppercase tracking-[0.08em]">
@@ -187,7 +187,7 @@ export default function FinishLightbox({
                                     resetZoom();
                                 }
                             }}
-                            className="border border-white/40 px-3 py-1 text-xs font-semibold uppercase tracking-[0.08em] transition hover:bg-white hover:text-black"
+                            className="rounded-[4px] border border-white/40 px-3 py-1 text-xs font-semibold uppercase tracking-[0.08em] transition hover:bg-[var(--urblo-lime)] hover:text-black"
                         >
                             {zoom === 1 ? 'Zoom 2x' : 'Reset Zoom'}
                         </button>
@@ -196,7 +196,7 @@ export default function FinishLightbox({
                             ref={closeButtonRef}
                             type="button"
                             onClick={onClose}
-                            className="border border-white/40 px-3 py-1 text-xs font-semibold uppercase tracking-[0.08em] transition hover:bg-white hover:text-black"
+                            className="rounded-[4px] border border-white/40 px-3 py-1 text-xs font-semibold uppercase tracking-[0.08em] transition hover:bg-[var(--urblo-lime)] hover:text-black"
                         >
                             Close
                         </button>
@@ -205,7 +205,7 @@ export default function FinishLightbox({
 
                 <div
                     ref={viewportRef}
-                    className="relative mt-4 flex min-h-0 flex-1 items-center justify-center overflow-hidden border border-white/20 bg-neutral-950"
+                    className="relative mt-4 flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-[4px] border border-white/20 bg-black"
                 >
                     {activeFinish.imageUrl ? (
                         <img

@@ -1,42 +1,50 @@
 import { useProductStore } from '../store/productStore';
-import type {MaterialCategory, OptionItem} from '../types/product';
+import type { MaterialCategory, OptionItem } from '../types/product';
 
 type Props = {
-    title: string;
-    category: MaterialCategory;        // ← uses the shared union
-    options: readonly OptionItem[];
-    whitelist?: string[];
+  title: string;
+  category: MaterialCategory;
+  options: readonly OptionItem[];
+  whitelist?: string[];
 };
 
-export default function OptionSelector({
-                                           title,
-                                           category,
-                                           options,
-                                           whitelist,
-                                       }: Props) {
-    const selected = useProductStore((s) => s.selectedMaterials[category]);
-    const setMaterial = useProductStore((s) => s.setMaterial);
+export default function OptionSelector({ title, category, options, whitelist }: Props) {
+  const selected = useProductStore((state) => state.selectedMaterials[category]);
+  const setMaterial = useProductStore((state) => state.setMaterial);
 
-    const visible = whitelist ? options.filter((o) => whitelist!.includes(o.slug)) : options;
+  const visible = whitelist ? options.filter((option) => whitelist.includes(option.slug)) : options;
 
-    if (!visible.length) return null;
+  if (!visible.length) {
+    return null;
+  }
 
-    return (
-        <section className="mb-6">
-            <h4 className="mb-2 font-medium">{title}</h4>
-            <div className="flex flex-wrap gap-4">
-                {visible.map((o) => (
-                    <button
-                        key={o.slug}
-                        onClick={() => setMaterial(category, o.slug)}
-                        className={`w-20 overflow-hidden rounded border-2 transition
-              ${selected === o.slug ? 'border-emerald-600' : 'border-transparent hover:border-gray-300'}`}
-                    >
-                        <img src={o.img} alt={o.name} className="h-16 w-full object-cover" />
-                        <span className="px-1 pb-1 text-xs text-center leading-tight min-h-[2.5rem] line-clamp-3">{o.name}</span>
-                    </button>
-                ))}
-            </div>
-        </section>
-    );
+  return (
+    <section className="mb-8">
+      <h4 className="urblo-meta mb-4 text-black/65">{title}</h4>
+      <div className="flex flex-wrap gap-4">
+        {visible.map((option) => {
+          const active = selected === option.slug;
+
+          return (
+            <button
+              key={option.slug}
+              type="button"
+              onClick={() => setMaterial(category, option.slug)}
+              className={[
+                'overflow-hidden rounded-[4px] border bg-white text-left transition',
+                active
+                  ? 'border-[var(--urblo-lime)] shadow-[0_0_0_1px_rgba(0,255,25,0.32)]'
+                  : 'border-black/10 hover:border-black/30',
+              ].join(' ')}
+            >
+              <img src={option.img} alt={option.name} className="h-20 w-24 object-cover" />
+              <span className="block w-24 px-2 py-2 text-center text-[11px] font-semibold leading-tight text-black">
+                {option.name}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
 }

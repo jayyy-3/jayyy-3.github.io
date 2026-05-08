@@ -64,19 +64,17 @@ export default function WelcomePopup() {
 
     return (
         <div
-            className={`fixed top-[20vh] left-1/2 z-50 -translate-x-1/2 pointer-events-none
-        transition-opacity duration-700 ease-in-out ${visible ? 'opacity-100' : 'opacity-0'}`}
+            className={`pointer-events-none fixed left-1/2 top-[14vh] z-50 w-[calc(100%-48px)] max-w-[980px] -translate-x-1/2 transition-opacity duration-700 ease-in-out ${visible ? 'opacity-100' : 'opacity-0'}`}
         >
             <div
-                className="relative w-[80vw] bg-black/40 px-6 py-10 text-center text-[14px]
-            font-light leading-[1.4] text-white shadow-md sm:max-w-[1200px]"
+                className="relative border border-white/20 bg-black/88 px-8 py-10 text-center text-[15px] leading-7 text-white shadow-[0_24px_60px_rgba(0,0,0,0.25)] backdrop-blur-sm"
             >
                 <p>
                     We acknowledge and respect Aboriginal and Torres Strait Islander Peoples across Australia as the Traditional Custodians of the lands, waters, seas and skies. We recognize their unique ability to care for Country and their deep spiritual connection with Country. We honor Elders past, present and emerging, whose knowledge and wisdom will ensure the continuation of Aboriginal and Torres Strait Islander cultures, and the values which uphold them.
                 </p>
                 <button
                     aria-label="Close"
-                    className="absolute top-2 right-4 pointer-events-auto text-xl leading-none text-white font-light"
+                    className="pointer-events-auto absolute right-4 top-3 text-xl leading-none text-white/72 transition hover:text-[var(--urblo-lime)]"
                     onClick={handleClose}
                 >
                     ×
