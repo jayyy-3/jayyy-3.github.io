@@ -70,7 +70,7 @@ export default function App() {
                     <Route
                         path="/stone-library"
                         element={
-                            <DefaultLayout bgImage="https://urblo.com.au/wp-content/uploads/2024/12/bg-materials.jpg">
+                            <DefaultLayout>
                                 <StoneLibraryPage />
                             </DefaultLayout>
                         }
@@ -79,7 +79,7 @@ export default function App() {
                     <Route
                         path="/stone-library/:stoneGroupId"
                         element={
-                            <DefaultLayout bgImage="https://urblo.com.au/wp-content/uploads/2024/12/bg-material-details.jpg">
+                            <DefaultLayout>
                                 <StoneLibraryDetailPage />
                             </DefaultLayout>
                         }

@@ -16,10 +16,10 @@ export default function FinishAccordion({
     onSelect,
 }: FinishAccordionProps) {
     return (
-        <section className="space-y-3">
-            <p className="urblo-meta text-black/65">Finish Selector · Click to select</p>
+        <section className="min-w-0 space-y-2.5">
+            <p className="urblo-meta text-[10px] text-black/58">Finish selector</p>
 
-            <div className="urblo-card divide-y divide-black/10 overflow-hidden border-black/10 shadow-none">
+            <div className="divide-y divide-black/10 overflow-hidden rounded-[4px] border border-black/10 bg-white shadow-none">
                 {finishes.map((finish) => {
                     const isActive = finish.finishKey === activeFinishKey;
 
@@ -36,10 +36,10 @@ export default function FinishAccordion({
                                 ].join(' ')}
                                 aria-pressed={isActive}
                             >
-                                <span className="text-sm font-medium">{finish.label}</span>
+                                <span className="text-[14px] font-semibold">{finish.label}</span>
                                 <span
                                     className={[
-                                        'rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em]',
+                                        'rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.08em]',
                                         finish.capability === 'tbc'
                                             ? isActive
                                                 ? 'bg-white/10 text-white'
@@ -54,9 +54,9 @@ export default function FinishAccordion({
                             </button>
 
                             {isActive ? (
-                                <div className="space-y-2 border-t border-white/10 bg-black px-4 pb-4 text-sm text-white/72">
-                                    <p>{finish.behavior.summary}</p>
-                                    <ul className="space-y-1 text-xs uppercase tracking-[0.08em] text-white/52">
+                                <div className="space-y-2 border-t border-white/10 bg-black px-4 pb-4 text-[13px] leading-6 text-white/90">
+                                    <p className="break-words">{finish.behavior.summary}</p>
+                                    <ul className="space-y-1 text-[11px] uppercase leading-5 tracking-[0.08em] text-white/76">
                                         <li>Slip: {finish.behavior.slip}</li>
                                         <li>Glare: {finish.behavior.glare}</li>
                                         <li>Maintenance: {finish.behavior.maintenance}</li>

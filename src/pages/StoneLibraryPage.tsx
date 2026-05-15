@@ -28,11 +28,11 @@ export default function StoneLibraryPage() {
 
   return (
     <div className="bg-white">
-      <section className="urblo-section-tight border-b border-black/10">
+      <section className="border-b border-black/10 py-10 md:py-12">
         <div className="urblo-page-container">
           <p className="urblo-eyebrow">Digital Stone Library</p>
           <h1 className="urblo-page-title">Stone Library</h1>
-          <p className="urblo-page-copy">
+          <p className="mt-5 max-w-[48rem] text-[18px] font-medium leading-8 text-[var(--urblo-text)] md:text-[19px]">
             Explore Urblo raw stone options by type, finish capability, and project suitability.
             This library is designed for fast design decisions backed by sourcing data.
           </p>
@@ -52,10 +52,10 @@ export default function StoneLibraryPage() {
         onClear={clearFilters}
       />
 
-      <section className="urblo-section bg-[rgba(239,239,239,0.28)]">
+      <section className="bg-[rgba(239,239,239,0.32)] py-10 md:py-12">
         <div className="urblo-page-container">
           {cards.length ? (
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {cards.map((card) => (
                 <StoneCard key={card.stoneGroupId} stone={card} />
               ))}

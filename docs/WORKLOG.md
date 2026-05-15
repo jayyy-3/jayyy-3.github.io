@@ -2,6 +2,52 @@
 
 Last updated: 2026-05-08
 
+## Entry - 2026-05-08 (Stone Library Visual Density Polish)
+
+### Scope
+- Restyled Stone Library list/detail surfaces into a tighter material-library tool experience.
+- Removed the empty black banner on Stone Library list/detail routes by using the header-only default layout spacer.
+- Tightened list page hero spacing, filter control sizing, card image ratio, card typography, status badges, card borders, and placeholder imagery.
+- Reduced Stone Library detail media stage scale and improved finish selector text contrast/readability, especially on mobile.
+- Kept route behavior, filtering behavior, finish selection, centering, and lightbox behavior unchanged.
+
+### Changed Files
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/App.tsx`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/StoneLibraryPage.tsx`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/StoneLibraryDetailPage.tsx`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/FilterBar.tsx`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/StoneCard.tsx`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/ImageStage.tsx`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/FinishAccordion.tsx`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/SpecsPanel.tsx`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/src/service/StoneLibraryService.ts`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/NEXT_STEPS.md`
+- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/WORKLOG.md`
+
+### Verification Results
+- `npm run build`: pass (chunk size warning `>500kB` unchanged; Browserslist data staleness notice shown)
+- `npm run lint`: pass
+- `npx tsc -b`: pass
+- Playwright CLI visual smoke check:
+  - `/stone-library` desktop: compact header, tighter filter bar, four-column material cards, lighter missing-image placeholder.
+  - `/stone-library` mobile: stacked filter controls and first card render without horizontal overflow.
+  - `/stone-library/alpine-white` desktop: reduced media stage scale, readable finish selector, specs visible below the comparison surface.
+  - `/stone-library/alpine-white` mobile: no horizontal document overflow (`scrollWidth` equals `clientWidth` at 390px).
+
+### Risks and Gaps
+- React Helmet still emits the known strict-mode `UNSAFE_componentWillMount` console warning via `SideEffect(NullComponent2)`.
+- Bundle size warning (`>500kB`) remains and is not addressed in this scope.
+- Long-tail Stone Library image mapping gaps remain under existing image backlog items.
+
+### Next Handoff
+- `NOW-STONELIB-IMG-FASTTRACK-001`
+- `NOW-DELIVERY-READINESS-001`
+- `NOW-ASSET-STRATEGY-001`
+- `NOW-DOCS-002`
+- `NOW-DEPLOY-PAGES-HARDEN-001`
+- `NEXT-STONELIB-IMG-001`
+- `NEXT-STONELIB-IMG-002`
+
 ## Entry - 2026-05-08 (Contact Route + Our Story Team Update + Docs Contract Sync)
 
 ### Scope

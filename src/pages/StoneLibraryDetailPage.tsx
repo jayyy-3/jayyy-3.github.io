@@ -60,7 +60,7 @@ export default function StoneLibraryDetailPage() {
         </div>
       </nav>
 
-      <section className="urblo-section-tight border-b border-black/10">
+      <section className="border-b border-black/10 py-10 md:py-12">
         <div className="urblo-page-container">
           <div className="flex flex-wrap items-center gap-3">
             <span className="rounded-[4px] border border-black/10 bg-[rgba(239,239,239,0.55)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-black">
@@ -72,14 +72,14 @@ export default function StoneLibraryDetailPage() {
           </div>
           <p className="urblo-eyebrow mt-6">Stone Detail</p>
           <h1 className="urblo-page-title">{detail.name}</h1>
-          <p className="urblo-page-copy">
+          <p className="mt-5 max-w-[48rem] text-[18px] font-medium leading-8 text-[var(--urblo-text)] md:text-[19px]">
             Evaluate finish behavior, sourcing metadata, and variant options in one place.
           </p>
         </div>
       </section>
 
-      <main className="bg-[rgba(239,239,239,0.18)] pb-16">
-        <section className="urblo-section">
+      <main className="bg-[rgba(239,239,239,0.26)] pb-14">
+        <section className="py-9 md:py-11">
           <div className="urblo-page-container space-y-8">
             <VariantSwitch
               variants={detail.variants}
@@ -87,7 +87,7 @@ export default function StoneLibraryDetailPage() {
               onChange={handleVariantChange}
             />
 
-            <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(340px,1fr)] lg:items-start">
+            <div className="grid min-w-0 gap-5 lg:grid-cols-[minmax(0,1.58fr)_minmax(310px,0.92fr)] lg:items-start">
               <ImageStage
                 stoneName={detail.name}
                 finishes={detail.finishes}

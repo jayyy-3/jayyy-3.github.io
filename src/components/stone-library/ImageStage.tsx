@@ -32,8 +32,8 @@ export default function ImageStage({
         finishes[0];
     const isSingleFinish = finishes.length === 1;
     const trackStyle: CSSProperties = {
-        ['--panel-h' as string]: 'clamp(220px, 34vw, 420px)',
-        ['--panel-collapsed' as string]: 'clamp(44px, 6vw, 64px)',
+        ['--panel-h' as string]: 'clamp(190px, 29vw, 340px)',
+        ['--panel-collapsed' as string]: 'clamp(40px, 4.6vw, 56px)',
     };
     const isDev = import.meta.env.DEV;
 
@@ -267,8 +267,8 @@ export default function ImageStage({
     if (!finishes.length) {
         return (
             <section className="urblo-card self-start overflow-hidden border-black/10 shadow-none">
-                <div className="flex h-[460px] items-center justify-center bg-gradient-to-br from-black to-[#33363f] px-6 text-center">
-                    <p className="urblo-meta text-[var(--urblo-lime)]">
+                <div className="flex h-[320px] items-center justify-center bg-[rgba(239,239,239,0.78)] px-6 text-center">
+                    <p className="urblo-meta text-black/50">
                         Image coming soon
                     </p>
                 </div>
@@ -277,10 +277,10 @@ export default function ImageStage({
     }
 
     return (
-        <section className="space-y-2 self-start">
-            <p className="urblo-meta text-black/65">Image Accordion · Click to select</p>
+        <section className="min-w-0 space-y-2 self-start">
+            <p className="urblo-meta text-[10px] text-black/58">Finish imagery</p>
 
-            <div className="urblo-card overflow-hidden border-black/10 bg-white p-2 shadow-none">
+            <div className="overflow-hidden rounded-[4px] border border-black/10 bg-white p-2 shadow-none">
                 <div
                     ref={trackRef}
                     className={[
@@ -306,7 +306,7 @@ export default function ImageStage({
                                     'group relative flex-none overflow-hidden border bg-black',
                                     isActive
                                         ? 'border-black shadow-[0_0_0_1px_rgba(0,0,0,0.12)]'
-                                        : 'border-black/75 hover:border-black',
+                                        : 'border-black/40 hover:border-black',
                                 ].join(' ')}
                                 style={{
                                     height: 'var(--panel-h)',
@@ -333,7 +333,7 @@ export default function ImageStage({
                                                 'absolute inset-0 h-full w-full object-cover transition duration-300',
                                                 isActive
                                                     ? 'opacity-100'
-                                                    : 'opacity-75 group-hover:opacity-95 group-focus-within:opacity-95',
+                                                    : 'opacity-70 group-hover:opacity-94 group-focus-within:opacity-94',
                                             ].join(' ')}
                                             loading="eager"
                                         />
@@ -350,7 +350,7 @@ export default function ImageStage({
                                     <button
                                         type="button"
                                         onClick={() => onOpenLightbox(finish.finishKey)}
-                                        className="absolute right-2 top-2 rounded-[4px] border border-black/70 bg-white/92 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-black transition hover:bg-white"
+                                        className="absolute right-2 top-2 rounded-[4px] border border-black/55 bg-white/94 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.1em] text-black transition hover:bg-white"
                                         aria-label={`Open ${finish.label} in large view`}
                                     >
                                         Zoom
@@ -364,7 +364,7 @@ export default function ImageStage({
                                     ].join(' ')}
                                 >
                                     <span
-                                        className="rounded border border-black/10 bg-white/92 px-1 py-2 text-[9px] font-semibold uppercase tracking-[0.08em] text-black"
+                                        className="rounded border border-black/10 bg-white/92 px-1 py-2 text-[8px] font-bold uppercase tracking-[0.08em] text-black"
                                         style={{
                                             writingMode: 'vertical-rl',
                                             textOrientation: 'mixed',
@@ -379,7 +379,7 @@ export default function ImageStage({
                 </div>
             </div>
 
-            <div className="urblo-card flex items-center justify-between border-black/10 bg-white px-4 py-3 text-xs uppercase tracking-[0.12em] text-black/65 shadow-none">
+            <div className="flex items-center justify-between rounded-[4px] border border-black/10 bg-white px-4 py-2.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-black/55 shadow-none">
                 <span>{stoneName}</span>
                 {activeFinish ? <span>{activeFinish.label}</span> : null}
             </div>

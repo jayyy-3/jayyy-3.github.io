@@ -49,39 +49,39 @@ export default function SpecsPanel({
     cutOptions,
 }: SpecsPanelProps) {
     return (
-        <section className="space-y-8">
+        <section className="space-y-7">
             <div className="grid gap-4 md:grid-cols-3">
-                <div className="urblo-card p-4 shadow-none">
+                <div className="rounded-[4px] border border-black/10 bg-white p-4 shadow-none">
                     <p className="urblo-meta text-black/55">
                         Type
                     </p>
                     <p className="mt-2 text-base text-black">{stoneType}</p>
                 </div>
-                <div className="urblo-card p-4 shadow-none">
+                <div className="rounded-[4px] border border-black/10 bg-white p-4 shadow-none">
                     <p className="urblo-meta text-black/55">
                         Origin
                     </p>
                     <p className="mt-2 text-base text-black">{originLabel}</p>
                 </div>
-                <div className="urblo-card p-4 shadow-none">
+                <div className="rounded-[4px] border border-black/10 bg-white p-4 shadow-none">
                     <p className="urblo-meta text-black/55">
                         Availability
                     </p>
                     <p className="mt-2 text-base text-black">{availabilityLabel}</p>
                 </div>
-                <div className="urblo-card p-4 shadow-none">
+                <div className="rounded-[4px] border border-black/10 bg-white p-4 shadow-none">
                     <p className="urblo-meta text-black/55">
                         Raw Block
                     </p>
                     <p className="mt-2 text-base text-black">{rawBlockLabel}</p>
                 </div>
-                <div className="urblo-card p-4 shadow-none">
+                <div className="rounded-[4px] border border-black/10 bg-white p-4 shadow-none">
                     <p className="urblo-meta text-black/55">
                         DL Name
                     </p>
                     <p className="mt-2 text-base text-black">{dlName || 'TBC'}</p>
                 </div>
-                <div className="urblo-card p-4 shadow-none">
+                <div className="rounded-[4px] border border-black/10 bg-white p-4 shadow-none">
                     <p className="urblo-meta text-black/55">
                         Price Range
                     </p>
@@ -112,10 +112,10 @@ export default function SpecsPanel({
             </div>
 
             <div className="space-y-3">
-                <h2 className="font-display text-[28px] font-semibold uppercase leading-[1.08] text-black">
+                <h2 className="font-display text-[24px] font-semibold uppercase leading-[1.08] tracking-[0.02em] text-black">
                     Finish Capability
                 </h2>
-                <div className="urblo-card divide-y divide-black/10 overflow-hidden shadow-none">
+                <div className="divide-y divide-black/10 overflow-hidden rounded-[4px] border border-black/10 bg-white shadow-none">
                     {finishCapabilities.map((finish) => (
                         <div
                             key={finish.finishKey}
@@ -140,11 +140,11 @@ export default function SpecsPanel({
             </div>
 
             <div className="space-y-3">
-                <h2 className="font-display text-[28px] font-semibold uppercase leading-[1.08] text-black">
+                <h2 className="font-display text-[24px] font-semibold uppercase leading-[1.08] tracking-[0.02em] text-black">
                     Cut Options
                 </h2>
                 {cutOptions.length ? (
-                    <div className="urblo-card divide-y divide-black/10 overflow-hidden shadow-none">
+                    <div className="divide-y divide-black/10 overflow-hidden rounded-[4px] border border-black/10 bg-white shadow-none">
                         {cutOptions.map((cut) => (
                             <div
                                 key={cut.cutOrientation}

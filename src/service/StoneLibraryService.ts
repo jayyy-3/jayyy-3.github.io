@@ -302,13 +302,18 @@ function placeholderStoneImage(label: string): string {
     const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 960 640'>
 <defs>
 <linearGradient id='g' x1='0' x2='1' y1='0' y2='1'>
-<stop offset='0%' stop-color='#161616'/>
-<stop offset='100%' stop-color='#3a3a3a'/>
+<stop offset='0%' stop-color='#f4f4f1'/>
+<stop offset='100%' stop-color='#d9dad5'/>
 </linearGradient>
+<pattern id='p' width='28' height='28' patternUnits='userSpaceOnUse'>
+<path d='M0 28L28 0' stroke='rgba(0,0,0,0.08)' stroke-width='1'/>
+</pattern>
 </defs>
 <rect width='960' height='640' fill='url(#g)'/>
-<text x='50%' y='48%' font-family='Arial, sans-serif' font-size='48' fill='#00FF19' text-anchor='middle'>IMAGE COMING SOON</text>
-<text x='50%' y='58%' font-family='Arial, sans-serif' font-size='36' fill='#f5f5f5' text-anchor='middle'>${escapedLabel}</text>
+<rect width='960' height='640' fill='url(#p)' opacity='0.35'/>
+<rect x='72' y='72' width='816' height='496' fill='none' stroke='rgba(0,0,0,0.22)' stroke-width='2'/>
+<text x='50%' y='48%' font-family='Arial, sans-serif' font-size='42' font-weight='700' fill='#33363F' text-anchor='middle' letter-spacing='4'>IMAGE COMING SOON</text>
+<text x='50%' y='58%' font-family='Arial, sans-serif' font-size='30' fill='#6b6d72' text-anchor='middle'>${escapedLabel}</text>
 </svg>`;
 
     return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;

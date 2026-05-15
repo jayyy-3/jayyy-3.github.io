@@ -152,6 +152,23 @@ For any user-facing layout/copy/IA task:
   - `/Users/lee/Documents/SAI/urblo/urblo-react/docs/NEXT_STEPS.md`
   - `/Users/lee/Documents/SAI/urblo/urblo-react/docs/WORKLOG.md`
 
+### DONE-STONELIB-UI-POLISH-001
+- Scope:
+  - Restyled Stone Library list/detail surfaces toward a compact material-library tool rather than a generic product-card page.
+  - Removed the empty Stone Library route banner by using the header-only default layout spacer on list/detail routes.
+  - Tightened list page hero copy, filter controls, card image ratio, card typography, status badges, and placeholder imagery.
+  - Reduced detail page media/control scale and improved mobile finish selector readability.
+- Key files:
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/App.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/StoneLibraryPage.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/StoneLibraryDetailPage.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/FilterBar.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/StoneCard.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/ImageStage.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/FinishAccordion.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/SpecsPanel.tsx`
+  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/service/StoneLibraryService.ts`
+
 ## Now
 
 ### NOW-STONELIB-IMG-FASTTRACK-001

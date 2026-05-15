@@ -13,36 +13,36 @@ export default function StoneCard({ stone }: StoneCardProps) {
   return (
     <Link
       to={`/stone-library/${stone.stoneGroupId}`}
-      className="urblo-card group block overflow-hidden transition-transform duration-300 hover:-translate-y-1"
+      className="group block overflow-hidden rounded-[4px] border border-black/10 bg-white transition duration-300 hover:-translate-y-0.5 hover:border-black/28 hover:shadow-[0_18px_38px_rgba(0,0,0,0.08)]"
     >
-      <div className="relative h-72 overflow-hidden bg-black/90">
+      <div className="relative aspect-[1.08/1] overflow-hidden bg-[rgba(239,239,239,0.78)]">
         {stone.coverImageUrl ? (
           <img
             src={stone.coverImageUrl}
             alt={stone.coverImageAlt || `${stone.name} finish preview`}
-            className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03] group-hover:opacity-90"
+            className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.025] group-hover:opacity-95"
             loading="lazy"
           />
         ) : (
-          <div className="flex h-full items-center justify-center bg-gradient-to-br from-black to-[#33363f] px-6 text-center">
-            <p className="urblo-meta text-[var(--urblo-lime)]">Image coming soon</p>
+          <div className="flex h-full items-center justify-center bg-[linear-gradient(135deg,#f4f4f1,#deded8)] px-6 text-center">
+            <p className="urblo-meta text-black/50">Image coming soon</p>
           </div>
         )}
 
-        <span className="absolute left-4 top-4 rounded-[4px] border border-black bg-white px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-black">
+        <span className="absolute left-3 top-3 rounded-[4px] border border-black/30 bg-white/94 px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.12em] text-black">
           {statusBadgeLabel(stone.status)}
         </span>
       </div>
 
-      <div className="space-y-3 p-5">
-        <h3 className="font-display text-[28px] font-semibold uppercase leading-[1.08] text-black">
+      <div className="space-y-2.5 p-4">
+        <h3 className="font-display text-[23px] font-semibold uppercase leading-[1.05] tracking-[0.01em] text-black md:text-[24px]">
           {stone.name}
         </h3>
-        <p className="text-[16px] text-black/80">{stone.stoneType}</p>
-        <p className="text-[15px] text-[var(--urblo-text)]">{stone.originLabel}</p>
-        <div className="flex items-center justify-between border-t border-black/10 pt-4">
-          <p className="urblo-meta text-black/65">{stone.finishCount} finishes</p>
-          <p className="urblo-meta text-black/65">
+        <p className="text-[14px] font-medium text-black/78">{stone.stoneType}</p>
+        <p className="text-[13px] font-medium text-[var(--urblo-text)]">{stone.originLabel}</p>
+        <div className="flex items-center justify-between border-t border-black/10 pt-3">
+          <p className="urblo-meta text-[10px] text-black/58">{stone.finishCount} finishes</p>
+          <p className="urblo-meta text-[10px] text-black/58">
             {stone.variantCount > 1 ? `${stone.variantCount} variants` : 'Standard'}
           </p>
         </div>
