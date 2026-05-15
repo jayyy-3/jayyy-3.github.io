@@ -1,6 +1,6 @@
 # Urblo Web - Architecture and Contracts
 
-Last updated: 2026-05-08
+Last updated: 2026-05-15
 
 ## System Boundary
 - Frontend-only React application shipped as static assets.
@@ -17,19 +17,29 @@ Last updated: 2026-05-08
 - Supporting libraries: Swiper, DOMPurify, lodash.throttle, react-helmet
 
 ## Deployment and Build Contract
-- Deployment workflow: `/Users/lee/Documents/SAI/urblo/urblo-react/.github/workflows/deploy.yml`
+- Deployment workflow: `.github/workflows/deploy.yml`
   - Trigger: push to `main`
   - Pipeline: `npm ci` -> `npm run build` -> deploy `dist/` to GitHub Pages
-- Vite base config: `/Users/lee/Documents/SAI/urblo/urblo-react/vite.config.ts`
+- Vite base config: `vite.config.ts`
   - `base: './'` for relative asset paths
-- Build script contract: `/Users/lee/Documents/SAI/urblo/urblo-react/package.json`
+- Build script contract: `package.json`
   - `npm run build` => `tsc -b && vite build`
   - `npm run lint` => `eslint .`
   - typecheck path => `npx tsc -b`
 - TypeScript contract update:
-  - `resolveJsonModule: true` enabled in `/Users/lee/Documents/SAI/urblo/urblo-react/tsconfig.app.json` to support `stone_library.json` imports.
+  - `resolveJsonModule: true` enabled in `tsconfig.app.json` to support `stone_library.json` imports.
 - Lint scope contract update:
-  - `.vite/**` ignored in `/Users/lee/Documents/SAI/urblo/urblo-react/eslint.config.js`.
+  - `.vite/**` ignored in `eslint.config.js`.
+
+## Agent Harness Contract
+- Root entry: `AGENTS.md`
+- Current state handoff: `docs/HANDOFF.md`
+- Machine-readable task queue: `docs/agent/tasks.json`
+- Verification matrix: `docs/agent/verification.md`
+- Harness checks:
+  - `npm run agent:check` => `node scripts/check-harness.mjs`
+  - `scripts/check-harness.mjs` verifies required harness files and delegates doc path/task checks.
+  - `scripts/check-doc-paths.mjs` rejects machine-specific paths and validates repo-relative path references in docs/task state.
 
 ## Route Interface Contract (`src/App.tsx`)
 
@@ -83,8 +93,8 @@ Last updated: 2026-05-08
 ## Data Contracts
 
 ### Stone Library Data Contract (Primary for Materials)
-- Source JSON: `/Users/lee/Documents/SAI/urblo/urblo-react/data/clean/stone_library.json`
-- Type contract: `/Users/lee/Documents/SAI/urblo/urblo-react/src/types/stone-library.ts`
+- Source JSON: `data/clean/stone_library.json`
+- Type contract: `src/types/stone-library.ts`
   - `StoneLibraryRaw`, `StoneFinishRaw`, `StoneGroupRaw`, `StoneVariantRaw`
   - `StoneCardVM`, `StoneDetailVM`, `FinishVM`, `StoneStatus`
   - Price presentation fields on `StoneDetailVM`:
@@ -92,7 +102,7 @@ Last updated: 2026-05-08
     - `priceTierLevel` (`1 | 2 | 3 | null`)
     - `priceTierLabel` (`Budget | Balanced | Premium | null`)
     - `pricePrimaryLabel` (`Budget | Balanced | Premium | Price on request`)
-- Service contract: `/Users/lee/Documents/SAI/urblo/urblo-react/src/service/StoneLibraryService.ts`
+- Service contract: `src/service/StoneLibraryService.ts`
   - `getStoneCards(filters)`
   - `getStoneDetail(stoneGroupId, variantId?)`
   - `getFilterFacets()`
@@ -101,29 +111,29 @@ Last updated: 2026-05-08
     - Active stones with valid tier (`1/2/3`) map to `Budget/Balanced/Premium`.
     - `tbc` status or missing/invalid tier degrades to `Price on request`.
 - Supplemental metadata:
-  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/data/finishBehaviorMeta.ts`
-  - `/Users/lee/Documents/SAI/urblo/urblo-react/src/data/stoneFinishImages.ts`
+  - `src/data/finishBehaviorMeta.ts`
+  - `src/data/stoneFinishImages.ts`
 
 ### Product Data Contract
-- Source of product records: `/Users/lee/Documents/SAI/urblo/urblo-react/src/data/productData.ts`
-- Access layer: `/Users/lee/Documents/SAI/urblo/urblo-react/src/service/ProductService.ts`
+- Source of product records: `src/data/productData.ts`
+- Access layer: `src/service/ProductService.ts`
   - `getAll(): Promise<Product[]>`
   - `getBySlug(slug): Promise<Product | undefined>`
-- Type contract: `/Users/lee/Documents/SAI/urblo/urblo-react/src/types/product.ts`
+- Type contract: `src/types/product.ts`
   - `Product`, `ProductModel`, `MaterialCategory`, `SelectedMaterials`, `OptionItem`
 - Runtime note:
   - `ProductDetailPage` material options now come from `StoneLibraryService.getStoneOptionsForProducts()`.
 
 ### Project Data Contract
-- Listing source in page module: `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/Projects.tsx`
-- Detail source in data module: `/Users/lee/Documents/SAI/urblo/urblo-react/src/data/projectData.ts`
+- Listing source in page module: `src/pages/Projects.tsx`
+- Detail source in data module: `src/data/projectData.ts`
 - Current contract risk: list and detail data are split across two sources and can drift.
 
 ### Article Data Contract
-- Public data root: `/Users/lee/Documents/SAI/urblo/urblo-react/public/articles`
-- Index manifest: `/Users/lee/Documents/SAI/urblo/urblo-react/public/articles/index.json`
-- Detail content: `/Users/lee/Documents/SAI/urblo/urblo-react/public/articles/<slug>/content.html`
-- Metadata type: `/Users/lee/Documents/SAI/urblo/urblo-react/src/types/article.ts`
+- Public data root: `public/articles`
+- Index manifest: `public/articles/index.json`
+- Detail content: `public/articles/<slug>/content.html`
+- Metadata type: `src/types/article.ts`
 - Loading behavior:
   - list page fetches `${import.meta.env.BASE_URL}articles/index.json`
   - detail page fetches index then HTML content
@@ -131,7 +141,7 @@ Last updated: 2026-05-08
 
 ### Contact Page Contract
 - Route: `/contact`
-- Page module: `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/ContactPage.tsx`
+- Page module: `src/pages/ContactPage.tsx`
 - Runtime behavior:
   - No backend submission is attempted.
   - Direct contact channels use `mailto:` and `tel:` links.
@@ -171,7 +181,7 @@ Last updated: 2026-05-08
   - `Space Grotesk` local WOFF2
 - Homepage runtime no longer depends on remote WordPress font CSS/TTF/WOFF assets.
 
-## Quality Gate Status (Measured 2026-05-08)
+## Last Runtime Quality Gate Status (Measured 2026-05-08)
 - `npm run build`: pass
 - `npm run lint`: pass
 - `npx tsc -b`: pass
@@ -181,5 +191,9 @@ Last updated: 2026-05-08
 - Project list data and project detail data are maintained in separate sources.
 - Bundle size warning (`>500kB`) indicates code-splitting and chunk strategy debt.
 
-## Brand Linkage Rule
-For UI/copy/IA changes, architecture and implementation decisions must be reviewed against `/Users/lee/Documents/SAI/urblo/urblo-react/docs/brand-baseline.md`. Brand linkage is advisory in execution flow, but required in task notes for high-impact user-facing changes.
+## Brand and Design Linkage Rule
+For UI/copy/IA changes, architecture and implementation decisions must be reviewed against:
+- `docs/brand-baseline.md` for positioning, audience, voice, and claim safety.
+- `docs/DESIGN.md` for visual rhythm, page composition, interaction tone, and responsive UI quality.
+
+Brand and design linkage is advisory in execution flow, but required in task notes for high-impact user-facing changes.

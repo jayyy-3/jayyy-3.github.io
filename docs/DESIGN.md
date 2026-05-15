@@ -1,0 +1,251 @@
+# Urblo Design Contract
+
+Last updated: 2026-05-15
+
+## Purpose
+This document governs Urblo's visual and UX execution. It is the design contract for Codex work in this repository.
+
+Use this file when deciding:
+- page composition
+- layout density
+- typography scale
+- image treatment
+- component styling
+- interaction tone
+- responsive behavior
+- whether a page feels like Urblo or like a generic template
+
+This file does not replace `docs/brand-baseline.md`. The brand baseline defines what Urblo means. This file defines how that meaning should feel in the interface.
+
+## Source Material
+- `docs/brand-baseline.md`
+- Prior website design discussion archive reviewed while authoring this contract: workflowy notes, website Q&A draft, newsletters, and sales emails. These are source references, not canonical repo files.
+- Current React implementation and user feedback from Stone Library, Contact, and Our Story work.
+
+## Design North Star
+Urblo should feel like calm confidence: contemporary, disciplined, precise, and quietly bold.
+
+The site is not a luxury stone catalogue and not a generic construction supplier page. It is a professional decision surface for landscape architects, contractors, councils, and project teams who need stone to become predictable, buildable, and inspectable.
+
+Every design choice should reinforce this equation:
+
+`design intent + material intelligence + engineering proof = confident project decisions`
+
+## Core Experience Principles
+
+### 1. Make Decisions Faster, Safer, and More Certain
+Every page should reduce friction for a real project decision:
+- Can this material work?
+- What finish changes its behavior?
+- How is this delivered?
+- What proof exists?
+- What should I do next?
+
+Do not design passive brochure sections when a focused decision surface would help more.
+
+### 2. Beauty Must Land in Buildability
+Visual polish is only on-brand when it points to fabrication, detailing, installation, sourcing, or proof. If a section is beautiful but does not clarify how Urblo works, tighten it or replace it with evidence.
+
+### 3. Stone Must Be Inspectable
+Images are not decoration. They should show at least one of:
+- context: scale, public realm, site condition
+- use: people, seating, walking, civic life, movement
+- texture: finish, edge, grain, color variation, surface behavior
+
+Stone Library and material pages require inspectable texture first. Dark overlays, vague atmospheric crops, and tiny thumbnails are off-brand when they hide the material.
+
+### 4. Professional Density Beats Empty Drama
+Editorial pages can breathe. Tool pages should be compact and scannable.
+
+Use whitespace to create hierarchy, not to inflate weak content. Avoid oversized sections where the user has to scroll past empty space to reach proof, filters, specs, or contact actions.
+
+### 5. Trust Comes from Constraints
+When a claim depends on project conditions, show the condition. Avoid universalizing project-specific notes. This is especially important for:
+- lead times
+- cost savings
+- slip ratings
+- carbon claims
+- origin and sourcing
+- installation gaps or tolerances
+- "standard" dimensions
+
+## Visual System
+
+### Palette
+Primary palette:
+- Ink: `#000000`
+- Body text: `#33363F`
+- Accent signal: `#00FF19`
+- Neutral surfaces: white, near-white, pale grey, charcoal
+
+Use the neon green as a signal, not as decoration. It should mark active states, key proof, small labels, and decisive CTAs. Large green fields should be rare.
+
+Avoid:
+- broad decorative gradients
+- generic blue SaaS palettes
+- warm beige lifestyle palettes
+- heavy dark-blue/slate dashboards
+- color systems that overpower stone texture
+
+### Typography
+Known brand typography:
+- Primary: `Avenir LT Std`
+- Display: `Space Grotesk`
+- Accent serif: `Didot LT Std`
+
+Rules:
+- Use display-scale type only for true hero or editorial moments.
+- Tool surfaces need smaller, tighter headings.
+- Keep body copy highly readable; do not rely on thin/light type on low-contrast backgrounds.
+- Avoid negative letter spacing.
+- Do not scale font size with viewport width.
+
+### Layout
+Rules:
+- Use full-width sections or clean constrained layouts.
+- Use cards for repeated items, modals, and framed tools only.
+- Do not nest cards inside cards.
+- Keep cards at 8px radius or less unless an existing component pattern requires otherwise.
+- Stabilize fixed-format UI with clear dimensions, aspect ratios, grid tracks, or min/max constraints.
+- Avoid empty route banners, oversized placeholders, and template-like hero blocks.
+
+### Imagery
+Rules:
+- Product and material pages should reveal the actual object or material.
+- Project pages should show real context before abstract detail.
+- Finish imagery should be large enough to compare texture.
+- Missing images should degrade quietly with an explicit material-placeholder state.
+- Do not let overlays, captions, or labels block the texture being inspected.
+
+## Page Archetypes
+
+### Home
+The homepage should introduce Urblo as a design-led, engineering-backed stone solution partner.
+
+Priorities:
+- clear proposition
+- proof of capability
+- visible project/material pathways
+- sustainability and pre-assembly framed with evidence
+- low-friction next steps
+
+Avoid making it feel like a generic landing page with decorative cards and abstract claims.
+
+### Stone Library
+Stone Library is an inspection and specification aid, not a product marketing grid.
+
+Priorities:
+- texture visibility
+- finish comparison
+- compact filters
+- fast scan of type, tone, origin, status, and price tier
+- specs close to imagery
+- direct path to sample/contact behavior
+
+Interaction rules:
+- Click or explicit controls should change material state. Hover may preview only when it does not create ambiguity.
+- Active finish state must remain stable across left and right controls.
+- Mobile layout must prioritize readable finish names and image inspection over decorative layout.
+- Placeholder usage must be visible enough to be honest but quiet enough not to dominate the tool.
+
+### Projects
+Projects are proof assets.
+
+Each project should answer:
+- Why was stone selected?
+- What design or delivery problem did Urblo solve?
+- What stone, finish, quantity, year, designer, and contractor were involved?
+- What result can another project team trust?
+
+Avoid purely visual gallery behavior without project facts.
+
+### Our Story
+Our Story should feel human, disciplined, and credible. It should support trust in Natalie, Cameron, SAI Stone, and the Urblo model without becoming a founder vanity page.
+
+Use portrait/team content only when it strengthens credibility. Keep team UI stable and proportionate when the team count changes.
+
+### Contact
+Contact should be direct and low-friction.
+
+Because the current app has no backend, avoid fake submission expectations. A local project-brief composer that opens a prefilled email draft is acceptable when clearly supported by direct email, phone, and address pathways.
+
+The page should help users choose a next step:
+- request samples
+- discuss a custom detail
+- talk through an early-stage project
+- explore Stone Library first
+
+### Articles and Q&A
+Trust-building pages should not feel like generic help-center content.
+
+They should:
+- answer real project uncertainty
+- group content by audience or decision type
+- put short useful answers first
+- expand into proof and constraints
+- avoid turning one-off email facts into universal company claims
+
+## Component Rules
+
+### Buttons and CTAs
+- Primary CTAs should be plain, decisive, and easy to locate.
+- Use icons where they clarify the action.
+- Do not overuse boxed text buttons for simple tool controls when icons or segmented controls are clearer.
+- Disabled or placeholder CTAs must be visibly intentional.
+
+### Filters and Controls
+- Filters should be compact, predictable, and close to the content they affect.
+- Use segmented controls, select menus, toggles, checkboxes, sliders, and steppers according to the actual input type.
+- Avoid decorative controls that look interactive but do not change state.
+
+### Motion
+- Motion should communicate state, focus, or transition.
+- Avoid motion that delays inspection of material or reading of specs.
+- Scroll/centering behavior must not fight user intent.
+
+### Mobile
+Mobile is not a squeezed desktop page.
+
+Rules:
+- No horizontal overflow.
+- Toolbars and filters must wrap cleanly.
+- Long labels must not overflow buttons or cards.
+- Image inspection must remain possible without huge empty vertical gaps.
+- Text contrast must remain strong on all backgrounds.
+
+## Copy and Claim Rules in UI
+
+Use confident headlines, but grounded bodies.
+
+Good pattern:
+- headline: outcome or belief
+- body: method and constraint
+- proof: project, metric, photo, or process
+- CTA: low-friction next action
+
+Avoid:
+- absolute guarantees without verified scope
+- luxury-only language
+- vague sustainability badges
+- "premium" as a substitute for proof
+- over-promising factory control when source ownership is limited
+
+When unsure, write the condition instead of smoothing it away.
+
+## Design QA Checklist
+Before shipping a user-facing page or component, check:
+- Does it make a project decision easier?
+- Does it pair beauty with buildability?
+- Does imagery reveal context, use, or texture?
+- Are typography scale and spacing appropriate for the page type?
+- Is Stone Library/tool UI compact enough for repeated use?
+- Are claims condition-safe and aligned with brand baseline?
+- Are CTAs real, route-safe, and low-friction?
+- Does mobile avoid overflow, text collision, and unusable controls?
+- Is the page recognizably Urblo rather than a generic template?
+
+## Open Design Debt
+- Final parity for Home, Our Story, Articles, and Contact still depends on approved Figma/WordPress references.
+- Stone Library finish image coverage and secondary frame behavior remain active design/data work.
+- Future sample ordering needs a real form/backend decision before UI can imply submission.
+- The website still needs a clearer long-term content system for Project Spotlight, Material Mastery, Behind the Scenes, and Concrete vs Stone themes.

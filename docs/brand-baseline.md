@@ -2,7 +2,7 @@
 
 **Date / 日期:** 2026-02-04  
 **Audience / 适用对象:** UI/UX designer, content designer, brand designer, sales enablement  
-**How to use / 使用方式:** Treat this file as the “decision rubric” for what to write, design, and build. When you face a trade-off, follow the rules here before personal taste.  
+**How to use / 使用方式:** Treat this file as the “decision rubric” for positioning, messaging, audience framing, claims, and brand intent. Use `docs/DESIGN.md` for implementation-level visual and UX decisions. When you face a trade-off, follow the rules here before personal taste.
 > 中文：把这份文件当成“决策尺子”。遇到取舍时，先按这里的规则判断，再谈审美偏好。
 
 **Language rule / 语言规则:** English is the source of truth; Chinese is provided for readability.  
@@ -11,15 +11,12 @@
 ## Sources / 信息来源
 
 **Primary sources**
-- Website snapshot: `Home - Urblo.html` + `Home - Urblo_files/` (CSS tokens, typography, key messaging)
-- Deck: `Urblo x Bldg.Eng.pdf` (JAN 2026)
-- Intro brochure: `docs/urblo/Urblo_Intro.pdf` (18 pages; Concrete vs Stone, capabilities, client messaging, metrics)
-- Sales/brand notes: `docs/urblo/workflowy.md` (Website 2.0 direction, segmentation, constraints)
-- Writing samples: `docs/urblo/newsletters.md`, `docs/urblo/emails.md` (voice & structure)
+- External archival sources used when this baseline was authored: offline website snapshot, Urblo x Bldg.Eng deck, Urblo intro brochure, sales/brand notes, newsletters, and sales emails.
+- Current repo companion: `docs/DESIGN.md` translates this brand baseline into implementation-level visual and UX rules.
 
 **Limitations**
-- Live browsing is restricted in this environment; some website pages could not be fetched directly. This baseline is built from the provided offline snapshot and PDFs.
-> 中文：当前环境无法直接联网抓取所有页面；本基准基于你提供的离线快照与 PDF 材料整理。
+- This baseline was originally built from the provided offline snapshot, PDFs, and local source materials. Verify current external facts before updating live claims.
+> 中文：本基准最初基于离线快照、PDF 与本地材料整理；涉及外部事实或实时官网信息时，应在更新前重新核验。
 
 ## Table of contents / 目录
 - 1) Brand North Star / 品牌北极星

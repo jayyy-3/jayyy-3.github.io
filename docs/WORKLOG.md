@@ -1,6 +1,42 @@
 # WORKLOG - Urblo Execution Log
 
-Last updated: 2026-05-08
+Last updated: 2026-05-15
+
+## Entry - 2026-05-15 (AI Harness Root Entry + Design Contract)
+
+### Scope
+- Promoted the agent harness entry from `docs/README_AGENT.md` to root-level `AGENTS.md` so Codex has a clear project entry point.
+- Added `docs/DESIGN.md` as the canonical design contract for visual rhythm, UX tone, page archetypes, Stone Library behavior, imagery, copy claim posture, and design QA.
+- Updated brand/architecture/backlog docs to separate brand authority from design execution authority.
+- Refreshed stale harness wording around quality gate measurement and the old live-browsing limitation note.
+- Converted committed docs to repo-root relative paths and added a rule to keep local absolute paths out of repo docs.
+- Rephrased archived source references in `docs/brand-baseline.md` and `docs/DESIGN.md` so external materials are not presented as repo files.
+- Added Phase 1 harness artifacts: `docs/HANDOFF.md`, `docs/agent/tasks.json`, `docs/agent/verification.md`, `scripts/check-doc-paths.mjs`, and `scripts/check-harness.mjs`.
+- Slimmed `docs/NEXT_STEPS.md` into a human-readable roadmap backed by the machine-readable task queue.
+
+### Changed Files
+- `AGENTS.md`
+- `package.json`
+- `docs/README_AGENT.md` (retired)
+- `docs/HANDOFF.md`
+- `docs/DESIGN.md`
+- `docs/brand-baseline.md`
+- `docs/ARCHITECTURE.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `docs/agent/verification.md`
+- `scripts/check-doc-paths.mjs`
+- `scripts/check-harness.mjs`
+
+### Verification Results
+- Documentation-only change; runtime gates were not rerun.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- `DESIGN.md` is a first canonical pass and should evolve after final Figma/WordPress parity decisions.
+- Runtime quality gates remain last measured on 2026-05-08.
 
 ## Entry - 2026-05-08 (Stone Library Visual Density Polish)
 
@@ -12,17 +48,17 @@ Last updated: 2026-05-08
 - Kept route behavior, filtering behavior, finish selection, centering, and lightbox behavior unchanged.
 
 ### Changed Files
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/App.tsx`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/StoneLibraryPage.tsx`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/StoneLibraryDetailPage.tsx`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/FilterBar.tsx`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/StoneCard.tsx`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/ImageStage.tsx`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/FinishAccordion.tsx`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/SpecsPanel.tsx`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/service/StoneLibraryService.ts`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/NEXT_STEPS.md`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/WORKLOG.md`
+- `src/App.tsx`
+- `src/pages/StoneLibraryPage.tsx`
+- `src/pages/StoneLibraryDetailPage.tsx`
+- `src/components/stone-library/FilterBar.tsx`
+- `src/components/stone-library/StoneCard.tsx`
+- `src/components/stone-library/ImageStage.tsx`
+- `src/components/stone-library/FinishAccordion.tsx`
+- `src/components/stone-library/SpecsPanel.tsx`
+- `src/service/StoneLibraryService.ts`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
 
 ### Verification Results
 - `npm run build`: pass (chunk size warning `>500kB` unchanged; Browserslist data staleness notice shown)
@@ -43,7 +79,6 @@ Last updated: 2026-05-08
 - `NOW-STONELIB-IMG-FASTTRACK-001`
 - `NOW-DELIVERY-READINESS-001`
 - `NOW-ASSET-STRATEGY-001`
-- `NOW-DOCS-002`
 - `NOW-DEPLOY-PAGES-HARDEN-001`
 - `NEXT-STONELIB-IMG-001`
 - `NEXT-STONELIB-IMG-002`
@@ -58,15 +93,15 @@ Last updated: 2026-05-08
 - Updated active harness docs to remove stale footer route mismatch claims and old component references in the backlog.
 
 ### Changed Files
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/App.tsx`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/ContactPage.tsx`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/OurStory.tsx`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/data/siteChrome.ts`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/site/SiteFooter.tsx`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/README_AGENT.md`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/ARCHITECTURE.md`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/NEXT_STEPS.md`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/WORKLOG.md`
+- `src/App.tsx`
+- `src/pages/ContactPage.tsx`
+- `src/pages/OurStory.tsx`
+- `src/data/siteChrome.ts`
+- `src/components/site/SiteFooter.tsx`
+- `docs/README_AGENT.md`
+- `docs/ARCHITECTURE.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
 
 ### Verification Results
 - `npm run build`: pass (chunk size warning `>500kB` unchanged; Browserslist data staleness notice shown)
@@ -86,7 +121,6 @@ Last updated: 2026-05-08
 - `NOW-STONELIB-IMG-FASTTRACK-001`
 - `NOW-DELIVERY-READINESS-001`
 - `NOW-ASSET-STRATEGY-001`
-- `NOW-DOCS-002`
 - `NOW-DEPLOY-PAGES-HARDEN-001`
 - `NEXT-UI-PARITY-001`
 - `NEXT-SAMPLE-REQUEST-001`
@@ -105,7 +139,7 @@ Last updated: 2026-05-08
   - manifesto
   - video CTA
 - Added a homepage-only layout so the new Figma-style header/footer does not change non-home routes.
-- Localized homepage fonts into `/Users/lee/Documents/SAI/urblo/urblo-react/public/fonts/urblo`:
+- Localized homepage fonts into `public/fonts/urblo`:
   - `Avenir LT Std`
   - `Didot LT Std`
   - `Space Grotesk`
@@ -113,17 +147,17 @@ Last updated: 2026-05-08
 - Kept homepage images/video remote for this phase; only fonts were moved on-platform.
 
 ### Changed Files
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/App.tsx`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/Home.tsx`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/index.css`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/layouts/HomepageLayout.tsx`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/homepage/HomepageHeader.tsx`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/homepage/HomepageFooter.tsx`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/homepage/HomepageSections.tsx`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/data/homepage.ts`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/public/fonts/urblo/*`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/ARCHITECTURE.md`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/WORKLOG.md`
+- `src/App.tsx`
+- `src/pages/Home.tsx`
+- `src/index.css`
+- `src/layouts/HomepageLayout.tsx`
+- `src/components/homepage/HomepageHeader.tsx`
+- `src/components/homepage/HomepageFooter.tsx`
+- `src/components/homepage/HomepageSections.tsx`
+- `src/data/homepage.ts`
+- `public/fonts/urblo/*`
+- `docs/ARCHITECTURE.md`
+- `docs/WORKLOG.md`
 
 ### Verification Results
 - `npm run build`: pass
@@ -139,11 +173,11 @@ Last updated: 2026-05-08
 
 ### Scope
 - Full rewrite of active execution docs to code-truth baseline:
-  - `/Users/lee/Documents/SAI/urblo/urblo-react/docs/README_AGENT.md`
-  - `/Users/lee/Documents/SAI/urblo/urblo-react/docs/ARCHITECTURE.md`
-  - `/Users/lee/Documents/SAI/urblo/urblo-react/docs/NEXT_STEPS.md`
-  - `/Users/lee/Documents/SAI/urblo/urblo-react/docs/WORKLOG.md`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/brand-baseline.md` kept read-only.
+  - `docs/README_AGENT.md`
+  - `docs/ARCHITECTURE.md`
+  - `docs/NEXT_STEPS.md`
+  - `docs/WORKLOG.md`
+- `docs/brand-baseline.md` kept read-only.
 
 ### Rationale
 - Active docs contained legacy project assumptions and outdated technical contracts.
@@ -153,7 +187,7 @@ Last updated: 2026-05-08
 - `npm run build`: pass
 - `npm run lint`: fail
   - 3 errors from linting generated file under `.vite/deps/react-router-dom.js`
-  - 1 warning in `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/ProductDetailPage.tsx`
+  - 1 warning in `src/pages/ProductDetailPage.tsx`
 - `npx tsc -b`: pass
 
 ### Key Risks at Handoff
@@ -181,29 +215,29 @@ Last updated: 2026-05-08
 - Updated docs to match post-refactor route/data contracts and quality gate reality.
 
 ### Changed Files (This Session)
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/App.tsx`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/Header.tsx`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/StoneLibraryPage.tsx`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/StoneLibraryDetailPage.tsx`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/FilterBar.tsx`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/StoneCard.tsx`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/VariantSwitch.tsx`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/ImageStage.tsx`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/FinishAccordion.tsx`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/SpecsPanel.tsx`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/types/stone-library.ts`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/service/StoneLibraryService.ts`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/data/finishBehaviorMeta.ts`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/data/stoneFinishImages.ts`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/ProductDetailPage.tsx`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/data/productData.ts`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/types/product.ts`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/tsconfig.app.json`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/eslint.config.js`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/README_AGENT.md`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/ARCHITECTURE.md`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/NEXT_STEPS.md`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/WORKLOG.md`
+- `src/App.tsx`
+- `src/components/Header.tsx`
+- `src/pages/StoneLibraryPage.tsx`
+- `src/pages/StoneLibraryDetailPage.tsx`
+- `src/components/stone-library/FilterBar.tsx`
+- `src/components/stone-library/StoneCard.tsx`
+- `src/components/stone-library/VariantSwitch.tsx`
+- `src/components/stone-library/ImageStage.tsx`
+- `src/components/stone-library/FinishAccordion.tsx`
+- `src/components/stone-library/SpecsPanel.tsx`
+- `src/types/stone-library.ts`
+- `src/service/StoneLibraryService.ts`
+- `src/data/finishBehaviorMeta.ts`
+- `src/data/stoneFinishImages.ts`
+- `src/pages/ProductDetailPage.tsx`
+- `src/data/productData.ts`
+- `src/types/product.ts`
+- `tsconfig.app.json`
+- `eslint.config.js`
+- `docs/README_AGENT.md`
+- `docs/ARCHITECTURE.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
 
 ### Verification Results
 - `npm run build`: pass
@@ -218,7 +252,6 @@ Last updated: 2026-05-08
 
 ### Next Handoff
 - `NOW-ROUTE-002`
-- `NOW-DOCS-002`
 - `NEXT-STONELIB-IMG-001`
 - `NEXT-STONELIB-DATA-001`
 
@@ -234,14 +267,14 @@ Last updated: 2026-05-08
 - Deferred dual-side accordion and price-tier visualization to documented backlog with explicit acceptance criteria.
 
 ### Changed Files
-- `/Users/lee/Documents/SAI/urblo/urblo-react/data/clean/stone_library.json`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/data/clean/stone_variants.csv`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/service/StoneLibraryService.ts`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/ProductDetailPage.tsx`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/types/product.ts`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/data/productData.ts`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/NEXT_STEPS.md`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/WORKLOG.md`
+- `data/clean/stone_library.json`
+- `data/clean/stone_variants.csv`
+- `src/service/StoneLibraryService.ts`
+- `src/pages/ProductDetailPage.tsx`
+- `src/types/product.ts`
+- `src/data/productData.ts`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
 
 ### Verification Results
 - `npm run build`: pass
@@ -272,13 +305,13 @@ Last updated: 2026-05-08
 - Updated architecture/backlog docs to reflect new runtime interaction contract and completed UX task.
 
 ### Changed Files
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/ImageStage.tsx`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/FinishAccordion.tsx`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/FinishLightbox.tsx`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/StoneLibraryDetailPage.tsx`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/ARCHITECTURE.md`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/NEXT_STEPS.md`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/WORKLOG.md`
+- `src/components/stone-library/ImageStage.tsx`
+- `src/components/stone-library/FinishAccordion.tsx`
+- `src/components/stone-library/FinishLightbox.tsx`
+- `src/pages/StoneLibraryDetailPage.tsx`
+- `docs/ARCHITECTURE.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
 
 ### Verification Results
 - `npm run build`: pass
@@ -303,11 +336,11 @@ Last updated: 2026-05-08
 - Updated architecture and backlog docs to match the new interaction contract.
 
 ### Changed Files
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/StoneLibraryDetailPage.tsx`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/ImageStage.tsx`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/ARCHITECTURE.md`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/NEXT_STEPS.md`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/WORKLOG.md`
+- `src/pages/StoneLibraryDetailPage.tsx`
+- `src/components/stone-library/ImageStage.tsx`
+- `docs/ARCHITECTURE.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
 
 ### Verification Results
 - `npm run build`: pass (chunk size warning `>500kB` unchanged; Browserslist data staleness notice shown)
@@ -332,9 +365,9 @@ Last updated: 2026-05-08
 - Updated architecture contract wording to match the new “visible then no-move” rule.
 
 ### Changed Files
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/ImageStage.tsx`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/ARCHITECTURE.md`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/WORKLOG.md`
+- `src/components/stone-library/ImageStage.tsx`
+- `docs/ARCHITECTURE.md`
+- `docs/WORKLOG.md`
 
 ### Verification Results
 - `npm run build`: pass (chunk size warning `>500kB` unchanged; Browserslist data staleness notice shown)
@@ -359,10 +392,10 @@ Last updated: 2026-05-08
 - Updated architecture/backlog docs to reflect this interaction contract.
 
 ### Changed Files
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/ImageStage.tsx`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/ARCHITECTURE.md`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/NEXT_STEPS.md`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/WORKLOG.md`
+- `src/components/stone-library/ImageStage.tsx`
+- `docs/ARCHITECTURE.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
 
 ### Verification Results
 - `npm run build`: pass (chunk size warning `>500kB` unchanged; Browserslist data staleness notice shown)
@@ -386,8 +419,8 @@ Last updated: 2026-05-08
 - Added fill-width state change guard to avoid redundant updates when measured width drift is negligible.
 
 ### Changed Files
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/ImageStage.tsx`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/WORKLOG.md`
+- `src/components/stone-library/ImageStage.tsx`
+- `docs/WORKLOG.md`
 
 ### Verification Results
 - `npm run build`: pass (chunk size warning `>500kB` unchanged; Browserslist data staleness notice shown)
@@ -411,10 +444,10 @@ Last updated: 2026-05-08
 - Added strict-mode guard using center token tracking to prevent duplicate scroll decisions from effect double-invocation.
 
 ### Changed Files
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/ImageStage.tsx`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/ARCHITECTURE.md`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/NEXT_STEPS.md`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/WORKLOG.md`
+- `src/components/stone-library/ImageStage.tsx`
+- `docs/ARCHITECTURE.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
 
 ### Verification Results
 - `npm run build`: pass (chunk size warning `>500kB` unchanged; Browserslist data staleness notice shown)
@@ -440,15 +473,15 @@ Last updated: 2026-05-08
 - Updated architecture and execution docs to keep runtime contracts synchronized.
 
 ### Changed Files
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/WelcomePopup.tsx`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/types/stone-library.ts`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/service/StoneLibraryService.ts`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/components/stone-library/SpecsPanel.tsx`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/src/pages/StoneLibraryDetailPage.tsx`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/README_AGENT.md`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/ARCHITECTURE.md`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/NEXT_STEPS.md`
-- `/Users/lee/Documents/SAI/urblo/urblo-react/docs/WORKLOG.md`
+- `src/components/WelcomePopup.tsx`
+- `src/types/stone-library.ts`
+- `src/service/StoneLibraryService.ts`
+- `src/components/stone-library/SpecsPanel.tsx`
+- `src/pages/StoneLibraryDetailPage.tsx`
+- `docs/README_AGENT.md`
+- `docs/ARCHITECTURE.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
 
 ### Verification Results
 - `npm run build`: pass (chunk size warning `>500kB` unchanged; Browserslist data staleness notice shown)
@@ -465,7 +498,6 @@ Last updated: 2026-05-08
 - `NOW-DELIVERY-READINESS-001`
 - `NOW-ASSET-STRATEGY-001`
 - `NOW-ROUTE-002`
-- `NOW-DOCS-002`
 - `NEXT-UI-PARITY-001`
 - `NEXT-SAMPLE-REQUEST-001`
 - `NEXT-STONELIB-IMG-001`
