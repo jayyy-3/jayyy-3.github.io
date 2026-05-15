@@ -21,7 +21,7 @@ Docs-only and harness-only work should run:
 - `git diff --check`
 
 ## Last Runtime Baseline
-Measured 2026-05-08:
+Measured 2026-05-15:
 - `npm run build`: pass
 - `npm run lint`: pass
 - `npx tsc -b`: pass
@@ -47,7 +47,7 @@ Source of truth: `docs/agent/tasks.json`.
 - `NEXT-STONELIB-IMG-001`: complete Stone Library HD finish image coverage.
 - `NEXT-STONELIB-IMG-002`: decide and implement secondary finish frame behavior.
 - `NEXT-STONELIB-DATA-001`: replace generic finish behavior text with approved notes.
-- `NEXT-DATA-001`: unify project list/detail data.
+- `NEXT-PROJECTS-INTAKE-001`: define the project intake template and migrate the next project into the material-map case study model.
 - `NEXT-ROUTER-SEO-001`: decide GitHub Pages routing and SEO tradeoff.
 
 ## Later
@@ -59,6 +59,7 @@ Source of truth: `docs/agent/tasks.json`.
 - `DONE-DOCS-HARNESS-ROOT-001`: promoted `docs/README_AGENT.md` to root `AGENTS.md`, added `docs/DESIGN.md`, moved repo docs to relative paths, and separated brand authority from design execution authority.
 - Phase 1 harness hygiene committed: `docs/HANDOFF.md`, `docs/agent/tasks.json`, `docs/agent/verification.md`, `scripts/check-doc-paths.mjs`, and `scripts/check-harness.mjs`.
 - Phase 2 verification harness completed: `scripts/agent-init.sh`, `scripts/agent-smoke.sh`, and package-level `agent:*` scripts.
+- `NEXT-DATA-001`: project list/detail metadata now comes from `src/data/projectData.ts`; Moon Gate is the first material-map case study.
 
 Older completion details live in `docs/WORKLOG.md`.
 

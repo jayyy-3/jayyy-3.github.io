@@ -115,7 +115,7 @@ export default function App() {
                     <Route
                         path="/projects/:slug"
                         element={
-                            <DefaultLayout bgImage="https://urblo.com.au/wp-content/uploads/2024/12/bg-project-details.jpg">
+                            <DefaultLayout showBanner={false}>
                                 <ProjectDetailsPage />
                             </DefaultLayout>
                         }

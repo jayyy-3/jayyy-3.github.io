@@ -2,6 +2,55 @@
 
 Last updated: 2026-05-15
 
+## Entry - 2026-05-15 (Moon Gate Project Material Map MVP)
+
+### Scope
+- Built `Moon Gate | Woolley Street` as the first designer-facing project case study and Project Material Map MVP.
+- Copied supplied Moon Garden imagery into controlled deployment assets under `public/images/projects/moon-gate`.
+- Unified project listing/detail metadata through `src/data/projectData.ts` and closed the previous project data drift task.
+- Added reusable hotspot interaction through `src/components/projects/ProjectMaterialMap.tsx`.
+- Rebuilt project detail layout around a page-owned hero, project facts, design narrative, material map, Urblo scope, featured materials, gallery, and CTA.
+- Linked Moon Gate featured materials to Stone Library entries for Angola Black and New Grey.
+- Updated architecture/design/handoff/task docs for the new project data and interaction contract.
+
+### Changed Files
+- `.gitignore`
+- `src/App.tsx`
+- `src/components/projects/ProjectMaterialMap.tsx`
+- `src/data/projectData.ts`
+- `src/layouts/DefaultLayout.tsx`
+- `src/pages/ProjectDetails.tsx`
+- `src/pages/Projects.tsx`
+- `public/images/projects/moon-gate/*`
+- `docs/ARCHITECTURE.md`
+- `docs/DESIGN.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run build`: pass (existing bundle size warning and Browserslist staleness notice remain).
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- Playwright CLI visual QA: desktop and mobile Moon Gate detail page checked; hotspot hover/tap changed active cards.
+- `npm run agent:check`: pass.
+- `npm run agent:smoke`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- Moon Gate scope/design copy is MVP-inferred from supplied imagery, confirmed finish notes, and public project context; designer confirmation is still needed before treating it as final project truth.
+- New Grey finish is recorded as Flamed per user confirmation; Angola Black remains Polished.
+- Quantity is presented as `5 bespoke stone elements` based on the previous `5 Units` field and should be confirmed later.
+- Other projects still use legacy-level project detail content until migrated into the material-map model.
+- React Helmet still emits an existing dev strict-mode lifecycle warning.
+- Bundle size warning (`>500kB`) remains out of scope.
+
+### Next Handoff
+- `NEXT-PROJECTS-INTAKE-001`
+- `NOW-STONELIB-IMG-FASTTRACK-001`
+- `NOW-DELIVERY-READINESS-001`
+
 ## Entry - 2026-05-15 (Agent Init and Static Smoke Harness)
 
 ### Scope
@@ -546,7 +595,7 @@ Last updated: 2026-05-15
 - Why it changed.
 
 ### Changed Files
-- Absolute file path list only.
+- Repo-root relative file path list only.
 
 ### Verification Results
 - `npm run build`: pass/fail (+ key notes)

@@ -58,7 +58,7 @@ Last updated: 2026-05-15
 | `/products` | `ProductsPage` | Bench/system product listing. |
 | `/products/:slug` | `ProductDetailPage` | Product detail and material options. |
 | `/projects` | `Projects` | Project listing page. |
-| `/projects/:slug` | `ProjectDetails` | Project detail page. |
+| `/projects/:slug` | `ProjectDetails` | Project detail page. Uses page-owned project hero via `DefaultLayout showBanner={false}`. |
 | `/our-story` | `OurStory` | About page. |
 | `/contact` | `ContactPage` | Contact surface with direct contact channels and a local mailto project-brief composer. |
 | `/articles` | `ArticlesPage` | Article list page. |
@@ -132,9 +132,23 @@ Last updated: 2026-05-15
   - `ProductDetailPage` material options now come from `StoneLibraryService.getStoneOptionsForProducts()`.
 
 ### Project Data Contract
-- Listing source in page module: `src/pages/Projects.tsx`
-- Detail source in data module: `src/data/projectData.ts`
-- Current contract risk: list and detail data are split across two sources and can drift.
+- Source of project listing and detail records: `src/data/projectData.ts`
+- Listing page: `src/pages/Projects.tsx`
+  - Reads `projectListingMeta` from the shared data module.
+- Detail page: `src/pages/ProjectDetails.tsx`
+  - Reads the same `projects` array and renders richer optional case-study fields when present.
+  - Falls back to image/detail rendering for projects that have not been migrated into the richer model.
+- Project material map component: `src/components/projects/ProjectMaterialMap.tsx`
+  - Desktop interaction: hover/focus/click can change the active hotspot detail.
+  - Mobile interaction: tap/focus changes the active hotspot; no hover-only dependency.
+  - Hotspot coordinates are stored as image-percentage positions in `src/data/projectData.ts`.
+- Moon Gate MVP assets:
+  - Local deployment assets live under `public/images/projects/moon-gate`.
+  - `Moon Gate | Woolley Street` is the first project using `hero`, `lead`, `projectStory`, `scopeItems`, `materialMap`, `materials`, `gallery`, and `cta` fields.
+  - Featured material links point to `/stone-library/angola-black` and `/stone-library/new-grey`.
+- Current contract risk:
+  - Moon Gate includes MVP-inferred scope/design copy that should be confirmed with the designer before final public launch.
+  - Other projects still use the legacy-level data shape and should be migrated one by one.
 
 ### Article Data Contract
 - Public data root: `public/articles`
@@ -188,7 +202,7 @@ Last updated: 2026-05-15
   - `Space Grotesk` local WOFF2
 - Homepage runtime no longer depends on remote WordPress font CSS/TTF/WOFF assets.
 
-## Last Runtime Quality Gate Status (Measured 2026-05-08)
+## Last Runtime Quality Gate Status (Measured 2026-05-15)
 - `npm run build`: pass
 - `npm run lint`: pass
 - `npx tsc -b`: pass

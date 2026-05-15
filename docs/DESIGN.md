@@ -159,6 +159,15 @@ Each project should answer:
 
 Avoid purely visual gallery behavior without project facts.
 
+Project Material Map pattern:
+- Use real project photography as an inspection surface, not a decorative gimmick.
+- Hotspots should explain material, finish, detail, experience, or scope decisions.
+- Desktop may use hover as preview, but click/focus must also work.
+- Mobile must use tap/focus behavior and avoid hover-only information.
+- Keep marker count low enough for the image to remain inspectable.
+- Hotspot cards should name stone, finish, application, design rationale, and next action when useful.
+- Separate confirmed project facts from MVP-inferred narrative until the designer/project team confirms the content.
+
 ### Our Story
 Our Story should feel human, disciplined, and credible. It should support trust in Natalie, Cameron, SAI Stone, and the Urblo model without becoming a founder vanity page.
 
