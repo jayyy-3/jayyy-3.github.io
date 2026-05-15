@@ -15,7 +15,6 @@ const docRoots = ['docs']
 const allowedMissing = new Set([
   'docs/README_AGENT.md',
   'public/404.html',
-  'scripts/agent-smoke.sh',
 ])
 const pathPrefixes = [
   '.github/',

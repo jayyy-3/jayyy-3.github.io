@@ -2,6 +2,37 @@
 
 Last updated: 2026-05-15
 
+## Entry - 2026-05-15 (Agent Init and Static Smoke Harness)
+
+### Scope
+- Added `scripts/agent-init.sh` and package script `npm run agent:init` for quick repo/status/read-order briefing.
+- Added `scripts/agent-smoke.sh` and package script `npm run agent:smoke` for lightweight Vite preview smoke checks across key hash routes and `public/articles/index.json`.
+- Updated `AGENTS.md`, `docs/HANDOFF.md`, `docs/ARCHITECTURE.md`, `docs/NEXT_STEPS.md`, and `docs/agent/verification.md` to include the new Phase 2 commands.
+- Removed the temporary missing-file allowance for `scripts/agent-smoke.sh` now that the script exists.
+
+### Changed Files
+- `AGENTS.md`
+- `package.json`
+- `docs/HANDOFF.md`
+- `docs/ARCHITECTURE.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/verification.md`
+- `scripts/agent-init.sh`
+- `scripts/agent-smoke.sh`
+- `scripts/check-doc-paths.mjs`
+- `scripts/check-harness.mjs`
+
+### Verification Results
+- `npm run agent:check`: pass.
+- `npm run agent:init`: pass.
+- `npm run agent:smoke`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- `agent:smoke` is a static shell smoke using Vite preview; it does not replace future browser-rendered visual or interaction checks.
+- Runtime application gates remain last measured on 2026-05-08 unless a runtime task reruns them.
+
 ## Entry - 2026-05-15 (AI Harness Root Entry + Design Contract)
 
 ### Scope

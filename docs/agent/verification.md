@@ -5,6 +5,14 @@ Last updated: 2026-05-15
 ## Purpose
 Use this matrix to choose the smallest verification set that proves a change is safe. Runtime changes still need the full build/lint/typecheck gate unless a task explicitly defines a temporary exception.
 
+## Startup Check
+Use when resuming work or handing off between agents.
+
+Run:
+- `npm run agent:init`
+
+This command is informational and does not replace verification gates.
+
 ## Verification Profiles
 
 ### Docs-Only

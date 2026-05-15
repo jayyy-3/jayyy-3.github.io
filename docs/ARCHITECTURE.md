@@ -40,6 +40,13 @@ Last updated: 2026-05-15
   - `npm run agent:check` => `node scripts/check-harness.mjs`
   - `scripts/check-harness.mjs` verifies required harness files and delegates doc path/task checks.
   - `scripts/check-doc-paths.mjs` rejects machine-specific paths and validates repo-relative path references in docs/task state.
+- Agent startup:
+  - `npm run agent:init` => `bash scripts/agent-init.sh`
+  - Prints repo path, git status, recent commits, runtime versions, read order, and common commands.
+- Static smoke:
+  - `npm run agent:smoke` => `bash scripts/agent-smoke.sh`
+  - Serves `dist/` with Vite preview and checks the React shell for key hash routes plus `public/articles/index.json`.
+  - Builds first only when `dist/` is missing; runtime tasks should still run `npm run build` before smoke.
 
 ## Route Interface Contract (`src/App.tsx`)
 

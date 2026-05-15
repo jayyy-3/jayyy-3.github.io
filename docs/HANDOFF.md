@@ -3,9 +3,9 @@
 Last updated: 2026-05-15
 
 ## Current Focus
-Implement the Codex-first AI harness upgrade in two checkpoints:
-- Phase 1: repo-local harness hygiene, machine-readable task state, docs checks, and slim roadmap.
-- Phase 2: agent init/smoke scripts and package-level verification commands.
+Codex-first AI harness upgrade is being implemented in two checkpoints:
+- Phase 1 committed: repo-local harness hygiene, machine-readable task state, docs checks, and slim roadmap.
+- Phase 2 completed: agent init/smoke scripts and package-level verification commands.
 
 ## Current Branch State
 - Branch: `main`
@@ -23,6 +23,11 @@ Implement the Codex-first AI harness upgrade in two checkpoints:
 - Historical evidence: `docs/WORKLOG.md`
 
 ## Latest Verification Snapshot
+- `npm run agent:check`: passed after Phase 1.
+- `npm run agent:init`: pass.
+- `npm run agent:smoke`: pass.
+- `git diff --check`: pass.
+- `npm run agent:check`: pass.
 - Last full runtime gates remain measured on 2026-05-08: `npm run build`, `npm run lint`, and `npx tsc -b` passed.
 - Current harness work uses docs/tooling checks first; runtime gates should be rerun when application code changes.
 
@@ -34,7 +39,7 @@ Implement the Codex-first AI harness upgrade in two checkpoints:
 - Bundle size warning (`>500kB`) remains open.
 
 ## Next Recommended Action
-Complete Phase 1, commit it, then implement Phase 2 scripts and commit again.
+Start the first active product task from `docs/agent/tasks.json`, likely `NOW-STONELIB-IMG-FASTTRACK-001`, unless delivery-readiness or deployment hardening is more urgent.
 
 ## Guardrails
 - Use repo-root relative paths in committed docs.

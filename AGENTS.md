@@ -10,23 +10,25 @@ The harness has two separate creative authorities:
 - Visual design, UX rhythm, page composition, interaction tone, and UI quality live in `docs/DESIGN.md`.
 
 ## Startup Checklist
-1. Read this file first: `AGENTS.md`.
-2. Read current handoff: `docs/HANDOFF.md`.
-3. Read machine task queue: `docs/agent/tasks.json`.
-4. Read verification matrix: `docs/agent/verification.md`.
-5. Read brand rubric: `docs/brand-baseline.md`.
-6. Read design contract: `docs/DESIGN.md`.
-7. Read technical facts and contracts: `docs/ARCHITECTURE.md`.
-8. Read human roadmap: `docs/NEXT_STEPS.md`.
-9. Read latest session evidence when needed: `docs/WORKLOG.md`.
-10. For docs/harness changes, run:
+1. Run `npm run agent:init` when you need a quick repo/status briefing.
+2. Read this file first: `AGENTS.md`.
+3. Read current handoff: `docs/HANDOFF.md`.
+4. Read machine task queue: `docs/agent/tasks.json`.
+5. Read verification matrix: `docs/agent/verification.md`.
+6. Read brand rubric: `docs/brand-baseline.md`.
+7. Read design contract: `docs/DESIGN.md`.
+8. Read technical facts and contracts: `docs/ARCHITECTURE.md`.
+9. Read human roadmap: `docs/NEXT_STEPS.md`.
+10. Read latest session evidence when needed: `docs/WORKLOG.md`.
+11. For docs/harness changes, run:
    - `npm run agent:check`
    - `git diff --check`
-11. For runtime changes, run quality gates from repo root in this order:
+12. For runtime changes, run quality gates from repo root in this order:
    - `npm run build`
    - `npm run lint`
    - `npx tsc -b`
-12. Treat any runtime gate failure as blocking unless `docs/agent/tasks.json` explicitly defines a temporary exception.
+   - `npm run agent:smoke`
+13. Treat any runtime gate failure as blocking unless `docs/agent/tasks.json` explicitly defines a temporary exception.
 
 ## Canonical Conflict Precedence
 - Code reality wins over stale docs. If docs conflict with implemented behavior, verify code reality, update docs, then add remediation tasks if the behavior itself is wrong.
