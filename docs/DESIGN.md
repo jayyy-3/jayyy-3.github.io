@@ -161,12 +161,16 @@ Avoid purely visual gallery behavior without project facts.
 
 Project Material Map pattern:
 - Use real project photography as an inspection surface, not a decorative gimmick.
-- Hotspots should explain material, finish, detail, experience, or scope decisions.
+- Hotspots should identify material and finish placement first; avoid broad conceptual markers unless they are tied to a material/application fact.
 - Desktop may use hover as preview, but click/focus must also work.
-- Mobile must use tap/focus behavior and avoid hover-only information.
+- Mobile must use tap/focus behavior and show the selected material inspector close to the image.
 - Keep marker count low enough for the image to remain inspectable.
-- Hotspot cards should name stone, finish, application, design rationale, and next action when useful.
+- Hotspot inspectors should name stone, finish, application, project note, and next action when useful.
 - Separate confirmed project facts from MVP-inferred narrative until the designer/project team confirms the content.
+
+Project typography:
+- Project archive/detail title typography should follow the live Urblo WordPress pattern: `Avenir LT Std`, light `300` for hero/page H1, normal letter spacing, no forced uppercase.
+- Project section headings use `Avenir LT Std` medium/semibold weight and uppercase sparingly for scanability; avoid `Space Grotesk` for project-page titles unless a future brand decision explicitly changes the project system.
 
 ### Our Story
 Our Story should feel human, disciplined, and credible. It should support trust in Natalie, Cameron, SAI Stone, and the Urblo model without becoming a founder vanity page.

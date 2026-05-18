@@ -136,18 +136,19 @@ Last updated: 2026-05-15
 - Listing page: `src/pages/Projects.tsx`
   - Reads `projectListingMeta` from the shared data module.
 - Detail page: `src/pages/ProjectDetails.tsx`
-  - Reads the same `projects` array and renders richer optional case-study fields when present.
-  - Falls back to image/detail rendering for projects that have not been migrated into the richer model.
+  - Reads the same `projects` array and renders optional material-map fields when present.
+  - Falls back to fact/detail plus image rendering for projects that have not been migrated into the material-map model.
 - Project material map component: `src/components/projects/ProjectMaterialMap.tsx`
-  - Desktop interaction: hover/focus/click can change the active hotspot detail.
-  - Mobile interaction: tap/focus changes the active hotspot; no hover-only dependency.
+  - Desktop interaction: hover/focus/click changes the active material inspector.
+  - Mobile interaction: tap/focus changes the active material inspector directly below the project image; no hover-only dependency.
   - Hotspot coordinates are stored as image-percentage positions in `src/data/projectData.ts`.
+  - Hotspots are material-placement records keyed by `stoneGroupId` and `finishKey`; stone names, finish labels, finish preview images, and detail links resolve through `StoneLibraryService` where possible.
 - Moon Gate MVP assets:
   - Local deployment assets live under `public/images/projects/moon-gate`.
-  - `Moon Gate | Woolley Street` is the first project using `hero`, `lead`, `projectStory`, `scopeItems`, `materialMap`, `materials`, `gallery`, and `cta` fields.
+  - `Moon Gate | Woolley Street` is the first project using `hero`, `lead`, `materialMap`, `materials`, `gallery`, and `cta` fields.
   - Featured material links point to `/stone-library/angola-black` and `/stone-library/new-grey`.
 - Current contract risk:
-  - Moon Gate includes MVP-inferred scope/design copy that should be confirmed with the designer before final public launch.
+  - Moon Gate includes MVP-inferred material/application notes that should be confirmed with the designer before final public launch.
   - Other projects still use the legacy-level data shape and should be migrated one by one.
 
 ### Article Data Contract

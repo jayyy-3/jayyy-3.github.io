@@ -23,7 +23,7 @@ export default function ProjectCard({ slug, title, location, date, cover }: Proj
       <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
       <div className="absolute bottom-0 left-0 right-0 space-y-4 p-6">
         <div className="flex items-start justify-between gap-4">
-          <h3 className="font-display text-[28px] font-semibold uppercase leading-[1.05] text-white">
+          <h3 className="urblo-project-card-title text-white">
             {title}
           </h3>
           <span className="mt-1 text-[18px] text-[var(--urblo-lime)]">-&gt;</span>

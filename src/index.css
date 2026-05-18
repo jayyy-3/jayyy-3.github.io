@@ -142,6 +142,64 @@ a {
     text-transform: uppercase;
 }
 
+.urblo-project-page-title,
+.urblo-project-hero-title,
+.urblo-project-section-title,
+.urblo-project-card-title {
+    font-family: var(--urblo-font-sans);
+    letter-spacing: 0;
+}
+
+.urblo-project-page-title {
+    margin: 16px 0 0;
+    color: var(--urblo-black);
+    font-size: 50px;
+    font-weight: 300;
+    line-height: 1.1;
+}
+
+.urblo-project-hero-title {
+    font-size: 50px;
+    font-weight: 300;
+    line-height: 1.1;
+    text-transform: none;
+}
+
+.urblo-project-section-title {
+    font-size: 30px;
+    font-weight: 600;
+    line-height: 1.35;
+    text-transform: uppercase;
+}
+
+.urblo-project-card-title {
+    font-size: 28px;
+    font-weight: 600;
+    line-height: 1.08;
+    text-transform: uppercase;
+}
+
+@media (min-width: 768px) {
+    .urblo-project-page-title {
+        font-size: 64px;
+    }
+
+    .urblo-project-hero-title {
+        font-size: 76px;
+    }
+
+    .urblo-project-section-title {
+        font-size: 34px;
+        line-height: 1.5;
+    }
+}
+
+@media (min-width: 1024px) {
+    .urblo-project-hero-title {
+        font-size: 100px;
+    }
+}
+
 .urblo-page-copy {
     margin-top: 24px;
     max-width: 44rem;

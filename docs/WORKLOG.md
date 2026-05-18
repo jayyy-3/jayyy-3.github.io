@@ -1,6 +1,82 @@
 # WORKLOG - Urblo Execution Log
 
-Last updated: 2026-05-15
+Last updated: 2026-05-18
+
+## Entry - 2026-05-18 (Project Typography Alignment)
+
+### Scope
+- Verified the live Urblo project archive/detail title system against `urblo.com.au`: project H1 uses `Avenir LT Std`, light `300`, normal letter spacing, and no forced uppercase.
+- Replaced the local project archive/detail title treatment that was inheriting the heavier `Space Grotesk` display style.
+- Added project-specific typography utilities for project page titles, project hero titles, section headings, and material/card titles.
+- Updated Project listing, Project detail, Project cards, and Material Map inspector headings to use the project typography system.
+- Updated design and handoff docs so future project pages preserve the live Urblo title pattern.
+
+### Changed Files
+- `src/index.css`
+- `src/pages/Projects.tsx`
+- `src/pages/ProjectDetails.tsx`
+- `src/components/ProjectCard.tsx`
+- `src/components/projects/ProjectMaterialMap.tsx`
+- `docs/DESIGN.md`
+- `docs/HANDOFF.md`
+- `docs/WORKLOG.md`
+
+### Verification Results
+- `npm run build`: pass (existing bundle size warning and Browserslist staleness notice remain).
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- Playwright visual QA: local Moon Gate project H1 computed styles matched the live Urblo project-title pattern for family, weight, size, line-height, letter spacing, and text transform.
+- `npm run agent:check`: pass.
+- `npm run agent:smoke`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- The broader site still keeps its existing `urblo-page-title` display treatment outside project pages; this change intentionally scopes the live Avenir title correction to Projects.
+- Bundle size warning (`>500kB`) remains out of scope.
+
+### Next Handoff
+- `NEXT-PROJECTS-INTAKE-001`
+- `NOW-STONELIB-IMG-FASTTRACK-001`
+- `NOW-DELIVERY-READINESS-001`
+
+## Entry - 2026-05-18 (Project Material Map Refinement)
+
+### Scope
+- Refined the Moon Gate project page from a broad editorial case-study layout into a material-first project detail flow.
+- Removed the heavy conceptual `Surface / Void / Pause` narrative modules from the rendered page.
+- Reworked `ProjectMaterialMap` so hotspots identify stone/finish/application placement and resolve stone labels, finish labels, preview imagery, and links through `StoneLibraryService`.
+- Replaced large featured-material cards with a compact material schedule.
+- Fixed the legacy project detail copy path so non-Moon Gate projects no longer inherit Moon Gate-specific narrative text.
+- Updated architecture, design, and handoff docs to reflect the material-first hotspot contract.
+
+### Changed Files
+- `src/components/projects/ProjectMaterialMap.tsx`
+- `src/data/projectData.ts`
+- `src/pages/ProjectDetails.tsx`
+- `docs/ARCHITECTURE.md`
+- `docs/DESIGN.md`
+- `docs/HANDOFF.md`
+- `docs/WORKLOG.md`
+
+### Verification Results
+- `npm run build`: pass (existing bundle size warning and Browserslist staleness notice remain).
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:check`: pass.
+- `npm run agent:smoke`: pass.
+- `git diff --check`: pass.
+- Playwright visual QA: desktop and mobile Moon Gate detail page checked locally; hotspot click changed the active material inspector.
+- Playwright visual QA: legacy ACU project detail checked locally; Moon Gate-specific copy was absent.
+
+### Risks and Gaps
+- Moon Gate material/application notes remain MVP-inferred and need designer/project-team confirmation before final production claims.
+- Other project pages still use legacy-level content until migrated.
+- Bundle size warning (`>500kB`) remains out of scope.
+
+### Next Handoff
+- `NEXT-PROJECTS-INTAKE-001`
+- `NOW-STONELIB-IMG-FASTTRACK-001`
+- `NOW-DELIVERY-READINESS-001`
 
 ## Entry - 2026-05-15 (Moon Gate Project Material Map MVP)
 

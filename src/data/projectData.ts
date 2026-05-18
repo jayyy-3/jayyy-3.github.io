@@ -6,8 +6,6 @@ export interface ProjectData {
     listing: ProjectListing;
     hero?: ProjectHero;
     lead?: string;
-    projectStory?: ProjectStoryBlock[];
-    scopeItems?: ProjectScopeItem[];
     materialMap?: ProjectMaterialMap;
     materials?: ProjectMaterial[];
     gallery?: ProjectGalleryImage[];
@@ -28,50 +26,31 @@ export interface ProjectHero {
     caption?: string;
 }
 
-export interface ProjectStoryBlock {
-    title: string;
-    body: string;
-}
-
-export interface ProjectScopeItem {
-    title: string;
-    body: string;
-}
-
-export type ProjectHotspotKind = 'material' | 'detail' | 'experience' | 'scope';
-
 export interface ProjectHotspot {
     id: string;
-    kind: ProjectHotspotKind;
     x: number;
     y: number;
-    title: string;
-    label: string;
-    stoneName?: string;
-    stoneGroupId?: string;
-    finish?: string;
+    stoneGroupId: string;
+    finishKey: string;
     application: string;
-    body: string;
-    designerNote: string;
-    image: string;
-    imageAlt: string;
-    ctaLabel?: string;
-    ctaTo?: string;
+    note: string;
+    image?: string;
+    imageAlt?: string;
 }
 
 export interface ProjectMaterialMap {
     image: string;
     imageAlt: string;
+    title: string;
     intro: string;
     hotspots: ProjectHotspot[];
 }
 
 export interface ProjectMaterial {
-    stoneGroupId?: string;
-    name: string;
-    finish: string;
+    stoneGroupId: string;
+    finishKey: string;
     application: string;
-    role: string;
+    note: string;
     image?: string;
     imageAlt?: string;
 }
@@ -225,128 +204,54 @@ export const projects: ProjectData[] = [
             Date: "2023",
             Address: "Woolley Street, Dickson, ACT 2602",
         },
-        projectStory: [
-            {
-                title: "Surface",
-                body:
-                    "Polished Angola Black gives the work a dark, reflective body. Trees, lanterns, paving, and passing movement appear across the stone surface, making the object change with the street.",
-            },
-            {
-                title: "Void",
-                body:
-                    "The circular opening turns stone mass into a civic threshold. It frames the next view, slows the pedestrian sequence, and gives the plaza a quiet moment of arrival.",
-            },
-            {
-                title: "Pause",
-                body:
-                    "Flamed New Grey seating lowers the register of the composition. The lighter, tactile stone gives people places to wait, meet, sit briefly, and occupy the edge of the work.",
-            },
-        ],
-        scopeItems: [
-            {
-                title: "Designer material consultation",
-                body:
-                    "Urblo's project role is framed around material decision support: stone tone, finish contrast, tactile behavior, and how the black and grey elements work together in a civic setting.",
-            },
-            {
-                title: "Custom stone element package",
-                body:
-                    "The scope presents a bespoke natural stone package for moon gate forms, seating pieces, and integrated public-realm elements rather than an off-the-shelf paving supply.",
-            },
-            {
-                title: "Finish and detail coordination",
-                body:
-                    "Polished Angola Black and flamed New Grey are positioned as a deliberate finish pairing: reflective marker surfaces for identity, textured seating surfaces for everyday contact.",
-            },
-            {
-                title: "Carbon offset project supply",
-                body:
-                    "The project is recorded as carbon offset, keeping sustainability visible without overstating performance claims beyond the confirmed project-level yes/no status.",
-            },
-        ],
         materialMap: {
             image: `${moonGateAssetRoot}/moon-gate-hero.jpg`,
             imageAlt: "Front view through the Moon Gate stone opening toward Woolley Street",
+            title: "Stone and finish placement",
             intro:
-                "Three readings hold the project together: a reflective surface, a cut-through void, and a quieter field of seating.",
+                "Tap the project photograph to see where each stone and finish appears in the built work.",
             hotspots: [
                 {
                     id: "angola-black-marker",
-                    kind: "material",
                     x: 61,
                     y: 32,
-                    title: "Surface",
-                    label: "Polished Angola Black",
-                    stoneName: "Angola Black",
                     stoneGroupId: "angola-black",
-                    finish: "Polished",
+                    finishKey: "polished",
                     application: "Moon gate body and reflective side faces",
-                    body:
-                        "The black polished surface carries the project's visual gravity. It reflects canopy, lanterns, paving, and passing activity rather than standing apart from the precinct.",
-                    designerNote:
-                        "A high-reflection finish can create civic presence, but it should be placed with care around glare, maintenance, and touch expectations.",
+                    note:
+                        "Polished Angola Black gives the threshold its dark civic presence and reflects canopy, lanterns, paving, and passing movement.",
                     image: `${moonGateAssetRoot}/moon-gate-context-lanterns.jpg`,
                     imageAlt: "Polished black moon gate stone reflecting trees beneath red street lanterns",
-                    ctaLabel: "View Angola Black",
-                    ctaTo: "/stone-library/angola-black",
-                },
-                {
-                    id: "circular-aperture",
-                    kind: "detail",
-                    x: 48,
-                    y: 42,
-                    title: "Void",
-                    label: "Circular threshold",
-                    stoneName: "Angola Black",
-                    stoneGroupId: "angola-black",
-                    finish: "Polished",
-                    application: "Cut-through opening and view alignment",
-                    body:
-                        "The circular opening is the project's spatial act. It turns a stone block into a frame, drawing the eye through the street and giving the plaza a deliberate pause.",
-                    designerNote:
-                        "The mass matters, but the void makes it architectural.",
-                    image: `${moonGateAssetRoot}/moon-gate-detail-arch-view.jpg`,
-                    imageAlt: "View through the circular stone opening toward seating and trees",
                 },
                 {
                     id: "new-grey-seating",
-                    kind: "material",
                     x: 57,
                     y: 80,
-                    title: "Pause",
-                    label: "Flamed New Grey",
-                    stoneName: "New Grey",
                     stoneGroupId: "new-grey",
-                    finish: "Flamed",
+                    finishKey: "flamed",
                     application: "Cylindrical seating pods and low public-realm elements",
-                    body:
-                        "New Grey brings the project down to hand and body scale. The flamed finish gives the seating elements a quieter tactility beside the polished moon gate.",
-                    designerNote:
-                        "This is where the marker becomes usable public realm.",
+                    note:
+                        "Flamed New Grey lowers the register of the composition at body-contact points, adding tactile grip and a quieter seating rhythm.",
                     image: `${moonGateAssetRoot}/moon-gate-seating-close.jpg`,
                     imageAlt: "Close view of flamed New Grey cylindrical seating elements",
-                    ctaLabel: "View New Grey",
-                    ctaTo: "/stone-library/new-grey",
                 },
             ],
         },
         materials: [
             {
                 stoneGroupId: "angola-black",
-                name: "Angola Black",
-                finish: "Polished",
+                finishKey: "polished",
                 application: "Moon gate marker forms",
-                role:
+                note:
                     "Reflective black stone used to create visual depth, strong civic identity, and a clear threshold in the streetscape.",
                 image: `${moonGateAssetRoot}/moon-gate-context-lanterns.jpg`,
                 imageAlt: "Polished Angola Black moon gate stone beneath red street lanterns",
             },
             {
                 stoneGroupId: "new-grey",
-                name: "New Grey",
-                finish: "Flamed",
+                finishKey: "flamed",
                 application: "Seating pods and low elements",
-                role:
+                note:
                     "Light grey tactile stone used for everyday contact points, informal seating, and quieter public-realm rhythm.",
                 image: `${moonGateAssetRoot}/moon-gate-seating-field.jpg`,
                 imageAlt: "Flamed New Grey seating pods arranged around planting and paving",
