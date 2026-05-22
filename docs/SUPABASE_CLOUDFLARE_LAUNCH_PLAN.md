@@ -25,7 +25,7 @@ After launch:
 - The current app is still a Vite/React static site.
 - The current deployment workflow still targets GitHub Pages.
 - Contact and Sample Request behavior still uses email links or local form state.
-- Projects, Stone Library, and Articles are still file-backed content.
+- Projects, Stone Library, Products, and Articles are still file-backed content.
 - Old WordPress-hosted media URLs still exist in runtime data and must not be treated as permanent production dependencies.
 
 ## Target Architecture
@@ -36,10 +36,11 @@ After launch:
 - Database: Supabase Postgres.
 - Auth: Supabase Auth for the admin area.
 - Admin UI: Urblo-owned `/admin` interface, not raw Supabase Studio for customers.
-- Structured content: Projects, Stone Library, Articles, and site settings live in Supabase.
+- Structured content: Projects, Stone Library, Products, Articles, and site settings live in Supabase.
 - Forms: Contact and Sample Request write to Supabase and send notification email.
 - Bot protection: Cloudflare Turnstile on public forms.
 - Media: Supabase Storage for normal editorial/product imagery; Cloudflare R2 or Stream remains the preferred review path for large homepage video assets.
+- Schema design: `docs/SUPABASE_SCHEMA.md` defines the first production content, media, admin, and lead-capture model.
 
 ## Monthly Cost Baseline
 Platform pricing is mostly USD. The AUD estimates below use a planning rate of about 1 USD = 1.4 AUD, based on the May 2026 USD/AUD range checked during planning. Actual invoices vary with exchange rate, tax, and usage.
@@ -76,7 +77,7 @@ Required work:
 
 Validation:
 - Production and preview builds complete from a clean commit.
-- Direct refresh works on key routes: home, Projects, Project detail, Stone Library, Article detail, Contact, Admin.
+- Direct refresh works on key routes: home, Projects, Project detail, Products, Product detail, Stone Library, Article detail, Contact, Admin.
 - Static routes do not invoke Functions.
 - Secrets are configured in Cloudflare/Supabase dashboards and are not committed.
 
@@ -93,6 +94,10 @@ Core tables:
 - `stone_variants`
 - `stone_finishes`
 - `stone_finish_images`
+- `products`
+- `product_models`
+- `product_material_defaults`
+- `product_specs`
 - `articles`
 - `article_blocks`
 - `enquiries`
@@ -123,6 +128,7 @@ First release scope:
 - Dashboard with content health warnings.
 - Projects CRUD, including gallery and hotspot records.
 - Stone Library CRUD, including finishes and images.
+- Products CRUD, including models, specs, and default material selections.
 - Articles CRUD using structured blocks, not arbitrary newsletter HTML.
 - Enquiry and Sample Request inbox with status, owner, notes, and export.
 - Media upload and alt text management.
@@ -172,7 +178,7 @@ Outcome: the launch no longer depends on uncontrolled old-site media and the hom
 
 Required work:
 - Inventory all remote old-site URLs.
-- Migrate priority homepage, logo, project, Stone Library, and article assets to controlled storage.
+- Migrate priority homepage, logo, project, product, Stone Library, and article assets to controlled storage.
 - Replace homepage video with a launch-safe source, poster, compression profile, and mobile fallback.
 - Add image alt text and dimensions where possible.
 - Keep large files out of the main JavaScript bundle.
@@ -183,7 +189,7 @@ Validation:
 - Homepage has a working poster and mobile fallback when video is slow or disabled.
 - Public images load from controlled sources.
 - Build output remains below Cloudflare Pages file limits.
-- Lighthouse or Playwright checks cover mobile homepage, Projects, Stone Library, Articles, and Contact.
+- Lighthouse or Playwright checks cover mobile homepage, Projects, Products, Stone Library, Articles, and Contact.
 
 ### 6. SEO, Brand, and Content Trust
 Outcome: the launched site looks credible to customers and search engines.
@@ -227,7 +233,7 @@ The site is not production-ready until all of the following are true:
 - Cloudflare Pages preview and production deployment work.
 - Supabase schema, RLS, Auth, and Storage are configured.
 - Forms submit to Supabase and send notifications.
-- Admin users can CRUD Projects, Stone Library, Articles, and lead records.
+- Admin users can CRUD Projects, Stone Library, Products, Articles, and lead records.
 - Priority media no longer depends on old WordPress URLs.
 - Homepage video has a controlled delivery and mobile fallback.
 - Default metadata and placeholder UI are removed.

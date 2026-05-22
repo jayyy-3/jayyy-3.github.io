@@ -6,7 +6,7 @@ Last updated: 2026-05-22
 The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin CMS:
 - Public website hosting should move to Cloudflare Pages.
 - Contact and Sample Request should move from mailto/local-only behavior to Supabase-backed submissions.
-- Projects, Stone Library, Articles, media records, and lead records should become customer-maintainable through `/admin`.
+- Projects, Stone Library, Products, Articles, media records, and lead records should become customer-maintainable through `/admin`.
 - The current runtime remains static/file-backed until implementation tasks are completed.
 - The long-form plan and cost baseline live in `docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md`.
 
@@ -34,12 +34,13 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 - `npm run agent:smoke`: pass on 2026-05-18.
 - `git diff --check`: pass on 2026-05-18.
 - Cloudflare/Supabase launch plan docs: `npm run agent:check` and `git diff --check` pass on 2026-05-22.
+- Supabase schema planning docs: `npm run agent:check` and `git diff --check` pass on 2026-05-22.
 
 ## Active Risks
 - Cloudflare + Supabase is approved as the launch target, but runtime implementation has not started.
-- Supabase schema, RLS, Auth, Storage, admin CRUD, form APIs, and transactional email are not implemented yet.
+- Supabase schema design is documented, but migrations, RLS implementation, Auth, Storage, admin CRUD, form APIs, and transactional email are not implemented yet.
 - Contact and Sample Request remain mailto/local-only in current runtime.
-- Projects, Stone Library, and Articles are still file-backed rather than customer-editable.
+- Projects, Stone Library, Products, and Articles are still file-backed rather than customer-editable.
 - The admin CMS does not exist yet.
 - Priority media still needs migration away from old WordPress URLs, especially homepage video/poster and other first-viewport assets.
 - Stone Library finish imagery still has placeholder/mapping gaps.
@@ -52,7 +53,7 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 - React Helmet still emits an existing strict-mode lifecycle warning in dev console.
 
 ## Next Recommended Action
-Start `NOW-CLOUDFLARE-SUPABASE-ARCH-001`, then proceed through `NOW-SUPABASE-SCHEMA-001` before implementing forms or admin UI.
+Start `NOW-CLOUDFLARE-PAGES-DEPLOY-001` for repo-side Cloudflare Pages deployment/runbook work. Actual Cloudflare project creation still requires account access.
 
 ## Guardrails
 - Use repo-root relative paths in committed docs.

@@ -2,6 +2,39 @@
 
 Last updated: 2026-05-22
 
+## Entry - 2026-05-22 (Supabase Schema Plan)
+
+### Scope
+- Closed `NOW-CLOUDFLARE-SUPABASE-ARCH-001` after the launch architecture and cost model were pushed to origin.
+- Added `docs/SUPABASE_SCHEMA.md` as the first Supabase schema design contract.
+- Covered admin roles, site settings, media assets, Stone Library, Products, Projects, Articles, enquiries, sample requests, RLS expectations, indexes, and migration phases.
+- Added Products to the CMS and schema scope so product pages are not left as static code-only data.
+- Updated launch, architecture, roadmap, task queue, and handoff docs to point at the schema plan.
+
+### Changed Files
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+- `docs/WORKLOG.md`
+
+### Verification Results
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- Runtime gates intentionally skipped because this is a docs/schema planning change only.
+
+### Risks and Gaps
+- The schema is documented but has not been implemented as Supabase migrations.
+- RLS policies, storage buckets, admin users, seed scripts, and form APIs still need implementation and live verification.
+- Actual Cloudflare and Supabase project setup requires account access.
+
+### Next Handoff
+- `NOW-CLOUDFLARE-PAGES-DEPLOY-001`
+- `NOW-FORMS-SUPABASE-001`
+- `NOW-ADMIN-CMS-001`
+
 ## Entry - 2026-05-22 (Cloudflare + Supabase Launch Harness)
 
 ### Scope

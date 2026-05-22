@@ -38,11 +38,9 @@ For any user-facing layout/copy/IA task:
 ## Now
 Source of truth: `docs/agent/tasks.json`.
 
-- `NOW-CLOUDFLARE-SUPABASE-ARCH-001`: lock the Cloudflare Pages + Supabase launch architecture and cost model.
-- `NOW-SUPABASE-SCHEMA-001`: design the Supabase schema for Projects, Stone Library, Articles, media, and lead capture.
 - `NOW-CLOUDFLARE-PAGES-DEPLOY-001`: implement Cloudflare Pages deployment, preview, function routing, and rollback runbook.
 - `NOW-FORMS-SUPABASE-001`: replace mailto-only Contact and Sample Request flows with Supabase-backed submissions.
-- `NOW-ADMIN-CMS-001`: build the Urblo admin CMS for customer-maintained Projects, Stone Library, Articles, media, and leads.
+- `NOW-ADMIN-CMS-001`: build the Urblo admin CMS for customer-maintained Projects, Stone Library, Products, Articles, media, and leads.
 - `NOW-ASSET-MIGRATION-001`: migrate priority media away from old WordPress URLs and define controlled storage for launch.
 - `NOW-SEO-DELIVERY-001`: remove default metadata and finish launch-critical SEO, icon, social, and claim-safety details.
 - `NOW-STONELIB-IMG-FASTTRACK-001`: map provided finish assets into Stone Library and reduce placeholder usage.
@@ -70,6 +68,8 @@ Source of truth: `docs/agent/tasks.json`.
 - Phase 1 harness hygiene committed: `docs/HANDOFF.md`, `docs/agent/tasks.json`, `docs/agent/verification.md`, `scripts/check-doc-paths.mjs`, and `scripts/check-harness.mjs`.
 - Phase 2 verification harness completed: `scripts/agent-init.sh`, `scripts/agent-smoke.sh`, and package-level `agent:*` scripts.
 - `NEXT-DATA-001`: project list/detail metadata now comes from `src/data/projectData.ts`; Moon Gate is the first material-map case study.
+- `NOW-CLOUDFLARE-SUPABASE-ARCH-001`: Cloudflare Pages + Supabase launch architecture, cost model, and customer-facing approval PDF are documented.
+- `NOW-SUPABASE-SCHEMA-001`: Supabase schema plan is documented for Projects, Stone Library, Products, Articles, media, admin access, and lead capture.
 
 Older completion details live in `docs/WORKLOG.md`.
 
@@ -78,7 +78,7 @@ Older completion details live in `docs/WORKLOG.md`.
 - Cloudflare Pages can deploy production and preview builds.
 - Supabase schema, Auth, Storage, and RLS assumptions are implemented and verified.
 - Contact and Sample Request persist records and send notifications.
-- Admin users can CRUD Projects, Stone Library, Articles, media, and lead records without code edits.
+- Admin users can CRUD Projects, Stone Library, Products, Articles, media, and lead records without code edits.
 - Priority media no longer depends on old WordPress URLs for first-viewport production experience.
 - All applicable quality gates pass per `docs/agent/verification.md`.
 - Navigation and route contracts remain consistent with `src/App.tsx`, `src/data/siteChrome.ts`, and `src/components/site/SiteFooter.tsx`.

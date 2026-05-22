@@ -5,7 +5,7 @@
   "tasks": [
     {
       "id": "NOW-CLOUDFLARE-SUPABASE-ARCH-001",
-      "status": "now",
+      "status": "done",
       "priority": 1,
       "summary": "Lock the Cloudflare Pages + Supabase launch architecture and cost model.",
       "files": [
@@ -26,18 +26,20 @@
     },
     {
       "id": "NOW-SUPABASE-SCHEMA-001",
-      "status": "now",
+      "status": "done",
       "priority": 2,
-      "summary": "Design the Supabase schema for Projects, Stone Library, Articles, media, and lead capture.",
+      "summary": "Design the Supabase schema for Projects, Stone Library, Products, Articles, media, and lead capture.",
       "files": [
+        "docs/SUPABASE_SCHEMA.md",
         "docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md",
         "docs/ARCHITECTURE.md",
         "data/clean/stone_library.json",
+        "src/data/productData.ts",
         "src/data/projectData.ts",
         "public/articles/index.json"
       ],
       "acceptance": [
-        "Content entities and relationships are specified before migration work begins.",
+        "Content entities and relationships are specified before migration work begins, including Products as a customer-maintained content type.",
         "Draft/published/archive status, slug uniqueness, ordering, audit fields, and public read rules are included.",
         "RLS expectations and service-role boundaries are recorded before any public API or admin implementation."
       ],
@@ -98,17 +100,18 @@
       "id": "NOW-ADMIN-CMS-001",
       "status": "now",
       "priority": 5,
-      "summary": "Build the Urblo admin CMS for customer-maintained Projects, Stone Library, Articles, media, and leads.",
+      "summary": "Build the Urblo admin CMS for customer-maintained Projects, Stone Library, Products, Articles, media, and leads.",
       "files": [
         "docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md",
         "docs/ARCHITECTURE.md",
         "src/App.tsx",
         "src/data/projectData.ts",
+        "src/data/productData.ts",
         "src/service/StoneLibraryService.ts",
         "src/pages/ArticlePage.tsx"
       ],
       "acceptance": [
-        "Authenticated admin users can create, read, update, delete, draft, and publish Projects, Stone Library records, Articles, and media records without code edits.",
+        "Authenticated admin users can create, read, update, delete, draft, and publish Projects, Stone Library records, Products, Articles, and media records without code edits.",
         "Article editing uses approved structured block types instead of arbitrary newsletter HTML.",
         "Unpublished content remains hidden from the public site, and unauthenticated users cannot access admin routes."
       ],

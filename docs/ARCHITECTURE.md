@@ -8,6 +8,7 @@ Last updated: 2026-05-22
 - Current implementation: no production HTTP API contract has been implemented yet.
 - Launch target: Cloudflare Pages static frontend, Cloudflare Pages Functions API endpoints, Supabase Postgres/Auth/Storage, and an Urblo-owned admin interface for content operations.
 - Planning source: `docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md`.
+- Supabase schema design source: `docs/SUPABASE_SCHEMA.md`.
 
 ## Runtime Stack
 - Bundler/dev server: Vite 6
@@ -33,6 +34,9 @@ Last updated: 2026-05-22
   - Lean production target: about USD 30/month before tax/usage spikes.
   - Safer production target with paid transactional email headroom: about USD 50/month before tax/usage spikes.
   - See `docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md` for the component-level cost table.
+- Schema planning:
+  - First production schema plan lives in `docs/SUPABASE_SCHEMA.md`.
+  - Runtime is not considered migrated until migrations, RLS policies, seed scripts, admin UI, and API contracts are implemented and verified.
 
 ## Deployment and Build Contract
 - Current deployment workflow: `.github/workflows/deploy.yml`
@@ -200,6 +204,9 @@ Last updated: 2026-05-22
   - Hotspots store image-percentage coordinates and references to Stone Library records where possible.
 - Stone Library:
   - Stone groups, variants, finishes, finish imagery, specifications, availability, and display ordering.
+- Products:
+  - Product families, model images, editable specs, and default material selections.
+  - Product material defaults should reference Stone Library records where possible.
 - Articles:
   - Article metadata plus structured block records.
   - Blocks cover rich text, image, gallery, quote, FAQ, CTA, project spotlight, stone reference, comparison table, proof metric, video embed, and callout.
@@ -271,7 +278,7 @@ Last updated: 2026-05-22
 ## Known Architecture Risks
 - Cloudflare + Supabase is the approved launch target, but implementation has not started in runtime code.
 - Sample Request has no backend/form workflow yet and remains a `mailto:` fallback in current runtime.
-- Projects, Stone Library, and Articles remain file-backed until Supabase migration work is implemented.
+- Projects, Stone Library, Products, and Articles remain file-backed until Supabase migration work is implemented.
 - Admin CMS does not exist yet; customers cannot CRUD content without code changes.
 - Project and Stone Library content migration needs strict separation between confirmed facts and inferred MVP copy.
 - Old WordPress-hosted media URLs remain a delivery risk until priority media is migrated or explicitly accepted.
