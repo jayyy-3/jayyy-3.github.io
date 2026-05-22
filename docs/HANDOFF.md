@@ -43,6 +43,7 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 - Browser media QA on 2026-05-22: desktop homepage selects local MP4 and poster; mobile homepage selects no MP4 source and uses the local poster; Products, Product detail, Projects, Our Story, Contact, Articles, and Article detail banners load from local `public/media/launch` assets with no broken images observed.
 - Homepage video replacement and P1 visible homepage/Our Story media pass: runtime, harness, and browser media QA pass on 2026-05-22.
 - Legacy project media and Stone Library fallback migration: runtime, harness, old WordPress scan, and browser media QA pass on 2026-05-22.
+- Old-site favicon restoration: runtime, harness, local asset, and browser head verification pass on 2026-05-22.
 
 ## Active Risks
 - Cloudflare + Supabase is approved as the launch target, but runtime implementation has not started.

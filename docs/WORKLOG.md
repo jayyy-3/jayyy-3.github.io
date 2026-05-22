@@ -2,6 +2,46 @@
 
 Last updated: 2026-05-22
 
+## Entry - 2026-05-22 (Old-Site Favicon Restoration)
+
+### Scope
+- Replaced the temporary SVG favicon with the original WordPress site icon files from the old Urblo site.
+- Added controlled local PNG icon assets for 32x32, 192x192, 512x512, Apple touch, and Microsoft tile use.
+- Updated `index.html` and `public/site.webmanifest` to reference the old-site-matched PNG icon set.
+- Updated architecture and task queue docs so agents do not reintroduce the temporary SVG icon.
+
+### Changed Files
+- `index.html`
+- `public/favicon.png`
+- `public/favicon-32x32.png`
+- `public/favicon-192x192.png`
+- `public/apple-touch-icon.png`
+- `public/mstile-270x270.png`
+- Removed the temporary SVG favicon file.
+- `public/site.webmanifest`
+- `docs/ARCHITECTURE.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run build`: pass (existing bundle size warning and Browserslist staleness notice remain).
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- Browser QA: homepage head exposes PNG favicon and Apple touch icon links, no `favicon.svg` reference remains.
+- Static asset checks: favicon PNGs and manifest return HTTP 200 from the local dev server.
+
+### Risks and Gaps
+- Browser favicon caches can be sticky; production verification should use a hard refresh or a fresh browser profile after deployment.
+- Final social share image is still `public/og-default.svg` and remains separate from favicon work.
+
+### Next Handoff
+- Continue `NOW-SEO-DELIVERY-001` with article media/HTML cleanup.
+- `NOW-FORMS-SUPABASE-001`
+- `NOW-ADMIN-CMS-001`
+
 ## Entry - 2026-05-22 (Legacy Project and Stone Fallback Media)
 
 ### Scope
@@ -169,7 +209,7 @@ Last updated: 2026-05-22
 
 ### Changed Files
 - `index.html`
-- `public/favicon.svg`
+- Temporary SVG favicon asset, later replaced by old-site PNG icons.
 - `public/og-default.svg`
 - `public/site.webmanifest`
 - Removed retired Vite favicon asset.

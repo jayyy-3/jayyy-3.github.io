@@ -117,8 +117,8 @@ Routing uses clean paths through `BrowserRouter`. Cloudflare Pages direct refres
 - `index.html` contains Urblo-owned default title, description, favicon, manifest, canonical, Open Graph, and Twitter metadata.
 - `src/App.tsx` updates route-level title, description, canonical, Open Graph, and Twitter metadata through `react-helmet`.
 - Default share image asset: `public/og-default.svg`.
-- Favicon asset: `public/favicon.svg`.
-- Web manifest: `public/site.webmanifest`.
+- Favicon assets: old-site-matched WordPress site icon PNGs in `public/favicon-32x32.png`, `public/favicon-192x192.png`, `public/favicon.png`, `public/apple-touch-icon.png`, and `public/mstile-270x270.png`.
+- Web manifest: `public/site.webmanifest`, referencing PNG icon assets instead of the retired temporary SVG favicon.
 - `react-helmet` still has a known strict-mode warning in development and should be replaced or upgraded during a later SEO/runtime cleanup.
 
 ## Current Static Media Contract
