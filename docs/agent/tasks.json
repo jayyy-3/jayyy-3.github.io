@@ -1,12 +1,179 @@
 {
   "version": 1,
-  "lastUpdated": "2026-05-15",
+  "lastUpdated": "2026-05-22",
   "sourceOfTruth": "Machine-readable task queue for active and upcoming agent work. Human-readable roadmap lives in docs/NEXT_STEPS.md.",
   "tasks": [
     {
-      "id": "NOW-STONELIB-IMG-FASTTRACK-001",
+      "id": "NOW-CLOUDFLARE-SUPABASE-ARCH-001",
       "status": "now",
       "priority": 1,
+      "summary": "Lock the Cloudflare Pages + Supabase launch architecture and cost model.",
+      "files": [
+        "docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md",
+        "docs/ARCHITECTURE.md",
+        "docs/NEXT_STEPS.md",
+        "docs/HANDOFF.md"
+      ],
+      "acceptance": [
+        "Launch target records Cloudflare Pages for hosting, Pages Functions for API endpoints, Supabase for data/auth/storage, and an Urblo-owned admin interface.",
+        "Current implementation reality remains explicit so agents do not assume backend features already exist.",
+        "Monthly cost baseline and optional cost drivers are documented for client planning."
+      ],
+      "verification": [
+        "npm run agent:check",
+        "git diff --check"
+      ]
+    },
+    {
+      "id": "NOW-SUPABASE-SCHEMA-001",
+      "status": "now",
+      "priority": 2,
+      "summary": "Design the Supabase schema for Projects, Stone Library, Articles, media, and lead capture.",
+      "files": [
+        "docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md",
+        "docs/ARCHITECTURE.md",
+        "data/clean/stone_library.json",
+        "src/data/projectData.ts",
+        "public/articles/index.json"
+      ],
+      "acceptance": [
+        "Content entities and relationships are specified before migration work begins.",
+        "Draft/published/archive status, slug uniqueness, ordering, audit fields, and public read rules are included.",
+        "RLS expectations and service-role boundaries are recorded before any public API or admin implementation."
+      ],
+      "verification": [
+        "npm run agent:check",
+        "git diff --check"
+      ]
+    },
+    {
+      "id": "NOW-CLOUDFLARE-PAGES-DEPLOY-001",
+      "status": "now",
+      "priority": 3,
+      "summary": "Implement Cloudflare Pages deployment, preview, function routing, and rollback runbook.",
+      "files": [
+        "docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md",
+        "docs/ARCHITECTURE.md",
+        "package.json",
+        "vite.config.ts",
+        "src/App.tsx"
+      ],
+      "acceptance": [
+        "Cloudflare Pages build command and output directory are documented and verified.",
+        "Only API routes invoke Pages Functions; static site traffic remains static.",
+        "SPA route refresh, preview deployment, production deployment, DNS cutover, and rollback are documented and tested."
+      ],
+      "verification": [
+        "npm run build",
+        "npm run lint",
+        "npx tsc -b",
+        "npm run agent:smoke"
+      ]
+    },
+    {
+      "id": "NOW-FORMS-SUPABASE-001",
+      "status": "now",
+      "priority": 4,
+      "summary": "Replace mailto-only Contact and Sample Request flows with Supabase-backed submissions.",
+      "files": [
+        "docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md",
+        "docs/ARCHITECTURE.md",
+        "src/pages/ContactPage.tsx",
+        "src/data/siteChrome.ts",
+        "src/data/homepage.ts"
+      ],
+      "acceptance": [
+        "Public form submissions are validated server-side, protected by Turnstile, stored in Supabase, and notify Urblo by email.",
+        "Admin users can view and update enquiry and sample-request status.",
+        "Visitor success and failure states are clear, and no submitted lead depends only on a local email client."
+      ],
+      "verification": [
+        "npm run build",
+        "npm run lint",
+        "npx tsc -b",
+        "npm run agent:smoke"
+      ]
+    },
+    {
+      "id": "NOW-ADMIN-CMS-001",
+      "status": "now",
+      "priority": 5,
+      "summary": "Build the Urblo admin CMS for customer-maintained Projects, Stone Library, Articles, media, and leads.",
+      "files": [
+        "docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md",
+        "docs/ARCHITECTURE.md",
+        "src/App.tsx",
+        "src/data/projectData.ts",
+        "src/service/StoneLibraryService.ts",
+        "src/pages/ArticlePage.tsx"
+      ],
+      "acceptance": [
+        "Authenticated admin users can create, read, update, delete, draft, and publish Projects, Stone Library records, Articles, and media records without code edits.",
+        "Article editing uses approved structured block types instead of arbitrary newsletter HTML.",
+        "Unpublished content remains hidden from the public site, and unauthenticated users cannot access admin routes."
+      ],
+      "verification": [
+        "npm run build",
+        "npm run lint",
+        "npx tsc -b",
+        "npm run agent:smoke"
+      ]
+    },
+    {
+      "id": "NOW-ASSET-MIGRATION-001",
+      "status": "now",
+      "priority": 6,
+      "summary": "Migrate priority media away from old WordPress URLs and define controlled storage for launch.",
+      "files": [
+        "docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md",
+        "docs/ARCHITECTURE.md",
+        "src/data/homepage.ts",
+        "src/data/siteChrome.ts",
+        "src/data/projectData.ts",
+        "src/data/stoneFinishImages.ts",
+        "public/articles/index.json"
+      ],
+      "acceptance": [
+        "All first-viewport critical media, logo assets, homepage video/poster assets, and priority project/stone imagery have a controlled hosting path.",
+        "Homepage video has a launch-safe source, poster, compression/fallback policy, and mobile behavior.",
+        "Residual old-site URLs are inventoried with owner, risk, and migration priority."
+      ],
+      "verification": [
+        "npm run build",
+        "npm run lint",
+        "npx tsc -b",
+        "npm run agent:smoke"
+      ]
+    },
+    {
+      "id": "NOW-SEO-DELIVERY-001",
+      "status": "now",
+      "priority": 7,
+      "summary": "Remove default metadata and finish launch-critical SEO, icon, social, and claim-safety details.",
+      "files": [
+        "docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md",
+        "docs/brand-baseline.md",
+        "docs/DESIGN.md",
+        "index.html",
+        "src/data/homepage.ts",
+        "src/data/siteChrome.ts"
+      ],
+      "acceptance": [
+        "No Vite/default metadata, favicon, or placeholder app identity remains.",
+        "Route-level title, description, canonical, and Open Graph basics are planned and implemented for public launch.",
+        "Carbon, speed, cost, safety, and durability claims are either evidenced, qualified, or deferred."
+      ],
+      "verification": [
+        "npm run build",
+        "npm run lint",
+        "npx tsc -b",
+        "npm run agent:smoke"
+      ]
+    },
+    {
+      "id": "NOW-STONELIB-IMG-FASTTRACK-001",
+      "status": "now",
+      "priority": 8,
       "summary": "Fast-track replacement of Stone Library placeholder images using provided finish assets.",
       "files": [
         "src/data/stoneFinishImages.ts",
@@ -29,7 +196,7 @@
     {
       "id": "NOW-DELIVERY-READINESS-001",
       "status": "now",
-      "priority": 2,
+      "priority": 9,
       "summary": "Remove template/default assets and visible placeholder UI that block production handoff.",
       "files": [
         "index.html",
@@ -53,8 +220,8 @@
     {
       "id": "NOW-ASSET-STRATEGY-001",
       "status": "now",
-      "priority": 3,
-      "summary": "Decide and document the image hosting strategy for current and delivery phases.",
+      "priority": 10,
+      "summary": "Decide and document the image hosting strategy for the interim static site and Supabase/Cloudflare delivery phases.",
       "files": [
         "docs/ARCHITECTURE.md",
         "docs/NEXT_STEPS.md"
@@ -71,19 +238,18 @@
     },
     {
       "id": "NOW-DEPLOY-PAGES-HARDEN-001",
-      "status": "now",
-      "priority": 4,
-      "summary": "Harden GitHub Pages deployment reliability and credential safety.",
+      "status": "later",
+      "priority": 31,
+      "summary": "Legacy fallback only: harden GitHub Pages deployment if the Cloudflare Pages decision is reversed.",
       "files": [
         ".github/workflows/deploy.yml",
         "docs/ARCHITECTURE.md",
         "README.md"
       ],
       "acceptance": [
-        "Deploy workflow does not depend on a personal PAT.",
-        "Lint/typecheck failures block deploy.",
-        "Manual redeploy is available from Actions.",
-        "Architecture/runbook docs reflect deployment contract."
+        "This task remains inactive while Cloudflare Pages is the approved launch target.",
+        "If reactivated, deploy workflow does not depend on a personal PAT.",
+        "If reactivated, lint/typecheck failures block deploy and manual redeploy is available from Actions."
       ],
       "verification": [
         "npm run agent:check",
@@ -94,7 +260,7 @@
     {
       "id": "NEXT-UI-PARITY-001",
       "status": "next",
-      "priority": 5,
+      "priority": 11,
       "summary": "Reproduce approved Home, Our Story, Articles, and Contact Us UI from Figma and WordPress references.",
       "files": [
         "src/pages/Home.tsx",
@@ -119,9 +285,9 @@
     },
     {
       "id": "NEXT-SAMPLE-REQUEST-001",
-      "status": "next",
-      "priority": 6,
-      "summary": "Define and stage Sample Request capability for later implementation.",
+      "status": "later",
+      "priority": 32,
+      "summary": "Legacy fallback only: define Sample Request without Supabase if the active form implementation changes.",
       "files": [
         "src/App.tsx",
         "src/pages/ContactPage.tsx",
@@ -130,9 +296,9 @@
         "docs/agent/tasks.json"
       ],
       "acceptance": [
-        "Implementation path is documented with constraints and owner.",
-        "Route and CTA behavior are explicit and non-broken before backend approval.",
-        "Follow-up build task has implementation-ready acceptance criteria."
+        "This task remains inactive while NOW-FORMS-SUPABASE-001 is the approved implementation path.",
+        "If reactivated, route and CTA behavior are explicit and non-broken before backend approval.",
+        "If reactivated, follow-up build task has implementation-ready acceptance criteria."
       ],
       "verification": [
         "npm run build",
@@ -143,7 +309,7 @@
     {
       "id": "NEXT-STONELIB-IMG-001",
       "status": "next",
-      "priority": 7,
+      "priority": 12,
       "summary": "Complete Stone Library finish imagery coverage after fast-track ingestion.",
       "files": [
         "src/data/stoneFinishImages.ts",
@@ -163,7 +329,7 @@
     {
       "id": "NEXT-STONELIB-IMG-002",
       "status": "next",
-      "priority": 8,
+      "priority": 13,
       "summary": "Define and implement how secondary finish frames should be shown.",
       "files": [
         "src/data/stoneFinishImages.ts",
@@ -186,7 +352,7 @@
     {
       "id": "NEXT-STONELIB-DATA-001",
       "status": "next",
-      "priority": 9,
+      "priority": 14,
       "summary": "Replace generic finish behavior text with approved product/engineering notes.",
       "files": [
         "src/data/finishBehaviorMeta.ts",
@@ -205,7 +371,7 @@
     {
       "id": "NEXT-DATA-001",
       "status": "done",
-      "priority": 10,
+      "priority": 15,
       "summary": "Unify project list/detail data source to prevent drift.",
       "files": [
         "src/pages/Projects.tsx",
@@ -226,7 +392,7 @@
     {
       "id": "NEXT-PROJECTS-INTAKE-001",
       "status": "next",
-      "priority": 11,
+      "priority": 16,
       "summary": "Define the reusable project intake template and migrate the next project into the material-map case study model.",
       "files": [
         "src/data/projectData.ts",
@@ -248,8 +414,8 @@
     {
       "id": "NEXT-ROUTER-SEO-001",
       "status": "next",
-      "priority": 12,
-      "summary": "Decide and implement final GitHub Pages routing strategy with explicit SEO tradeoff.",
+      "priority": 17,
+      "summary": "Decide and implement final Cloudflare Pages routing strategy with explicit SEO tradeoff.",
       "files": [
         "src/App.tsx",
         "vite.config.ts",
@@ -258,7 +424,7 @@
       ],
       "acceptance": [
         "Routing strategy is explicitly chosen, implemented, and documented.",
-        "No refresh 404 regressions occur for declared routes under Pages hosting.",
+        "No refresh 404 regressions occur for declared routes under Cloudflare Pages hosting.",
         "SEO/URL tradeoff is visible in handoff docs."
       ],
       "verification": [
@@ -271,7 +437,7 @@
     {
       "id": "LATER-BRAND-001",
       "status": "later",
-      "priority": 13,
+      "priority": 18,
       "summary": "Align homepage feature modules with brand baseline pillars and proof framing.",
       "files": [
         "src/components/homepage/HomepageSections.tsx",
@@ -290,7 +456,7 @@
     {
       "id": "LATER-PERF-001",
       "status": "later",
-      "priority": 14,
+      "priority": 19,
       "summary": "Reduce client bundle size and improve chunk strategy.",
       "files": [
         "vite.config.ts",
@@ -309,7 +475,7 @@
     {
       "id": "LATER-QA-001",
       "status": "later",
-      "priority": 15,
+      "priority": 20,
       "summary": "Add automated route smoke coverage for declared routes and key CTAs.",
       "files": [
         "scripts/agent-smoke.sh",
@@ -321,6 +487,30 @@
       ],
       "verification": [
         "npm run agent:smoke"
+      ]
+    },
+    {
+      "id": "LATER-LAUNCH-DOCS-CONSOLIDATE-001",
+      "status": "later",
+      "priority": 21,
+      "summary": "After production launch, consolidate the temporary Cloudflare/Supabase launch plan into durable architecture, operations, and worklog docs.",
+      "files": [
+        "docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md",
+        "docs/ARCHITECTURE.md",
+        "docs/WORKLOG.md",
+        "docs/HANDOFF.md",
+        "docs/NEXT_STEPS.md",
+        "docs/agent/tasks.json"
+      ],
+      "acceptance": [
+        "Final production architecture facts are moved into docs/ARCHITECTURE.md.",
+        "Deployment, rollback, environment, admin, form, lead-management, and monthly cost operations are moved into a durable operations runbook.",
+        "Launch-history evidence remains in docs/WORKLOG.md.",
+        "docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md is archived or removed after durable content is migrated so it does not remain a stale control document."
+      ],
+      "verification": [
+        "npm run agent:check",
+        "git diff --check"
       ]
     }
   ]

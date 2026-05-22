@@ -1,6 +1,6 @@
 # Agent Verification Matrix
 
-Last updated: 2026-05-15
+Last updated: 2026-05-22
 
 ## Purpose
 Use this matrix to choose the smallest verification set that proves a change is safe. Runtime changes still need the full build/lint/typecheck gate unless a task explicitly defines a temporary exception.
@@ -82,6 +82,77 @@ Run:
 Evidence to record:
 - Command output summary.
 - Any credentials, environment, or CI assumptions.
+
+### Cloudflare Deployment
+Use when changing the Cloudflare Pages launch contract, Pages Functions routing, environment variables, redirects, headers, preview deployments, DNS cutover docs, or rollback docs.
+
+Run:
+- `npm run build`
+- `npm run lint`
+- `npx tsc -b`
+- `npm run agent:smoke`
+- `npm run agent:check`
+- `git diff --check`
+
+Evidence to record:
+- Cloudflare project name/environment if known.
+- Build command and output directory.
+- Preview URL and production URL if available.
+- Whether static routes avoid Function invocation.
+- Direct-refresh checks for declared public routes.
+- DNS cutover and rollback assumptions.
+
+### Supabase Schema or Data Migration
+Use when adding Supabase schema, RLS policies, seed/migration scripts, public read contracts, or moving Projects, Stone Library, Articles, media, enquiries, or sample requests out of static files.
+
+Run:
+- `npm run build`
+- `npm run lint`
+- `npx tsc -b`
+- `npm run agent:check`
+- Tool-specific migration dry run or local Supabase verification when available.
+
+Evidence to record:
+- Tables/relations changed.
+- RLS status and public/admin access assumptions.
+- Migration source files and row counts where available.
+- Rollback or restore path.
+- Any customer-facing data not yet migrated.
+
+### Backend API and Forms
+Use when adding or changing `/api/*` endpoints, form submission behavior, Turnstile verification, Supabase writes, transactional email, or lead-status workflow.
+
+Run:
+- `npm run build`
+- `npm run lint`
+- `npx tsc -b`
+- `npm run agent:smoke`
+- API-level positive and negative submission tests when endpoints exist.
+
+Evidence to record:
+- Endpoint paths changed.
+- Valid submission result.
+- Invalid/spam submission result.
+- Supabase record creation proof.
+- Email notification proof or reason it was mocked.
+- Secret/env assumptions.
+
+### Admin CMS
+Use when adding or changing `/admin`, authenticated content CRUD, article block editing, media upload, or lead-management views.
+
+Run:
+- `npm run build`
+- `npm run lint`
+- `npx tsc -b`
+- `npm run agent:smoke`
+- Browser or Playwright checks for authenticated and unauthenticated admin routes when possible.
+
+Evidence to record:
+- Admin routes touched.
+- CRUD flows manually or automatically checked.
+- Draft/published visibility behavior.
+- Auth/RLS assumptions.
+- Any content type still requiring code edits.
 
 ## Output Rule
 Every completed task should leave a short verification note in `docs/WORKLOG.md` and should keep `docs/HANDOFF.md` current if it changes the next recommended action.

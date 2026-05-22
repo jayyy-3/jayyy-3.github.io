@@ -1,6 +1,6 @@
 # NEXT_STEPS - Urblo Roadmap
 
-Last updated: 2026-05-15
+Last updated: 2026-05-22
 
 ## Purpose
 This file is the human-readable roadmap. The machine-readable task queue lives in `docs/agent/tasks.json` and is the source of truth for active task status, file ownership, acceptance criteria, and verification commands.
@@ -8,7 +8,7 @@ This file is the human-readable roadmap. The machine-readable task queue lives i
 Use this file to understand priority shape. Use `docs/agent/tasks.json` to execute.
 
 ## Current Objective
-Raise delivery readiness baseline, keep route integrity explicit, and use the root harness plus design contract to align high-impact pages before later performance and data-quality refinements.
+Move Urblo from a static website toward a launchable Cloudflare + Supabase operating system: public site hosting, real forms, customer-maintained content, controlled media, and a durable admin workflow.
 
 ## Blocking Quality Gate Policy
 A task touching runtime behavior is not complete unless all three pass:
@@ -19,6 +19,8 @@ A task touching runtime behavior is not complete unless all three pass:
 Docs-only and harness-only work should run:
 - `npm run agent:check`
 - `git diff --check`
+
+Cloudflare/Supabase implementation work should also follow the new verification profiles in `docs/agent/verification.md`.
 
 ## Last Runtime Baseline
 Measured 2026-05-15:
@@ -36,24 +38,32 @@ For any user-facing layout/copy/IA task:
 ## Now
 Source of truth: `docs/agent/tasks.json`.
 
+- `NOW-CLOUDFLARE-SUPABASE-ARCH-001`: lock the Cloudflare Pages + Supabase launch architecture and cost model.
+- `NOW-SUPABASE-SCHEMA-001`: design the Supabase schema for Projects, Stone Library, Articles, media, and lead capture.
+- `NOW-CLOUDFLARE-PAGES-DEPLOY-001`: implement Cloudflare Pages deployment, preview, function routing, and rollback runbook.
+- `NOW-FORMS-SUPABASE-001`: replace mailto-only Contact and Sample Request flows with Supabase-backed submissions.
+- `NOW-ADMIN-CMS-001`: build the Urblo admin CMS for customer-maintained Projects, Stone Library, Articles, media, and leads.
+- `NOW-ASSET-MIGRATION-001`: migrate priority media away from old WordPress URLs and define controlled storage for launch.
+- `NOW-SEO-DELIVERY-001`: remove default metadata and finish launch-critical SEO, icon, social, and claim-safety details.
 - `NOW-STONELIB-IMG-FASTTRACK-001`: map provided finish assets into Stone Library and reduce placeholder usage.
 - `NOW-DELIVERY-READINESS-001`: remove template/default shell assets and user-visible placeholder UI.
-- `NOW-ASSET-STRATEGY-001`: decide and document current vs delivery image hosting policy.
-- `NOW-DEPLOY-PAGES-HARDEN-001`: harden GitHub Pages deployment and credential safety.
+- `NOW-ASSET-STRATEGY-001`: document interim static-site and Cloudflare/Supabase delivery-phase image hosting policy.
 
 ## Next
 - `NEXT-UI-PARITY-001`: bring Home, Our Story, Articles, and Contact Us toward approved visual references.
-- `NEXT-SAMPLE-REQUEST-001`: define Sample Request implementation path and backend/form constraints.
 - `NEXT-STONELIB-IMG-001`: complete Stone Library HD finish image coverage.
 - `NEXT-STONELIB-IMG-002`: decide and implement secondary finish frame behavior.
 - `NEXT-STONELIB-DATA-001`: replace generic finish behavior text with approved notes.
 - `NEXT-PROJECTS-INTAKE-001`: define the project intake template and migrate the next project into the material-map case study model.
-- `NEXT-ROUTER-SEO-001`: decide GitHub Pages routing and SEO tradeoff.
+- `NEXT-ROUTER-SEO-001`: decide final Cloudflare Pages routing and SEO tradeoff.
 
 ## Later
 - `LATER-BRAND-001`: align homepage modules with brand pillars and proof framing.
 - `LATER-PERF-001`: reduce bundle size and improve chunk strategy.
 - `LATER-QA-001`: broaden automated route and CTA smoke coverage.
+- `LATER-LAUNCH-DOCS-CONSOLIDATE-001`: after production launch, split the temporary launch plan into durable architecture, operations, and worklog docs.
+- `NOW-DEPLOY-PAGES-HARDEN-001`: legacy fallback only if Cloudflare Pages is reversed.
+- `NEXT-SAMPLE-REQUEST-001`: legacy fallback only if Supabase-backed forms are not implemented.
 
 ## Completed This Cycle
 - `DONE-DOCS-HARNESS-ROOT-001`: promoted `docs/README_AGENT.md` to root `AGENTS.md`, added `docs/DESIGN.md`, moved repo docs to relative paths, and separated brand authority from design execution authority.
@@ -65,6 +75,11 @@ Older completion details live in `docs/WORKLOG.md`.
 
 ## Exit Criteria for Current Delivery Cycle
 - Active `now` tasks in `docs/agent/tasks.json` are complete or explicitly deferred.
+- Cloudflare Pages can deploy production and preview builds.
+- Supabase schema, Auth, Storage, and RLS assumptions are implemented and verified.
+- Contact and Sample Request persist records and send notifications.
+- Admin users can CRUD Projects, Stone Library, Articles, media, and lead records without code edits.
+- Priority media no longer depends on old WordPress URLs for first-viewport production experience.
 - All applicable quality gates pass per `docs/agent/verification.md`.
 - Navigation and route contracts remain consistent with `src/App.tsx`, `src/data/siteChrome.ts`, and `src/components/site/SiteFooter.tsx`.
 - Delivery shell is free of template/default app metadata and dead social links.

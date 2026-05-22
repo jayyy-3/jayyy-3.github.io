@@ -1,13 +1,14 @@
 # HANDOFF - Current Agent State
 
-Last updated: 2026-05-18
+Last updated: 2026-05-22
 
 ## Current Focus
-Moon Gate is the first Projects-system material-map MVP:
-- Project listing/detail metadata has been unified in `src/data/projectData.ts`.
-- `Moon Gate | Woolley Street` now prioritizes project facts, a real project-photo material map, a compact material schedule, gallery evidence, and direct links into Stone Library.
-- `ProjectMaterialMap` is intentionally material-first: hotspots identify stone/finish/application placement and resolve stone labels, finish labels, preview imagery, and links through `StoneLibraryService` where possible.
-- Project archive/detail headings now use the live Urblo project typography pattern: `Avenir LT Std`, light hero/page H1, normal letter spacing, and no forced uppercase on the main title.
+The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin CMS:
+- Public website hosting should move to Cloudflare Pages.
+- Contact and Sample Request should move from mailto/local-only behavior to Supabase-backed submissions.
+- Projects, Stone Library, Articles, media records, and lead records should become customer-maintainable through `/admin`.
+- The current runtime remains static/file-backed until implementation tasks are completed.
+- The long-form plan and cost baseline live in `docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md`.
 
 ## Current Branch State
 - Branch: `main`
@@ -32,19 +33,26 @@ Moon Gate is the first Projects-system material-map MVP:
 - `npm run agent:check`: pass on 2026-05-18.
 - `npm run agent:smoke`: pass on 2026-05-18.
 - `git diff --check`: pass on 2026-05-18.
+- Cloudflare/Supabase launch plan docs: `npm run agent:check` and `git diff --check` pass on 2026-05-22.
 
 ## Active Risks
+- Cloudflare + Supabase is approved as the launch target, but runtime implementation has not started.
+- Supabase schema, RLS, Auth, Storage, admin CRUD, form APIs, and transactional email are not implemented yet.
+- Contact and Sample Request remain mailto/local-only in current runtime.
+- Projects, Stone Library, and Articles are still file-backed rather than customer-editable.
+- The admin CMS does not exist yet.
+- Priority media still needs migration away from old WordPress URLs, especially homepage video/poster and other first-viewport assets.
 - Stone Library finish imagery still has placeholder/mapping gaps.
 - App shell still has delivery-readiness debt around template/default assets and footer/social hygiene.
-- Image hosting policy is undecided for WordPress-hosted runtime assets.
-- GitHub Pages deployment workflow still needs hardening.
+- Image hosting policy must now be resolved against the Cloudflare/Supabase launch plan.
+- GitHub Pages deployment hardening is a legacy fallback only; Cloudflare Pages is the active target.
 - Bundle size warning (`>500kB`) remains open.
 - Moon Gate material/application notes are intentionally MVP-inferred from supplied imagery and public project context; designer confirmation is still needed before final production claims.
 - Other project pages still have legacy-level content and need migration into the material-map model.
 - React Helmet still emits an existing strict-mode lifecycle warning in dev console.
 
 ## Next Recommended Action
-Start `NEXT-PROJECTS-INTAKE-001` to define the reusable content intake template for future project migrations.
+Start `NOW-CLOUDFLARE-SUPABASE-ARCH-001`, then proceed through `NOW-SUPABASE-SCHEMA-001` before implementing forms or admin UI.
 
 ## Guardrails
 - Use repo-root relative paths in committed docs.

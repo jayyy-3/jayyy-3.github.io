@@ -1,11 +1,13 @@
 # Urblo Web - Architecture and Contracts
 
-Last updated: 2026-05-15
+Last updated: 2026-05-22
 
 ## System Boundary
-- Frontend-only React application shipped as static assets.
-- No runtime backend service in this repository.
-- No backend HTTP API contract currently exists for production runtime.
+- Current implementation: frontend-only React application shipped as static assets.
+- Current implementation: no runtime backend service exists in this repository yet.
+- Current implementation: no production HTTP API contract has been implemented yet.
+- Launch target: Cloudflare Pages static frontend, Cloudflare Pages Functions API endpoints, Supabase Postgres/Auth/Storage, and an Urblo-owned admin interface for content operations.
+- Planning source: `docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md`.
 
 ## Runtime Stack
 - Bundler/dev server: Vite 6
@@ -16,10 +18,34 @@ Last updated: 2026-05-15
 - Motion/interaction: Framer Motion
 - Supporting libraries: Swiper, DOMPurify, lodash.throttle, react-helmet
 
+## Launch Target Stack
+- Public hosting: Cloudflare Pages.
+- Backend/API: Cloudflare Pages Functions scoped to `/api/*`.
+- Database: Supabase Postgres.
+- Authentication: Supabase Auth for the admin area.
+- Admin UI: Urblo-owned `/admin` interface, not raw Supabase Studio for customer operation.
+- Public form protection: Cloudflare Turnstile.
+- Transactional email: external email API such as Resend, wired from server-side API code only.
+- Media storage:
+  - Supabase Storage for normal editorial, Stone Library, project, and article imagery.
+  - Cloudflare R2 or Stream remains the review path for large homepage video assets if Supabase Storage or Pages asset limits are a poor fit.
+- Cost planning:
+  - Lean production target: about USD 30/month before tax/usage spikes.
+  - Safer production target with paid transactional email headroom: about USD 50/month before tax/usage spikes.
+  - See `docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md` for the component-level cost table.
+
 ## Deployment and Build Contract
-- Deployment workflow: `.github/workflows/deploy.yml`
+- Current deployment workflow: `.github/workflows/deploy.yml`
   - Trigger: push to `main`
   - Pipeline: `npm ci` -> `npm run build` -> deploy `dist/` to GitHub Pages
+- Launch target deployment workflow:
+  - Cloudflare Pages Git integration builds the repository.
+  - Build command: `npm run build`
+  - Output directory: `dist`
+  - Production branch: `main` unless a later release process changes it.
+  - Preview deployments are required for branch/PR review.
+  - Cloudflare environment variables and secrets must not be committed.
+  - Function routing must be restricted so only `/api/*` invokes Pages Functions.
 - Vite base config: `vite.config.ts`
   - `base: './'` for relative asset paths
 - Build script contract: `package.json`
@@ -73,7 +99,8 @@ Last updated: 2026-05-15
 - Shared footer social links: Instagram and LinkedIn use external links with `target="_blank"` plus `rel="noopener noreferrer"`; Facebook and YouTube are rendered as non-linked labels until real destinations are available.
 
 ### Gaps
-- Sample Request is intentionally a `mailto:` fallback until a backend/form submission path is approved.
+- Current implementation gap: Sample Request is still a `mailto:` fallback.
+- Launch target: Contact and Sample Request submit through Cloudflare Pages Functions into Supabase, with Turnstile protection, email notification, and admin-visible lead records.
 
 ## Stone Library Detail Interaction Contract (`src/pages/StoneLibraryDetailPage.tsx`)
 - State composition:
@@ -159,7 +186,31 @@ Last updated: 2026-05-15
 - Loading behavior:
   - list page fetches `${import.meta.env.BASE_URL}articles/index.json`
   - detail page fetches index then HTML content
-  - HTML is sanitized via DOMPurify before render
+- HTML is sanitized via DOMPurify before render
+- Launch target:
+  - Articles move to Supabase-backed structured article blocks.
+  - Raw newsletter HTML remains migration source material, not the long-term authoring format.
+  - Approved block types are tracked in `docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md`.
+
+### Supabase Launch Data Contract (Target)
+- Site settings:
+  - Global SEO, logo, favicon, social links, footer content, and default share image.
+- Projects:
+  - Project metadata, hero/gallery media, published status, SEO, evidence facts, material schedules, and hotspot records.
+  - Hotspots store image-percentage coordinates and references to Stone Library records where possible.
+- Stone Library:
+  - Stone groups, variants, finishes, finish imagery, specifications, availability, and display ordering.
+- Articles:
+  - Article metadata plus structured block records.
+  - Blocks cover rich text, image, gallery, quote, FAQ, CTA, project spotlight, stone reference, comparison table, proof metric, video embed, and callout.
+- Forms:
+  - Enquiries and sample requests store submitted fields, source route, Turnstile result, notification status, admin status, owner, and internal notes.
+- Admin audit:
+  - Admin mutations should be attributable through audit fields or audit-event records.
+- Access control:
+  - Public reads expose only published content.
+  - Admin writes require Supabase Auth.
+  - RLS must be enabled for exposed tables before any public integration is considered complete.
 
 ### Contact Page Contract
 - Route: `/contact`
@@ -169,6 +220,10 @@ Last updated: 2026-05-15
   - Direct contact channels use `mailto:` and `tel:` links.
   - The project-brief form is local React state only; submit builds a prefilled `mailto:info@urblo.com.au` draft through `window.location.href`.
   - The page links back to `/stone-library` as a material discovery path.
+- Launch target behavior:
+  - Contact and Sample Request submit to server-side endpoints.
+  - Server-side endpoints validate payloads, verify Turnstile, write Supabase records, and send transactional email.
+  - Visitor-facing success/failure states must not depend on opening a local email client.
 
 ## State Contract (`src/store/productStore.ts`)
 - Store keys:
@@ -193,6 +248,11 @@ Last updated: 2026-05-15
   - No authenticated or server API fetches
 - Contact side effects:
   - Contact page submit opens a local email draft via `mailto:`; no form payload is stored in this application.
+- Launch target side effects:
+  - Public read paths fetch published Supabase content either at build time or through a controlled API contract.
+  - Admin paths require authenticated Supabase sessions.
+  - Form submissions create durable Supabase records and email notifications.
+  - Old WordPress media URLs must not remain first-viewport production dependencies.
 
 ## Homepage Contract
 - Homepage structure is driven by dedicated internal config in `src/data/homepage.ts`, not the legacy tabbed `FeatureSection`.
@@ -209,8 +269,12 @@ Last updated: 2026-05-15
 - `npx tsc -b`: pass
 
 ## Known Architecture Risks
-- Sample Request has no backend/form workflow yet and remains a `mailto:` fallback.
-- Project list data and project detail data are maintained in separate sources.
+- Cloudflare + Supabase is the approved launch target, but implementation has not started in runtime code.
+- Sample Request has no backend/form workflow yet and remains a `mailto:` fallback in current runtime.
+- Projects, Stone Library, and Articles remain file-backed until Supabase migration work is implemented.
+- Admin CMS does not exist yet; customers cannot CRUD content without code changes.
+- Project and Stone Library content migration needs strict separation between confirmed facts and inferred MVP copy.
+- Old WordPress-hosted media URLs remain a delivery risk until priority media is migrated or explicitly accepted.
 - Bundle size warning (`>500kB`) indicates code-splitting and chunk strategy debt.
 
 ## Brand and Design Linkage Rule

@@ -1,6 +1,42 @@
 # WORKLOG - Urblo Execution Log
 
-Last updated: 2026-05-18
+Last updated: 2026-05-22
+
+## Entry - 2026-05-22 (Cloudflare + Supabase Launch Harness)
+
+### Scope
+- Recorded the launch decision to use Cloudflare Pages, Cloudflare Pages Functions, Supabase, and an Urblo-owned admin CMS.
+- Added a long-form launch plan with monthly platform cost planning, required workstreams, and launch readiness gates.
+- Recorded that `docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md` is temporary before launch and must be consolidated into architecture, operations, and worklog docs after production launch.
+- Updated machine task priority so Cloudflare/Supabase schema, deployment, forms, admin CMS, media migration, and SEO delivery are the active launch track.
+- Added verification profiles for Cloudflare deployment, Supabase schema/data migration, backend API/forms, and admin CMS work.
+- Updated handoff and roadmap docs to distinguish current static/file-backed runtime reality from the target launch architecture.
+
+### Changed Files
+- `AGENTS.md`
+- `docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+- `docs/agent/verification.md`
+- `docs/WORKLOG.md`
+
+### Verification Results
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- Runtime gates intentionally skipped because this is a docs/harness planning change only.
+
+### Risks and Gaps
+- Runtime code still deploys as a static app and still uses mailto/local-only form behavior until implementation tasks are completed.
+- Supabase schema, RLS, Auth, Storage, Pages Functions, transactional email, and `/admin` are not yet implemented.
+- Cloudflare Pages project, environment variables, DNS cutover, and rollback still need implementation and verification.
+- Platform costs are estimates and must be rechecked before billing commitments or major usage changes.
+
+### Next Handoff
+- `NOW-CLOUDFLARE-SUPABASE-ARCH-001`
+- `NOW-SUPABASE-SCHEMA-001`
+- `NOW-CLOUDFLARE-PAGES-DEPLOY-001`
 
 ## Entry - 2026-05-18 (Project Typography Alignment)
 

@@ -1,6 +1,6 @@
 # AGENTS - Urblo AI Harness Entry
 
-Last updated: 2026-05-15
+Last updated: 2026-05-22
 
 ## Project Mission
 Urblo web exists to communicate a design-led, engineering-backed, proof-driven natural stone solution system for streetscapes and civil landscapes.
@@ -75,7 +75,10 @@ Before declaring implementation complete, verify all checks below:
 ## Current Critical Risk Snapshot
 - Root harness entry is `AGENTS.md`; the old `docs/README_AGENT.md` path is retired.
 - Current-state handoff is `docs/HANDOFF.md`; machine task state is `docs/agent/tasks.json`.
+- Launch target is now Cloudflare Pages + Supabase + Urblo-owned `/admin`; the long-form plan is `docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md`.
+- Current runtime remains static/file-backed until the new launch tasks are implemented.
 - Stone Library migration is complete: old `/materials*` route family has been removed and replaced with `/stone-library` plus `/stone-library/:stoneGroupId`.
-- Contact route is declared at `/contact`; shared header/footer navigation points to declared routes, with Sample Request remaining a `mailto:` fallback until a backend/form path is chosen.
+- Contact route is declared at `/contact`; shared header/footer navigation points to declared routes, with Sample Request remaining a `mailto:` fallback until `NOW-FORMS-SUPABASE-001` is implemented.
 - Last runtime gates were measured on 2026-05-08 and were green (`npm run build`, `npm run lint`, `npx tsc -b`).
 - Bundle size warning (`>500kB` chunk) remains and should be addressed with code splitting.
+- GitHub Pages hardening is now a legacy fallback; Cloudflare Pages deployment is the active launch path.
