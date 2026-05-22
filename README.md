@@ -1,54 +1,62 @@
-# React + TypeScript + Vite
+# Urblo Web
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Urblo web communicates a design-led, engineering-backed natural stone system for streetscapes and civil landscapes.
 
-Currently, two official plugins are available:
+## Current Status
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Current implementation: static React frontend with file-backed content.
+- Launch direction: Cloudflare Pages, Supabase, and an Urblo-owned `/admin` CMS.
+- Current backend status: no production API, Supabase integration, or admin CMS is implemented yet.
+- Planning and handoff live in the AI Harness docs under `docs/`.
 
-## Expanding the ESLint configuration
+## Agent Entry Points
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Start with:
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+```sh
+npm run agent:init
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Then read:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- `AGENTS.md`
+- `docs/HANDOFF.md`
+- `docs/agent/tasks.json`
+- `docs/agent/verification.md`
+- `docs/ARCHITECTURE.md`
+- `docs/NEXT_STEPS.md`
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+## Local Development
+
+```sh
+npm install
+npm run dev
 ```
+
+## Verification
+
+Runtime changes should pass:
+
+```sh
+npm run build
+npm run lint
+npx tsc -b
+npm run agent:smoke
+```
+
+Docs and harness changes should pass:
+
+```sh
+npm run agent:check
+git diff --check
+```
+
+## Deployment Direction
+
+Cloudflare Pages is the active launch target. The current GitHub Pages workflow is legacy fallback only unless the launch plan changes.
+
+See:
+
+- `docs/CLOUDFLARE_DEPLOYMENT.md`
+- `docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md`
+- `docs/SUPABASE_SCHEMA.md`

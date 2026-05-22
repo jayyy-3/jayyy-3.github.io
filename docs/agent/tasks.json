@@ -245,14 +245,24 @@
     },
     {
       "id": "NOW-DELIVERY-READINESS-001",
-      "status": "now",
+      "status": "done",
       "priority": 9,
       "summary": "Remove template/default assets and visible placeholder UI that block production handoff.",
       "files": [
+        "README.md",
+        "docs/HANDOFF.md",
+        "docs/NEXT_STEPS.md",
+        "docs/WORKLOG.md",
+        "docs/agent/tasks.json",
         "index.html",
         "src/components/homepage/HomepageSections.tsx",
         "src/components/site/SiteFooter.tsx",
         "src/data/siteChrome.ts"
+      ],
+      "notes": [
+        "2026-05-22: README no longer contains Vite starter-template guidance.",
+        "2026-05-22: Unused src/assets/react.svg was removed.",
+        "Footer social links remain limited to live Instagram and LinkedIn destinations with noopener/noreferrer."
       ],
       "acceptance": [
         "No user-visible Vite/default app metadata remains.",

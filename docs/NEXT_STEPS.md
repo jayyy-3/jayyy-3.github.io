@@ -44,7 +44,6 @@ Source of truth: `docs/agent/tasks.json`.
 - `NOW-ASSET-MIGRATION-001`: migrate priority media away from old WordPress URLs and define controlled storage for launch.
 - `NOW-SEO-DELIVERY-001`: remove default metadata and finish launch-critical SEO, icon, social, and claim-safety details.
 - `NOW-STONELIB-IMG-FASTTRACK-001`: map provided finish assets into Stone Library and reduce placeholder usage.
-- `NOW-DELIVERY-READINESS-001`: remove template/default shell assets and user-visible placeholder UI.
 - `NOW-ASSET-STRATEGY-001`: document interim static-site and Cloudflare/Supabase delivery-phase image hosting policy.
 
 ## Next
@@ -74,6 +73,7 @@ Source of truth: `docs/agent/tasks.json`.
 - `NOW-SUPABASE-SCHEMA-001`: Supabase schema plan is documented for Projects, Stone Library, Products, Articles, media, admin access, and lead capture.
 - `NEXT-ROUTER-SEO-001`: clean Cloudflare Pages routing is implemented with `BrowserRouter`, root Vite base, and SPA fallback.
 - Asset migration stopgap: direct old WordPress media references have been removed from runtime data and replaced with controlled local assets under `public/media/launch`; article covers and known article detail images now use a local runtime cleanup layer, while CMS media records and structured article blocks remain open under the article/admin tracks.
+- `NOW-DELIVERY-READINESS-001`: removed Vite starter README content and deleted the unused React starter SVG asset.
 
 Older completion details live in `docs/WORKLOG.md`.
 

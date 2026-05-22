@@ -45,6 +45,7 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 - Legacy project media and Stone Library fallback migration: runtime, harness, old WordPress scan, and browser media QA pass on 2026-05-22.
 - Old-site favicon restoration: runtime, harness, local asset, and browser head verification pass on 2026-05-22.
 - Article media cleanup: runtime build/lint/typecheck pass on 2026-05-22; Browser QA confirms `/articles` uses local article covers and all four article detail routes render text with zero known external/proxy article images or campaign/unsubscribe/Google redirect/old upload links after lazy-load scroll.
+- Delivery-readiness cleanup: Vite starter README content and the unused React starter SVG asset were removed on 2026-05-22.
 
 ## Active Risks
 - Cloudflare + Supabase is approved as the launch target, but runtime implementation has not started.
@@ -56,7 +57,7 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 - P0/P1 old WordPress media references in runtime data have been migrated to controlled local assets under `public/media/launch`; article covers and known detail images now have a local runtime stopgap under `public/media/launch/articles`.
 - Stone Library finish imagery still has placeholder/mapping gaps.
 - Raw article newsletter HTML remains source material and still needs Supabase structured-block migration plus editorial cleanup before the article system is considered final.
-- App shell default Vite metadata has been replaced; delivery-readiness debt remains around final share imagery and deeper claim-safety review.
+- App shell default Vite metadata and starter README content have been replaced; launch polish debt remains around final share imagery and deeper claim-safety review.
 - Image hosting policy must now be resolved against the Cloudflare/Supabase launch plan.
 - GitHub Pages deployment hardening is a legacy fallback only; Cloudflare Pages is the active target and currently blocked at account-level project setup.
 - Bundle size warning (`>500kB`) remains open.

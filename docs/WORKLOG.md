@@ -1050,6 +1050,39 @@ Last updated: 2026-05-22
 - `NOW-STONELIB-IMG-FASTTRACK-001`
 - `NOW-DELIVERY-READINESS-001`
 
+## Entry - 2026-05-22 (Delivery Readiness Cleanup)
+
+### Scope
+- Replaced the default Vite starter README with an Urblo-specific project README.
+- Removed the unused React starter SVG asset from the starter assets folder.
+- Marked `NOW-DELIVERY-READINESS-001` done because the active app metadata, favicon, footer social destinations, README handoff, and starter asset cleanup no longer expose template defaults.
+
+### Changed Files
+- `README.md`
+- `src/assets/*`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run build`: pass with existing bundle size warning and Browserslist staleness notice.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- Final share imagery and deeper claim-safety review remain under `NOW-SEO-DELIVERY-001`.
+- Contact and Sample Request still need Supabase-backed implementation.
+
+### Next Handoff
+- `NOW-FORMS-SUPABASE-001`
+- `NOW-ADMIN-CMS-001`
+- `NOW-STONELIB-IMG-FASTTRACK-001`
+- `NOW-ASSET-STRATEGY-001`
+
 ## Entry Template (Use for Every Future Session)
 
 ### Date
