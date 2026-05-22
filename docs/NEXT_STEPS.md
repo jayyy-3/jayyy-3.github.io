@@ -40,15 +40,16 @@ For any user-facing layout/copy/IA task:
 Source of truth: `docs/agent/tasks.json`.
 
 - `NOW-FORMS-SUPABASE-001`: replace mailto-only Contact and Sample Request flows with Supabase-backed submissions.
-- `NOW-ADMIN-CMS-001`: build the Urblo admin CMS for customer-maintained Projects, Stone Library, Products, Articles, media, and leads.
+- `NOW-ADMIN-CMS-001`: umbrella objective for customer-maintained Projects, Stone Library, Products, Articles, media, and leads; execute through the smaller admin child tasks.
 - `NOW-ASSET-MIGRATION-001`: migrate priority media away from old WordPress URLs and define controlled storage for launch.
 - `NOW-ROUTE-ERROR-STATES-001`: replace catch-all homepage fallback and blank loading states with launch-safe route error states.
 - `NOW-ARTICLE-STRUCTURE-CLAIMS-001`: move article details from raw newsletter HTML to mobile-safe, claim-reviewed structured article templates.
 
 ## Next
+- `NEXT-ADMIN-IA-ACCESS-001`: define executable admin IA, access states, and module rollout sequence before building CRUD.
 - `NEXT-UI-PARITY-001`: bring Home, Our Story, Articles, and Contact Us toward approved visual references.
-- `NEXT-STONELIB-IMG-001`: complete Stone Library HD finish image coverage.
 - `NEXT-STONELIB-DRIVE-IMAGE-AUDIT-001`: compare the Saistone Google Drive `Urblo Digital Stone Library` source folder against current website Stone Library imagery.
+- `NEXT-STONELIB-IMG-001`: complete Stone Library HD finish image coverage after the Drive image audit.
 - `NEXT-STONELIB-IMG-002`: decide and implement secondary finish frame behavior.
 - `NEXT-STONELIB-DATA-001`: replace generic finish behavior text with approved notes.
 - `NEXT-PRODUCT-DETAIL-CONVERSION-001`: make product details behave like credible conversion/configuration pages.
@@ -63,6 +64,9 @@ Source of truth: `docs/agent/tasks.json`.
 
 ## Blocked
 - `NOW-CLOUDFLARE-PAGES-DEPLOY-001`: repo-side Cloudflare Pages configuration is prepared; dashboard project creation, preview URL validation, production custom domain, DNS cutover, and rollback require Cloudflare account access.
+- `NOW-ADMIN-AUTH-RLS-001`: Supabase Auth, RLS, and protected admin shell require Supabase project credentials and admin access policy.
+- `NOW-ADMIN-CONTENT-CRUD-001`: admin CRUD modules require the protected admin shell and Supabase content tables.
+- `NOW-ADMIN-MEDIA-LEADS-001`: media library and lead management require Supabase Storage, form endpoints, Turnstile, and email secrets.
 
 ## Completed This Cycle
 - `DONE-DOCS-HARNESS-ROOT-001`: promoted `docs/README_AGENT.md` to root `AGENTS.md`, added `docs/DESIGN.md`, moved repo docs to relative paths, and separated brand authority from design execution authority.

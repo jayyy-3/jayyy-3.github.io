@@ -120,6 +120,9 @@
         "src/service/StoneLibraryService.ts",
         "src/pages/ArticlePage.tsx"
       ],
+      "notes": [
+        "2026-05-22: This is an umbrella launch objective, not a directly executable single-pass implementation task. Execute through the smaller admin IA, auth/RLS, content CRUD, media, and lead-management tasks below."
+      ],
       "acceptance": [
         "Authenticated admin users can create, read, update, delete, draft, and publish Projects, Stone Library records, Products, Articles, and media records without code edits.",
         "Article editing uses approved structured block types instead of arbitrary newsletter HTML.",
@@ -130,6 +133,134 @@
         "npm run lint",
         "npx tsc -b",
         "npm run agent:smoke"
+      ]
+    },
+    {
+      "id": "NEXT-ADMIN-IA-ACCESS-001",
+      "status": "next",
+      "priority": 5.1,
+      "summary": "Define executable admin IA, access states, and module rollout sequence before building CRUD.",
+      "files": [
+        "docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md",
+        "docs/SUPABASE_SCHEMA.md",
+        "docs/ARCHITECTURE.md",
+        "docs/DESIGN.md",
+        "docs/HANDOFF.md",
+        "docs/NEXT_STEPS.md",
+        "docs/WORKLOG.md",
+        "docs/agent/tasks.json",
+        "src/App.tsx"
+      ],
+      "notes": [
+        "This is the no-secret admin task to run before Supabase credentials are available. It should turn the admin umbrella into concrete route, permission, and module contracts without pretending backend auth exists."
+      ],
+      "acceptance": [
+        "Admin route map is explicit, including unauthenticated, authenticated, unauthorized, loading, and draft/published states.",
+        "Module rollout sequence is recorded for leads, media, Stone Library, Projects, Products, and Articles.",
+        "Each content type has a first-pass field ownership model: editable by customer, computed by system, or developer-only until migration.",
+        "Follow-up implementation tasks remain blocked wherever Supabase project credentials, RLS, Storage, Turnstile, or email secrets are required."
+      ],
+      "verification": [
+        "npm run agent:check",
+        "git diff --check"
+      ]
+    },
+    {
+      "id": "NOW-ADMIN-AUTH-RLS-001",
+      "status": "blocked",
+      "priority": 5.2,
+      "summary": "Implement Supabase Auth, RLS, and the protected Urblo admin shell.",
+      "files": [
+        "docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md",
+        "docs/SUPABASE_SCHEMA.md",
+        "docs/ARCHITECTURE.md",
+        "docs/HANDOFF.md",
+        "docs/WORKLOG.md",
+        "docs/agent/tasks.json",
+        "src/App.tsx"
+      ],
+      "notes": [
+        "Blocked until Supabase project URL, anon key, service-role handling plan, and admin user policy are available."
+      ],
+      "acceptance": [
+        "Admin shell route is protected by Supabase Auth.",
+        "Unauthenticated and unauthorized users cannot access admin content.",
+        "RLS policies are enabled and verified for public-read and admin-write boundaries.",
+        "Admin session behavior is documented and covered by browser or Playwright checks."
+      ],
+      "verification": [
+        "npm run build",
+        "npm run lint",
+        "npx tsc -b",
+        "npm run agent:smoke",
+        "npm run agent:check"
+      ]
+    },
+    {
+      "id": "NOW-ADMIN-CONTENT-CRUD-001",
+      "status": "blocked",
+      "priority": 5.3,
+      "summary": "Implement admin CRUD modules for Projects, Stone Library, Products, and Articles.",
+      "files": [
+        "docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md",
+        "docs/SUPABASE_SCHEMA.md",
+        "docs/ARCHITECTURE.md",
+        "docs/HANDOFF.md",
+        "docs/WORKLOG.md",
+        "docs/agent/tasks.json",
+        "src/data/projectData.ts",
+        "src/data/productData.ts",
+        "src/service/StoneLibraryService.ts",
+        "src/pages/ArticlePage.tsx"
+      ],
+      "notes": [
+        "Blocked until the admin auth/RLS shell and Supabase content tables are available. Article editing must use structured blocks, not raw newsletter HTML."
+      ],
+      "acceptance": [
+        "Admin users can draft, publish, edit, archive, and delete Projects, Stone Library records, Products, and Articles.",
+        "Public routes expose only published content and preserve current route contracts.",
+        "Article CRUD uses approved structured blocks and strips newsletter artifacts from the authoring model.",
+        "Static file-backed data sources have a documented migration or fallback path."
+      ],
+      "verification": [
+        "npm run build",
+        "npm run lint",
+        "npx tsc -b",
+        "npm run agent:smoke",
+        "npm run agent:check"
+      ]
+    },
+    {
+      "id": "NOW-ADMIN-MEDIA-LEADS-001",
+      "status": "blocked",
+      "priority": 5.4,
+      "summary": "Implement admin media library and lead-management workflow.",
+      "files": [
+        "docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md",
+        "docs/SUPABASE_SCHEMA.md",
+        "docs/ASSET_MIGRATION_AUDIT.md",
+        "docs/ARCHITECTURE.md",
+        "docs/HANDOFF.md",
+        "docs/WORKLOG.md",
+        "docs/agent/tasks.json",
+        "public/media/launch",
+        "src/pages/ContactPage.tsx"
+      ],
+      "notes": [
+        "Blocked until Supabase Storage, form submission endpoints, Turnstile verification, and transactional email secrets are available."
+      ],
+      "acceptance": [
+        "Admin users can manage uploaded media records with source, alt text, usage, and publish status.",
+        "Contact and Sample Request submissions are visible to admins with status, owner, notes, and notification state.",
+        "Large homepage video delivery remains reviewed against Cloudflare R2 or Stream before becoming a CMS-managed default.",
+        "Media and lead workflows have clear rollback/export paths."
+      ],
+      "verification": [
+        "npm run build",
+        "npm run lint",
+        "npx tsc -b",
+        "npm run agent:smoke",
+        "npm run agent:check"
       ]
     },
     {
@@ -498,7 +629,7 @@
     {
       "id": "NEXT-STONELIB-IMG-001",
       "status": "next",
-      "priority": 12,
+      "priority": 12.2,
       "summary": "Complete Stone Library finish imagery coverage after fast-track ingestion.",
       "files": [
         "docs/ASSET_MIGRATION_AUDIT.md",
@@ -506,7 +637,8 @@
         "src/service/StoneLibraryService.ts"
       ],
       "notes": [
-        "2026-05-22 full-site QA confirmed Golden Crust, Harcourt, and Tan Brown still expose visible Image coming soon placeholders in Stone Library, and product Body Stone selectors can surface placeholder/data images for stones without approved imagery."
+        "2026-05-22 full-site QA confirmed Golden Crust, Harcourt, and Tan Brown still expose visible Image coming soon placeholders in Stone Library, and product Body Stone selectors can surface placeholder/data images for stones without approved imagery.",
+        "Run NEXT-STONELIB-DRIVE-IMAGE-AUDIT-001 first so final HD coverage uses the current shared-drive source, not stale fast-track assumptions."
       ],
       "acceptance": [
         "All priority stones/finishes display intended HD images in list and detail views.",
@@ -523,7 +655,7 @@
     {
       "id": "NEXT-STONELIB-DRIVE-IMAGE-AUDIT-001",
       "status": "next",
-      "priority": 12.1,
+      "priority": 11.9,
       "summary": "Audit the Stone Library Google Drive image source against current website imagery.",
       "files": [
         "docs/ASSET_MIGRATION_AUDIT.md",

@@ -77,7 +77,9 @@ Before declaring implementation complete, verify all checks below:
 - Current-state handoff is `docs/HANDOFF.md`; machine task state is `docs/agent/tasks.json`.
 - Launch target is now Cloudflare Pages + Supabase + Urblo-owned `/admin`; the long-form plan is `docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md`.
 - Current runtime remains static/file-backed until the new launch tasks are implemented.
+- `NOW-ADMIN-CMS-001` is an umbrella objective, not a single executable implementation task; use the smaller admin IA/auth/CRUD/media/leads tasks in `docs/agent/tasks.json`.
 - Stone Library migration is complete: old `/materials*` route family has been removed and replaced with `/stone-library` plus `/stone-library/:stoneGroupId`.
+- Run `NEXT-STONELIB-DRIVE-IMAGE-AUDIT-001` against the Saistone Google Drive `Urblo Digital Stone Library` source before final Stone Library HD image coverage.
 - Contact route is declared at `/contact`; shared header/footer navigation points to declared routes, with Sample Request remaining a `mailto:` fallback until `NOW-FORMS-SUPABASE-001` is implemented.
 - Last runtime gates were measured on 2026-05-22 and were green (`npm run build`, `npm run lint`, `npx tsc -b`, `npm run agent:smoke`).
 - Route-level code splitting is in place and the previous `>500kB` chunk warning is resolved; continue monitoring bundle output as features are added.

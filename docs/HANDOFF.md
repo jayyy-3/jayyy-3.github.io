@@ -13,7 +13,7 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 ## Current Branch State
 - Branch: `main`
 - Remote tracking: `origin/main`
-- Current work includes runtime UI, data, local project assets, and harness doc updates.
+- Worktree should be clean after the latest pushed harness/task updates; verify with `git status --short` before editing.
 
 ## Canonical Entry Points
 - Agent entry: `AGENTS.md`
@@ -26,34 +26,11 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 - Historical evidence: `docs/WORKLOG.md`
 
 ## Latest Verification Snapshot
-- `npm run build`: pass on 2026-05-22; the previous bundle size warning remains resolved, with the existing Browserslist staleness notice only.
-- `npm run lint`: pass on 2026-05-22.
-- `npx tsc -b`: pass on 2026-05-22.
-- Playwright visual QA: desktop and mobile Moon Gate detail page checked locally; hotspot click changed the active material inspector, the legacy ACU detail page no longer showed Moon Gate copy, and project heading computed styles matched the live Avenir project-title pattern.
-- `npm run agent:check`: pass on 2026-05-18.
-- `npm run agent:smoke`: pass on 2026-05-18.
-- `git diff --check`: pass on 2026-05-18.
-- Cloudflare/Supabase launch plan docs: `npm run agent:check` and `git diff --check` pass on 2026-05-22.
-- Supabase schema planning docs: `npm run agent:check` and `git diff --check` pass on 2026-05-22.
-- `npm run agent:smoke`: pass on 2026-05-22 for clean routes and article index.
-- Cloudflare Pages repo-side routing/runbook work: runtime and harness verification pass on 2026-05-22.
-- SEO metadata baseline: runtime and harness verification pass on 2026-05-22.
-- Asset migration audit: `npm run agent:check` and `git diff --check` pass on 2026-05-22.
-- P0 launch media stopgap: runtime and harness verification pass on 2026-05-22.
-- Browser media QA on 2026-05-22: desktop homepage selects local MP4 and poster; mobile homepage selects no MP4 source and uses the local poster; Products, Product detail, Projects, Our Story, Contact, Articles, and Article detail banners load from local `public/media/launch` assets with no broken images observed.
-- Homepage video replacement and P1 visible homepage/Our Story media pass: runtime, harness, and browser media QA pass on 2026-05-22.
-- Legacy project media and Stone Library fallback migration: runtime, harness, old WordPress scan, and browser media QA pass on 2026-05-22.
-- Old-site favicon restoration: runtime, harness, local asset, and browser head verification pass on 2026-05-22.
-- Article media cleanup: runtime build/lint/typecheck pass on 2026-05-22; Browser QA confirms `/articles` uses local article covers and all four article detail routes render text with zero known external/proxy article images or campaign/unsubscribe/Google redirect/old upload links after lazy-load scroll.
-- Delivery-readiness cleanup: Vite starter README content and the unused React starter SVG asset were removed on 2026-05-22.
-- Asset hosting strategy: current local `public/media/launch` stopgap plus delivery-phase Supabase Storage and Cloudflare R2/Stream review policy are documented and `NOW-ASSET-STRATEGY-001` is closed.
-- Stone Library image fast-track: provided primary finish assets are mapped, controlled fallback usage is documented, and remaining missing image groups are recorded for the full coverage task.
-- SEO/social launch cleanup: default social metadata now uses a 1200 x 630 PNG share image, article excerpts are claim-safe, and known high-risk newsletter phrases are rewritten at runtime.
-- Performance cleanup: route-level lazy loading is implemented in `src/App.tsx`; build output no longer emits the previous `>500kB` JavaScript chunk warning.
-- Smoke coverage cleanup: `npm run agent:smoke` now checks declared route shells, article index availability, and key CTA targets including Contact, Sample Request mailto fallback, Moon Gate CTAs, Contact page Stone Library CTA, and stone detail phone CTA.
-- Homepage Browse by stone type removal: requested section, section data, and four unused local stone showcase images were removed on 2026-05-22.
-- Full-site UI/UX QA on 2026-05-22 covered Home, Stone Library list/detail, Products list/detail, Projects list/detail, Our Story, Contact, Articles list/detail, plus mobile spot checks. No broken images or broad horizontal overflow were found outside the known article newsletter HTML issue; article mobile overflow now has a runtime CSS stopgap.
-- Final browser QA on 2026-05-22 confirms Home no longer contains `Browse by stone type`, Prime Block initializes default material selections, and the Debunking article has zero horizontal overflow at 390px after the article stopgap.
+- Last full runtime gate on 2026-05-22: `npm run build`, `npm run lint`, `npx tsc -b`, and `npm run agent:smoke` pass. Build no longer emits the previous `>500kB` JavaScript chunk warning; Browserslist staleness notice remains.
+- Last docs/harness gate on 2026-05-22: `npm run agent:check` and `git diff --check` pass.
+- Recent browser QA on 2026-05-22: Home no longer contains `Browse by stone type`; Prime Block initializes default material selections; the Debunking article has zero horizontal overflow at 390px after the article stopgap.
+- Current controlled-media status: P0/P1 visible media has local stopgaps under `public/media/launch`; direct old WordPress `wp-content/uploads` references are removed from runtime data; article media still needs structured-block migration.
+- Detailed historical verification evidence lives in `docs/WORKLOG.md`; keep this snapshot limited to current state and latest gates.
 
 ## Active Risks
 - Cloudflare + Supabase is approved as the launch target, but runtime implementation has not started.
@@ -62,10 +39,9 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 - Contact and Sample Request remain mailto/local-only in current runtime.
 - Unknown URLs still render the homepage through the catch-all route; `NOW-ROUTE-ERROR-STATES-001` tracks a proper 404/not-found state.
 - Projects, Stone Library, Products, and Articles are still file-backed rather than customer-editable.
-- The admin CMS does not exist yet.
+- The admin CMS does not exist yet. `NOW-ADMIN-CMS-001` is an umbrella objective; use `NEXT-ADMIN-IA-ACCESS-001` first, then the blocked auth/RLS, content CRUD, media, and lead-management child tasks when Supabase access is available.
 - P0/P1 old WordPress media references in runtime data have been migrated to controlled local assets under `public/media/launch`; article covers and known detail images now have a local runtime stopgap under `public/media/launch/articles`.
-- Stone Library fast-track imagery is mapped/documented, but final HD coverage still needs approved source images for Golden Crust, Harcourt, and Tan Brown plus a decision on secondary Juparana/Zen Grey frames.
-- The Saistone Google Drive shared folder `Urblo Digital Stone Library` is now recorded as the temporary Stone Library image source of truth; `NEXT-STONELIB-DRIVE-IMAGE-AUDIT-001` should compare it against current website mappings before final image coverage work.
+- Stone Library fast-track imagery is mapped/documented, but final HD coverage must start with `NEXT-STONELIB-DRIVE-IMAGE-AUDIT-001` against the Saistone Google Drive `Urblo Digital Stone Library` source before `NEXT-STONELIB-IMG-001`.
 - Raw article newsletter HTML remains source material and still needs Supabase structured-block migration, claim-safety review, mobile-safe templates, and full editorial cleanup before the article system is considered final.
 - Product detail pages now initialize default material selections, but still need a stronger conversion/configuration experience with clear CTA, selected-summary feedback, and deliberate missing-image states.
 - Legacy project detail pages remain weaker than the Moon Gate material-map case study model; at least one more project should be migrated before the project system feels consistent.
@@ -79,7 +55,7 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 - React Helmet still emits an existing strict-mode lifecycle warning in dev console.
 
 ## Next Recommended Action
-Start `NOW-FORMS-SUPABASE-001` once Supabase project credentials and Turnstile/email secrets are available. Return to `NOW-CLOUDFLARE-PAGES-DEPLOY-001` once Cloudflare dashboard access is available. If account access is still unavailable, the next useful non-secret launch tasks are `NEXT-STONELIB-DRIVE-IMAGE-AUDIT-001`, `NOW-ROUTE-ERROR-STATES-001`, `NOW-ARTICLE-STRUCTURE-CLAIMS-001`, `NEXT-PRODUCT-DETAIL-CONVERSION-001`, and `NEXT-PROJECTS-INTAKE-001`.
+If account access is unavailable, start with `NEXT-STONELIB-DRIVE-IMAGE-AUDIT-001` or `NEXT-ADMIN-IA-ACCESS-001`; both are useful non-secret tasks. Then use `NOW-ROUTE-ERROR-STATES-001`, `NEXT-PRODUCT-DETAIL-CONVERSION-001`, or `NEXT-PROJECTS-INTAKE-001` for runtime polish. Start `NOW-FORMS-SUPABASE-001`, `NOW-ADMIN-AUTH-RLS-001`, and `NOW-CLOUDFLARE-PAGES-DEPLOY-001` only when the required Supabase, Turnstile/email, or Cloudflare access is available.
 
 ## Guardrails
 - Use repo-root relative paths in committed docs.

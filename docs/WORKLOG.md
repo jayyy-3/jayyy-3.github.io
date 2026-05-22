@@ -1329,6 +1329,34 @@ Last updated: 2026-05-22
 - `NEXT-STONELIB-IMG-001`
 - `NEXT-STONELIB-IMG-002`
 
+## Entry - 2026-05-22 (Harness Task Sequencing Cleanup)
+
+### Scope
+- Shortened `docs/HANDOFF.md` so it reads as a current handoff instead of a full verification history.
+- Re-sequenced Stone Library image work so `NEXT-STONELIB-DRIVE-IMAGE-AUDIT-001` runs before final HD image coverage.
+- Marked `NOW-ADMIN-CMS-001` as an umbrella objective and added smaller admin child tasks for IA/access planning, Auth/RLS, content CRUD, media, and lead management.
+- Updated roadmap and root harness notes so future agents do not attempt the whole admin CMS in one pass.
+
+### Changed Files
+- `AGENTS.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- The new admin implementation child tasks remain blocked until Supabase/Auth/Storage/form secrets are available.
+- `NEXT-ADMIN-IA-ACCESS-001` is the only admin task intended to proceed without secrets.
+
+### Next Handoff
+- `NEXT-STONELIB-DRIVE-IMAGE-AUDIT-001`
+- `NEXT-ADMIN-IA-ACCESS-001`
+- `NOW-ROUTE-ERROR-STATES-001`
+
 ## Entry Template (Use for Every Future Session)
 
 ### Date
