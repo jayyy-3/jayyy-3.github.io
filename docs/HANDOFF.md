@@ -38,6 +38,7 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 - `npm run agent:smoke`: pass on 2026-05-22 for clean routes and article index.
 - Cloudflare Pages repo-side routing/runbook work: runtime and harness verification pass on 2026-05-22.
 - SEO metadata baseline: runtime and harness verification pass on 2026-05-22.
+- Asset migration audit: `npm run agent:check` and `git diff --check` pass on 2026-05-22.
 
 ## Active Risks
 - Cloudflare + Supabase is approved as the launch target, but runtime implementation has not started.
@@ -46,7 +47,7 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 - Contact and Sample Request remain mailto/local-only in current runtime.
 - Projects, Stone Library, Products, and Articles are still file-backed rather than customer-editable.
 - The admin CMS does not exist yet.
-- Priority media still needs migration away from old WordPress URLs, especially homepage video/poster and other first-viewport assets.
+- Priority media still needs migration away from old WordPress URLs; P0/P1/P2 risk groups are documented in `docs/ASSET_MIGRATION_AUDIT.md`.
 - Stone Library finish imagery still has placeholder/mapping gaps.
 - App shell default Vite metadata has been replaced; delivery-readiness debt remains around article cleanup, final share imagery, and deeper claim-safety review.
 - Image hosting policy must now be resolved against the Cloudflare/Supabase launch plan.

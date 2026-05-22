@@ -34,6 +34,7 @@ After launch:
 - Preview deployments: Cloudflare Pages branch/PR previews for client review before publishing.
 - API layer: Cloudflare Pages Functions under `/api/*` only.
 - Deployment runbook: `docs/CLOUDFLARE_DEPLOYMENT.md`.
+- Asset migration audit: `docs/ASSET_MIGRATION_AUDIT.md`.
 - Database: Supabase Postgres.
 - Auth: Supabase Auth for the admin area.
 - Admin UI: Urblo-owned `/admin` interface, not raw Supabase Studio for customers.

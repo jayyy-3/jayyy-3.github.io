@@ -2,6 +2,37 @@
 
 Last updated: 2026-05-22
 
+## Entry - 2026-05-22 (Asset Migration Audit)
+
+### Scope
+- Added `docs/ASSET_MIGRATION_AUDIT.md` to inventory old WordPress and remote article media dependencies.
+- Classified launch media risk into P0, P1, and P2 groups.
+- Identified homepage video/poster, logo, route banners, contact image, and share image as pre-cutover risks.
+- Documented storage targets for normal images, homepage video, and short-term local stopgap assets.
+- Added verification commands for checking residual old-site media references before cutover.
+
+### Changed Files
+- `docs/ASSET_MIGRATION_AUDIT.md`
+- `docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md`
+- `docs/HANDOFF.md`
+- `docs/agent/tasks.json`
+- `docs/WORKLOG.md`
+
+### Verification Results
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- Runtime gates intentionally skipped because this is a docs/asset-audit change only.
+
+### Risks and Gaps
+- `NOW-ASSET-MIGRATION-001` remains open because the audit is complete but actual media migration is not.
+- Homepage video/poster and old WordPress route banners remain runtime dependencies.
+- Article media cleanup remains tied to the future article CMS block migration.
+
+### Next Handoff
+- Continue `NOW-ASSET-MIGRATION-001` with P0 asset replacement.
+- Continue `NOW-SEO-DELIVERY-001` article cleanup and claim-safety review.
+- `NOW-FORMS-SUPABASE-001`
+
 ## Entry - 2026-05-22 (SEO Metadata Baseline)
 
 ### Scope

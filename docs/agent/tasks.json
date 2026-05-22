@@ -9,6 +9,7 @@
       "priority": 1,
       "summary": "Lock the Cloudflare Pages + Supabase launch architecture and cost model.",
       "files": [
+        "docs/ASSET_MIGRATION_AUDIT.md",
         "docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md",
         "docs/ARCHITECTURE.md",
         "docs/NEXT_STEPS.md",
