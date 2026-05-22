@@ -154,7 +154,8 @@
       ],
       "notes": [
         "2026-05-22: P0 launch stopgap is implemented for logo, homepage poster/video, route banners, and contact imagery under public/media/launch.",
-        "Task remains open for P1/P2 legacy media, Supabase media records, article media cleanup, and final Cloudflare R2/Stream review for homepage video."
+        "2026-05-22: Homepage video replaced with a web-ready H.264 export from the user-provided Urblo_Homepage.mp4; homepage and Our Story visible media now use controlled local assets.",
+        "Task remains open for legacy project media, Stone Library fallback media, Supabase media records, article media cleanup, and final Cloudflare R2/Stream review for homepage video."
       ],
       "acceptance": [
         "All first-viewport critical media, logo assets, homepage video/poster assets, and priority project/stone imagery have a controlled hosting path.",

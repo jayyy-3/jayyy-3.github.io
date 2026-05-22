@@ -109,7 +109,7 @@ export const homepageData = {
     eyebrow: 'A trusted partner for your next streetscapes & civil landscape project.',
   },
   sustainability: {
-    footprintUrl: 'https://urblo.com.au/wp-content/uploads/2025/01/co2-footprint.png',
+    footprintUrl: '/media/launch/homepage/co2-footprint.png',
     tabs: [
       { id: 'sustainability', title: 'Sustainability' },
       { id: 'installation', title: 'Streamline Installation' },
@@ -128,29 +128,29 @@ export const homepageData = {
           index: '01',
           label: 'First step',
           title: 'Off-site pre-Assembly',
-          image: 'https://urblo.com.au/wp-content/uploads/2024/12/step1-scaled.jpg',
+          image: '/media/launch/homepage/installation-step-1.jpg',
         },
         {
           id: 'step_1',
           index: '02',
           label: 'Second step',
           title: 'Delivery to site',
-          image: 'https://urblo.com.au/wp-content/uploads/2024/12/step2.jpg',
+          image: '/media/launch/homepage/installation-step-2.jpg',
         },
         {
           id: 'step_2',
           index: '03',
           label: 'Third step',
           title: 'Sling & Place',
-          image: 'https://urblo.com.au/wp-content/uploads/2024/12/step3-scaled.jpg',
+          image: '/media/launch/homepage/installation-step-3.jpg',
         },
       ] satisfies HomepageInstallationStep[],
     },
     costSaving: {
       leftTitle: 'Concrete',
       rightTitle: 'Stone',
-      leftImage: 'https://urblo.com.au/wp-content/uploads/2024/12/concrete.jpeg',
-      rightImage: 'https://urblo.com.au/wp-content/uploads/2024/12/stone.jpeg',
+      leftImage: '/media/launch/homepage/cost-concrete.jpg',
+      rightImage: '/media/launch/homepage/cost-stone.jpg',
       note: 'This is a comparison of total cost between insitu concrete and customized stone solution in general circumstances. In regards of special circumstances, please refer to additional documents.',
       rows: [
         { label: 'Preparation cost', leftPercentage: 30, rightPercentage: 25 },
@@ -167,7 +167,7 @@ export const homepageData = {
           index: '01',
           title: 'Sketch & concept design',
           variant: 'dark',
-          image: 'https://urblo.com.au/wp-content/uploads/2024/12/sketch-concept-design.jpeg',
+          image: '/media/launch/homepage/collab-sketch-concept-design.jpg',
         },
         {
           index: '02',
@@ -179,7 +179,7 @@ export const homepageData = {
           index: '03',
           title: 'Engineering design',
           variant: 'dark',
-          image: 'https://urblo.com.au/wp-content/uploads/2024/12/engineering-design.jpeg',
+          image: '/media/launch/homepage/collab-engineering-design.jpg',
         },
         {
           index: '04',
@@ -197,7 +197,7 @@ export const homepageData = {
           index: '06',
           title: 'Shop drawing',
           variant: 'dark',
-          image: 'https://urblo.com.au/wp-content/uploads/2024/12/shop-drawing.jpeg',
+          image: '/media/launch/homepage/collab-shop-drawing.jpg',
         },
         {
           index: '07',
@@ -209,7 +209,7 @@ export const homepageData = {
           index: '08',
           title: 'Manufacture',
           variant: 'dark',
-          image: 'https://urblo.com.au/wp-content/uploads/2024/12/manufacture.jpeg',
+          image: '/media/launch/homepage/collab-manufacture.jpg',
         },
         {
           index: '09',
@@ -228,8 +228,7 @@ export const homepageData = {
     title: 'Explore our latest products',
     intro:
       'Urblo was conceived as a response to the growing demand for better and greener alternatives to concrete seats / planters.',
-    backgroundImage:
-      'https://urblo.com.au/wp-content/uploads/2024/12/P1090007-1-scaled-2.jpg',
+    backgroundImage: '/media/launch/homepage/product-showcase-bg.jpg',
     categories: [
       {
         index: '01',
@@ -274,7 +273,7 @@ export const homepageData = {
       title: 'Artisan Park',
       excerpt:
         'Deakin University student accomodation was organised back in July 2016 with a focus on practical, durable, and design-led streetscape outcomes.',
-      image: 'https://urblo.com.au/wp-content/uploads/2024/12/P1090007-1-scaled-2-1024x657.jpg',
+      image: '/media/launch/homepage/project-artisan-park.jpg',
     } satisfies HomepageProject,
     gallery: [
       {
@@ -287,22 +286,19 @@ export const homepageData = {
         slug: 'moon-gate-woolley-street',
         title: 'Moon Gate',
         excerpt: 'Polished stone sculptural forms for a landmark arrival.',
-        image:
-          'https://urblo.com.au/wp-content/uploads/2024/12/Moon-Garden-4-Web-Sized-Matthew-Sherren-Photography.jpg',
+        image: '/media/launch/homepage/project-moon-gate.jpg',
       },
       {
         slug: 'west-side-place',
         title: 'West Side Place',
         excerpt: 'Large-scale stone deployment across a dense urban precinct.',
-        image:
-          'https://urblo.com.au/wp-content/uploads/2024/12/WhatsApp-Image-2024-12-18-at-15.30.57-scaled.jpeg',
+        image: '/media/launch/homepage/project-west-side-place.jpg',
       },
       {
         slug: 'xavier-college',
         title: 'Xavier College',
         excerpt: 'Warm sandstone detailing for an educational landscape.',
-        image:
-          'https://urblo.com.au/wp-content/uploads/2024/12/WhatsApp-Image-2024-12-18-at-16.00.24-scaled.jpeg',
+        image: '/media/launch/homepage/project-xavier-college.jpg',
       },
     ] satisfies HomepageProject[],
   },
@@ -315,34 +311,32 @@ export const homepageData = {
         index: '01',
         title: 'Antline',
         finish: 'Sawn',
-        image: 'https://urblo.com.au/wp-content/uploads/2024/12/Antline-scaled-1.jpg',
+        image: '/media/launch/homepage/stone-antline.jpg',
       },
       {
         index: '02',
         title: 'Zen Grey',
-        image: 'https://urblo.com.au/wp-content/uploads/2024/12/New-Grey-1-1.jpg',
+        image: '/media/launch/homepage/stone-zen-grey.jpg',
       },
       {
         index: '03',
         title: 'Ash Grey',
         finish: 'Flamed',
-        image: 'https://urblo.com.au/wp-content/uploads/2024/12/Ash-Grey-1.jpg',
+        image: '/media/launch/homepage/stone-ash-grey.jpg',
       },
       {
         index: '04',
         title: 'Ken Black',
         finish: 'Flamed',
-        image: 'https://urblo.com.au/wp-content/uploads/2024/12/Ken-Black-1.jpg',
+        image: '/media/launch/homepage/stone-ken-black.jpg',
       },
     ] satisfies HomepageStoneCard[],
     sampleCta:
       'mailto:info@urblo.com.au?subject=Sample%20Request&body=Hi%20Urblo%2C%20I%20would%20like%20to%20request%20stone%20samples.',
   },
   manifesto: {
-    backgroundImage:
-      'https://urblo.com.au/wp-content/uploads/2025/01/WhatsApp-Image-2024-12-18-at-13.19.23-scaled-1.png',
-    image:
-      'https://urblo.com.au/wp-content/uploads/2025/01/stone-block-design-scaled-1.jpg',
+    backgroundImage: '/media/launch/homepage/manifesto-bg.png',
+    image: '/media/launch/homepage/manifesto-stone-block.jpg',
     supportingText:
       'At Urblo, we believe in the transformative power of stone to shape urban environments.',
     lines: ['Natural', 'Stone', 'Blocks', 'design'],
@@ -350,24 +344,23 @@ export const homepageData = {
   logoCarousel: [
     {
       alt: 'Delta',
-      image: 'https://urblo.com.au/wp-content/uploads/2024/12/logo1-1.png',
+      image: '/media/launch/homepage/partners/delta.png',
     },
     {
       alt: 'Aspect Studios',
-      image: 'https://urblo.com.au/wp-content/uploads/2024/12/ASPECTStudios_logo-1.png',
+      image: '/media/launch/homepage/partners/aspect-studios.png',
     },
     {
       alt: 'Wamara',
-      image: 'https://urblo.com.au/wp-content/uploads/2024/12/logo-1.png',
+      image: '/media/launch/homepage/partners/wamara.png',
     },
     {
       alt: 'Symal logo',
-      image: 'https://urblo.com.au/wp-content/uploads/2024/12/symal-logo.D2MsYZMB_ZxdUqU-1.png',
+      image: '/media/launch/homepage/partners/symal.png',
     },
   ] satisfies HomepageLogo[],
   videoCta: {
-    backgroundImage:
-      'https://urblo.com.au/wp-content/uploads/2024/12/WhatsApp-Image-2024-12-18-at-15.47.49.jpeg',
+    backgroundImage: '/media/launch/homepage/video-cta-bg.jpg',
     videoUrl: '/media/launch/home/urblo-hero.mp4',
   },
   footer: {

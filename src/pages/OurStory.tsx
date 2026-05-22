@@ -15,14 +15,14 @@ export default function OurStory() {
     {
       name: 'Natalie',
       role: 'Co-Founder',
-      img: 'https://urblo.com.au/wp-content/uploads/2025/01/Natalie-Ma-1-1.jpg',
+      img: '/media/launch/our-story/natalie-ma.jpg',
       bio:
         'Natalie founded Urblo with SAI Stone to bridge the gap between designers and suppliers through natural materials.',
     },
     {
       name: 'Cameron',
       role: 'Sales Manager',
-      img: 'https://urblo.com.au/wp-content/uploads/2025/01/Cameron-scaled-1-1.jpg',
+      img: '/media/launch/our-story/cameron.jpg',
       bio:
         'With deep stone-sourcing experience, Cameron helps clients across Australia match material character to project intent.',
     },
@@ -97,7 +97,7 @@ export default function OurStory() {
       <section className="relative flex min-h-[420px] items-center justify-center overflow-hidden text-white">
         <motion.div
           className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: 'url(https://urblo.com.au/wp-content/uploads/2024/12/carbon-neutral-banner.jpg)' }}
+          style={{ backgroundImage: 'url(/media/launch/banners/our-story.jpg)' }}
           initial={{ scale: 1.08 }}
           whileInView={{ scale: 1 }}
           viewport={{ once: true }}

@@ -2,6 +2,47 @@
 
 Last updated: 2026-05-22
 
+## Entry - 2026-05-22 (Homepage Video Replacement and P1 Visible Media)
+
+### Scope
+- Replaced the old local homepage MP4 with a web-ready H.264 720p export from the user-provided `Urblo_Homepage.mp4`.
+- Kept the public runtime path as `public/media/launch/home/urblo-hero.mp4` so the existing homepage and video modal code continues to use the controlled source.
+- Migrated homepage section imagery, latest-project thumbnails, Stone Showcase thumbnails, manifesto imagery, partner logos, and video CTA background away from old WordPress URLs.
+- Migrated Our Story portraits away from old WordPress URLs and replaced the old carbon banner URL, which returned 404, with the controlled local route banner.
+- Updated architecture, asset audit, handoff, roadmap, and task queue docs to reflect the new media state.
+
+### Changed Files
+- `public/media/launch/home/urblo-hero.mp4`
+- `public/media/launch/homepage`
+- `public/media/launch/our-story`
+- `src/data/homepage.ts`
+- `src/pages/OurStory.tsx`
+- `docs/ARCHITECTURE.md`
+- `docs/ASSET_MIGRATION_AUDIT.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run build`: pass (existing bundle size warning and Browserslist staleness notice remain).
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- Browser QA: desktop homepage selected the new local MP4, reported `readyState=4`, `1280x720`, `17.67s`, and no broken first-screen images; mobile homepage selected no MP4 source and kept the local poster fallback.
+
+### Risks and Gaps
+- `NOW-ASSET-MIGRATION-001` remains open because legacy project media, Stone Library fallback media, and article media still need migration.
+- The homepage MP4 is controlled locally for launch safety but should still be reviewed for Cloudflare R2 or Stream before production scale.
+- The original user-provided HEVC source was not committed; only the web-ready export is in the repository.
+
+### Next Handoff
+- Continue `NOW-ASSET-MIGRATION-001` with legacy project media and Stone Library fallback media.
+- `NOW-FORMS-SUPABASE-001`
+- `NOW-SEO-DELIVERY-001`
+
 ## Entry - 2026-05-22 (P0 Launch Media Stopgap)
 
 ### Scope
