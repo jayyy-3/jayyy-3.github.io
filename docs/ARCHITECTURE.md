@@ -132,6 +132,8 @@ Routing uses clean paths through `BrowserRouter`. Cloudflare Pages direct refres
 - Contact image path: `public/media/launch/contact/project-contact.jpg`, referenced by `src/pages/ContactPage.tsx` and reused in homepage data where the same old WordPress image was previously used.
 - Homepage section imagery and partner logos now use controlled files under `public/media/launch/homepage`.
 - Our Story portraits now use controlled files under `public/media/launch/our-story`; the carbon banner uses the controlled route banner because the old WordPress carbon banner returned 404.
+- Legacy project listing/detail media now uses controlled files under `public/media/launch/projects`.
+- Stone Library fallback media now uses controlled files under `public/media/launch/stone-library/fallbacks`.
 - This is not the long-term CMS media contract. During Supabase migration, these assets should be represented as media records and moved to Supabase Storage or Cloudflare media storage according to final performance testing.
 
 ## Stone Library Detail Interaction Contract (`src/pages/StoneLibraryDetailPage.tsx`)

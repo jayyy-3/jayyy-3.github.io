@@ -73,7 +73,7 @@ Source of truth: `docs/agent/tasks.json`.
 - `NOW-CLOUDFLARE-SUPABASE-ARCH-001`: Cloudflare Pages + Supabase launch architecture, cost model, and customer-facing approval PDF are documented.
 - `NOW-SUPABASE-SCHEMA-001`: Supabase schema plan is documented for Projects, Stone Library, Products, Articles, media, admin access, and lead capture.
 - `NEXT-ROUTER-SEO-001`: clean Cloudflare Pages routing is implemented with `BrowserRouter`, root Vite base, and SPA fallback.
-- Asset migration stopgap: launch-critical logo, homepage poster/video, route banners, contact imagery, homepage section imagery, partner logos, and Our Story imagery now have controlled local assets under `public/media/launch`; `NOW-ASSET-MIGRATION-001` remains active for legacy project media, Stone Library fallback media, article media, and CMS media migration.
+- Asset migration stopgap: direct old WordPress media references have been removed from runtime data and replaced with controlled local assets under `public/media/launch`; article media cleanup and CMS media migration remain open under the article/admin tracks.
 
 Older completion details live in `docs/WORKLOG.md`.
 

@@ -11,12 +11,12 @@ It does not mean the assets have already been migrated. It records what must be 
 Scan scope: `src`, `public/articles`, and `data`.
 
 Findings:
-- 81 unique remote URLs were detected.
-- 26 unique URLs point at `urblo.com.au`.
-- 15 unique URLs still point at old `urblo.com.au/wp-content/uploads` assets after the P0/P1 visible media pass.
+- 66 unique remote URLs were detected.
+- 11 unique URLs point at `urblo.com.au`, all from article/email-import links rather than runtime image references.
+- 0 direct URLs point at old `urblo.com.au/wp-content/uploads` assets after the legacy project and Stone Library fallback pass.
 - Article HTML contains additional remote proxy and tracking URLs from Google, Front, Squarespace, and Squarespace email campaigns.
-- `public` is about 51 MB after the P0/P1 local launch media stopgap.
-- `public/media/launch` is about 27 MB, including the local homepage MP4 and controlled homepage/Our Story imagery.
+- `public` is about 58 MB after the local launch media stopgap.
+- `public/media/launch` is about 33 MB, including the local homepage MP4 plus controlled homepage, Our Story, legacy project, and Stone Library fallback imagery.
 - Current `dist` is about 135 MB after build, largely because large stone imagery is bundled into build output plus controlled launch media.
 
 ## Launch Risk
@@ -63,9 +63,9 @@ These are visible content quality and performance items.
 |---|---|---|---|
 | Homepage process and proof imagery | Local `public/media/launch/homepage` assets | Controlled local stopgap in place. | Move to Supabase media records during CMS migration. |
 | Homepage latest project images | Local `public/media/launch/homepage` assets | Controlled local stopgap in place. | Move to Supabase media records during CMS migration. |
-| Legacy project images | `src/data/projectData.ts` old WordPress images | Project archive/detail pages depend on old site | Migrate project media during Supabase project import. |
+| Legacy project images | Local `public/media/launch/projects` assets | Controlled local stopgap in place. | Move to Supabase media records during project CMS migration. |
 | Our Story portraits and banner | Local `public/media/launch/our-story` plus controlled route banner | Controlled local stopgap in place; old `carbon-neutral-banner.jpg` tested as 404 on 2026-05-22. | Move to Supabase media records during CMS migration. |
-| Remote Stone Library finish fallbacks | `src/data/stoneFinishImages.ts` old WordPress images | Some finish imagery still depends on old site | Migrate or replace with approved finish assets. |
+| Remote Stone Library finish fallbacks | Local `public/media/launch/stone-library/fallbacks` assets | Controlled local stopgap in place. | Replace with approved HD finish assets during full Stone Library image coverage. |
 
 ### P2 - Migrate Through CMS Cleanup
 These should not block infrastructure setup but must be cleaned before the article system is considered launch-quality.
@@ -78,14 +78,14 @@ These should not block infrastructure setup but must be cleaned before the artic
 | Emoji image assets | article HTML `fonts.gstatic.com` emoji images | Cosmetic external dependency | Remove or replace with text/icons during article block conversion. |
 
 ## Detailed Old WordPress URL Inventory
-The current scan still finds old `wp-content/uploads` dependencies in:
-- `src/data/projectData.ts`: legacy project covers and galleries.
-- `src/data/stoneFinishImages.ts`: several remote finish images.
+The current scan finds no direct old `wp-content/uploads` dependencies in `src`, `public/articles`, or `data`.
 
 Resolved in the local launch stopgap:
 - `src/App.tsx`: route banner backgrounds.
 - `src/data/homepage.ts`: logo, hero video, poster, sustainability, process, project, stone, client logo, manifesto, and video CTA media.
 - `src/data/siteChrome.ts`: shared logo.
+- `src/data/projectData.ts`: legacy project covers and galleries.
+- `src/data/stoneFinishImages.ts`: remote Stone Library fallback images.
 - `src/pages/ContactPage.tsx`: contact image.
 - `src/pages/OurStory.tsx`: portraits and carbon banner.
 
@@ -116,8 +116,10 @@ Current stopgap location:
 - `public/media/launch/contact`
 - `public/media/launch/our-story`
 - `public/media/launch/banners`
+- `public/media/launch/projects`
+- `public/media/launch/stone-library/fallbacks`
 
-Runtime references were moved from old WordPress URLs to these paths in `src/App.tsx`, `src/data/homepage.ts`, `src/data/siteChrome.ts`, `src/pages/ContactPage.tsx`, and `src/pages/OurStory.tsx`.
+Runtime references were moved from old WordPress URLs to these paths in `src/App.tsx`, `src/data/homepage.ts`, `src/data/siteChrome.ts`, `src/data/projectData.ts`, `src/data/stoneFinishImages.ts`, `src/pages/ContactPage.tsx`, and `src/pages/OurStory.tsx`.
 
 ## Migration Sequence
 
@@ -125,9 +127,8 @@ Runtime references were moved from old WordPress URLs to these paths in `src/App
 2. Add mobile fallback behavior for homepage video.
 3. Migrate route banner/contact imagery.
 4. Migrate homepage proof/process/project imagery.
-5. Migrate legacy project images as project records move into Supabase.
-6. Migrate Stone Library remaining remote finish images.
-7. Convert articles to CMS blocks and remove remote email artifacts.
+5. Convert articles to CMS blocks and remove remote email artifacts.
+6. Move local stopgap media into Supabase/Cloudflare media records during CMS migration.
 
 ## Verification
 
@@ -148,10 +149,12 @@ Verified on 2026-05-22:
 - `git diff --check`: pass.
 - Browser QA: desktop homepage selects the local MP4 and local poster; mobile homepage selects no MP4 source and uses the local poster; Products, Product detail, Projects, Our Story, Contact, Articles, and Article detail route banners load from local `public/media/launch` paths with no broken images observed.
 - Browser QA after the homepage video replacement: desktop homepage selects `public/media/launch/home/urblo-hero.mp4`, reports `readyState=4`, `1280x720`, and `17.67s`; mobile homepage still selects no MP4 source and keeps the poster fallback.
+- Direct old WordPress media scan after legacy project and Stone Library fallback migration: `rg "urblo.com.au/wp-content/uploads" src public/articles data` returns no results.
+- Browser QA after legacy project and Stone Library fallback migration: Projects list, legacy project detail pages, Stone Library list, and Blueocean stone detail show no broken images and no old WordPress image URLs.
 
 Before declaring asset migration complete:
-- `rg "urblo.com.au/wp-content" src public/articles data`
-  returns only explicitly deferred legacy references, or no results.
+- `rg "urblo.com.au/wp-content/uploads" src public/articles data`
+  returns no direct old WordPress media references.
 - Article list covers are controlled assets.
 - Article detail HTML no longer depends on email proxy image URLs.
 - All migrated assets have alt text, owner, and source recorded in Supabase media records.

@@ -205,31 +205,31 @@ const stoneFinishImages: Record<string, VariantImageMap> = {
     },
     'blueocean': {
         default: {
-            imageUrl: 'https://urblo.com.au/wp-content/uploads/2024/12/Blueocean-Sawn-1.jpg',
+            imageUrl: '/media/launch/stone-library/fallbacks/blueocean-sawn.jpg',
             alt: 'Blueocean stone surface',
         },
     },
     'honey-comb': {
         default: {
-            imageUrl: 'https://urblo.com.au/wp-content/uploads/2024/12/Blueocean-Sawn-1.jpg',
+            imageUrl: '/media/launch/stone-library/fallbacks/blueocean-sawn.jpg',
             alt: 'Honey Comb stone surface',
         },
     },
     'tuscany': {
         default: {
-            imageUrl: 'https://urblo.com.au/wp-content/uploads/2024/12/Toscany-1-1.jpg',
+            imageUrl: '/media/launch/stone-library/fallbacks/tuscany.jpg',
             alt: 'Tuscany stone surface',
         },
     },
     'tuscany--vein-cut': {
         default: {
-            imageUrl: 'https://urblo.com.au/wp-content/uploads/2024/12/Toscany-1-1.jpg',
+            imageUrl: '/media/launch/stone-library/fallbacks/tuscany.jpg',
             alt: 'Tuscany vein cut surface',
         },
     },
     'tuscany--cross-cut': {
         default: {
-            imageUrl: 'https://urblo.com.au/wp-content/uploads/2024/12/Creama-1-1.jpg',
+            imageUrl: '/media/launch/stone-library/fallbacks/tuscany-cross-cut.jpg',
             alt: 'Tuscany cross cut surface',
         },
     },

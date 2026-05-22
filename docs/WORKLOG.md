@@ -2,6 +2,45 @@
 
 Last updated: 2026-05-22
 
+## Entry - 2026-05-22 (Legacy Project and Stone Fallback Media)
+
+### Scope
+- Migrated legacy project listing/detail images from old WordPress URLs into `public/media/launch/projects`.
+- Migrated remaining Stone Library fallback images from old WordPress URLs into `public/media/launch/stone-library/fallbacks`.
+- Updated `src/data/projectData.ts` and `src/data/stoneFinishImages.ts` to use controlled local paths.
+- Updated asset audit, architecture, handoff, roadmap, and task queue docs to record that direct old WordPress media references are no longer present in runtime data.
+
+### Changed Files
+- `public/media/launch/projects`
+- `public/media/launch/stone-library/fallbacks`
+- `src/data/projectData.ts`
+- `src/data/stoneFinishImages.ts`
+- `docs/ARCHITECTURE.md`
+- `docs/ASSET_MIGRATION_AUDIT.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run build`: pass (existing bundle size warning and Browserslist staleness notice remain).
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `rg "urblo.com.au/wp-content/uploads" src public/articles data`: no results.
+- Browser QA: Projects list, legacy project detail pages, Stone Library list, and Blueocean stone detail showed no broken images and no old WordPress image URLs.
+
+### Risks and Gaps
+- Article list/detail media still contains external Squarespace, Google, and Front email artifacts and should be cleaned through `NOW-SEO-DELIVERY-001` and the Article CMS migration.
+- Local launch media remains a stopgap; Supabase/Cloudflare media records are still required for long-term customer-maintained content.
+
+### Next Handoff
+- Continue `NOW-SEO-DELIVERY-001` with article media/HTML cleanup.
+- `NOW-FORMS-SUPABASE-001`
+- `NOW-ADMIN-CMS-001`
+
 ## Entry - 2026-05-22 (Homepage Video Replacement and P1 Visible Media)
 
 ### Scope

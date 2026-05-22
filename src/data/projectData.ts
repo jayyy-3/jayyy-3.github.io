@@ -72,20 +72,21 @@ export interface ProjectCta {
 }
 
 const moonGateAssetRoot = '/images/projects/moon-gate';
+const legacyProjectAssetRoot = '/media/launch/projects';
 
 export const projects: ProjectData[] = [
     {
         slug: "australian-catholic-university",
         name: "Australian Catholic University",
         images: [
-            "https://urblo.com.au/wp-content/uploads/2024/12/WhatsApp-Image-2024-12-18-at-15.47.48.jpeg",
-            "https://urblo.com.au/wp-content/uploads/2024/12/WhatsApp-Image-2024-12-18-at-15.47.49.jpeg",
+            `${legacyProjectAssetRoot}/australian-catholic-university/detail-1.jpg`,
+            `${legacyProjectAssetRoot}/australian-catholic-university/detail-2.jpg`,
         ],
         listing: {
             title: "Australian Catholic University",
             location: "Victoria",
             date: "December 18, 2024",
-            cover: "https://urblo.com.au/wp-content/uploads/2024/12/IMGP0028-scaled-1.jpg",
+            cover: "/media/launch/contact/project-contact.jpg",
         },
         details: {
             Stone: "Bluestone",
@@ -102,14 +103,14 @@ export const projects: ProjectData[] = [
         slug: "west-side-place",
         name: "West Side Place",
         images: [
-            "https://urblo.com.au/wp-content/uploads/2024/12/WhatsApp-Image-2024-12-18-at-15.30.49-scaled.jpeg",
-            "https://urblo.com.au/wp-content/uploads/2024/12/WhatsApp-Image-2024-12-18-at-15.30.57-scaled.jpeg",
+            `${legacyProjectAssetRoot}/west-side-place/detail-1.jpg`,
+            `${legacyProjectAssetRoot}/west-side-place/detail-2.jpg`,
         ],
         listing: {
             title: "West Side Place",
             location: "Victoria",
             date: "December 16, 2024",
-            cover: "https://urblo.com.au/wp-content/uploads/2024/12/P1090007-1-scaled-2.jpg",
+            cover: `${legacyProjectAssetRoot}/west-side-place/cover.jpg`,
         },
         details: {
             Stone: [
@@ -129,14 +130,14 @@ export const projects: ProjectData[] = [
         slug: "xavier-college",
         name: "Xavier College",
         images: [
-            "https://urblo.com.au/wp-content/uploads/2024/12/WhatsApp-Image-2024-12-18-at-16.00.24-1-scaled.jpeg",
-            "https://urblo.com.au/wp-content/uploads/2024/12/WhatsApp-Image-2024-12-18-at-16.00.24-scaled.jpeg",
+            `${legacyProjectAssetRoot}/xavier-college/detail-1.jpg`,
+            `${legacyProjectAssetRoot}/xavier-college/detail-2.jpg`,
         ],
         listing: {
             title: "Xavier College",
             location: "Victoria",
             date: "December 15, 2024",
-            cover: "https://urblo.com.au/wp-content/uploads/2024/12/WhatsApp-Image-2024-12-18-at-14.55.37-1.jpeg",
+            cover: `${legacyProjectAssetRoot}/xavier-college/cover.jpg`,
         },
         details: {
             Stone: "Sandstone",
@@ -153,14 +154,14 @@ export const projects: ProjectData[] = [
         slug: "artisan-park-yarrabend",
         name: "Artisan Park | YarraBend",
         images: [
-            "https://urblo.com.au/wp-content/uploads/2024/12/IMG_3557-1-scaled.jpg",
-            "https://urblo.com.au/wp-content/uploads/2024/12/DJI_0212-scaled-1.png",
+            `${legacyProjectAssetRoot}/artisan-park-yarrabend/detail-1.jpg`,
+            `${legacyProjectAssetRoot}/artisan-park-yarrabend/detail-2.png`,
         ],
         listing: {
             title: "Artisan Park | YarraBend",
             location: "Victoria",
             date: "December 14, 2024",
-            cover: "https://urblo.com.au/wp-content/uploads/2025/01/WhatsApp-Image-2024-12-18-at-13.19.23-scaled-1.png",
+            cover: `${legacyProjectAssetRoot}/artisan-park-yarrabend/cover.png`,
         },
         details: {
             Stone: "New Grey",

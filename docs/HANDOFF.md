@@ -42,6 +42,7 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 - P0 launch media stopgap: runtime and harness verification pass on 2026-05-22.
 - Browser media QA on 2026-05-22: desktop homepage selects local MP4 and poster; mobile homepage selects no MP4 source and uses the local poster; Products, Product detail, Projects, Our Story, Contact, Articles, and Article detail banners load from local `public/media/launch` assets with no broken images observed.
 - Homepage video replacement and P1 visible homepage/Our Story media pass: runtime, harness, and browser media QA pass on 2026-05-22.
+- Legacy project media and Stone Library fallback migration: runtime, harness, old WordPress scan, and browser media QA pass on 2026-05-22.
 
 ## Active Risks
 - Cloudflare + Supabase is approved as the launch target, but runtime implementation has not started.
@@ -50,7 +51,7 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 - Contact and Sample Request remain mailto/local-only in current runtime.
 - Projects, Stone Library, Products, and Articles are still file-backed rather than customer-editable.
 - The admin CMS does not exist yet.
-- P0 launch-critical media plus homepage/Our Story visible media now use controlled local assets under `public/media/launch`; remaining P1/P2 media is concentrated in legacy project data, Stone Library finish fallbacks, and article email/CDN assets.
+- P0/P1 old WordPress media references in runtime data have been migrated to controlled local assets under `public/media/launch`; article email/CDN assets remain for the article CMS cleanup path.
 - Stone Library finish imagery still has placeholder/mapping gaps.
 - App shell default Vite metadata has been replaced; delivery-readiness debt remains around article cleanup, final share imagery, and deeper claim-safety review.
 - Image hosting policy must now be resolved against the Cloudflare/Supabase launch plan.
@@ -61,7 +62,7 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 - React Helmet still emits an existing strict-mode lifecycle warning in dev console.
 
 ## Next Recommended Action
-Continue `NOW-ASSET-MIGRATION-001` with legacy project media and Stone Library finish fallback cleanup, or start `NOW-FORMS-SUPABASE-001` once Supabase project credentials and Turnstile/email secrets are available. Return to `NOW-CLOUDFLARE-PAGES-DEPLOY-001` once Cloudflare dashboard access is available.
+Continue with article media/HTML cleanup under `NOW-SEO-DELIVERY-001`, or start `NOW-FORMS-SUPABASE-001` once Supabase project credentials and Turnstile/email secrets are available. Return to `NOW-CLOUDFLARE-PAGES-DEPLOY-001` once Cloudflare dashboard access is available.
 
 ## Guardrails
 - Use repo-root relative paths in committed docs.
