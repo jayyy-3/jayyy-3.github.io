@@ -1302,6 +1302,33 @@ Last updated: 2026-05-22
 - `NEXT-PRODUCT-DETAIL-CONVERSION-001`
 - `NEXT-PROJECTS-INTAKE-001`
 
+## Entry - 2026-05-22 (Stone Library Drive Source Task)
+
+### Scope
+- Recorded the Saistone Google Drive shared folder named `Urblo Digital Stone Library` as the temporary source of truth for Stone Library imagery.
+- Added `NEXT-STONELIB-DRIVE-IMAGE-AUDIT-001` to compare the shared-drive source against current website mappings and identify stale, changed, or unpublished Stone Library images.
+- Kept machine-specific local absolute paths out of committed Harness docs.
+
+### Changed Files
+- `docs/ASSET_MIGRATION_AUDIT.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- The image audit itself has not been run yet.
+- Shared-drive source folders may need manual naming normalization before automated mapping is reliable.
+
+### Next Handoff
+- `NEXT-STONELIB-DRIVE-IMAGE-AUDIT-001`
+- `NEXT-STONELIB-IMG-001`
+- `NEXT-STONELIB-IMG-002`
+
 ## Entry Template (Use for Every Future Session)
 
 ### Date

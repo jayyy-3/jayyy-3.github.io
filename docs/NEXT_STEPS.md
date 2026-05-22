@@ -48,6 +48,7 @@ Source of truth: `docs/agent/tasks.json`.
 ## Next
 - `NEXT-UI-PARITY-001`: bring Home, Our Story, Articles, and Contact Us toward approved visual references.
 - `NEXT-STONELIB-IMG-001`: complete Stone Library HD finish image coverage.
+- `NEXT-STONELIB-DRIVE-IMAGE-AUDIT-001`: compare the Saistone Google Drive `Urblo Digital Stone Library` source folder against current website Stone Library imagery.
 - `NEXT-STONELIB-IMG-002`: decide and implement secondary finish frame behavior.
 - `NEXT-STONELIB-DATA-001`: replace generic finish behavior text with approved notes.
 - `NEXT-PRODUCT-DETAIL-CONVERSION-001`: make product details behave like credible conversion/configuration pages.

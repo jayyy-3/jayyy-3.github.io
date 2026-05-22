@@ -521,6 +521,42 @@
       ]
     },
     {
+      "id": "NEXT-STONELIB-DRIVE-IMAGE-AUDIT-001",
+      "status": "next",
+      "priority": 12.1,
+      "summary": "Audit the Stone Library Google Drive image source against current website imagery.",
+      "files": [
+        "docs/ASSET_MIGRATION_AUDIT.md",
+        "src/data/stoneFinishImages.ts",
+        "src/service/StoneLibraryService.ts",
+        "data/clean/stone_library.json",
+        "public/media/launch/stone-library",
+        "docs/HANDOFF.md",
+        "docs/NEXT_STEPS.md",
+        "docs/WORKLOG.md",
+        "docs/agent/tasks.json"
+      ],
+      "notes": [
+        "2026-05-22: Temporary approved source location is the Saistone Google Drive shared folder named Urblo Digital Stone Library under ALVIN then Urblo. Do not commit machine-specific local absolute paths for this source.",
+        "Purpose is to detect source images that changed after the fast-track mapping, source images that exist but have not been published on the site, and website images that are now stale versus the shared drive."
+      ],
+      "acceptance": [
+        "Inventory the shared-drive Stone Library image folders and compare them to current mapped assets in src/data/stoneFinishImages.ts.",
+        "Identify stones/finishes where the shared drive has newer or changed imagery versus the current website.",
+        "Identify stones/finishes where the shared drive has approved imagery that the current site still treats as fallback or placeholder.",
+        "Produce an update list with source filename, target stone group, finish key, current runtime status, and recommended action.",
+        "If runtime mappings or assets are changed, run the full runtime verification gate and browser-check Stone Library list/detail pages."
+      ],
+      "verification": [
+        "npm run build",
+        "npm run lint",
+        "npx tsc -b",
+        "npm run agent:smoke",
+        "npm run agent:check",
+        "git diff --check"
+      ]
+    },
+    {
       "id": "NEXT-STONELIB-IMG-002",
       "status": "next",
       "priority": 13,

@@ -65,6 +65,7 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 - The admin CMS does not exist yet.
 - P0/P1 old WordPress media references in runtime data have been migrated to controlled local assets under `public/media/launch`; article covers and known detail images now have a local runtime stopgap under `public/media/launch/articles`.
 - Stone Library fast-track imagery is mapped/documented, but final HD coverage still needs approved source images for Golden Crust, Harcourt, and Tan Brown plus a decision on secondary Juparana/Zen Grey frames.
+- The Saistone Google Drive shared folder `Urblo Digital Stone Library` is now recorded as the temporary Stone Library image source of truth; `NEXT-STONELIB-DRIVE-IMAGE-AUDIT-001` should compare it against current website mappings before final image coverage work.
 - Raw article newsletter HTML remains source material and still needs Supabase structured-block migration, claim-safety review, mobile-safe templates, and full editorial cleanup before the article system is considered final.
 - Product detail pages now initialize default material selections, but still need a stronger conversion/configuration experience with clear CTA, selected-summary feedback, and deliberate missing-image states.
 - Legacy project detail pages remain weaker than the Moon Gate material-map case study model; at least one more project should be migrated before the project system feels consistent.
@@ -78,7 +79,7 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 - React Helmet still emits an existing strict-mode lifecycle warning in dev console.
 
 ## Next Recommended Action
-Start `NOW-FORMS-SUPABASE-001` once Supabase project credentials and Turnstile/email secrets are available. Return to `NOW-CLOUDFLARE-PAGES-DEPLOY-001` once Cloudflare dashboard access is available. If account access is still unavailable, the next useful non-secret launch tasks are `NOW-ROUTE-ERROR-STATES-001`, `NOW-ARTICLE-STRUCTURE-CLAIMS-001`, `NEXT-PRODUCT-DETAIL-CONVERSION-001`, and `NEXT-PROJECTS-INTAKE-001`.
+Start `NOW-FORMS-SUPABASE-001` once Supabase project credentials and Turnstile/email secrets are available. Return to `NOW-CLOUDFLARE-PAGES-DEPLOY-001` once Cloudflare dashboard access is available. If account access is still unavailable, the next useful non-secret launch tasks are `NEXT-STONELIB-DRIVE-IMAGE-AUDIT-001`, `NOW-ROUTE-ERROR-STATES-001`, `NOW-ARTICLE-STRUCTURE-CLAIMS-001`, `NEXT-PRODUCT-DETAIL-CONVERSION-001`, and `NEXT-PROJECTS-INTAKE-001`.
 
 ## Guardrails
 - Use repo-root relative paths in committed docs.

@@ -89,6 +89,15 @@ True missing image groups for the full coverage task:
 
 This is the correct customer-safe posture for launch preparation: use real supplied imagery where available, use controlled local fallbacks where explicitly known, and keep visible placeholders only where Urblo still needs approved source images.
 
+### Temporary Stone Library Source Folder
+The temporary source of truth for Stone Library imagery is the Saistone Google Drive shared folder named `Urblo Digital Stone Library` under the shared-drive path ALVIN then Urblo. Do not commit machine-specific local absolute paths for this source.
+
+`NEXT-STONELIB-DRIVE-IMAGE-AUDIT-001` should compare that shared-drive source against the current website mappings before final image coverage work:
+- source images that changed after the fast-track ingestion;
+- source images that exist in the shared drive but have not been published to the current website;
+- current website images that are stale versus the shared-drive source;
+- unresolved stones/finishes that should remain placeholders because no approved source image exists.
+
 ### P2 - Migrate Through CMS Cleanup
 These should not block infrastructure setup but must be cleaned before the article system is considered launch-quality.
 
