@@ -50,6 +50,7 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 - Stone Library image fast-track: provided primary finish assets are mapped, controlled fallback usage is documented, and remaining missing image groups are recorded for the full coverage task.
 - SEO/social launch cleanup: default social metadata now uses a 1200 x 630 PNG share image, article excerpts are claim-safe, and known high-risk newsletter phrases are rewritten at runtime.
 - Performance cleanup: route-level lazy loading is implemented in `src/App.tsx`; build output no longer emits the previous `>500kB` JavaScript chunk warning.
+- Smoke coverage cleanup: `npm run agent:smoke` now checks declared route shells, article index availability, and key CTA targets including Contact, Sample Request mailto fallback, Moon Gate CTAs, Contact page Stone Library CTA, and stone detail phone CTA.
 
 ## Active Risks
 - Cloudflare + Supabase is approved as the launch target, but runtime implementation has not started.
@@ -70,7 +71,7 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 - React Helmet still emits an existing strict-mode lifecycle warning in dev console.
 
 ## Next Recommended Action
-Continue with the next launch-quality task that does not require account secrets: broaden automated smoke coverage for key CTAs under `LATER-QA-001`. Start `NOW-FORMS-SUPABASE-001` once Supabase project credentials and Turnstile/email secrets are available. Return to `NOW-CLOUDFLARE-PAGES-DEPLOY-001` once Cloudflare dashboard access is available.
+Start `NOW-FORMS-SUPABASE-001` once Supabase project credentials and Turnstile/email secrets are available. Return to `NOW-CLOUDFLARE-PAGES-DEPLOY-001` once Cloudflare dashboard access is available. If account access is still unavailable, the next useful non-secret task is `NEXT-PROJECTS-INTAKE-001` or `NEXT-STONELIB-DATA-001`, depending on available content direction.
 
 ## Guardrails
 - Use repo-root relative paths in committed docs.

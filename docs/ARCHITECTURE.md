@@ -81,7 +81,7 @@ Last updated: 2026-05-22
   - Prints repo path, git status, recent commits, runtime versions, read order, and common commands.
 - Static smoke:
   - `npm run agent:smoke` => `bash scripts/agent-smoke.sh`
-  - Serves `dist/` with Vite preview and checks the React shell for key clean routes plus `public/articles/index.json`.
+  - Serves `dist/` with Vite preview and checks the React shell for key clean routes, `public/articles/index.json`, and critical CTA contracts.
   - Builds first only when `dist/` is missing; runtime tasks should still run `npm run build` before smoke.
 
 ## Route Interface Contract (`src/App.tsx`)

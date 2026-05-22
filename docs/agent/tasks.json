@@ -575,12 +575,20 @@
     },
     {
       "id": "LATER-QA-001",
-      "status": "later",
+      "status": "done",
       "priority": 20,
       "summary": "Add automated route smoke coverage for declared routes and key CTAs.",
       "files": [
         "scripts/agent-smoke.sh",
-        "src/App.tsx"
+        "docs/ARCHITECTURE.md",
+        "docs/HANDOFF.md",
+        "docs/NEXT_STEPS.md",
+        "docs/WORKLOG.md",
+        "docs/agent/tasks.json"
+      ],
+      "notes": [
+        "2026-05-22: Agent smoke now checks declared route shells, article index availability, and key CTA targets with actionable names.",
+        "Sample Request remains a verified mailto fallback until NOW-FORMS-SUPABASE-001 replaces it with Supabase-backed submissions."
       ],
       "acceptance": [
         "Declared routes and key CTAs are covered by automated smoke checks.",

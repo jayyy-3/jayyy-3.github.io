@@ -1223,6 +1223,36 @@ Last updated: 2026-05-22
 - `NOW-ADMIN-CMS-001`
 - `LATER-QA-001`
 
+## Entry - 2026-05-22 (Smoke CTA Coverage)
+
+### Scope
+- Expanded `npm run agent:smoke` beyond route-shell and article-index checks.
+- Added named CTA contract checks for Contact navigation, Sample Request mailto fallback, homepage Contact/Sample Request fallbacks, Moon Gate CTAs, Contact page Stone Library CTA, and stone detail phone CTA.
+- Closed `LATER-QA-001` because smoke failures now report actionable route/CTA names.
+
+### Changed Files
+- `scripts/agent-smoke.sh`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run agent:smoke`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- Smoke checks are still contract-level checks, not full browser interaction tests.
+- Supabase-backed forms are still not implemented, so Sample Request remains a verified mailto fallback only.
+
+### Next Handoff
+- `NOW-FORMS-SUPABASE-001`
+- `NOW-ADMIN-CMS-001`
+- `NEXT-PROJECTS-INTAKE-001`
+- `NEXT-STONELIB-DATA-001`
+
 ## Entry Template (Use for Every Future Session)
 
 ### Date

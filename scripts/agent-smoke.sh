@@ -41,6 +41,46 @@ const requiredAssets = [
   '/articles/index.json',
 ]
 
+const ctaContracts = [
+  {
+    name: 'Header Contact navigation',
+    target: '/contact',
+  },
+  {
+    name: 'Footer Contact navigation',
+    target: '/contact',
+  },
+  {
+    name: 'Footer Sample Request fallback',
+    target: 'mailto:info@urblo.com.au?subject=Sample%20Request',
+  },
+  {
+    name: 'Homepage Sample Request fallback',
+    target:
+      'mailto:info@urblo.com.au?subject=Sample%20Request&body=Hi%20Urblo%2C%20I%20would%20like%20to%20request%20stone%20samples.',
+  },
+  {
+    name: 'Homepage Contact fallback',
+    target: 'mailto:info@urblo.com.au?subject=Contact%20Us',
+  },
+  {
+    name: 'Moon Gate primary CTA',
+    target: '/contact',
+  },
+  {
+    name: 'Moon Gate secondary CTA',
+    target: '/stone-library',
+  },
+  {
+    name: 'Contact page Stone Library CTA',
+    target: '/stone-library',
+  },
+  {
+    name: 'Stone detail phone CTA',
+    target: 'tel:1300187256',
+  },
+]
+
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
 async function waitForServer() {
@@ -73,6 +113,37 @@ async function checkAsset(path) {
   }
 }
 
+async function checkCta(contract) {
+  if (contract.target.startsWith('/')) {
+    await checkHtmlShell(contract.target)
+    console.log(`cta ok: ${contract.name} -> ${contract.target}`)
+    return
+  }
+
+  if (contract.target.startsWith('mailto:')) {
+    const url = new URL(contract.target)
+    if (url.pathname !== 'info@urblo.com.au') {
+      throw new Error(`${contract.name} mailto target is ${url.pathname}`)
+    }
+    if (!url.searchParams.get('subject')) {
+      throw new Error(`${contract.name} mailto is missing a subject`)
+    }
+    console.log(`cta ok: ${contract.name} -> mailto`)
+    return
+  }
+
+  if (contract.target.startsWith('tel:')) {
+    const phone = contract.target.replace(/^tel:/, '')
+    if (!/^\d{10}$/.test(phone)) {
+      throw new Error(`${contract.name} tel target is ${contract.target}`)
+    }
+    console.log(`cta ok: ${contract.name} -> tel`)
+    return
+  }
+
+  throw new Error(`${contract.name} has unsupported CTA target ${contract.target}`)
+}
+
 await waitForServer()
 
 for (const route of routes) {
@@ -83,6 +154,10 @@ for (const route of routes) {
 for (const asset of requiredAssets) {
   await checkAsset(asset)
   console.log(`asset ok: ${asset}`)
+}
+
+for (const contract of ctaContracts) {
+  await checkCta(contract)
 }
 
 console.log('Agent smoke passed.')
