@@ -23,10 +23,11 @@ Docs-only and harness-only work should run:
 Cloudflare/Supabase implementation work should also follow the new verification profiles in `docs/agent/verification.md`.
 
 ## Last Runtime Baseline
-Measured 2026-05-15:
+Measured 2026-05-22:
 - `npm run build`: pass
 - `npm run lint`: pass
 - `npx tsc -b`: pass
+- `npm run agent:smoke`: pass
 
 ## Advisory Brand + Design Gate
 For any user-facing layout/copy/IA task:
@@ -38,7 +39,6 @@ For any user-facing layout/copy/IA task:
 ## Now
 Source of truth: `docs/agent/tasks.json`.
 
-- `NOW-CLOUDFLARE-PAGES-DEPLOY-001`: implement Cloudflare Pages deployment, preview, function routing, and rollback runbook.
 - `NOW-FORMS-SUPABASE-001`: replace mailto-only Contact and Sample Request flows with Supabase-backed submissions.
 - `NOW-ADMIN-CMS-001`: build the Urblo admin CMS for customer-maintained Projects, Stone Library, Products, Articles, media, and leads.
 - `NOW-ASSET-MIGRATION-001`: migrate priority media away from old WordPress URLs and define controlled storage for launch.
@@ -53,7 +53,6 @@ Source of truth: `docs/agent/tasks.json`.
 - `NEXT-STONELIB-IMG-002`: decide and implement secondary finish frame behavior.
 - `NEXT-STONELIB-DATA-001`: replace generic finish behavior text with approved notes.
 - `NEXT-PROJECTS-INTAKE-001`: define the project intake template and migrate the next project into the material-map case study model.
-- `NEXT-ROUTER-SEO-001`: decide final Cloudflare Pages routing and SEO tradeoff.
 
 ## Later
 - `LATER-BRAND-001`: align homepage modules with brand pillars and proof framing.
@@ -63,6 +62,9 @@ Source of truth: `docs/agent/tasks.json`.
 - `NOW-DEPLOY-PAGES-HARDEN-001`: legacy fallback only if Cloudflare Pages is reversed.
 - `NEXT-SAMPLE-REQUEST-001`: legacy fallback only if Supabase-backed forms are not implemented.
 
+## Blocked
+- `NOW-CLOUDFLARE-PAGES-DEPLOY-001`: repo-side Cloudflare Pages configuration is prepared; dashboard project creation, preview URL validation, production custom domain, DNS cutover, and rollback require Cloudflare account access.
+
 ## Completed This Cycle
 - `DONE-DOCS-HARNESS-ROOT-001`: promoted `docs/README_AGENT.md` to root `AGENTS.md`, added `docs/DESIGN.md`, moved repo docs to relative paths, and separated brand authority from design execution authority.
 - Phase 1 harness hygiene committed: `docs/HANDOFF.md`, `docs/agent/tasks.json`, `docs/agent/verification.md`, `scripts/check-doc-paths.mjs`, and `scripts/check-harness.mjs`.
@@ -70,6 +72,7 @@ Source of truth: `docs/agent/tasks.json`.
 - `NEXT-DATA-001`: project list/detail metadata now comes from `src/data/projectData.ts`; Moon Gate is the first material-map case study.
 - `NOW-CLOUDFLARE-SUPABASE-ARCH-001`: Cloudflare Pages + Supabase launch architecture, cost model, and customer-facing approval PDF are documented.
 - `NOW-SUPABASE-SCHEMA-001`: Supabase schema plan is documented for Projects, Stone Library, Products, Articles, media, admin access, and lead capture.
+- `NEXT-ROUTER-SEO-001`: clean Cloudflare Pages routing is implemented with `BrowserRouter`, root Vite base, and SPA fallback.
 
 Older completion details live in `docs/WORKLOG.md`.
 

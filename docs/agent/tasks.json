@@ -50,20 +50,26 @@
     },
     {
       "id": "NOW-CLOUDFLARE-PAGES-DEPLOY-001",
-      "status": "now",
+      "status": "blocked",
       "priority": 3,
       "summary": "Implement Cloudflare Pages deployment, preview, function routing, and rollback runbook.",
       "files": [
+        "docs/CLOUDFLARE_DEPLOYMENT.md",
         "docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md",
         "docs/ARCHITECTURE.md",
+        "public/_redirects",
+        "public/_routes.json",
+        "public/_headers",
+        "scripts/agent-smoke.sh",
         "package.json",
         "vite.config.ts",
         "src/App.tsx"
       ],
       "acceptance": [
-        "Cloudflare Pages build command and output directory are documented and verified.",
-        "Only API routes invoke Pages Functions; static site traffic remains static.",
-        "SPA route refresh, preview deployment, production deployment, DNS cutover, and rollback are documented and tested."
+        "Repo-side Cloudflare Pages build command, output directory, SPA fallback, function routing, and launch headers are documented and verified locally.",
+        "Only future API routes are configured to invoke Pages Functions; static site traffic remains static.",
+        "Clean URL direct refresh works locally for declared routes.",
+        "Cloudflare Pages project creation, preview URL validation, production custom domain, DNS cutover, and rollback require account access before this task can be marked done."
       ],
       "verification": [
         "npm run build",
@@ -416,12 +422,14 @@
     },
     {
       "id": "NEXT-ROUTER-SEO-001",
-      "status": "next",
+      "status": "done",
       "priority": 17,
       "summary": "Decide and implement final Cloudflare Pages routing strategy with explicit SEO tradeoff.",
       "files": [
         "src/App.tsx",
         "vite.config.ts",
+        "public/_redirects",
+        "scripts/agent-smoke.sh",
         "index.html",
         "docs/ARCHITECTURE.md"
       ],

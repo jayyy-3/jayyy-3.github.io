@@ -33,6 +33,7 @@ After launch:
 - Production branch: main unless a later release process chooses a dedicated release branch.
 - Preview deployments: Cloudflare Pages branch/PR previews for client review before publishing.
 - API layer: Cloudflare Pages Functions under `/api/*` only.
+- Deployment runbook: `docs/CLOUDFLARE_DEPLOYMENT.md`.
 - Database: Supabase Postgres.
 - Auth: Supabase Auth for the admin area.
 - Admin UI: Urblo-owned `/admin` interface, not raw Supabase Studio for customers.

@@ -1,4 +1,4 @@
-import { HashRouter, Route, Routes, useLocation } from 'react-router-dom';
+import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import WelcomePopup from './components/WelcomePopup';
 import DefaultLayout from './layouts/DefaultLayout';
@@ -55,7 +55,7 @@ export default function App() {
     return (
         <>
             <WelcomePopup />
-            <HashRouter>
+            <BrowserRouter>
                 <TitleUpdater />
                 <Routes>
                     <Route
@@ -166,7 +166,7 @@ export default function App() {
                         }
                     />
                 </Routes>
-            </HashRouter>
+            </BrowserRouter>
         </>
     );
 }

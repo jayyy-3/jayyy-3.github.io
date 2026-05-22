@@ -79,6 +79,7 @@ Before declaring implementation complete, verify all checks below:
 - Current runtime remains static/file-backed until the new launch tasks are implemented.
 - Stone Library migration is complete: old `/materials*` route family has been removed and replaced with `/stone-library` plus `/stone-library/:stoneGroupId`.
 - Contact route is declared at `/contact`; shared header/footer navigation points to declared routes, with Sample Request remaining a `mailto:` fallback until `NOW-FORMS-SUPABASE-001` is implemented.
-- Last runtime gates were measured on 2026-05-08 and were green (`npm run build`, `npm run lint`, `npx tsc -b`).
+- Last runtime gates were measured on 2026-05-22 and were green (`npm run build`, `npm run lint`, `npx tsc -b`, `npm run agent:smoke`).
 - Bundle size warning (`>500kB` chunk) remains and should be addressed with code splitting.
 - GitHub Pages hardening is now a legacy fallback; Cloudflare Pages deployment is the active launch path.
+- Routing now uses clean paths through `BrowserRouter` with Cloudflare Pages SPA fallback files in `public/`.

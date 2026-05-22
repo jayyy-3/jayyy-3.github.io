@@ -2,6 +2,49 @@
 
 Last updated: 2026-05-22
 
+## Entry - 2026-05-22 (Cloudflare Pages Repo Prep)
+
+### Scope
+- Switched routing from `HashRouter` to `BrowserRouter` for Cloudflare-friendly clean URLs.
+- Changed Vite `base` to `/` for root-domain Pages deployment and direct-refresh asset loading.
+- Added Cloudflare Pages static config: `public/_redirects`, `public/_routes.json`, and `public/_headers`.
+- Updated smoke checks from hash routes to clean routes, including product and project detail paths.
+- Added `docs/CLOUDFLARE_DEPLOYMENT.md` as the deployment, environment, preview, DNS, and rollback runbook.
+- Marked `NEXT-ROUTER-SEO-001` done and marked `NOW-CLOUDFLARE-PAGES-DEPLOY-001` blocked at account-level setup after repo-side prep.
+
+### Changed Files
+- `src/App.tsx`
+- `vite.config.ts`
+- `public/_redirects`
+- `public/_routes.json`
+- `public/_headers`
+- `scripts/agent-smoke.sh`
+- `docs/CLOUDFLARE_DEPLOYMENT.md`
+- `docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+- `docs/WORKLOG.md`
+
+### Verification Results
+- `npm run build`: pass (existing bundle size warning and Browserslist staleness notice remain).
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass for clean routes `/`, `/stone-library`, `/stone-library/alpine-white`, `/products`, `/products/primeBlock`, `/projects`, `/projects/moon-gate-woolley-street`, `/our-story`, `/contact`, `/articles`, plus `/articles/index.json`.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- Cloudflare dashboard project creation, preview URL validation, custom domain, DNS cutover, and rollback still require account access.
+- The current GitHub Pages workflow remains as a legacy path and may not represent final launch behavior.
+- BrowserRouter clean URLs rely on the Cloudflare Pages SPA fallback when deployed.
+
+### Next Handoff
+- `NOW-SEO-DELIVERY-001`
+- `NOW-ASSET-MIGRATION-001`
+- `NOW-FORMS-SUPABASE-001`
+
 ## Entry - 2026-05-22 (Supabase Schema Plan)
 
 ### Scope

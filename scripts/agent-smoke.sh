@@ -25,14 +25,16 @@ const host = process.env.SMOKE_HOST
 const port = process.env.SMOKE_PORT
 const base = `http://${host}:${port}`
 const routes = [
-  '/#/',
-  '/#/stone-library',
-  '/#/stone-library/alpine-white',
-  '/#/products',
-  '/#/projects',
-  '/#/our-story',
-  '/#/contact',
-  '/#/articles',
+  '/',
+  '/stone-library',
+  '/stone-library/alpine-white',
+  '/products',
+  '/products/primeBlock',
+  '/projects',
+  '/projects/moon-gate-woolley-street',
+  '/our-story',
+  '/contact',
+  '/articles',
 ]
 
 const requiredAssets = [

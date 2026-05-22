@@ -26,18 +26,21 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 - Historical evidence: `docs/WORKLOG.md`
 
 ## Latest Verification Snapshot
-- `npm run build`: pass on 2026-05-18; existing bundle size warning remains.
-- `npm run lint`: pass on 2026-05-18.
-- `npx tsc -b`: pass on 2026-05-18.
+- `npm run build`: pass on 2026-05-22; existing bundle size warning and Browserslist staleness notice remain.
+- `npm run lint`: pass on 2026-05-22.
+- `npx tsc -b`: pass on 2026-05-22.
 - Playwright visual QA: desktop and mobile Moon Gate detail page checked locally; hotspot click changed the active material inspector, the legacy ACU detail page no longer showed Moon Gate copy, and project heading computed styles matched the live Avenir project-title pattern.
 - `npm run agent:check`: pass on 2026-05-18.
 - `npm run agent:smoke`: pass on 2026-05-18.
 - `git diff --check`: pass on 2026-05-18.
 - Cloudflare/Supabase launch plan docs: `npm run agent:check` and `git diff --check` pass on 2026-05-22.
 - Supabase schema planning docs: `npm run agent:check` and `git diff --check` pass on 2026-05-22.
+- `npm run agent:smoke`: pass on 2026-05-22 for clean routes and article index.
+- Cloudflare Pages repo-side routing/runbook work: runtime and harness verification pass on 2026-05-22.
 
 ## Active Risks
 - Cloudflare + Supabase is approved as the launch target, but runtime implementation has not started.
+- Clean URL routing is implemented repo-side for Cloudflare Pages, but the live Cloudflare project, preview deployment, custom domain, DNS cutover, and rollback still require account access.
 - Supabase schema design is documented, but migrations, RLS implementation, Auth, Storage, admin CRUD, form APIs, and transactional email are not implemented yet.
 - Contact and Sample Request remain mailto/local-only in current runtime.
 - Projects, Stone Library, Products, and Articles are still file-backed rather than customer-editable.
@@ -46,14 +49,14 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 - Stone Library finish imagery still has placeholder/mapping gaps.
 - App shell still has delivery-readiness debt around template/default assets and footer/social hygiene.
 - Image hosting policy must now be resolved against the Cloudflare/Supabase launch plan.
-- GitHub Pages deployment hardening is a legacy fallback only; Cloudflare Pages is the active target.
+- GitHub Pages deployment hardening is a legacy fallback only; Cloudflare Pages is the active target and currently blocked at account-level project setup.
 - Bundle size warning (`>500kB`) remains open.
 - Moon Gate material/application notes are intentionally MVP-inferred from supplied imagery and public project context; designer confirmation is still needed before final production claims.
 - Other project pages still have legacy-level content and need migration into the material-map model.
 - React Helmet still emits an existing strict-mode lifecycle warning in dev console.
 
 ## Next Recommended Action
-Start `NOW-CLOUDFLARE-PAGES-DEPLOY-001` for repo-side Cloudflare Pages deployment/runbook work. Actual Cloudflare project creation still requires account access.
+Start `NOW-SEO-DELIVERY-001` or `NOW-ASSET-MIGRATION-001` while Cloudflare project creation waits for account access. Return to `NOW-CLOUDFLARE-PAGES-DEPLOY-001` once Cloudflare dashboard access is available.
 
 ## Guardrails
 - Use repo-root relative paths in committed docs.

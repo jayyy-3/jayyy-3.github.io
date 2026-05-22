@@ -13,7 +13,7 @@ Last updated: 2026-05-22
 ## Runtime Stack
 - Bundler/dev server: Vite 6
 - UI runtime: React 19
-- Routing: `react-router-dom` with `HashRouter`
+- Routing: `react-router-dom` with `BrowserRouter`
 - Styling: Tailwind CSS + project CSS (`src/index.css`, `src/App.css`)
 - Client state: Zustand (`src/store/productStore.ts`)
 - Motion/interaction: Framer Motion
@@ -51,7 +51,11 @@ Last updated: 2026-05-22
   - Cloudflare environment variables and secrets must not be committed.
   - Function routing must be restricted so only `/api/*` invokes Pages Functions.
 - Vite base config: `vite.config.ts`
-  - `base: './'` for relative asset paths
+  - `base: '/'` for root-domain Cloudflare Pages clean URL routing.
+- Cloudflare Pages static config:
+  - `public/_redirects` provides SPA fallback with `/* /index.html 200`.
+  - `public/_routes.json` scopes future Pages Functions to `/api/*`.
+  - `public/_headers` sets conservative launch headers and long-cache rules for hashed assets/fonts.
 - Build script contract: `package.json`
   - `npm run build` => `tsc -b && vite build`
   - `npm run lint` => `eslint .`
@@ -75,10 +79,12 @@ Last updated: 2026-05-22
   - Prints repo path, git status, recent commits, runtime versions, read order, and common commands.
 - Static smoke:
   - `npm run agent:smoke` => `bash scripts/agent-smoke.sh`
-  - Serves `dist/` with Vite preview and checks the React shell for key hash routes plus `public/articles/index.json`.
+  - Serves `dist/` with Vite preview and checks the React shell for key clean routes plus `public/articles/index.json`.
   - Builds first only when `dist/` is missing; runtime tasks should still run `npm run build` before smoke.
 
 ## Route Interface Contract (`src/App.tsx`)
+
+Routing uses clean paths through `BrowserRouter`. Cloudflare Pages direct refresh support depends on `public/_redirects`.
 
 | Route pattern | Page component | Notes |
 |---|---|---|
@@ -270,13 +276,15 @@ Last updated: 2026-05-22
   - `Space Grotesk` local WOFF2
 - Homepage runtime no longer depends on remote WordPress font CSS/TTF/WOFF assets.
 
-## Last Runtime Quality Gate Status (Measured 2026-05-15)
+## Last Runtime Quality Gate Status (Measured 2026-05-22)
 - `npm run build`: pass
 - `npm run lint`: pass
 - `npx tsc -b`: pass
+- `npm run agent:smoke`: pass
 
 ## Known Architecture Risks
 - Cloudflare + Supabase is the approved launch target, but implementation has not started in runtime code.
+- Cloudflare Pages repo-side clean URL configuration is in place, but dashboard project creation, preview validation, custom domain, DNS cutover, and rollback still require account access.
 - Sample Request has no backend/form workflow yet and remains a `mailto:` fallback in current runtime.
 - Projects, Stone Library, Products, and Articles remain file-backed until Supabase migration work is implemented.
 - Admin CMS does not exist yet; customers cannot CRUD content without code changes.
