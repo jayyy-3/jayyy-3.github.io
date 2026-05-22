@@ -1110,6 +1110,41 @@ Last updated: 2026-05-22
 - `NOW-FORMS-SUPABASE-001`
 - `NOW-ADMIN-CMS-001`
 
+## Entry - 2026-05-22 (Stone Library Image Fast-Track Closure)
+
+### Scope
+- Confirmed the provided primary Stone Library finish assets are mapped through the runtime image layer.
+- Recorded current Stone Library image coverage so future agents and the client can distinguish real mapped finish photos, controlled temporary fallback images, and true missing source images.
+- Closed `NOW-STONELIB-IMG-FASTTRACK-001`; final HD image sourcing remains under `NEXT-STONELIB-IMG-001`, and secondary Juparana/Zen Grey frame behavior remains under `NEXT-STONELIB-IMG-002`.
+
+### Changed Files
+- `docs/ASSET_MIGRATION_AUDIT.md`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run build`: pass with existing bundle size warning and Browserslist staleness notice.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- Golden Crust, Harcourt, and Tan Brown still need approved HD source images before the Stone Library can be called visually complete.
+- Blueocean, Honey Comb, and Tuscany use controlled local fallback imagery but still need finish-specific HD coverage.
+- Juparana and Zen Grey secondary source frames exist but need an approved presentation pattern before implementation.
+
+### Next Handoff
+- `NOW-SEO-DELIVERY-001`
+- `NOW-FORMS-SUPABASE-001`
+- `NOW-ADMIN-CMS-001`
+- `NEXT-STONELIB-IMG-001`
+- `NEXT-STONELIB-IMG-002`
+
 ## Entry Template (Use for Every Future Session)
 
 ### Date

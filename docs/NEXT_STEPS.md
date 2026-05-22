@@ -43,7 +43,6 @@ Source of truth: `docs/agent/tasks.json`.
 - `NOW-ADMIN-CMS-001`: build the Urblo admin CMS for customer-maintained Projects, Stone Library, Products, Articles, media, and leads.
 - `NOW-ASSET-MIGRATION-001`: migrate priority media away from old WordPress URLs and define controlled storage for launch.
 - `NOW-SEO-DELIVERY-001`: remove default metadata and finish launch-critical SEO, icon, social, and claim-safety details.
-- `NOW-STONELIB-IMG-FASTTRACK-001`: map provided finish assets into Stone Library and reduce placeholder usage.
 
 ## Next
 - `NEXT-UI-PARITY-001`: bring Home, Our Story, Articles, and Contact Us toward approved visual references.
@@ -74,6 +73,7 @@ Source of truth: `docs/agent/tasks.json`.
 - Asset migration stopgap: direct old WordPress media references have been removed from runtime data and replaced with controlled local assets under `public/media/launch`; article covers and known article detail images now use a local runtime cleanup layer, while CMS media records and structured article blocks remain open under the article/admin tracks.
 - `NOW-DELIVERY-READINESS-001`: removed Vite starter README content and deleted the unused React starter SVG asset.
 - `NOW-ASSET-STRATEGY-001`: interim local stopgap and delivery-phase Supabase/Cloudflare media hosting policy are documented.
+- `NOW-STONELIB-IMG-FASTTRACK-001`: provided primary finish assets are mapped, controlled fallback usage is documented, and remaining true missing image groups are recorded for full coverage.
 
 Older completion details live in `docs/WORKLOG.md`.
 

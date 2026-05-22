@@ -67,6 +67,28 @@ These are visible content quality and performance items.
 | Our Story portraits and banner | Local `public/media/launch/our-story` plus controlled route banner | Controlled local stopgap in place; old `carbon-neutral-banner.jpg` tested as 404 on 2026-05-22. | Move to Supabase media records during CMS migration. |
 | Remote Stone Library finish fallbacks | Local `public/media/launch/stone-library/fallbacks` assets | Controlled local stopgap in place. | Replace with approved HD finish assets during full Stone Library image coverage. |
 
+### Stone Library Image Coverage - 2026-05-22
+The fast-track pass confirms the provided primary finish assets are already wired through `src/data/stoneFinishImages.ts` and remain independent of the old WordPress site.
+
+Current runtime coverage across available/TBC Stone Library finish states:
+
+| Coverage type | Count | Meaning |
+|---|---:|---|
+| Finish-specific image | 31 | A matching finish photo is mapped from `data/Product` and appears on list/detail where that stone/finish is selected. |
+| Controlled default/fallback image | 16 | A local fallback image exists for the stone/variant, but not for each individual finish. |
+| True missing image placeholder | 22 | No approved source image exists in the repo yet, so the UI must not pretend to show a real stone finish. |
+
+Finish-specific coverage currently includes Alpine White, Angola Black, Ivory Sand, Juparana, New Grey, Steel Blue, and Zen Grey. Juparana and Zen Grey also have secondary frames in the source asset folder, but the secondary-frame presentation is intentionally left to `NEXT-STONELIB-IMG-002`.
+
+Controlled default/fallback coverage currently includes Blueocean, Honey Comb, and Tuscany. These are launch-safe local fallbacks, not final finish-by-finish HD coverage.
+
+True missing image groups for the full coverage task:
+- Golden Crust Light and Dark: flamed, sawn, honed, polished.
+- Harcourt: all TBC finishes.
+- Tan Brown: flamed, sawn, honed, polished.
+
+This is the correct customer-safe posture for launch preparation: use real supplied imagery where available, use controlled local fallbacks where explicitly known, and keep visible placeholders only where Urblo still needs approved source images.
+
 ### P2 - Migrate Through CMS Cleanup
 These should not block infrastructure setup but must be cleaned before the article system is considered launch-quality.
 
@@ -142,8 +164,9 @@ Article cover references and runtime article cleanup now use `public/media/launc
 3. Migrate route banner/contact imagery.
 4. Migrate homepage proof/process/project imagery.
 5. Add article launch stopgap: local covers plus runtime cleanup of known email proxy images and campaign links.
-6. Convert articles to CMS blocks and remove raw newsletter HTML dependency.
-7. Move local stopgap media into Supabase/Cloudflare media records during CMS migration.
+6. Source approved HD images for the remaining Stone Library gaps and decide secondary finish frame behavior.
+7. Convert articles to CMS blocks and remove raw newsletter HTML dependency.
+8. Move local stopgap media into Supabase/Cloudflare media records during CMS migration.
 
 ## Verification
 
@@ -167,6 +190,7 @@ Verified on 2026-05-22:
 - Direct old WordPress media scan after legacy project and Stone Library fallback migration: `rg "urblo.com.au/wp-content/uploads" src public/articles data` returns no results.
 - Browser QA after legacy project and Stone Library fallback migration: Projects list, legacy project detail pages, Stone Library list, and Blueocean stone detail show no broken images and no old WordPress image URLs.
 - Article media cleanup browser QA: `/articles` renders four local article cover images; all four article detail routes render article text, use zero external/proxy article images after lazy-load scroll, expose zero known campaign/unsubscribe/Google redirect/old upload links, and keep only the existing React Helmet strict-mode development warning.
+- Stone Library fast-track coverage audit: provided primary finish assets are mapped for 31 finish states; 16 finish states use controlled local default/fallback imagery; 22 finish states remain true missing-image placeholders pending approved source images.
 
 Before declaring asset migration complete:
 - `rg "urblo.com.au/wp-content/uploads" src public/articles data`

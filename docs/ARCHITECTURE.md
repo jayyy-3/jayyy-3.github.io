@@ -133,7 +133,8 @@ Routing uses clean paths through `BrowserRouter`. Cloudflare Pages direct refres
 - Homepage section imagery and partner logos now use controlled files under `public/media/launch/homepage`.
 - Our Story portraits now use controlled files under `public/media/launch/our-story`; the carbon banner uses the controlled route banner because the old WordPress carbon banner returned 404.
 - Legacy project listing/detail media now uses controlled files under `public/media/launch/projects`.
-- Stone Library fallback media now uses controlled files under `public/media/launch/stone-library/fallbacks`.
+- Stone Library primary finish imagery is mapped from `data/Product` through `src/data/stoneFinishImages.ts`; controlled fallback media lives under `public/media/launch/stone-library/fallbacks`.
+- Stone Library fast-track image status: provided primary finish images are mapped for Alpine White, Angola Black, Ivory Sand, Juparana, New Grey, Steel Blue, and Zen Grey; Blueocean, Honey Comb, and Tuscany use controlled local fallback imagery; Golden Crust, Harcourt, and Tan Brown still require approved HD source images.
 - Article cover and inline cleanup media now uses controlled files under `public/media/launch/articles`.
 - Article email-export HTML is still stored as source material under `public/articles`, but `src/lib/articleMedia.ts` rewrites known Squarespace/Front/Google proxy images to local launch media and removes email campaign tracking links before DOMPurify sanitization.
 - This is not the long-term CMS media contract. During Supabase migration, these assets should be represented as media records and moved to Supabase Storage or Cloudflare media storage according to final performance testing.
