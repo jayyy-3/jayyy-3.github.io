@@ -127,9 +127,12 @@ export function prepareArticleHtml(rawHtml: string): string {
         return;
       }
 
-      anchor.removeAttribute('href');
-      anchor.removeAttribute('target');
-      anchor.removeAttribute('rel');
+      const children = Array.from(anchor.childNodes);
+      if (children.length) {
+        anchor.replaceWith(...children);
+      } else {
+        anchor.remove();
+      }
       return;
     }
 
@@ -153,6 +156,7 @@ export function prepareArticleHtml(rawHtml: string): string {
   });
 
   rewriteClaimSensitiveText(document);
+  replaceClaimSensitiveText(document);
 
   return document.body.innerHTML;
 }
@@ -201,6 +205,66 @@ function rewriteClaimSensitiveText(document: Document): void {
         '<br><strong>Consistent outcome</strong>: finish checks support consistency across the block set.',
       ].join('');
     }
+
+    if (
+      normalizedText.includes('Speed to Completion') &&
+      normalizedText.includes('3-10-week curing cycle')
+    ) {
+      element.innerHTML =
+        '<strong>Speed to Completion</strong>: Onsite installation can be planned around prefabricated blocks rather than concrete curing assumptions.';
+      return;
+    }
+
+    if (
+      normalizedText.includes('Speed & Efficiency') &&
+      normalizedText.includes('30% faster')
+    ) {
+      element.innerHTML =
+        '<strong>Speed &amp; Efficiency</strong>: Prefabricated workflows are intended to shorten installation programs under comparable project conditions.';
+      return;
+    }
+
+    if (
+      normalizedText.includes('Pre-Assembled Precision') &&
+      normalizedText.includes('flawless alignment')
+    ) {
+      element.innerHTML =
+        '<strong>Pre-Assembled Precision</strong>: Off-site fabrication supports checked alignment and reduces onsite coordination risk for complex curves.';
+    }
+  });
+}
+
+function replaceClaimSensitiveText(document: Document): void {
+  const replacements: [RegExp, string][] = [
+    [/carbon-neutral curves/gi, 'project-based carbon-offset curves'],
+    [/carbon-neutral masterpiece/gi, 'project-based carbon-offset result'],
+    [/flawless alignment/gi, 'checked alignment'],
+    [/eliminating onsite errors/gi, 'reducing onsite coordination risk'],
+    [/Completed\s+30%\s+faster than traditional concrete methods/gi, 'Designed to shorten installation programs under comparable project conditions'],
+    [
+      /Onsite installation completed in\s+2-3 weeks\s+vs\. concrete’s 3-10-week curing cycle/gi,
+      'Onsite installation can be planned around prefabricated blocks rather than concrete curing assumptions',
+    ],
+    [/Guaranteed Quality/gi, 'Quality Controls'],
+    [/ensures zero cracks, color variation, or uneven surfaces/gi, 'supports crack-risk reduction, colour-range planning, and surface consistency checks'],
+    [/zero cracks, color variation, or uneven surfaces/gi, 'crack-risk reduction, colour-range planning, and surface consistency checks'],
+  ];
+
+  const walker = document.createTreeWalker(document.body, 4);
+  const textNodes: Text[] = [];
+  let currentNode = walker.nextNode();
+
+  while (currentNode) {
+    textNodes.push(currentNode as Text);
+    currentNode = walker.nextNode();
+  }
+
+  textNodes.forEach((node) => {
+    let value = node.nodeValue ?? '';
+    replacements.forEach(([pattern, replacement]) => {
+      value = value.replace(pattern, replacement);
+    });
+    node.nodeValue = value;
   });
 }
 

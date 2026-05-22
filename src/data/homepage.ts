@@ -17,13 +17,6 @@ export interface HomepageProject {
   image: string;
 }
 
-export interface HomepageStoneCard {
-  index: string;
-  title: string;
-  finish?: string;
-  image: string;
-}
-
 export interface HomepageProductCategory {
   index: string;
   title: string;
@@ -227,33 +220,33 @@ export const homepageData = {
   productShowcase: {
     title: 'Explore our latest products',
     intro:
-      'Urblo was conceived as a response to the growing demand for better and greener alternatives to concrete seats / planters.',
+      'Urblo was conceived as a response to the growing demand for better, greener alternatives to concrete seating, planters, and civic landscape elements.',
     backgroundImage: '/media/launch/homepage/product-showcase-bg.jpg',
     categories: [
       {
         index: '01',
         title: 'Seat',
-        body: 'Freestanding stone seats ...',
+        body: 'Freestanding stone seats for durable public realm settings.',
       },
       {
         index: '02',
         title: 'Bollard',
-        body: 'Natural stone bollards in any shape...',
+        body: 'Natural stone bollards shaped for civic boundaries and entries.',
       },
       {
         index: '03',
         title: 'Planter',
-        body: 'Retaining wall blocks in solid natural stone ...',
+        body: 'Solid natural stone planters for long-life planting schemes.',
       },
       {
         index: '04',
         title: 'Sculpture',
-        body: 'Natural stone sculpture in any size ...',
+        body: 'Custom stone sculptural elements for landmark public spaces.',
       },
       {
         index: '05',
         title: 'Engraved Stone Inlays',
-        body: 'Engraving on any of our stone street furnitures...',
+        body: 'Engraving across stone street furniture and inlay details.',
       },
     ] satisfies HomepageProductCategory[],
   },
@@ -262,7 +255,7 @@ export const homepageData = {
     { value: '30', label: 'Indoor / outdoor projects' },
     { value: '430+', label: 'Clients' },
     { value: '80+', label: 'Tonnes of CO2e tracked for offsetting' },
-    { value: '18', label: 'No of helped landscape architects' },
+    { value: '18', label: 'Landscape architects supported' },
   ] satisfies HomepageMetric[],
   latestProjects: {
     title: 'Latest Projects',
@@ -272,7 +265,7 @@ export const homepageData = {
       slug: 'artisan-park-yarrabend',
       title: 'Artisan Park',
       excerpt:
-        'Deakin University student accomodation was organised back in July 2016 with a focus on practical, durable, and design-led streetscape outcomes.',
+        'Deakin University student accommodation was organised back in July 2016 with a focus on practical, durable, and design-led streetscape outcomes.',
       image: '/media/launch/homepage/project-artisan-park.jpg',
     } satisfies HomepageProject,
     gallery: [
@@ -301,38 +294,6 @@ export const homepageData = {
         image: '/media/launch/homepage/project-xavier-college.jpg',
       },
     ] satisfies HomepageProject[],
-  },
-  stoneShowcase: {
-    title: 'Browse by stone type',
-    intro:
-      'Urblo offers project-based design collaboration consultation service to professionals like architects and designers no matter which designing stage you are in.',
-    cards: [
-      {
-        index: '01',
-        title: 'Antline',
-        finish: 'Sawn',
-        image: '/media/launch/homepage/stone-antline.jpg',
-      },
-      {
-        index: '02',
-        title: 'Zen Grey',
-        image: '/media/launch/homepage/stone-zen-grey.jpg',
-      },
-      {
-        index: '03',
-        title: 'Ash Grey',
-        finish: 'Flamed',
-        image: '/media/launch/homepage/stone-ash-grey.jpg',
-      },
-      {
-        index: '04',
-        title: 'Ken Black',
-        finish: 'Flamed',
-        image: '/media/launch/homepage/stone-ken-black.jpg',
-      },
-    ] satisfies HomepageStoneCard[],
-    sampleCta:
-      'mailto:info@urblo.com.au?subject=Sample%20Request&body=Hi%20Urblo%2C%20I%20would%20like%20to%20request%20stone%20samples.',
   },
   manifesto: {
     backgroundImage: '/media/launch/homepage/manifesto-bg.png',

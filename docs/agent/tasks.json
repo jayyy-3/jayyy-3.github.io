@@ -91,6 +91,9 @@
         "src/data/siteChrome.ts",
         "src/data/homepage.ts"
       ],
+      "notes": [
+        "2026-05-22 full-site QA confirmed Contact page copy is clear about opening an email draft, but Sample Request and other mailto CTAs still need consistent fallback wording until Supabase submissions are live."
+      ],
       "acceptance": [
         "Public form submissions are validated server-side, protected by Turnstile, stored in Supabase, and notify Urblo by email.",
         "Admin users can view and update enquiry and sample-request status.",
@@ -168,6 +171,70 @@
         "All first-viewport critical media, logo assets, homepage video/poster assets, and priority project/stone imagery have a controlled hosting path.",
         "Homepage video has a launch-safe source, poster, compression/fallback policy, and mobile behavior.",
         "Residual old-site URLs are inventoried with owner, risk, and migration priority."
+      ],
+      "verification": [
+        "npm run build",
+        "npm run lint",
+        "npx tsc -b",
+        "npm run agent:smoke"
+      ]
+    },
+    {
+      "id": "NOW-ROUTE-ERROR-STATES-001",
+      "status": "now",
+      "priority": 6.1,
+      "summary": "Replace catch-all homepage fallback and blank loading states with launch-safe route error states.",
+      "files": [
+        "src/App.tsx",
+        "src/pages/ArticlePage.tsx",
+        "src/pages/ProductDetailPage.tsx",
+        "scripts/agent-smoke.sh",
+        "docs/ARCHITECTURE.md",
+        "docs/HANDOFF.md",
+        "docs/WORKLOG.md",
+        "docs/agent/tasks.json"
+      ],
+      "notes": [
+        "2026-05-22 full-site QA found unknown URLs currently render Home through the catch-all route. Article loading flash was reduced in src/pages/ArticlePage.tsx, but a deliberate 404/Not Found route is still required."
+      ],
+      "acceptance": [
+        "Unknown public URLs render a branded 404/Not Found state instead of silently showing the homepage.",
+        "Article and product loading/not-found states are visually deliberate and do not flash incorrect error copy while data is still loading.",
+        "Smoke coverage verifies one unknown route and one known missing detail route."
+      ],
+      "verification": [
+        "npm run build",
+        "npm run lint",
+        "npx tsc -b",
+        "npm run agent:smoke"
+      ]
+    },
+    {
+      "id": "NOW-ARTICLE-STRUCTURE-CLAIMS-001",
+      "status": "now",
+      "priority": 6.2,
+      "summary": "Move article details from raw newsletter HTML to mobile-safe, claim-reviewed structured article templates.",
+      "files": [
+        "src/pages/ArticlePage.tsx",
+        "src/lib/articleMedia.ts",
+        "src/index.css",
+        "public/articles/index.json",
+        "public/articles",
+        "docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md",
+        "docs/SUPABASE_SCHEMA.md",
+        "docs/ARCHITECTURE.md",
+        "docs/HANDOFF.md",
+        "docs/WORKLOG.md",
+        "docs/agent/tasks.json"
+      ],
+      "notes": [
+        "2026-05-22 full-site QA found newsletter HTML can overflow on mobile and still contains source-level carbon/speed/guarantee wording. A runtime stopgap now constrains article tables/media, unwraps dead links, and rewrites additional high-risk phrases, but structured blocks remain the launch-quality solution."
+      ],
+      "acceptance": [
+        "All article details render without horizontal overflow at 390px and desktop widths.",
+        "No public article detail page exposes unqualified carbon-neutral, guaranteed quality, zero-defect, cost, or speed claims without scope and evidence.",
+        "Newsletter artifacts, empty links, campaign links, unsubscribe/preference links, and source footers do not appear in public article details.",
+        "Article authoring uses approved structured block types before customer CRUD is considered complete."
       ],
       "verification": [
         "npm run build",
@@ -297,6 +364,36 @@
       ]
     },
     {
+      "id": "DONE-HOMEPAGE-STONE-SHOWCASE-REMOVE-001",
+      "status": "done",
+      "priority": 9.5,
+      "summary": "Remove the homepage Browse by stone type section and its unused static showcase images.",
+      "files": [
+        "src/components/homepage/HomepageSections.tsx",
+        "src/data/homepage.ts",
+        "public/media/launch/homepage",
+        "docs/ARCHITECTURE.md",
+        "docs/HANDOFF.md",
+        "docs/NEXT_STEPS.md",
+        "docs/WORKLOG.md",
+        "docs/agent/tasks.json"
+      ],
+      "notes": [
+        "2026-05-22: The requested homepage section was removed instead of recreated in the old visual style. Four now-unused local stone showcase images were deleted."
+      ],
+      "acceptance": [
+        "Homepage no longer renders the Browse by stone type section.",
+        "Removed section data and component types no longer remain in source.",
+        "Unused stone showcase assets are removed from public media."
+      ],
+      "verification": [
+        "npm run build",
+        "npm run lint",
+        "npx tsc -b",
+        "npm run agent:smoke"
+      ]
+    },
+    {
       "id": "NOW-ASSET-STRATEGY-001",
       "status": "done",
       "priority": 10,
@@ -359,6 +456,10 @@
         "src/components/site/SiteHeader.tsx",
         "src/components/site/SiteFooter.tsx"
       ],
+      "notes": [
+        "2026-05-22 full-site QA found the overall shell is coherent, but Products, Articles, and legacy Project details still feel less resolved than Stone Library and Moon Gate.",
+        "2026-05-22: Homepage Browse by stone type was removed by request. The next UI parity pass should consider a lighter, more Urblo-native Stone Library bridge if the client still wants a homepage material entry point."
+      ],
       "acceptance": [
         "Target pages reach agreed parity versus approved references.",
         "Responsive parity is checked on desktop and mobile.",
@@ -403,6 +504,9 @@
         "docs/ASSET_MIGRATION_AUDIT.md",
         "src/data/stoneFinishImages.ts",
         "src/service/StoneLibraryService.ts"
+      ],
+      "notes": [
+        "2026-05-22 full-site QA confirmed Golden Crust, Harcourt, and Tan Brown still expose visible Image coming soon placeholders in Stone Library, and product Body Stone selectors can surface placeholder/data images for stones without approved imagery."
       ],
       "acceptance": [
         "All priority stones/finishes display intended HD images in list and detail views.",
@@ -459,6 +563,39 @@
       ]
     },
     {
+      "id": "NEXT-PRODUCT-DETAIL-CONVERSION-001",
+      "status": "next",
+      "priority": 14.5,
+      "summary": "Make product detail pages behave like credible conversion/configuration pages.",
+      "files": [
+        "src/pages/ProductDetailPage.tsx",
+        "src/components/OptionSelector.tsx",
+        "src/components/ModelSelector.tsx",
+        "src/data/productData.ts",
+        "src/service/StoneLibraryService.ts",
+        "docs/ARCHITECTURE.md",
+        "docs/HANDOFF.md",
+        "docs/WORKLOG.md",
+        "docs/agent/tasks.json"
+      ],
+      "notes": [
+        "2026-05-22: Default material selections now initialize on product detail pages and duplicate Timber Flush + labels were corrected to Timber Rise + where applicable.",
+        "Remaining issue: material selection still changes button state only; it does not update a composed result, project-fit summary, availability warning, or conversion CTA."
+      ],
+      "acceptance": [
+        "Product detail pages show a clear next-step CTA such as Request quote, Discuss this product, or Request sample.",
+        "Selected model and material choices produce visible feedback beyond button state, such as a selected summary, availability copy, or scoped specification notes.",
+        "Missing stone imagery in product selectors uses a deliberate unavailable/pending state rather than generic placeholder thumbnails.",
+        "Product data is reviewed for duplicate labels, placeholder copy, and sample-level specs before production launch."
+      ],
+      "verification": [
+        "npm run build",
+        "npm run lint",
+        "npx tsc -b",
+        "npm run agent:smoke"
+      ]
+    },
+    {
       "id": "NEXT-DATA-001",
       "status": "done",
       "priority": 15,
@@ -490,6 +627,9 @@
         "docs/DESIGN.md",
         "docs/ARCHITECTURE.md"
       ],
+      "notes": [
+        "2026-05-22 full-site QA confirmed Moon Gate is close to the intended material-map case study model, while the other project details still render as legacy fact/gallery pages with weaker CTA and proof framing."
+      ],
       "acceptance": [
         "Future project content fields are explicit: client, designer, contractor, Urblo scope, stone schedule, finish schedule, carbon claim, and hotspot notes.",
         "At least one additional project is selected for migration after Moon Gate.",
@@ -518,6 +658,36 @@
         "Routing strategy is explicitly chosen, implemented, and documented.",
         "No refresh 404 regressions occur for declared routes under Cloudflare Pages hosting.",
         "SEO/URL tradeoff is visible in handoff docs."
+      ],
+      "verification": [
+        "npm run build",
+        "npm run lint",
+        "npx tsc -b",
+        "npm run agent:smoke"
+      ]
+    },
+    {
+      "id": "NEXT-SLUG-URL-NORMALIZE-001",
+      "status": "next",
+      "priority": 17.5,
+      "summary": "Normalize product and article URL slug style before production indexing.",
+      "files": [
+        "src/data/productData.ts",
+        "public/articles/index.json",
+        "public/_redirects",
+        "scripts/agent-smoke.sh",
+        "docs/ARCHITECTURE.md",
+        "docs/HANDOFF.md",
+        "docs/WORKLOG.md",
+        "docs/agent/tasks.json"
+      ],
+      "notes": [
+        "2026-05-22 full-site QA found mixed URL styles: projects and Stone Library use kebab-case, products use camelCase, and article slugs are title-case export names. This should be decided before production SEO indexing."
+      ],
+      "acceptance": [
+        "Product, article, project, and Stone Library public slugs follow one agreed production URL convention where feasible.",
+        "Any changed live or preview URLs have explicit redirects and smoke coverage.",
+        "CMS slug rules are documented before admin CRUD exposes slug editing."
       ],
       "verification": [
         "npm run build",

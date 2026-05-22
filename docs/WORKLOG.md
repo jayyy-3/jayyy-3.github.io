@@ -1253,6 +1253,55 @@ Last updated: 2026-05-22
 - `NEXT-PROJECTS-INTAKE-001`
 - `NEXT-STONELIB-DATA-001`
 
+## Entry - 2026-05-22 (Homepage Stone Section Removal and Full-Site UI QA)
+
+### Scope
+- Removed the homepage `Browse by stone type` section by request, including the unused source type/data and four local showcase images.
+- Polished obvious homepage/product copy issues surfaced during the QA pass: removed unfinished ellipses, corrected `student accommodation`, corrected `street furniture`, and fixed the product heading text spacing.
+- Added runtime article safeguards for legacy newsletter HTML: mobile table/media constraints, dead-link unwrapping, stronger loading behavior, and additional claim-sensitive phrase rewrites.
+- Initialized product detail default material selections and corrected duplicate `Timber Flush +` model labels where they were intended to be `Timber Rise +`.
+- Used two read-only subagents for independent route/UI and customer/content QA, then converted the unresolved findings into machine-readable Harness tasks.
+
+### Changed Files
+- `src/components/homepage/HomepageSections.tsx`
+- `src/data/homepage.ts`
+- `src/data/productData.ts`
+- `src/pages/ProductDetailPage.tsx`
+- `src/pages/ArticlePage.tsx`
+- `src/lib/articleMedia.ts`
+- `src/index.css`
+- Deleted four former homepage stone showcase images from `public/media/launch/homepage`.
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run build`: pass; no `>500kB` JavaScript chunk warning, with the existing Browserslist staleness notice only.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- Browser desktop QA on `http://127.0.0.1:4174`: Home no longer contains `Browse by stone type`, Home and Prime Block have no broken images or horizontal overflow, Prime Block initializes New Grey, Stainless Steel Finish, and Spotted-Gum Timber, and the known React Helmet strict-mode warning remains.
+- Playwright mobile fallback QA at 390px: `/articles/Debunking-the-Cost-Myth-by-Urblo-Bluestone-Blocks` had `scrollWidth` 390, zero horizontal overflow, zero broken images, zero empty links, and no flagged `Guaranteed Quality`, `zero cracks`, `3-10-week curing cycle`, `30% faster`, or `flawless alignment` text.
+
+### Risks and Gaps
+- Unknown URLs still render Home until `NOW-ROUTE-ERROR-STATES-001`.
+- Articles still need structured blocks and full editorial approval under `NOW-ARTICLE-STRUCTURE-CLAIMS-001`.
+- Product detail configuration still needs stronger conversion feedback and CTA under `NEXT-PRODUCT-DETAIL-CONVERSION-001`.
+- Stone Library still needs approved source imagery for Golden Crust, Harcourt, and Tan Brown under `NEXT-STONELIB-IMG-001`.
+- Legacy project pages remain less complete than Moon Gate and need migration under `NEXT-PROJECTS-INTAKE-001`.
+- URL slug normalization should be decided before production indexing under `NEXT-SLUG-URL-NORMALIZE-001`.
+
+### Next Handoff
+- `NOW-FORMS-SUPABASE-001`
+- `NOW-ROUTE-ERROR-STATES-001`
+- `NOW-ARTICLE-STRUCTURE-CLAIMS-001`
+- `NEXT-PRODUCT-DETAIL-CONVERSION-001`
+- `NEXT-PROJECTS-INTAKE-001`
+
 ## Entry Template (Use for Every Future Session)
 
 ### Date

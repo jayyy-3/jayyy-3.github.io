@@ -9,6 +9,7 @@ export default function ArticlePage() {
   const { slug = '' } = useParams<{ slug: string }>();
   const [html, setHtml] = useState('<p>Loading...</p>');
   const [articles, setArticles] = useState<ArticleMeta[]>([]);
+  const [indexLoaded, setIndexLoaded] = useState(false);
 
   const meta = articles.find((article) => article.slug === slug);
   const index = articles.findIndex((article) => article.slug === slug);
@@ -20,6 +21,8 @@ export default function ArticlePage() {
       return;
     }
 
+    setHtml('<p>Loading...</p>');
+
     fetch(import.meta.env.BASE_URL + 'articles/' + slug + '/content.html')
       .then((response) => response.text())
       .then((raw) => setHtml(DOMPurify.sanitize(prepareArticleHtml(raw))))
@@ -30,8 +33,13 @@ export default function ArticlePage() {
     fetch(import.meta.env.BASE_URL + 'articles/index.json')
       .then((response) => response.json())
       .then(setArticles)
-      .catch(console.error);
+      .catch(console.error)
+      .finally(() => setIndexLoaded(true));
   }, []);
+
+  if (!indexLoaded) {
+    return <p className="py-20 text-center text-black/60">Loading article...</p>;
+  }
 
   if (!meta) {
     return <p className="py-20 text-center text-red-600">Article not found.</p>;

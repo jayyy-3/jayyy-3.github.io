@@ -103,6 +103,8 @@ Routing uses clean paths through `BrowserRouter`. Cloudflare Pages direct refres
 | `/articles/:slug` | `ArticlePage` | Article detail page. |
 | `*` | `Home` | Fallback to homepage content wrapped by `HomepageLayout`. |
 
+Current route risk: the catch-all still renders Home for unknown URLs. `NOW-ROUTE-ERROR-STATES-001` tracks replacing this with a branded 404/Not Found state before launch.
+
 ## Navigation Contract vs Implemented Routes
 
 ### Implemented navigation surfaces
@@ -138,7 +140,7 @@ Routing uses clean paths through `BrowserRouter`. Cloudflare Pages direct refres
 - Stone Library fast-track image status: provided primary finish images are mapped for Alpine White, Angola Black, Ivory Sand, Juparana, New Grey, Steel Blue, and Zen Grey; Blueocean, Honey Comb, and Tuscany use controlled local fallback imagery; Golden Crust, Harcourt, and Tan Brown still require approved HD source images.
 - Article cover and inline cleanup media now uses controlled files under `public/media/launch/articles`.
 - Article email-export HTML is still stored as source material under `public/articles`, but `src/lib/articleMedia.ts` rewrites known Squarespace/Front/Google proxy images to local launch media and removes email campaign tracking links before DOMPurify sanitization.
-- Article claim-safety stopgap: `src/lib/articleMedia.ts` also rewrites known high-risk newsletter phrases at runtime so public article detail pages avoid unqualified carbon, cost, speed, and guarantee claims until structured article blocks replace the raw newsletter HTML.
+- Article claim-safety and mobile stopgap: `src/lib/articleMedia.ts` rewrites known high-risk newsletter phrases at runtime, unwraps dead links, and `src/index.css` constrains legacy newsletter tables/media to reduce mobile overflow until structured article blocks replace the raw newsletter HTML.
 - This is not the long-term CMS media contract. During Supabase migration, these assets should be represented as media records and moved to Supabase Storage or Cloudflare media storage according to final performance testing.
 
 ## Stone Library Detail Interaction Contract (`src/pages/StoneLibraryDetailPage.tsx`)
@@ -196,6 +198,7 @@ Routing uses clean paths through `BrowserRouter`. Cloudflare Pages direct refres
   - `Product`, `ProductModel`, `MaterialCategory`, `SelectedMaterials`, `OptionItem`
 - Runtime note:
   - `ProductDetailPage` material options now come from `StoneLibraryService.getStoneOptionsForProducts()`.
+  - Product detail pages initialize their configured default material selections, but selector changes still need stronger conversion feedback under `NEXT-PRODUCT-DETAIL-CONVERSION-001`.
 
 ### Project Data Contract
 - Source of project listing and detail records: `src/data/projectData.ts`
@@ -302,6 +305,7 @@ Routing uses clean paths through `BrowserRouter`. Cloudflare Pages direct refres
 ## Homepage Contract
 - Homepage structure is driven by dedicated internal config in `src/data/homepage.ts`, not the legacy tabbed `FeatureSection`.
 - Homepage uses `HomepageLayout` with `HomepageHeader`/`HomepageFooter` proxy components that currently render the shared `SiteHeader`/`SiteFooter`.
+- The previous homepage `Browse by stone type` showcase has been removed by request; homepage material discovery should be reintroduced only through a new Urblo-aligned section if the client wants that pathway.
 - Homepage typography is self-hosted from local static assets under `/public/fonts/urblo`:
   - `Avenir LT Std` weights `300/400/500/600/800`
   - `Didot LT Std` italic `400` and normal `600`
@@ -322,7 +326,8 @@ Routing uses clean paths through `BrowserRouter`. Cloudflare Pages direct refres
 - Admin CMS does not exist yet; customers cannot CRUD content without code changes.
 - Project and Stone Library content migration needs strict separation between confirmed facts and inferred MVP copy.
 - Raw article newsletter HTML still contains external source URLs as migration source material, but runtime article rendering now rewrites known email proxy image URLs and campaign links before render.
-- Long-term article quality still requires Supabase structured blocks, approved article image records, and editorial review.
+- Long-term article quality still requires Supabase structured blocks, approved article image records, editorial review, and claim-safe copy approval.
+- Unknown URLs still render the homepage through the catch-all route until `NOW-ROUTE-ERROR-STATES-001` is implemented.
 - Route-level code splitting has resolved the previous `>500kB` JavaScript chunk warning; continue monitoring build output as admin/CMS features are added.
 
 ## Brand and Design Linkage Rule

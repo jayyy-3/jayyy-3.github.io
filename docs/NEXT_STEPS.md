@@ -42,13 +42,17 @@ Source of truth: `docs/agent/tasks.json`.
 - `NOW-FORMS-SUPABASE-001`: replace mailto-only Contact and Sample Request flows with Supabase-backed submissions.
 - `NOW-ADMIN-CMS-001`: build the Urblo admin CMS for customer-maintained Projects, Stone Library, Products, Articles, media, and leads.
 - `NOW-ASSET-MIGRATION-001`: migrate priority media away from old WordPress URLs and define controlled storage for launch.
+- `NOW-ROUTE-ERROR-STATES-001`: replace catch-all homepage fallback and blank loading states with launch-safe route error states.
+- `NOW-ARTICLE-STRUCTURE-CLAIMS-001`: move article details from raw newsletter HTML to mobile-safe, claim-reviewed structured article templates.
 
 ## Next
 - `NEXT-UI-PARITY-001`: bring Home, Our Story, Articles, and Contact Us toward approved visual references.
 - `NEXT-STONELIB-IMG-001`: complete Stone Library HD finish image coverage.
 - `NEXT-STONELIB-IMG-002`: decide and implement secondary finish frame behavior.
 - `NEXT-STONELIB-DATA-001`: replace generic finish behavior text with approved notes.
+- `NEXT-PRODUCT-DETAIL-CONVERSION-001`: make product details behave like credible conversion/configuration pages.
 - `NEXT-PROJECTS-INTAKE-001`: define the project intake template and migrate the next project into the material-map case study model.
+- `NEXT-SLUG-URL-NORMALIZE-001`: normalize product and article URL slug style before production indexing.
 
 ## Later
 - `LATER-BRAND-001`: align homepage modules with brand pillars and proof framing.
@@ -74,6 +78,7 @@ Source of truth: `docs/agent/tasks.json`.
 - `NOW-SEO-DELIVERY-001`: default metadata/icons/social image are launch-owned, Open Graph/Twitter image now uses a PNG, and high-risk article excerpt/runtime newsletter claims are qualified.
 - `LATER-PERF-001`: route-level lazy loading is implemented, initial app shell JS is reduced, and the previous `>500kB` JavaScript chunk warning is resolved.
 - `LATER-QA-001`: `npm run agent:smoke` now verifies key route shells, article index availability, and critical CTA targets with actionable names.
+- `DONE-HOMEPAGE-STONE-SHOWCASE-REMOVE-001`: homepage Browse by stone type section and unused local showcase images were removed by request; article/mobile and product/detail polish discovered during the full-site QA pass is tracked in the active queue.
 
 Older completion details live in `docs/WORKLOG.md`.
 

@@ -287,6 +287,7 @@ html {
     width: 100%;
     padding: 0;
     background: transparent;
+    overflow-x: clip;
 }
 
 .article-wrapper #newsletter-email {
@@ -295,6 +296,39 @@ html {
 
 .article-wrapper {
     font-family: inherit !important;
+}
+
+.article-wrapper .urblo-card {
+    max-width: min(980px, 100%);
+    overflow-x: hidden;
+}
+
+.article-wrapper table {
+    width: 100% !important;
+    max-width: 100% !important;
+    table-layout: fixed;
+}
+
+.article-wrapper tbody,
+.article-wrapper tr,
+.article-wrapper td,
+.article-wrapper th {
+    max-width: 100% !important;
+    box-sizing: border-box;
+}
+
+.article-wrapper img,
+.article-wrapper iframe,
+.article-wrapper video {
+    max-width: 100% !important;
+    height: auto !important;
+}
+
+.article-wrapper td,
+.article-wrapper th,
+.article-wrapper p,
+.article-wrapper li {
+    overflow-wrap: anywhere;
 }
 
 @keyframes marquee {

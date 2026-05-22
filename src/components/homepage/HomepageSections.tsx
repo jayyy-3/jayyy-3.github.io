@@ -15,7 +15,6 @@ import {
   type HomepageLogo,
   type HomepageMetric,
   type HomepageProject,
-  type HomepageStoneCard,
 } from '../../data/homepage';
 
 function Reveal({
@@ -728,7 +727,7 @@ function ProductShowcaseSection() {
         <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
           <Reveal>
             <h2 className="font-display text-[34px] font-semibold uppercase leading-[1.45] text-black md:text-[44px]">
-              Explore our latest
+              Explore our latest{' '}
               <br />
               products
             </h2>
@@ -956,107 +955,6 @@ function LatestProjectsSection() {
   );
 }
 
-function StoneCard({ card, compact = false }: { card: HomepageStoneCard; compact?: boolean }) {
-  return (
-    <div className={`group ${compact ? 'lg:mt-14' : ''}`}>
-      <div className="overflow-hidden rounded-[4px]">
-        <img
-          src={card.image}
-          alt={card.title}
-          className={`w-full object-cover transition-transform duration-500 group-hover:scale-[1.03] ${
-            compact ? 'h-[470px]' : 'h-[510px]'
-          }`}
-        />
-      </div>
-      <div className="mt-5 flex items-start gap-5">
-        <div className="min-w-[78px] text-[64px] font-semibold leading-none text-black md:min-w-[96px] md:text-[100px]">
-          {card.index}
-        </div>
-        <div className="pt-2">
-          <h3 className="text-[26px] font-bold uppercase leading-[1.25] text-black">
-            {card.finish ? `${card.title}, ${card.finish}` : card.title}
-          </h3>
-          <a
-            href={homepageData.stoneShowcase.sampleCta}
-            className="mt-4 inline-flex items-center gap-3 text-[16px] font-semibold text-[#4F4F4D]"
-          >
-            <span>See more</span>
-            <ArrowIcon />
-          </a>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function StoneShowcaseSection() {
-  return (
-    <section className="bg-white px-6 py-20 md:px-10 lg:px-[92px] lg:py-24">
-      <div className="mx-auto max-w-[1440px]">
-        <div className="grid gap-8 lg:grid-cols-[0.74fr_0.96fr_auto] lg:items-start">
-          <Reveal>
-            <h2 className="font-display text-[34px] font-bold uppercase leading-[1.45] text-black md:text-[36px]">
-              Browse by stone type
-            </h2>
-          </Reveal>
-          <Reveal
-            delay={0.08}
-            className="max-w-[36rem] text-[20px] font-semibold leading-8 text-black md:text-[22px]"
-          >
-            Urblo offers project-based <span className="uppercase">design collaboration</span>{' '}
-            consultation service to professionals like architects and designers no matter which
-            designing stage you are in.
-          </Reveal>
-          <Reveal delay={0.12} className="hidden items-start gap-3 lg:flex">
-            <button
-              type="button"
-              className="inline-flex h-12 w-12 items-center justify-center rounded-[4px] border border-black/20 text-black"
-              aria-label="Previous stones"
-            >
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <path d="M15 5l-7 7 7 7" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
-            <button
-              type="button"
-              className="inline-flex h-12 w-12 items-center justify-center rounded-[4px] border border-black/20 text-black"
-              aria-label="Next stones"
-            >
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
-          </Reveal>
-        </div>
-
-        <div className="mt-16 grid gap-10 lg:grid-cols-2 lg:gap-x-14 lg:gap-y-20">
-          <Reveal>
-            <StoneCard card={homepageData.stoneShowcase.cards[0]} />
-          </Reveal>
-          <Reveal delay={0.06}>
-            <StoneCard card={homepageData.stoneShowcase.cards[1]} compact />
-          </Reveal>
-          <Reveal delay={0.1}>
-            <StoneCard card={homepageData.stoneShowcase.cards[2]} />
-          </Reveal>
-          <Reveal delay={0.14}>
-            <div>
-              <a
-                href={homepageData.stoneShowcase.sampleCta}
-                className="mb-10 inline-flex w-full items-center justify-between rounded-[4px] bg-black px-8 py-5 text-[24px] text-white"
-              >
-                <span>Add sample to cart</span>
-                <ArrowIcon light />
-              </a>
-              <StoneCard card={homepageData.stoneShowcase.cards[3]} compact />
-            </div>
-          </Reveal>
-        </div>
-      </div>
-    </section>
-  );
-}
-
 function ManifestoSection() {
   return (
     <section className="overflow-hidden bg-white pb-0 pt-20 text-white">
@@ -1234,7 +1132,6 @@ export default function HomepageSections() {
       <ProductShowcaseSection />
       <MetricsSection />
       <LatestProjectsSection />
-      <StoneShowcaseSection />
       <ManifestoSection />
       <LogoCarouselSection />
       <VideoCTASection />

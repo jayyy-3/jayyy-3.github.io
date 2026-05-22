@@ -1,6 +1,5 @@
 import type {Product} from '../types/product';
 
-// 6 个座椅的示例数据 —— 可自行删改 / 拆分为独立文件
 export const products: Product[] = [
     {
         slug: 'primeBlock',
@@ -10,19 +9,18 @@ export const products: Product[] = [
             {key: 'core', label: 'Core', img: '/products/primeBlock/core.png'},
             {key: 'timberRise', label: 'Timber Rise', img: '/products/primeBlock/timberRise.png'},
             {key: 'timberFlush', label: 'Timber Flush', img: '/products/primeBlock/timberFlush.png'},
-            {key: 'timberRiseP', label: 'Timber Flush +', img: '/products/primeBlock/timberRiseP.png'},
+            {key: 'timberRiseP', label: 'Timber Rise +', img: '/products/primeBlock/timberRiseP.png'},
             {key: 'timberFlushP', label: 'Timber Flush +', img: '/products/primeBlock/timberFlushP.png'},
         ],
         defaultMaterials: {
-            body: 'new-grey',         // ← 对应 Stone Library stoneGroupId
-            frame: 'stainless-finish',
+            body: 'new-grey',
+            frame: 'stainless',
             battens: 'spotted-gum'
         },
         specs: {
             'Linear Metre Weight': '≈ 126 kg / lm',
             'Max Span': '2200 mm',
             'Fixings': 'M12 SS316',
-            // ……
         }
     },
 
@@ -34,19 +32,18 @@ export const products: Product[] = [
             {key: 'core', label: 'Core', img: '/products/primeLume/core.png'},
             {key: 'timberRise', label: 'Timber Rise', img: '/products/primeLume/timberRise.png'},
             {key: 'timberFlush', label: 'Timber Flush', img: '/products/primeLume/timberFlush.png'},
-            {key: 'timberRiseP', label: 'Timber Flush +', img: '/products/primeLume/timberRiseP.png'},
+            {key: 'timberRiseP', label: 'Timber Rise +', img: '/products/primeLume/timberRiseP.png'},
             {key: 'timberFlushP', label: 'Timber Flush +', img: '/products/primeLume/timberFlushP.png'},
         ],
         defaultMaterials: {
-            body: 'new-grey',         // ← 对应 Stone Library stoneGroupId
-            frame: 'stainless-finish',
+            body: 'new-grey',
+            frame: 'stainless',
             battens: 'spotted-gum'
         },
         specs: {
             'Linear Metre Weight': '≈ 126 kg / lm',
             'Max Span': '2200 mm',
             'Fixings': 'M12 SS316',
-            // ……
         }
     },
 
@@ -58,19 +55,18 @@ export const products: Product[] = [
             {key: 'core', label: 'Core', img: '/products/terraLine/core.png'},
             {key: 'timberRise', label: 'Timber Rise', img: '/products/terraLine/timberRise.png'},
             {key: 'timberFlush', label: 'Timber Flush', img: '/products/terraLine/timberFlush.png'},
-            {key: 'timberRiseP', label: 'Timber Flush +', img: '/products/terraLine/timberRiseP.png'},
+            {key: 'timberRiseP', label: 'Timber Rise +', img: '/products/terraLine/timberRiseP.png'},
             {key: 'timberFlushP', label: 'Timber Flush +', img: '/products/terraLine/timberFlushP.png'},
         ],
         defaultMaterials: {
-            body: 'new-grey',         // ← 对应 Stone Library stoneGroupId
-            frame: 'stainless-finish',
+            body: 'new-grey',
+            frame: 'stainless',
             battens: 'spotted-gum'
         },
         specs: {
             'Linear Metre Weight': '≈ 126 kg / lm',
             'Max Span': '2200 mm',
             'Fixings': 'M12 SS316',
-            // ……
         }
     },
 
@@ -85,39 +81,37 @@ export const products: Product[] = [
             {key: 'timberSpanP', label: 'Timber Span +', img: '/products/strataBench/timberSpanP.jpg'},
         ],
         defaultMaterials: {
-            body: 'new-grey',         // ← 对应 Stone Library stoneGroupId
-            frame: 'stainless-finish',
+            body: 'new-grey',
+            frame: 'stainless',
             battens: 'spotted-gum'
         },
         specs: {
             'Linear Metre Weight': '≈ 126 kg / lm',
             'Max Span': '2200 mm',
             'Fixings': 'M12 SS316',
-            // ……
         }
     },
 
     {
         slug: 'primeCurve',
         name: 'Prime Curve',
-        shortDesc: 'The PrimeCurve Series extends PrimeLume’s innovation into sweeping profiles, merging signature light-ready grooves with organic curves for plazas, pathways, or sculptural installations. Engineered stone ensures durability adapts to any landscape poetry.',
+        shortDesc: 'The PrimeCurve Series extends PrimeLume’s innovation into sweeping profiles, merging signature light-ready grooves with organic curves for plazas, pathways, and sculptural installations.',
         models: [
             {key: 'core', label: 'Core', img: '/products/primeCurve/core.png'},
             {key: 'timberRise', label: 'Timber Rise', img: '/products/primeCurve/timberRise.png'},
             {key: 'timberFlush', label: 'Timber Flush', img: '/products/primeCurve/timberFlush.png'},
-            {key: 'timberRiseP', label: 'Timber Flush +', img: '/products/primeCurve/timberRiseP.png'},
+            {key: 'timberRiseP', label: 'Timber Rise +', img: '/products/primeCurve/timberRiseP.png'},
             {key: 'timberFlushP', label: 'Timber Flush +', img: '/products/primeCurve/timberFlushP.png'},
         ],
         defaultMaterials: {
-            body: 'new-grey',         // ← 对应 Stone Library stoneGroupId
-            frame: 'stainless-finish',
+            body: 'new-grey',
+            frame: 'stainless',
             battens: 'spotted-gum'
         },
         specs: {
             'Linear Metre Weight': '≈ 126 kg / lm',
             'Max Span': '2200 mm',
             'Fixings': 'M12 SS316',
-            // ……
         }
     },
 
@@ -129,19 +123,18 @@ export const products: Product[] = [
             {key: 'core', label: 'Core', img: '/products/terraArc/core.png'},
             {key: 'timberRise', label: 'Timber Rise', img: '/products/terraArc/timberRise.png'},
             {key: 'timberFlush', label: 'Timber Flush', img: '/products/terraArc/timberFlush.png'},
-            {key: 'timberRiseP', label: 'Timber Flush +', img: '/products/terraArc/timberRiseP.png'},
+            {key: 'timberRiseP', label: 'Timber Rise +', img: '/products/terraArc/timberRiseP.png'},
             {key: 'timberFlushP', label: 'Timber Flush +', img: '/products/terraArc/timberFlushP.png'},
         ],
         defaultMaterials: {
-            body: 'new-grey',         // ← 对应 Stone Library stoneGroupId
-            frame: 'stainless-finish',
+            body: 'new-grey',
+            frame: 'stainless',
             battens: 'spotted-gum'
         },
         specs: {
             'Linear Metre Weight': '≈ 126 kg / lm',
             'Max Span': '2200 mm',
             'Fixings': 'M12 SS316',
-            // ……
         }
     },
 ];

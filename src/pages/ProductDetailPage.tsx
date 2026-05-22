@@ -8,7 +8,7 @@ import { frameFinishes } from '../data/frameFinishData';
 import ProductService from '../service/ProductService';
 import StoneLibraryService from '../service/StoneLibraryService';
 import { useProductStore } from '../store/productStore';
-import type { Product } from '../types/product';
+import type { MaterialCategory, Product } from '../types/product';
 
 export default function ProductDetailPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -16,6 +16,7 @@ export default function ProductDetailPage() {
 
   const storeSetProduct = useProductStore((state) => state.setProduct);
   const currentModelKey = useProductStore((state) => state.currentModelKey);
+  const setMaterial = useProductStore((state) => state.setMaterial);
 
   const stoneOptions = useMemo(() => StoneLibraryService.getStoneGroupOptionsForProducts(), []);
 
@@ -31,8 +32,14 @@ export default function ProductDetailPage() {
 
       setProduct(result);
       storeSetProduct(result.slug, result.models[0].key);
+
+      Object.entries(result.defaultMaterials ?? {}).forEach(([category, materialSlug]) => {
+        if (materialSlug) {
+          setMaterial(category as MaterialCategory, materialSlug);
+        }
+      });
     });
-  }, [slug, storeSetProduct]);
+  }, [setMaterial, slug, storeSetProduct]);
 
   if (!product) {
     return null;
