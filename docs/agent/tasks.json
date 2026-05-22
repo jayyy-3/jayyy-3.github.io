@@ -136,12 +136,25 @@
       "summary": "Migrate priority media away from old WordPress URLs and define controlled storage for launch.",
       "files": [
         "docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md",
+        "docs/ASSET_MIGRATION_AUDIT.md",
         "docs/ARCHITECTURE.md",
+        "docs/HANDOFF.md",
+        "docs/NEXT_STEPS.md",
+        "docs/WORKLOG.md",
+        "public/_headers",
+        "public/media/launch",
+        "src/App.tsx",
+        "src/components/homepage/HomepageSections.tsx",
         "src/data/homepage.ts",
         "src/data/siteChrome.ts",
+        "src/pages/ContactPage.tsx",
         "src/data/projectData.ts",
         "src/data/stoneFinishImages.ts",
         "public/articles/index.json"
+      ],
+      "notes": [
+        "2026-05-22: P0 launch stopgap is implemented for logo, homepage poster/video, route banners, and contact imagery under public/media/launch.",
+        "Task remains open for P1/P2 legacy media, Supabase media records, article media cleanup, and final Cloudflare R2/Stream review for homepage video."
       ],
       "acceptance": [
         "All first-viewport critical media, logo assets, homepage video/poster assets, and priority project/stone imagery have a controlled hosting path.",

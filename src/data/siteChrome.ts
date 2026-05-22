@@ -17,7 +17,7 @@ export interface SiteFooterContact {
   copyright: string;
 }
 
-export const siteLogoUrl = 'https://urblo.com.au/wp-content/uploads/2024/12/logo.png';
+export const siteLogoUrl = '/media/launch/identity/urblo-logo.png';
 
 export const siteBrandStatement =
   'devoted to supporting ethical and significant projects every step of the way.';

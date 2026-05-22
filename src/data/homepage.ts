@@ -102,10 +102,10 @@ export const homepageSocialLinks: HomepageNavLink[] = [
 
 export const homepageData = {
   brandStatement: 'devoted to supporting ethical and significant projects every step of the way.',
-  logoUrl: 'https://urblo.com.au/wp-content/uploads/2024/12/logo.png',
+  logoUrl: '/media/launch/identity/urblo-logo.png',
   hero: {
-    videoUrl: 'https://urblo.com.au/wp-content/uploads/stream/video.php/urblo.mp4',
-    posterUrl: 'https://urblo.com.au/wp-content/uploads/revslider/video-media/urblo_1.jpeg',
+    videoUrl: '/media/launch/home/urblo-hero.mp4',
+    posterUrl: '/media/launch/home/hero-poster.jpg',
     eyebrow: 'A trusted partner for your next streetscapes & civil landscape project.',
   },
   sustainability: {
@@ -221,7 +221,7 @@ export const homepageData = {
     },
   },
   partnerBanner: {
-    image: 'https://urblo.com.au/wp-content/uploads/2024/12/IMGP0028-scaled-1.jpg',
+    image: '/media/launch/contact/project-contact.jpg',
     text: 'A trusted partner for your next streetscapes & civil landscape project.',
   },
   productShowcase: {
@@ -281,7 +281,7 @@ export const homepageData = {
         slug: 'australian-catholic-university',
         title: 'Australian Catholic University',
         excerpt: 'Precision-built bluestone seating with calm civic character.',
-        image: 'https://urblo.com.au/wp-content/uploads/2024/12/IMGP0028-scaled-1.jpg',
+        image: '/media/launch/contact/project-contact.jpg',
       },
       {
         slug: 'moon-gate-woolley-street',
@@ -368,7 +368,7 @@ export const homepageData = {
   videoCta: {
     backgroundImage:
       'https://urblo.com.au/wp-content/uploads/2024/12/WhatsApp-Image-2024-12-18-at-15.47.49.jpeg',
-    videoUrl: 'https://urblo.com.au/wp-content/uploads/stream/video.php/urblo.mp4',
+    videoUrl: '/media/launch/home/urblo-hero.mp4',
   },
   footer: {
     address: ['5 Hamilton St,', 'Oakleigh VIC 3166'],

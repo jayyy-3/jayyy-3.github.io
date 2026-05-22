@@ -17,6 +17,15 @@ import ContactPage from './pages/ContactPage';
 
 const SITE_URL = 'https://urblo.com.au';
 const DEFAULT_SHARE_IMAGE = `${SITE_URL}/og-default.svg`;
+const ROUTE_BANNERS = {
+    products: '/media/launch/banners/products.jpg',
+    materials: '/media/launch/banners/materials.jpg',
+    projects: '/media/launch/banners/projects.jpg',
+    ourStory: '/media/launch/banners/our-story.jpg',
+    contact: '/media/launch/banners/our-story.jpg',
+    articles: '/media/launch/banners/articles.jpg',
+    articleDetail: '/media/launch/banners/article-detail.jpg',
+} as const;
 
 interface RouteMeta {
     title: string;
@@ -180,7 +189,7 @@ export default function App() {
                     <Route
                         path="/products"
                         element={
-                            <DefaultLayout bgImage="https://urblo.com.au/wp-content/uploads/2024/12/bg-products.jpg">
+                            <DefaultLayout bgImage={ROUTE_BANNERS.products}>
                                 <ProductsPage />
                             </DefaultLayout>
                         }
@@ -189,7 +198,7 @@ export default function App() {
                     <Route
                         path="/products/:slug"
                         element={
-                            <DefaultLayout bgImage="https://urblo.com.au/wp-content/uploads/2024/12/bg-materials.jpg">
+                            <DefaultLayout bgImage={ROUTE_BANNERS.materials}>
                                 <ProductDetailPage />
                             </DefaultLayout>
                         }
@@ -198,7 +207,7 @@ export default function App() {
                     <Route
                         path="/projects"
                         element={
-                            <DefaultLayout bgImage="https://urblo.com.au/wp-content/uploads/2024/12/bg-products.jpg">
+                            <DefaultLayout bgImage={ROUTE_BANNERS.projects}>
                                 <ProjectsPage />
                             </DefaultLayout>
                         }
@@ -216,7 +225,7 @@ export default function App() {
                     <Route
                         path="/our-story"
                         element={
-                            <DefaultLayout bgImage="https://urblo.com.au/wp-content/uploads/2024/12/bg-our-story.jpg">
+                            <DefaultLayout bgImage={ROUTE_BANNERS.ourStory}>
                                 <OurStoryPage />
                             </DefaultLayout>
                         }
@@ -225,7 +234,7 @@ export default function App() {
                     <Route
                         path="/contact"
                         element={
-                            <DefaultLayout bgImage="https://urblo.com.au/wp-content/uploads/2024/12/IMGP0028-scaled-1.jpg">
+                            <DefaultLayout bgImage={ROUTE_BANNERS.contact}>
                                 <ContactPage />
                             </DefaultLayout>
                         }
@@ -234,7 +243,7 @@ export default function App() {
                     <Route
                         path="/articles"
                         element={
-                            <DefaultLayout bgImage="https://urblo.com.au/wp-content/uploads/2024/12/bg-articles.jpg">
+                            <DefaultLayout bgImage={ROUTE_BANNERS.articles}>
                                 <ArticlesPage />
                             </DefaultLayout>
                         }
@@ -243,7 +252,7 @@ export default function App() {
                     <Route
                         path="/articles/:slug"
                         element={
-                            <DefaultLayout bgImage="https://urblo.com.au/wp-content/uploads/2024/12/bg-article-details.jpg">
+                            <DefaultLayout bgImage={ROUTE_BANNERS.articleDetail}>
                                 <ArticlePage />
                             </DefaultLayout>
                         }

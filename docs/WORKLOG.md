@@ -2,6 +2,51 @@
 
 Last updated: 2026-05-22
 
+## Entry - 2026-05-22 (P0 Launch Media Stopgap)
+
+### Scope
+- Downloaded and controlled the launch-critical logo, homepage poster, contact image, and homepage MP4 under `public/media/launch`.
+- Generated controlled route banner stopgaps from existing project media because several old WordPress banner URLs now return 404.
+- Repointed shared logo, homepage hero media, video modal source, route banners, Contact page imagery, and matching homepage proof imagery away from old WordPress URLs.
+- Added mobile homepage video fallback behavior so mobile viewports keep the poster and do not select the 10 MB MP4 source.
+- Added a Cloudflare Pages cache rule for unversioned `/media/*` launch assets.
+- Updated architecture, handoff, roadmap, task queue, and asset audit docs so the current launch media posture is explicit.
+
+### Changed Files
+- `public/_headers`
+- `public/media/launch`
+- `src/App.tsx`
+- `src/components/homepage/HomepageSections.tsx`
+- `src/data/homepage.ts`
+- `src/data/siteChrome.ts`
+- `src/pages/ContactPage.tsx`
+- `docs/ARCHITECTURE.md`
+- `docs/ASSET_MIGRATION_AUDIT.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run build`: pass (existing bundle size warning and Browserslist staleness notice remain).
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- Browser QA: desktop homepage selected the local MP4 and local poster; mobile homepage selected no MP4 source and kept the local poster; Products, Product detail, Projects, Our Story, Contact, Articles, and Article detail route banners loaded from local `public/media/launch` paths with no broken images observed.
+
+### Risks and Gaps
+- `NOW-ASSET-MIGRATION-001` remains open because P1/P2 media still depends on old WordPress, Squarespace, Google, and Front URLs.
+- The homepage MP4 is controlled locally for launch safety but should still be reviewed for Cloudflare R2 or Stream before production scale.
+- Article cover GIFs and newsletter HTML media remain part of the article CMS cleanup path.
+- React Helmet still emits the existing strict-mode dev-console warning.
+
+### Next Handoff
+- Continue `NOW-ASSET-MIGRATION-001` with P1 homepage/project/Stone Library media migration.
+- `NOW-FORMS-SUPABASE-001`
+- `NOW-SEO-DELIVERY-001`
+
 ## Entry - 2026-05-22 (Asset Migration Audit)
 
 ### Scope

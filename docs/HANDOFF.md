@@ -39,6 +39,8 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 - Cloudflare Pages repo-side routing/runbook work: runtime and harness verification pass on 2026-05-22.
 - SEO metadata baseline: runtime and harness verification pass on 2026-05-22.
 - Asset migration audit: `npm run agent:check` and `git diff --check` pass on 2026-05-22.
+- P0 launch media stopgap: runtime and harness verification pass on 2026-05-22.
+- Browser media QA on 2026-05-22: desktop homepage selects local MP4 and poster; mobile homepage selects no MP4 source and uses the local poster; Products, Product detail, Projects, Our Story, Contact, Articles, and Article detail banners load from local `public/media/launch` assets with no broken images observed.
 
 ## Active Risks
 - Cloudflare + Supabase is approved as the launch target, but runtime implementation has not started.
@@ -47,7 +49,7 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 - Contact and Sample Request remain mailto/local-only in current runtime.
 - Projects, Stone Library, Products, and Articles are still file-backed rather than customer-editable.
 - The admin CMS does not exist yet.
-- Priority media still needs migration away from old WordPress URLs; P0/P1/P2 risk groups are documented in `docs/ASSET_MIGRATION_AUDIT.md`.
+- P0 launch-critical media now has a controlled local stopgap under `public/media/launch`; P1/P2 media still needs migration away from old WordPress, Squarespace, Google, and Front URLs.
 - Stone Library finish imagery still has placeholder/mapping gaps.
 - App shell default Vite metadata has been replaced; delivery-readiness debt remains around article cleanup, final share imagery, and deeper claim-safety review.
 - Image hosting policy must now be resolved against the Cloudflare/Supabase launch plan.
@@ -58,7 +60,7 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 - React Helmet still emits an existing strict-mode lifecycle warning in dev console.
 
 ## Next Recommended Action
-Start `NOW-SEO-DELIVERY-001` or `NOW-ASSET-MIGRATION-001` while Cloudflare project creation waits for account access. Return to `NOW-CLOUDFLARE-PAGES-DEPLOY-001` once Cloudflare dashboard access is available.
+Continue `NOW-ASSET-MIGRATION-001` with P1 homepage/project/Stone Library media cleanup, or start `NOW-FORMS-SUPABASE-001` once Supabase project credentials and Turnstile/email secrets are available. Return to `NOW-CLOUDFLARE-PAGES-DEPLOY-001` once Cloudflare dashboard access is available.
 
 ## Guardrails
 - Use repo-root relative paths in committed docs.

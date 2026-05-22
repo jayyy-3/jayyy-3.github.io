@@ -15,8 +15,9 @@ Findings:
 - 48 unique URLs point at `urblo.com.au`.
 - 47 unique URLs point at old `urblo.com.au/wp-content/uploads` assets.
 - Article HTML contains additional remote proxy and tracking URLs from Google, Front, Squarespace, and Squarespace email campaigns.
-- `public` is about 24 MB.
-- Current `dist` is about 107 MB after build, largely because large stone imagery is bundled into build output.
+- `public` is about 39 MB after the P0 local launch media stopgap.
+- `public/media/launch` is about 15 MB, including the local homepage MP4.
+- Current `dist` is about 122 MB after build, largely because large stone imagery is bundled into build output plus the P0 local launch media.
 
 ## Launch Risk
 The key cutover risk is not only speed. If the production domain moves to Cloudflare Pages while the new site still references `https://urblo.com.au/wp-content/uploads/...`, those references may break unless old WordPress media stays reachable or the assets are migrated before DNS cutover.
@@ -41,6 +42,19 @@ These affect first impression, navigation identity, or direct business contact.
 | Default layout banners | `src/App.tsx` old WordPress background images | Main route visual chrome depends on old site | Controlled media or local stopgap assets. |
 | Contact page image | `src/pages/ContactPage.tsx` old WordPress image | Lead-generation page depends on old site | Controlled media asset. |
 | Share image | `public/og-default.svg` temporary local asset | Acceptable for now, but social platforms may prefer PNG/JPEG | Replace with production PNG/JPEG after media direction is approved. |
+
+### P0 Stopgap Status - 2026-05-22
+The launch-critical first-viewport dependency risk has a local stopgap in place:
+
+| Area | Current controlled path | Status | Follow-up |
+|---|---|---|---|
+| Homepage hero video | `public/media/launch/home/urblo-hero.mp4` | Controlled local file, about 10 MB. Desktop selects this source. | Review whether final delivery should move to Cloudflare R2 or Stream before production scale. |
+| Homepage hero poster | `public/media/launch/home/hero-poster.jpg` | Controlled local poster. | Replace only if Nat/Hunter approve a different first-frame or campaign image. |
+| Mobile hero fallback | `src/components/homepage/HomepageSections.tsx` | Mobile viewport does not select the MP4 source; it shows the poster instead. | Keep this policy unless a compressed mobile video is intentionally produced. |
+| Site logo | `public/media/launch/identity/urblo-logo.png` | Controlled local logo, resized for web use. | Move to CMS site settings/media record during Supabase migration. |
+| Default layout banners | `public/media/launch/banners/*.jpg` | Controlled local route banners. The old banner URLs tested as 404 on 2026-05-22. | Treat these as launch-safe placeholders until CMS-managed page banners are approved. |
+| Contact page image | `public/media/launch/contact/project-contact.jpg` | Controlled local image used by the Contact page and reused on homepage proof cards where the same old URL appeared. | Move to CMS media record during Supabase migration. |
+| Share image | `public/og-default.svg` | Local and controlled. | Replace with production PNG/JPEG after final social preview review. |
 
 ### P1 - Should Resolve Before Public Launch If Time Allows
 These are visible content quality and performance items.
@@ -93,6 +107,14 @@ Evaluate separately:
 ### Immediate Stopgap
 For P0 assets, local `public` files are acceptable as a short-term launch stopgap when a controlled storage bucket is not ready. This should not become the long-term media management workflow.
 
+Current stopgap location:
+- `public/media/launch/identity`
+- `public/media/launch/home`
+- `public/media/launch/contact`
+- `public/media/launch/banners`
+
+Runtime references were moved from old WordPress URLs to these paths in `src/App.tsx`, `src/data/homepage.ts`, `src/data/siteChrome.ts`, and `src/pages/ContactPage.tsx`.
+
 ## Migration Sequence
 
 1. Replace P0 site identity and first-viewport assets.
@@ -112,6 +134,15 @@ Before production cutover:
 - Mobile homepage does not wait on the full video before showing useful content.
 - Logo, favicon, and share image load from controlled assets.
 - Project and Stone Library pages remain visually usable when old WordPress URLs are blocked in the browser.
+
+Verified on 2026-05-22:
+- `npm run build`: pass with existing bundle warning and Browserslist notice.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- Browser QA: desktop homepage selects the local MP4 and local poster; mobile homepage selects no MP4 source and uses the local poster; Products, Product detail, Projects, Our Story, Contact, Articles, and Article detail route banners load from local `public/media/launch` paths with no broken images observed.
 
 Before declaring asset migration complete:
 - `rg "urblo.com.au/wp-content" src public/articles data`

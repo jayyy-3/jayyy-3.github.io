@@ -95,7 +95,7 @@ export default function ContactPage() {
             <div className="urblo-card overflow-hidden border-black/10 bg-black text-white shadow-none">
               <div className="relative min-h-[360px]">
                 <img
-                  src="https://urblo.com.au/wp-content/uploads/2024/12/IMGP0028-scaled-1.jpg"
+                  src="/media/launch/contact/project-contact.jpg"
                   alt="Urblo stone seating project"
                   className="absolute inset-0 h-full w-full object-cover opacity-72"
                 />

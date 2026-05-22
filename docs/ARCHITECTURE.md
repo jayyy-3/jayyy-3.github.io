@@ -28,6 +28,7 @@ Last updated: 2026-05-22
 - Public form protection: Cloudflare Turnstile.
 - Transactional email: external email API such as Resend, wired from server-side API code only.
 - Media storage:
+  - Current static stopgap: launch-critical identity, hero, contact, and route banner assets live under `public/media/launch`.
   - Supabase Storage for normal editorial, Stone Library, project, and article imagery.
   - Cloudflare R2 or Stream remains the review path for large homepage video assets if Supabase Storage or Pages asset limits are a poor fit.
 - Cost planning:
@@ -55,7 +56,7 @@ Last updated: 2026-05-22
 - Cloudflare Pages static config:
   - `public/_redirects` provides SPA fallback with `/* /index.html 200`.
   - `public/_routes.json` scopes future Pages Functions to `/api/*`.
-  - `public/_headers` sets conservative launch headers and long-cache rules for hashed assets/fonts.
+  - `public/_headers` sets conservative launch headers, long-cache rules for hashed assets/fonts, and one-day cache for unversioned launch media under `/media/*`.
 - Build script contract: `package.json`
   - `npm run build` => `tsc -b && vite build`
   - `npm run lint` => `eslint .`
@@ -119,6 +120,16 @@ Routing uses clean paths through `BrowserRouter`. Cloudflare Pages direct refres
 - Favicon asset: `public/favicon.svg`.
 - Web manifest: `public/site.webmanifest`.
 - `react-helmet` still has a known strict-mode warning in development and should be replaced or upgraded during a later SEO/runtime cleanup.
+
+## Current Static Media Contract
+- P0 launch media lives under `public/media/launch` as a short-term controlled stopgap until Supabase Storage and Cloudflare media delivery are implemented.
+- Shared site logo path: `public/media/launch/identity/urblo-logo.png`, referenced by `src/data/siteChrome.ts` and `src/data/homepage.ts`.
+- Homepage hero poster path: `public/media/launch/home/hero-poster.jpg`.
+- Homepage hero video path: `public/media/launch/home/urblo-hero.mp4`.
+- Homepage hero video source is constrained to desktop/tablet width through `media="(min-width: 768px)"`; mobile viewports keep the poster and do not select the MP4 source.
+- Route banners are local launch media referenced from `src/App.tsx` through the `ROUTE_BANNERS` map.
+- Contact image path: `public/media/launch/contact/project-contact.jpg`, referenced by `src/pages/ContactPage.tsx` and reused in homepage data where the same old WordPress image was previously used.
+- This is not the long-term CMS media contract. During Supabase migration, these assets should be represented as media records and moved to Supabase Storage or Cloudflare media storage according to final performance testing.
 
 ## Stone Library Detail Interaction Contract (`src/pages/StoneLibraryDetailPage.tsx`)
 - State composition:

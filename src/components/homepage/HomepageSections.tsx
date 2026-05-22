@@ -254,9 +254,10 @@ function HeroSection() {
         muted
         loop
         playsInline
+        preload="metadata"
         poster={homepageData.hero.posterUrl}
       >
-        <source src={homepageData.hero.videoUrl} type="video/mp4" />
+        <source src={homepageData.hero.videoUrl} type="video/mp4" media="(min-width: 768px)" />
       </video>
       <div className="absolute inset-0 bg-black/40" />
 
