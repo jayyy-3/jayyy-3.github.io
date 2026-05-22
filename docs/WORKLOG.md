@@ -1010,6 +1010,46 @@ Last updated: 2026-05-22
 - `NEXT-STONELIB-DATA-001`
 - `NEXT-DATA-001`
 
+## Entry - 2026-05-22 (Article Media Launch Cleanup)
+
+### Scope
+- Replaced article list/detail cover GIF URLs with controlled local WebP still images under `public/media/launch/articles`.
+- Added runtime article HTML preparation before DOMPurify sanitization so known Squarespace/Front/Google proxy images resolve to local media, Google emoji images become text, and known campaign/unsubscribe/old-upload links are stripped or rewritten.
+- Kept raw newsletter HTML as migration source only; long-term article authoring remains Supabase structured blocks through the admin CMS.
+- Updated architecture, asset audit, handoff, roadmap, and machine task queue to reflect the current article stopgap and remaining CMS work.
+
+### Changed Files
+- `public/media/launch/articles`
+- `public/articles/index.json`
+- `public/articles/*/meta.json`
+- `src/lib/articleMedia.ts`
+- `src/components/ArticleCard.tsx`
+- `src/pages/ArticlePage.tsx`
+- `docs/ARCHITECTURE.md`
+- `docs/ASSET_MIGRATION_AUDIT.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+- `docs/WORKLOG.md`
+
+### Verification Results
+- `npm run build`: pass with existing bundle size warning and Browserslist staleness notice.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- Browser QA: `/articles` renders four local article covers; all four article detail routes render article text and, after lazy-load scroll, have zero known external/proxy article image URLs and zero known campaign/unsubscribe/Google redirect/old upload links.
+
+### Risks and Gaps
+- Raw newsletter HTML remains in `public/articles/*/content.html`; this is acceptable only as a migration source until Supabase structured article blocks are implemented.
+- Article image ownership, alt text, and source metadata still need Supabase media records.
+- React Helmet strict-mode warning remains an existing development-console issue.
+- Bundle size warning remains and is not addressed in this scope.
+
+### Next Handoff
+- `NOW-FORMS-SUPABASE-001`
+- `NOW-ADMIN-CMS-001`
+- `NOW-STONELIB-IMG-FASTTRACK-001`
+- `NOW-DELIVERY-READINESS-001`
+
 ## Entry Template (Use for Every Future Session)
 
 ### Date

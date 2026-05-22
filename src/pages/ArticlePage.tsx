@@ -2,6 +2,7 @@ import DOMPurify from 'dompurify';
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import ReadingProgressBar from '../components/ReadingProgressBar';
+import { prepareArticleHtml, resolveArticleAssetPath } from '../lib/articleMedia';
 import type { ArticleMeta } from '../types/article';
 
 export default function ArticlePage() {
@@ -21,7 +22,7 @@ export default function ArticlePage() {
 
     fetch(import.meta.env.BASE_URL + 'articles/' + slug + '/content.html')
       .then((response) => response.text())
-      .then((raw) => setHtml(DOMPurify.sanitize(raw)))
+      .then((raw) => setHtml(DOMPurify.sanitize(prepareArticleHtml(raw))))
       .catch(() => setHtml("<p class='text-red-600'>Failed to load article.</p>"));
   }, [slug, meta]);
 
@@ -36,16 +37,22 @@ export default function ArticlePage() {
     return <p className="py-20 text-center text-red-600">Article not found.</p>;
   }
 
-  const heroImage = meta.cover?.startsWith('http')
-    ? meta.cover
-    : import.meta.env.BASE_URL + (meta.cover || '').replace(/^\/+/, '');
+  const heroImage = resolveArticleAssetPath(meta.cover);
 
   return (
     <div className="bg-white">
       <ReadingProgressBar />
 
       <header className="relative overflow-hidden bg-black text-white">
-        {meta.cover ? <img src={heroImage} alt={meta.title} className="h-[380px] w-full object-cover opacity-75" loading="lazy" /> : null}
+        {meta.cover ? (
+          <img
+            src={heroImage}
+            alt={meta.title}
+            className="h-[380px] w-full object-cover opacity-75"
+            loading="lazy"
+            decoding="async"
+          />
+        ) : null}
         <div className="absolute inset-0 bg-black/45" />
         <div className="urblo-page-container absolute inset-0 flex items-end pb-14">
           <div className="max-w-[60rem]">

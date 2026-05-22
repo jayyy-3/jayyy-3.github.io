@@ -134,6 +134,8 @@ Routing uses clean paths through `BrowserRouter`. Cloudflare Pages direct refres
 - Our Story portraits now use controlled files under `public/media/launch/our-story`; the carbon banner uses the controlled route banner because the old WordPress carbon banner returned 404.
 - Legacy project listing/detail media now uses controlled files under `public/media/launch/projects`.
 - Stone Library fallback media now uses controlled files under `public/media/launch/stone-library/fallbacks`.
+- Article cover and inline cleanup media now uses controlled files under `public/media/launch/articles`.
+- Article email-export HTML is still stored as source material under `public/articles`, but `src/lib/articleMedia.ts` rewrites known Squarespace/Front/Google proxy images to local launch media and removes email campaign tracking links before DOMPurify sanitization.
 - This is not the long-term CMS media contract. During Supabase migration, these assets should be represented as media records and moved to Supabase Storage or Cloudflare media storage according to final performance testing.
 
 ## Stone Library Detail Interaction Contract (`src/pages/StoneLibraryDetailPage.tsx`)
@@ -220,7 +222,10 @@ Routing uses clean paths through `BrowserRouter`. Cloudflare Pages direct refres
 - Loading behavior:
   - list page fetches `${import.meta.env.BASE_URL}articles/index.json`
   - detail page fetches index then HTML content
-- HTML is sanitized via DOMPurify before render
+- Cover images in the article manifest use local controlled paths under `public/media/launch/articles`.
+- Detail HTML passes through `prepareArticleHtml` in `src/lib/articleMedia.ts` before DOMPurify sanitization.
+- Runtime cleanup rewrites known email proxy image URLs to local article media, converts Google-hosted emoji images to text, removes Squarespace campaign wrappers where possible, and rewrites old product-PDF links to `/products`.
+- Raw newsletter HTML remains committed only as migration source; do not treat it as the long-term authoring format.
 - Launch target:
   - Articles move to Supabase-backed structured article blocks.
   - Raw newsletter HTML remains migration source material, not the long-term authoring format.
@@ -313,7 +318,8 @@ Routing uses clean paths through `BrowserRouter`. Cloudflare Pages direct refres
 - Projects, Stone Library, Products, and Articles remain file-backed until Supabase migration work is implemented.
 - Admin CMS does not exist yet; customers cannot CRUD content without code changes.
 - Project and Stone Library content migration needs strict separation between confirmed facts and inferred MVP copy.
-- Old WordPress-hosted media URLs remain a delivery risk until priority media is migrated or explicitly accepted.
+- Raw article newsletter HTML still contains external source URLs as migration source material, but runtime article rendering now rewrites known email proxy image URLs and campaign links before render.
+- Long-term article quality still requires Supabase structured blocks, approved article image records, and editorial review.
 - Bundle size warning (`>500kB`) indicates code-splitting and chunk strategy debt.
 
 ## Brand and Design Linkage Rule

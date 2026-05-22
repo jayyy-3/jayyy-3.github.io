@@ -143,20 +143,26 @@
         "docs/WORKLOG.md",
         "public/_headers",
         "public/media/launch",
+        "public/media/launch/articles",
         "src/App.tsx",
+        "src/components/ArticleCard.tsx",
         "src/components/homepage/HomepageSections.tsx",
         "src/data/homepage.ts",
         "src/data/siteChrome.ts",
         "src/pages/ContactPage.tsx",
+        "src/pages/ArticlePage.tsx",
+        "src/lib/articleMedia.ts",
         "src/data/projectData.ts",
         "src/data/stoneFinishImages.ts",
+        "public/articles/*/meta.json",
         "public/articles/index.json"
       ],
       "notes": [
         "2026-05-22: P0 launch stopgap is implemented for logo, homepage poster/video, route banners, and contact imagery under public/media/launch.",
         "2026-05-22: Homepage video replaced with a web-ready H.264 export from the user-provided Urblo_Homepage.mp4; homepage and Our Story visible media now use controlled local assets.",
         "2026-05-22: Legacy project media and Stone Library fallback media now use controlled local assets; direct old WordPress media references are removed from runtime data.",
-        "Task remains open for article media cleanup, Supabase media records, and final Cloudflare R2/Stream review for homepage video."
+        "2026-05-22: Article covers now use controlled local WebP assets and ArticlePage rewrites known email proxy images/campaign links before DOMPurify sanitization.",
+        "Task remains open for Supabase media records, structured article blocks, full media ownership metadata, and final Cloudflare R2/Stream review for homepage video."
       ],
       "acceptance": [
         "All first-viewport critical media, logo assets, homepage video/poster assets, and priority project/stone imagery have a controlled hosting path.",
@@ -188,9 +194,19 @@
         "public/og-default.svg",
         "public/site.webmanifest",
         "src/App.tsx",
+        "src/components/ArticleCard.tsx",
         "src/components/homepage/HomepageSections.tsx",
         "src/data/homepage.ts",
-        "src/data/siteChrome.ts"
+        "src/data/siteChrome.ts",
+        "src/lib/articleMedia.ts",
+        "src/pages/ArticlePage.tsx",
+        "public/articles/index.json",
+        "public/articles/*/meta.json"
+      ],
+      "notes": [
+        "2026-05-22: App metadata and old-site-matched favicon assets are in place.",
+        "2026-05-22: Article cover GIFs were replaced with local still images and article detail rendering now strips known email campaign/proxy artifacts at runtime.",
+        "Task remains open for final social share imagery and deeper route-level claim-safety review."
       ],
       "acceptance": [
         "No Vite/default metadata, favicon, or placeholder app identity remains.",

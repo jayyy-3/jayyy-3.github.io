@@ -11,13 +11,13 @@ It does not mean the assets have already been migrated. It records what must be 
 Scan scope: `src`, `public/articles`, and `data`.
 
 Findings:
-- 66 unique remote URLs were detected.
-- 11 unique URLs point at `urblo.com.au`, all from article/email-import links rather than runtime image references.
+- 64 unique remote URLs were detected in the raw scan after article covers were moved to local media.
+- 12 unique URLs point at `urblo.com.au`, primarily from article/email-import source links and article cleanup fallback code rather than first-viewport runtime image references.
 - 0 direct URLs point at old `urblo.com.au/wp-content/uploads` assets after the legacy project and Stone Library fallback pass.
-- Article HTML contains additional remote proxy and tracking URLs from Google, Front, Squarespace, and Squarespace email campaigns.
-- `public` is about 58 MB after the local launch media stopgap.
-- `public/media/launch` is about 33 MB, including the local homepage MP4 plus controlled homepage, Our Story, legacy project, and Stone Library fallback imagery.
-- Current `dist` is about 135 MB after build, largely because large stone imagery is bundled into build output plus controlled launch media.
+- Article HTML still contains remote proxy and tracking URLs from Google, Front, Squarespace, and Squarespace email campaigns as raw migration source material. Runtime rendering now rewrites known image URLs to local launch media and strips campaign links before DOMPurify sanitization.
+- `public` is about 64 MB after the local launch media stopgap plus article media cleanup.
+- `public/media/launch` is about 40 MB, including the local homepage MP4 plus controlled homepage, Our Story, legacy project, Stone Library fallback, and article imagery.
+- Current `dist` is about 148 MB after build, largely because large stone imagery is bundled into build output plus controlled launch media.
 
 ## Launch Risk
 The key cutover risk is not only speed. If the production domain moves to Cloudflare Pages while the new site still references `https://urblo.com.au/wp-content/uploads/...`, those references may break unless old WordPress media stays reachable or the assets are migrated before DNS cutover.
@@ -77,6 +77,16 @@ These should not block infrastructure setup but must be cleaned before the artic
 | Email campaign links | `public/articles/*/content.html` Squarespace campaign links | Tracking/unsubscribe/old CTA residue | Remove during article cleanup. |
 | Emoji image assets | article HTML `fonts.gstatic.com` emoji images | Cosmetic external dependency | Remove or replace with text/icons during article block conversion. |
 
+### P2 Runtime Cleanup Status - 2026-05-22
+The static launch version now has a runtime safety layer for articles:
+
+| Area | Current controlled path or behavior | Status | Follow-up |
+|---|---|---|---|
+| Article cover GIFs | `public/media/launch/articles/*/*.webp` plus local cover paths in `public/articles/index.json` and article `meta.json` files | Controlled local still-image stopgap in place. | Move to Supabase media records during article CMS migration. |
+| Article email HTML images | `src/lib/articleMedia.ts` maps known Squarespace image IDs to local launch media before DOMPurify sanitization | Runtime-rendered article details no longer load known Google/Front/Squarespace proxy image URLs. | Convert raw newsletter HTML into structured article blocks. |
+| Email campaign links | `src/lib/articleMedia.ts` unwraps or strips known Google/Squarespace campaign links | Runtime-rendered article links no longer expose known campaign, unsubscribe, Google redirect, or old upload URLs. | Replace article CTAs with approved CMS-managed CTA blocks. |
+| Emoji image assets | Google emoji images become text during article preparation | External emoji image dependency removed at render time. | Use approved icon/text treatment in structured article blocks. |
+
 ## Detailed Old WordPress URL Inventory
 The current scan finds no direct old `wp-content/uploads` dependencies in `src`, `public/articles`, or `data`.
 
@@ -88,6 +98,8 @@ Resolved in the local launch stopgap:
 - `src/data/stoneFinishImages.ts`: remote Stone Library fallback images.
 - `src/pages/ContactPage.tsx`: contact image.
 - `src/pages/OurStory.tsx`: portraits and carbon banner.
+- `public/articles/index.json` and article `meta.json` files: article covers.
+- `src/lib/articleMedia.ts`: runtime cleanup for known article proxy images, campaign links, emoji images, and old upload links.
 
 ## Recommended Storage Targets
 
@@ -118,8 +130,10 @@ Current stopgap location:
 - `public/media/launch/banners`
 - `public/media/launch/projects`
 - `public/media/launch/stone-library/fallbacks`
+- `public/media/launch/articles`
 
 Runtime references were moved from old WordPress URLs to these paths in `src/App.tsx`, `src/data/homepage.ts`, `src/data/siteChrome.ts`, `src/data/projectData.ts`, `src/data/stoneFinishImages.ts`, `src/pages/ContactPage.tsx`, and `src/pages/OurStory.tsx`.
+Article cover references and runtime article cleanup now use `public/media/launch/articles` through `public/articles/index.json`, article `meta.json` files, and `src/lib/articleMedia.ts`.
 
 ## Migration Sequence
 
@@ -127,8 +141,9 @@ Runtime references were moved from old WordPress URLs to these paths in `src/App
 2. Add mobile fallback behavior for homepage video.
 3. Migrate route banner/contact imagery.
 4. Migrate homepage proof/process/project imagery.
-5. Convert articles to CMS blocks and remove remote email artifacts.
-6. Move local stopgap media into Supabase/Cloudflare media records during CMS migration.
+5. Add article launch stopgap: local covers plus runtime cleanup of known email proxy images and campaign links.
+6. Convert articles to CMS blocks and remove raw newsletter HTML dependency.
+7. Move local stopgap media into Supabase/Cloudflare media records during CMS migration.
 
 ## Verification
 
@@ -151,12 +166,13 @@ Verified on 2026-05-22:
 - Browser QA after the homepage video replacement: desktop homepage selects `public/media/launch/home/urblo-hero.mp4`, reports `readyState=4`, `1280x720`, and `17.67s`; mobile homepage still selects no MP4 source and keeps the poster fallback.
 - Direct old WordPress media scan after legacy project and Stone Library fallback migration: `rg "urblo.com.au/wp-content/uploads" src public/articles data` returns no results.
 - Browser QA after legacy project and Stone Library fallback migration: Projects list, legacy project detail pages, Stone Library list, and Blueocean stone detail show no broken images and no old WordPress image URLs.
+- Article media cleanup browser QA: `/articles` renders four local article cover images; all four article detail routes render article text, use zero external/proxy article images after lazy-load scroll, expose zero known campaign/unsubscribe/Google redirect/old upload links, and keep only the existing React Helmet strict-mode development warning.
 
 Before declaring asset migration complete:
 - `rg "urblo.com.au/wp-content/uploads" src public/articles data`
   returns no direct old WordPress media references.
 - Article list covers are controlled assets.
-- Article detail HTML no longer depends on email proxy image URLs.
+- Article detail runtime rendering no longer depends on known email proxy image URLs.
 - All migrated assets have alt text, owner, and source recorded in Supabase media records.
 
 ## Owner Notes

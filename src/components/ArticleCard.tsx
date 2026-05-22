@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import type { ArticleMeta } from '../types/article';
+import { resolveArticleAssetPath } from '../lib/articleMedia';
 
 interface Props {
   meta: ArticleMeta;
@@ -18,7 +19,13 @@ export default function ArticleCard({ meta }: Props) {
       <Link to={`/articles/${meta.slug}`} className="block">
         {meta.cover ? (
           <div className="aspect-[3/2] overflow-hidden bg-black/5">
-            <img src={meta.cover} alt={meta.title} className="h-full w-full object-cover" />
+            <img
+              src={resolveArticleAssetPath(meta.cover)}
+              alt={meta.title}
+              className="h-full w-full object-cover"
+              loading="lazy"
+              decoding="async"
+            />
           </div>
         ) : null}
         <div className="space-y-3 p-6">
