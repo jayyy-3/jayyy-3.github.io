@@ -16,7 +16,7 @@ import ArticlePage from './pages/ArticlePage';
 import ContactPage from './pages/ContactPage';
 
 const SITE_URL = 'https://urblo.com.au';
-const DEFAULT_SHARE_IMAGE = `${SITE_URL}/og-default.svg`;
+const DEFAULT_SHARE_IMAGE = `${SITE_URL}/og-default.png`;
 const ROUTE_BANNERS = {
     products: '/media/launch/banners/products.jpg',
     materials: '/media/launch/banners/materials.jpg',
@@ -144,6 +144,9 @@ function TitleUpdater() {
             <meta property="og:description" content={meta.description} />
             <meta property="og:url" content={canonicalUrl} />
             <meta property="og:image" content={DEFAULT_SHARE_IMAGE} />
+            <meta property="og:image:type" content="image/png" />
+            <meta property="og:image:width" content="1200" />
+            <meta property="og:image:height" content="630" />
             <meta name="twitter:card" content="summary_large_image" />
             <meta name="twitter:title" content={meta.title} />
             <meta name="twitter:description" content={meta.description} />

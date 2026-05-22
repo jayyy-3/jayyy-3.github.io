@@ -1145,6 +1145,50 @@ Last updated: 2026-05-22
 - `NEXT-STONELIB-IMG-001`
 - `NEXT-STONELIB-IMG-002`
 
+## Entry - 2026-05-22 (SEO Social and Claim-Safety Cleanup)
+
+### Scope
+- Added a controlled 1200 x 630 PNG social share image and updated default Open Graph/Twitter metadata to use it.
+- Kept the SVG social image as the editable source and adjusted the source text so it does not clip when exported.
+- Rewrote article excerpts away from unqualified carbon, cost, speed, and universal-performance claims.
+- Added a runtime article cleanup layer for known high-risk newsletter phrases so public article detail pages render safer wording until the Supabase structured article system replaces raw newsletter HTML.
+- Closed `NOW-SEO-DELIVERY-001`.
+
+### Changed Files
+- `index.html`
+- `public/og-default.png`
+- `public/og-default.svg`
+- `public/articles/index.json`
+- `public/articles/*/meta.json`
+- `src/App.tsx`
+- `src/lib/articleMedia.ts`
+- `docs/ASSET_MIGRATION_AUDIT.md`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run build`: pass with existing bundle size warning and Browserslist staleness notice.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- Raw article newsletter HTML is still not the final article model; it should move to Supabase structured blocks with editorial review.
+- The React Helmet strict-mode warning remains.
+- Bundle size warning remains and is the next no-secret launch-quality task.
+
+### Next Handoff
+- `NOW-FORMS-SUPABASE-001`
+- `NOW-ADMIN-CMS-001`
+- `LATER-PERF-001`
+- `NEXT-STONELIB-IMG-001`
+- `NEXT-STONELIB-IMG-002`
+
 ## Entry Template (Use for Every Future Session)
 
 ### Date

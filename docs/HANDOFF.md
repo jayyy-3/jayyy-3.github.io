@@ -48,6 +48,7 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 - Delivery-readiness cleanup: Vite starter README content and the unused React starter SVG asset were removed on 2026-05-22.
 - Asset hosting strategy: current local `public/media/launch` stopgap plus delivery-phase Supabase Storage and Cloudflare R2/Stream review policy are documented and `NOW-ASSET-STRATEGY-001` is closed.
 - Stone Library image fast-track: provided primary finish assets are mapped, controlled fallback usage is documented, and remaining missing image groups are recorded for the full coverage task.
+- SEO/social launch cleanup: default social metadata now uses a 1200 x 630 PNG share image, article excerpts are claim-safe, and known high-risk newsletter phrases are rewritten at runtime.
 
 ## Active Risks
 - Cloudflare + Supabase is approved as the launch target, but runtime implementation has not started.
@@ -58,8 +59,8 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 - The admin CMS does not exist yet.
 - P0/P1 old WordPress media references in runtime data have been migrated to controlled local assets under `public/media/launch`; article covers and known detail images now have a local runtime stopgap under `public/media/launch/articles`.
 - Stone Library fast-track imagery is mapped/documented, but final HD coverage still needs approved source images for Golden Crust, Harcourt, and Tan Brown plus a decision on secondary Juparana/Zen Grey frames.
-- Raw article newsletter HTML remains source material and still needs Supabase structured-block migration plus editorial cleanup before the article system is considered final.
-- App shell default Vite metadata and starter README content have been replaced; launch polish debt remains around final share imagery and deeper claim-safety review.
+- Raw article newsletter HTML remains source material and still needs Supabase structured-block migration plus full editorial cleanup before the article system is considered final.
+- App shell default Vite metadata, starter README content, and default social image issues have been replaced; launch polish debt remains around future campaign-specific share imagery only if the client wants a bespoke preview.
 - Image hosting policy must now be resolved against the Cloudflare/Supabase launch plan.
 - GitHub Pages deployment hardening is a legacy fallback only; Cloudflare Pages is the active target and currently blocked at account-level project setup.
 - Bundle size warning (`>500kB`) remains open.
@@ -68,7 +69,7 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 - React Helmet still emits an existing strict-mode lifecycle warning in dev console.
 
 ## Next Recommended Action
-Continue with the next launch blocker that does not require account secrets: `NOW-SEO-DELIVERY-001` final social/share and claim-safety review. Start `NOW-FORMS-SUPABASE-001` once Supabase project credentials and Turnstile/email secrets are available. Return to `NOW-CLOUDFLARE-PAGES-DEPLOY-001` once Cloudflare dashboard access is available.
+Continue with the next launch blocker that does not require account secrets: bundle-size/performance cleanup, because the build still warns about a chunk above 500 kB. Start `NOW-FORMS-SUPABASE-001` once Supabase project credentials and Turnstile/email secrets are available. Return to `NOW-CLOUDFLARE-PAGES-DEPLOY-001` once Cloudflare dashboard access is available.
 
 ## Guardrails
 - Use repo-root relative paths in committed docs.

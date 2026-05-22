@@ -178,14 +178,21 @@
     },
     {
       "id": "NOW-SEO-DELIVERY-001",
-      "status": "now",
+      "status": "done",
       "priority": 7,
       "summary": "Remove default metadata and finish launch-critical SEO, icon, social, and claim-safety details.",
       "files": [
+        "docs/ASSET_MIGRATION_AUDIT.md",
+        "docs/ARCHITECTURE.md",
+        "docs/HANDOFF.md",
+        "docs/NEXT_STEPS.md",
+        "docs/WORKLOG.md",
+        "docs/agent/tasks.json",
         "docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md",
         "docs/brand-baseline.md",
         "docs/DESIGN.md",
         "index.html",
+        "public/og-default.png",
         "public/favicon.png",
         "public/favicon-32x32.png",
         "public/favicon-192x192.png",
@@ -206,7 +213,8 @@
       "notes": [
         "2026-05-22: App metadata and old-site-matched favicon assets are in place.",
         "2026-05-22: Article cover GIFs were replaced with local still images and article detail rendering now strips known email campaign/proxy artifacts at runtime.",
-        "Task remains open for final social share imagery and deeper route-level claim-safety review."
+        "2026-05-22: Default Open Graph/Twitter image now uses a 1200 x 630 PNG generated from the local SVG source.",
+        "2026-05-22: Article excerpts and known high-risk newsletter phrases are rewritten to avoid unqualified carbon, cost, speed, and guarantee claims."
       ],
       "acceptance": [
         "No Vite/default metadata, favicon, or placeholder app identity remains.",

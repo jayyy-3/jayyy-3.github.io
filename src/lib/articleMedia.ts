@@ -152,7 +152,56 @@ export function prepareArticleHtml(rawHtml: string): string {
     }
   });
 
+  rewriteClaimSensitiveText(document);
+
   return document.body.innerHTML;
+}
+
+function rewriteClaimSensitiveText(document: Document): void {
+  document.querySelectorAll('p').forEach((element) => {
+    const normalizedText = element.textContent?.replace(/\s+/g, ' ').trim() ?? '';
+
+    if (normalizedText.startsWith('At Urblo, we’re pushing the boundaries of sustainable design')) {
+      element.textContent =
+        'Greening the Pipeline Education Node in Truganina shows how curved natural stone elements can support a resilient public realm. The project uses a project-based carbon-offset framing for 76 linear metres of curved work.';
+      return;
+    }
+
+    if (normalizedText.startsWith('At Urblo, we’re rewriting the rules of landscape design')) {
+      element.textContent =
+        'Using Bundha Sports Centre as the reference, this article compares total-cost factors for bluestone blocks and in-situ concrete, including preparation, labour, maintenance, and project assumptions.';
+      return;
+    }
+
+    if (normalizedText.includes('surface treatments unlock endless design possibilities')) {
+      element.textContent =
+        'This Material Mastery article shows how surface treatments can broaden Bluestone’s appearance and performance profile across eight finish directions.';
+      return;
+    }
+
+    if (normalizedText.includes('Mix and match models for endless layouts')) {
+      element.textContent = 'Modular Flexibility - Mix and match models for varied layouts.';
+      return;
+    }
+
+    if (normalizedText.includes('A cohesive yet dynamic streetscape proving that one stone can wear many hats')) {
+      element.textContent = 'Result? A cohesive streetscape showing how one stone can support multiple finish expressions.';
+      return;
+    }
+
+    if (
+      normalizedText.includes('Zero Onsite Errors') &&
+      normalizedText.includes('Installed in 1/3 the time') &&
+      normalizedText.includes('Guaranteed Outcome')
+    ) {
+      element.innerHTML = [
+        '<strong>Why pre-assembly helps</strong>:',
+        '<br><strong>Factory fit checks</strong>: workshop checks support alignment before site delivery.',
+        '<br><strong>Installation efficiency</strong>: modular preparation is intended to reduce site time under comparable project conditions.',
+        '<br><strong>Consistent outcome</strong>: finish checks support consistency across the block set.',
+      ].join('');
+    }
+  });
 }
 
 function resolveSquarespaceArticleImage(rawValue: string): string | null | undefined {

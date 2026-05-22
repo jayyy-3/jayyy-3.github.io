@@ -116,7 +116,7 @@ Routing uses clean paths through `BrowserRouter`. Cloudflare Pages direct refres
 ## Metadata Contract
 - `index.html` contains Urblo-owned default title, description, favicon, manifest, canonical, Open Graph, and Twitter metadata.
 - `src/App.tsx` updates route-level title, description, canonical, Open Graph, and Twitter metadata through `react-helmet`.
-- Default share image asset: `public/og-default.svg`.
+- Default share image asset: `public/og-default.png` at 1200 x 630. `public/og-default.svg` remains the editable source used to generate the PNG.
 - Favicon assets: old-site-matched WordPress site icon PNGs in `public/favicon-32x32.png`, `public/favicon-192x192.png`, `public/favicon.png`, `public/apple-touch-icon.png`, and `public/mstile-270x270.png`.
 - Web manifest: `public/site.webmanifest`, referencing PNG icon assets instead of the retired temporary SVG favicon.
 - `react-helmet` still has a known strict-mode warning in development and should be replaced or upgraded during a later SEO/runtime cleanup.
@@ -137,6 +137,7 @@ Routing uses clean paths through `BrowserRouter`. Cloudflare Pages direct refres
 - Stone Library fast-track image status: provided primary finish images are mapped for Alpine White, Angola Black, Ivory Sand, Juparana, New Grey, Steel Blue, and Zen Grey; Blueocean, Honey Comb, and Tuscany use controlled local fallback imagery; Golden Crust, Harcourt, and Tan Brown still require approved HD source images.
 - Article cover and inline cleanup media now uses controlled files under `public/media/launch/articles`.
 - Article email-export HTML is still stored as source material under `public/articles`, but `src/lib/articleMedia.ts` rewrites known Squarespace/Front/Google proxy images to local launch media and removes email campaign tracking links before DOMPurify sanitization.
+- Article claim-safety stopgap: `src/lib/articleMedia.ts` also rewrites known high-risk newsletter phrases at runtime so public article detail pages avoid unqualified carbon, cost, speed, and guarantee claims until structured article blocks replace the raw newsletter HTML.
 - This is not the long-term CMS media contract. During Supabase migration, these assets should be represented as media records and moved to Supabase Storage or Cloudflare media storage according to final performance testing.
 
 ## Stone Library Detail Interaction Contract (`src/pages/StoneLibraryDetailPage.tsx`)

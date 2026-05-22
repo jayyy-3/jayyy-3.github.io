@@ -42,7 +42,6 @@ Source of truth: `docs/agent/tasks.json`.
 - `NOW-FORMS-SUPABASE-001`: replace mailto-only Contact and Sample Request flows with Supabase-backed submissions.
 - `NOW-ADMIN-CMS-001`: build the Urblo admin CMS for customer-maintained Projects, Stone Library, Products, Articles, media, and leads.
 - `NOW-ASSET-MIGRATION-001`: migrate priority media away from old WordPress URLs and define controlled storage for launch.
-- `NOW-SEO-DELIVERY-001`: remove default metadata and finish launch-critical SEO, icon, social, and claim-safety details.
 
 ## Next
 - `NEXT-UI-PARITY-001`: bring Home, Our Story, Articles, and Contact Us toward approved visual references.
@@ -74,6 +73,7 @@ Source of truth: `docs/agent/tasks.json`.
 - `NOW-DELIVERY-READINESS-001`: removed Vite starter README content and deleted the unused React starter SVG asset.
 - `NOW-ASSET-STRATEGY-001`: interim local stopgap and delivery-phase Supabase/Cloudflare media hosting policy are documented.
 - `NOW-STONELIB-IMG-FASTTRACK-001`: provided primary finish assets are mapped, controlled fallback usage is documented, and remaining true missing image groups are recorded for full coverage.
+- `NOW-SEO-DELIVERY-001`: default metadata/icons/social image are launch-owned, Open Graph/Twitter image now uses a PNG, and high-risk article excerpt/runtime newsletter claims are qualified.
 
 Older completion details live in `docs/WORKLOG.md`.
 

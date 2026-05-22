@@ -41,7 +41,7 @@ These affect first impression, navigation identity, or direct business contact.
 | Site logo | `src/data/siteChrome.ts`, `src/data/homepage.ts` old WordPress PNG | Brand identity depends on old site | Controlled local/Supabase media asset. |
 | Default layout banners | `src/App.tsx` old WordPress background images | Main route visual chrome depends on old site | Controlled media or local stopgap assets. |
 | Contact page image | `src/pages/ContactPage.tsx` old WordPress image | Lead-generation page depends on old site | Controlled media asset. |
-| Share image | `public/og-default.svg` temporary local asset | Acceptable for now, but social platforms may prefer PNG/JPEG | Replace with production PNG/JPEG after media direction is approved. |
+| Share image | `public/og-default.png` generated from the local SVG source | Controlled PNG at 1200 x 630 for stable social previews. | Replace only if Nat/Hunter approve a campaign-specific share image. |
 
 ### P0 Stopgap Status - 2026-05-22
 The launch-critical first-viewport dependency risk has a local stopgap in place:
@@ -54,7 +54,7 @@ The launch-critical first-viewport dependency risk has a local stopgap in place:
 | Site logo | `public/media/launch/identity/urblo-logo.png` | Controlled local logo, resized for web use. | Move to CMS site settings/media record during Supabase migration. |
 | Default layout banners | `public/media/launch/banners/*.jpg` | Controlled local route banners. The old banner URLs tested as 404 on 2026-05-22. | Treat these as launch-safe placeholders until CMS-managed page banners are approved. |
 | Contact page image | `public/media/launch/contact/project-contact.jpg` | Controlled local image used by the Contact page and reused on homepage proof cards where the same old URL appeared. | Move to CMS media record during Supabase migration. |
-| Share image | `public/og-default.svg` | Local and controlled. | Replace with production PNG/JPEG after final social preview review. |
+| Share image | `public/og-default.png` | Local PNG and controlled; `public/og-default.svg` remains the editable source. | Replace only if Nat/Hunter approve a campaign-specific share image. |
 
 ### P1 - Should Resolve Before Public Launch If Time Allows
 These are visible content quality and performance items.
@@ -156,6 +156,7 @@ Current stopgap location:
 
 Runtime references were moved from old WordPress URLs to these paths in `src/App.tsx`, `src/data/homepage.ts`, `src/data/siteChrome.ts`, `src/data/projectData.ts`, `src/data/stoneFinishImages.ts`, `src/pages/ContactPage.tsx`, and `src/pages/OurStory.tsx`.
 Article cover references and runtime article cleanup now use `public/media/launch/articles` through `public/articles/index.json`, article `meta.json` files, and `src/lib/articleMedia.ts`.
+Default social preview metadata now uses `public/og-default.png`; `public/og-default.svg` is retained as the editable source image.
 
 ## Migration Sequence
 
@@ -191,6 +192,7 @@ Verified on 2026-05-22:
 - Browser QA after legacy project and Stone Library fallback migration: Projects list, legacy project detail pages, Stone Library list, and Blueocean stone detail show no broken images and no old WordPress image URLs.
 - Article media cleanup browser QA: `/articles` renders four local article cover images; all four article detail routes render article text, use zero external/proxy article images after lazy-load scroll, expose zero known campaign/unsubscribe/Google redirect/old upload links, and keep only the existing React Helmet strict-mode development warning.
 - Stone Library fast-track coverage audit: provided primary finish assets are mapped for 31 finish states; 16 finish states use controlled local default/fallback imagery; 22 finish states remain true missing-image placeholders pending approved source images.
+- SEO/social cleanup: default Open Graph/Twitter image now points at `public/og-default.png`, and high-risk article excerpt/runtime newsletter phrases are qualified or rewritten before public rendering.
 
 Before declaring asset migration complete:
 - `rg "urblo.com.au/wp-content/uploads" src public/articles data`
