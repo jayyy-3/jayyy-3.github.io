@@ -1,19 +1,22 @@
+import { lazy, Suspense } from 'react';
+import type { ReactNode } from 'react';
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import WelcomePopup from './components/WelcomePopup';
 import DefaultLayout from './layouts/DefaultLayout';
 import HomepageLayout from './layouts/HomepageLayout';
-import Home from './pages/Home';
-import ProductsPage from './pages/ProductsPage';
-import ProductDetailPage from './pages/ProductDetailPage';
-import ProjectsPage from './pages/Projects';
-import ProjectDetailsPage from './pages/ProjectDetails';
-import StoneLibraryPage from './pages/StoneLibraryPage';
-import StoneLibraryDetailPage from './pages/StoneLibraryDetailPage';
-import OurStoryPage from './pages/OurStory';
-import ArticlesPage from './pages/ArticlesPage';
-import ArticlePage from './pages/ArticlePage';
-import ContactPage from './pages/ContactPage';
+
+const Home = lazy(() => import('./pages/Home'));
+const ProductsPage = lazy(() => import('./pages/ProductsPage'));
+const ProductDetailPage = lazy(() => import('./pages/ProductDetailPage'));
+const ProjectsPage = lazy(() => import('./pages/Projects'));
+const ProjectDetailsPage = lazy(() => import('./pages/ProjectDetails'));
+const StoneLibraryPage = lazy(() => import('./pages/StoneLibraryPage'));
+const StoneLibraryDetailPage = lazy(() => import('./pages/StoneLibraryDetailPage'));
+const OurStoryPage = lazy(() => import('./pages/OurStory'));
+const ArticlesPage = lazy(() => import('./pages/ArticlesPage'));
+const ArticlePage = lazy(() => import('./pages/ArticlePage'));
+const ContactPage = lazy(() => import('./pages/ContactPage'));
 
 const SITE_URL = 'https://urblo.com.au';
 const DEFAULT_SHARE_IMAGE = `${SITE_URL}/og-default.png`;
@@ -155,6 +158,18 @@ function TitleUpdater() {
     );
 }
 
+function PageLoading() {
+    return (
+        <div className="urblo-page-container py-20">
+            <p className="urblo-meta text-black/55">Loading</p>
+        </div>
+    );
+}
+
+function loadPage(page: ReactNode) {
+    return <Suspense fallback={<PageLoading />}>{page}</Suspense>;
+}
+
 export default function App() {
     return (
         <>
@@ -166,7 +181,7 @@ export default function App() {
                         path="/"
                         element={
                             <HomepageLayout>
-                                <Home />
+                                {loadPage(<Home />)}
                             </HomepageLayout>
                         }
                     />
@@ -175,7 +190,7 @@ export default function App() {
                         path="/stone-library"
                         element={
                             <DefaultLayout>
-                                <StoneLibraryPage />
+                                {loadPage(<StoneLibraryPage />)}
                             </DefaultLayout>
                         }
                     />
@@ -184,7 +199,7 @@ export default function App() {
                         path="/stone-library/:stoneGroupId"
                         element={
                             <DefaultLayout>
-                                <StoneLibraryDetailPage />
+                                {loadPage(<StoneLibraryDetailPage />)}
                             </DefaultLayout>
                         }
                     />
@@ -193,7 +208,7 @@ export default function App() {
                         path="/products"
                         element={
                             <DefaultLayout bgImage={ROUTE_BANNERS.products}>
-                                <ProductsPage />
+                                {loadPage(<ProductsPage />)}
                             </DefaultLayout>
                         }
                     />
@@ -202,7 +217,7 @@ export default function App() {
                         path="/products/:slug"
                         element={
                             <DefaultLayout bgImage={ROUTE_BANNERS.materials}>
-                                <ProductDetailPage />
+                                {loadPage(<ProductDetailPage />)}
                             </DefaultLayout>
                         }
                     />
@@ -211,7 +226,7 @@ export default function App() {
                         path="/projects"
                         element={
                             <DefaultLayout bgImage={ROUTE_BANNERS.projects}>
-                                <ProjectsPage />
+                                {loadPage(<ProjectsPage />)}
                             </DefaultLayout>
                         }
                     />
@@ -220,7 +235,7 @@ export default function App() {
                         path="/projects/:slug"
                         element={
                             <DefaultLayout showBanner={false}>
-                                <ProjectDetailsPage />
+                                {loadPage(<ProjectDetailsPage />)}
                             </DefaultLayout>
                         }
                     />
@@ -229,7 +244,7 @@ export default function App() {
                         path="/our-story"
                         element={
                             <DefaultLayout bgImage={ROUTE_BANNERS.ourStory}>
-                                <OurStoryPage />
+                                {loadPage(<OurStoryPage />)}
                             </DefaultLayout>
                         }
                     />
@@ -238,7 +253,7 @@ export default function App() {
                         path="/contact"
                         element={
                             <DefaultLayout bgImage={ROUTE_BANNERS.contact}>
-                                <ContactPage />
+                                {loadPage(<ContactPage />)}
                             </DefaultLayout>
                         }
                     />
@@ -247,7 +262,7 @@ export default function App() {
                         path="/articles"
                         element={
                             <DefaultLayout bgImage={ROUTE_BANNERS.articles}>
-                                <ArticlesPage />
+                                {loadPage(<ArticlesPage />)}
                             </DefaultLayout>
                         }
                     />
@@ -256,7 +271,7 @@ export default function App() {
                         path="/articles/:slug"
                         element={
                             <DefaultLayout bgImage={ROUTE_BANNERS.articleDetail}>
-                                <ArticlePage />
+                                {loadPage(<ArticlePage />)}
                             </DefaultLayout>
                         }
                     />
@@ -265,7 +280,7 @@ export default function App() {
                         path="*"
                         element={
                             <HomepageLayout>
-                                <Home />
+                                {loadPage(<Home />)}
                             </HomepageLayout>
                         }
                     />

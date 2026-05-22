@@ -18,6 +18,7 @@ Last updated: 2026-05-22
 - Client state: Zustand (`src/store/productStore.ts`)
 - Motion/interaction: Framer Motion
 - Supporting libraries: Swiper, DOMPurify, lodash.throttle, react-helmet
+- Route loading: public page components are lazy-loaded in `src/App.tsx` so the initial app shell does not ship every route at once.
 
 ## Launch Target Stack
 - Public hosting: Cloudflare Pages.
@@ -322,7 +323,7 @@ Routing uses clean paths through `BrowserRouter`. Cloudflare Pages direct refres
 - Project and Stone Library content migration needs strict separation between confirmed facts and inferred MVP copy.
 - Raw article newsletter HTML still contains external source URLs as migration source material, but runtime article rendering now rewrites known email proxy image URLs and campaign links before render.
 - Long-term article quality still requires Supabase structured blocks, approved article image records, and editorial review.
-- Bundle size warning (`>500kB`) indicates code-splitting and chunk strategy debt.
+- Route-level code splitting has resolved the previous `>500kB` JavaScript chunk warning; continue monitoring build output as admin/CMS features are added.
 
 ## Brand and Design Linkage Rule
 For UI/copy/IA changes, architecture and implementation decisions must be reviewed against:

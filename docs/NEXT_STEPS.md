@@ -52,7 +52,6 @@ Source of truth: `docs/agent/tasks.json`.
 
 ## Later
 - `LATER-BRAND-001`: align homepage modules with brand pillars and proof framing.
-- `LATER-PERF-001`: reduce bundle size and improve chunk strategy.
 - `LATER-QA-001`: broaden automated route and CTA smoke coverage.
 - `LATER-LAUNCH-DOCS-CONSOLIDATE-001`: after production launch, split the temporary launch plan into durable architecture, operations, and worklog docs.
 - `NOW-DEPLOY-PAGES-HARDEN-001`: legacy fallback only if Cloudflare Pages is reversed.
@@ -74,6 +73,7 @@ Source of truth: `docs/agent/tasks.json`.
 - `NOW-ASSET-STRATEGY-001`: interim local stopgap and delivery-phase Supabase/Cloudflare media hosting policy are documented.
 - `NOW-STONELIB-IMG-FASTTRACK-001`: provided primary finish assets are mapped, controlled fallback usage is documented, and remaining true missing image groups are recorded for full coverage.
 - `NOW-SEO-DELIVERY-001`: default metadata/icons/social image are launch-owned, Open Graph/Twitter image now uses a PNG, and high-risk article excerpt/runtime newsletter claims are qualified.
+- `LATER-PERF-001`: route-level lazy loading is implemented, initial app shell JS is reduced, and the previous `>500kB` JavaScript chunk warning is resolved.
 
 Older completion details live in `docs/WORKLOG.md`.
 

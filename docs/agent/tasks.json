@@ -547,16 +547,25 @@
     },
     {
       "id": "LATER-PERF-001",
-      "status": "later",
+      "status": "done",
       "priority": 19,
       "summary": "Reduce client bundle size and improve chunk strategy.",
       "files": [
-        "vite.config.ts",
-        "src/pages"
+        "AGENTS.md",
+        "src/App.tsx",
+        "docs/ARCHITECTURE.md",
+        "docs/HANDOFF.md",
+        "docs/NEXT_STEPS.md",
+        "docs/WORKLOG.md",
+        "docs/agent/tasks.json"
+      ],
+      "notes": [
+        "2026-05-22: Public page components are lazy-loaded at the route level in src/App.tsx.",
+        "2026-05-22: Production build initial app shell JS dropped from about 674 kB to about 255 kB, and the previous >500kB JavaScript chunk warning no longer appears."
       ],
       "acceptance": [
         "Large chunk warning is reduced or documented with a deliberate split strategy.",
-        "Route-level lazy loading is evaluated."
+        "Route-level lazy loading is implemented for public page components."
       ],
       "verification": [
         "npm run build",

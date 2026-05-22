@@ -1189,6 +1189,40 @@ Last updated: 2026-05-22
 - `NEXT-STONELIB-IMG-001`
 - `NEXT-STONELIB-IMG-002`
 
+## Entry - 2026-05-22 (Route-Level Code Splitting)
+
+### Scope
+- Converted public page components in `src/App.tsx` to lazy-loaded route modules while keeping existing layouts, route paths, and metadata behavior intact.
+- Added a small route-loading fallback inside the existing page layout surfaces.
+- Reduced the initial JavaScript app shell from about 674 kB to about 255 kB in the Vite production build.
+- Closed `LATER-PERF-001`; the previous `>500kB` JavaScript chunk warning no longer appears.
+
+### Changed Files
+- `AGENTS.md`
+- `src/App.tsx`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run build`: pass; no `>500kB` JavaScript chunk warning, with the existing Browserslist staleness notice only.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- Future admin/CMS features can reintroduce large chunks if not split deliberately.
+- React Helmet strict-mode warning remains.
+
+### Next Handoff
+- `NOW-FORMS-SUPABASE-001`
+- `NOW-ADMIN-CMS-001`
+- `LATER-QA-001`
+
 ## Entry Template (Use for Every Future Session)
 
 ### Date
