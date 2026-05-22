@@ -279,12 +279,21 @@
     },
     {
       "id": "NOW-ASSET-STRATEGY-001",
-      "status": "now",
+      "status": "done",
       "priority": 10,
       "summary": "Decide and document the image hosting strategy for the interim static site and Supabase/Cloudflare delivery phases.",
       "files": [
+        "docs/ASSET_MIGRATION_AUDIT.md",
         "docs/ARCHITECTURE.md",
-        "docs/NEXT_STEPS.md"
+        "docs/HANDOFF.md",
+        "docs/NEXT_STEPS.md",
+        "docs/WORKLOG.md",
+        "docs/agent/tasks.json"
+      ],
+      "notes": [
+        "2026-05-22: Current-phase policy is controlled local public/media/launch stopgap for launch-critical static assets.",
+        "2026-05-22: Delivery-phase policy is Supabase Storage for normal CMS media and Cloudflare R2/Stream review for large homepage video delivery.",
+        "Migration sequence, owner notes, and residual storage risks are tracked in docs/ASSET_MIGRATION_AUDIT.md and docs/ARCHITECTURE.md."
       ],
       "acceptance": [
         "Current-phase and delivery-phase image hosting policy is explicitly recorded.",

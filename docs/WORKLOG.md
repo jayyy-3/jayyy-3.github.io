@@ -1083,6 +1083,33 @@ Last updated: 2026-05-22
 - `NOW-STONELIB-IMG-FASTTRACK-001`
 - `NOW-ASSET-STRATEGY-001`
 
+## Entry - 2026-05-22 (Asset Hosting Strategy Closure)
+
+### Scope
+- Closed `NOW-ASSET-STRATEGY-001` because the interim and delivery-phase media hosting policy is now explicit.
+- Current phase: controlled local assets under `public/media/launch` for launch-critical static media until backend storage is available.
+- Delivery phase: Supabase Storage for normal CMS-managed media, with Cloudflare R2 or Stream reviewed separately for large homepage video delivery.
+- Kept migration sequence, owners, and residual risks in the asset audit and architecture docs.
+
+### Changed Files
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- The policy is documented, but Supabase Storage buckets, media records, and upload workflows are not implemented yet.
+- Homepage video still needs a final R2/Stream decision before production scale.
+
+### Next Handoff
+- `NOW-STONELIB-IMG-FASTTRACK-001`
+- `NOW-FORMS-SUPABASE-001`
+- `NOW-ADMIN-CMS-001`
+
 ## Entry Template (Use for Every Future Session)
 
 ### Date

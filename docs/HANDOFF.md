@@ -46,6 +46,7 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 - Old-site favicon restoration: runtime, harness, local asset, and browser head verification pass on 2026-05-22.
 - Article media cleanup: runtime build/lint/typecheck pass on 2026-05-22; Browser QA confirms `/articles` uses local article covers and all four article detail routes render text with zero known external/proxy article images or campaign/unsubscribe/Google redirect/old upload links after lazy-load scroll.
 - Delivery-readiness cleanup: Vite starter README content and the unused React starter SVG asset were removed on 2026-05-22.
+- Asset hosting strategy: current local `public/media/launch` stopgap plus delivery-phase Supabase Storage and Cloudflare R2/Stream review policy are documented and `NOW-ASSET-STRATEGY-001` is closed.
 
 ## Active Risks
 - Cloudflare + Supabase is approved as the launch target, but runtime implementation has not started.
@@ -66,7 +67,7 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 - React Helmet still emits an existing strict-mode lifecycle warning in dev console.
 
 ## Next Recommended Action
-Continue with the next launch blocker that does not require account secrets: Stone Library image coverage or delivery-readiness cleanup. Start `NOW-FORMS-SUPABASE-001` once Supabase project credentials and Turnstile/email secrets are available. Return to `NOW-CLOUDFLARE-PAGES-DEPLOY-001` once Cloudflare dashboard access is available.
+Continue with the next launch blocker that does not require account secrets: Stone Library image coverage. Start `NOW-FORMS-SUPABASE-001` once Supabase project credentials and Turnstile/email secrets are available. Return to `NOW-CLOUDFLARE-PAGES-DEPLOY-001` once Cloudflare dashboard access is available.
 
 ## Guardrails
 - Use repo-root relative paths in committed docs.
