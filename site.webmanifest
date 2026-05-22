@@ -1,0 +1,16 @@
+{
+  "name": "Urblo",
+  "short_name": "Urblo",
+  "description": "Natural stone streetscape systems for public realm and civic landscape projects.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f4f5f1",
+  "theme_color": "#20312d",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "64x64",
+      "type": "image/svg+xml"
+    }
+  ]
+}

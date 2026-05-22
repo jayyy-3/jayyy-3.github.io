@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">Urblo natural stone streetscape systems</title>
+  <desc id="desc">Share image for Urblo, a natural stone streetscape system company.</desc>
+  <rect width="1200" height="630" fill="#f4f5f1"/>
+  <rect x="72" y="72" width="1056" height="486" fill="#20312d"/>
+  <path d="M185 165v184c0 86 55 137 133 137s133-51 133-137V165h-73v181c0 43-21 68-60 68s-60-25-60-68V165h-73z" fill="#f4f5f1"/>
+  <path d="M185 165h73v181c0 43 21 68 60 68s60-25 60-68V165h73" fill="none" stroke="#8fa46f" stroke-width="14"/>
+  <text x="540" y="260" fill="#f4f5f1" font-family="Avenir, Arial, sans-serif" font-size="92" font-weight="300">Urblo</text>
+  <text x="543" y="328" fill="#cbd4c1" font-family="Avenir, Arial, sans-serif" font-size="34">Natural stone streetscape systems</text>
+  <text x="543" y="382" fill="#f4f5f1" font-family="Avenir, Arial, sans-serif" font-size="26">Design-led. Engineering-backed. Built for civic landscapes.</text>
+  <line x1="543" y1="425" x2="950" y2="425" stroke="#8fa46f" stroke-width="4"/>
+</svg>
