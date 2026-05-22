@@ -20,7 +20,7 @@ export interface SiteFooterContact {
 export const siteLogoUrl = 'https://urblo.com.au/wp-content/uploads/2024/12/logo.png';
 
 export const siteBrandStatement =
-  'devoted to Support Ethical and Significant Projects Every Step of the Way.';
+  'devoted to supporting ethical and significant projects every step of the way.';
 
 export const siteNavLinks: SiteNavLink[] = [
   { label: 'Projects', to: '/projects' },
@@ -44,7 +44,6 @@ export const siteFooterLinks: SiteNavLink[] = [
 ];
 
 export const siteSocialLinks: SiteSocialLink[] = [
-  { label: 'Facebook' },
   {
     label: 'Instagram',
     href: 'https://www.instagram.com/urb.lo?igsh=MThyZ3g1NnoyMXc0cg%3D%3D&utm_source=qr',
@@ -53,12 +52,11 @@ export const siteSocialLinks: SiteSocialLink[] = [
     label: 'LinkedIn',
     href: 'https://au.linkedin.com/company/urblo',
   },
-  { label: 'YouTube' },
 ];
 
 export const siteFooterContact: SiteFooterContact = {
   address: ['5 Hamilton St,', 'Oakleigh VIC 3166'],
   email: 'info@urblo.com.au',
   phone: '1300 1URBLO',
-  copyright: '© Copyright 2025',
+  copyright: '© Copyright 2026',
 };

@@ -15,38 +15,130 @@ import ArticlesPage from './pages/ArticlesPage';
 import ArticlePage from './pages/ArticlePage';
 import ContactPage from './pages/ContactPage';
 
+const SITE_URL = 'https://urblo.com.au';
+const DEFAULT_SHARE_IMAGE = `${SITE_URL}/og-default.svg`;
+
+interface RouteMeta {
+    title: string;
+    description: string;
+}
+
+function getRouteMeta(pathname: string): RouteMeta {
+    if (pathname === '/') {
+        return {
+            title: 'Urblo | Natural Stone Streetscape Systems',
+            description:
+                'Design-led, engineering-backed natural stone systems for streetscapes, public realm, and civic landscape projects.',
+        };
+    }
+
+    if (pathname.startsWith('/stone-library/')) {
+        return {
+            title: 'Stone Detail | Urblo',
+            description:
+                'Review natural stone options, finishes, and application notes for Urblo streetscape projects.',
+        };
+    }
+
+    if (pathname === '/stone-library') {
+        return {
+            title: 'Stone Library | Urblo',
+            description:
+                'Explore Urblo natural stone types, finishes, origins, and availability for public realm projects.',
+        };
+    }
+
+    if (pathname.startsWith('/products/')) {
+        return {
+            title: 'Product Detail | Urblo',
+            description:
+                'Explore Urblo product systems, material defaults, models, and specifications for civic landscapes.',
+        };
+    }
+
+    if (pathname === '/products') {
+        return {
+            title: 'Products | Urblo',
+            description:
+                'Browse Urblo modular stone product systems for streetscapes, seating, and civic landscape applications.',
+        };
+    }
+
+    if (pathname.startsWith('/projects/')) {
+        return {
+            title: 'Project Detail | Urblo',
+            description:
+                'See how Urblo stone systems are applied across public realm and civic landscape projects.',
+        };
+    }
+
+    if (pathname === '/projects') {
+        return {
+            title: 'Projects | Urblo',
+            description:
+                'Review Urblo project examples across streetscapes, civic landscapes, and commercial outdoor spaces.',
+        };
+    }
+
+    if (pathname === '/our-story') {
+        return {
+            title: 'Our Story | Urblo',
+            description:
+                'Learn about Urblo, its natural stone system approach, and its role in public realm projects.',
+        };
+    }
+
+    if (pathname === '/contact') {
+        return {
+            title: 'Contact | Urblo',
+            description:
+                'Contact Urblo to discuss project briefs, stone intent, sample requests, and public realm applications.',
+        };
+    }
+
+    if (pathname.startsWith('/articles/')) {
+        return {
+            title: 'Article | Urblo',
+            description:
+                'Read Urblo insights on natural stone, streetscape design, public realm projects, and material systems.',
+        };
+    }
+
+    if (pathname === '/articles') {
+        return {
+            title: 'Articles | Urblo',
+            description:
+                'Read Urblo articles on stone, surface finishes, sustainability, streetscapes, and landscape design.',
+        };
+    }
+
+    return {
+        title: 'Urblo | Natural Stone Streetscape Systems',
+        description:
+            'Design-led, engineering-backed natural stone systems for streetscapes, public realm, and civic landscape projects.',
+    };
+}
+
 function TitleUpdater() {
     const location = useLocation();
-
-    let currentTitle = 'Urblo';
-
-    if (location.pathname === '/') {
-        currentTitle = 'Home';
-    } else if (location.pathname.startsWith('/stone-library/')) {
-        currentTitle = 'Stone Detail';
-    } else if (location.pathname === '/stone-library') {
-        currentTitle = 'Stone Library';
-    } else if (location.pathname.startsWith('/products/')) {
-        currentTitle = 'Product Detail';
-    } else if (location.pathname === '/products') {
-        currentTitle = 'Products';
-    } else if (location.pathname.startsWith('/projects/')) {
-        currentTitle = 'Project Detail';
-    } else if (location.pathname === '/projects') {
-        currentTitle = 'Projects';
-    } else if (location.pathname === '/our-story') {
-        currentTitle = 'Our Story';
-    } else if (location.pathname === '/contact') {
-        currentTitle = 'Contact Us';
-    } else if (location.pathname.startsWith('/articles/')) {
-        currentTitle = 'Article';
-    } else if (location.pathname === '/articles') {
-        currentTitle = 'Articles';
-    }
+    const meta = getRouteMeta(location.pathname);
+    const canonicalUrl = new URL(location.pathname, SITE_URL).toString();
 
     return (
         <Helmet>
-            <title>{`Urblo - ${currentTitle}`}</title>
+            <title>{meta.title}</title>
+            <meta name="description" content={meta.description} />
+            <link rel="canonical" href={canonicalUrl} />
+            <meta property="og:site_name" content="Urblo" />
+            <meta property="og:type" content="website" />
+            <meta property="og:title" content={meta.title} />
+            <meta property="og:description" content={meta.description} />
+            <meta property="og:url" content={canonicalUrl} />
+            <meta property="og:image" content={DEFAULT_SHARE_IMAGE} />
+            <meta name="twitter:card" content="summary_large_image" />
+            <meta name="twitter:title" content={meta.title} />
+            <meta name="twitter:description" content={meta.description} />
+            <meta name="twitter:image" content={DEFAULT_SHARE_IMAGE} />
         </Helmet>
     );
 }

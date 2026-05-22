@@ -101,7 +101,7 @@ export const homepageSocialLinks: HomepageNavLink[] = [
 ];
 
 export const homepageData = {
-  brandStatement: 'devoted to Support Ethical and Significant Projects Every Step of the Way.',
+  brandStatement: 'devoted to supporting ethical and significant projects every step of the way.',
   logoUrl: 'https://urblo.com.au/wp-content/uploads/2024/12/logo.png',
   hero: {
     videoUrl: 'https://urblo.com.au/wp-content/uploads/stream/video.php/urblo.mp4',
@@ -117,8 +117,8 @@ export const homepageData = {
       { id: 'design-collaboration', title: 'Design Collaboration' },
     ] satisfies HomepageFeatureTab[],
     paragraphs: [
-      'At Urblo, we are unwavering in our commitment to long-term sustainability with project bused **carbon neutral offer**. Urblo was created by SAl Stone, along with a novice request, greener alternative to concrete seats. We have decided to carry this idea further by offering **FULL LIFE CIRCLE** carbon dioxide offsets, this includes the production, ocean freight, local freight and energy for end of product line crush/reuse as road base.',
-      'We actively offset life cycle carbon emissions management, replace polluting building materials, and dedicate ourselves to the responsible restoration of quarries. Our goal is not just to provide stone blocks but to **build a future** where our actions contribute positively to the planet.',
+      'Urblo supports long-term sustainability through a **carbon-neutral option for eligible projects**. The offer is designed around life-cycle offset accounting, including production, ocean freight, local freight, and end-of-life crushing or reuse assumptions where they are confirmed for the project.',
+      'We work to reduce unnecessary material waste, support responsible quarry restoration, and help project teams compare natural stone systems with conventional alternatives. Our goal is not just to supply stone blocks but to **build a future** where public-realm materials are selected with evidence and care.',
     ],
     installation: {
       duration: 'Typically 2-3 weeks',
@@ -262,7 +262,7 @@ export const homepageData = {
   metrics: [
     { value: '30', label: 'Indoor / outdoor projects' },
     { value: '430+', label: 'Clients' },
-    { value: '80+', label: 'Offseted tons of carbon dioxide' },
+    { value: '80+', label: 'Tonnes of CO2e tracked for offsetting' },
     { value: '18', label: 'No of helped landscape architects' },
   ] satisfies HomepageMetric[],
   latestProjects: {

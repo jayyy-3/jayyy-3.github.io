@@ -106,11 +106,19 @@ Routing uses clean paths through `BrowserRouter`. Cloudflare Pages direct refres
 ### Implemented navigation surfaces
 - Shared header links: `/projects`, `/stone-library`, `/our-story`, `/articles`, `/products`, `/contact`
 - Shared footer links: `mailto:info@urblo.com.au?subject=Sample%20Request`, `/contact`
-- Shared footer social links: Instagram and LinkedIn use external links with `target="_blank"` plus `rel="noopener noreferrer"`; Facebook and YouTube are rendered as non-linked labels until real destinations are available.
+- Shared footer social links: Instagram and LinkedIn use external links with `target="_blank"` plus `rel="noopener noreferrer"`; Facebook and YouTube are hidden until real destinations are available.
 
 ### Gaps
 - Current implementation gap: Sample Request is still a `mailto:` fallback.
 - Launch target: Contact and Sample Request submit through Cloudflare Pages Functions into Supabase, with Turnstile protection, email notification, and admin-visible lead records.
+
+## Metadata Contract
+- `index.html` contains Urblo-owned default title, description, favicon, manifest, canonical, Open Graph, and Twitter metadata.
+- `src/App.tsx` updates route-level title, description, canonical, Open Graph, and Twitter metadata through `react-helmet`.
+- Default share image asset: `public/og-default.svg`.
+- Favicon asset: `public/favicon.svg`.
+- Web manifest: `public/site.webmanifest`.
+- `react-helmet` still has a known strict-mode warning in development and should be replaced or upgraded during a later SEO/runtime cleanup.
 
 ## Stone Library Detail Interaction Contract (`src/pages/StoneLibraryDetailPage.tsx`)
 - State composition:

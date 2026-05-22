@@ -315,9 +315,9 @@ function SustainabilityOverviewPanel() {
               </motion.svg>
               <div className="absolute w-[180px] max-w-[44%] text-center text-[18px] font-medium leading-[1.5] text-[var(--urblo-lime)] sm:text-[20px]">
                 <span>
-                  Urblo offsets CO<sub>2</sub>
+                  CO<sub>2</sub>e offset
                   <br />
-                  footprint, 100%
+                  pathway
                 </span>
               </div>
             </div>

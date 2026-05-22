@@ -2,6 +2,47 @@
 
 Last updated: 2026-05-22
 
+## Entry - 2026-05-22 (SEO Metadata Baseline)
+
+### Scope
+- Replaced the default Vite title and favicon references in `index.html`.
+- Added Urblo favicon, web manifest, and default share image assets.
+- Added route-level title, description, canonical, Open Graph, and Twitter metadata through `react-helmet`.
+- Removed inactive footer social placeholders for Facebook and YouTube until real destinations are available.
+- Tightened visible sustainability wording by replacing obvious typo/placeholder copy and avoiding the prior absolute "100%" carbon wording.
+
+### Changed Files
+- `index.html`
+- `public/favicon.svg`
+- `public/og-default.svg`
+- `public/site.webmanifest`
+- Removed retired Vite favicon asset.
+- `src/App.tsx`
+- `src/components/homepage/HomepageSections.tsx`
+- `src/data/homepage.ts`
+- `src/data/siteChrome.ts`
+- `docs/ARCHITECTURE.md`
+- `docs/agent/tasks.json`
+- `docs/WORKLOG.md`
+
+### Verification Results
+- `npm run build`: pass (existing bundle size warning and Browserslist staleness notice remain).
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- `NOW-SEO-DELIVERY-001` remains open because article cleanup and broader claim-safety review are not complete.
+- Default share image is an SVG placeholder asset; a production PNG/JPEG share image should be considered after media migration.
+- `react-helmet` strict-mode warning remains a known dev-console issue.
+
+### Next Handoff
+- Continue `NOW-SEO-DELIVERY-001`.
+- `NOW-ASSET-MIGRATION-001`
+- `NOW-FORMS-SUPABASE-001`
+
 ## Entry - 2026-05-22 (Cloudflare Pages Repo Prep)
 
 ### Scope
