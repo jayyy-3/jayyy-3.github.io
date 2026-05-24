@@ -1,6 +1,6 @@
 # Urblo Web - Architecture and Contracts
 
-Last updated: 2026-05-22
+Last updated: 2026-05-25
 
 ## System Boundary
 - Current implementation: frontend-only React application shipped as static assets.
@@ -137,7 +137,8 @@ Current route risk: the catch-all still renders Home for unknown URLs. `NOW-ROUT
 - Our Story portraits now use controlled files under `public/media/launch/our-story`; the carbon banner uses the controlled route banner because the old WordPress carbon banner returned 404.
 - Legacy project listing/detail media now uses controlled files under `public/media/launch/projects`.
 - Stone Library primary finish imagery is mapped from `data/Product` through `src/data/stoneFinishImages.ts`; controlled fallback media lives under `public/media/launch/stone-library/fallbacks`.
-- Stone Library fast-track image status: provided primary finish images are mapped for Alpine White, Angola Black, Ivory Sand, Juparana, New Grey, Steel Blue, and Zen Grey; Blueocean, Honey Comb, and Tuscany use controlled local fallback imagery; Golden Crust, Harcourt, and Tan Brown still require approved HD source images.
+- Stone Library fast-track image status: provided primary finish images are mapped for Alpine White, Angola Black, Ivory Sand, Juparana, New Grey, Steel Blue, and Zen Grey; Blueocean, Honey Comb, and Tuscany use controlled local fallback imagery; Golden Crust, Harcourt, and Tan Brown still show placeholders in runtime where no repo asset is mapped.
+- The 2026-05-25 current-site-only shared-drive audit found source candidates for Golden Crust, Tan Brown, Honey Comb, and Tuscany. Blueocean and Harcourt still have no matching current-site source candidate in the shared-drive scope. Ivory Sand honed has a shared-drive checksum mismatch that should be reviewed before remapping.
 - Article cover and inline cleanup media now uses controlled files under `public/media/launch/articles`.
 - Article email-export HTML is still stored as source material under `public/articles`, but `src/lib/articleMedia.ts` rewrites known Squarespace/Front/Google proxy images to local launch media and removes email campaign tracking links before DOMPurify sanitization.
 - Article claim-safety and mobile stopgap: `src/lib/articleMedia.ts` rewrites known high-risk newsletter phrases at runtime, unwraps dead links, and `src/index.css` constrains legacy newsletter tables/media to reduce mobile overflow until structured article blocks replace the raw newsletter HTML.

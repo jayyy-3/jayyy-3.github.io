@@ -1,6 +1,6 @@
 # WORKLOG - Urblo Execution Log
 
-Last updated: 2026-05-22
+Last updated: 2026-05-25
 
 ## Entry - 2026-05-22 (Old-Site Favicon Restoration)
 
@@ -1354,6 +1354,38 @@ Last updated: 2026-05-22
 
 ### Next Handoff
 - `NEXT-STONELIB-DRIVE-IMAGE-AUDIT-001`
+- `NEXT-ADMIN-IA-ACCESS-001`
+- `NOW-ROUTE-ERROR-STATES-001`
+
+## Entry - 2026-05-25 (Stone Library Drive Image Audit)
+
+### Scope
+- Ran the current-site-only Stone Library source audit against the Saistone shared-drive folder named `Urblo Digital Stone Library`.
+- Followed user direction to ignore shared-drive products that are not currently present on the website.
+- Compared current runtime mappings in `src/data/stoneFinishImages.ts` and repo media against shared-drive candidates without changing runtime mappings or assets in this pass.
+- Recorded the update list for `NEXT-STONELIB-IMG-001`: Golden Crust Light/Dark, Tan Brown, Honey Comb, Tuscany, and Ivory Sand honed review.
+
+### Changed Files
+- `AGENTS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/ASSET_MIGRATION_AUDIT.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- Runtime gates were not run because no runtime mappings or assets changed.
+
+### Risks and Gaps
+- `NEXT-STONELIB-IMG-001` still needs to normalize and map the approved shared-drive candidates.
+- Ivory Sand honed needs visual review before replacing the current Sandstone-named asset.
+- Blueocean and Harcourt still have no matching current-site source candidate in the shared-drive scope.
+
+### Next Handoff
+- `NEXT-STONELIB-IMG-001`
 - `NEXT-ADMIN-IA-ACCESS-001`
 - `NOW-ROUTE-ERROR-STATES-001`
 

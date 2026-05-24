@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lastUpdated": "2026-05-22",
+  "lastUpdated": "2026-05-25",
   "sourceOfTruth": "Machine-readable task queue for active and upcoming agent work. Human-readable roadmap lives in docs/NEXT_STEPS.md.",
   "tasks": [
     {
@@ -638,12 +638,14 @@
       ],
       "notes": [
         "2026-05-22 full-site QA confirmed Golden Crust, Harcourt, and Tan Brown still expose visible Image coming soon placeholders in Stone Library, and product Body Stone selectors can surface placeholder/data images for stones without approved imagery.",
-        "Run NEXT-STONELIB-DRIVE-IMAGE-AUDIT-001 first so final HD coverage uses the current shared-drive source, not stale fast-track assumptions."
+        "2026-05-25 current-site-only shared-drive audit is complete. Use the audit list in docs/ASSET_MIGRATION_AUDIT.md before changing runtime mappings.",
+        "Map approved candidates for Golden Crust Light/Dark, Tan Brown, Honey Comb, and Tuscany where appropriate; review Ivory Sand honed because the current Sandstone-named file differs from the shared-drive Ivory Sand source; keep Blueocean and Harcourt unresolved unless Urblo supplies matching source imagery."
       ],
       "acceptance": [
         "All priority stones/finishes display intended HD images in list and detail views.",
         "No approved finish remains on placeholder imagery.",
-        "Approved source images are supplied for Golden Crust, Harcourt, Tan Brown, and finish-specific Blueocean, Honey Comb, and Tuscany coverage before runtime mapping is changed."
+        "Approved current-site source candidates from the 2026-05-25 audit are normalized, committed, and mapped without presenting variant-level imagery as finish-specific imagery.",
+        "Blueocean and Harcourt either receive approved current-site source imagery or remain explicitly deferred with controlled fallback/placeholder behavior."
       ],
       "verification": [
         "npm run build",
@@ -654,7 +656,7 @@
     },
     {
       "id": "NEXT-STONELIB-DRIVE-IMAGE-AUDIT-001",
-      "status": "next",
+      "status": "done",
       "priority": 11.9,
       "summary": "Audit the Stone Library Google Drive image source against current website imagery.",
       "files": [
@@ -670,7 +672,10 @@
       ],
       "notes": [
         "2026-05-22: Temporary approved source location is the Saistone Google Drive shared folder named Urblo Digital Stone Library under ALVIN then Urblo. Do not commit machine-specific local absolute paths for this source.",
-        "Purpose is to detect source images that changed after the fast-track mapping, source images that exist but have not been published on the site, and website images that are now stale versus the shared drive."
+        "Purpose is to detect source images that changed after the fast-track mapping, source images that exist but have not been published on the site, and website images that are now stale versus the shared drive.",
+        "2026-05-25: Audit completed for current website stones only per user direction. Shared-drive-only products are intentionally out of scope for now.",
+        "2026-05-25: Current mapped files match the shared drive for 30 finish states. One current mapped file needs review: Ivory Sand honed maps a Sandstone-named asset that differs from the shared-drive Ivory Sand candidate.",
+        "2026-05-25: Shared-drive candidates exist for 12 placeholder states across Golden Crust Light/Dark and Tan Brown, and 8 fallback states across Honey Comb and Tuscany. Blueocean and Harcourt have no matching current-site source candidate in the shared-drive scope."
       ],
       "acceptance": [
         "Inventory the shared-drive Stone Library image folders and compare them to current mapped assets in src/data/stoneFinishImages.ts.",

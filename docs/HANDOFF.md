@@ -1,6 +1,6 @@
 # HANDOFF - Current Agent State
 
-Last updated: 2026-05-22
+Last updated: 2026-05-25
 
 ## Current Focus
 The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin CMS:
@@ -27,9 +27,10 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 
 ## Latest Verification Snapshot
 - Last full runtime gate on 2026-05-22: `npm run build`, `npm run lint`, `npx tsc -b`, and `npm run agent:smoke` pass. Build no longer emits the previous `>500kB` JavaScript chunk warning; Browserslist staleness notice remains.
-- Last docs/harness gate on 2026-05-22: `npm run agent:check` and `git diff --check` pass.
+- Last docs/harness gate on 2026-05-25: `npm run agent:check` and `git diff --check` pass.
 - Recent browser QA on 2026-05-22: Home no longer contains `Browse by stone type`; Prime Block initializes default material selections; the Debunking article has zero horizontal overflow at 390px after the article stopgap.
 - Current controlled-media status: P0/P1 visible media has local stopgaps under `public/media/launch`; direct old WordPress `wp-content/uploads` references are removed from runtime data; article media still needs structured-block migration.
+- Stone Library shared-drive audit on 2026-05-25 is complete for current website stones only; Drive-only products are intentionally out of scope for this launch pass.
 - Detailed historical verification evidence lives in `docs/WORKLOG.md`; keep this snapshot limited to current state and latest gates.
 
 ## Active Risks
@@ -41,7 +42,7 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 - Projects, Stone Library, Products, and Articles are still file-backed rather than customer-editable.
 - The admin CMS does not exist yet. `NOW-ADMIN-CMS-001` is an umbrella objective; use `NEXT-ADMIN-IA-ACCESS-001` first, then the blocked auth/RLS, content CRUD, media, and lead-management child tasks when Supabase access is available.
 - P0/P1 old WordPress media references in runtime data have been migrated to controlled local assets under `public/media/launch`; article covers and known detail images now have a local runtime stopgap under `public/media/launch/articles`.
-- Stone Library fast-track imagery is mapped/documented, but final HD coverage must start with `NEXT-STONELIB-DRIVE-IMAGE-AUDIT-001` against the Saistone Google Drive `Urblo Digital Stone Library` source before `NEXT-STONELIB-IMG-001`.
+- Stone Library fast-track imagery is mapped/documented, and the current-site-only shared-drive audit is complete. `NEXT-STONELIB-IMG-001` should now use the update list in `docs/ASSET_MIGRATION_AUDIT.md`: map Golden Crust, Tan Brown, Honey Comb, and Tuscany candidates; review Ivory Sand honed; keep Blueocean and Harcourt unresolved unless new source imagery is supplied.
 - Raw article newsletter HTML remains source material and still needs Supabase structured-block migration, claim-safety review, mobile-safe templates, and full editorial cleanup before the article system is considered final.
 - Product detail pages now initialize default material selections, but still need a stronger conversion/configuration experience with clear CTA, selected-summary feedback, and deliberate missing-image states.
 - Legacy project detail pages remain weaker than the Moon Gate material-map case study model; at least one more project should be migrated before the project system feels consistent.
@@ -55,7 +56,7 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 - React Helmet still emits an existing strict-mode lifecycle warning in dev console.
 
 ## Next Recommended Action
-If account access is unavailable, start with `NEXT-STONELIB-DRIVE-IMAGE-AUDIT-001` or `NEXT-ADMIN-IA-ACCESS-001`; both are useful non-secret tasks. Then use `NOW-ROUTE-ERROR-STATES-001`, `NEXT-PRODUCT-DETAIL-CONVERSION-001`, or `NEXT-PROJECTS-INTAKE-001` for runtime polish. Start `NOW-FORMS-SUPABASE-001`, `NOW-ADMIN-AUTH-RLS-001`, and `NOW-CLOUDFLARE-PAGES-DEPLOY-001` only when the required Supabase, Turnstile/email, or Cloudflare access is available.
+If account access is unavailable, start with `NEXT-STONELIB-IMG-001` using the completed audit list, or `NEXT-ADMIN-IA-ACCESS-001` for non-secret admin planning. Then use `NOW-ROUTE-ERROR-STATES-001`, `NEXT-PRODUCT-DETAIL-CONVERSION-001`, or `NEXT-PROJECTS-INTAKE-001` for runtime polish. Start `NOW-FORMS-SUPABASE-001`, `NOW-ADMIN-AUTH-RLS-001`, and `NOW-CLOUDFLARE-PAGES-DEPLOY-001` only when the required Supabase, Turnstile/email, or Cloudflare access is available.
 
 ## Guardrails
 - Use repo-root relative paths in committed docs.

@@ -1,6 +1,6 @@
 # Urblo Asset Migration Audit
 
-Last updated: 2026-05-22
+Last updated: 2026-05-25
 
 ## Purpose
 This audit turns the current "some media is slow or still on the old site" concern into an actionable launch checklist.
@@ -76,27 +76,74 @@ Current runtime coverage across available/TBC Stone Library finish states:
 |---|---:|---|
 | Finish-specific image | 31 | A matching finish photo is mapped from `data/Product` and appears on list/detail where that stone/finish is selected. |
 | Controlled default/fallback image | 16 | A local fallback image exists for the stone/variant, but not for each individual finish. |
-| True missing image placeholder | 22 | No approved source image exists in the repo yet, so the UI must not pretend to show a real stone finish. |
+| True missing image placeholder | 22 | No approved source image is committed/mapped in the repo yet, so the UI must not pretend to show a real stone finish. |
 
 Finish-specific coverage currently includes Alpine White, Angola Black, Ivory Sand, Juparana, New Grey, Steel Blue, and Zen Grey. Juparana and Zen Grey also have secondary frames in the source asset folder, but the secondary-frame presentation is intentionally left to `NEXT-STONELIB-IMG-002`.
 
 Controlled default/fallback coverage currently includes Blueocean, Honey Comb, and Tuscany. These are launch-safe local fallbacks, not final finish-by-finish HD coverage.
 
-True missing image groups for the full coverage task:
+Visible placeholder groups before the shared-drive audit:
 - Golden Crust Light and Dark: flamed, sawn, honed, polished.
 - Harcourt: all TBC finishes.
 - Tan Brown: flamed, sawn, honed, polished.
 
-This is the correct customer-safe posture for launch preparation: use real supplied imagery where available, use controlled local fallbacks where explicitly known, and keep visible placeholders only where Urblo still needs approved source images.
+This is the correct customer-safe posture for launch preparation: use real supplied imagery where available, use controlled local fallbacks where explicitly known, and keep visible placeholders only where Urblo still needs approved source images or explicit approval to publish shared-drive candidates.
 
 ### Temporary Stone Library Source Folder
 The temporary source of truth for Stone Library imagery is the Saistone Google Drive shared folder named `Urblo Digital Stone Library` under the shared-drive path ALVIN then Urblo. Do not commit machine-specific local absolute paths for this source.
 
-`NEXT-STONELIB-DRIVE-IMAGE-AUDIT-001` should compare that shared-drive source against the current website mappings before final image coverage work:
-- source images that changed after the fast-track ingestion;
-- source images that exist in the shared drive but have not been published to the current website;
-- current website images that are stale versus the shared-drive source;
-- unresolved stones/finishes that should remain placeholders because no approved source image exists.
+### Stone Library Drive Image Audit - 2026-05-25
+Scope is intentionally limited to stone groups and variants already present in the current website Stone Library. Shared-drive-only products that are not currently on the website are not included in this launch audit.
+
+Inventory result:
+
+| Area | Result |
+|---|---:|
+| Shared-drive image files found | 125 |
+| Shared-drive folders found | 18 |
+| Current website stone groups audited | 13 |
+| Current website finish states audited | 69 |
+| Finish states whose current mapped file matches the shared drive by checksum | 30 |
+| Current mapped image differs from the shared-drive candidate | 1 |
+| Runtime fallback states with a shared-drive candidate | 8 |
+| Runtime placeholder states with a shared-drive candidate | 12 |
+| Runtime states with no matching shared-drive source for the current website stone | 18 |
+
+Current-website source status:
+
+| Status | Stone groups / variants | Action |
+|---|---|---|
+| Current mapped files match shared drive | Alpine White, Angola Black, Juparana primary frames, New Grey, Steel Blue, Zen Grey primary frames, Ivory Sand bush hammered and sparrow peck | No replacement needed before Supabase/Cloudflare setup. |
+| Current mapped file needs review | Ivory Sand honed currently maps `Sandstone/Sandstone_Sawn_Urblo.jpeg`, while the shared drive has `Ivory Sand/Ivory Sand_Sawn_Urblo.jpeg` with a different checksum. | Visually review and either remap to the shared-drive file or confirm the existing Sandstone-named file remains the approved source. |
+| Placeholder but source candidate exists | Golden Crust Light and Dark, Tan Brown | Copy normalized source images into controlled media and map finish-specific runtime images under `NEXT-STONELIB-IMG-001`. |
+| Controlled fallback but source candidate exists | Honey Comb; Tuscany vein cut; Tuscany cross cut | Replace generic fallback usage with shared-drive candidates. For Tuscany, treat each cut image as a variant-level source unless Urblo supplies finish-specific honed/polished/sandblasted photos. |
+| No source candidate in current shared-drive scope | Blueocean; Harcourt | Keep current controlled fallback or placeholder behavior unless Urblo supplies approved source imagery. Harcourt remains TBC. |
+
+Current-website update list for `NEXT-STONELIB-IMG-001`:
+
+| Source filename | Target stone / variant | Finish key | Current runtime status | Recommended action |
+|---|---|---|---|---|
+| `Ivory Sand/Ivory Sand_Sawn_Urblo.jpeg` | Ivory Sand | `honed` | Finish-specific image exists but differs from shared drive | Review visually, then either remap to the shared-drive source or record why the current Sandstone-named file is preferred. |
+| `Golden Crust/Golden Crust Light_Flamed_Urblo.JPG` | Golden Crust Light | `flamed` | Placeholder | Add normalized controlled asset and map finish-specific image. |
+| `Golden Crust/Golden Crust Light_Sawn_Urblo.JPG` | Golden Crust Light | `sawn` | Placeholder | Add normalized controlled asset and map finish-specific image. |
+| `Golden Crust/Golden Crust Light_Honed_Urblo.JPG` | Golden Crust Light | `honed` | Placeholder | Add normalized controlled asset and map finish-specific image. |
+| `Golden Crust/Golden Crust Light_Polished_Urblo.JPG` | Golden Crust Light | `polished` | Placeholder | Add normalized controlled asset and map finish-specific image. |
+| `Golden Crust(Dark)_虾红/Golden Crust Dark_Flamed_Urblo.JPG` | Golden Crust Dark | `flamed` | Placeholder | Add normalized controlled asset and map finish-specific image. |
+| `Golden Crust(Dark)_虾红/Golden Crust Dark_Sawn_Urblo.JPG` | Golden Crust Dark | `sawn` | Placeholder | Add normalized controlled asset and map finish-specific image. |
+| `Golden Crust(Dark)_虾红/Golden Crust Dark_Honed_Urblo.JPG` | Golden Crust Dark | `honed` | Placeholder | Add normalized controlled asset and map finish-specific image. |
+| `Golden Crust(Dark)_虾红/Golden Crust Dark_Polished_Urblo.JPG` | Golden Crust Dark | `polished` | Placeholder | Add normalized controlled asset and map finish-specific image. |
+| `Honey Comb/Honey Comb_Sawn_Urblo.JPG` | Honey Comb | `sawn` | Controlled default fallback using Blueocean fallback | Replace fallback with Honey Comb source image. |
+| `Honey Comb/Honey Comb_Honed_Urblo.JPG` | Honey Comb | `honed` | Controlled default fallback using Blueocean fallback | Replace fallback with Honey Comb source image. |
+| `Tan Brown/Tan Brown_Flamed_副本.JPG` | Tan Brown | `flamed` | Placeholder | Add normalized controlled asset and map finish-specific image. |
+| `Tan Brown/Tan Brown_Sawn_副本.JPG` | Tan Brown | `sawn` | Placeholder | Add normalized controlled asset and map finish-specific image. |
+| `Tan Brown/Tan Brown_Honed_副本.JPG` | Tan Brown | `honed` | Placeholder | Add normalized controlled asset and map finish-specific image. |
+| `Tan Brown/Tan Brown_Polished_副本.JPG` | Tan Brown | `polished` | Placeholder | Add normalized controlled asset and map finish-specific image. |
+| `Toscany_Vein Cut/Toscany_Vein Cut_Urblo.JPG` | Tuscany Vein Cut | `honed`, `polished`, `sandblasted` | Controlled default fallback | Use as a variant-level source only, or wait for finish-specific photos before mapping individual finish states. |
+| `Toscany_Cross Cut/Toscany_Cross Cut_Urblo.JPG` | Tuscany Cross Cut | `honed`, `polished`, `sandblasted` | Controlled default fallback | Use as a variant-level source only, or wait for finish-specific photos before mapping individual finish states. |
+| No matching shared-drive source | Blueocean | `sawn`, `honed`, `bush_hammered`, `combed`, `rippling`, `rock_face`, `rippling__fine`, `rippling__rough` | Controlled default fallback | Keep fallback until approved Blueocean finish sources are supplied. |
+| No matching shared-drive source | Harcourt | all TBC finish states | Placeholder | Keep placeholder/TBC state until approved Harcourt source imagery is supplied. |
+
+Excluded from this launch audit by scope: Cloud Whisper, Mica Grey, Romeo's Vow, Rosy Mist, and Verdant Grey shared-drive folders because those products are not currently on the website Stone Library.
 
 ### P2 - Migrate Through CMS Cleanup
 These should not block infrastructure setup but must be cleaned before the article system is considered launch-quality.
