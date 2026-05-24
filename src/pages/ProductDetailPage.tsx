@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, Navigate, useParams } from 'react-router-dom';
 import ModelSelector from '../components/ModelSelector';
 import OptionSelector from '../components/OptionSelector';
 import RouteState from '../components/RouteState';
@@ -114,6 +114,10 @@ export default function ProductDetailPage() {
         ]}
       />
     );
+  }
+
+  if (slug && slug !== product.slug) {
+    return <Navigate to={`/products/${product.slug}`} replace />;
   }
 
   const currentModel =

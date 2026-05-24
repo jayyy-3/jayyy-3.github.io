@@ -4,6 +4,10 @@
 export interface ArticleMeta {
     /** folder name under /src/articles/<slug> */
     slug: string;
+    /** Legacy content folder under /public/articles when public slug differs. */
+    sourceSlug?: string;
+    /** Previous public URLs that should resolve to the canonical slug. */
+    legacySlugs?: string[];
     /** Article title */
     title: string;
     /** ISO‑8601 publish date */

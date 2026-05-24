@@ -48,7 +48,6 @@ Source of truth: `docs/agent/tasks.json`.
 - `NEXT-UI-PARITY-001`: bring Home, Our Story, Articles, and Contact Us toward approved visual references.
 - `NEXT-STONELIB-DATA-001`: replace generic finish behavior text with approved notes.
 - `NEXT-PROJECTS-INTAKE-001`: define the project intake template and migrate the next project into the material-map case study model.
-- `NEXT-SLUG-URL-NORMALIZE-001`: normalize product and article URL slug style before production indexing.
 
 ## Later
 - `LATER-BRAND-001`: align homepage modules with brand pillars and proof framing.
@@ -84,6 +83,7 @@ Source of truth: `docs/agent/tasks.json`.
 - `NOW-ROUTE-ERROR-STATES-001`: unknown URLs now render a branded not-found state, and article/product detail routes now have deliberate loading, not-found, and load-error states.
 - `NEXT-PRODUCT-DETAIL-CONVERSION-001`: product details now show selected configuration feedback, a prefilled discussion CTA, specification caveats, and pending-image treatment for missing selector imagery.
 - `NEXT-STONELIB-IMG-002`: secondary finish frames are implemented for approved Juparana and Zen Grey source frames as active-finish support media with lightbox frame selection.
+- `NEXT-SLUG-URL-NORMALIZE-001`: product and article public slugs now use lowercase kebab-case with explicit Cloudflare 301 redirects and runtime alias handling for old URLs.
 
 Older completion details live in `docs/WORKLOG.md`.
 

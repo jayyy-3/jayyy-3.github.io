@@ -117,7 +117,7 @@ Lead modules use operational status instead of public visibility:
 
 | Area | Customer Editable | System Computed | Developer / Admin-Only |
 |---|---|---|---|
-| Product family | name, description, status, SEO, sort order | slug uniqueness | route conventions until slug normalization is finished |
+| Product family | name, description, status, SEO, sort order | lowercase kebab-case slug uniqueness and redirect alias preservation | model key migration |
 | Models | labels, images, status, order | default active model | model key migration |
 | Material defaults | linked stone group, display label, category | fallback image and option resolution | category enum changes |
 | Specs | spec label/value/order | content health if required specs missing | validation rules for future configurators |

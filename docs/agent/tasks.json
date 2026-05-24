@@ -887,21 +887,33 @@
     },
     {
       "id": "NEXT-SLUG-URL-NORMALIZE-001",
-      "status": "next",
+      "status": "done",
       "priority": 17.5,
       "summary": "Normalize product and article URL slug style before production indexing.",
       "files": [
+        "public/articles/*/meta.json",
         "src/data/productData.ts",
+        "src/pages/ArticlePage.tsx",
+        "src/pages/ProductDetailPage.tsx",
+        "src/scripts/generate-article-index.ts",
+        "src/service/ProductService.ts",
+        "src/types/article.ts",
+        "src/types/product.ts",
         "public/articles/index.json",
         "public/_redirects",
         "scripts/agent-smoke.sh",
+        "docs/ADMIN_IA_ACCESS.md",
         "docs/ARCHITECTURE.md",
         "docs/HANDOFF.md",
+        "docs/NEXT_STEPS.md",
         "docs/WORKLOG.md",
         "docs/agent/tasks.json"
       ],
       "notes": [
-        "2026-05-22 full-site QA found mixed URL styles: projects and Stone Library use kebab-case, products use camelCase, and article slugs are title-case export names. This should be decided before production SEO indexing."
+        "2026-05-22 full-site QA found mixed URL styles: projects and Stone Library use kebab-case, products use camelCase, and article slugs are title-case export names. This should be decided before production SEO indexing.",
+        "2026-05-25: Canonical product and article public slugs now use lowercase kebab-case.",
+        "2026-05-25: Old product camelCase URLs and old article title-case URLs are preserved with explicit Cloudflare 301 rules in public/_redirects plus runtime alias redirects for local/SPA navigation.",
+        "2026-05-25: Article metadata keeps sourceSlug for legacy title-case content folders until structured article migration removes the raw HTML source layout."
       ],
       "acceptance": [
         "Product, article, project, and Stone Library public slugs follow one agreed production URL convention where feasible.",

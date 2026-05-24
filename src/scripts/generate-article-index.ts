@@ -20,7 +20,11 @@ const entries = fs
 const index = entries.map((slug) => {
     const metaPath = path.join(baseDir, slug, "meta.json");
     const meta = JSON.parse(fs.readFileSync(metaPath, "utf-8"));
-    return { slug, ...meta };
+    return {
+        ...meta,
+        slug: meta.slug || slug,
+        sourceSlug: meta.sourceSlug || slug,
+    };
 });
 
 fs.writeFileSync(output, JSON.stringify(index, null, 2));

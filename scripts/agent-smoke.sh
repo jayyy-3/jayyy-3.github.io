@@ -21,6 +21,8 @@ cleanup() {
 trap cleanup EXIT
 
 SMOKE_HOST="${HOST}" SMOKE_PORT="${PORT}" node --input-type=module <<'NODE'
+import fs from 'node:fs'
+
 const host = process.env.SMOKE_HOST
 const port = process.env.SMOKE_PORT
 const base = `http://${host}:${port}`
@@ -29,12 +31,13 @@ const routes = [
   '/stone-library',
   '/stone-library/alpine-white',
   '/products',
-  '/products/primeBlock',
+  '/products/prime-block',
   '/projects',
   '/projects/moon-gate-woolley-street',
   '/our-story',
   '/contact',
   '/articles',
+  '/articles/modular-mastery-how-primeblock-core-transformed-aitken-college',
 ]
 
 const stateRoutes = [
@@ -50,6 +53,18 @@ const stateRoutes = [
 
 const requiredAssets = [
   '/articles/index.json',
+  '/articles/Modular-Mastery-How-PrimeBlock-Core-Transformed-Aitken-College/content.html',
+]
+
+const redirectContracts = [
+  {
+    from: '/products/primeBlock',
+    to: '/products/prime-block',
+  },
+  {
+    from: '/articles/Modular-Mastery-How-PrimeBlock-Core-Transformed-Aitken-College',
+    to: '/articles/modular-mastery-how-primeblock-core-transformed-aitken-college',
+  },
 ]
 
 const ctaContracts = [
@@ -124,6 +139,15 @@ async function checkAsset(path) {
   }
 }
 
+function checkRedirectRule(contract) {
+  const redirects = fs.readFileSync('public/_redirects', 'utf8')
+  const expected = `${contract.from} ${contract.to} 301`
+  if (!redirects.includes(expected)) {
+    throw new Error(`Missing redirect rule: ${expected}`)
+  }
+  console.log(`redirect ok: ${contract.from} -> ${contract.to}`)
+}
+
 async function checkCta(contract) {
   if (contract.target.startsWith('/')) {
     await checkHtmlShell(contract.target)
@@ -170,6 +194,10 @@ for (const stateRoute of stateRoutes) {
 for (const asset of requiredAssets) {
   await checkAsset(asset)
   console.log(`asset ok: ${asset}`)
+}
+
+for (const contract of redirectContracts) {
+  checkRedirectRule(contract)
 }
 
 for (const contract of ctaContracts) {

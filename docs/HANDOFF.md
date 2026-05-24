@@ -31,6 +31,7 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 - Recent browser QA on 2026-05-25: unknown route, missing product detail, and missing article detail render deliberate route states instead of falling back to Home or blank/error text.
 - Recent browser QA on 2026-05-25: Product detail configuration on `/products/primeBlock` renders selected-summary feedback, a prefilled configuration enquiry CTA, and pending-image copy when Harcourt is selected. Browser screenshot/desktop DOM checks passed; mobile viewport fallback was attempted but blocked by local browser tooling.
 - Secondary Stone Library frames are implemented for approved Juparana and Zen Grey source files. Runtime gates pass, but fresh desktop/mobile browser visual QA remains blocked until the in-app Browser pane or local Chrome/Playwright is available.
+- Product and article public slugs now use lowercase kebab-case with explicit Cloudflare 301 rules and runtime alias redirects for the previous camelCase/title-case URLs.
 - Recent browser QA on 2026-05-25: Stone Library list renders 13 results; Golden Crust, Tan Brown, Honey Comb, and Tuscany detail pages render mapped images without `IMAGE COMING SOON`; Golden Crust Dark and Tuscany Cross Cut variant switches update to the correct mapped images. The known React Helmet strict-mode warning still appears.
 - Current controlled-media status: P0/P1 visible media has local stopgaps under `public/media/launch`; direct old WordPress `wp-content/uploads` references are removed from runtime data; article media still needs structured-block migration.
 - Stone Library shared-drive audit and current-site image mapping on 2026-05-25 are complete for current website stones only; Drive-only products are intentionally out of scope for this launch pass.
@@ -48,7 +49,7 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 - Raw article newsletter HTML remains source material and still needs Supabase structured-block migration, claim-safety review, mobile-safe templates, and full editorial cleanup before the article system is considered final.
 - Product detail pages now initialize default material selections and include selected-summary feedback, a configuration enquiry CTA, and deliberate pending-image states; deeper product data approval remains part of the CMS/content migration work.
 - Legacy project detail pages remain weaker than the Moon Gate material-map case study model; at least one more project should be migrated before the project system feels consistent.
-- Public URL styles are mixed across products, articles, projects, and Stone Library; normalize before production indexing if URLs will be changed.
+- Public URL style is normalized to lowercase kebab-case across products, articles, projects, and Stone Library. Old product/article URLs are preserved through `public/_redirects` and runtime alias handling.
 - App shell default Vite metadata, starter README content, and default social image issues have been replaced; launch polish debt remains around future campaign-specific share imagery only if the client wants a bespoke preview.
 - Image hosting policy must now be resolved against the Cloudflare/Supabase launch plan.
 - GitHub Pages deployment hardening is a legacy fallback only; Cloudflare Pages is the active target and currently blocked at account-level project setup.
@@ -58,7 +59,7 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 - React Helmet still emits an existing strict-mode lifecycle warning in dev console.
 
 ## Next Recommended Action
-If account access is unavailable, start with `NEXT-PROJECTS-INTAKE-001`, `NEXT-SLUG-URL-NORMALIZE-001`, or `NOW-ARTICLE-STRUCTURE-CLAIMS-001` for runtime polish. Start `NOW-FORMS-SUPABASE-001`, `NOW-ADMIN-AUTH-RLS-001`, and `NOW-CLOUDFLARE-PAGES-DEPLOY-001` only when the required Supabase, Turnstile/email, or Cloudflare access is available.
+If account access is unavailable, start with `NEXT-PROJECTS-INTAKE-001`, `NOW-ARTICLE-STRUCTURE-CLAIMS-001`, or `NEXT-UI-PARITY-001` for runtime polish. Start `NOW-FORMS-SUPABASE-001`, `NOW-ADMIN-AUTH-RLS-001`, and `NOW-CLOUDFLARE-PAGES-DEPLOY-001` only when the required Supabase, Turnstile/email, or Cloudflare access is available.
 
 ## Guardrails
 - Use repo-root relative paths in committed docs.

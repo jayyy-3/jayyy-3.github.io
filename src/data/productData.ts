@@ -2,7 +2,8 @@ import type {Product} from '../types/product';
 
 export const products: Product[] = [
     {
-        slug: 'primeBlock',
+        slug: 'prime-block',
+        legacySlugs: ['primeBlock'],
         name: 'Prime Block',
         shortDesc: 'The PrimeBlock Series delivers foundational elegance with its clean, square profile, ideal for minimalist urban spaces requiring durability and understated design.',
         models: [
@@ -25,7 +26,8 @@ export const products: Product[] = [
     },
 
     {
-        slug: 'primeLume',
+        slug: 'prime-lume',
+        legacySlugs: ['primeLume'],
         name: 'Prime Lume',
         shortDesc: 'The PrimeLume Series redefines minimalism with dual-side grooves for integrated lighting or drainage. Built on Urblo’s signature robustness, it transforms functional details into sleek design statements.',
         models: [
@@ -48,7 +50,8 @@ export const products: Product[] = [
     },
 
     {
-        slug: 'terraLine',
+        slug: 'terra-line',
+        legacySlugs: ['terraLine'],
         name: 'Terra Line',
         shortDesc: 'Crafted for modern landscapes, this modular series seamlessly integrates natural stone and timber, offering versatile configurations from minimalist benches to ergonomic seating. The signature tapered profile and recessed base channel (LED-ready) blend functionality with sleek design, while embedded wood elements add warmth to urban rigidity. Whether illuminating pathways or framing plazas, TerraLine adapts to any space with tailored elegance.',
         models: [
@@ -72,7 +75,8 @@ export const products: Product[] = [
 
 
     {
-        slug: 'strataBench',
+        slug: 'strata-bench',
+        legacySlugs: ['strataBench'],
         name: 'Strata Bench',
         shortDesc: 'Engineered for bustling public spaces, this wide-profile bench series offers versatile double-sided seating, seamlessly blending robust stone bases with optional timber accents for organic warmth.',
         models: [
@@ -93,7 +97,8 @@ export const products: Product[] = [
     },
 
     {
-        slug: 'primeCurve',
+        slug: 'prime-curve',
+        legacySlugs: ['primeCurve'],
         name: 'Prime Curve',
         shortDesc: 'The PrimeCurve Series extends PrimeLume’s innovation into sweeping profiles, merging signature light-ready grooves with organic curves for plazas, pathways, and sculptural installations.',
         models: [
@@ -116,7 +121,8 @@ export const products: Product[] = [
     },
 
     {
-        slug: 'terraArc',
+        slug: 'terra-arc',
+        legacySlugs: ['terraArc'],
         name: 'Terra Arc',
         shortDesc: 'Fluid curves meet TerraLine’s iconic taper and grooves. Precision-carved stone arcs with LED-ready channels, paired with sweeping timber accents for ergonomic comfort. Adapts seamlessly from sculptural park seats to waterfront rings—durable, dynamic, and designed to connect.',
         models: [

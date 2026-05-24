@@ -1,6 +1,6 @@
 import DOMPurify from 'dompurify';
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, Navigate, useParams } from 'react-router-dom';
 import ReadingProgressBar from '../components/ReadingProgressBar';
 import RouteState from '../components/RouteState';
 import { prepareArticleHtml, resolveArticleAssetPath } from '../lib/articleMedia';
@@ -13,7 +13,12 @@ export default function ArticlePage() {
   const [indexStatus, setIndexStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const [contentStatus, setContentStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
 
-  const meta = articles.find((article) => article.slug === slug);
+  const meta = articles.find(
+    (article) =>
+      article.slug === slug ||
+      article.sourceSlug === slug ||
+      article.legacySlugs?.includes(slug),
+  );
   const index = articles.findIndex((article) => article.slug === slug);
   const prev = articles[index - 1];
   const next = articles[index + 1];
@@ -27,7 +32,9 @@ export default function ArticlePage() {
     setHtml(null);
     setContentStatus('loading');
 
-    fetch(import.meta.env.BASE_URL + 'articles/' + slug + '/content.html')
+    const contentSlug = meta.sourceSlug || meta.slug;
+
+    fetch(import.meta.env.BASE_URL + 'articles/' + contentSlug + '/content.html')
       .then((response) => {
         if (!response.ok) {
           throw new Error(`Article content returned ${response.status}`);
@@ -105,6 +112,10 @@ export default function ArticlePage() {
         ]}
       />
     );
+  }
+
+  if (slug !== meta.slug) {
+    return <Navigate to={`/articles/${meta.slug}`} replace />;
   }
 
   if (contentStatus === 'loading' || contentStatus === 'idle') {

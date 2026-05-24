@@ -1599,6 +1599,57 @@ Last updated: 2026-05-25
 - `NEXT-SLUG-URL-NORMALIZE-001`
 - `NOW-ARTICLE-STRUCTURE-CLAIMS-001`
 
+## Entry - 2026-05-25 (Public Slug Normalization)
+
+### Scope
+- Normalized canonical product slugs from camelCase to lowercase kebab-case.
+- Normalized canonical article slugs from title-case export names to lowercase kebab-case.
+- Added `legacySlugs` on products and articles so old public URLs still resolve inside the SPA.
+- Added `sourceSlug` on article metadata so current raw HTML content can stay in the existing title-case source folders while public URLs become canonical.
+- Added explicit Cloudflare 301 rules for old product and article URLs before the SPA fallback in `public/_redirects`.
+- Updated smoke coverage to exercise canonical product/article route shells and assert representative redirect rules exist.
+- Updated architecture, admin IA, handoff, roadmap, and task queue docs with the slug policy and redirect compatibility model.
+
+### Changed Files
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `public/_redirects`
+- `public/articles/index.json`
+- `public/articles/Curving-the-Future-Greening-the-Pipelines-Sustainable-Legacy/meta.json`
+- `public/articles/Debunking-the-Cost-Myth-by-Urblo-Bluestone-Blocks/meta.json`
+- `public/articles/Modular-Mastery-How-PrimeBlock-Core-Transformed-Aitken-College/meta.json`
+- `public/articles/Stone-Transformed-8-Ways-to-Redefine-Bluestones-Look-Feel/meta.json`
+- `scripts/agent-smoke.sh`
+- `src/data/productData.ts`
+- `src/pages/ArticlePage.tsx`
+- `src/pages/ProductDetailPage.tsx`
+- `src/scripts/generate-article-index.ts`
+- `src/service/ProductService.ts`
+- `src/types/article.ts`
+- `src/types/product.ts`
+
+### Verification Results
+- Article JSON metadata parse check: pass.
+- `npm run build`: pass. Build emits the existing Browserslist staleness notice; no JavaScript chunk-size warning returned.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass, including canonical product/article route shells and representative old-to-new redirect rule checks.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- Cloudflare 301 behavior still needs live Pages preview validation after Cloudflare project setup.
+- Raw article content folders are intentionally not renamed in this pass; `sourceSlug` keeps compatibility until structured article migration.
+
+### Next Handoff
+- `NEXT-PROJECTS-INTAKE-001`
+- `NOW-ARTICLE-STRUCTURE-CLAIMS-001`
+- `NEXT-UI-PARITY-001`
+
 ## Entry Template (Use for Every Future Session)
 
 ### Date

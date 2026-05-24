@@ -130,6 +130,13 @@ Route state contract:
 - Web manifest: `public/site.webmanifest`, referencing PNG icon assets instead of the retired temporary SVG favicon.
 - `react-helmet` still has a known strict-mode warning in development and should be replaced or upgraded during a later SEO/runtime cleanup.
 
+## Public Slug and Redirect Contract
+- Canonical public slugs use lowercase kebab-case across Projects, Stone Library, Products, and Articles.
+- Product records in `src/data/productData.ts` may retain `legacySlugs` for pre-normalization camelCase links; `ProductService.getBySlug()` resolves both canonical and legacy slugs, and `ProductDetailPage` redirects legacy matches to the canonical URL.
+- Article records in `public/articles/index.json` may retain `sourceSlug` and `legacySlugs` while the legacy raw HTML folders remain title-case export folders. `ArticlePage` resolves those aliases, fetches from `sourceSlug`, and redirects legacy matches to the canonical URL.
+- `public/_redirects` contains explicit Cloudflare 301 rules for the old product and article URLs before the SPA catch-all rule.
+- Future `/admin` slug editing should enforce lowercase kebab-case and preserve old public URLs as redirect aliases before changing published content slugs.
+
 ## Current Static Media Contract
 - P0 launch media lives under `public/media/launch` as a short-term controlled stopgap until Supabase Storage and Cloudflare media delivery are implemented.
 - Shared site logo path: `public/media/launch/identity/urblo-logo.png`, referenced by `src/data/siteChrome.ts` and `src/data/homepage.ts`.
@@ -210,6 +217,7 @@ Route state contract:
   - `Product`, `ProductModel`, `MaterialCategory`, `SelectedMaterials`, `OptionItem`
   - `OptionItem.imageState` may mark selector imagery as `ready` or `pending`.
 - Runtime note:
+  - Canonical product slugs are lowercase kebab-case; old camelCase product slugs are stored in `legacySlugs` for redirect compatibility.
   - `ProductDetailPage` body-stone selector options come from `StoneLibraryService.getStoneGroupOptionsForProducts()` so product configuration uses stone-group choices rather than variant-level entries.
   - Product detail pages initialize configured default material selections, show selected model/material feedback, expose a prefilled configuration enquiry `mailto:`, and mark missing selector imagery as pending.
 
@@ -236,11 +244,12 @@ Route state contract:
 ### Article Data Contract
 - Public data root: `public/articles`
 - Index manifest: `public/articles/index.json`
-- Detail content: `public/articles/<slug>/content.html`
+- Detail content: `public/articles/<sourceSlug-or-slug>/content.html`
 - Metadata type: `src/types/article.ts`
+- Canonical article slugs are lowercase kebab-case. `sourceSlug` keeps the legacy content folder name when the source HTML still lives in a title-case export folder, and `legacySlugs` preserves old public URLs for redirect compatibility.
 - Loading behavior:
   - list page fetches `${import.meta.env.BASE_URL}articles/index.json`
-  - detail page fetches index then HTML content
+  - detail page fetches index then HTML content from `sourceSlug || slug`
 - Cover images in the article manifest use local controlled paths under `public/media/launch/articles`.
 - Detail HTML passes through `prepareArticleHtml` in `src/lib/articleMedia.ts` before DOMPurify sanitization.
 - Runtime cleanup rewrites known email proxy image URLs to local article media, converts Google-hosted emoji images to text, removes Squarespace campaign wrappers where possible, and rewrites old product-PDF links to `/products`.

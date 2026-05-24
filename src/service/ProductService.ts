@@ -8,7 +8,11 @@ class ProductService {
     }
 
     static async getBySlug(slug: string): Promise<Product | undefined> {
-        return products.find(p => p.slug === slug);
+        return products.find(
+            (product) =>
+                product.slug === slug ||
+                product.legacySlugs?.includes(slug),
+        );
     }
 }
 

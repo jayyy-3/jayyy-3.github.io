@@ -27,6 +27,7 @@ export interface ProductModel {
 
 export interface Product {
     slug: string;         // 路由路径
+    legacySlugs?: string[];
     name: string;         // 产品名
     shortDesc?: string;   // 列表卡片描述
     models: ProductModel[];

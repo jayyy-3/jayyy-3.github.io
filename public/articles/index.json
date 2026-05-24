@@ -1,6 +1,10 @@
 [
   {
-    "slug": "Curving-the-Future-Greening-the-Pipelines-Sustainable-Legacy",
+    "slug": "curving-the-future-greening-the-pipelines-sustainable-legacy",
+    "sourceSlug": "Curving-the-Future-Greening-the-Pipelines-Sustainable-Legacy",
+    "legacySlugs": [
+      "Curving-the-Future-Greening-the-Pipelines-Sustainable-Legacy"
+    ],
     "title": "Curving the Future: Greening the Pipeline’s Sustainable Legacy",
     "date": "2024-04-28",
     "author": "Natalie",
@@ -12,7 +16,11 @@
     ]
   },
   {
-    "slug": "Debunking-the-Cost-Myth-by-Urblo-Bluestone-Blocks",
+    "slug": "debunking-the-cost-myth-by-urblo-bluestone-blocks",
+    "sourceSlug": "Debunking-the-Cost-Myth-by-Urblo-Bluestone-Blocks",
+    "legacySlugs": [
+      "Debunking-the-Cost-Myth-by-Urblo-Bluestone-Blocks"
+    ],
     "title": "Debunking the Cost Myth by Urblo Bluestone Blocks",
     "date": "2024-04-11",
     "author": "Natalie",
@@ -24,7 +32,11 @@
     ]
   },
   {
-    "slug": "Modular-Mastery-How-PrimeBlock-Core-Transformed-Aitken-College",
+    "slug": "modular-mastery-how-primeblock-core-transformed-aitken-college",
+    "sourceSlug": "Modular-Mastery-How-PrimeBlock-Core-Transformed-Aitken-College",
+    "legacySlugs": [
+      "Modular-Mastery-How-PrimeBlock-Core-Transformed-Aitken-College"
+    ],
     "title": "Modular Mastery: How PrimeBlock Core Transformed Aitken College",
     "date": "2024-06-10",
     "author": "Natalie",
@@ -36,7 +48,11 @@
     ]
   },
   {
-    "slug": "Stone-Transformed-8-Ways-to-Redefine-Bluestones-Look-Feel",
+    "slug": "stone-transformed-8-ways-to-redefine-bluestones-look-feel",
+    "sourceSlug": "Stone-Transformed-8-Ways-to-Redefine-Bluestones-Look-Feel",
+    "legacySlugs": [
+      "Stone-Transformed-8-Ways-to-Redefine-Bluestones-Look-Feel"
+    ],
     "title": "Stone Transformed: 8 Ways to Redefine Bluestone’s Look & Feel",
     "date": "2024-05-16",
     "author": "Natalie",
