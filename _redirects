@@ -1,3 +1,13 @@
 # Cloudflare Pages SPA fallback for React Router clean URLs.
 # API requests are handled by Pages Functions when the matching /functions/api routes exist.
+/products/primeBlock /products/prime-block 301
+/products/primeLume /products/prime-lume 301
+/products/terraLine /products/terra-line 301
+/products/strataBench /products/strata-bench 301
+/products/primeCurve /products/prime-curve 301
+/products/terraArc /products/terra-arc 301
+/articles/Curving-the-Future-Greening-the-Pipelines-Sustainable-Legacy /articles/curving-the-future-greening-the-pipelines-sustainable-legacy 301
+/articles/Debunking-the-Cost-Myth-by-Urblo-Bluestone-Blocks /articles/debunking-the-cost-myth-by-urblo-bluestone-blocks 301
+/articles/Modular-Mastery-How-PrimeBlock-Core-Transformed-Aitken-College /articles/modular-mastery-how-primeblock-core-transformed-aitken-college 301
+/articles/Stone-Transformed-8-Ways-to-Redefine-Bluestones-Look-Feel /articles/stone-transformed-8-ways-to-redefine-bluestones-look-feel 301
 /* /index.html 200
