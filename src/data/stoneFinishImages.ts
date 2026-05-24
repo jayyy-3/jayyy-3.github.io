@@ -187,19 +187,19 @@ const stoneFinishImages: Record<string, VariantImageMap> = {
     },
     'ivory-sand': {
         default: productImage(
-            'Sandstone/Sandstone_Sawn_Urblo.jpeg',
+            'Ivory Sand/Ivory Sand_Sawn_Urblo.jpeg',
             'Ivory Sand honed finish',
         ),
         honed: productImage(
-            'Sandstone/Sandstone_Sawn_Urblo.jpeg',
+            'Ivory Sand/Ivory Sand_Sawn_Urblo.jpeg',
             'Ivory Sand honed finish',
         ),
         bush_hammered: productImage(
-            'Sandstone/Sandstone_Bush-hammered_Urblo.jpeg',
+            'Ivory Sand/Ivory Sand_Bush-hammered_Urblo.jpeg',
             'Ivory Sand bush hammered finish',
         ),
         sparrow_peck: productImage(
-            'Sandstone/Sandstone_Sparrow_Urblo.jpeg',
+            'Ivory Sand/Ivory Sand_Sparrow_Urblo.jpeg',
             'Ivory Sand sparrow peck finish',
         ),
     },
@@ -210,28 +210,102 @@ const stoneFinishImages: Record<string, VariantImageMap> = {
         },
     },
     'honey-comb': {
-        default: {
-            imageUrl: '/media/launch/stone-library/fallbacks/blueocean-sawn.jpg',
-            alt: 'Honey Comb stone surface',
-        },
+        default: productImage(
+            'Honey Comb/Honey Comb_Sawn_Urblo.jpeg',
+            'Honey Comb sawn finish',
+        ),
+        sawn: productImage(
+            'Honey Comb/Honey Comb_Sawn_Urblo.jpeg',
+            'Honey Comb sawn finish',
+        ),
+        honed: productImage(
+            'Honey Comb/Honey Comb_Honed_Urblo.jpeg',
+            'Honey Comb honed finish',
+        ),
+    },
+    'golden-crust--light': {
+        default: productImage(
+            'Golden Crust/Golden Crust Light_Flamed_Urblo.jpeg',
+            'Golden Crust Light flamed finish',
+        ),
+        flamed: productImage(
+            'Golden Crust/Golden Crust Light_Flamed_Urblo.jpeg',
+            'Golden Crust Light flamed finish',
+        ),
+        sawn: productImage(
+            'Golden Crust/Golden Crust Light_Sawn_Urblo.jpeg',
+            'Golden Crust Light sawn finish',
+        ),
+        honed: productImage(
+            'Golden Crust/Golden Crust Light_Honed_Urblo.jpeg',
+            'Golden Crust Light honed finish',
+        ),
+        polished: productImage(
+            'Golden Crust/Golden Crust Light_Polished_Urblo.jpeg',
+            'Golden Crust Light polished finish',
+        ),
+    },
+    'golden-crust--dark': {
+        default: productImage(
+            'Golden Crust/Golden Crust Dark_Flamed_Urblo.jpeg',
+            'Golden Crust Dark flamed finish',
+        ),
+        flamed: productImage(
+            'Golden Crust/Golden Crust Dark_Flamed_Urblo.jpeg',
+            'Golden Crust Dark flamed finish',
+        ),
+        sawn: productImage(
+            'Golden Crust/Golden Crust Dark_Sawn_Urblo.jpeg',
+            'Golden Crust Dark sawn finish',
+        ),
+        honed: productImage(
+            'Golden Crust/Golden Crust Dark_Honed_Urblo.jpeg',
+            'Golden Crust Dark honed finish',
+        ),
+        polished: productImage(
+            'Golden Crust/Golden Crust Dark_Polished_Urblo.jpeg',
+            'Golden Crust Dark polished finish',
+        ),
+    },
+    'tan-brown': {
+        default: productImage(
+            'Tan Brown/Tan Brown_Flamed_Urblo.jpeg',
+            'Tan Brown flamed finish',
+        ),
+        flamed: productImage(
+            'Tan Brown/Tan Brown_Flamed_Urblo.jpeg',
+            'Tan Brown flamed finish',
+        ),
+        sawn: productImage(
+            'Tan Brown/Tan Brown_Sawn_Urblo.jpeg',
+            'Tan Brown sawn finish',
+        ),
+        honed: productImage(
+            'Tan Brown/Tan Brown_Honed_Urblo.jpeg',
+            'Tan Brown honed finish',
+        ),
+        polished: productImage(
+            'Tan Brown/Tan Brown_Polished_Urblo.jpeg',
+            'Tan Brown polished finish',
+        ),
     },
     'tuscany': {
-        default: {
-            imageUrl: '/media/launch/stone-library/fallbacks/tuscany.jpg',
-            alt: 'Tuscany stone surface',
-        },
+        default: productImage(
+            'Tuscany/Tuscany_Vein Cut_Urblo.jpeg',
+            'Tuscany stone surface',
+        ),
     },
     'tuscany--vein-cut': {
-        default: {
-            imageUrl: '/media/launch/stone-library/fallbacks/tuscany.jpg',
-            alt: 'Tuscany vein cut surface',
-        },
+        default: productImage(
+            'Tuscany/Tuscany_Vein Cut_Urblo.jpeg',
+            'Tuscany vein cut surface',
+        ),
     },
     'tuscany--cross-cut': {
-        default: {
-            imageUrl: '/media/launch/stone-library/fallbacks/tuscany-cross-cut.jpg',
-            alt: 'Tuscany cross cut surface',
-        },
+        default: productImage(
+            'Tuscany/Tuscany_Cross Cut_Urblo.jpeg',
+            'Tuscany cross cut surface',
+        ),
     },
 };
 

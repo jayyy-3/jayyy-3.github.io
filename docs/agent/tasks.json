@@ -445,7 +445,7 @@
       ],
       "notes": [
         "2026-05-22: Fast-track coverage audit confirms 31 finish states have finish-specific mapped imagery, 16 finish states use controlled local default/fallback imagery, and 22 finish states are true missing-image placeholders pending approved source assets.",
-        "Golden Crust, Harcourt, and Tan Brown remain under NEXT-STONELIB-IMG-001 for approved HD image sourcing.",
+        "2026-05-25: Golden Crust, Tan Brown, Honey Comb, Ivory Sand, and Tuscany current-site shared-drive candidates were handled under NEXT-STONELIB-IMG-001. Harcourt remains placeholder/TBC and Blueocean remains a controlled fallback because matching current-site shared-drive source images were not found.",
         "Juparana and Zen Grey secondary source frames remain under NEXT-STONELIB-IMG-002 for presentation design and implementation."
       ],
       "acceptance": [
@@ -628,18 +628,31 @@
     },
     {
       "id": "NEXT-STONELIB-IMG-001",
-      "status": "next",
+      "status": "done",
       "priority": 12.2,
       "summary": "Complete Stone Library finish imagery coverage after fast-track ingestion.",
       "files": [
+        "data/Product/Golden Crust",
+        "data/Product/Honey Comb",
+        "data/Product/Ivory Sand",
+        "data/Product/Tan Brown",
+        "data/Product/Tuscany",
         "docs/ASSET_MIGRATION_AUDIT.md",
+        "docs/ARCHITECTURE.md",
+        "docs/HANDOFF.md",
+        "docs/NEXT_STEPS.md",
+        "docs/WORKLOG.md",
+        "docs/agent/tasks.json",
+        "public/media/launch/stone-library/fallbacks",
         "src/data/stoneFinishImages.ts",
         "src/service/StoneLibraryService.ts"
       ],
       "notes": [
-        "2026-05-22 full-site QA confirmed Golden Crust, Harcourt, and Tan Brown still expose visible Image coming soon placeholders in Stone Library, and product Body Stone selectors can surface placeholder/data images for stones without approved imagery.",
+        "2026-05-22 full-site QA previously confirmed Golden Crust, Harcourt, and Tan Brown visible placeholder coverage before shared-drive mapping.",
         "2026-05-25 current-site-only shared-drive audit is complete. Use the audit list in docs/ASSET_MIGRATION_AUDIT.md before changing runtime mappings.",
-        "Map approved candidates for Golden Crust Light/Dark, Tan Brown, Honey Comb, and Tuscany where appropriate; review Ivory Sand honed because the current Sandstone-named file differs from the shared-drive Ivory Sand source; keep Blueocean and Harcourt unresolved unless Urblo supplies matching source imagery."
+        "2026-05-25: Normalized and mapped shared-drive candidates for Golden Crust Light/Dark, Tan Brown, Honey Comb, Ivory Sand, and Tuscany.",
+        "2026-05-25: Tuscany remains variant-level by design: Vein Cut and Cross Cut use cut-level default images, not finish-specific honed/polished/sandblasted images.",
+        "2026-05-25: Blueocean remains on the controlled fallback and Harcourt remains placeholder/TBC because no matching current-site shared-drive source images were found."
       ],
       "acceptance": [
         "All priority stones/finishes display intended HD images in list and detail views.",

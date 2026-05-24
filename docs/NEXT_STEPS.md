@@ -48,7 +48,6 @@ Source of truth: `docs/agent/tasks.json`.
 ## Next
 - `NEXT-ADMIN-IA-ACCESS-001`: define executable admin IA, access states, and module rollout sequence before building CRUD.
 - `NEXT-UI-PARITY-001`: bring Home, Our Story, Articles, and Contact Us toward approved visual references.
-- `NEXT-STONELIB-IMG-001`: complete Stone Library HD finish image coverage using the completed current-site-only shared-drive audit list.
 - `NEXT-STONELIB-IMG-002`: decide and implement secondary finish frame behavior.
 - `NEXT-STONELIB-DATA-001`: replace generic finish behavior text with approved notes.
 - `NEXT-PRODUCT-DETAIL-CONVERSION-001`: make product details behave like credible conversion/configuration pages.
@@ -83,7 +82,8 @@ Source of truth: `docs/agent/tasks.json`.
 - `LATER-PERF-001`: route-level lazy loading is implemented, initial app shell JS is reduced, and the previous `>500kB` JavaScript chunk warning is resolved.
 - `LATER-QA-001`: `npm run agent:smoke` now verifies key route shells, article index availability, and critical CTA targets with actionable names.
 - `DONE-HOMEPAGE-STONE-SHOWCASE-REMOVE-001`: homepage Browse by stone type section and unused local showcase images were removed by request; article/mobile and product/detail polish discovered during the full-site QA pass is tracked in the active queue.
-- `NEXT-STONELIB-DRIVE-IMAGE-AUDIT-001`: completed current-website-only audit of the Saistone Google Drive `Urblo Digital Stone Library` source. Drive-only products are excluded for now; `NEXT-STONELIB-IMG-001` should map the identified Golden Crust, Tan Brown, Honey Comb, and Tuscany candidates, review Ivory Sand honed, and keep Blueocean/Harcourt unresolved unless source images are supplied.
+- `NEXT-STONELIB-DRIVE-IMAGE-AUDIT-001`: completed current-website-only audit of the Saistone Google Drive `Urblo Digital Stone Library` source. Drive-only products are excluded for now.
+- `NEXT-STONELIB-IMG-001`: normalized and mapped current-site shared-drive images for Golden Crust, Tan Brown, Honey Comb, Ivory Sand, and Tuscany. Blueocean remains a controlled fallback and Harcourt remains placeholder/TBC because no matching current-site source imagery was found.
 
 Older completion details live in `docs/WORKLOG.md`.
 

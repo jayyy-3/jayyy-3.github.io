@@ -67,27 +67,25 @@ These are visible content quality and performance items.
 | Our Story portraits and banner | Local `public/media/launch/our-story` plus controlled route banner | Controlled local stopgap in place; old `carbon-neutral-banner.jpg` tested as 404 on 2026-05-22. | Move to Supabase media records during CMS migration. |
 | Remote Stone Library finish fallbacks | Local `public/media/launch/stone-library/fallbacks` assets | Controlled local stopgap in place. | Replace with approved HD finish assets during full Stone Library image coverage. |
 
-### Stone Library Image Coverage - 2026-05-22
-The fast-track pass confirms the provided primary finish assets are already wired through `src/data/stoneFinishImages.ts` and remain independent of the old WordPress site.
+### Stone Library Image Coverage - 2026-05-25
+The fast-track pass and current-site shared-drive follow-up confirm the approved current website source assets are wired through `src/data/stoneFinishImages.ts` and remain independent of the old WordPress site.
 
 Current runtime coverage across available/TBC Stone Library finish states:
 
 | Coverage type | Count | Meaning |
 |---|---:|---|
-| Finish-specific image | 31 | A matching finish photo is mapped from `data/Product` and appears on list/detail where that stone/finish is selected. |
-| Controlled default/fallback image | 16 | A local fallback image exists for the stone/variant, but not for each individual finish. |
-| True missing image placeholder | 22 | No approved source image is committed/mapped in the repo yet, so the UI must not pretend to show a real stone finish. |
+| Finish-specific image | 45 | A matching finish photo is mapped from `data/Product` and appears on list/detail where that stone/finish is selected. |
+| Controlled default/fallback image | 14 | A local fallback or variant-level image exists for the stone/variant, but not for each individual finish. |
+| True missing image placeholder | 10 | No approved source image is committed/mapped in the repo yet, so the UI must not pretend to show a real stone finish. |
 
-Finish-specific coverage currently includes Alpine White, Angola Black, Ivory Sand, Juparana, New Grey, Steel Blue, and Zen Grey. Juparana and Zen Grey also have secondary frames in the source asset folder, but the secondary-frame presentation is intentionally left to `NEXT-STONELIB-IMG-002`.
+Finish-specific coverage currently includes Alpine White, Angola Black, Golden Crust Light and Dark, Honey Comb, Ivory Sand, Juparana, New Grey, Steel Blue, Tan Brown, and Zen Grey. Juparana and Zen Grey also have secondary frames in the source asset folder, but the secondary-frame presentation is intentionally left to `NEXT-STONELIB-IMG-002`.
 
-Controlled default/fallback coverage currently includes Blueocean, Honey Comb, and Tuscany. These are launch-safe local fallbacks, not final finish-by-finish HD coverage.
+Controlled default/fallback coverage currently includes Blueocean and Tuscany. Blueocean remains a controlled fallback because no matching shared-drive source exists in the current-site scope. Tuscany uses cut-level source images for Vein Cut and Cross Cut, but those images are intentionally treated as variant-level defaults rather than finish-specific honed/polished/sandblasted photos.
 
-Visible placeholder groups before the shared-drive audit:
-- Golden Crust Light and Dark: flamed, sawn, honed, polished.
+Visible placeholder groups after current-site source mapping:
 - Harcourt: all TBC finishes.
-- Tan Brown: flamed, sawn, honed, polished.
 
-This is the correct customer-safe posture for launch preparation: use real supplied imagery where available, use controlled local fallbacks where explicitly known, and keep visible placeholders only where Urblo still needs approved source images or explicit approval to publish shared-drive candidates.
+This is the correct customer-safe posture for launch preparation: use real supplied imagery where available, use controlled local fallbacks where explicitly known, and keep visible placeholders only where Urblo still needs approved source images.
 
 ### Temporary Stone Library Source Folder
 The temporary source of truth for Stone Library imagery is the Saistone Google Drive shared folder named `Urblo Digital Stone Library` under the shared-drive path ALVIN then Urblo. Do not commit machine-specific local absolute paths for this source.
@@ -114,9 +112,9 @@ Current-website source status:
 | Status | Stone groups / variants | Action |
 |---|---|---|
 | Current mapped files match shared drive | Alpine White, Angola Black, Juparana primary frames, New Grey, Steel Blue, Zen Grey primary frames, Ivory Sand bush hammered and sparrow peck | No replacement needed before Supabase/Cloudflare setup. |
-| Current mapped file needs review | Ivory Sand honed currently maps `Sandstone/Sandstone_Sawn_Urblo.jpeg`, while the shared drive has `Ivory Sand/Ivory Sand_Sawn_Urblo.jpeg` with a different checksum. | Visually review and either remap to the shared-drive file or confirm the existing Sandstone-named file remains the approved source. |
-| Placeholder but source candidate exists | Golden Crust Light and Dark, Tan Brown | Copy normalized source images into controlled media and map finish-specific runtime images under `NEXT-STONELIB-IMG-001`. |
-| Controlled fallback but source candidate exists | Honey Comb; Tuscany vein cut; Tuscany cross cut | Replace generic fallback usage with shared-drive candidates. For Tuscany, treat each cut image as a variant-level source unless Urblo supplies finish-specific honed/polished/sandblasted photos. |
+| Current mapped file reviewed and remapped | Ivory Sand honed previously mapped `Sandstone/Sandstone_Sawn_Urblo.jpeg`, while the shared drive had `Ivory Sand/Ivory Sand_Sawn_Urblo.jpeg` with a different checksum. | Visual review completed; runtime now uses the shared-drive Ivory Sand source. |
+| Placeholder but source candidate exists | Golden Crust Light and Dark, Tan Brown | Completed under `NEXT-STONELIB-IMG-001`; finish-specific images are now mapped. |
+| Controlled fallback but source candidate exists | Honey Comb; Tuscany vein cut; Tuscany cross cut | Honey Comb now uses finish-specific images. Tuscany now uses variant-level source images and still waits for finish-specific photos if honed/polished/sandblasted need to be visually distinct. |
 | No source candidate in current shared-drive scope | Blueocean; Harcourt | Keep current controlled fallback or placeholder behavior unless Urblo supplies approved source imagery. Harcourt remains TBC. |
 
 Current-website update list for `NEXT-STONELIB-IMG-001`:
@@ -144,6 +142,21 @@ Current-website update list for `NEXT-STONELIB-IMG-001`:
 | No matching shared-drive source | Harcourt | all TBC finish states | Placeholder | Keep placeholder/TBC state until approved Harcourt source imagery is supplied. |
 
 Excluded from this launch audit by scope: Cloud Whisper, Mica Grey, Romeo's Vow, Rosy Mist, and Verdant Grey shared-drive folders because those products are not currently on the website Stone Library.
+
+### Stone Library Current-Site Image Mapping - 2026-05-25
+`NEXT-STONELIB-IMG-001` normalized and mapped the current-site shared-drive candidates into `data/Product`:
+
+| Stone / variant | Runtime result |
+|---|---|
+| Golden Crust Light and Dark | Flamed, sawn, honed, and polished now use finish-specific images. |
+| Honey Comb | Sawn and honed now use finish-specific images instead of the Blueocean fallback. |
+| Ivory Sand | Runtime paths now use the shared-drive `Ivory Sand` filenames instead of the old `Sandstone` file paths; the honed image uses the shared-drive candidate after visual review. |
+| Tan Brown | Flamed, sawn, honed, and polished now use finish-specific images. |
+| Tuscany Vein Cut and Cross Cut | Each cut now uses its shared-drive variant-level image as the default image; finish tabs still share the cut-level image because no finish-specific photos were supplied. |
+| Blueocean | Still uses the controlled `blueocean-sawn` fallback because no matching current-site shared-drive source was found. |
+| Harcourt | Still uses placeholder/TBC imagery because no matching current-site shared-drive source was found. |
+
+The obsolete `Sandstone` image folder and unused Tuscany fallback files were removed so the build does not carry duplicate Stone Library assets.
 
 ### P2 - Migrate Through CMS Cleanup
 These should not block infrastructure setup but must be cleaned before the article system is considered launch-quality.

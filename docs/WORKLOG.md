@@ -1389,6 +1389,50 @@ Last updated: 2026-05-25
 - `NEXT-ADMIN-IA-ACCESS-001`
 - `NOW-ROUTE-ERROR-STATES-001`
 
+## Entry - 2026-05-25 (Stone Library Current-Site Image Mapping)
+
+### Scope
+- Normalized current-site shared-drive Stone Library candidates into `data/Product`.
+- Mapped Golden Crust Light/Dark, Tan Brown, and Honey Comb to finish-specific runtime images.
+- Replaced old Ivory Sand `Sandstone` file paths with shared-drive `Ivory Sand` image paths after visual review.
+- Mapped Tuscany Vein Cut and Cross Cut to variant-level default images only, avoiding false finish-specific claims.
+- Removed obsolete old Sandstone-named assets and unused Tuscany fallback files; Blueocean keeps the controlled fallback and Harcourt keeps TBC placeholders.
+
+### Changed Files
+- `AGENTS.md`
+- `data/Product/Golden Crust`
+- `data/Product/Honey Comb`
+- `data/Product/Ivory Sand`
+- `data/Product/Tan Brown`
+- `data/Product/Tuscany`
+- `docs/ARCHITECTURE.md`
+- `docs/ASSET_MIGRATION_AUDIT.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `public/media/launch/stone-library/fallbacks`
+- `src/data/stoneFinishImages.ts`
+
+### Verification Results
+- `npm run build`: pass. Build emits the existing Browserslist staleness notice; no JavaScript chunk-size warning returned.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- Browser QA: pass on `http://127.0.0.1:5173/stone-library`, `/stone-library/golden-crust`, `/stone-library/tan-brown`, `/stone-library/honey-comb`, and `/stone-library/tuscany`. Golden Crust Dark and Tuscany Cross Cut variant switches update to mapped images; only the known React Helmet strict-mode warning appeared in console logs.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- Blueocean still needs approved finish imagery if Urblo wants more than the controlled fallback.
+- Harcourt still needs approved source imagery before its TBC placeholder state can be removed.
+- Tuscany still needs finish-specific photos before honed, polished, and sandblasted can be visually distinct.
+
+### Next Handoff
+- `NEXT-ADMIN-IA-ACCESS-001`
+- `NOW-ROUTE-ERROR-STATES-001`
+- `NEXT-STONELIB-IMG-002`
+
 ## Entry Template (Use for Every Future Session)
 
 ### Date

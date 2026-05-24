@@ -79,7 +79,7 @@ Before declaring implementation complete, verify all checks below:
 - Current runtime remains static/file-backed until the new launch tasks are implemented.
 - `NOW-ADMIN-CMS-001` is an umbrella objective, not a single executable implementation task; use the smaller admin IA/auth/CRUD/media/leads tasks in `docs/agent/tasks.json`.
 - Stone Library migration is complete: old `/materials*` route family has been removed and replaced with `/stone-library` plus `/stone-library/:stoneGroupId`.
-- `NEXT-STONELIB-DRIVE-IMAGE-AUDIT-001` is complete for current website stones only; use the update list in `docs/ASSET_MIGRATION_AUDIT.md` before final Stone Library HD image coverage.
+- `NEXT-STONELIB-DRIVE-IMAGE-AUDIT-001` and `NEXT-STONELIB-IMG-001` are complete for current website stones only; Drive-only products remain out of scope until the client decides to add them.
 - Contact route is declared at `/contact`; shared header/footer navigation points to declared routes, with Sample Request remaining a `mailto:` fallback until `NOW-FORMS-SUPABASE-001` is implemented.
 - Last runtime gates were measured on 2026-05-22 and were green (`npm run build`, `npm run lint`, `npx tsc -b`, `npm run agent:smoke`).
 - Route-level code splitting is in place and the previous `>500kB` chunk warning is resolved; continue monitoring bundle output as features are added.
