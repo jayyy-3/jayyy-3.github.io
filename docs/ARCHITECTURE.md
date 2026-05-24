@@ -9,6 +9,7 @@ Last updated: 2026-05-25
 - Launch target: Cloudflare Pages static frontend, Cloudflare Pages Functions API endpoints, Supabase Postgres/Auth/Storage, and an Urblo-owned admin interface for content operations.
 - Planning source: `docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md`.
 - Supabase schema design source: `docs/SUPABASE_SCHEMA.md`.
+- Admin IA/access design source: `docs/ADMIN_IA_ACCESS.md`.
 
 ## Runtime Stack
 - Bundler/dev server: Vite 6
@@ -38,6 +39,7 @@ Last updated: 2026-05-25
   - See `docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md` for the component-level cost table.
 - Schema planning:
   - First production schema plan lives in `docs/SUPABASE_SCHEMA.md`.
+  - First `/admin` route, access-state, role, module rollout, and field-ownership contract lives in `docs/ADMIN_IA_ACCESS.md`.
   - Runtime is not considered migrated until migrations, RLS policies, seed scripts, admin UI, and API contracts are implemented and verified.
 
 ## Deployment and Build Contract
@@ -255,6 +257,9 @@ Current route risk: the catch-all still renders Home for unknown URLs. `NOW-ROUT
   - Enquiries and sample requests store submitted fields, source route, Turnstile result, notification status, admin status, owner, and internal notes.
 - Admin audit:
   - Admin mutations should be attributable through audit fields or audit-event records.
+- Admin IA/access:
+  - `/admin` route, login, unauthorized, loading, module, settings, and audit states are defined in `docs/ADMIN_IA_ACCESS.md`.
+  - The admin CMS must not ship fake production auth before Supabase Auth, `admin_profiles`, RLS, Storage policies, form endpoints, and secrets are available.
 - Access control:
   - Public reads expose only published content.
   - Admin writes require Supabase Auth.

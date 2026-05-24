@@ -1,6 +1,6 @@
 # Urblo Cloudflare + Supabase Launch Plan
 
-Last updated: 2026-05-22
+Last updated: 2026-05-25
 
 ## Decision
 The launch target is Cloudflare Pages for the public website, Cloudflare Pages Functions for small API endpoints, Supabase for the operational database/auth/storage layer, and a Urblo-owned admin interface for customer-maintained content.
@@ -38,6 +38,7 @@ After launch:
 - Database: Supabase Postgres.
 - Auth: Supabase Auth for the admin area.
 - Admin UI: Urblo-owned `/admin` interface, not raw Supabase Studio for customers.
+- Admin IA/access contract: `docs/ADMIN_IA_ACCESS.md` defines the route map, role behavior, module rollout order, and field ownership model before CRUD implementation.
 - Structured content: Projects, Stone Library, Products, Articles, and site settings live in Supabase.
 - Forms: Contact and Sample Request write to Supabase and send notification email.
 - Bot protection: Cloudflare Turnstile on public forms.
@@ -124,6 +125,11 @@ Validation:
 
 ### 3. Admin CMS
 Outcome: Urblo can maintain the site without changing code.
+
+Implementation contract:
+- Build against `docs/ADMIN_IA_ACCESS.md`.
+- Do not expose a fake production `/admin` experience before Supabase Auth, admin profile checks, RLS, and required secrets exist.
+- Keep viewer/editor/admin/owner behavior aligned with the admin IA/access role matrix.
 
 First release scope:
 - Login/logout.

@@ -137,10 +137,11 @@
     },
     {
       "id": "NEXT-ADMIN-IA-ACCESS-001",
-      "status": "next",
+      "status": "done",
       "priority": 5.1,
       "summary": "Define executable admin IA, access states, and module rollout sequence before building CRUD.",
       "files": [
+        "docs/ADMIN_IA_ACCESS.md",
         "docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md",
         "docs/SUPABASE_SCHEMA.md",
         "docs/ARCHITECTURE.md",
@@ -152,7 +153,9 @@
         "src/App.tsx"
       ],
       "notes": [
-        "This is the no-secret admin task to run before Supabase credentials are available. It should turn the admin umbrella into concrete route, permission, and module contracts without pretending backend auth exists."
+        "This is the no-secret admin task to run before Supabase credentials are available. It turns the admin umbrella into concrete route, permission, and module contracts without pretending backend auth exists.",
+        "2026-05-25: Completed in docs/ADMIN_IA_ACCESS.md with route map, access states, role behavior, module rollout sequence, field ownership model, dashboard health checks, and implementation boundaries.",
+        "2026-05-25: No runtime /admin route was added because Supabase Auth, admin profiles, RLS, Storage policies, form endpoints, and secrets are still unavailable."
       ],
       "acceptance": [
         "Admin route map is explicit, including unauthenticated, authenticated, unauthorized, loading, and draft/published states.",
@@ -180,7 +183,8 @@
         "src/App.tsx"
       ],
       "notes": [
-        "Blocked until Supabase project URL, anon key, service-role handling plan, and admin user policy are available."
+        "Blocked until Supabase project URL, anon key, service-role handling plan, and admin user policy are available.",
+        "Use docs/ADMIN_IA_ACCESS.md for the protected admin shell route map, access states, and role behavior once Supabase credentials are available."
       ],
       "acceptance": [
         "Admin shell route is protected by Supabase Auth.",
@@ -214,7 +218,8 @@
         "src/pages/ArticlePage.tsx"
       ],
       "notes": [
-        "Blocked until the admin auth/RLS shell and Supabase content tables are available. Article editing must use structured blocks, not raw newsletter HTML."
+        "Blocked until the admin auth/RLS shell and Supabase content tables are available. Article editing must use structured blocks, not raw newsletter HTML.",
+        "Use docs/ADMIN_IA_ACCESS.md for module sequencing and field ownership when implementing Projects, Stone Library, Products, and Articles CRUD."
       ],
       "acceptance": [
         "Admin users can draft, publish, edit, archive, and delete Projects, Stone Library records, Products, and Articles.",
@@ -247,7 +252,8 @@
         "src/pages/ContactPage.tsx"
       ],
       "notes": [
-        "Blocked until Supabase Storage, form submission endpoints, Turnstile verification, and transactional email secrets are available."
+        "Blocked until Supabase Storage, form submission endpoints, Turnstile verification, and transactional email secrets are available.",
+        "Use docs/ADMIN_IA_ACCESS.md for lead inbox, media library, status, export, and role behavior when Supabase Storage/forms/email secrets are available."
       ],
       "acceptance": [
         "Admin users can manage uploaded media records with source, alt text, usage, and publish status.",

@@ -40,7 +40,7 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 - Contact and Sample Request remain mailto/local-only in current runtime.
 - Unknown URLs still render the homepage through the catch-all route; `NOW-ROUTE-ERROR-STATES-001` tracks a proper 404/not-found state.
 - Projects, Stone Library, Products, and Articles are still file-backed rather than customer-editable.
-- The admin CMS does not exist yet. `NOW-ADMIN-CMS-001` is an umbrella objective; use `NEXT-ADMIN-IA-ACCESS-001` first, then the blocked auth/RLS, content CRUD, media, and lead-management child tasks when Supabase access is available.
+- The admin CMS does not exist yet. `NOW-ADMIN-CMS-001` is an umbrella objective; the no-secret admin IA/access contract is complete in `docs/ADMIN_IA_ACCESS.md`, and the blocked auth/RLS, content CRUD, media, and lead-management child tasks should use that contract when Supabase access is available.
 - P0/P1 old WordPress media references in runtime data have been migrated to controlled local assets under `public/media/launch`; article covers and known detail images now have a local runtime stopgap under `public/media/launch/articles`.
 - Stone Library current-site shared-drive image mapping is complete for Golden Crust, Tan Brown, Honey Comb, Ivory Sand, and Tuscany. Blueocean remains on the controlled fallback and Harcourt remains placeholder/TBC because no matching current-site shared-drive source was found.
 - Raw article newsletter HTML remains source material and still needs Supabase structured-block migration, claim-safety review, mobile-safe templates, and full editorial cleanup before the article system is considered final.
@@ -56,7 +56,7 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 - React Helmet still emits an existing strict-mode lifecycle warning in dev console.
 
 ## Next Recommended Action
-If account access is unavailable, start with `NEXT-ADMIN-IA-ACCESS-001` for non-secret admin planning, `NOW-ROUTE-ERROR-STATES-001`, `NEXT-PRODUCT-DETAIL-CONVERSION-001`, or `NEXT-PROJECTS-INTAKE-001` for runtime polish. Start `NOW-FORMS-SUPABASE-001`, `NOW-ADMIN-AUTH-RLS-001`, and `NOW-CLOUDFLARE-PAGES-DEPLOY-001` only when the required Supabase, Turnstile/email, or Cloudflare access is available.
+If account access is unavailable, start with `NOW-ROUTE-ERROR-STATES-001`, `NEXT-PRODUCT-DETAIL-CONVERSION-001`, or `NEXT-PROJECTS-INTAKE-001` for runtime polish. Start `NOW-FORMS-SUPABASE-001`, `NOW-ADMIN-AUTH-RLS-001`, and `NOW-CLOUDFLARE-PAGES-DEPLOY-001` only when the required Supabase, Turnstile/email, or Cloudflare access is available.
 
 ## Guardrails
 - Use repo-root relative paths in committed docs.

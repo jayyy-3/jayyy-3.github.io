@@ -1,6 +1,6 @@
 # Urblo Supabase Schema Plan
 
-Last updated: 2026-05-22
+Last updated: 2026-05-25
 
 ## Purpose
 This document defines the first production Supabase data model for the Urblo website launch.
@@ -41,6 +41,7 @@ Most editable content tables should include:
 | `archived_at` | `timestamptz` | Archive timestamp where relevant. |
 
 ## Admin and Access Tables
+The `/admin` route map, access states, role behavior, module rollout order, and first-pass field ownership model are defined in `docs/ADMIN_IA_ACCESS.md`. This schema plan defines the tables that support that contract.
 
 ### `admin_profiles`
 Purpose: maps Supabase Auth users to Urblo admin roles.

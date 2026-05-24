@@ -19,16 +19,17 @@ The harness has two separate creative authorities:
 7. Read design contract: `docs/DESIGN.md`.
 8. Read technical facts and contracts: `docs/ARCHITECTURE.md`.
 9. Read human roadmap: `docs/NEXT_STEPS.md`.
-10. Read latest session evidence when needed: `docs/WORKLOG.md`.
-11. For docs/harness changes, run:
+10. Read admin IA/access contract when working on `/admin`: `docs/ADMIN_IA_ACCESS.md`.
+11. Read latest session evidence when needed: `docs/WORKLOG.md`.
+12. For docs/harness changes, run:
    - `npm run agent:check`
    - `git diff --check`
-12. For runtime changes, run quality gates from repo root in this order:
+13. For runtime changes, run quality gates from repo root in this order:
    - `npm run build`
    - `npm run lint`
    - `npx tsc -b`
    - `npm run agent:smoke`
-13. Treat any runtime gate failure as blocking unless `docs/agent/tasks.json` explicitly defines a temporary exception.
+14. Treat any runtime gate failure as blocking unless `docs/agent/tasks.json` explicitly defines a temporary exception.
 
 ## Canonical Conflict Precedence
 - Code reality wins over stale docs. If docs conflict with implemented behavior, verify code reality, update docs, then add remediation tasks if the behavior itself is wrong.
@@ -77,11 +78,11 @@ Before declaring implementation complete, verify all checks below:
 - Current-state handoff is `docs/HANDOFF.md`; machine task state is `docs/agent/tasks.json`.
 - Launch target is now Cloudflare Pages + Supabase + Urblo-owned `/admin`; the long-form plan is `docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md`.
 - Current runtime remains static/file-backed until the new launch tasks are implemented.
-- `NOW-ADMIN-CMS-001` is an umbrella objective, not a single executable implementation task; use the smaller admin IA/auth/CRUD/media/leads tasks in `docs/agent/tasks.json`.
+- `NOW-ADMIN-CMS-001` is an umbrella objective, not a single executable implementation task; admin IA/access is now defined in `docs/ADMIN_IA_ACCESS.md`, and implementation still uses the smaller auth/CRUD/media/leads tasks in `docs/agent/tasks.json`.
 - Stone Library migration is complete: old `/materials*` route family has been removed and replaced with `/stone-library` plus `/stone-library/:stoneGroupId`.
 - `NEXT-STONELIB-DRIVE-IMAGE-AUDIT-001` and `NEXT-STONELIB-IMG-001` are complete for current website stones only; Drive-only products remain out of scope until the client decides to add them.
 - Contact route is declared at `/contact`; shared header/footer navigation points to declared routes, with Sample Request remaining a `mailto:` fallback until `NOW-FORMS-SUPABASE-001` is implemented.
-- Last runtime gates were measured on 2026-05-22 and were green (`npm run build`, `npm run lint`, `npx tsc -b`, `npm run agent:smoke`).
+- Last runtime gates were measured on 2026-05-25 and were green (`npm run build`, `npm run lint`, `npx tsc -b`, `npm run agent:smoke`).
 - Route-level code splitting is in place and the previous `>500kB` chunk warning is resolved; continue monitoring bundle output as features are added.
 - GitHub Pages hardening is now a legacy fallback; Cloudflare Pages deployment is the active launch path.
 - Routing now uses clean paths through `BrowserRouter` with Cloudflare Pages SPA fallback files in `public/`.

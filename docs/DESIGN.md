@@ -1,6 +1,6 @@
 # Urblo Design Contract
 
-Last updated: 2026-05-15
+Last updated: 2026-05-25
 
 ## Purpose
 This document governs Urblo's visual and UX execution. It is the design contract for Codex work in this repository.
@@ -197,6 +197,23 @@ They should:
 - put short useful answers first
 - expand into proof and constraints
 - avoid turning one-off email facts into universal company claims
+
+### Admin
+The future `/admin` experience is an operational tool, not a public brand page.
+
+Priorities:
+- dense but readable content lists
+- clear draft, review, published, archived, and TBC status treatment
+- content health warnings before visual decoration
+- fast table/detail editing for repeated maintenance work
+- obvious read-only, unauthorized, loading, and unsaved-change states
+
+Avoid:
+- marketing-style hero sections
+- decorative cards inside cards
+- ambiguous save/publish controls
+- free-form page-builder UI where structured fields are safer
+- implying backend submission or authentication works before Supabase is implemented
 
 ## Component Rules
 

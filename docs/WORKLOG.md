@@ -1433,6 +1433,42 @@ Last updated: 2026-05-25
 - `NOW-ROUTE-ERROR-STATES-001`
 - `NEXT-STONELIB-IMG-002`
 
+## Entry - 2026-05-25 (Admin IA and Access Contract)
+
+### Scope
+- Added `docs/ADMIN_IA_ACCESS.md` as the executable no-secret contract for the future Urblo-owned `/admin` site.
+- Defined admin route map, unauthenticated/authenticated/unauthorized/loading states, viewer/editor/admin/owner role behavior, draft/review/published/archived/TBC content states, and module rollout sequence.
+- Added first-pass field ownership models for leads, media, Stone Library, Projects, Products, and Articles.
+- Recorded admin implementation boundaries so future agents do not ship fake production auth before Supabase credentials, RLS, Storage policies, form endpoints, and secrets are available.
+- Updated architecture, launch plan, schema, design, handoff, roadmap, and task queue references to point future admin implementation work at the contract.
+
+### Changed Files
+- `AGENTS.md`
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/DESIGN.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- Runtime gates were not run because no runtime routes, components, data, or assets changed.
+
+### Risks and Gaps
+- `/admin` is not implemented yet.
+- Supabase Auth, RLS, Storage policies, Cloudflare Pages Functions, Turnstile, and email secrets remain blocked until account access is available.
+- The next no-secret runtime task is `NOW-ROUTE-ERROR-STATES-001`.
+
+### Next Handoff
+- `NOW-ROUTE-ERROR-STATES-001`
+- `NEXT-PRODUCT-DETAIL-CONVERSION-001`
+- `NEXT-PROJECTS-INTAKE-001`
+
 ## Entry Template (Use for Every Future Session)
 
 ### Date
