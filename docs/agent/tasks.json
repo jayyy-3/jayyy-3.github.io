@@ -763,23 +763,27 @@
     },
     {
       "id": "NEXT-PRODUCT-DETAIL-CONVERSION-001",
-      "status": "next",
+      "status": "done",
       "priority": 14.5,
       "summary": "Make product detail pages behave like credible conversion/configuration pages.",
       "files": [
         "src/pages/ProductDetailPage.tsx",
         "src/components/OptionSelector.tsx",
         "src/components/ModelSelector.tsx",
-        "src/data/productData.ts",
+        "src/types/product.ts",
         "src/service/StoneLibraryService.ts",
         "docs/ARCHITECTURE.md",
+        "docs/DESIGN.md",
         "docs/HANDOFF.md",
+        "docs/NEXT_STEPS.md",
         "docs/WORKLOG.md",
         "docs/agent/tasks.json"
       ],
       "notes": [
         "2026-05-22: Default material selections now initialize on product detail pages and duplicate Timber Flush + labels were corrected to Timber Rise + where applicable.",
-        "Remaining issue: material selection still changes button state only; it does not update a composed result, project-fit summary, availability warning, or conversion CTA."
+        "2026-05-25: Product detail pages now show selected model/material summary feedback, a prefilled configuration enquiry mailto, contact/Stone Library recovery links, and project-scope caveat copy for sample-level specs.",
+        "2026-05-25: Stone product selector options now carry imageState, and OptionSelector marks missing imagery as Image pending without making the pending badge part of the button's accessible name.",
+        "Product records remain static/file-backed until Supabase/admin migration, but duplicate labels and sample-level spec presentation have been reviewed for launch-safe UI treatment."
       ],
       "acceptance": [
         "Product detail pages show a clear next-step CTA such as Request quote, Discuss this product, or Request sample.",

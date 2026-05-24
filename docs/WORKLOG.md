@@ -1512,6 +1512,48 @@ Last updated: 2026-05-25
 - `NEXT-PROJECTS-INTAKE-001`
 - `NEXT-STONELIB-IMG-002`
 
+## Entry - 2026-05-25 (Product Detail Conversion)
+
+### Scope
+- Turned product detail configuration from button-only selection into a visible selected-configuration summary.
+- Added a prefilled `mailto:` CTA so a visitor can discuss the exact product/model/material combination without waiting for Supabase forms.
+- Added Contact and Stone Library recovery links inside the product configuration area.
+- Added specification caveat copy so the current sample-level values are presented as discussion cues until final engineering/product data is approved.
+- Added `OptionItem.imageState` and product selector treatment for missing stone imagery, including an explicit `Image pending` badge that does not pollute the button accessible name.
+- Updated product/detail architecture, design contract, handoff, roadmap, and task queue docs.
+
+### Changed Files
+- `docs/ARCHITECTURE.md`
+- `docs/DESIGN.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `src/components/ModelSelector.tsx`
+- `src/components/OptionSelector.tsx`
+- `src/pages/ProductDetailPage.tsx`
+- `src/service/StoneLibraryService.ts`
+- `src/types/product.ts`
+
+### Verification Results
+- `npm run build`: pass. Build emits the existing Browserslist staleness notice; no JavaScript chunk-size warning returned.
+- Browser QA: desktop pass on `/products/primeBlock`; the page identity, meaningful content, selected summary, prefilled `mailto:` CTA, pending-image copy, and Timber Rise + / Harcourt interaction were verified. One screenshot was captured before the CTA row was adjusted, and a later browser reconnect failed before a fresh screenshot could be captured.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- Browser mobile viewport override did not apply in the in-app Browser, and the Playwright CLI fallback was blocked because the local Chrome distribution is unavailable. Mobile layout still needs a fresh visual check when browser tooling is available.
+- React Helmet still emits an existing strict-mode lifecycle warning in dev console.
+- Product records remain static/file-backed; customer-editable product fields are still part of the Supabase/admin CRUD track.
+
+### Next Handoff
+- `NEXT-PROJECTS-INTAKE-001`
+- `NEXT-STONELIB-IMG-002`
+- `NEXT-SLUG-URL-NORMALIZE-001`
+
 ## Entry Template (Use for Every Future Session)
 
 ### Date

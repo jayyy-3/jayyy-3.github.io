@@ -48,7 +48,6 @@ Source of truth: `docs/agent/tasks.json`.
 - `NEXT-UI-PARITY-001`: bring Home, Our Story, Articles, and Contact Us toward approved visual references.
 - `NEXT-STONELIB-IMG-002`: decide and implement secondary finish frame behavior.
 - `NEXT-STONELIB-DATA-001`: replace generic finish behavior text with approved notes.
-- `NEXT-PRODUCT-DETAIL-CONVERSION-001`: make product details behave like credible conversion/configuration pages.
 - `NEXT-PROJECTS-INTAKE-001`: define the project intake template and migrate the next project into the material-map case study model.
 - `NEXT-SLUG-URL-NORMALIZE-001`: normalize product and article URL slug style before production indexing.
 
@@ -84,6 +83,7 @@ Source of truth: `docs/agent/tasks.json`.
 - `NEXT-STONELIB-IMG-001`: normalized and mapped current-site shared-drive images for Golden Crust, Tan Brown, Honey Comb, Ivory Sand, and Tuscany. Blueocean remains a controlled fallback and Harcourt remains placeholder/TBC because no matching current-site source imagery was found.
 - `NEXT-ADMIN-IA-ACCESS-001`: defined the executable `/admin` route map, access states, role behavior, module rollout order, content field ownership model, and implementation boundaries in `docs/ADMIN_IA_ACCESS.md`.
 - `NOW-ROUTE-ERROR-STATES-001`: unknown URLs now render a branded not-found state, and article/product detail routes now have deliberate loading, not-found, and load-error states.
+- `NEXT-PRODUCT-DETAIL-CONVERSION-001`: product details now show selected configuration feedback, a prefilled discussion CTA, specification caveats, and pending-image treatment for missing selector imagery.
 
 Older completion details live in `docs/WORKLOG.md`.
 

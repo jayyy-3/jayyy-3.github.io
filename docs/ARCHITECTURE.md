@@ -188,6 +188,7 @@ Route state contract:
   - `getStoneDetail(stoneGroupId, variantId?)`
   - `getFilterFacets()`
   - `getStoneOptionsForProducts()`
+  - `getStoneGroupOptionsForProducts()`
   - Price mapping contract in `getStoneDetail`:
     - Active stones with valid tier (`1/2/3`) map to `Budget/Balanced/Premium`.
     - `tbc` status or missing/invalid tier degrades to `Price on request`.
@@ -202,9 +203,10 @@ Route state contract:
   - `getBySlug(slug): Promise<Product | undefined>`
 - Type contract: `src/types/product.ts`
   - `Product`, `ProductModel`, `MaterialCategory`, `SelectedMaterials`, `OptionItem`
+  - `OptionItem.imageState` may mark selector imagery as `ready` or `pending`.
 - Runtime note:
-  - `ProductDetailPage` material options now come from `StoneLibraryService.getStoneOptionsForProducts()`.
-  - Product detail pages initialize their configured default material selections, but selector changes still need stronger conversion feedback under `NEXT-PRODUCT-DETAIL-CONVERSION-001`.
+  - `ProductDetailPage` body-stone selector options come from `StoneLibraryService.getStoneGroupOptionsForProducts()` so product configuration uses stone-group choices rather than variant-level entries.
+  - Product detail pages initialize configured default material selections, show selected model/material feedback, expose a prefilled configuration enquiry `mailto:`, and mark missing selector imagery as pending.
 
 ### Project Data Contract
 - Source of project listing and detail records: `src/data/projectData.ts`

@@ -16,6 +16,7 @@ export interface OptionItem {
     slug: string;
     name: string;
     img: string;
+    imageState?: 'ready' | 'pending';
 }
 
 export interface ProductModel {

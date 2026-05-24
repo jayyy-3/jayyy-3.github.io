@@ -172,6 +172,16 @@ Project typography:
 - Project archive/detail title typography should follow the live Urblo WordPress pattern: `Avenir LT Std`, light `300` for hero/page H1, normal letter spacing, no forced uppercase.
 - Project section headings use `Avenir LT Std` medium/semibold weight and uppercase sparingly for scanability; avoid `Space Grotesk` for project-page titles unless a future brand decision explicitly changes the project system.
 
+### Products
+Product detail pages should behave like configuration and enquiry surfaces, not static render galleries.
+
+Priorities:
+- make the selected model and material choices visible outside the buttons
+- keep the product render large enough to inspect
+- use CTA copy that starts a real project conversation
+- show pending imagery honestly without making missing assets dominate the page
+- frame specs as project-confirmed discussion cues unless final engineering data has been approved
+
 ### Our Story
 Our Story should feel human, disciplined, and credible. It should support trust in Natalie, Cameron, SAI Stone, and the Urblo model without becoming a founder vanity page.
 

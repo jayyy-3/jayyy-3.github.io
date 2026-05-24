@@ -19,8 +19,9 @@ export default function ModelSelector({ models }: Props) {
             key={model.key}
             type="button"
             onClick={() => setModel(model.key)}
+            aria-pressed={active}
             className={[
-              'rounded-[4px] border px-4 py-2 text-sm font-semibold uppercase tracking-[0.08em] transition',
+              'rounded-[4px] border px-4 py-2 text-sm font-semibold uppercase tracking-[0.08em] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--urblo-lime)]',
               active
                 ? 'border-black bg-black text-white'
                 : 'border-black/15 bg-white text-black hover:border-black/35',

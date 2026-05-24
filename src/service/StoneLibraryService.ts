@@ -484,11 +484,15 @@ class StoneLibraryService {
                     const name = variant.displayVariant
                         ? `${stone.displayName} (${variant.displayVariant})`
                         : stone.displayName;
+                    const imageState: OptionItem['imageState'] = defaultImage?.imageUrl
+                        ? 'ready'
+                        : 'pending';
 
                     return {
                         slug: variant.stoneVariantId,
                         name,
                         img: defaultImage?.imageUrl || placeholderStoneImage(name),
+                        imageState,
                     };
                 });
             })
@@ -499,12 +503,16 @@ class StoneLibraryService {
         return stoneLibrary.stones
             .map((stone) => {
                 const cover = pickCoverImage(stone);
+                const imageState: OptionItem['imageState'] = cover.coverImageUrl
+                    ? 'ready'
+                    : 'pending';
 
                 return {
                     slug: stone.stoneGroupId,
                     name: stone.displayName,
                     img:
                         cover.coverImageUrl || placeholderStoneImage(stone.displayName),
+                    imageState,
                 };
             })
             .sort((a, b) => a.name.localeCompare(b.name));
