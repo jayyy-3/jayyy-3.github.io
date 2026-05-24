@@ -103,9 +103,13 @@ Routing uses clean paths through `BrowserRouter`. Cloudflare Pages direct refres
 | `/contact` | `ContactPage` | Contact surface with direct contact channels and a local mailto project-brief composer. |
 | `/articles` | `ArticlesPage` | Article list page. |
 | `/articles/:slug` | `ArticlePage` | Article detail page. |
-| `*` | `Home` | Fallback to homepage content wrapped by `HomepageLayout`. |
+| `*` | `NotFoundPage` | Branded not-found state wrapped by `DefaultLayout showBanner={false}`. |
 
-Current route risk: the catch-all still renders Home for unknown URLs. `NOW-ROUTE-ERROR-STATES-001` tracks replacing this with a branded 404/Not Found state before launch.
+Route state contract:
+- Shared route-level loading states use `src/components/RouteState.tsx` instead of plain text placeholders.
+- Unknown public URLs render `src/pages/NotFoundPage.tsx`, not the homepage.
+- Product detail and article detail routes render deliberate loading, not-found, and load-error states before showing detail content.
+- `scripts/agent-smoke.sh` includes unknown-route and missing-product route-shell coverage; browser QA is still required for rendered copy/state checks.
 
 ## Navigation Contract vs Implemented Routes
 
@@ -317,7 +321,7 @@ Current route risk: the catch-all still renders Home for unknown URLs. `NOW-ROUT
   - `Space Grotesk` local WOFF2
 - Homepage runtime no longer depends on remote WordPress font CSS/TTF/WOFF assets.
 
-## Last Runtime Quality Gate Status (Measured 2026-05-22)
+## Last Runtime Quality Gate Status (Measured 2026-05-25)
 - `npm run build`: pass
 - `npm run lint`: pass
 - `npx tsc -b`: pass
@@ -332,7 +336,6 @@ Current route risk: the catch-all still renders Home for unknown URLs. `NOW-ROUT
 - Project and Stone Library content migration needs strict separation between confirmed facts and inferred MVP copy.
 - Raw article newsletter HTML still contains external source URLs as migration source material, but runtime article rendering now rewrites known email proxy image URLs and campaign links before render.
 - Long-term article quality still requires Supabase structured blocks, approved article image records, editorial review, and claim-safe copy approval.
-- Unknown URLs still render the homepage through the catch-all route until `NOW-ROUTE-ERROR-STATES-001` is implemented.
 - Route-level code splitting has resolved the previous `>500kB` JavaScript chunk warning; continue monitoring build output as admin/CMS features are added.
 
 ## Brand and Design Linkage Rule

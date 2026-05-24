@@ -85,4 +85,4 @@ Before declaring implementation complete, verify all checks below:
 - Last runtime gates were measured on 2026-05-25 and were green (`npm run build`, `npm run lint`, `npx tsc -b`, `npm run agent:smoke`).
 - Route-level code splitting is in place and the previous `>500kB` chunk warning is resolved; continue monitoring bundle output as features are added.
 - GitHub Pages hardening is now a legacy fallback; Cloudflare Pages deployment is the active launch path.
-- Routing now uses clean paths through `BrowserRouter` with Cloudflare Pages SPA fallback files in `public/`.
+- Routing now uses clean paths through `BrowserRouter` with Cloudflare Pages SPA fallback files in `public/`; unknown public URLs render a branded not-found state instead of the homepage.

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import ModelSelector from '../components/ModelSelector';
 import OptionSelector from '../components/OptionSelector';
+import RouteState from '../components/RouteState';
 import SpecTable from '../components/SpecTable';
 import { battenOptions } from '../data/battenData';
 import { frameFinishes } from '../data/frameFinishData';
@@ -13,6 +14,7 @@ import type { MaterialCategory, Product } from '../types/product';
 export default function ProductDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const [product, setProduct] = useState<Product | null>(null);
+  const [status, setStatus] = useState<'loading' | 'ready' | 'not-found' | 'error'>('loading');
 
   const storeSetProduct = useProductStore((state) => state.setProduct);
   const currentModelKey = useProductStore((state) => state.currentModelKey);
@@ -22,27 +24,83 @@ export default function ProductDetailPage() {
 
   useEffect(() => {
     if (!slug) {
+      setProduct(null);
+      setStatus('not-found');
       return;
     }
 
-    ProductService.getBySlug(slug).then((result) => {
-      if (!result) {
-        return;
-      }
+    let isCurrent = true;
+    setProduct(null);
+    setStatus('loading');
 
-      setProduct(result);
-      storeSetProduct(result.slug, result.models[0].key);
+    ProductService.getBySlug(slug)
+      .then((result) => {
+        if (!isCurrent) {
+          return;
+        }
 
-      Object.entries(result.defaultMaterials ?? {}).forEach(([category, materialSlug]) => {
-        if (materialSlug) {
-          setMaterial(category as MaterialCategory, materialSlug);
+        if (!result) {
+          setStatus('not-found');
+          return;
+        }
+
+        setProduct(result);
+        setStatus('ready');
+        storeSetProduct(result.slug, result.models[0].key);
+
+        Object.entries(result.defaultMaterials ?? {}).forEach(([category, materialSlug]) => {
+          if (materialSlug) {
+            setMaterial(category as MaterialCategory, materialSlug);
+          }
+        });
+      })
+      .catch(() => {
+        if (isCurrent) {
+          setStatus('error');
         }
       });
-    });
+
+    return () => {
+      isCurrent = false;
+    };
   }, [setMaterial, slug, storeSetProduct]);
 
+  if (status === 'loading') {
+    return (
+      <RouteState
+        eyebrow="Loading"
+        title="Preparing product"
+        copy="The product detail is loading. This should only take a moment."
+      />
+    );
+  }
+
+  if (status === 'error') {
+    return (
+      <RouteState
+        eyebrow="Product Error"
+        title="Product could not load"
+        copy="The product detail could not be loaded right now. Return to the product list or contact Urblo if this keeps happening."
+        actions={[
+          { label: 'Products', to: '/products' },
+          { label: 'Contact Us', to: '/contact', variant: 'secondary' },
+        ]}
+      />
+    );
+  }
+
   if (!product) {
-    return null;
+    return (
+      <RouteState
+        eyebrow="Product Not Found"
+        title="Product not found"
+        copy="This product link does not match a published Urblo product. Browse the product range or contact Urblo for help."
+        actions={[
+          { label: 'Products', to: '/products' },
+          { label: 'Contact Us', to: '/contact', variant: 'secondary' },
+        ]}
+      />
+    );
   }
 
   const currentModel =

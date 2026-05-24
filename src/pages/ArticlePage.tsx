@@ -2,14 +2,16 @@ import DOMPurify from 'dompurify';
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import ReadingProgressBar from '../components/ReadingProgressBar';
+import RouteState from '../components/RouteState';
 import { prepareArticleHtml, resolveArticleAssetPath } from '../lib/articleMedia';
 import type { ArticleMeta } from '../types/article';
 
 export default function ArticlePage() {
   const { slug = '' } = useParams<{ slug: string }>();
-  const [html, setHtml] = useState('<p>Loading...</p>');
+  const [html, setHtml] = useState<string | null>(null);
   const [articles, setArticles] = useState<ArticleMeta[]>([]);
-  const [indexLoaded, setIndexLoaded] = useState(false);
+  const [indexStatus, setIndexStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [contentStatus, setContentStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
 
   const meta = articles.find((article) => article.slug === slug);
   const index = articles.findIndex((article) => article.slug === slug);
@@ -21,28 +23,112 @@ export default function ArticlePage() {
       return;
     }
 
-    setHtml('<p>Loading...</p>');
+    let isCurrent = true;
+    setHtml(null);
+    setContentStatus('loading');
 
     fetch(import.meta.env.BASE_URL + 'articles/' + slug + '/content.html')
-      .then((response) => response.text())
-      .then((raw) => setHtml(DOMPurify.sanitize(prepareArticleHtml(raw))))
-      .catch(() => setHtml("<p class='text-red-600'>Failed to load article.</p>"));
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Article content returned ${response.status}`);
+        }
+        return response.text();
+      })
+      .then((raw) => {
+        if (!isCurrent) {
+          return;
+        }
+        setHtml(DOMPurify.sanitize(prepareArticleHtml(raw)));
+        setContentStatus('ready');
+      })
+      .catch(() => {
+        if (isCurrent) {
+          setContentStatus('error');
+        }
+      });
+
+    return () => {
+      isCurrent = false;
+    };
   }, [slug, meta]);
 
   useEffect(() => {
+    setIndexStatus('loading');
+
     fetch(import.meta.env.BASE_URL + 'articles/index.json')
-      .then((response) => response.json())
-      .then(setArticles)
-      .catch(console.error)
-      .finally(() => setIndexLoaded(true));
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Article index returned ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((result) => {
+        setArticles(result);
+        setIndexStatus('ready');
+      })
+      .catch(() => setIndexStatus('error'));
   }, []);
 
-  if (!indexLoaded) {
-    return <p className="py-20 text-center text-black/60">Loading article...</p>;
+  if (indexStatus === 'loading') {
+    return (
+      <RouteState
+        eyebrow="Loading"
+        title="Preparing article"
+        copy="The article is loading. This should only take a moment."
+      />
+    );
+  }
+
+  if (indexStatus === 'error') {
+    return (
+      <RouteState
+        eyebrow="Article Error"
+        title="Articles could not load"
+        copy="The article index could not be loaded right now. Return to articles or contact Urblo if this keeps happening."
+        actions={[
+          { label: 'Articles', to: '/articles' },
+          { label: 'Contact Us', to: '/contact', variant: 'secondary' },
+        ]}
+      />
+    );
   }
 
   if (!meta) {
-    return <p className="py-20 text-center text-red-600">Article not found.</p>;
+    return (
+      <RouteState
+        eyebrow="Article Not Found"
+        title="Article not found"
+        copy="This article link does not match a published Urblo article. Browse the article library or contact Urblo for help."
+        actions={[
+          { label: 'Articles', to: '/articles' },
+          { label: 'Contact Us', to: '/contact', variant: 'secondary' },
+        ]}
+      />
+    );
+  }
+
+  if (contentStatus === 'loading' || contentStatus === 'idle') {
+    return (
+      <RouteState
+        eyebrow="Loading"
+        title="Preparing article"
+        copy="The article content is loading. This should only take a moment."
+      />
+    );
+  }
+
+  if (contentStatus === 'error' || !html) {
+    return (
+      <RouteState
+        eyebrow="Article Error"
+        title="Article could not load"
+        copy="The article content could not be loaded right now. Return to articles or contact Urblo if this keeps happening."
+        actions={[
+          { label: 'Articles', to: '/articles' },
+          { label: 'Contact Us', to: '/contact', variant: 'secondary' },
+        ]}
+      />
+    );
   }
 
   const heroImage = resolveArticleAssetPath(meta.cover);

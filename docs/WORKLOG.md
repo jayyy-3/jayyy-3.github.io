@@ -1469,6 +1469,49 @@ Last updated: 2026-05-25
 - `NEXT-PRODUCT-DETAIL-CONVERSION-001`
 - `NEXT-PROJECTS-INTAKE-001`
 
+## Entry - 2026-05-25 (Route Error States)
+
+### Scope
+- Replaced the catch-all homepage fallback with a branded not-found page so unknown public URLs no longer look like valid homepage visits.
+- Added a shared `RouteState` component for public route-level loading, not-found, and load-error states.
+- Updated product detail and article detail routes so missing slugs, loading work, and fetch failures render deliberate recovery states instead of blank content, red text, or misleading fallback content.
+- Added smoke coverage for one unknown route shell and one missing product detail route shell.
+- Updated architecture, design, handoff, roadmap, and task queue docs so future agents treat this as an implemented launch-safety contract.
+
+### Changed Files
+- `AGENTS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/DESIGN.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `scripts/agent-smoke.sh`
+- `src/App.tsx`
+- `src/components/RouteState.tsx`
+- `src/pages/ArticlePage.tsx`
+- `src/pages/NotFoundPage.tsx`
+- `src/pages/ProductDetailPage.tsx`
+
+### Verification Results
+- `npm run build`: pass. Build emits the existing Browserslist staleness notice; no JavaScript chunk-size warning returned.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass, including unknown-route and missing-product state route shells.
+- Browser QA: pass on `/not-a-real-urblo-route`, `/products/not-a-real-product`, and `/articles/not-a-real-article`; each route rendered deliberate state copy and did not render the homepage title.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- Browser screenshot capture timed out during this QA pass, so state verification used browser title and rendered text checks instead.
+- React Helmet still emits an existing strict-mode lifecycle warning in dev console.
+- Product detail pages still need the separate conversion/configuration polish task.
+
+### Next Handoff
+- `NEXT-PRODUCT-DETAIL-CONVERSION-001`
+- `NEXT-PROJECTS-INTAKE-001`
+- `NEXT-STONELIB-IMG-002`
+
 ## Entry Template (Use for Every Future Session)
 
 ### Date

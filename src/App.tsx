@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import WelcomePopup from './components/WelcomePopup';
+import RouteState from './components/RouteState';
 import DefaultLayout from './layouts/DefaultLayout';
 import HomepageLayout from './layouts/HomepageLayout';
 
@@ -17,6 +18,7 @@ const OurStoryPage = lazy(() => import('./pages/OurStory'));
 const ArticlesPage = lazy(() => import('./pages/ArticlesPage'));
 const ArticlePage = lazy(() => import('./pages/ArticlePage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
 const SITE_URL = 'https://urblo.com.au';
 const DEFAULT_SHARE_IMAGE = `${SITE_URL}/og-default.png`;
@@ -125,9 +127,9 @@ function getRouteMeta(pathname: string): RouteMeta {
     }
 
     return {
-        title: 'Urblo | Natural Stone Streetscape Systems',
+        title: 'Page Not Found | Urblo',
         description:
-            'Design-led, engineering-backed natural stone systems for streetscapes, public realm, and civic landscape projects.',
+            'The requested Urblo page could not be found. Explore projects, products, Stone Library, or contact pathways.',
     };
 }
 
@@ -160,9 +162,11 @@ function TitleUpdater() {
 
 function PageLoading() {
     return (
-        <div className="urblo-page-container py-20">
-            <p className="urblo-meta text-black/55">Loading</p>
-        </div>
+        <RouteState
+            eyebrow="Loading"
+            title="Preparing content"
+            copy="The page is loading. This should only take a moment."
+        />
     );
 }
 
@@ -279,9 +283,9 @@ export default function App() {
                     <Route
                         path="*"
                         element={
-                            <HomepageLayout>
-                                {loadPage(<Home />)}
-                            </HomepageLayout>
+                            <DefaultLayout showBanner={false}>
+                                {loadPage(<NotFoundPage />)}
+                            </DefaultLayout>
                         }
                     />
                 </Routes>

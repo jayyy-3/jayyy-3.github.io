@@ -318,21 +318,28 @@
     },
     {
       "id": "NOW-ROUTE-ERROR-STATES-001",
-      "status": "now",
+      "status": "done",
       "priority": 6.1,
       "summary": "Replace catch-all homepage fallback and blank loading states with launch-safe route error states.",
       "files": [
+        "AGENTS.md",
         "src/App.tsx",
+        "src/components/RouteState.tsx",
         "src/pages/ArticlePage.tsx",
+        "src/pages/NotFoundPage.tsx",
         "src/pages/ProductDetailPage.tsx",
         "scripts/agent-smoke.sh",
         "docs/ARCHITECTURE.md",
+        "docs/DESIGN.md",
         "docs/HANDOFF.md",
+        "docs/NEXT_STEPS.md",
         "docs/WORKLOG.md",
         "docs/agent/tasks.json"
       ],
       "notes": [
-        "2026-05-22 full-site QA found unknown URLs currently render Home through the catch-all route. Article loading flash was reduced in src/pages/ArticlePage.tsx, but a deliberate 404/Not Found route is still required."
+        "2026-05-22 full-site QA found unknown URLs rendered Home through the catch-all route. Article loading flash was reduced in src/pages/ArticlePage.tsx, but a deliberate 404/Not Found route was still required.",
+        "2026-05-25: Implemented shared RouteState, branded NotFoundPage catch-all, deliberate ProductDetailPage loading/not-found/error states, and deliberate ArticlePage index/content loading/not-found/error states.",
+        "2026-05-25: scripts/agent-smoke.sh now covers an unknown route shell and a missing product detail route shell; Browser QA confirmed unknown, missing product, and missing article routes no longer render Home or blank states."
       ],
       "acceptance": [
         "Unknown public URLs render a branded 404/Not Found state instead of silently showing the homepage.",

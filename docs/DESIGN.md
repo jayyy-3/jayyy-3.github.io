@@ -228,6 +228,12 @@ Avoid:
 - Use segmented controls, select menus, toggles, checkboxes, sliders, and steppers according to the actual input type.
 - Avoid decorative controls that look interactive but do not change state.
 
+### Route and System States
+- Loading, not-found, and load-error states should feel like calm operational surfaces, not broken template remnants.
+- Use the shared `RouteState` pattern for public route-level states unless a page needs a more specific recovery workflow.
+- State copy should be short, factual, and paired with useful next actions when the user is blocked.
+- Unknown URLs must preserve Urblo navigation pathways without pretending the requested page exists.
+
 ### Motion
 - Motion should communicate state, focus, or transition.
 - Avoid motion that delays inspection of material or reading of specs.

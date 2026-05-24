@@ -42,7 +42,6 @@ Source of truth: `docs/agent/tasks.json`.
 - `NOW-FORMS-SUPABASE-001`: replace mailto-only Contact and Sample Request flows with Supabase-backed submissions.
 - `NOW-ADMIN-CMS-001`: umbrella objective for customer-maintained Projects, Stone Library, Products, Articles, media, and leads; execute through the smaller admin child tasks.
 - `NOW-ASSET-MIGRATION-001`: migrate priority media away from old WordPress URLs and define controlled storage for launch.
-- `NOW-ROUTE-ERROR-STATES-001`: replace catch-all homepage fallback and blank loading states with launch-safe route error states.
 - `NOW-ARTICLE-STRUCTURE-CLAIMS-001`: move article details from raw newsletter HTML to mobile-safe, claim-reviewed structured article templates.
 
 ## Next
@@ -84,6 +83,7 @@ Source of truth: `docs/agent/tasks.json`.
 - `NEXT-STONELIB-DRIVE-IMAGE-AUDIT-001`: completed current-website-only audit of the Saistone Google Drive `Urblo Digital Stone Library` source. Drive-only products are excluded for now.
 - `NEXT-STONELIB-IMG-001`: normalized and mapped current-site shared-drive images for Golden Crust, Tan Brown, Honey Comb, Ivory Sand, and Tuscany. Blueocean remains a controlled fallback and Harcourt remains placeholder/TBC because no matching current-site source imagery was found.
 - `NEXT-ADMIN-IA-ACCESS-001`: defined the executable `/admin` route map, access states, role behavior, module rollout order, content field ownership model, and implementation boundaries in `docs/ADMIN_IA_ACCESS.md`.
+- `NOW-ROUTE-ERROR-STATES-001`: unknown URLs now render a branded not-found state, and article/product detail routes now have deliberate loading, not-found, and load-error states.
 
 Older completion details live in `docs/WORKLOG.md`.
 

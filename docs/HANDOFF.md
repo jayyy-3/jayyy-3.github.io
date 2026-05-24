@@ -28,6 +28,7 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 ## Latest Verification Snapshot
 - Last full runtime gate on 2026-05-25: `npm run build`, `npm run lint`, `npx tsc -b`, and `npm run agent:smoke` pass. Build keeps the previous healthy JavaScript chunk profile; Browserslist staleness notice remains.
 - Last docs/harness gate on 2026-05-25: `npm run agent:check` and `git diff --check` pass.
+- Recent browser QA on 2026-05-25: unknown route, missing product detail, and missing article detail render deliberate route states instead of falling back to Home or blank/error text.
 - Recent browser QA on 2026-05-25: Stone Library list renders 13 results; Golden Crust, Tan Brown, Honey Comb, and Tuscany detail pages render mapped images without `IMAGE COMING SOON`; Golden Crust Dark and Tuscany Cross Cut variant switches update to the correct mapped images. The known React Helmet strict-mode warning still appears.
 - Current controlled-media status: P0/P1 visible media has local stopgaps under `public/media/launch`; direct old WordPress `wp-content/uploads` references are removed from runtime data; article media still needs structured-block migration.
 - Stone Library shared-drive audit and current-site image mapping on 2026-05-25 are complete for current website stones only; Drive-only products are intentionally out of scope for this launch pass.
@@ -38,7 +39,6 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 - Clean URL routing is implemented repo-side for Cloudflare Pages, but the live Cloudflare project, preview deployment, custom domain, DNS cutover, and rollback still require account access.
 - Supabase schema design is documented, but migrations, RLS implementation, Auth, Storage, admin CRUD, form APIs, and transactional email are not implemented yet.
 - Contact and Sample Request remain mailto/local-only in current runtime.
-- Unknown URLs still render the homepage through the catch-all route; `NOW-ROUTE-ERROR-STATES-001` tracks a proper 404/not-found state.
 - Projects, Stone Library, Products, and Articles are still file-backed rather than customer-editable.
 - The admin CMS does not exist yet. `NOW-ADMIN-CMS-001` is an umbrella objective; the no-secret admin IA/access contract is complete in `docs/ADMIN_IA_ACCESS.md`, and the blocked auth/RLS, content CRUD, media, and lead-management child tasks should use that contract when Supabase access is available.
 - P0/P1 old WordPress media references in runtime data have been migrated to controlled local assets under `public/media/launch`; article covers and known detail images now have a local runtime stopgap under `public/media/launch/articles`.
@@ -56,7 +56,7 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 - React Helmet still emits an existing strict-mode lifecycle warning in dev console.
 
 ## Next Recommended Action
-If account access is unavailable, start with `NOW-ROUTE-ERROR-STATES-001`, `NEXT-PRODUCT-DETAIL-CONVERSION-001`, or `NEXT-PROJECTS-INTAKE-001` for runtime polish. Start `NOW-FORMS-SUPABASE-001`, `NOW-ADMIN-AUTH-RLS-001`, and `NOW-CLOUDFLARE-PAGES-DEPLOY-001` only when the required Supabase, Turnstile/email, or Cloudflare access is available.
+If account access is unavailable, start with `NEXT-PRODUCT-DETAIL-CONVERSION-001`, `NEXT-PROJECTS-INTAKE-001`, or `NEXT-STONELIB-IMG-002` for runtime polish. Start `NOW-FORMS-SUPABASE-001`, `NOW-ADMIN-AUTH-RLS-001`, and `NOW-CLOUDFLARE-PAGES-DEPLOY-001` only when the required Supabase, Turnstile/email, or Cloudflare access is available.
 
 ## Guardrails
 - Use repo-root relative paths in committed docs.

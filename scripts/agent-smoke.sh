@@ -37,6 +37,17 @@ const routes = [
   '/articles',
 ]
 
+const stateRoutes = [
+  {
+    name: 'Unknown route branded 404 shell',
+    path: '/not-a-real-urblo-route',
+  },
+  {
+    name: 'Missing product detail state shell',
+    path: '/products/not-a-real-product',
+  },
+]
+
 const requiredAssets = [
   '/articles/index.json',
 ]
@@ -149,6 +160,11 @@ await waitForServer()
 for (const route of routes) {
   await checkHtmlShell(route)
   console.log(`route ok: ${route}`)
+}
+
+for (const stateRoute of stateRoutes) {
+  await checkHtmlShell(stateRoute.path)
+  console.log(`state route ok: ${stateRoute.name} -> ${stateRoute.path}`)
 }
 
 for (const asset of requiredAssets) {
