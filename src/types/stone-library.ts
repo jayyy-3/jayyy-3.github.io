@@ -78,6 +78,13 @@ export interface FinishBehaviorMeta {
     maintenance: string;
 }
 
+export interface FinishSecondaryImageVM {
+    imageUrl: string;
+    thumbUrl?: string;
+    imageAlt?: string;
+    label: string;
+}
+
 export interface FinishVM {
     finishKey: FinishKey;
     finishId: string;
@@ -90,6 +97,7 @@ export interface FinishVM {
     imageUrl?: string;
     thumbUrl?: string;
     imageAlt?: string;
+    secondaryImages: FinishSecondaryImageVM[];
 }
 
 export interface FinishCapabilityVM {

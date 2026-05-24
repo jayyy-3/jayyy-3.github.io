@@ -8,7 +8,7 @@ interface ImageStageProps {
     activeFinishKey: string | null;
     centerRequestToken: number;
     onSelect: (finishKey: string) => void;
-    onOpenLightbox: (finishKey: string) => void;
+    onOpenLightbox: (finishKey: string, frameIndex?: number) => void;
 }
 
 export default function ImageStage({
@@ -30,6 +30,7 @@ export default function ImageStage({
     const activeFinish =
         finishes.find((finish) => finish.finishKey === effectiveActiveKey) ||
         finishes[0];
+    const activeSecondaryImages = activeFinish?.secondaryImages ?? [];
     const isSingleFinish = finishes.length === 1;
     const trackStyle: CSSProperties = {
         ['--panel-h' as string]: 'clamp(190px, 29vw, 340px)',
@@ -383,6 +384,43 @@ export default function ImageStage({
                 <span>{stoneName}</span>
                 {activeFinish ? <span>{activeFinish.label}</span> : null}
             </div>
+
+            {activeFinish && activeSecondaryImages.length ? (
+                <div className="rounded-[4px] border border-black/10 bg-white p-3 shadow-none">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                        <p className="urblo-meta text-[10px] text-black/58">
+                            Secondary frame
+                        </p>
+                        <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-black/45">
+                            Same finish, alternate source view
+                        </span>
+                    </div>
+
+                    <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+                        {activeSecondaryImages.map((image, index) => (
+                            <button
+                                key={`${activeFinish.finishKey}-${image.imageUrl}`}
+                                type="button"
+                                onClick={() => onOpenLightbox(activeFinish.finishKey, index + 1)}
+                                className="group flex w-[120px] flex-none flex-col overflow-hidden rounded-[4px] border border-black/10 bg-white text-left transition hover:border-black/35 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--urblo-lime)]"
+                            >
+                                <span className="block aspect-[3/2] overflow-hidden bg-black/5">
+                                    <img
+                                        src={image.thumbUrl || image.imageUrl}
+                                        alt=""
+                                        aria-hidden="true"
+                                        className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
+                                        loading="lazy"
+                                    />
+                                </span>
+                                <span className="px-2 py-2 text-[10px] font-semibold uppercase leading-tight tracking-[0.08em] text-black">
+                                    {image.label}
+                                </span>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            ) : null}
         </section>
     );
 }

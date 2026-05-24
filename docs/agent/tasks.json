@@ -459,7 +459,7 @@
       "notes": [
         "2026-05-22: Fast-track coverage audit confirms 31 finish states have finish-specific mapped imagery, 16 finish states use controlled local default/fallback imagery, and 22 finish states are true missing-image placeholders pending approved source assets.",
         "2026-05-25: Golden Crust, Tan Brown, Honey Comb, Ivory Sand, and Tuscany current-site shared-drive candidates were handled under NEXT-STONELIB-IMG-001. Harcourt remains placeholder/TBC and Blueocean remains a controlled fallback because matching current-site shared-drive source images were not found.",
-        "Juparana and Zen Grey secondary source frames remain under NEXT-STONELIB-IMG-002 for presentation design and implementation."
+        "2026-05-25: Juparana and Zen Grey secondary source frames are implemented under NEXT-STONELIB-IMG-002."
       ],
       "acceptance": [
         "Provided finish images are mapped and visible in Stone Library list/detail wherever matching keys exist.",
@@ -721,14 +721,30 @@
     },
     {
       "id": "NEXT-STONELIB-IMG-002",
-      "status": "next",
+      "status": "done",
       "priority": 13,
       "summary": "Define and implement how secondary finish frames should be shown.",
       "files": [
         "src/data/stoneFinishImages.ts",
         "src/components/stone-library/ImageStage.tsx",
         "src/components/stone-library/FinishAccordion.tsx",
+        "src/components/stone-library/FinishLightbox.tsx",
+        "src/pages/StoneLibraryDetailPage.tsx",
+        "src/service/StoneLibraryService.ts",
+        "src/types/stone-library.ts",
+        "docs/ARCHITECTURE.md",
+        "docs/ASSET_MIGRATION_AUDIT.md",
+        "docs/DESIGN.md",
+        "docs/HANDOFF.md",
+        "docs/NEXT_STEPS.md",
+        "docs/WORKLOG.md",
         "docs/agent/tasks.json"
+      ],
+      "notes": [
+        "2026-05-25: Secondary frames are implemented as support media for the active finish, not as separate finish states.",
+        "2026-05-25: Juparana and Zen Grey approved _2 source frames are mapped in src/data/stoneFinishImages.ts and exposed through FinishVM.secondaryImages.",
+        "2026-05-25: ImageStage shows secondary thumbnails only when approved secondary images exist; clicking one opens FinishLightbox on that frame while preserving active finish state.",
+        "2026-05-25: Browser visual QA was blocked by unavailable in-app Browser pane and missing local Chrome/Playwright fallback, so runtime gates are the verified acceptance evidence for this pass."
       ],
       "acceptance": [
         "Secondary image behavior is documented and implemented with clear trigger rules.",

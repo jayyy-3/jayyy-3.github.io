@@ -18,6 +18,7 @@ export default function StoneLibraryDetailPage() {
   const [lockedFinishKey, setLockedFinishKey] = useState<string | null>(null);
   const [centerRequestToken, setCenterRequestToken] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [lightboxFrameIndex, setLightboxFrameIndex] = useState(0);
 
   const detail = useMemo(
     () => StoneLibraryService.getStoneDetail(stoneGroupId, selectedVariantId || undefined),
@@ -36,15 +37,18 @@ export default function StoneLibraryDetailPage() {
     setSelectedVariantId(variantId);
     setLockedFinishKey(null);
     setIsLightboxOpen(false);
+    setLightboxFrameIndex(0);
   }
 
   function handleFinishSelect(finishKey: string) {
     setLockedFinishKey(finishKey);
+    setLightboxFrameIndex(0);
     setCenterRequestToken((current) => current + 1);
   }
 
-  function handleOpenLightbox(finishKey: string) {
+  function handleOpenLightbox(finishKey: string, frameIndex = 0) {
     handleFinishSelect(finishKey);
+    setLightboxFrameIndex(frameIndex);
     setIsLightboxOpen(true);
   }
 
@@ -145,8 +149,12 @@ export default function StoneLibraryDetailPage() {
         finishes={detail.finishes}
         activeFinishKey={activeFinish?.finishKey || null}
         stoneName={detail.name}
+        initialFrameIndex={lightboxFrameIndex}
         onClose={() => setIsLightboxOpen(false)}
-        onSelectFinish={handleFinishSelect}
+        onSelectFinish={(finishKey) => {
+          setLightboxFrameIndex(0);
+          handleFinishSelect(finishKey);
+        }}
       />
     </div>
   );

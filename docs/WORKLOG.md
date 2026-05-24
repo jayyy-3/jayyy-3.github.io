@@ -1554,6 +1554,51 @@ Last updated: 2026-05-25
 - `NEXT-STONELIB-IMG-002`
 - `NEXT-SLUG-URL-NORMALIZE-001`
 
+## Entry - 2026-05-25 (Stone Library Secondary Frames)
+
+### Scope
+- Implemented secondary finish frames as support media for the active Stone Library finish, not separate finish states.
+- Added secondary image mapping for approved Juparana and Zen Grey `_2` source frames in `src/data/stoneFinishImages.ts`.
+- Extended the Stone Library service/type contract so `FinishVM.secondaryImages` carries approved secondary frame metadata.
+- Added active-finish secondary thumbnails below the image stage; clicking a thumbnail opens the lightbox on that frame while preserving the active finish.
+- Added frame selection inside `FinishLightbox` so primary and secondary frames can be inspected without changing finish state.
+- Added active finish frame-count disclosure to `FinishAccordion`.
+- Updated architecture, design, handoff, asset audit, roadmap, and task queue docs.
+
+### Changed Files
+- `docs/ARCHITECTURE.md`
+- `docs/ASSET_MIGRATION_AUDIT.md`
+- `docs/DESIGN.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `src/components/stone-library/FinishAccordion.tsx`
+- `src/components/stone-library/FinishLightbox.tsx`
+- `src/components/stone-library/ImageStage.tsx`
+- `src/data/stoneFinishImages.ts`
+- `src/pages/StoneLibraryDetailPage.tsx`
+- `src/service/StoneLibraryService.ts`
+- `src/types/stone-library.ts`
+
+### Verification Results
+- `npm run build`: pass. Build emits the existing Browserslist staleness notice; no JavaScript chunk-size warning returned.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- Fresh desktop/mobile browser visual QA is blocked: the in-app Browser reports no active pane, and the Playwright CLI fallback cannot launch because local Chrome is unavailable.
+- Harcourt remains placeholder/TBC because no approved source imagery exists.
+- Blueocean remains on the controlled fallback because no matching current-site shared-drive source exists.
+
+### Next Handoff
+- `NEXT-PROJECTS-INTAKE-001`
+- `NEXT-SLUG-URL-NORMALIZE-001`
+- `NOW-ARTICLE-STRUCTURE-CLAIMS-001`
+
 ## Entry Template (Use for Every Future Session)
 
 ### Date

@@ -60,6 +60,11 @@ export default function FinishAccordion({
                                         <li>Slip: {finish.behavior.slip}</li>
                                         <li>Glare: {finish.behavior.glare}</li>
                                         <li>Maintenance: {finish.behavior.maintenance}</li>
+                                        {finish.secondaryImages.length ? (
+                                            <li>
+                                                Frames: primary + {finish.secondaryImages.length} secondary
+                                            </li>
+                                        ) : null}
                                     </ul>
                                 </div>
                             ) : null}

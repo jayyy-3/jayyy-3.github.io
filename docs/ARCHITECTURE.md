@@ -142,7 +142,7 @@ Route state contract:
 - Homepage section imagery and partner logos now use controlled files under `public/media/launch/homepage`.
 - Our Story portraits now use controlled files under `public/media/launch/our-story`; the carbon banner uses the controlled route banner because the old WordPress carbon banner returned 404.
 - Legacy project listing/detail media now uses controlled files under `public/media/launch/projects`.
-- Stone Library primary finish imagery is mapped from `data/Product` through `src/data/stoneFinishImages.ts`; controlled fallback media lives under `public/media/launch/stone-library/fallbacks`.
+- Stone Library primary and secondary finish imagery is mapped from `data/Product` through `src/data/stoneFinishImages.ts`; controlled fallback media lives under `public/media/launch/stone-library/fallbacks`.
 - Stone Library current image status: Alpine White, Angola Black, Golden Crust Light/Dark, Honey Comb, Ivory Sand, Juparana, New Grey, Steel Blue, Tan Brown, and Zen Grey have finish-specific images. Tuscany Vein Cut and Cross Cut use variant-level shared-drive images as defaults rather than pretending to have finish-specific honed/polished/sandblasted photos. Blueocean still uses the controlled local fallback, and Harcourt still uses TBC placeholders because no matching current-site shared-drive sources were found.
 - Article cover and inline cleanup media now uses controlled files under `public/media/launch/articles`.
 - Article email-export HTML is still stored as source material under `public/articles`, but `src/lib/articleMedia.ts` rewrites known Squarespace/Front/Google proxy images to local launch media and removes email campaign tracking links before DOMPurify sanitization.
@@ -163,13 +163,18 @@ Route state contract:
   - Active panel maintains fixed 3:2 ratio.
   - When finish count is low and default panel widths do not fill the stage viewport, non-active panels expand to consume remaining width.
   - Single-finish states keep the lone 3:2 panel centered in the stage viewport (no forced full-bleed stretch).
+  - Secondary frames are not separate finishes. They display only for the active finish when `FinishVM.secondaryImages` exists.
+  - Clicking a secondary frame opens the lightbox on that frame while preserving the active finish key.
+  - Missing secondary frames are omitted entirely and must not introduce placeholder thumbnails.
 - Right finish selector contract (`src/components/stone-library/FinishAccordion.tsx`):
   - Click (or keyboard activation on focused button) is the only state-changing selection action.
   - Selection updates active finish and triggers the left-stage visibility-check scroll policy.
+  - Active finishes with secondary frames disclose the primary-plus-secondary frame count in the behavior panel.
 - Large-image inspection contract (`src/components/stone-library/FinishLightbox.tsx`):
   - Open via active-panel zoom action; close via button, backdrop, or `Esc`.
   - Supports previous/next finish navigation with buttons and arrow keys.
   - Supports 1x/2x zoom with 2x drag-pan and body-scroll lock while open.
+  - Supports primary/secondary frame selection within the active finish without changing finish state.
 
 ## Data Contracts
 
@@ -177,7 +182,7 @@ Route state contract:
 - Source JSON: `data/clean/stone_library.json`
 - Type contract: `src/types/stone-library.ts`
   - `StoneLibraryRaw`, `StoneFinishRaw`, `StoneGroupRaw`, `StoneVariantRaw`
-  - `StoneCardVM`, `StoneDetailVM`, `FinishVM`, `StoneStatus`
+  - `StoneCardVM`, `StoneDetailVM`, `FinishVM`, `FinishSecondaryImageVM`, `StoneStatus`
   - Price presentation fields on `StoneDetailVM`:
     - `priceRange` (source notation, e.g. `$ / $$ / $$$`)
     - `priceTierLevel` (`1 | 2 | 3 | null`)

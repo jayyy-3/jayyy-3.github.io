@@ -190,6 +190,14 @@ function mapAvailableFinishVM(
     );
     const finishDefinition = finishDefinitionByKey.get(finishKey);
     const imageAsset = getStoneFinishImage(stoneVariantId, finishKey);
+    const secondaryImages = (imageAsset?.secondaryImages ?? [])
+        .filter((image) => image.imageUrl)
+        .map((image, index) => ({
+            imageUrl: image.imageUrl,
+            thumbUrl: image.thumbUrl,
+            imageAlt: image.alt,
+            label: image.label || `Secondary frame ${index + 1}`,
+        }));
 
     return {
         finishKey,
@@ -203,6 +211,7 @@ function mapAvailableFinishVM(
         imageUrl: imageAsset?.imageUrl,
         thumbUrl: imageAsset?.thumbUrl,
         imageAlt: imageAsset?.alt,
+        secondaryImages,
     };
 }
 

@@ -78,7 +78,7 @@ Current runtime coverage across available/TBC Stone Library finish states:
 | Controlled default/fallback image | 14 | A local fallback or variant-level image exists for the stone/variant, but not for each individual finish. |
 | True missing image placeholder | 10 | No approved source image is committed/mapped in the repo yet, so the UI must not pretend to show a real stone finish. |
 
-Finish-specific coverage currently includes Alpine White, Angola Black, Golden Crust Light and Dark, Honey Comb, Ivory Sand, Juparana, New Grey, Steel Blue, Tan Brown, and Zen Grey. Juparana and Zen Grey also have secondary frames in the source asset folder, but the secondary-frame presentation is intentionally left to `NEXT-STONELIB-IMG-002`.
+Finish-specific coverage currently includes Alpine White, Angola Black, Golden Crust Light and Dark, Honey Comb, Ivory Sand, Juparana, New Grey, Steel Blue, Tan Brown, and Zen Grey. Juparana and Zen Grey also have approved secondary frames wired as active-finish support media with lightbox frame selection.
 
 Controlled default/fallback coverage currently includes Blueocean and Tuscany. Blueocean remains a controlled fallback because no matching shared-drive source exists in the current-site scope. Tuscany uses cut-level source images for Vein Cut and Cross Cut, but those images are intentionally treated as variant-level defaults rather than finish-specific honed/polished/sandblasted photos.
 

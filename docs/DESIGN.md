@@ -145,6 +145,8 @@ Priorities:
 Interaction rules:
 - Click or explicit controls should change material state. Hover may preview only when it does not create ambiguity.
 - Active finish state must remain stable across left and right controls.
+- Secondary frames are supporting inspection media for the selected finish, not new finish states.
+- Secondary frame thumbnails should appear only when approved source images exist; do not show placeholder secondary frames.
 - Mobile layout must prioritize readable finish names and image inspection over decorative layout.
 - Placeholder usage must be visible enough to be honest but quiet enough not to dominate the tool.
 
@@ -292,6 +294,6 @@ Before shipping a user-facing page or component, check:
 
 ## Open Design Debt
 - Final parity for Home, Our Story, Articles, and Contact still depends on approved Figma/WordPress references.
-- Stone Library finish image coverage and secondary frame behavior remain active design/data work.
+- Stone Library finish image coverage remains active data work; secondary frame behavior is implemented for approved Juparana and Zen Grey source frames.
 - Future sample ordering needs a real form/backend decision before UI can imply submission.
 - The website still needs a clearer long-term content system for Project Spotlight, Material Mastery, Behind the Scenes, and Concrete vs Stone themes.

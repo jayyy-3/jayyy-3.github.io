@@ -4,6 +4,14 @@ export interface StoneImageAsset {
     imageUrl: string;
     thumbUrl?: string;
     alt?: string;
+    secondaryImages?: SecondaryStoneImageAsset[];
+}
+
+export interface SecondaryStoneImageAsset {
+    imageUrl: string;
+    thumbUrl?: string;
+    alt?: string;
+    label?: string;
 }
 
 type VariantImageMap = Partial<Record<FinishKey | 'default', StoneImageAsset>>;
@@ -28,11 +36,27 @@ function productImage(
     relativePath: string,
     alt: string,
     thumbPath?: string,
+    secondaryImages: SecondaryStoneImageAsset[] = [],
 ): StoneImageAsset {
     return {
         imageUrl: resolveProductImage(relativePath),
         thumbUrl: thumbPath ? resolveProductImage(thumbPath) : undefined,
         alt,
+        secondaryImages,
+    };
+}
+
+function secondaryProductImage(
+    relativePath: string,
+    alt: string,
+    label = 'Secondary frame',
+    thumbPath?: string,
+): SecondaryStoneImageAsset {
+    return {
+        imageUrl: resolveProductImage(relativePath),
+        thumbUrl: thumbPath ? resolveProductImage(thumbPath) : undefined,
+        alt,
+        label,
     };
 }
 
@@ -63,22 +87,57 @@ const stoneFinishImages: Record<string, VariantImageMap> = {
         default: productImage(
             'Zen Grey/Zen Grey_Flamed_Urblo_1.jpeg',
             'Zen Grey flamed finish',
+            undefined,
+            [
+                secondaryProductImage(
+                    'Zen Grey/Zen Grey_Flamed_Urblo_2.jpeg',
+                    'Zen Grey flamed finish alternate frame',
+                ),
+            ],
         ),
         flamed: productImage(
             'Zen Grey/Zen Grey_Flamed_Urblo_1.jpeg',
             'Zen Grey flamed finish',
+            undefined,
+            [
+                secondaryProductImage(
+                    'Zen Grey/Zen Grey_Flamed_Urblo_2.jpeg',
+                    'Zen Grey flamed finish alternate frame',
+                ),
+            ],
         ),
         sawn: productImage(
             'Zen Grey/Zen Grey_Sawn_Urblo_1.jpeg',
             'Zen Grey sawn finish',
+            undefined,
+            [
+                secondaryProductImage(
+                    'Zen Grey/Zen Grey_Sawn_Urblo_2.jpeg',
+                    'Zen Grey sawn finish alternate frame',
+                ),
+            ],
         ),
         honed: productImage(
             'Zen Grey/Zen Grey_Honed_Urblo_1.jpeg',
             'Zen Grey honed finish',
+            undefined,
+            [
+                secondaryProductImage(
+                    'Zen Grey/Zen Grey_Honed_Urblo_2.jpeg',
+                    'Zen Grey honed finish alternate frame',
+                ),
+            ],
         ),
         polished: productImage(
             'Zen Grey/Zen Grey_Polished_Urblo_1.jpeg',
             'Zen Grey polished finish',
+            undefined,
+            [
+                secondaryProductImage(
+                    'Zen Grey/Zen Grey_Polished_Urblo_2.jpeg',
+                    'Zen Grey polished finish alternate frame',
+                ),
+            ],
         ),
     },
     'alpine-white': {
@@ -167,22 +226,57 @@ const stoneFinishImages: Record<string, VariantImageMap> = {
         default: productImage(
             'Juparana/Juparana_Flamed_Urblo_1.jpeg',
             'Juparana flamed finish',
+            undefined,
+            [
+                secondaryProductImage(
+                    'Juparana/Juparana_Flamed _Urblo_2.jpeg',
+                    'Juparana flamed finish alternate frame',
+                ),
+            ],
         ),
         flamed: productImage(
             'Juparana/Juparana_Flamed_Urblo_1.jpeg',
             'Juparana flamed finish',
+            undefined,
+            [
+                secondaryProductImage(
+                    'Juparana/Juparana_Flamed _Urblo_2.jpeg',
+                    'Juparana flamed finish alternate frame',
+                ),
+            ],
         ),
         sawn: productImage(
             'Juparana/Juparana_Sawn_Urblo_1.jpeg',
             'Juparana sawn finish',
+            undefined,
+            [
+                secondaryProductImage(
+                    'Juparana/Juparana_Sawn _Urblo_2.jpeg',
+                    'Juparana sawn finish alternate frame',
+                ),
+            ],
         ),
         honed: productImage(
             'Juparana/Juparana_Honed_Urblo_1.jpeg',
             'Juparana honed finish',
+            undefined,
+            [
+                secondaryProductImage(
+                    'Juparana/Juparana_Honed _Urblo_2.jpeg',
+                    'Juparana honed finish alternate frame',
+                ),
+            ],
         ),
         polished: productImage(
             'Juparana/Juparana_Polished_Urblo_1.jpeg',
             'Juparana polished finish',
+            undefined,
+            [
+                secondaryProductImage(
+                    'Juparana/Juparana_Polished_Urblo_2.jpeg',
+                    'Juparana polished finish alternate frame',
+                ),
+            ],
         ),
     },
     'ivory-sand': {
