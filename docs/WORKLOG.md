@@ -1756,6 +1756,49 @@ Last updated: 2026-05-25
 - `NOW-ADMIN-AUTH-RLS-001`
 - `NOW-CLOUDFLARE-PAGES-DEPLOY-001`
 
+## Entry - 2026-05-25 (Motion Polish)
+
+### Scope
+- Added shared structured-number motion for Urblo proof metrics.
+- Applied count-up behavior to homepage metrics and Our Story counters.
+- Added restrained route enter transitions keyed by pathname so public page changes feel smoother without delaying route-state content.
+- Kept dates, dimensions, specification text, filter counts, native select option counts, and Stone Library card scan counts static after motion review because those numbers support fast inspection rather than brand proof.
+- Updated the design, architecture, handoff, roadmap, worklog, and machine task queue to record the motion boundary for future agents.
+
+### Changed Files
+- `src/App.tsx`
+- `src/components/AnimatedNumber.tsx`
+- `src/components/homepage/HomepageSections.tsx`
+- `src/pages/OurStory.tsx`
+- `docs/ARCHITECTURE.md`
+- `docs/DESIGN.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- Browser QA: homepage proof metrics render final values with zero horizontal overflow.
+- Browser QA: Our Story proof counters render final values with zero horizontal overflow.
+- Browser QA: Stone Library result count and card finish/variant counts remain immediate/static scan text, not count-up targets.
+- Browser QA: clicking from `/projects` at scroll depth into `/projects/moon-gate-woolley-street` lands on the detail page with `scrollY=0` and zero horizontal overflow.
+- Browser QA: unknown public route still renders the deliberate Page not found state with zero horizontal overflow.
+
+### Risks and Gaps
+- The in-app browser reported `prefers-reduced-motion: reduce`, so browser QA directly verified reduced-motion fallback and final values. The non-reduced count-up path is covered by implementation review and runtime gates, but should still be visually checked in a normal-motion browser before production sign-off if available.
+- This pass does not change Supabase forms, admin CMS, article structure, or broad legacy project migration.
+
+### Next Handoff
+- `NEXT-UI-PARITY-001`
+- `NOW-FORMS-SUPABASE-001`
+- `NOW-ADMIN-AUTH-RLS-001`
+
 ## Entry Template (Use for Every Future Session)
 
 ### Date

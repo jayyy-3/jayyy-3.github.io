@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import CountUp from 'react-countup';
+import AnimatedNumber from '../components/AnimatedNumber';
 
 export default function OurStory() {
   const counterVariants = {
@@ -82,10 +82,13 @@ export default function OurStory() {
               whileInView="visible"
               viewport={{ once: true, amount: 0.3 }}
             >
-              <CountUp end={item.end} duration={2} className="text-[64px] font-semibold leading-none" />
-              <span className="ml-1 text-[64px] font-semibold leading-none text-[var(--urblo-lime)]">
-                {item.suffix}
-              </span>
+              <AnimatedNumber
+                value={item.end}
+                suffix={item.suffix}
+                duration={2}
+                className="text-[64px] font-semibold leading-none"
+                suffixClassName="ml-1 text-[var(--urblo-lime)]"
+              />
               <div className="mt-4 text-[18px] uppercase tracking-[0.12em] text-white/76">
                 {item.label}
               </div>

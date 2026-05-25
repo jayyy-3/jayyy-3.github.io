@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useLayoutEffect } from 'react';
 import type { ReactNode } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
 import {
     BrowserRouter,
     Route,
@@ -219,6 +220,130 @@ function loadPage(page: ReactNode, options: { headerOffset?: boolean } = {}) {
     return <Suspense fallback={<PageLoading headerOffset={options.headerOffset} />}>{page}</Suspense>;
 }
 
+function AnimatedRoutes() {
+    const location = useLocation();
+    const shouldReduceMotion = useReducedMotion();
+
+    return (
+        <motion.div
+            key={location.pathname}
+            initial={shouldReduceMotion ? false : { opacity: 0, y: 10 }}
+            animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+            transition={{ duration: shouldReduceMotion ? 0.01 : 0.22, ease: [0.22, 1, 0.36, 1] }}
+        >
+            <Routes location={location}>
+                <Route
+                    path="/"
+                    element={
+                        <HomepageLayout>
+                            {loadPage(<Home />)}
+                        </HomepageLayout>
+                    }
+                />
+
+                <Route
+                    path="/stone-library"
+                    element={
+                        <DefaultLayout>
+                            {loadPage(<StoneLibraryPage />)}
+                        </DefaultLayout>
+                    }
+                />
+
+                <Route
+                    path="/stone-library/:stoneGroupId"
+                    element={
+                        <DefaultLayout>
+                            {loadPage(<StoneLibraryDetailPage />)}
+                        </DefaultLayout>
+                    }
+                />
+
+                <Route
+                    path="/products"
+                    element={
+                        <DefaultLayout bgImage={ROUTE_BANNERS.products}>
+                            {loadPage(<ProductsPage />)}
+                        </DefaultLayout>
+                    }
+                />
+
+                <Route
+                    path="/products/:slug"
+                    element={
+                        <DefaultLayout bgImage={ROUTE_BANNERS.materials}>
+                            {loadPage(<ProductDetailPage />)}
+                        </DefaultLayout>
+                    }
+                />
+
+                <Route
+                    path="/projects"
+                    element={
+                        <DefaultLayout bgImage={ROUTE_BANNERS.projects}>
+                            {loadPage(<ProjectsPage />)}
+                        </DefaultLayout>
+                    }
+                />
+
+                <Route
+                    path="/projects/:slug"
+                    element={
+                        <DefaultLayout showBanner={false}>
+                            {loadPage(<ProjectDetailsPage />, { headerOffset: true })}
+                        </DefaultLayout>
+                    }
+                />
+
+                <Route
+                    path="/our-story"
+                    element={
+                        <DefaultLayout bgImage={ROUTE_BANNERS.ourStory}>
+                            {loadPage(<OurStoryPage />)}
+                        </DefaultLayout>
+                    }
+                />
+
+                <Route
+                    path="/contact"
+                    element={
+                        <DefaultLayout bgImage={ROUTE_BANNERS.contact}>
+                            {loadPage(<ContactPage />)}
+                        </DefaultLayout>
+                    }
+                />
+
+                <Route
+                    path="/articles"
+                    element={
+                        <DefaultLayout bgImage={ROUTE_BANNERS.articles}>
+                            {loadPage(<ArticlesPage />)}
+                        </DefaultLayout>
+                    }
+                />
+
+                <Route
+                    path="/articles/:slug"
+                    element={
+                        <DefaultLayout showBanner={false}>
+                            {loadPage(<ArticlePage />, { headerOffset: true })}
+                        </DefaultLayout>
+                    }
+                />
+
+                <Route
+                    path="*"
+                    element={
+                        <DefaultLayout showBanner={false}>
+                            {loadPage(<NotFoundPage />, { headerOffset: true })}
+                        </DefaultLayout>
+                    }
+                />
+            </Routes>
+        </motion.div>
+    );
+}
+
 export default function App() {
     return (
         <>
@@ -226,115 +351,7 @@ export default function App() {
             <BrowserRouter>
                 <TitleUpdater />
                 <ScrollRestoration />
-                <Routes>
-                    <Route
-                        path="/"
-                        element={
-                            <HomepageLayout>
-                                {loadPage(<Home />)}
-                            </HomepageLayout>
-                        }
-                    />
-
-                    <Route
-                        path="/stone-library"
-                        element={
-                            <DefaultLayout>
-                                {loadPage(<StoneLibraryPage />)}
-                            </DefaultLayout>
-                        }
-                    />
-
-                    <Route
-                        path="/stone-library/:stoneGroupId"
-                        element={
-                            <DefaultLayout>
-                                {loadPage(<StoneLibraryDetailPage />)}
-                            </DefaultLayout>
-                        }
-                    />
-
-                    <Route
-                        path="/products"
-                        element={
-                            <DefaultLayout bgImage={ROUTE_BANNERS.products}>
-                                {loadPage(<ProductsPage />)}
-                            </DefaultLayout>
-                        }
-                    />
-
-                    <Route
-                        path="/products/:slug"
-                        element={
-                            <DefaultLayout bgImage={ROUTE_BANNERS.materials}>
-                                {loadPage(<ProductDetailPage />)}
-                            </DefaultLayout>
-                        }
-                    />
-
-                    <Route
-                        path="/projects"
-                        element={
-                            <DefaultLayout bgImage={ROUTE_BANNERS.projects}>
-                                {loadPage(<ProjectsPage />)}
-                            </DefaultLayout>
-                        }
-                    />
-
-                    <Route
-                        path="/projects/:slug"
-                        element={
-                            <DefaultLayout showBanner={false}>
-                                {loadPage(<ProjectDetailsPage />, { headerOffset: true })}
-                            </DefaultLayout>
-                        }
-                    />
-
-                    <Route
-                        path="/our-story"
-                        element={
-                            <DefaultLayout bgImage={ROUTE_BANNERS.ourStory}>
-                                {loadPage(<OurStoryPage />)}
-                            </DefaultLayout>
-                        }
-                    />
-
-                    <Route
-                        path="/contact"
-                        element={
-                            <DefaultLayout bgImage={ROUTE_BANNERS.contact}>
-                                {loadPage(<ContactPage />)}
-                            </DefaultLayout>
-                        }
-                    />
-
-                    <Route
-                        path="/articles"
-                        element={
-                            <DefaultLayout bgImage={ROUTE_BANNERS.articles}>
-                                {loadPage(<ArticlesPage />)}
-                            </DefaultLayout>
-                        }
-                    />
-
-                    <Route
-                        path="/articles/:slug"
-                        element={
-                            <DefaultLayout showBanner={false}>
-                                {loadPage(<ArticlePage />, { headerOffset: true })}
-                            </DefaultLayout>
-                        }
-                    />
-
-                    <Route
-                        path="*"
-                        element={
-                            <DefaultLayout showBanner={false}>
-                                {loadPage(<NotFoundPage />, { headerOffset: true })}
-                            </DefaultLayout>
-                        }
-                    />
-                </Routes>
+                <AnimatedRoutes />
             </BrowserRouter>
         </>
     );

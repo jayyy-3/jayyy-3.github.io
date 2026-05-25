@@ -259,6 +259,8 @@ Avoid:
 - Motion should communicate state, focus, or transition.
 - Avoid motion that delays inspection of material or reading of specs.
 - Scroll/centering behavior must not fight user intent.
+- Page transitions should stay restrained: short opacity/vertical movement, no decorative wipes, and reduced-motion support.
+- Numeric count-up motion belongs only on structured proof metrics. Do not animate dates, dimensions, prices, product specifications, body copy numbers, native select option labels, filter counts, or material-card scan counts.
 
 ### Mobile
 Mobile is not a squeezed desktop page.

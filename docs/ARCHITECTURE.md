@@ -112,6 +112,13 @@ Route state contract:
 - Product detail and article detail routes render deliberate loading, not-found, and load-error states before showing detail content.
 - `scripts/agent-smoke.sh` includes unknown-route and missing-product route-shell coverage; browser QA is still required for rendered copy/state checks.
 - Client-side route navigation scrolls to the top for new PUSH/REPLACE navigations while preserving POP/back behavior.
+- Public route changes are wrapped by `AnimatedRoutes` in `src/App.tsx` with a restrained Framer Motion enter transition keyed by pathname. Query/filter changes do not trigger full-page transitions, route-state content is not held behind exit animation, and reduced-motion preferences collapse the movement.
+
+## UI Motion Contract
+- `src/components/AnimatedNumber.tsx` is the shared count-up component for structured numeric UI.
+- Approved current usages: homepage metrics and Our Story proof counters.
+- Do not use count-up for dates, sizes, dimensions, product specifications, editorial body copy, prices, native select option labels, filter result counts, or Stone Library card scan counts.
+- The component preserves final text for assistive technology and renders final values immediately when reduced motion is requested.
 
 ## Navigation Contract vs Implemented Routes
 

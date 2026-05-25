@@ -16,6 +16,7 @@ import {
   type HomepageMetric,
   type HomepageProject,
 } from '../../data/homepage';
+import AnimatedNumber from '../AnimatedNumber';
 
 function Reveal({
   children,
@@ -849,9 +850,10 @@ function ProductShowcaseSection() {
 function MetricCard({ metric }: { metric: HomepageMetric }) {
   return (
     <div className="border-b border-black/80 pb-5">
-      <div className="text-[72px] font-semibold leading-none text-black md:text-[96px]">
-        {metric.value}
-      </div>
+      <AnimatedNumber
+        value={metric.value}
+        className="block text-[72px] font-semibold leading-none text-black md:text-[96px]"
+      />
       <p className="mt-4 text-[16px] leading-[1.9] text-[var(--urblo-text)]">
         {metric.label}
       </p>

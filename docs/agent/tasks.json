@@ -625,6 +625,42 @@
       ]
     },
     {
+      "id": "NEXT-MOTION-POLISH-001",
+      "status": "done",
+      "priority": 11.1,
+      "summary": "Add mature route transitions and structured numeric count-up motion.",
+      "files": [
+        "src/App.tsx",
+        "src/components/AnimatedNumber.tsx",
+        "src/components/homepage/HomepageSections.tsx",
+        "src/pages/OurStory.tsx",
+        "docs/ARCHITECTURE.md",
+        "docs/DESIGN.md",
+        "docs/HANDOFF.md",
+        "docs/NEXT_STEPS.md",
+        "docs/WORKLOG.md",
+        "docs/agent/tasks.json"
+      ],
+      "notes": [
+        "2026-05-25: Implemented a shared AnimatedNumber component for structured proof metrics, with reduced-motion fallback and one-time viewport-triggered count-up behavior.",
+        "2026-05-25: Added subtle enter transitions in src/App.tsx keyed by pathname so page changes feel deliberate without animating query/filter changes or delaying route-state content.",
+        "Dates, dimensions, product specifications, body copy, native select option counts, Stone Library filter counts, and Stone Library card scan counts are intentionally not animated."
+      ],
+      "acceptance": [
+        "Homepage metrics and Our Story proof counters animate from zero to their final structured values.",
+        "Public route changes use a restrained opacity/vertical transition and respect reduced-motion preferences.",
+        "Motion does not block reading, cause horizontal overflow, or animate dates/specification/tooling text."
+      ],
+      "verification": [
+        "npm run build",
+        "npm run lint",
+        "npx tsc -b",
+        "npm run agent:smoke",
+        "npm run agent:check",
+        "git diff --check"
+      ]
+    },
+    {
       "id": "NEXT-SAMPLE-REQUEST-001",
       "status": "later",
       "priority": 32,

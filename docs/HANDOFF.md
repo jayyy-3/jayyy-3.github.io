@@ -28,6 +28,7 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 ## Latest Verification Snapshot
 - Last full runtime gate on 2026-05-25: `npm run build`, `npm run lint`, `npx tsc -b`, and `npm run agent:smoke` pass. Build keeps the previous healthy JavaScript chunk profile; Browserslist staleness notice remains.
 - Last docs/harness gate on 2026-05-25: `npm run agent:check` and `git diff --check` pass.
+- Recent motion polish on 2026-05-25: route changes now use restrained pathname-keyed enter transitions, and proof metrics use shared count-up motion with reduced-motion fallback.
 - Recent browser QA on 2026-05-25: homepage hero is full viewport at 1440x900 and 390x844; mobile does not select the MP4 source; desktop selects the MP4 with `preload="none"`.
 - Recent video QA on 2026-05-25: `public/media/launch/home/urblo-hero.mp4` was re-encoded from about 16MB to about 3MB while preserving 1280x720 playback; desktop video reached `readyState=4`, and mobile still selected no MP4 source.
 - Recent browser QA on 2026-05-25: article detail at 320px, contact at 390px, Products, Our Story, missing project, unknown route, Product detail, and Stone Library detail all reported zero horizontal overflow and no fresh console errors after `react-helmet` removal.
@@ -67,7 +68,7 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 - Homepage video is now a controlled, optimized static launch asset. Live Cloudflare preview should still verify actual LCP/network behavior after deployment, and Cloudflare Stream/R2 remains optional for adaptive video management.
 
 ## Next Recommended Action
-If account access is unavailable, continue low-risk runtime polish under `NEXT-UI-PARITY-001` and media performance work under `NOW-ASSET-MIGRATION-001`, while leaving article claim cleanup and broad legacy project migration paused until the user resumes them. Start `NOW-FORMS-SUPABASE-001`, `NOW-ADMIN-AUTH-RLS-001`, and `NOW-CLOUDFLARE-PAGES-DEPLOY-001` only when the required Supabase, Turnstile/email, or Cloudflare access is available.
+If account access is unavailable, continue low-risk runtime polish under `NEXT-UI-PARITY-001` and media performance work under `NOW-ASSET-MIGRATION-001`, while leaving article claim cleanup and broad legacy project migration paused until the user resumes them. `NEXT-MOTION-POLISH-001` is complete unless browser QA finds a motion regression. Start `NOW-FORMS-SUPABASE-001`, `NOW-ADMIN-AUTH-RLS-001`, and `NOW-CLOUDFLARE-PAGES-DEPLOY-001` only when the required Supabase, Turnstile/email, or Cloudflare access is available.
 
 ## Guardrails
 - Use repo-root relative paths in committed docs.

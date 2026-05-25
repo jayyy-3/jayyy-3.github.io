@@ -85,6 +85,7 @@ Source of truth: `docs/agent/tasks.json`.
 - `NEXT-PRODUCT-DETAIL-CONVERSION-001`: product details now show selected configuration feedback, a prefilled discussion CTA, specification caveats, and pending-image treatment for missing selector imagery.
 - `NEXT-STONELIB-IMG-002`: secondary finish frames are implemented for approved Juparana and Zen Grey source frames as active-finish support media with lightbox frame selection.
 - `NEXT-SLUG-URL-NORMALIZE-001`: product and article public slugs now use lowercase kebab-case with explicit Cloudflare 301 redirects and runtime alias handling for old URLs.
+- `NEXT-MOTION-POLISH-001`: homepage and Our Story proof metrics now count up from zero, and public route changes use restrained reduced-motion-aware enter transitions.
 - `NEXT-UI-PARITY-001` partial launch polish: homepage hero now fills the first viewport, route transitions reset to top, no-banner error/loading states clear the header, article detail no longer double-renders a route banner, article mobile overflow has a CSS stopgap, Contact blocks empty email drafts, product renders are labeled as geometry previews with separate material previews, Stone Library images disclose finish-specific/reference status, and `react-helmet` was removed to clear React 19 strict-mode console noise.
 
 Older completion details live in `docs/WORKLOG.md`.
