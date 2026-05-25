@@ -1,15 +1,19 @@
 import type {
     FinishCapabilityVM,
+    StoneStatus,
     StoneCutOptionRaw,
     StonePriceTierLabel,
     StonePriceTierLevel,
 } from '../../types/stone-library';
+import StatusPill from './StatusPill';
+import type { StatusPillTone } from './StatusPill';
 
 interface SpecsPanelProps {
     stoneType: string;
     originLabel: string;
     rawBlockLabel: string;
     dlName: string | null;
+    availabilityStatus: StoneStatus;
     availabilityLabel: string;
     priceRange: string;
     priceTierLevel: StonePriceTierLevel | null;
@@ -29,6 +33,20 @@ function capabilityBadge(capability: FinishCapabilityVM['capability']): string {
     return 'No';
 }
 
+function capabilityTone(capability: FinishCapabilityVM['capability']): StatusPillTone {
+    if (capability === 'yes') {
+        return 'available';
+    }
+    if (capability === 'tbc') {
+        return 'upcoming';
+    }
+    return 'unavailable';
+}
+
+function availabilityBadgeLabel(status: StoneStatus): string {
+    return status === 'tbc' ? 'Upcoming' : 'Available';
+}
+
 function cutOrientationLabel(value: string): string {
     return value
         .replace(/[-_]/g, ' ')
@@ -40,6 +58,7 @@ export default function SpecsPanel({
     originLabel,
     rawBlockLabel,
     dlName,
+    availabilityStatus,
     availabilityLabel,
     priceRange,
     priceTierLevel,
@@ -67,7 +86,12 @@ export default function SpecsPanel({
                     <p className="urblo-meta text-black/55">
                         Availability
                     </p>
-                    <p className="mt-2 text-base text-black">{availabilityLabel}</p>
+                    <StatusPill
+                        label={availabilityBadgeLabel(availabilityStatus)}
+                        tone={availabilityStatus === 'tbc' ? 'upcoming' : 'available'}
+                        className="mt-3"
+                    />
+                    <p className="mt-3 text-sm leading-6 text-black/62">{availabilityLabel}</p>
                 </div>
                 <div className="rounded-[4px] border border-black/10 bg-white p-4 shadow-none">
                     <p className="urblo-meta text-black/55">
@@ -122,18 +146,10 @@ export default function SpecsPanel({
                             className="flex items-center justify-between gap-3 px-4 py-3 text-sm"
                         >
                             <span className="text-black">{finish.label}</span>
-                            <span
-                                className={[
-                                    'rounded-full px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.08em]',
-                                    finish.capability === 'yes'
-                                        ? 'bg-[#00FF19] text-black'
-                                        : finish.capability === 'tbc'
-                                          ? 'bg-black/6 text-black/65'
-                                          : 'bg-black/4 text-black/50',
-                                ].join(' ')}
-                            >
-                                {capabilityBadge(finish.capability)}
-                            </span>
+                            <StatusPill
+                                label={capabilityBadge(finish.capability)}
+                                tone={capabilityTone(finish.capability)}
+                            />
                         </div>
                     ))}
                 </div>
@@ -153,16 +169,10 @@ export default function SpecsPanel({
                                 <span className="text-black">
                                     {cutOrientationLabel(cut.cutOrientation)}
                                 </span>
-                                <span
-                                    className={[
-                                        'rounded-full px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.08em]',
-                                        cut.available
-                                            ? 'bg-[#00FF19] text-black'
-                                            : 'bg-black/4 text-black/50',
-                                    ].join(' ')}
-                                >
-                                    {cut.available ? 'Available' : 'No'}
-                                </span>
+                                <StatusPill
+                                    label={cut.available ? 'Available' : 'No'}
+                                    tone={cut.available ? 'available' : 'unavailable'}
+                                />
                             </div>
                         ))}
                     </div>

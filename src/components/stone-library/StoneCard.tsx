@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import type { StoneCardVM } from '../../types/stone-library';
+import StatusPill from './StatusPill';
 
 interface StoneCardProps {
   stone: StoneCardVM;
@@ -7,12 +8,6 @@ interface StoneCardProps {
 
 function statusBadgeLabel(status: StoneCardVM['status']): string {
   return status === 'tbc' ? 'Upcoming' : 'Available';
-}
-
-function statusSignalClass(status: StoneCardVM['status']): string {
-  return status === 'tbc'
-    ? 'border border-white/50 bg-black/40'
-    : 'bg-[var(--urblo-lime)]';
 }
 
 export default function StoneCard({ stone }: StoneCardProps) {
@@ -35,16 +30,12 @@ export default function StoneCard({ stone }: StoneCardProps) {
           </div>
         )}
 
-        <span className="absolute left-3 top-3 flex items-center gap-1.5 rounded-[4px] border border-white/20 bg-black/80 px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.06em] text-white shadow-[0_8px_18px_rgba(0,0,0,0.22)] backdrop-blur-sm">
-          <span
-            className={[
-              'h-1.5 w-1.5 flex-none rounded-full',
-              statusSignalClass(stone.status),
-            ].join(' ')}
-            aria-hidden="true"
-          />
-          <span>{statusBadgeLabel(stone.status)}</span>
-        </span>
+        <StatusPill
+          label={statusBadgeLabel(stone.status)}
+          tone={stone.status === 'tbc' ? 'upcoming' : 'available'}
+          surface="overlay"
+          className="absolute left-3 top-3"
+        />
       </div>
 
       <div className="space-y-2.5 p-4">

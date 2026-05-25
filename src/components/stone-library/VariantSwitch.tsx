@@ -1,4 +1,5 @@
 import type { StoneVariantVM } from '../../types/stone-library';
+import StatusPill from './StatusPill';
 
 interface VariantSwitchProps {
     variants: StoneVariantVM[];
@@ -39,20 +40,12 @@ export default function VariantSwitch({
                             ].join(' ')}
                         >
                             <span>{variant.label}</span>
-                            <span
-                                className={[
-                                    'rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em]',
-                                    variant.status === 'tbc'
-                                        ? isActive
-                                            ? 'bg-white/12 text-white'
-                                            : 'bg-black/6 text-black/65'
-                                        : isActive
-                                          ? 'bg-[#00FF19] text-black'
-                                          : 'bg-[rgba(0,255,25,0.12)] text-black',
-                                ].join(' ')}
-                            >
-                                {variantStatusLabel(variant.status)}
-                            </span>
+                            <StatusPill
+                                label={variantStatusLabel(variant.status)}
+                                tone={variant.status === 'tbc' ? 'upcoming' : 'available'}
+                                surface={isActive ? 'dark' : 'light'}
+                                className="py-1"
+                            />
                         </button>
                     );
                 })}

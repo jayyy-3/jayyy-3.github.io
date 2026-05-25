@@ -154,6 +154,7 @@ Interaction rules:
 - Secondary frame thumbnails should appear only when approved source images exist; do not show placeholder secondary frames.
 - Finish imagery must disclose whether the active image is finish-specific, a reference/default view, or pending. Never let fallback imagery read as a confirmed finish photo.
 - Image overlay labels on Stone Library media, including list-card status badges and detail-stage provenance labels, must stay readable across light, dark, and patterned stone: use dark translucent backplates with white text, and reserve Urblo lime for small confirmed/interactive signals rather than broad label fills.
+- Availability/status pills outside imagery should stay light: use a thin Urblo lime outline/wash and medium-weight type for confirmed available states, muted white/neutral pills for upcoming or unavailable states, and avoid heavy black status blocks or full lime badge fills in selectors or data tables.
 - Mobile layout must prioritize readable finish names and image inspection over decorative layout.
 - Placeholder usage must be visible enough to be honest but quiet enough not to dominate the tool.
 

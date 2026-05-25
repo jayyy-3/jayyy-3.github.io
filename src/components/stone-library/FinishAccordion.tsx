@@ -1,4 +1,5 @@
 import type { FinishVM } from '../../types/stone-library';
+import StatusPill from './StatusPill';
 
 interface FinishAccordionProps {
     finishes: FinishVM[];
@@ -49,20 +50,12 @@ export default function FinishAccordion({
                                 aria-pressed={isActive}
                             >
                                 <span className="text-[14px] font-semibold">{finish.label}</span>
-                                <span
-                                    className={[
-                                        'rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.08em]',
-                                        finish.capability === 'tbc'
-                                            ? isActive
-                                                ? 'bg-white/10 text-white'
-                                                : 'bg-black/6 text-black/65'
-                                            : isActive
-                                              ? 'bg-[#00FF19] text-black'
-                                              : 'bg-[rgba(0,255,25,0.12)] text-black',
-                                    ].join(' ')}
-                                >
-                                    {capabilityLabel(finish.capability)}
-                                </span>
+                                <StatusPill
+                                    label={capabilityLabel(finish.capability)}
+                                    tone={finish.capability === 'tbc' ? 'upcoming' : 'available'}
+                                    surface={isActive ? 'dark' : 'light'}
+                                    className="py-1 text-[9px]"
+                                />
                             </button>
 
                             {isActive ? (

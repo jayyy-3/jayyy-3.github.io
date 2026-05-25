@@ -4,6 +4,7 @@ import FinishAccordion from '../components/stone-library/FinishAccordion';
 import FinishLightbox from '../components/stone-library/FinishLightbox';
 import ImageStage from '../components/stone-library/ImageStage';
 import SpecsPanel from '../components/stone-library/SpecsPanel';
+import StatusPill from '../components/stone-library/StatusPill';
 import VariantSwitch from '../components/stone-library/VariantSwitch';
 import StoneLibraryService from '../service/StoneLibraryService';
 
@@ -70,9 +71,10 @@ export default function StoneLibraryDetailPage() {
             <span className="rounded-[4px] border border-black/10 bg-[rgba(239,239,239,0.55)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-black">
               {detail.stoneType}
             </span>
-            <span className="rounded-[4px] border border-black/10 bg-[rgba(239,239,239,0.55)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-black">
-              {statusLabel(detail.status)}
-            </span>
+            <StatusPill
+              label={statusLabel(detail.status)}
+              tone={detail.status === 'tbc' ? 'upcoming' : 'available'}
+            />
           </div>
           <p className="urblo-eyebrow mt-6">Stone Detail</p>
           <h1 className="urblo-page-title">{detail.name}</h1>
@@ -113,6 +115,7 @@ export default function StoneLibraryDetailPage() {
               originLabel={detail.originLabel}
               rawBlockLabel={detail.rawBlockLabel}
               dlName={detail.dlName}
+              availabilityStatus={detail.status}
               availabilityLabel={detail.availabilityLabel}
               priceRange={detail.priceRange}
               priceTierLevel={detail.priceTierLevel}

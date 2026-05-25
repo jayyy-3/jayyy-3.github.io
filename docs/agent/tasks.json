@@ -697,7 +697,8 @@
         "npx tsc -b",
         "npm run agent:smoke",
         "npm run agent:check",
-        "git diff --check"
+        "git diff --check",
+        "Browser QA: Stone Library list, Juparana detail, and Harcourt detail status pills checked at desktop and 390px mobile widths with no heavy black status blocks and no page-level horizontal overflow."
       ]
     },
     {
@@ -727,6 +728,44 @@
         "Urblo lime is used as a restrained confirmed/action signal, not as a large overlay that distorts material inspection or implies pending/reference imagery is approved.",
         "Collapsed finish labels remain readable while keeping stone texture inspectable.",
         "Stone Library list-card status badges and detail-stage image labels use a coherent overlay treatment."
+      ],
+      "verification": [
+        "npm run build",
+        "npm run lint",
+        "npx tsc -b",
+        "npm run agent:smoke",
+        "npm run agent:check",
+        "git diff --check"
+      ]
+    },
+    {
+      "id": "NEXT-STONELIB-STATUS-PILL-CONSISTENCY-001",
+      "status": "done",
+      "priority": 11.4,
+      "summary": "Unify Stone Library external availability/status pills with a lightweight lime status system.",
+      "files": [
+        "src/components/stone-library/StatusPill.tsx",
+        "src/components/stone-library/StoneCard.tsx",
+        "src/pages/StoneLibraryDetailPage.tsx",
+        "src/components/stone-library/VariantSwitch.tsx",
+        "src/components/stone-library/FinishAccordion.tsx",
+        "src/components/stone-library/SpecsPanel.tsx",
+        "docs/DESIGN.md",
+        "docs/HANDOFF.md",
+        "docs/NEXT_STEPS.md",
+        "docs/WORKLOG.md",
+        "docs/agent/tasks.json"
+      ],
+      "notes": [
+        "2026-05-25: Added a shared Stone Library StatusPill component with lightweight light, dark, and image-overlay surfaces.",
+        "2026-05-25: Detail header, variant switch, finish selector, availability summary, finish capability rows, and cut option rows now show Available/Upcoming/No as dot-led status pills.",
+        "2026-05-25: Heavy black status blocks and full lime badge fills were removed from Stone Library external availability states; Available now uses a thin lime outline/wash with medium-weight type."
+      ],
+      "acceptance": [
+        "Available outside image overlays uses a lightweight Urblo lime outline/wash rather than a black block or full lime pill.",
+        "Upcoming and No states are visually distinct but muted, so they do not imply approved availability.",
+        "Detail header, variant switch, finish selector, Specs availability summary, Finish Capability rows, Cut Options rows, and Stone Library card badges use one coherent status language.",
+        "Missing-data copy such as DL Name TBC and empty-state messages remains plain text, not status chrome."
       ],
       "verification": [
         "npm run build",

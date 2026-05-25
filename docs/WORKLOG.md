@@ -1881,6 +1881,47 @@ Last updated: 2026-05-25
 - `NOW-FORMS-SUPABASE-001`
 - `NOW-ADMIN-AUTH-RLS-001`
 
+## Entry - 2026-05-25 (Stone Library Status Pill Consistency)
+
+### Scope
+- Followed up on the external Stone Library `Available` states after user feedback that the outside status badges also needed the same polish.
+- Added a shared `StatusPill` component for Stone Library status presentation across light, dark, and image-overlay contexts.
+- Converted detail header status, variant status, finish selector status, Specs availability summary, Finish Capability rows, Cut Options rows, and card status badges to the same lightweight status system.
+- Reworked external availability badges into a lighter lime ghost treatment after user feedback that black status blocks felt too heavy for Urblo.
+- Removed broad lime fills from external availability badges; Urblo lime now appears as a thin outline/wash and small confirmed-available signal.
+- Left missing-data and empty-state text as plain copy rather than turning every `TBC` or `No` string into status chrome.
+
+### Changed Files
+- `src/components/stone-library/StatusPill.tsx`
+- `src/components/stone-library/StoneCard.tsx`
+- `src/pages/StoneLibraryDetailPage.tsx`
+- `src/components/stone-library/VariantSwitch.tsx`
+- `src/components/stone-library/FinishAccordion.tsx`
+- `src/components/stone-library/SpecsPanel.tsx`
+- `docs/DESIGN.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run build`: pass.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- Browser QA: Stone Library list, Juparana detail, and Harcourt detail status pills render with no heavy black status blocks at desktop and 390px mobile widths, and the checked routes have no page-level horizontal overflow.
+
+### Risks and Gaps
+- The price tier meter still uses Urblo lime bars by design; it is a price scale, not an availability badge.
+- Production contrast should be checked again after any future Stone Library visual system change or image source swap.
+
+### Next Handoff
+- `NEXT-UI-PARITY-001`
+- `NOW-FORMS-SUPABASE-001`
+- `NOW-ADMIN-AUTH-RLS-001`
+
 ## Entry Template (Use for Every Future Session)
 
 ### Date
