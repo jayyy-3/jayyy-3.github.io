@@ -247,7 +247,7 @@ function LegacyProjectDetails({ project }: { project: ProjectData }) {
       <section className="urblo-section-tight border-b border-black/10">
         <div className="urblo-page-container">
           <p className="urblo-eyebrow">Project Details</p>
-          <h1 className="urblo-project-page-title">{project.name}</h1>
+          <h1 className="urblo-page-title">{project.name}</h1>
         </div>
       </section>
       <ProjectBrief project={project} />

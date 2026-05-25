@@ -135,31 +135,28 @@ a {
     color: rgb(255 255 255 / 0.7);
 }
 
-.urblo-page-title {
+.urblo-page-title,
+.urblo-project-page-title {
     margin: 16px 0 0;
     color: var(--urblo-black);
-    font-family: var(--urblo-font-display);
-    font-size: clamp(2.25rem, 2rem + 1vw, 4rem);
-    font-weight: 600;
-    line-height: 1.05;
-    letter-spacing: 0.03em;
-    text-transform: uppercase;
+    font-family: var(--urblo-font-sans);
+    font-size: 50px;
+    font-weight: 300;
+    line-height: 1.1;
+    letter-spacing: 0;
+    text-transform: none;
+    overflow-wrap: anywhere;
 }
 
-.urblo-project-page-title,
+.urblo-page-title--inverse {
+    color: #ffffff;
+}
+
 .urblo-project-hero-title,
 .urblo-project-section-title,
 .urblo-project-card-title {
     font-family: var(--urblo-font-sans);
     letter-spacing: 0;
-}
-
-.urblo-project-page-title {
-    margin: 16px 0 0;
-    color: var(--urblo-black);
-    font-size: 50px;
-    font-weight: 300;
-    line-height: 1.1;
 }
 
 .urblo-project-hero-title {
@@ -184,6 +181,7 @@ a {
 }
 
 @media (min-width: 768px) {
+    .urblo-page-title,
     .urblo-project-page-title {
         font-size: 64px;
     }

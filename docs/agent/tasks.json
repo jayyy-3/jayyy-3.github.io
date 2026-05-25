@@ -630,6 +630,8 @@
       "priority": 11.1,
       "summary": "Add mature route transitions and structured numeric count-up motion.",
       "files": [
+        "package.json",
+        "package-lock.json",
         "src/App.tsx",
         "src/components/AnimatedNumber.tsx",
         "src/components/homepage/HomepageSections.tsx",
@@ -642,14 +644,51 @@
         "docs/agent/tasks.json"
       ],
       "notes": [
-        "2026-05-25: Implemented a shared AnimatedNumber component for structured proof metrics, with reduced-motion fallback and one-time viewport-triggered count-up behavior.",
+        "2026-05-25: Implemented a shared AnimatedNumber component for structured proof metrics, with one-time viewport-triggered count-up behavior.",
         "2026-05-25: Added subtle enter transitions in src/App.tsx keyed by pathname so page changes feel deliberate without animating query/filter changes or delaying route-state content.",
-        "Dates, dimensions, product specifications, body copy, native select option counts, Stone Library filter counts, and Stone Library card scan counts are intentionally not animated."
+        "Dates, dimensions, product specifications, body copy, native select option counts, Stone Library filter counts, and Stone Library card scan counts are intentionally not animated.",
+        "2026-05-25: Replaced react-countup scroll-spy behavior with an in-house IntersectionObserver/requestAnimationFrame counter so homepage and Our Story numbers visibly grow when scrolled into view."
       ],
       "acceptance": [
         "Homepage metrics and Our Story proof counters animate from zero to their final structured values.",
         "Public route changes use a restrained opacity/vertical transition and respect reduced-motion preferences.",
         "Motion does not block reading, cause horizontal overflow, or animate dates/specification/tooling text."
+      ],
+      "verification": [
+        "npm run build",
+        "npm run lint",
+        "npx tsc -b",
+        "npm run agent:smoke",
+        "npm run agent:check",
+        "git diff --check"
+      ]
+    },
+    {
+      "id": "NEXT-PAGE-TITLE-TYPOGRAPHY-001",
+      "status": "done",
+      "priority": 11.2,
+      "summary": "Promote the Projects page title typography to all public page-level titles.",
+      "files": [
+        "src/index.css",
+        "src/pages/Projects.tsx",
+        "src/pages/ProjectDetails.tsx",
+        "src/pages/ArticlePage.tsx",
+        "docs/DESIGN.md",
+        "docs/HANDOFF.md",
+        "docs/NEXT_STEPS.md",
+        "docs/WORKLOG.md",
+        "docs/agent/tasks.json"
+      ],
+      "notes": [
+        "2026-05-25: The global .urblo-page-title style now uses the Projects page title treatment: Avenir LT Std, light 300, normal letter spacing, and no forced uppercase.",
+        "2026-05-25: Article detail hero H1 now uses the same page title system with an inverse color modifier.",
+        "2026-05-25: Page titles allow emergency wrapping, and Article detail hero media height was increased so long article titles do not clip on mobile.",
+        "Card, section, tool, and homepage hero headings intentionally keep their separate typography roles."
+      ],
+      "acceptance": [
+        "Products, Projects, Stone Library, Our Story, Articles, Contact, Product detail, Stone detail, RouteState, and legacy project detail page-level H1s share the Projects title typography.",
+        "Article detail H1 no longer uses the previous Space Grotesk uppercase title style.",
+        "Non-page heading levels such as cards, section headings, Stone Library specs, and homepage hero typography remain intentionally separate."
       ],
       "verification": [
         "npm run build",

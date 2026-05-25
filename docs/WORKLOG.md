@@ -1761,12 +1761,15 @@ Last updated: 2026-05-25
 ### Scope
 - Added shared structured-number motion for Urblo proof metrics.
 - Applied count-up behavior to homepage metrics and Our Story counters.
+- Replaced `react-countup` scroll-spy behavior with an in-house `IntersectionObserver` plus `requestAnimationFrame` counter so numbers visibly grow when the user scrolls to them.
 - Added restrained route enter transitions keyed by pathname so public page changes feel smoother without delaying route-state content.
 - Kept dates, dimensions, specification text, filter counts, native select option counts, and Stone Library card scan counts static after motion review because those numbers support fast inspection rather than brand proof.
 - Updated the design, architecture, handoff, roadmap, worklog, and machine task queue to record the motion boundary for future agents.
 
 ### Changed Files
 - `src/App.tsx`
+- `package.json`
+- `package-lock.json`
 - `src/components/AnimatedNumber.tsx`
 - `src/components/homepage/HomepageSections.tsx`
 - `src/pages/OurStory.tsx`
@@ -1784,15 +1787,55 @@ Last updated: 2026-05-25
 - `npm run agent:smoke`: pass.
 - `npm run agent:check`: pass.
 - `git diff --check`: pass.
-- Browser QA: homepage proof metrics render final values with zero horizontal overflow.
-- Browser QA: Our Story proof counters render final values with zero horizontal overflow.
+- Browser QA: homepage proof metrics start at `0`, show intermediate values after scroll, and reach final values with zero horizontal overflow.
+- Browser QA: Our Story proof counters start at `0`, show intermediate values after scroll, and reach final values with zero horizontal overflow.
 - Browser QA: Stone Library result count and card finish/variant counts remain immediate/static scan text, not count-up targets.
 - Browser QA: clicking from `/projects` at scroll depth into `/projects/moon-gate-woolley-street` lands on the detail page with `scrollY=0` and zero horizontal overflow.
 - Browser QA: unknown public route still renders the deliberate Page not found state with zero horizontal overflow.
 
 ### Risks and Gaps
-- The in-app browser reported `prefers-reduced-motion: reduce`, so browser QA directly verified reduced-motion fallback and final values. The non-reduced count-up path is covered by implementation review and runtime gates, but should still be visually checked in a normal-motion browser before production sign-off if available.
+- Numeric count-up now intentionally runs on viewport entry so the growth is visible. If future accessibility review requires a reduced-motion opt-out for counters, add a scoped prop rather than reverting to library scroll-spy behavior.
 - This pass does not change Supabase forms, admin CMS, article structure, or broad legacy project migration.
+
+### Next Handoff
+- `NEXT-UI-PARITY-001`
+- `NOW-FORMS-SUPABASE-001`
+- `NOW-ADMIN-AUTH-RLS-001`
+
+## Entry - 2026-05-25 (Page Title Typography)
+
+### Scope
+- Promoted the Projects page title typography to the global public page H1 style.
+- Changed `.urblo-page-title` to use `Avenir LT Std`, light `300`, normal letter spacing, and no forced uppercase.
+- Replaced Projects and legacy project detail H1s with the shared page title class.
+- Replaced Article detail's previous Space Grotesk uppercase H1 with the shared page title class plus a white inverse modifier for the image hero.
+- Left homepage hero, card titles, section headings, Stone Library specs headings, and project material-map hero typography unchanged because they are different hierarchy roles.
+- Updated design, handoff, roadmap, worklog, and machine task docs.
+
+### Changed Files
+- `src/index.css`
+- `src/pages/Projects.tsx`
+- `src/pages/ProjectDetails.tsx`
+- `src/pages/ArticlePage.tsx`
+- `docs/DESIGN.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- Browser QA: `/projects`, `/products`, `/stone-library`, `/our-story`, `/contact`, `/articles`, one article detail route, one product detail route, one stone detail route, and one no-banner route state all use `Avenir LT Std`, weight `300`, no forced uppercase, and zero horizontal overflow for page H1s.
+- Browser QA: mobile `/contact` and the long article detail title have zero horizontal overflow after adding page-title wrapping and increasing the article hero image height.
+
+### Risks and Gaps
+- Further editorial/title content can still create unusual wrapping, but current long Contact and article-detail cases are checked at desktop and 390px mobile.
+- This pass does not change card, section, tool, or homepage hero typography.
 
 ### Next Handoff
 - `NEXT-UI-PARITY-001`

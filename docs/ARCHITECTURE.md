@@ -118,7 +118,8 @@ Route state contract:
 - `src/components/AnimatedNumber.tsx` is the shared count-up component for structured numeric UI.
 - Approved current usages: homepage metrics and Our Story proof counters.
 - Do not use count-up for dates, sizes, dimensions, product specifications, editorial body copy, prices, native select option labels, filter result counts, or Stone Library card scan counts.
-- The component preserves final text for assistive technology and renders final values immediately when reduced motion is requested.
+- The component starts at `0`, waits until the number enters the viewport, then animates to the final value once with `IntersectionObserver` and `requestAnimationFrame`.
+- The final value remains exposed through `aria-label` while the visible counter changes.
 
 ## Navigation Contract vs Implemented Routes
 

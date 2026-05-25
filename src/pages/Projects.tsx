@@ -9,7 +9,7 @@ export default function Projects() {
       <section className="urblo-section-tight border-b border-black/10">
         <div className="urblo-page-container">
           <p className="urblo-eyebrow">Portfolio</p>
-          <h1 className="urblo-project-page-title">Projects</h1>
+          <h1 className="urblo-page-title">Projects</h1>
           <p className="urblo-page-copy">
             Browse recent streetscape and civil landscape outcomes that show how Urblo integrates
             natural stone into durable public environments.

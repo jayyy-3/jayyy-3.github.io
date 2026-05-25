@@ -158,7 +158,7 @@ export default function ArticlePage() {
           <img
             src={heroImage}
             alt={meta.title}
-            className="h-[380px] w-full object-cover opacity-75"
+            className="h-[520px] w-full object-cover opacity-75 md:h-[420px]"
             loading="lazy"
             decoding="async"
           />
@@ -167,7 +167,7 @@ export default function ArticlePage() {
         <div className="urblo-page-container absolute inset-0 flex items-end pb-14">
           <div className="max-w-[60rem]">
             <p className="urblo-eyebrow text-white/70">Article</p>
-            <h1 className="mt-4 font-display text-[34px] font-semibold uppercase leading-[1.08] tracking-[0.03em] md:text-[58px]">
+            <h1 className="urblo-page-title urblo-page-title--inverse">
               {meta.title}
             </h1>
           </div>

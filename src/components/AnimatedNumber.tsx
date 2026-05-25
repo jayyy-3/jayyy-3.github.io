@@ -1,5 +1,4 @@
-import { useReducedMotion } from 'framer-motion';
-import CountUp from 'react-countup';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 interface AnimatedNumberProps {
   value: number | string;
@@ -23,6 +22,18 @@ interface ParsedNumber {
 }
 
 const NUMERIC_VALUE_PATTERN = /^([^0-9-]*)(-?\d[\d,]*(?:\.\d+)?)(.*)$/;
+const VIEW_TRIGGER_THRESHOLD = 0.05;
+
+function formatNumber(value: number, decimals: number): string {
+  return value.toLocaleString(undefined, {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  });
+}
+
+function easeOutCubic(progress: number): number {
+  return 1 - Math.pow(1 - progress, 3);
+}
 
 function parseNumberValue(
   value: number | string,
@@ -32,10 +43,7 @@ function parseNumberValue(
 ): ParsedNumber | null {
   if (typeof value === 'number') {
     const resolvedDecimals = decimals ?? (Number.isInteger(value) ? 0 : 1);
-    const formattedNumber = value.toLocaleString(undefined, {
-      minimumFractionDigits: resolvedDecimals,
-      maximumFractionDigits: resolvedDecimals,
-    });
+    const formattedNumber = formatNumber(value, resolvedDecimals);
 
     return {
       end: value,
@@ -65,10 +73,7 @@ function parseNumberValue(
     decimals ?? (normalizedValue.includes('.') ? normalizedValue.split('.')[1]?.length ?? 0 : 0);
   const resolvedPrefix = `${prefix}${parsedPrefix}`;
   const resolvedSuffix = `${parsedSuffix}${suffix}`;
-  const formattedNumber = Number(normalizedValue).toLocaleString(undefined, {
-    minimumFractionDigits: resolvedDecimals,
-    maximumFractionDigits: resolvedDecimals,
-  });
+  const formattedNumber = formatNumber(Number(normalizedValue), resolvedDecimals);
 
   return {
     end,
@@ -91,38 +96,97 @@ export default function AnimatedNumber({
   decimals,
   scrollSpy = true,
 }: AnimatedNumberProps) {
-  const shouldReduceMotion = useReducedMotion();
-  const parsed = parseNumberValue(value, prefix, suffix, decimals);
+  const numberRef = useRef<HTMLSpanElement | null>(null);
+  const parsed = useMemo(
+    () => parseNumberValue(value, prefix, suffix, decimals),
+    [decimals, prefix, suffix, value],
+  );
+  const [animatedValue, setAnimatedValue] = useState(0);
+
+  useEffect(() => {
+    if (!parsed) {
+      return;
+    }
+
+    let animationFrame = 0;
+    let hasStarted = false;
+
+    setAnimatedValue(0);
+
+    const startAnimation = () => {
+      if (hasStarted) {
+        return;
+      }
+
+      hasStarted = true;
+      const startTime = performance.now();
+      const durationMs = Math.max(duration, 0.1) * 1000;
+
+      const tick = (now: number) => {
+        const progress = Math.min((now - startTime) / durationMs, 1);
+        setAnimatedValue(parsed.end * easeOutCubic(progress));
+
+        if (progress < 1) {
+          animationFrame = window.requestAnimationFrame(tick);
+          return;
+        }
+
+        setAnimatedValue(parsed.end);
+      };
+
+      animationFrame = window.requestAnimationFrame(tick);
+    };
+
+    if (!scrollSpy) {
+      startAnimation();
+
+      return () => {
+        window.cancelAnimationFrame(animationFrame);
+      };
+    }
+
+    const target = numberRef.current;
+
+    if (!target || !('IntersectionObserver' in window)) {
+      startAnimation();
+
+      return () => {
+        window.cancelAnimationFrame(animationFrame);
+      };
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          observer.disconnect();
+          startAnimation();
+        }
+      },
+      {
+        rootMargin: '0px',
+        threshold: VIEW_TRIGGER_THRESHOLD,
+      },
+    );
+
+    observer.observe(target);
+
+    return () => {
+      observer.disconnect();
+      window.cancelAnimationFrame(animationFrame);
+    };
+  }, [duration, parsed, scrollSpy]);
 
   if (!parsed) {
     return <span className={className}>{value}</span>;
   }
 
-  if (shouldReduceMotion) {
-    return (
-      <span className={className} aria-label={parsed.displayValue}>
-        <span aria-hidden="true">
-          {parsed.prefix ? <span className={prefixClassName}>{parsed.prefix}</span> : null}
-          {parsed.formattedNumber}
-          {parsed.suffix ? <span className={suffixClassName}>{parsed.suffix}</span> : null}
-        </span>
-      </span>
-    );
-  }
+  const visibleNumber = formatNumber(animatedValue, parsed.decimals);
 
   return (
-    <span className={className} aria-label={parsed.displayValue}>
+    <span ref={numberRef} className={className} aria-label={parsed.displayValue}>
       <span aria-hidden="true">
         {parsed.prefix ? <span className={prefixClassName}>{parsed.prefix}</span> : null}
-        <CountUp
-          end={parsed.end}
-          duration={duration}
-          decimals={parsed.decimals}
-          separator=","
-          preserveValue
-          enableScrollSpy={scrollSpy}
-          scrollSpyOnce
-        />
+        {visibleNumber}
         {parsed.suffix ? <span className={suffixClassName}>{parsed.suffix}</span> : null}
       </span>
     </span>

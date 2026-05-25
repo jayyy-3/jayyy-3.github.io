@@ -94,6 +94,7 @@ Known brand typography:
 - Accent serif: `Didot LT Std`
 
 Rules:
+- Public page-level H1 typography follows the Projects page pattern: `Avenir LT Std`, light `300`, normal letter spacing, no forced uppercase.
 - Use display-scale type only for true hero or editorial moments.
 - Tool surfaces need smaller, tighter headings.
 - Keep body copy highly readable; do not rely on thin/light type on low-contrast backgrounds.
@@ -176,7 +177,7 @@ Project Material Map pattern:
 - Separate confirmed project facts from MVP-inferred narrative until the designer/project team confirms the content.
 
 Project typography:
-- Project archive/detail title typography should follow the live Urblo WordPress pattern: `Avenir LT Std`, light `300` for hero/page H1, normal letter spacing, no forced uppercase.
+- Project archive/detail title typography is the source reference for global page-level H1s: `Avenir LT Std`, light `300`, normal letter spacing, no forced uppercase.
 - Project section headings use `Avenir LT Std` medium/semibold weight and uppercase sparingly for scanability; avoid `Space Grotesk` for project-page titles unless a future brand decision explicitly changes the project system.
 
 ### Products
