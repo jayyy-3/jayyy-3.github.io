@@ -777,6 +777,44 @@
       ]
     },
     {
+      "id": "NEXT-HOME-HERO-EDGE-REVEAL-001",
+      "status": "done",
+      "priority": 11.5,
+      "summary": "Rework homepage first viewport into edge-aligned three-line Urblo hero copy.",
+      "files": [
+        "src/components/homepage/HomepageSections.tsx",
+        "src/components/site/SiteHeader.tsx",
+        "src/data/homepage.ts",
+        "src/index.css",
+        "docs/DESIGN.md",
+        "docs/HANDOFF.md",
+        "docs/NEXT_STEPS.md",
+        "docs/WORKLOG.md",
+        "docs/agent/tasks.json"
+      ],
+      "notes": [
+        "2026-05-25: Replaced the old homepage hero headline/support copy with three sequential title lines: Design, Source, Deliver.",
+        "2026-05-25: The green punctuation is restricted to the terminal dot on each line, matching the Urblo signal-color rule without turning the hero into a green decoration.",
+        "2026-05-25: Added a shared edge container for the global header and homepage hero so the first viewport no longer inherits the standard 1440px page-container inset."
+      ],
+      "acceptance": [
+        "Homepage hero text renders as three lines: Design., Source., Deliver., with only the punctuation in Urblo lime.",
+        "The old Stone Solutions for Street headline and trusted-partner support copy are removed from the first viewport.",
+        "Logo, nav, and hero copy use the same edge-aligned gutter rather than the standard centered page container.",
+        "Line reveal animation is sequential, restrained, and respects reduced-motion preferences.",
+        "Desktop and mobile first-viewport checks show no text overflow and preserve full-screen video/poster treatment."
+      ],
+      "verification": [
+        "npm run build",
+        "npm run lint",
+        "npx tsc -b",
+        "npm run agent:smoke",
+        "npm run agent:check",
+        "git diff --check",
+        "Playwright screenshot QA: homepage checked at 1440x900 and 390x844 after animation settle; header and hero edge alignment verified visually."
+      ]
+    },
+    {
       "id": "NEXT-SAMPLE-REQUEST-001",
       "status": "later",
       "priority": 32,

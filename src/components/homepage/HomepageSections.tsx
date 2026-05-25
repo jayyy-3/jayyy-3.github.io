@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useState, type ReactNode } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Autoplay, Navigation, Pagination } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -245,7 +245,39 @@ function renderRichText(value: string) {
   });
 }
 
+const heroStatements = ['Design', 'Source', 'Deliver'] as const;
+
+function HeroStatementLine({
+  word,
+  index,
+  reduceMotion,
+}: {
+  word: (typeof heroStatements)[number];
+  index: number;
+  reduceMotion: boolean;
+}) {
+  return (
+    <span className="block overflow-hidden pb-[0.03em]">
+      <motion.span
+        className="block"
+        initial={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: '112%' }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{
+          duration: reduceMotion ? 0 : 0.78,
+          delay: reduceMotion ? 0 : 0.18 + index * 0.22,
+          ease: [0.22, 1, 0.36, 1],
+        }}
+      >
+        {word}
+        <span className="text-[var(--urblo-lime)]">.</span>
+      </motion.span>
+    </span>
+  );
+}
+
 function HeroSection() {
+  const reduceMotion = useReducedMotion() ?? false;
+
   return (
     <section className="relative min-h-[100svh] overflow-hidden bg-black text-white">
       <video
@@ -262,20 +294,20 @@ function HeroSection() {
       </video>
       <div className="absolute inset-0 bg-black/40" />
 
-      <div className="relative mx-auto flex min-h-[100svh] max-w-[1440px] items-end px-6 pb-24 pt-32 md:px-10 lg:px-[94px]">
-        <Reveal className="max-w-[1000px]">
-          <div className="space-y-6">
-            <h1 className="max-w-[1000px] text-[52px] uppercase leading-[1.08] tracking-[0.04em] text-white md:text-[72px] xl:text-[90px]">
-              <span className="font-normal">Stone </span>
-              <span className="font-accent text-[1.02em] italic">Solutions</span>
-              <span className="font-normal"> for Street</span>
-              <span className="text-[var(--urblo-lime)]">.</span>
-            </h1>
-            <p className="max-w-[36rem] text-[20px] font-medium leading-8 text-white/92 md:text-[22px]">
-              {homepageData.hero.eyebrow}
-            </p>
-          </div>
-        </Reveal>
+      <div className="urblo-edge-container relative flex min-h-[100svh] items-end pb-[72px] pt-32 md:pb-[92px] lg:pb-[110px]">
+        <h1
+          className="text-[62px] font-light leading-[0.94] text-white sm:text-[78px] md:text-[104px] lg:text-[132px] xl:text-[158px] 2xl:text-[174px]"
+          aria-label="Design. Source. Deliver."
+        >
+          {heroStatements.map((statement, index) => (
+            <HeroStatementLine
+              key={statement}
+              word={statement}
+              index={index}
+              reduceMotion={reduceMotion}
+            />
+          ))}
+        </h1>
       </div>
     </section>
   );

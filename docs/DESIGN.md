@@ -135,6 +135,8 @@ Avoid making it feel like a generic landing page with decorative cards and abstr
 Hero behavior:
 - The first homepage viewport should feel full-screen on desktop and mobile.
 - Desktop video is acceptable when it does not slow first meaningfully visible content; mobile should use a poster or optimized mobile-specific media until a smaller video variant is approved.
+- The homepage hero and global header may use the edge-aligned container instead of the standard page container when the first viewport needs a full-bleed editorial composition.
+- Homepage hero title motion should be restrained, sequential, and reduced-motion aware. Line reveals are acceptable when they clarify hierarchy rather than delaying access to content.
 
 ### Stone Library
 Stone Library is an inspection and specification aid, not a product marketing grid.

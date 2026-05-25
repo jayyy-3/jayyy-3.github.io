@@ -89,6 +89,7 @@ Source of truth: `docs/agent/tasks.json`.
 - `NEXT-PAGE-TITLE-TYPOGRAPHY-001`: Projects page title typography is now the global public page H1 system, including Article detail.
 - `NEXT-STONELIB-IMAGE-LABEL-READABILITY-001`: Stone Library list/detail image overlay labels now use readable dark translucent surfaces with restrained Urblo lime status/action accents.
 - `NEXT-STONELIB-STATUS-PILL-CONSISTENCY-001`: Stone Library external Available/Upcoming/No states now use shared lightweight status pills instead of heavy black blocks or full lime badge fills.
+- `NEXT-HOME-HERO-EDGE-REVEAL-001`: homepage first viewport now uses edge-aligned header/hero gutters and a sequential three-line `Design. Source. Deliver.` hero title with Urblo-green punctuation.
 - `NEXT-UI-PARITY-001` partial launch polish: homepage hero now fills the first viewport, route transitions reset to top, no-banner error/loading states clear the header, article detail no longer double-renders a route banner, article mobile overflow has a CSS stopgap, Contact blocks empty email drafts, product renders are labeled as geometry previews with separate material previews, Stone Library images disclose finish-specific/reference status, and `react-helmet` was removed to clear React 19 strict-mode console noise.
 
 Older completion details live in `docs/WORKLOG.md`.

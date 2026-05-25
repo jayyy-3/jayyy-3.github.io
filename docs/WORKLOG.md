@@ -1922,6 +1922,44 @@ Last updated: 2026-05-25
 - `NOW-FORMS-SUPABASE-001`
 - `NOW-ADMIN-AUTH-RLS-001`
 
+## Entry - 2026-05-25 (Homepage Edge Hero Reveal)
+
+### Scope
+- Reworked the homepage first viewport after user feedback that the logo, nav, and hero copy were too constrained by the centered page container.
+- Added an edge-aligned container for the global header and homepage hero while leaving standard content pages on the normal readable page container.
+- Replaced the old first-viewport `Stone Solutions for Street` headline and support copy with three sequential hero lines: `Design.`, `Source.`, `Deliver.`
+- Restricted Urblo green to the punctuation dots and made the line reveal reduced-motion aware.
+- Recorded the edge-aligned hero/header pattern in the design contract and machine task queue.
+
+### Changed Files
+- `src/components/homepage/HomepageSections.tsx`
+- `src/components/site/SiteHeader.tsx`
+- `src/data/homepage.ts`
+- `src/index.css`
+- `docs/DESIGN.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- Playwright screenshot QA: homepage checked at 1440x900 and 390x844 after animation settle; header/hero edge alignment, full-viewport video/poster treatment, and no hero text overflow were verified visually.
+
+### Risks and Gaps
+- The desktop hero video remains the controlled static MP4 with mobile poster-only behavior; Cloudflare preview should still verify actual LCP/network behavior after deployment.
+- The edge container is intentionally limited to the global header and homepage first viewport; future full-bleed sections should opt in deliberately rather than replacing the standard content container.
+
+### Next Handoff
+- `NEXT-UI-PARITY-001`
+- `NOW-FORMS-SUPABASE-001`
+- `NOW-ADMIN-AUTH-RLS-001`
+
 ## Entry Template (Use for Every Future Session)
 
 ### Date

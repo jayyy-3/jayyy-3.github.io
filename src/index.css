@@ -113,6 +113,11 @@ a {
     padding-inline: 24px;
 }
 
+.urblo-edge-container {
+    width: 100%;
+    padding-inline: clamp(20px, 3.2vw, 64px);
+}
+
 .urblo-section {
     padding-block: 72px;
 }
@@ -424,6 +429,10 @@ html {
 @media (min-width: 768px) {
     .urblo-page-container {
         padding-inline: 40px;
+    }
+
+    .urblo-edge-container {
+        padding-inline: clamp(28px, 4vw, 78px);
     }
 }
 

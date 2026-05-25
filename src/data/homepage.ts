@@ -99,7 +99,6 @@ export const homepageData = {
   hero: {
     videoUrl: '/media/launch/home/urblo-hero.mp4',
     posterUrl: '/media/launch/home/hero-poster.jpg',
-    eyebrow: 'A trusted partner for your next streetscapes & civil landscape project.',
   },
   sustainability: {
     footprintUrl: '/media/launch/homepage/co2-footprint.png',

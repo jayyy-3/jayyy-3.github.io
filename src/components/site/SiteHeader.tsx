@@ -57,7 +57,7 @@ export default function SiteHeader() {
 
   return (
     <header className="absolute inset-x-0 top-0 z-50 border-b border-white/20 bg-black/88 text-white backdrop-blur-sm">
-      <div className="mx-auto flex h-[102px] max-w-[1440px] items-center justify-between px-6 md:px-10 lg:px-[94px]">
+      <div className="urblo-edge-container flex h-[102px] items-center justify-between">
         <Link to="/" aria-label="Urblo home">
           <img src={siteLogoUrl} alt="Urblo logo" className="h-10 w-auto md:h-[45px]" />
         </Link>
