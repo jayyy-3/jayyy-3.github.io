@@ -660,7 +660,8 @@
         "npx tsc -b",
         "npm run agent:smoke",
         "npm run agent:check",
-        "git diff --check"
+        "git diff --check",
+        "Browser QA: Stone Library list and Blueocean, Harcourt, Tuscany, and Juparana detail overlay labels checked at desktop; list plus Blueocean, Harcourt, and Juparana checked at 390px; Juparana checked at 320px."
       ]
     },
     {
@@ -689,6 +690,43 @@
         "Products, Projects, Stone Library, Our Story, Articles, Contact, Product detail, Stone detail, RouteState, and legacy project detail page-level H1s share the Projects title typography.",
         "Article detail H1 no longer uses the previous Space Grotesk uppercase title style.",
         "Non-page heading levels such as cards, section headings, Stone Library specs, and homepage hero typography remain intentionally separate."
+      ],
+      "verification": [
+        "npm run build",
+        "npm run lint",
+        "npx tsc -b",
+        "npm run agent:smoke",
+        "npm run agent:check",
+        "git diff --check"
+      ]
+    },
+    {
+      "id": "NEXT-STONELIB-IMAGE-LABEL-READABILITY-001",
+      "status": "done",
+      "priority": 11.3,
+      "summary": "Improve Stone Library image overlay label readability without overpowering material inspection.",
+      "files": [
+        "src/components/stone-library/ImageStage.tsx",
+        "src/components/stone-library/FinishLightbox.tsx",
+        "src/components/stone-library/StoneCard.tsx",
+        "docs/DESIGN.md",
+        "docs/HANDOFF.md",
+        "docs/NEXT_STEPS.md",
+        "docs/WORKLOG.md",
+        "docs/agent/tasks.json"
+      ],
+      "notes": [
+        "2026-05-25: Image provenance labels now use dark translucent backplates with white text and small status dots instead of black text over image surfaces.",
+        "2026-05-25: The active image Zoom action now uses a larger dark translucent button and turns lime through border/text focus or hover states, not a full green fill.",
+        "2026-05-25: Collapsed finish strip labels now use larger dark translucent vertical labels with white text and lime hover border treatment.",
+        "2026-05-25: Stone Library list-card Available/Upcoming badges now use the same dark translucent overlay language.",
+        "2026-05-25: Replaced unsupported Tailwind opacity shorthands in the touched Stone Library overlay and lightbox text styles with generated opacity tokens."
+      ],
+      "acceptance": [
+        "Finish-specific, reference, and pending image labels remain readable on light, dark, and patterned stone imagery.",
+        "Urblo lime is used as a restrained confirmed/action signal, not as a large overlay that distorts material inspection or implies pending/reference imagery is approved.",
+        "Collapsed finish labels remain readable while keeping stone texture inspectable.",
+        "Stone Library list-card status badges and detail-stage image labels use a coherent overlay treatment."
       ],
       "verification": [
         "npm run build",

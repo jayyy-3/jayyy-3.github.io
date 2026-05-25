@@ -1842,6 +1842,45 @@ Last updated: 2026-05-25
 - `NOW-FORMS-SUPABASE-001`
 - `NOW-ADMIN-AUTH-RLS-001`
 
+## Entry - 2026-05-25 (Stone Library Image Label Readability)
+
+### Scope
+- Improved Stone Library image overlay labels after user feedback that small black-on-image labels were hard to read.
+- Changed detail-stage image provenance labels, Zoom affordance, and collapsed finish labels to use dark translucent backplates with white text.
+- Used Urblo lime as a restrained confirmed/action signal instead of a broad overlay fill, so pending/reference imagery does not read as approved and stone texture remains inspectable.
+- Unified Stone Library list-card `Available` and `Upcoming` image badges with the same overlay language.
+- Updated the design contract, handoff, roadmap, and machine task queue.
+
+### Changed Files
+- `src/components/stone-library/ImageStage.tsx`
+- `src/components/stone-library/FinishLightbox.tsx`
+- `src/components/stone-library/StoneCard.tsx`
+- `docs/DESIGN.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run build`: pass.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- Browser QA: `/stone-library` list badges and `/stone-library/blueocean`, `/stone-library/harcourt`, `/stone-library/tuscany`, and `/stone-library/juparana` detail overlays render with generated dark translucent backgrounds and white text at 1280px.
+- Browser QA: `/stone-library` and `/stone-library/harcourt`, `/stone-library/blueocean`, and `/stone-library/juparana` remain readable at 390px; `/stone-library/juparana` also remains readable at 320px, with no page-level horizontal overflow and no collision between the left provenance label and right Zoom action.
+
+### Risks and Gaps
+- This pass improves label contrast and UI consistency; it does not change remaining Stone Library source-image coverage gaps such as Harcourt pending imagery.
+- Browser QA caught unsupported Tailwind opacity shorthands during the pass; the affected Stone Library classes were replaced with generated opacity tokens before final gates.
+- Final production contrast should still be rechecked after any future HD image swap, especially on very bright or highly patterned stone photos.
+
+### Next Handoff
+- `NEXT-UI-PARITY-001`
+- `NOW-FORMS-SUPABASE-001`
+- `NOW-ADMIN-AUTH-RLS-001`
+
 ## Entry Template (Use for Every Future Session)
 
 ### Date

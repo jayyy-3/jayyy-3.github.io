@@ -201,7 +201,7 @@ export default function FinishLightbox({
             <div className="mx-auto flex h-full w-full max-w-7xl flex-col px-4 py-4">
                 <div className="flex items-center justify-between rounded-[4px] border border-white/20 bg-black/60 px-4 py-3 text-white">
                     <div>
-                        <p className="urblo-meta text-white/55">
+                        <p className="urblo-meta text-white/60">
                             {stoneName}
                         </p>
                         <p className="text-sm font-semibold uppercase tracking-[0.08em]">

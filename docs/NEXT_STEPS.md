@@ -87,6 +87,7 @@ Source of truth: `docs/agent/tasks.json`.
 - `NEXT-SLUG-URL-NORMALIZE-001`: product and article public slugs now use lowercase kebab-case with explicit Cloudflare 301 redirects and runtime alias handling for old URLs.
 - `NEXT-MOTION-POLISH-001`: homepage and Our Story proof metrics now visibly count up from zero when scrolled into view, and public route changes use restrained reduced-motion-aware enter transitions.
 - `NEXT-PAGE-TITLE-TYPOGRAPHY-001`: Projects page title typography is now the global public page H1 system, including Article detail.
+- `NEXT-STONELIB-IMAGE-LABEL-READABILITY-001`: Stone Library list/detail image overlay labels now use readable dark translucent surfaces with restrained Urblo lime status/action accents.
 - `NEXT-UI-PARITY-001` partial launch polish: homepage hero now fills the first viewport, route transitions reset to top, no-banner error/loading states clear the header, article detail no longer double-renders a route banner, article mobile overflow has a CSS stopgap, Contact blocks empty email drafts, product renders are labeled as geometry previews with separate material previews, Stone Library images disclose finish-specific/reference status, and `react-helmet` was removed to clear React 19 strict-mode console noise.
 
 Older completion details live in `docs/WORKLOG.md`.

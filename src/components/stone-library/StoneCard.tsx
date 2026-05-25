@@ -9,6 +9,12 @@ function statusBadgeLabel(status: StoneCardVM['status']): string {
   return status === 'tbc' ? 'Upcoming' : 'Available';
 }
 
+function statusSignalClass(status: StoneCardVM['status']): string {
+  return status === 'tbc'
+    ? 'border border-white/50 bg-black/40'
+    : 'bg-[var(--urblo-lime)]';
+}
+
 export default function StoneCard({ stone }: StoneCardProps) {
   return (
     <Link
@@ -29,8 +35,15 @@ export default function StoneCard({ stone }: StoneCardProps) {
           </div>
         )}
 
-        <span className="absolute left-3 top-3 rounded-[4px] border border-black/30 bg-white/94 px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.12em] text-black">
-          {statusBadgeLabel(stone.status)}
+        <span className="absolute left-3 top-3 flex items-center gap-1.5 rounded-[4px] border border-white/20 bg-black/80 px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.06em] text-white shadow-[0_8px_18px_rgba(0,0,0,0.22)] backdrop-blur-sm">
+          <span
+            className={[
+              'h-1.5 w-1.5 flex-none rounded-full',
+              statusSignalClass(stone.status),
+            ].join(' ')}
+            aria-hidden="true"
+          />
+          <span>{statusBadgeLabel(stone.status)}</span>
         </span>
       </div>
 
@@ -38,7 +51,7 @@ export default function StoneCard({ stone }: StoneCardProps) {
         <h3 className="font-display text-[23px] font-semibold uppercase leading-[1.05] tracking-[0.01em] text-black md:text-[24px]">
           {stone.name}
         </h3>
-        <p className="text-[14px] font-medium text-black/78">{stone.stoneType}</p>
+        <p className="text-[14px] font-medium text-black/80">{stone.stoneType}</p>
         <p className="text-[13px] font-medium text-[var(--urblo-text)]">{stone.originLabel}</p>
         <div className="flex items-center justify-between border-t border-black/10 pt-3">
           <p className="urblo-meta text-[10px] text-black/58">{stone.finishCount} finishes</p>

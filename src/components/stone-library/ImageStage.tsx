@@ -23,6 +23,18 @@ function imageRoleLabel(finish: FinishVM): string {
     return 'Image pending';
 }
 
+function imageRoleSignalClass(finish: FinishVM): string {
+    if (finish.imageRole === 'finish-specific') {
+        return 'bg-[var(--urblo-lime)]';
+    }
+
+    if (finish.imageRole === 'reference') {
+        return 'border border-white/50 bg-black/40';
+    }
+
+    return 'border border-white/50 bg-white/60';
+}
+
 export default function ImageStage({
     stoneName,
     finishes,
@@ -363,7 +375,7 @@ export default function ImageStage({
                                     <button
                                         type="button"
                                         onClick={() => onOpenLightbox(finish.finishKey)}
-                                        className="absolute right-2 top-2 rounded-[4px] border border-black/55 bg-white/94 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.1em] text-black transition hover:bg-white"
+                                        className="absolute right-2 top-2 min-h-8 rounded-[4px] border border-white/25 bg-black/80 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.06em] text-white shadow-[0_8px_18px_rgba(0,0,0,0.22)] backdrop-blur-sm transition hover:border-[var(--urblo-lime)] hover:bg-black/90 hover:text-[var(--urblo-lime)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--urblo-lime)] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                                         aria-label={`Open ${finish.label} in large view`}
                                     >
                                         Zoom
@@ -371,8 +383,15 @@ export default function ImageStage({
                                 ) : null}
 
                                 {isActive ? (
-                                    <div className="pointer-events-none absolute left-2 top-2 max-w-[calc(100%-5.5rem)] rounded-[4px] border border-black/45 bg-white/94 px-2 py-1 text-[9px] font-bold uppercase leading-tight tracking-[0.08em] text-black">
-                                        {imageRoleLabel(finish)}
+                                    <div className="pointer-events-none absolute left-2 top-2 flex max-w-[calc(100%-6.75rem)] items-center gap-1.5 rounded-[4px] border border-white/20 bg-black/80 px-2.5 py-1.5 text-[10px] font-bold uppercase leading-[1.12] tracking-[0.04em] text-white shadow-[0_8px_18px_rgba(0,0,0,0.24)] backdrop-blur-sm sm:text-[11px]">
+                                        <span
+                                            className={[
+                                                'h-1.5 w-1.5 flex-none rounded-full',
+                                                imageRoleSignalClass(finish),
+                                            ].join(' ')}
+                                            aria-hidden="true"
+                                        />
+                                        <span>{imageRoleLabel(finish)}</span>
                                     </div>
                                 ) : null}
 
@@ -383,7 +402,7 @@ export default function ImageStage({
                                     ].join(' ')}
                                 >
                                     <span
-                                        className="rounded border border-black/10 bg-white/92 px-1 py-2 text-[8px] font-bold uppercase tracking-[0.08em] text-black"
+                                        className="rounded border border-white/20 bg-black/80 px-1.5 py-2.5 text-[10px] font-bold uppercase leading-none tracking-[0.04em] text-white shadow-[0_6px_14px_rgba(0,0,0,0.24)] backdrop-blur-sm transition group-hover:border-[var(--urblo-lime)] group-hover:bg-black/90"
                                         style={{
                                             writingMode: 'vertical-rl',
                                             textOrientation: 'mixed',
