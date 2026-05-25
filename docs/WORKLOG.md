@@ -1717,6 +1717,45 @@ Last updated: 2026-05-25
 - `NOW-FORMS-SUPABASE-001`
 - `NEXT-UI-PARITY-001`
 
+## Entry - 2026-05-25 (Homepage Video Optimization)
+
+### Scope
+- Re-encoded the controlled homepage hero MP4 from the previous launch stopgap into a smaller production-friendly static asset.
+- Preserved the existing public path `public/media/launch/home/urblo-hero.mp4` so no data contract or route changes were required.
+- Kept desktop/tablet video behavior and mobile poster-only behavior from the launch UI hardening pass.
+- Updated asset, architecture, handoff, roadmap, worklog, and machine task docs so agents no longer treat the desktop MP4 as an unresolved large-asset blocker.
+
+### Changed Files
+- `public/media/launch/home/urblo-hero.mp4`
+- `docs/ARCHITECTURE.md`
+- `docs/ASSET_MIGRATION_AUDIT.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- Source size comparison: previous controlled MP4 was about 16MB; optimized MP4 is about 3MB.
+- Encoding target: H.264 MP4, 1280x720, 30fps, no audio, fast-start.
+- Browser QA on desktop 1440x900: homepage video selected `/media/launch/home/urblo-hero.mp4`, reached `readyState=4`, reported 1280x720 intrinsic size, first section height was 900px, and horizontal overflow was 0.
+- Browser QA on mobile 390x844: homepage first section height was 844px, horizontal overflow was 0, and the video selected no MP4 source.
+- Playwright CLI screenshot fallback captured the optimized desktop homepage first viewport.
+- `npm run build`: pass.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- Live Cloudflare preview should still verify actual LCP/network behavior after deployment.
+- Cloudflare Stream/R2 remains optional if the client wants adaptive streaming, analytics, or non-repo video management later.
+
+### Next Handoff
+- `NOW-FORMS-SUPABASE-001`
+- `NOW-ADMIN-AUTH-RLS-001`
+- `NOW-CLOUDFLARE-PAGES-DEPLOY-001`
+
 ## Entry Template (Use for Every Future Session)
 
 ### Date

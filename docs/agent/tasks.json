@@ -301,7 +301,8 @@
       "notes": [
         "2026-05-22: P0 launch stopgap is implemented for logo, homepage poster/video, route banners, and contact imagery under public/media/launch.",
         "2026-05-22: Homepage video replaced with a web-ready H.264 export from the user-provided Urblo_Homepage.mp4; homepage and Our Story visible media now use controlled local assets.",
-        "2026-05-25: Homepage hero now uses a full-viewport 100svh layout, preload=none, and mobile poster-only behavior. The desktop MP4 is still a large asset and needs re-encoding or Cloudflare Stream/R2 review before final performance sign-off.",
+        "2026-05-25: Homepage hero now uses a full-viewport 100svh layout, preload=none, and mobile poster-only behavior.",
+        "2026-05-25: Desktop homepage MP4 was re-encoded from about 16MB to about 3MB as H.264 1280x720, 30fps, no-audio, fast-start media. Browser QA confirmed desktop 1280x720 playback and mobile no-source behavior.",
         "2026-05-22: Legacy project media and Stone Library fallback media now use controlled local assets; direct old WordPress media references are removed from runtime data.",
         "2026-05-22: Article covers now use controlled local WebP assets and ArticlePage rewrites known email proxy images/campaign links before DOMPurify sanitization.",
         "Task remains open for Supabase media records, structured article blocks, full media ownership metadata, and final Cloudflare R2/Stream review for homepage video."

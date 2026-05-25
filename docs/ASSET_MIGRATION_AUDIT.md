@@ -263,7 +263,7 @@ Verified on 2026-05-22:
 - Stone Library fast-track coverage audit: provided primary finish assets are mapped for 31 finish states; 16 finish states use controlled local default/fallback imagery; 22 finish states remain true missing-image placeholders pending approved source images.
 - SEO/social cleanup: default Open Graph/Twitter image now points at `public/og-default.png`, and high-risk article excerpt/runtime newsletter phrases are qualified or rewritten before public rendering.
 - 2026-05-25 launch UI hardening QA: homepage hero renders as a full viewport on desktop/mobile, desktop selects the controlled MP4 with `preload="none"`, mobile still selects no MP4 source, and fresh console checks show no React Helmet strict-mode warning after removing that dependency.
-- Residual media performance risk: the desktop homepage MP4 remains large and still needs re-encoding or Cloudflare Stream/R2 review before final performance sign-off.
+- 2026-05-25 video optimization QA: desktop homepage MP4 was re-encoded from about 16MB to about 3MB as H.264 1280x720, 30fps, no-audio, fast-start media. Browser QA confirmed 1280x720 playback, `readyState=4`, no horizontal overflow, and mobile still selects no MP4 source.
 
 Before declaring asset migration complete:
 - `rg "urblo.com.au/wp-content/uploads" src public/articles data`

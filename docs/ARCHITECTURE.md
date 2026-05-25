@@ -144,10 +144,10 @@ Route state contract:
 - Shared site logo path: `public/media/launch/identity/urblo-logo.png`, referenced by `src/data/siteChrome.ts` and `src/data/homepage.ts`.
 - Homepage hero poster path: `public/media/launch/home/hero-poster.jpg`.
 - Homepage hero video path: `public/media/launch/home/urblo-hero.mp4`.
-- Current homepage video asset is a web-ready H.264 720p export from the user-provided `Urblo_Homepage.mp4`; the original HEVC source was not committed.
+- Current homepage video asset is a web-ready H.264 1280x720, 30fps, no-audio, fast-start export from the user-provided `Urblo_Homepage.mp4`; the original HEVC source was not committed.
 - Homepage hero uses `100svh` so the first viewport reads as a full-screen hero across desktop and mobile.
 - Homepage hero video uses `preload="none"` and is constrained to desktop/tablet width through `media="(min-width: 768px)"`; mobile viewports keep the poster and do not select the MP4 source.
-- The desktop MP4 remains a large launch asset and should be re-encoded into smaller web/mobile variants or moved to Cloudflare Stream/R2 before final performance sign-off.
+- The desktop MP4 was re-encoded from about 16MB to about 3MB for launch. Cloudflare Stream/R2 remains optional if the client later wants adaptive delivery, analytics, or non-repo video management.
 - Route banners are local launch media referenced from `src/App.tsx` through the `ROUTE_BANNERS` map.
 - Contact image path: `public/media/launch/contact/project-contact.jpg`, referenced by `src/pages/ContactPage.tsx` and reused in homepage data where the same old WordPress image was previously used.
 - Homepage section imagery and partner logos now use controlled files under `public/media/launch/homepage`.
