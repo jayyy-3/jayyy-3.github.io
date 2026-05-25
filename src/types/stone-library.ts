@@ -1,6 +1,7 @@
 export type StoneStatus = 'active' | 'tbc';
 export type FinishCapability = 'yes' | 'no' | 'tbc';
 export type FinishKey = string;
+export type StoneFinishImageRole = 'finish-specific' | 'reference' | 'placeholder';
 export type StonePriceTierLevel = 1 | 2 | 3;
 export type StonePriceTierLabel = 'Budget' | 'Balanced' | 'Premium';
 
@@ -97,6 +98,7 @@ export interface FinishVM {
     imageUrl?: string;
     thumbUrl?: string;
     imageAlt?: string;
+    imageRole: StoneFinishImageRole;
     secondaryImages: FinishSecondaryImageVM[];
 }
 

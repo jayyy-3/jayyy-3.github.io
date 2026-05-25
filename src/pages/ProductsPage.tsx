@@ -17,8 +17,8 @@ export default function ProductsPage() {
           <p className="urblo-eyebrow">Streetscape Collection</p>
           <h1 className="urblo-page-title">Products</h1>
           <p className="urblo-page-copy">
-            Explore Urblo seating, bollards, planters, sculpture pieces, and custom details built for
-            streetscapes and civil landscape projects.
+            Explore Urblo modular stone seating systems and configurable streetscape details built
+            for civic landscape projects.
           </p>
         </div>
       </section>

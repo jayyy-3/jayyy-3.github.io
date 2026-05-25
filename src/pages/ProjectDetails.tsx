@@ -1,5 +1,6 @@
 import { Link, useParams } from 'react-router-dom';
 import ProjectMaterialMap from '../components/projects/ProjectMaterialMap';
+import RouteState from '../components/RouteState';
 import { projects, type ProjectData, type ProjectMaterial } from '../data/projectData';
 import StoneLibraryService from '../service/StoneLibraryService';
 
@@ -69,7 +70,7 @@ function ProjectBrief({ project }: { project: ProjectData }) {
 
         <div className="border-t border-black pt-1">
           {facts.map(({ label, value }) => (
-            <div key={label} className="grid grid-cols-[0.42fr_1fr] gap-4 border-b border-black/10 py-4">
+            <div key={label} className="grid gap-2 border-b border-black/10 py-4 md:grid-cols-[0.42fr_1fr] md:gap-4">
               <p className="urblo-meta text-black/45">{label}</p>
               <div>{renderDetailValue(value)}</div>
             </div>
@@ -289,7 +290,18 @@ export default function ProjectDetails() {
   const project = projects.find((item) => item.slug === slug);
 
   if (!project) {
-    return <div className="py-40 text-center text-xl">Project not found.</div>;
+    return (
+      <RouteState
+        eyebrow="Project Not Found"
+        title="Project not found"
+        copy="This project link does not match a published Urblo project. Browse current project records or contact Urblo for help."
+        headerOffset
+        actions={[
+          { label: 'Projects', to: '/projects' },
+          { label: 'Contact Us', to: '/contact', variant: 'secondary' },
+        ]}
+      />
+    );
   }
 
   const heroImage = project.hero?.image || project.images[0];

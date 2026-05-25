@@ -131,6 +131,10 @@ Priorities:
 
 Avoid making it feel like a generic landing page with decorative cards and abstract claims.
 
+Hero behavior:
+- The first homepage viewport should feel full-screen on desktop and mobile.
+- Desktop video is acceptable when it does not slow first meaningfully visible content; mobile should use a poster or optimized mobile-specific media until a smaller video variant is approved.
+
 ### Stone Library
 Stone Library is an inspection and specification aid, not a product marketing grid.
 
@@ -147,6 +151,7 @@ Interaction rules:
 - Active finish state must remain stable across left and right controls.
 - Secondary frames are supporting inspection media for the selected finish, not new finish states.
 - Secondary frame thumbnails should appear only when approved source images exist; do not show placeholder secondary frames.
+- Finish imagery must disclose whether the active image is finish-specific, a reference/default view, or pending. Never let fallback imagery read as a confirmed finish photo.
 - Mobile layout must prioritize readable finish names and image inspection over decorative layout.
 - Placeholder usage must be visible enough to be honest but quiet enough not to dominate the tool.
 
@@ -182,6 +187,7 @@ Priorities:
 - keep the product render large enough to inspect
 - use CTA copy that starts a real project conversation
 - show pending imagery honestly without making missing assets dominate the page
+- separate product geometry renders from selected material swatches unless the render is truly composited from those selections
 - frame specs as project-confirmed discussion cues unless final engineering data has been approved
 
 ### Our Story
@@ -193,6 +199,8 @@ Use portrait/team content only when it strengthens credibility. Keep team UI sta
 Contact should be direct and low-friction.
 
 Because the current app has no backend, avoid fake submission expectations. A local project-brief composer that opens a prefilled email draft is acceptable when clearly supported by direct email, phone, and address pathways.
+
+Until Supabase forms are implemented, the mailto composer should block empty drafts and ask for useful project notes plus at least one contact method.
 
 The page should help users choose a next step:
 - request samples
@@ -245,6 +253,7 @@ Avoid:
 - Use the shared `RouteState` pattern for public route-level states unless a page needs a more specific recovery workflow.
 - State copy should be short, factual, and paired with useful next actions when the user is blocked.
 - Unknown URLs must preserve Urblo navigation pathways without pretending the requested page exists.
+- No-banner route states must clear the absolute header; do not let loading or 404 copy sit underneath navigation.
 
 ### Motion
 - Motion should communicate state, focus, or transition.

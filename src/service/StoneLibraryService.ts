@@ -2,7 +2,7 @@ import stoneLibraryJson from '../../data/clean/stone_library.json';
 import { getFinishBehaviorMeta } from '../data/finishBehaviorMeta';
 import {
     getStoneDefaultImage,
-    getStoneFinishImage,
+    getStoneFinishImageResolution,
 } from '../data/stoneFinishImages';
 import type { OptionItem } from '../types/product';
 import type {
@@ -16,6 +16,7 @@ import type {
     StoneFinishCapabilityRaw,
     StoneFinishRaw,
     StoneGroupRaw,
+    StoneFinishImageRole,
     StoneLibraryRaw,
     StonePriceTierLabel,
     StonePriceTierLevel,
@@ -189,7 +190,8 @@ function mapAvailableFinishVM(
         capability.finishVariantId,
     );
     const finishDefinition = finishDefinitionByKey.get(finishKey);
-    const imageAsset = getStoneFinishImage(stoneVariantId, finishKey);
+    const imageResolution = getStoneFinishImageResolution(stoneVariantId, finishKey);
+    const imageAsset = imageResolution.asset;
     const secondaryImages = (imageAsset?.secondaryImages ?? [])
         .filter((image) => image.imageUrl)
         .map((image, index) => ({
@@ -211,6 +213,7 @@ function mapAvailableFinishVM(
         imageUrl: imageAsset?.imageUrl,
         thumbUrl: imageAsset?.thumbUrl,
         imageAlt: imageAsset?.alt,
+        imageRole: imageResolution.role,
         secondaryImages,
     };
 }
@@ -441,11 +444,15 @@ class StoneLibraryService {
                 }
 
                 const fallbackImage = getStoneDefaultImage(activeVariant.stoneVariantId);
+                const imageRole: StoneFinishImageRole = fallbackImage?.imageUrl
+                    ? 'reference'
+                    : 'placeholder';
                 return {
                     ...finish,
                     imageUrl:
                         fallbackImage?.imageUrl || placeholderStoneImage(stone.displayName),
                     imageAlt: fallbackImage?.alt || `${stone.displayName} finish preview`,
+                    imageRole,
                 };
             });
 

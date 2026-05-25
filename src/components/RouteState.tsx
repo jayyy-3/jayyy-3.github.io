@@ -11,6 +11,7 @@ interface RouteStateProps {
   title: string;
   copy: string;
   actions?: RouteStateAction[];
+  headerOffset?: boolean;
 }
 
 export default function RouteState({
@@ -18,9 +19,15 @@ export default function RouteState({
   title,
   copy,
   actions = [],
+  headerOffset = false,
 }: RouteStateProps) {
   return (
-    <section className="min-h-[56vh] border-b border-black/10 bg-white py-16 md:py-24">
+    <section
+      className={[
+        'min-h-[56vh] border-b border-black/10 bg-white pb-16 md:pb-24',
+        headerOffset ? 'pt-[166px] md:pt-[198px]' : 'pt-16 md:pt-24',
+      ].join(' ')}
+    >
       <div className="urblo-page-container">
         <div className="max-w-[56rem]">
           <p className="urblo-eyebrow">{eyebrow}</p>

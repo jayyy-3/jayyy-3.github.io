@@ -10,6 +10,18 @@ function capabilityLabel(capability: FinishVM['capability']): string {
     return capability === 'tbc' ? 'Upcoming' : 'Available';
 }
 
+function imageSourceLabel(finish: FinishVM): string {
+    if (finish.imageRole === 'finish-specific') {
+        return 'Image: finish-specific source';
+    }
+
+    if (finish.imageRole === 'reference') {
+        return 'Image: reference view, confirm sample';
+    }
+
+    return 'Image: pending';
+}
+
 export default function FinishAccordion({
     finishes,
     activeFinishKey,
@@ -65,6 +77,7 @@ export default function FinishAccordion({
                                                 Frames: primary + {finish.secondaryImages.length} secondary
                                             </li>
                                         ) : null}
+                                        <li>{imageSourceLabel(finish)}</li>
                                     </ul>
                                 </div>
                             ) : null}

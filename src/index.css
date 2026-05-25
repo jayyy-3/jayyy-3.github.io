@@ -123,12 +123,16 @@ a {
 
 .urblo-eyebrow {
     margin: 0;
-    color: var(--urblo-lime);
+    color: rgba(51, 54, 63, 0.72);
     font-size: 13px;
     font-weight: 600;
     line-height: 1.4;
     letter-spacing: 0.18em;
     text-transform: uppercase;
+}
+
+.urblo-eyebrow.text-white\/70 {
+    color: rgb(255 255 255 / 0.7);
 }
 
 .urblo-page-title {
@@ -329,6 +333,40 @@ html {
 .article-wrapper p,
 .article-wrapper li {
     overflow-wrap: anywhere;
+}
+
+@media (max-width: 640px) {
+    .article-wrapper {
+        padding-inline: 16px;
+        overflow-x: hidden;
+    }
+
+    .article-wrapper .urblo-card {
+        padding-inline: 16px;
+    }
+
+    .article-wrapper table,
+    .article-wrapper thead,
+    .article-wrapper tbody,
+    .article-wrapper tr,
+    .article-wrapper td,
+    .article-wrapper th {
+        display: block !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        height: auto !important;
+    }
+
+    .article-wrapper td,
+    .article-wrapper th {
+        padding-left: 14px !important;
+        padding-right: 14px !important;
+    }
+
+    .article-wrapper [style*="width"] {
+        max-width: 100% !important;
+    }
 }
 
 @keyframes marquee {

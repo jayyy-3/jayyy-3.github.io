@@ -13,11 +13,11 @@ export default function ProductCard({ product }: Props) {
       to={`/products/${product.slug}`}
       className="urblo-card group block overflow-hidden transition-transform duration-300 hover:-translate-y-1"
     >
-      <div className="relative overflow-hidden bg-black/5">
+      <div className="relative overflow-hidden bg-[rgba(239,239,239,0.42)]">
         <img
           src={hero}
           alt={product.name}
-          className="h-72 w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+          className="h-72 w-full object-contain p-5 transition duration-500 group-hover:scale-[1.03]"
         />
       </div>
       <div className="space-y-3 p-6">

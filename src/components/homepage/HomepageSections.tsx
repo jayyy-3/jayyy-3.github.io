@@ -246,21 +246,22 @@ function renderRichText(value: string) {
 
 function HeroSection() {
   return (
-    <section className="relative min-h-[874px] overflow-hidden bg-black text-white">
+    <section className="relative min-h-[100svh] overflow-hidden bg-black text-white">
       <video
         className="absolute inset-0 h-full w-full object-cover"
         autoPlay
         muted
         loop
         playsInline
-        preload="metadata"
+        preload="none"
         poster={homepageData.hero.posterUrl}
+        aria-label="Urblo stone streetscape project video"
       >
         <source src={homepageData.hero.videoUrl} type="video/mp4" media="(min-width: 768px)" />
       </video>
       <div className="absolute inset-0 bg-black/40" />
 
-      <div className="relative mx-auto flex min-h-[874px] max-w-[1440px] items-end px-6 pb-24 pt-32 md:px-10 lg:px-[94px]">
+      <div className="relative mx-auto flex min-h-[100svh] max-w-[1440px] items-end px-6 pb-24 pt-32 md:px-10 lg:px-[94px]">
         <Reveal className="max-w-[1000px]">
           <div className="space-y-6">
             <h1 className="max-w-[1000px] text-[52px] uppercase leading-[1.08] tracking-[0.04em] text-white md:text-[72px] xl:text-[90px]">

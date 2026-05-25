@@ -92,7 +92,8 @@
         "src/data/homepage.ts"
       ],
       "notes": [
-        "2026-05-22 full-site QA confirmed Contact page copy is clear about opening an email draft, but Sample Request and other mailto CTAs still need consistent fallback wording until Supabase submissions are live."
+        "2026-05-22 full-site QA confirmed Contact page copy is clear about opening an email draft, but Sample Request and other mailto CTAs still need consistent fallback wording until Supabase submissions are live.",
+        "2026-05-25: Contact now blocks empty local email drafts unless the visitor provides project notes plus either email or phone. This is a runtime guardrail, not a substitute for Supabase-backed lead persistence."
       ],
       "acceptance": [
         "Public form submissions are validated server-side, protected by Turnstile, stored in Supabase, and notify Urblo by email.",
@@ -300,6 +301,7 @@
       "notes": [
         "2026-05-22: P0 launch stopgap is implemented for logo, homepage poster/video, route banners, and contact imagery under public/media/launch.",
         "2026-05-22: Homepage video replaced with a web-ready H.264 export from the user-provided Urblo_Homepage.mp4; homepage and Our Story visible media now use controlled local assets.",
+        "2026-05-25: Homepage hero now uses a full-viewport 100svh layout, preload=none, and mobile poster-only behavior. The desktop MP4 is still a large asset and needs re-encoding or Cloudflare Stream/R2 review before final performance sign-off.",
         "2026-05-22: Legacy project media and Stone Library fallback media now use controlled local assets; direct old WordPress media references are removed from runtime data.",
         "2026-05-22: Article covers now use controlled local WebP assets and ArticlePage rewrites known email proxy images/campaign links before DOMPurify sanitization.",
         "Task remains open for Supabase media records, structured article blocks, full media ownership metadata, and final Cloudflare R2/Stream review for homepage video."
@@ -372,7 +374,9 @@
         "docs/agent/tasks.json"
       ],
       "notes": [
-        "2026-05-22 full-site QA found newsletter HTML can overflow on mobile and still contains source-level carbon/speed/guarantee wording. A runtime stopgap now constrains article tables/media, unwraps dead links, and rewrites additional high-risk phrases, but structured blocks remain the launch-quality solution."
+        "2026-05-22 full-site QA found newsletter HTML can overflow on mobile and still contains source-level carbon/speed/guarantee wording. A runtime stopgap now constrains article tables/media, unwraps dead links, and rewrites additional high-risk phrases, but structured blocks remain the launch-quality solution.",
+        "2026-05-25: Article detail route banner duplication was removed, previous/next article buttons were shortened for mobile, and mobile CSS blockifies legacy newsletter tables/media. Browser QA verified the cost-myth article at 320px with zero horizontal overflow.",
+        "2026-05-25: Article claim cleanup remains paused by user direction; do not satisfy this task's claim-review acceptance criteria until explicitly resumed."
       ],
       "acceptance": [
         "All article details render without horizontal overflow at 390px and desktop widths.",
@@ -425,7 +429,8 @@
         "2026-05-22: App metadata and old-site-matched favicon assets are in place.",
         "2026-05-22: Article cover GIFs were replaced with local still images and article detail rendering now strips known email campaign/proxy artifacts at runtime.",
         "2026-05-22: Default Open Graph/Twitter image now uses a 1200 x 630 PNG generated from the local SVG source.",
-        "2026-05-22: Article excerpts and known high-risk newsletter phrases are rewritten to avoid unqualified carbon, cost, speed, and guarantee claims."
+        "2026-05-22: Article excerpts and known high-risk newsletter phrases are rewritten to avoid unqualified carbon, cost, speed, and guarantee claims.",
+        "2026-05-25: Route metadata now uses a native document-head updater and react-helmet/@types/react-helmet were removed to clear React 19 strict-mode lifecycle console noise."
       ],
       "acceptance": [
         "No Vite/default metadata, favicon, or placeholder app identity remains.",
@@ -602,7 +607,9 @@
       ],
       "notes": [
         "2026-05-22 full-site QA found the overall shell is coherent, but Products, Articles, and legacy Project details still feel less resolved than Stone Library and Moon Gate.",
-        "2026-05-22: Homepage Browse by stone type was removed by request. The next UI parity pass should consider a lighter, more Urblo-native Stone Library bridge if the client still wants a homepage material entry point."
+        "2026-05-22: Homepage Browse by stone type was removed by request. The next UI parity pass should consider a lighter, more Urblo-native Stone Library bridge if the client still wants a homepage material entry point.",
+        "2026-05-25: Launch UI hardening pass fixed homepage full-viewport hero, route scroll restoration, no-banner RouteState header offsets, ArticlePage double hero, ArticlesPage state structure, legacy article mobile overflow, Contact empty-draft validation, Our Story mobile team overlays, global eyebrow contrast, project facts mobile stacking, Products copy/image treatment, ProductDetail geometry-preview honesty, and Stone Library finish image provenance labels.",
+        "2026-05-25: Broad legacy project detail migration remains paused by user direction; article claim cleanup remains paused under NOW-ARTICLE-STRUCTURE-CLAIMS-001."
       ],
       "acceptance": [
         "Target pages reach agreed parity versus approved references.",
@@ -665,7 +672,8 @@
         "2026-05-25 current-site-only shared-drive audit is complete. Use the audit list in docs/ASSET_MIGRATION_AUDIT.md before changing runtime mappings.",
         "2026-05-25: Normalized and mapped shared-drive candidates for Golden Crust Light/Dark, Tan Brown, Honey Comb, Ivory Sand, and Tuscany.",
         "2026-05-25: Tuscany remains variant-level by design: Vein Cut and Cross Cut use cut-level default images, not finish-specific honed/polished/sandblasted images.",
-        "2026-05-25: Blueocean remains on the controlled fallback and Harcourt remains placeholder/TBC because no matching current-site shared-drive source images were found."
+        "2026-05-25: Blueocean remains on the controlled fallback and Harcourt remains placeholder/TBC because no matching current-site shared-drive source images were found.",
+        "2026-05-25: Finish imagery now exposes imageRole as finish-specific, reference, or placeholder, and active Stone Library UI labels the image source so fallback/default imagery is not mistaken for a finish-specific photo."
       ],
       "acceptance": [
         "All priority stones/finishes display intended HD images in list and detail views.",
@@ -799,6 +807,7 @@
         "2026-05-22: Default material selections now initialize on product detail pages and duplicate Timber Flush + labels were corrected to Timber Rise + where applicable.",
         "2026-05-25: Product detail pages now show selected model/material summary feedback, a prefilled configuration enquiry mailto, contact/Stone Library recovery links, and project-scope caveat copy for sample-level specs.",
         "2026-05-25: Stone product selector options now carry imageState, and OptionSelector marks missing imagery as Image pending without making the pending badge part of the button's accessible name.",
+        "2026-05-25: Product detail render is now explicitly labeled as a geometry preview, with body stone, frame finish, and battens shown as separate material previews instead of implying live material compositing.",
         "Product records remain static/file-backed until Supabase/admin migration, but duplicate labels and sample-level spec presentation have been reviewed for launch-safe UI treatment."
       ],
       "acceptance": [

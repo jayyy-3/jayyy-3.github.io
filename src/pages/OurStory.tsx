@@ -141,7 +141,7 @@ export default function OurStory() {
                 <div className="overflow-hidden rounded-[4px] border border-white/10 bg-white/5">
                   <div className="relative overflow-hidden">
                     <img src={member.img} alt={member.name} className="aspect-[2/3] w-full object-cover" />
-                    <div className="absolute inset-0 flex items-end bg-gradient-to-t from-black/90 to-black/10 p-6 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                    <div className="absolute inset-0 flex items-end bg-gradient-to-t from-black/90 to-black/10 p-6 opacity-100 transition-opacity duration-300 md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100">
                       <p className="text-sm leading-6 text-white/88">{member.bio}</p>
                     </div>
                   </div>

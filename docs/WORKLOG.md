@@ -403,6 +403,7 @@ Last updated: 2026-05-25
 - `src/data/projectData.ts`
 - `src/pages/ProjectDetails.tsx`
 - `docs/ARCHITECTURE.md`
+- `docs/ASSET_MIGRATION_AUDIT.md`
 - `docs/DESIGN.md`
 - `docs/HANDOFF.md`
 - `docs/WORKLOG.md`
@@ -1648,6 +1649,72 @@ Last updated: 2026-05-25
 ### Next Handoff
 - `NEXT-PROJECTS-INTAKE-001`
 - `NOW-ARTICLE-STRUCTURE-CLAIMS-001`
+- `NEXT-UI-PARITY-001`
+
+## Entry - 2026-05-25 (Launch UI Hardening)
+
+### Scope
+- Implemented the approved UI/UX launch fixes except the two user-paused areas: article claim cleanup and broad legacy project-detail migration.
+- Made the homepage hero full viewport, changed hero video loading to `preload="none"`, and preserved mobile poster-only behavior for performance.
+- Added client-side scroll restoration so internal route changes land at the top instead of preserving deep scroll positions.
+- Removed the duplicated Article detail route banner and hardened route-level loading, not-found, and error states for no-banner routes.
+- Added mobile safeguards for legacy article newsletter HTML and shortened article previous/next controls.
+- Made Product detail renders honest as geometry previews, with separate material preview rows for body stone, frame finish, and battens.
+- Added Stone Library finish-image provenance roles so active imagery is labeled as finish-specific, reference, or pending.
+- Added local Contact form validation before opening a mailto draft, improved mobile Our Story bio visibility, tightened global eyebrow contrast, fixed project facts mobile stacking, and made Product cards/copy more aligned with the current data.
+- Replaced `react-helmet` with a native route metadata updater to remove React 19 strict-mode console noise.
+
+### Changed Files
+- `package.json`
+- `package-lock.json`
+- `src/App.tsx`
+- `src/components/ProductCard.tsx`
+- `src/components/RouteState.tsx`
+- `src/components/homepage/HomepageSections.tsx`
+- `src/components/stone-library/FinishAccordion.tsx`
+- `src/components/stone-library/ImageStage.tsx`
+- `src/data/stoneFinishImages.ts`
+- `src/index.css`
+- `src/pages/ArticlePage.tsx`
+- `src/pages/ArticlesPage.tsx`
+- `src/pages/ContactPage.tsx`
+- `src/pages/NotFoundPage.tsx`
+- `src/pages/OurStory.tsx`
+- `src/pages/ProductDetailPage.tsx`
+- `src/pages/ProductsPage.tsx`
+- `src/pages/ProjectDetails.tsx`
+- `src/service/StoneLibraryService.ts`
+- `src/types/stone-library.ts`
+- `docs/ARCHITECTURE.md`
+- `docs/DESIGN.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- Subagent review: completed as a sidecar UI/UX launch pass; it confirmed most dirty fixes and caught a temporary Stone Library `imageRole` type narrowing issue, which was fixed before final gates.
+- Browser QA: pass on `/`, `/definitely-not-a-page`, `/projects/unknown-project`, `/articles/debunking-the-cost-myth-by-urblo-bluestone-blocks`, `/products/terra-line`, `/stone-library/new-grey`, `/our-story`, `/products`, and `/contact`.
+- Browser QA metrics: homepage first section measured 900px at 1440x900 and 844px at 390x844; mobile homepage did not select the MP4 source; article detail at 320px had zero horizontal overflow; contact empty submit showed the inline validation message; homepage project-card navigation reset to `scrollY=0`.
+- Fresh browser console check after removing `react-helmet`: no new warnings or errors after page load.
+- Screenshot evidence was captured through the Playwright CLI fallback because Browser screenshot capture timed out in this environment.
+- `npm run build`: pass.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- The desktop homepage MP4 is still large. Current mitigations reduce mobile cost and initial preload, but final performance sign-off still needs re-encoding or Cloudflare Stream/R2 review.
+- Article claim cleanup is explicitly paused by user direction and remains open under `NOW-ARTICLE-STRUCTURE-CLAIMS-001`.
+- Broad legacy project detail migration is explicitly paused by user direction and remains open under `NEXT-PROJECTS-INTAKE-001`.
+- Raw article newsletter HTML remains a migration source and should still move to structured article blocks before customer CRUD is considered complete.
+- Contact validation prevents empty mailto drafts but does not persist leads; Supabase-backed forms remain required.
+
+### Next Handoff
+- `NOW-ASSET-MIGRATION-001`
+- `NOW-FORMS-SUPABASE-001`
 - `NEXT-UI-PARITY-001`
 
 ## Entry Template (Use for Every Future Session)

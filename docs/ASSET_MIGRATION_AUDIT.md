@@ -259,9 +259,11 @@ Verified on 2026-05-22:
 - Browser QA after the homepage video replacement: desktop homepage selects `public/media/launch/home/urblo-hero.mp4`, reports `readyState=4`, `1280x720`, and `17.67s`; mobile homepage still selects no MP4 source and keeps the poster fallback.
 - Direct old WordPress media scan after legacy project and Stone Library fallback migration: `rg "urblo.com.au/wp-content/uploads" src public/articles data` returns no results.
 - Browser QA after legacy project and Stone Library fallback migration: Projects list, legacy project detail pages, Stone Library list, and Blueocean stone detail show no broken images and no old WordPress image URLs.
-- Article media cleanup browser QA: `/articles` renders four local article cover images; all four article detail routes render article text, use zero external/proxy article images after lazy-load scroll, expose zero known campaign/unsubscribe/Google redirect/old upload links, and keep only the existing React Helmet strict-mode development warning.
+- Article media cleanup browser QA: `/articles` renders four local article cover images; all four article detail routes render article text, use zero external/proxy article images after lazy-load scroll, and expose zero known campaign/unsubscribe/Google redirect/old upload links.
 - Stone Library fast-track coverage audit: provided primary finish assets are mapped for 31 finish states; 16 finish states use controlled local default/fallback imagery; 22 finish states remain true missing-image placeholders pending approved source images.
 - SEO/social cleanup: default Open Graph/Twitter image now points at `public/og-default.png`, and high-risk article excerpt/runtime newsletter phrases are qualified or rewritten before public rendering.
+- 2026-05-25 launch UI hardening QA: homepage hero renders as a full viewport on desktop/mobile, desktop selects the controlled MP4 with `preload="none"`, mobile still selects no MP4 source, and fresh console checks show no React Helmet strict-mode warning after removing that dependency.
+- Residual media performance risk: the desktop homepage MP4 remains large and still needs re-encoding or Cloudflare Stream/R2 review before final performance sign-off.
 
 Before declaring asset migration complete:
 - `rg "urblo.com.au/wp-content/uploads" src public/articles data`

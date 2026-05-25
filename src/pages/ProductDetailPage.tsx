@@ -143,11 +143,17 @@ export default function ProductDetailPage() {
     { label: 'Frame finish', value: selectedFrame?.name ?? 'Select a frame finish' },
     { label: 'Battens', value: selectedBattens?.name ?? 'Select batten material' },
   ];
+  const previewRows = [
+    { label: 'Body stone', option: selectedBody },
+    { label: 'Frame finish', option: selectedFrame },
+    { label: 'Battens', option: selectedBattens },
+  ];
   const mailSubject = `Urblo product enquiry: ${product.name} - ${currentModel.label}`;
   const mailBody = [
     `Product: ${product.name}`,
     `Model: ${currentModel.label}`,
     `Body stone: ${selectedBody?.name ?? 'Not selected'}`,
+    'Body finish: Confirm through project sample review',
     `Frame finish: ${selectedFrame?.name ?? 'Not selected'}`,
     `Battens: ${selectedBattens?.name ?? 'Not selected'}`,
     '',
@@ -172,6 +178,39 @@ export default function ProductDetailPage() {
           <div className="urblo-card overflow-hidden bg-white p-4">
             <div className="aspect-square overflow-hidden rounded-[4px] bg-black/5">
               <img src={currentModel.img} alt={product.name} className="h-full w-full object-contain" />
+            </div>
+            <div className="mt-4 border-t border-black/10 pt-4">
+              <p className="urblo-meta text-black/60">Model preview</p>
+              <p className="mt-2 text-sm leading-6 text-black/62">
+                This render shows product geometry. Stone, frame, and batten selections are captured
+                below for sample confirmation rather than composited into the render.
+              </p>
+            </div>
+
+            <div className="mt-4 grid gap-3 sm:grid-cols-3">
+              {previewRows.map(({ label, option }) => (
+                <div key={label} className="border border-black/10 bg-[rgba(239,239,239,0.24)] p-3">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-black/52">
+                    {label}
+                  </p>
+                  <div className="mt-3 aspect-[4/3] overflow-hidden bg-white">
+                    {option ? (
+                      <img
+                        src={option.img}
+                        alt=""
+                        aria-hidden="true"
+                        className={[
+                          'h-full w-full object-cover',
+                          option.imageState === 'pending' ? 'opacity-70 grayscale' : '',
+                        ].join(' ')}
+                      />
+                    ) : null}
+                  </div>
+                  <p className="mt-2 text-[12px] font-semibold leading-5 text-black">
+                    {option?.name ?? 'To confirm'}
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
 
@@ -217,6 +256,11 @@ export default function ProductDetailPage() {
                   before using this configuration for sign-off.
                 </p>
               ) : null}
+
+              <p className="mt-4 text-sm leading-6 text-black/65">
+                Body-stone finish is confirmed through Stone Library review and physical samples.
+                The product image remains a geometry preview until final project materials are approved.
+              </p>
 
               <div className="mt-5 flex flex-wrap gap-3">
                 <Link to="/contact" className="urblo-button">

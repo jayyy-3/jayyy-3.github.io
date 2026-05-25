@@ -18,7 +18,7 @@ Last updated: 2026-05-25
 - Styling: Tailwind CSS + project CSS (`src/index.css`, `src/App.css`)
 - Client state: Zustand (`src/store/productStore.ts`)
 - Motion/interaction: Framer Motion
-- Supporting libraries: Swiper, DOMPurify, lodash.throttle, react-helmet
+- Supporting libraries: Swiper, DOMPurify, lodash.throttle
 - Route loading: public page components are lazy-loaded in `src/App.tsx` so the initial app shell does not ship every route at once.
 
 ## Launch Target Stack
@@ -100,16 +100,18 @@ Routing uses clean paths through `BrowserRouter`. Cloudflare Pages direct refres
 | `/projects` | `Projects` | Project listing page. |
 | `/projects/:slug` | `ProjectDetails` | Project detail page. Uses page-owned project hero via `DefaultLayout showBanner={false}`. |
 | `/our-story` | `OurStory` | About page. |
-| `/contact` | `ContactPage` | Contact surface with direct contact channels and a local mailto project-brief composer. |
+| `/contact` | `ContactPage` | Contact surface with direct contact channels and a local mailto project-brief composer that requires project notes plus email or phone before opening the draft. |
 | `/articles` | `ArticlesPage` | Article list page. |
-| `/articles/:slug` | `ArticlePage` | Article detail page. |
+| `/articles/:slug` | `ArticlePage` | Article detail page. Uses page-owned article hero via `DefaultLayout showBanner={false}`. |
 | `*` | `NotFoundPage` | Branded not-found state wrapped by `DefaultLayout showBanner={false}`. |
 
 Route state contract:
 - Shared route-level loading states use `src/components/RouteState.tsx` instead of plain text placeholders.
+- Route states on no-banner routes use the `headerOffset` prop so loading, not-found, and error copy clears the absolute site header.
 - Unknown public URLs render `src/pages/NotFoundPage.tsx`, not the homepage.
 - Product detail and article detail routes render deliberate loading, not-found, and load-error states before showing detail content.
 - `scripts/agent-smoke.sh` includes unknown-route and missing-product route-shell coverage; browser QA is still required for rendered copy/state checks.
+- Client-side route navigation scrolls to the top for new PUSH/REPLACE navigations while preserving POP/back behavior.
 
 ## Navigation Contract vs Implemented Routes
 
@@ -124,11 +126,11 @@ Route state contract:
 
 ## Metadata Contract
 - `index.html` contains Urblo-owned default title, description, favicon, manifest, canonical, Open Graph, and Twitter metadata.
-- `src/App.tsx` updates route-level title, description, canonical, Open Graph, and Twitter metadata through `react-helmet`.
+- `src/App.tsx` updates route-level title, description, canonical, Open Graph, and Twitter metadata through a small native document-head updater.
 - Default share image asset: `public/og-default.png` at 1200 x 630. `public/og-default.svg` remains the editable source used to generate the PNG.
 - Favicon assets: old-site-matched WordPress site icon PNGs in `public/favicon-32x32.png`, `public/favicon-192x192.png`, `public/favicon.png`, `public/apple-touch-icon.png`, and `public/mstile-270x270.png`.
 - Web manifest: `public/site.webmanifest`, referencing PNG icon assets instead of the retired temporary SVG favicon.
-- `react-helmet` still has a known strict-mode warning in development and should be replaced or upgraded during a later SEO/runtime cleanup.
+- `react-helmet` was removed because it emitted React strict-mode lifecycle warnings under the current React 19 dev setup.
 
 ## Public Slug and Redirect Contract
 - Canonical public slugs use lowercase kebab-case across Projects, Stone Library, Products, and Articles.
@@ -143,13 +145,16 @@ Route state contract:
 - Homepage hero poster path: `public/media/launch/home/hero-poster.jpg`.
 - Homepage hero video path: `public/media/launch/home/urblo-hero.mp4`.
 - Current homepage video asset is a web-ready H.264 720p export from the user-provided `Urblo_Homepage.mp4`; the original HEVC source was not committed.
-- Homepage hero video source is constrained to desktop/tablet width through `media="(min-width: 768px)"`; mobile viewports keep the poster and do not select the MP4 source.
+- Homepage hero uses `100svh` so the first viewport reads as a full-screen hero across desktop and mobile.
+- Homepage hero video uses `preload="none"` and is constrained to desktop/tablet width through `media="(min-width: 768px)"`; mobile viewports keep the poster and do not select the MP4 source.
+- The desktop MP4 remains a large launch asset and should be re-encoded into smaller web/mobile variants or moved to Cloudflare Stream/R2 before final performance sign-off.
 - Route banners are local launch media referenced from `src/App.tsx` through the `ROUTE_BANNERS` map.
 - Contact image path: `public/media/launch/contact/project-contact.jpg`, referenced by `src/pages/ContactPage.tsx` and reused in homepage data where the same old WordPress image was previously used.
 - Homepage section imagery and partner logos now use controlled files under `public/media/launch/homepage`.
 - Our Story portraits now use controlled files under `public/media/launch/our-story`; the carbon banner uses the controlled route banner because the old WordPress carbon banner returned 404.
 - Legacy project listing/detail media now uses controlled files under `public/media/launch/projects`.
 - Stone Library primary and secondary finish imagery is mapped from `data/Product` through `src/data/stoneFinishImages.ts`; controlled fallback media lives under `public/media/launch/stone-library/fallbacks`.
+- Stone Library finish imagery carries `FinishVM.imageRole` as `finish-specific`, `reference`, or `placeholder`; the UI must disclose reference/placeholder imagery instead of implying a fallback is finish-specific.
 - Stone Library current image status: Alpine White, Angola Black, Golden Crust Light/Dark, Honey Comb, Ivory Sand, Juparana, New Grey, Steel Blue, Tan Brown, and Zen Grey have finish-specific images. Tuscany Vein Cut and Cross Cut use variant-level shared-drive images as defaults rather than pretending to have finish-specific honed/polished/sandblasted photos. Blueocean still uses the controlled local fallback, and Harcourt still uses TBC placeholders because no matching current-site shared-drive sources were found.
 - Article cover and inline cleanup media now uses controlled files under `public/media/launch/articles`.
 - Article email-export HTML is still stored as source material under `public/articles`, but `src/lib/articleMedia.ts` rewrites known Squarespace/Front/Google proxy images to local launch media and removes email campaign tracking links before DOMPurify sanitization.
@@ -189,7 +194,7 @@ Route state contract:
 - Source JSON: `data/clean/stone_library.json`
 - Type contract: `src/types/stone-library.ts`
   - `StoneLibraryRaw`, `StoneFinishRaw`, `StoneGroupRaw`, `StoneVariantRaw`
-  - `StoneCardVM`, `StoneDetailVM`, `FinishVM`, `FinishSecondaryImageVM`, `StoneStatus`
+  - `StoneCardVM`, `StoneDetailVM`, `FinishVM`, `FinishSecondaryImageVM`, `StoneFinishImageRole`, `StoneStatus`
   - Price presentation fields on `StoneDetailVM`:
     - `priceRange` (source notation, e.g. `$ / $$ / $$$`)
     - `priceTierLevel` (`1 | 2 | 3 | null`)
@@ -220,6 +225,7 @@ Route state contract:
   - Canonical product slugs are lowercase kebab-case; old camelCase product slugs are stored in `legacySlugs` for redirect compatibility.
   - `ProductDetailPage` body-stone selector options come from `StoneLibraryService.getStoneGroupOptionsForProducts()` so product configuration uses stone-group choices rather than variant-level entries.
   - Product detail pages initialize configured default material selections, show selected model/material feedback, expose a prefilled configuration enquiry `mailto:`, and mark missing selector imagery as pending.
+  - Product render imagery is treated as a geometry preview; selected body stone, frame finish, and battens are shown as separate material previews instead of pretending the render is composited live.
 
 ### Project Data Contract
 - Source of project listing and detail records: `src/data/projectData.ts`

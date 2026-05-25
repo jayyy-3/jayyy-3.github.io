@@ -11,6 +11,18 @@ interface ImageStageProps {
     onOpenLightbox: (finishKey: string, frameIndex?: number) => void;
 }
 
+function imageRoleLabel(finish: FinishVM): string {
+    if (finish.imageRole === 'finish-specific') {
+        return 'Finish-specific image';
+    }
+
+    if (finish.imageRole === 'reference') {
+        return 'Reference image';
+    }
+
+    return 'Image pending';
+}
+
 export default function ImageStage({
     stoneName,
     finishes,
@@ -358,6 +370,12 @@ export default function ImageStage({
                                     </button>
                                 ) : null}
 
+                                {isActive ? (
+                                    <div className="pointer-events-none absolute left-2 top-2 max-w-[calc(100%-5.5rem)] rounded-[4px] border border-black/45 bg-white/94 px-2 py-1 text-[9px] font-bold uppercase leading-tight tracking-[0.08em] text-black">
+                                        {imageRoleLabel(finish)}
+                                    </div>
+                                ) : null}
+
                                 <div
                                     className={[
                                         'pointer-events-none absolute inset-y-3 right-1 flex items-center justify-center transition-opacity duration-200',
@@ -382,7 +400,14 @@ export default function ImageStage({
 
             <div className="flex items-center justify-between rounded-[4px] border border-black/10 bg-white px-4 py-2.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-black/55 shadow-none">
                 <span>{stoneName}</span>
-                {activeFinish ? <span>{activeFinish.label}</span> : null}
+                {activeFinish ? (
+                    <span className="text-right">
+                        {activeFinish.label}
+                        {activeFinish.imageRole === 'finish-specific'
+                            ? ''
+                            : ' - confirm sample'}
+                    </span>
+                ) : null}
             </div>
 
             {activeFinish && activeSecondaryImages.length ? (

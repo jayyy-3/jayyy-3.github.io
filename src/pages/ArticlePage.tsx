@@ -82,6 +82,7 @@ export default function ArticlePage() {
         eyebrow="Loading"
         title="Preparing article"
         copy="The article is loading. This should only take a moment."
+        headerOffset
       />
     );
   }
@@ -92,6 +93,7 @@ export default function ArticlePage() {
         eyebrow="Article Error"
         title="Articles could not load"
         copy="The article index could not be loaded right now. Return to articles or contact Urblo if this keeps happening."
+        headerOffset
         actions={[
           { label: 'Articles', to: '/articles' },
           { label: 'Contact Us', to: '/contact', variant: 'secondary' },
@@ -106,6 +108,7 @@ export default function ArticlePage() {
         eyebrow="Article Not Found"
         title="Article not found"
         copy="This article link does not match a published Urblo article. Browse the article library or contact Urblo for help."
+        headerOffset
         actions={[
           { label: 'Articles', to: '/articles' },
           { label: 'Contact Us', to: '/contact', variant: 'secondary' },
@@ -124,6 +127,7 @@ export default function ArticlePage() {
         eyebrow="Loading"
         title="Preparing article"
         copy="The article content is loading. This should only take a moment."
+        headerOffset
       />
     );
   }
@@ -134,6 +138,7 @@ export default function ArticlePage() {
         eyebrow="Article Error"
         title="Article could not load"
         copy="The article content could not be loaded right now. Return to articles or contact Urblo if this keeps happening."
+        headerOffset
         actions={[
           { label: 'Articles', to: '/articles' },
           { label: 'Contact Us', to: '/contact', variant: 'secondary' },
@@ -173,18 +178,18 @@ export default function ArticlePage() {
         <div className="urblo-card w-full max-w-[980px] bg-white px-6 py-8 md:px-10 md:py-10" dangerouslySetInnerHTML={{ __html: html }} />
       </div>
 
-      <nav className="urblo-page-container flex items-center justify-between gap-4 py-10">
+      <nav className="urblo-page-container flex flex-col gap-4 py-10 md:flex-row md:items-center md:justify-between">
         {prev ? (
-          <Link to={'/articles/' + prev.slug} className="urblo-button">
-            Previous: {prev.title}
+          <Link to={'/articles/' + prev.slug} className="urblo-button w-full whitespace-normal text-center md:w-auto">
+            Previous article
           </Link>
         ) : (
           <span />
         )}
 
         {next ? (
-          <Link to={'/articles/' + next.slug} className="urblo-button-inverse">
-            Next: {next.title}
+          <Link to={'/articles/' + next.slug} className="urblo-button-inverse w-full whitespace-normal text-center md:w-auto">
+            Next article
           </Link>
         ) : (
           <span />

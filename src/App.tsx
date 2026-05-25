@@ -1,7 +1,12 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect, useLayoutEffect } from 'react';
 import type { ReactNode } from 'react';
-import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
-import { Helmet } from 'react-helmet';
+import {
+    BrowserRouter,
+    Route,
+    Routes,
+    useLocation,
+    useNavigationType,
+} from 'react-router-dom';
 import WelcomePopup from './components/WelcomePopup';
 import RouteState from './components/RouteState';
 import DefaultLayout from './layouts/DefaultLayout';
@@ -29,7 +34,6 @@ const ROUTE_BANNERS = {
     ourStory: '/media/launch/banners/our-story.jpg',
     contact: '/media/launch/banners/our-story.jpg',
     articles: '/media/launch/banners/articles.jpg',
-    articleDetail: '/media/launch/banners/article-detail.jpg',
 } as const;
 
 interface RouteMeta {
@@ -138,40 +142,81 @@ function TitleUpdater() {
     const meta = getRouteMeta(location.pathname);
     const canonicalUrl = new URL(location.pathname, SITE_URL).toString();
 
-    return (
-        <Helmet>
-            <title>{meta.title}</title>
-            <meta name="description" content={meta.description} />
-            <link rel="canonical" href={canonicalUrl} />
-            <meta property="og:site_name" content="Urblo" />
-            <meta property="og:type" content="website" />
-            <meta property="og:title" content={meta.title} />
-            <meta property="og:description" content={meta.description} />
-            <meta property="og:url" content={canonicalUrl} />
-            <meta property="og:image" content={DEFAULT_SHARE_IMAGE} />
-            <meta property="og:image:type" content="image/png" />
-            <meta property="og:image:width" content="1200" />
-            <meta property="og:image:height" content="630" />
-            <meta name="twitter:card" content="summary_large_image" />
-            <meta name="twitter:title" content={meta.title} />
-            <meta name="twitter:description" content={meta.description} />
-            <meta name="twitter:image" content={DEFAULT_SHARE_IMAGE} />
-        </Helmet>
-    );
+    useEffect(() => {
+        document.title = meta.title;
+        upsertMeta('name', 'description', meta.description);
+        upsertCanonical(canonicalUrl);
+        upsertMeta('property', 'og:site_name', 'Urblo');
+        upsertMeta('property', 'og:type', 'website');
+        upsertMeta('property', 'og:title', meta.title);
+        upsertMeta('property', 'og:description', meta.description);
+        upsertMeta('property', 'og:url', canonicalUrl);
+        upsertMeta('property', 'og:image', DEFAULT_SHARE_IMAGE);
+        upsertMeta('property', 'og:image:type', 'image/png');
+        upsertMeta('property', 'og:image:width', '1200');
+        upsertMeta('property', 'og:image:height', '630');
+        upsertMeta('name', 'twitter:card', 'summary_large_image');
+        upsertMeta('name', 'twitter:title', meta.title);
+        upsertMeta('name', 'twitter:description', meta.description);
+        upsertMeta('name', 'twitter:image', DEFAULT_SHARE_IMAGE);
+    }, [canonicalUrl, meta.description, meta.title]);
+
+    return null;
 }
 
-function PageLoading() {
+function upsertMeta(attributeName: 'name' | 'property', attributeValue: string, content: string) {
+    const selector = `meta[${attributeName}="${attributeValue}"]`;
+    let tag = document.head.querySelector<HTMLMetaElement>(selector);
+
+    if (!tag) {
+        tag = document.createElement('meta');
+        tag.setAttribute(attributeName, attributeValue);
+        document.head.appendChild(tag);
+    }
+
+    tag.content = content;
+}
+
+function upsertCanonical(href: string) {
+    let tag = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+
+    if (!tag) {
+        tag = document.createElement('link');
+        tag.rel = 'canonical';
+        document.head.appendChild(tag);
+    }
+
+    tag.href = href;
+}
+
+function ScrollRestoration() {
+    const location = useLocation();
+    const navigationType = useNavigationType();
+
+    useLayoutEffect(() => {
+        if (navigationType === 'POP') {
+            return;
+        }
+
+        window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    }, [location.pathname, location.search, navigationType]);
+
+    return null;
+}
+
+function PageLoading({ headerOffset = false }: { headerOffset?: boolean }) {
     return (
         <RouteState
             eyebrow="Loading"
             title="Preparing content"
             copy="The page is loading. This should only take a moment."
+            headerOffset={headerOffset}
         />
     );
 }
 
-function loadPage(page: ReactNode) {
-    return <Suspense fallback={<PageLoading />}>{page}</Suspense>;
+function loadPage(page: ReactNode, options: { headerOffset?: boolean } = {}) {
+    return <Suspense fallback={<PageLoading headerOffset={options.headerOffset} />}>{page}</Suspense>;
 }
 
 export default function App() {
@@ -180,6 +225,7 @@ export default function App() {
             <WelcomePopup />
             <BrowserRouter>
                 <TitleUpdater />
+                <ScrollRestoration />
                 <Routes>
                     <Route
                         path="/"
@@ -239,7 +285,7 @@ export default function App() {
                         path="/projects/:slug"
                         element={
                             <DefaultLayout showBanner={false}>
-                                {loadPage(<ProjectDetailsPage />)}
+                                {loadPage(<ProjectDetailsPage />, { headerOffset: true })}
                             </DefaultLayout>
                         }
                     />
@@ -274,8 +320,8 @@ export default function App() {
                     <Route
                         path="/articles/:slug"
                         element={
-                            <DefaultLayout bgImage={ROUTE_BANNERS.articleDetail}>
-                                {loadPage(<ArticlePage />)}
+                            <DefaultLayout showBanner={false}>
+                                {loadPage(<ArticlePage />, { headerOffset: true })}
                             </DefaultLayout>
                         }
                     />
@@ -284,7 +330,7 @@ export default function App() {
                         path="*"
                         element={
                             <DefaultLayout showBanner={false}>
-                                {loadPage(<NotFoundPage />)}
+                                {loadPage(<NotFoundPage />, { headerOffset: true })}
                             </DefaultLayout>
                         }
                     />

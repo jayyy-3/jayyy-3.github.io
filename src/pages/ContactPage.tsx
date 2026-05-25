@@ -64,13 +64,26 @@ const inputClassName =
 
 export default function ContactPage() {
   const [form, setForm] = useState<ContactFormState>(initialFormState);
+  const [formError, setFormError] = useState<string | null>(null);
 
   function updateField(field: keyof ContactFormState, value: string) {
     setForm((current) => ({ ...current, [field]: value }));
+    setFormError(null);
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    const hasContactMethod = Boolean(form.email.trim() || form.phone.trim());
+    const hasProjectNotes = Boolean(form.message.trim());
+
+    if (!hasContactMethod || !hasProjectNotes) {
+      setFormError(
+        'Add project notes and at least one contact method before opening the email draft.',
+      );
+      return;
+    }
+
     window.location.href = buildMailto(form);
   }
 
@@ -254,8 +267,19 @@ export default function ContactPage() {
                   onChange={(event) => updateField('message', event.target.value)}
                   className={`${inputClassName} min-h-[170px] resize-y leading-7`}
                   placeholder="Tell us about location, project stage, stone intent, finish preference, timing, or sample needs."
+                  aria-describedby={formError ? 'contact-form-error' : undefined}
                 />
               </div>
+
+              {formError ? (
+                <p
+                  id="contact-form-error"
+                  role="alert"
+                  className="rounded-[4px] border border-black/10 bg-[rgba(0,255,25,0.14)] px-4 py-3 text-[14px] font-semibold leading-6 text-black"
+                >
+                  {formError}
+                </p>
+              ) : null}
 
               <div className="flex flex-col gap-4 border-t border-black/10 pt-6 md:flex-row md:items-center md:justify-between">
                 <p className="max-w-[30rem] text-[14px] leading-6 text-black/58">
