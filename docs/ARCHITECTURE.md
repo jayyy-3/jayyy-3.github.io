@@ -6,6 +6,7 @@ Last updated: 2026-05-26
 - Current implementation: frontend-only React application shipped as static assets.
 - Current implementation: no runtime backend service exists in this repository yet.
 - Current implementation: no production HTTP API contract has been implemented yet.
+- Current Supabase project: `Urblo` (`npkidywzwddbnfrnxlmo`, `ap-southeast-2`) is accessible through the Supabase connector, but no production migrations, RLS policies, seed data, or runtime integrations have been applied yet.
 - Launch target: Cloudflare Pages static frontend, Cloudflare Pages Functions API endpoints, Supabase Postgres/Auth/Storage, and an Urblo-owned admin interface for content operations.
 - Planning source: `docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md`.
 - Supabase schema design source: `docs/SUPABASE_SCHEMA.md`.
@@ -41,6 +42,7 @@ Last updated: 2026-05-26
   - First production schema plan lives in `docs/SUPABASE_SCHEMA.md`.
   - First `/admin` route, access-state, role, module rollout, and field-ownership contract lives in `docs/ADMIN_IA_ACCESS.md`.
   - Runtime is not considered migrated until migrations, RLS policies, seed scripts, admin UI, and API contracts are implemented and verified.
+  - Supabase execution order is foundation migration, baseline seeds, forms backend, admin auth shell, then content CRUD.
 
 ## Deployment and Build Contract
 - Current deployment workflow: `.github/workflows/deploy.yml`
@@ -364,7 +366,8 @@ Route state contract:
 - `npm run agent:smoke`: pass
 
 ## Known Architecture Risks
-- Cloudflare + Supabase is the approved launch target, but implementation has not started in runtime code.
+- Cloudflare + Supabase is the approved launch target, and the Supabase project is accessible, but implementation has not started in runtime code.
+- Supabase still needs the foundation migration, RLS verification, baseline seeds, form endpoints, Auth, Storage policies, and admin CRUD before it can replace static/file-backed behavior.
 - Cloudflare Pages repo-side clean URL configuration is in place, but dashboard project creation, preview validation, custom domain, DNS cutover, and rollback still require account access.
 - Sample Request has no backend/form workflow yet and remains a `mailto:` fallback in current runtime.
 - Projects, Stone Library, Products, and Articles remain file-backed until Supabase migration work is implemented.

@@ -50,6 +50,111 @@
       ]
     },
     {
+      "id": "NOW-SUPABASE-FOUNDATION-001",
+      "status": "now",
+      "priority": 2.1,
+      "summary": "Apply the Supabase foundation schema, indexes, helper functions, and RLS posture to the Urblo project.",
+      "files": [
+        "docs/SUPABASE_SCHEMA.md",
+        "docs/ADMIN_IA_ACCESS.md",
+        "docs/ARCHITECTURE.md",
+        "docs/HANDOFF.md",
+        "docs/WORKLOG.md",
+        "docs/agent/tasks.json",
+        "supabase/migrations"
+      ],
+      "notes": [
+        "2026-05-26: Supabase connector can access the Urblo project directly: project ref npkidywzwddbnfrnxlmo, region ap-southeast-2, status ACTIVE_HEALTHY.",
+        "Do not request manual dashboard table creation while connector migrations are available.",
+        "Do not commit or paste service-role keys, database passwords, Turnstile secrets, or email provider secrets."
+      ],
+      "acceptance": [
+        "Foundation migration is applied to Supabase project npkidywzwddbnfrnxlmo and appears in the Supabase migration list.",
+        "Core tables exist for admin profiles, audit events, media assets, site settings, finish definitions, enquiries, sample requests, sample request items, and the planned content model skeletons.",
+        "RLS is enabled on every exposed public, admin, and lead table.",
+        "Policies allow anonymous users to read only published public content and prevent anonymous reads of leads, admin profiles, and audit events.",
+        "Foreign-key, status, slug, and operational lead-queue indexes exist for the first launch access patterns.",
+        "Migration evidence and Supabase verification results are recorded in docs/WORKLOG.md."
+      ],
+      "verification": [
+        "Supabase MCP: list_migrations includes the foundation migration on project npkidywzwddbnfrnxlmo",
+        "Supabase MCP: list_tables verbose=true confirms foundation tables and foreign keys",
+        "Supabase MCP: execute_sql verifies relrowsecurity and pg_policies for public, admin, and lead tables",
+        "npm run agent:check",
+        "git diff --check"
+      ]
+    },
+    {
+      "id": "NOW-SUPABASE-SEED-BASELINE-001",
+      "status": "next",
+      "priority": 2.2,
+      "summary": "Seed Supabase baseline rows needed before forms and admin work.",
+      "files": [
+        "docs/SUPABASE_SCHEMA.md",
+        "docs/ARCHITECTURE.md",
+        "docs/HANDOFF.md",
+        "docs/WORKLOG.md",
+        "docs/agent/tasks.json",
+        "supabase/migrations"
+      ],
+      "notes": [
+        "Run after NOW-SUPABASE-FOUNDATION-001 so seed statements can use stable table constraints.",
+        "Initial seed scope should stay small: finish definitions, one published site settings row, and only media placeholders needed by near-term migration work."
+      ],
+      "acceptance": [
+        "finish_definitions contains the approved first finish dictionary.",
+        "site_settings contains one published default Urblo row.",
+        "Seed migration is idempotent and does not duplicate rows when rerun.",
+        "Seed verification queries and row counts are recorded in docs/WORKLOG.md."
+      ],
+      "verification": [
+        "Supabase MCP: execute_sql confirms finish_definitions and site_settings row counts",
+        "Supabase MCP: list_migrations includes the baseline seed migration on project npkidywzwddbnfrnxlmo",
+        "npm run agent:check",
+        "git diff --check"
+      ]
+    },
+    {
+      "id": "NOW-FORMS-BACKEND-001",
+      "status": "next",
+      "priority": 4.1,
+      "summary": "Implement Cloudflare Pages Functions for Contact and Sample Request Supabase writes.",
+      "files": [
+        "docs/SUPABASE_SCHEMA.md",
+        "docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md",
+        "docs/ARCHITECTURE.md",
+        "docs/HANDOFF.md",
+        "docs/WORKLOG.md",
+        "docs/agent/tasks.json",
+        "src/pages/ContactPage.tsx",
+        "src/data/siteChrome.ts",
+        "src/data/homepage.ts",
+        "public/_routes.json"
+      ],
+      "notes": [
+        "Run after Supabase foundation and baseline seed work. Turnstile and email notification can be staged: database insert comes first, notification can remain pending until the email provider secret exists.",
+        "The main public submit path should stop depending on a local mail client once this is complete."
+      ],
+      "acceptance": [
+        "Valid enquiry submissions create Supabase enquiry rows through a server-side endpoint.",
+        "Valid sample request submissions create sample_request rows and item rows through a server-side endpoint.",
+        "Invalid submissions return validation errors and create no records.",
+        "Turnstile failures fail closed when Turnstile environment variables are configured.",
+        "Visitor-facing success and failure states are clear on desktop and mobile.",
+        "No Supabase service-role key is shipped to browser code."
+      ],
+      "verification": [
+        "npm run build",
+        "npm run lint",
+        "npx tsc -b",
+        "npm run agent:smoke",
+        "API test: valid enquiry creates one Supabase row",
+        "API test: invalid enquiry creates no Supabase row",
+        "API test: valid sample request creates request and item rows",
+        "Browser or Playwright verification: Contact form success and validation states"
+      ]
+    },
+    {
       "id": "NOW-CLOUDFLARE-PAGES-DEPLOY-001",
       "status": "blocked",
       "priority": 3,
@@ -93,7 +198,8 @@
       ],
       "notes": [
         "2026-05-22 full-site QA confirmed Contact page copy is clear about opening an email draft, but Sample Request and other mailto CTAs still need consistent fallback wording until Supabase submissions are live.",
-        "2026-05-25: Contact now blocks empty local email drafts unless the visitor provides project notes plus either email or phone. This is a runtime guardrail, not a substitute for Supabase-backed lead persistence."
+        "2026-05-25: Contact now blocks empty local email drafts unless the visitor provides project notes plus either email or phone. This is a runtime guardrail, not a substitute for Supabase-backed lead persistence.",
+        "2026-05-26: Execute through NOW-SUPABASE-FOUNDATION-001, NOW-SUPABASE-SEED-BASELINE-001, and NOW-FORMS-BACKEND-001 so database safety is verified before public submit behavior changes."
       ],
       "acceptance": [
         "Public form submissions are validated server-side, protected by Turnstile, stored in Supabase, and notify Urblo by email.",
@@ -184,7 +290,7 @@
         "src/App.tsx"
       ],
       "notes": [
-        "Blocked until Supabase project URL, anon key, service-role handling plan, and admin user policy are available.",
+        "2026-05-26: Supabase project access is now available through the connector, but this task remains blocked until the foundation schema/RLS is applied and the first admin email plus browser-safe anon key handling are confirmed.",
         "Use docs/ADMIN_IA_ACCESS.md for the protected admin shell route map, access states, and role behavior once Supabase credentials are available."
       ],
       "acceptance": [

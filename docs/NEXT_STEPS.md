@@ -39,12 +39,15 @@ For any user-facing layout/copy/IA task:
 ## Now
 Source of truth: `docs/agent/tasks.json`.
 
+- `NOW-SUPABASE-FOUNDATION-001`: apply the production Supabase foundation schema, indexes, helper functions, and RLS posture to the Urblo project.
 - `NOW-FORMS-SUPABASE-001`: replace mailto-only Contact and Sample Request flows with Supabase-backed submissions.
 - `NOW-ADMIN-CMS-001`: umbrella objective for customer-maintained Projects, Stone Library, Products, Articles, media, and leads; execute through the smaller admin child tasks.
 - `NOW-ASSET-MIGRATION-001`: migrate priority media away from old WordPress URLs and define controlled storage for launch.
 - `NOW-ARTICLE-STRUCTURE-CLAIMS-001`: move article details from raw newsletter HTML to mobile-safe, claim-reviewed structured article templates.
 
 ## Next
+- `NOW-SUPABASE-SEED-BASELINE-001`: seed finish definitions and the default Urblo site settings row after the foundation migration is in place.
+- `NOW-FORMS-BACKEND-001`: implement Cloudflare Pages Functions for Contact and Sample Request writes into Supabase.
 - `NEXT-UI-PARITY-001`: bring Home, Our Story, Articles, and Contact Us toward approved visual references.
 - `NEXT-STONELIB-DATA-001`: replace generic finish behavior text with approved notes.
 - `NEXT-PROJECTS-INTAKE-001`: define the project intake template and migrate the next project into the material-map case study model.
@@ -56,7 +59,7 @@ Source of truth: `docs/agent/tasks.json`.
 
 ## Blocked
 - `NOW-CLOUDFLARE-PAGES-DEPLOY-001`: repo-side Cloudflare Pages configuration is prepared; dashboard project creation, preview URL validation, production custom domain, DNS cutover, and rollback require Cloudflare account access.
-- `NOW-ADMIN-AUTH-RLS-001`: Supabase Auth, RLS, and protected admin shell require Supabase project credentials and admin access policy.
+- `NOW-ADMIN-AUTH-RLS-001`: Supabase project access is available, but the protected admin shell still waits for the foundation schema/RLS, first admin email, and browser-safe anon-key handling.
 - `NOW-ADMIN-CONTENT-CRUD-001`: admin CRUD modules require the protected admin shell and Supabase content tables.
 - `NOW-ADMIN-MEDIA-LEADS-001`: media library and lead management require Supabase Storage, form endpoints, Turnstile, and email secrets.
 

@@ -1,11 +1,108 @@
 # Urblo Supabase Schema Plan
 
-Last updated: 2026-05-25
+Last updated: 2026-05-26
 
 ## Purpose
 This document defines the first production Supabase data model for the Urblo website launch.
 
 It is a schema design contract, not proof that the database has already been created. Runtime work must still implement migrations, seed scripts, RLS policies, Cloudflare Pages Functions, and admin UI.
+
+## Current Supabase Project
+
+The Supabase connector can access the Urblo project directly. Do not ask the user to manually create tables in the dashboard unless a connector or migration path is blocked.
+
+| Field | Value |
+|---|---|
+| Project name | `Urblo` |
+| Project ref | `npkidywzwddbnfrnxlmo` |
+| Region | `ap-southeast-2` |
+| Status checked | `ACTIVE_HEALTHY` on 2026-05-26 |
+
+Secrets still must not be committed or pasted into repo docs. Service-role keys, database passwords, Turnstile secrets, and email provider secrets belong only in server-side environment variable stores.
+
+## Supabase Execution Plan
+
+### Phase 1 - Foundation Migration
+Outcome: the production Supabase project has the core schema, constraints, helper functions, indexes, and RLS posture needed before public forms or admin screens are connected.
+
+Scope:
+- Admin/access tables: `admin_profiles`, `admin_audit_events`.
+- Lead tables: `enquiries`, `sample_requests`, `sample_request_items`.
+- Shared tables needed by later content work: `media_assets`, `site_settings`, `finish_definitions`.
+- Core content table skeletons for Stone Library, Products, Projects, and Articles as defined below.
+- Common `updated_at` trigger helper.
+- Foreign-key and status indexes required by the RLS and listing patterns.
+- RLS enabled on all public/admin/lead tables.
+
+Acceptance:
+- Supabase migration list includes the applied foundation migration on project `npkidywzwddbnfrnxlmo`.
+- Table listing confirms every foundation table exists in the `public` schema.
+- `pg_class.relrowsecurity` confirms RLS is enabled for all exposed tables.
+- `pg_policies` confirms anonymous users can only read published public content and cannot read leads, admin profiles, or audit events.
+- Private form tables have operational partial indexes for new lead queues.
+- The migration is represented in repo review material under `supabase/migrations`.
+
+### Phase 2 - Baseline Seeds
+Outcome: the database has enough safe baseline data for forms/admin work without moving all public content yet.
+
+Scope:
+- Seed canonical `finish_definitions`.
+- Seed one published `site_settings` row for Urblo contact/site identity.
+- Seed initial media placeholder records only where needed for future migration references.
+
+Acceptance:
+- `finish_definitions` contains the approved first finish dictionary.
+- `site_settings` contains one published `default` row.
+- Seed scripts are idempotent: rerunning them does not duplicate rows.
+
+### Phase 3 - Forms Backend
+Outcome: Contact and Sample Request become durable business workflows.
+
+Scope:
+- Build `/api/enquiries` and `/api/sample-requests` as Cloudflare Pages Functions.
+- Server-side validation and normalization.
+- Turnstile verification when keys are configured.
+- Insert validated submissions into Supabase.
+- Add notification status handling and later email notification.
+- Replace public mailto-only submit flows with clear success/failure states.
+
+Acceptance:
+- Valid enquiry and sample request submissions create Supabase rows.
+- Invalid submissions return a clear validation error and create no rows.
+- Turnstile failure fails closed when Turnstile is enabled.
+- Visitor UI no longer depends on opening a local email client for the main submit action.
+- Admin/lead-management follow-up can read submitted records through protected access.
+
+### Phase 4 - Admin Auth Shell
+Outcome: `/admin` exists as a protected operating console, not a public placeholder.
+
+Scope:
+- Supabase Auth client configuration.
+- `/admin/login`, `/admin`, `/admin/unauthorized`, and loading/session bootstrap states.
+- `admin_profiles` role check.
+- Read-only dashboard shell with content/lead health placeholders.
+
+Acceptance:
+- Unauthenticated users cannot view admin content.
+- Authenticated users without an active admin profile see unauthorized state.
+- Active admin users can reach the dashboard.
+- No service-role key is shipped to browser code.
+
+### Phase 5 - Content Migration and CRUD
+Outcome: content can move out of static files in a controlled order.
+
+Order:
+1. Media records and Storage policy.
+2. Stone Library data.
+3. Projects and project material maps.
+4. Products.
+5. Articles as structured blocks.
+
+Acceptance:
+- Public routes continue exposing only published content.
+- Static-file fallback remains available until each content type is fully migrated.
+- Customer-editable fields match `docs/ADMIN_IA_ACCESS.md`.
+- Raw newsletter HTML is not the normal admin article authoring model.
 
 ## Design Goals
 - Let Urblo maintain site content without code edits.

@@ -2146,6 +2146,39 @@ Last updated: 2026-05-26
 - `NOW-CLOUDFLARE-PAGES-DEPLOY-001`
 - `NOW-FORMS-SUPABASE-001`
 
+## Entry - 2026-05-26 (Supabase Execution Task Breakdown)
+
+### Scope
+- Confirmed the Supabase execution path should start with the accessible Urblo project, not manual dashboard table creation.
+- Split the Supabase work into foundation migration, baseline seed, forms backend, admin auth shell, and later content CRUD phases.
+- Added explicit acceptance criteria for migrations, table existence, RLS policy inspection, lead row creation, and no browser-exposed service-role secrets.
+- Added a reviewed migration directory scaffold for future SQL migration files.
+
+### Changed Files
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `supabase/migrations/README.md`
+
+### Verification Results
+- `node -e "JSON.parse(require('fs').readFileSync('docs/agent/tasks.json','utf8')); console.log('tasks json ok')"`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- The Supabase project exists and is connector-accessible, but no production migration has been applied yet.
+- First admin email, browser-safe anon-key handling, Turnstile secrets, and transactional email secrets are still needed before the admin and form flows can be considered production-ready.
+- Cloudflare Pages project creation remains separate from Supabase execution and may still require resolving Hunter account Pages API permissions or choosing Jay's account for Pages.
+
+### Next Handoff
+- `NOW-SUPABASE-FOUNDATION-001`
+- `NOW-SUPABASE-SEED-BASELINE-001`
+- `NOW-FORMS-BACKEND-001`
+
 ## Entry Template (Use for Every Future Session)
 
 ### Date
