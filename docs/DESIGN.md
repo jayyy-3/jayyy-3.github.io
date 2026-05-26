@@ -136,7 +136,7 @@ Hero behavior:
 - The first homepage viewport should feel full-screen on desktop and mobile.
 - Desktop video is acceptable when it does not slow first meaningfully visible content; mobile should use a poster or optimized mobile-specific media until a smaller video variant is approved.
 - The homepage hero and global header may use the edge-aligned container instead of the standard page container when the first viewport needs a full-bleed editorial composition.
-- Homepage hero title motion should be restrained, sequential, and reduced-motion aware. Left-to-right line reveals are acceptable when they clarify hierarchy rather than delaying access to content.
+- Homepage hero title motion should be restrained, sequential, and reduced-motion aware. Letter-by-letter left-to-right reveals are acceptable when they clarify hierarchy rather than delaying access to content.
 - The approved first-viewport verb stack is all-caps, with a deliberate second-line offset, lighter Urblo punctuation, and enough bottom proximity to feel anchored without clipping on mobile.
 
 ### Stone Library

@@ -1966,7 +1966,7 @@ Last updated: 2026-05-26
 - Adjusted the homepage hero after the user clarified the Richard Crookes reference target.
 - Changed the verb stack to all caps: `DESIGN.`, `SOURCE.`, `DELIVER.`
 - Offset the second line, reduced the hero type scale, and lowered the stack closer to the viewport bottom.
-- Changed hero motion from an upward line reveal to a left-to-right line reveal, while preserving reduced-motion behavior.
+- Changed hero motion from an upward line reveal to a letter-by-letter left-to-right reveal, while preserving reduced-motion behavior.
 - Rechecked desktop and mobile first-viewport rendering and mobile menu interaction.
 
 ### Changed Files
@@ -1984,13 +1984,14 @@ Last updated: 2026-05-26
 - `npm run agent:smoke`: pass.
 - `npm run agent:check`: pass.
 - `git diff --check`: pass.
-- Browser QA at 1440x900: all-caps hero, edge-aligned first line, second-line offset, smaller type, and lower bottom anchoring render correctly.
+- Browser QA at 1440x900: all-caps hero, edge-aligned first line, second-line offset, smaller type, lower bottom anchoring, and no top clipping render correctly.
 - Browser QA at 390x844: no horizontal overflow; all three lines fit and remain readable over the poster frame.
+- Browser animation QA: mid-animation state shows `DESIGN.` complete while `SOURCE.` is partially revealed and `DELIVER.` is still hidden, matching the requested first-line, second-line, third-line sequencing.
 - Browser interaction QA: mobile header menu button resolves uniquely, opens successfully, and exposes nav links.
 - Browser console: only the expected Framer Motion reduced-motion warning was present because the test browser has reduced motion enabled.
 
 ### Risks and Gaps
-- The Browser test environment had reduced motion enabled, so the normal-motion reveal was validated by code path and final layout, not by observing live motion in that Browser session.
+- The Browser test environment had reduced motion enabled; the reduced-motion path still preserves visible letter sequencing with shorter fades, while the normal path keeps the same line and character delays with slightly more motion.
 - The hero remains tied to the current controlled video/poster asset; Cloudflare preview should still verify real network and LCP behavior after deployment.
 
 ### Next Handoff

@@ -257,26 +257,32 @@ function HeroStatementLine({
   reduceMotion: boolean;
 }) {
   const lineOffset = index === 1 ? 'pl-[0.42em] sm:pl-[0.54em] lg:pl-[0.66em]' : '';
+  const characters = Array.from(`${word}.`);
+  const lineDelay = reduceMotion ? 0.08 + index * 0.34 : 0.22 + index * 0.82;
+  const characterDelay = reduceMotion ? 0.035 : 0.06;
 
   return (
-    <span className={`block overflow-hidden pb-[0.03em] ${lineOffset}`}>
-      <motion.span
-        className="block"
-        initial={
-          reduceMotion
-            ? { clipPath: 'inset(0 0% 0 0)', opacity: 1 }
-            : { clipPath: 'inset(0 100% 0 0)', opacity: 0.6 }
-        }
-        animate={{ clipPath: 'inset(0 0% 0 0)', opacity: 1 }}
-        transition={{
-          duration: reduceMotion ? 0 : 0.86,
-          delay: reduceMotion ? 0 : 0.16 + index * 0.24,
-          ease: [0.76, 0, 0.24, 1],
-        }}
-      >
-        {word}
-        <span className="text-[var(--urblo-lime)]">.</span>
-      </motion.span>
+    <span className={`block whitespace-nowrap py-[0.035em] ${lineOffset}`}>
+      {characters.map((character, characterIndex) => {
+        const isDot = character === '.';
+
+        return (
+          <motion.span
+            key={`${word}-${character}-${characterIndex}`}
+            aria-hidden="true"
+            className={`inline-block ${isDot ? 'text-[var(--urblo-lime)]' : ''}`}
+            initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: '0.16em' }}
+            animate={{ opacity: 1, y: '0em' }}
+            transition={{
+              duration: reduceMotion ? 0.22 : 0.42,
+              delay: lineDelay + characterIndex * characterDelay,
+              ease: [0.22, 1, 0.36, 1],
+            }}
+          >
+            {character}
+          </motion.span>
+        );
+      })}
     </span>
   );
 }
@@ -300,9 +306,9 @@ function HeroSection() {
       </video>
       <div className="absolute inset-0 bg-black/40" />
 
-      <div className="urblo-edge-container relative flex min-h-[100svh] items-end pb-[38px] pt-32 md:pb-[52px] lg:pb-[64px]">
+      <div className="urblo-edge-container relative flex min-h-[100svh] items-end pb-[22px] pt-32 md:pb-[30px] lg:pb-[38px]">
         <h1
-          className="text-[54px] font-light leading-[0.9] text-white sm:text-[68px] md:text-[92px] lg:text-[116px] xl:text-[136px] 2xl:text-[152px]"
+          className="text-[52px] font-light leading-[0.98] text-white sm:text-[66px] md:text-[88px] lg:text-[112px] xl:text-[132px] 2xl:text-[148px]"
           aria-label="DESIGN. SOURCE. DELIVER."
         >
           {heroStatements.map((statement, index) => (
