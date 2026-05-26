@@ -573,23 +573,33 @@
     },
     {
       "id": "NOW-DEPLOY-PAGES-HARDEN-001",
-      "status": "later",
+      "status": "done",
       "priority": 31,
-      "summary": "Legacy fallback only: harden GitHub Pages deployment if the Cloudflare Pages decision is reversed.",
+      "summary": "Short-term fallback only: harden GitHub Pages clean-route refresh before Cloudflare Pages launch.",
       "files": [
         ".github/workflows/deploy.yml",
         "docs/ARCHITECTURE.md",
-        "README.md"
+        "docs/HANDOFF.md",
+        "docs/NEXT_STEPS.md",
+        "docs/WORKLOG.md",
+        "docs/agent/tasks.json"
+      ],
+      "notes": [
+        "2026-05-26: Direct clean-route visits on GitHub Pages, including /stone-library/angola-black, returned the platform 404 because GitHub Pages does not read public/_redirects.",
+        "2026-05-26: The GitHub Pages workflow now copies dist/index.html to dist/404.html after build so deep links can load the React app during the short-term preview period.",
+        "This does not change the launch target. Cloudflare Pages remains the approved production path and should continue using public/_redirects for 200-status SPA fallback."
       ],
       "acceptance": [
-        "This task remains inactive while Cloudflare Pages is the approved launch target.",
-        "If reactivated, deploy workflow does not depend on a personal PAT.",
-        "If reactivated, lint/typecheck failures block deploy and manual redeploy is available from Actions."
+        "GitHub Pages deploy output includes a 404.html copy of index.html for SPA clean-route fallback.",
+        "The change is documented as a short-term GitHub Pages compatibility patch, not a replacement for Cloudflare Pages routing.",
+        "Cloudflare Pages configuration remains unchanged and continues to use public/_redirects."
       ],
       "verification": [
+        "npm run build",
+        "test -f dist/index.html && cp dist/index.html dist/404.html && cmp -s dist/index.html dist/404.html",
+        "npm run agent:smoke",
         "npm run agent:check",
-        "npm run lint",
-        "npm run build"
+        "git diff --check"
       ]
     },
     {

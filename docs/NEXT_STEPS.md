@@ -52,7 +52,6 @@ Source of truth: `docs/agent/tasks.json`.
 ## Later
 - `LATER-BRAND-001`: align homepage modules with brand pillars and proof framing.
 - `LATER-LAUNCH-DOCS-CONSOLIDATE-001`: after production launch, split the temporary launch plan into durable architecture, operations, and worklog docs.
-- `NOW-DEPLOY-PAGES-HARDEN-001`: legacy fallback only if Cloudflare Pages is reversed.
 - `NEXT-SAMPLE-REQUEST-001`: legacy fallback only if Supabase-backed forms are not implemented.
 
 ## Blocked
@@ -90,6 +89,7 @@ Source of truth: `docs/agent/tasks.json`.
 - `NEXT-STONELIB-IMAGE-LABEL-READABILITY-001`: Stone Library list/detail image overlay labels now use readable dark translucent surfaces with restrained Urblo lime status/action accents.
 - `NEXT-STONELIB-STATUS-PILL-CONSISTENCY-001`: Stone Library external Available/Upcoming/No states now use shared lightweight status pills instead of heavy black blocks or full lime badge fills.
 - `NEXT-HOME-HERO-EDGE-REVEAL-001`: homepage first viewport now uses edge-aligned header/hero gutters and a sequential all-caps `DESIGN. SOURCE. DELIVER.` hero title, with letter-by-letter reveal motion, the second line offset, and Urblo-green punctuation.
+- `NOW-DEPLOY-PAGES-HARDEN-001`: GitHub Pages preview deploy now generates `404.html` from `index.html` so direct clean-route visits can load the React app until Cloudflare Pages goes live.
 - `NEXT-UI-PARITY-001` partial launch polish: homepage hero now fills the first viewport, route transitions reset to top, no-banner error/loading states clear the header, article detail no longer double-renders a route banner, article mobile overflow has a CSS stopgap, Contact blocks empty email drafts, product renders are labeled as geometry previews with separate material previews, Stone Library images disclose finish-specific/reference status, and `react-helmet` was removed to clear React 19 strict-mode console noise.
 
 Older completion details live in `docs/WORKLOG.md`.

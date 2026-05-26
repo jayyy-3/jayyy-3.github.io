@@ -66,6 +66,7 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 - App shell default Vite metadata, starter README content, and default social image issues have been replaced; launch polish debt remains around future campaign-specific share imagery only if the client wants a bespoke preview.
 - Image hosting policy must now be resolved against the Cloudflare/Supabase launch plan.
 - GitHub Pages deployment hardening is a legacy fallback only; Cloudflare Pages is the active target and currently blocked at account-level project setup.
+- Short-term GitHub Pages preview routing now generates `404.html` from `index.html` during deploy so direct clean-route visits can load the React app. This is a compatibility patch only; Cloudflare Pages remains the production launch target and should use `public/_redirects`.
 - Route-level code splitting resolved the previous bundle size warning; future admin/CMS additions should keep chunk output under review.
 - Moon Gate material/application notes are intentionally MVP-inferred from supplied imagery and public project context; designer confirmation is still needed before final production claims.
 - Other project pages still have legacy-level content and need migration into the material-map model.

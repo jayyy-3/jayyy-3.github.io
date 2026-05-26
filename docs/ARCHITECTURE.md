@@ -1,6 +1,6 @@
 # Urblo Web - Architecture and Contracts
 
-Last updated: 2026-05-25
+Last updated: 2026-05-26
 
 ## System Boundary
 - Current implementation: frontend-only React application shipped as static assets.
@@ -45,7 +45,9 @@ Last updated: 2026-05-25
 ## Deployment and Build Contract
 - Current deployment workflow: `.github/workflows/deploy.yml`
   - Trigger: push to `main`
-  - Pipeline: `npm ci` -> `npm run build` -> deploy `dist/` to GitHub Pages
+  - Pipeline: `npm ci` -> `npm run build` -> copy `dist/index.html` to `dist/404.html` -> deploy `dist/` to GitHub Pages
+  - GitHub Pages does not read Cloudflare `_redirects`; `dist/404.html` is a short-term SPA fallback so direct clean-route visits can load the React app during the GitHub Pages preview period.
+  - This fallback does not change the launch target and should not be treated as the final Cloudflare Pages routing mechanism.
 - Launch target deployment workflow:
   - Cloudflare Pages Git integration builds the repository.
   - Build command: `npm run build`
@@ -58,6 +60,7 @@ Last updated: 2026-05-25
   - `base: '/'` for root-domain Cloudflare Pages clean URL routing.
 - Cloudflare Pages static config:
   - `public/_redirects` provides SPA fallback with `/* /index.html 200`.
+  - Cloudflare Pages should continue to use `_redirects`; the GitHub Pages `404.html` fallback is harmless but not required on Cloudflare.
   - `public/_routes.json` scopes future Pages Functions to `/api/*`.
   - `public/_headers` sets conservative launch headers, long-cache rules for hashed assets/fonts, and one-day cache for unversioned launch media under `/media/*`.
 - Build script contract: `package.json`

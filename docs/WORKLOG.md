@@ -1999,6 +1999,41 @@ Last updated: 2026-05-26
 - `NOW-FORMS-SUPABASE-001`
 - `NOW-ADMIN-AUTH-RLS-001`
 
+## Entry - 2026-05-26 (GitHub Pages SPA Fallback)
+
+### Scope
+- Investigated direct URL 404s on GitHub Pages for clean React routes such as `/stone-library/angola-black`.
+- Confirmed direct GitHub Pages requests were returning the platform 404 before the React app loaded, while client-side navigation worked after the app was already running.
+- Added a short-term GitHub Pages deploy step that copies `dist/index.html` to `dist/404.html` after build, allowing GitHub Pages missing-file fallback to load the SPA.
+- Documented that this does not replace Cloudflare Pages routing; Cloudflare remains the production launch target and continues to rely on `public/_redirects`.
+
+### Changed Files
+- `.github/workflows/deploy.yml`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `curl -I https://jayyy-3.github.io/stone-library/angola-black`: confirmed current live GitHub Pages platform 404 before the fix is deployed.
+- `git show origin/gh-pages:404.html`: confirmed the deployed branch currently has no `404.html`.
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `test -f dist/index.html && cp dist/index.html dist/404.html && cmp -s dist/index.html dist/404.html`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- GitHub Pages may still return HTTP 404 status for fallback-served deep links even though the React app renders the requested route; this is acceptable only as a short-term preview fix.
+- Cloudflare Pages should remove the need for this workaround by serving clean routes through `public/_redirects` with a 200 fallback.
+- Live GitHub Pages behavior can only be confirmed after the pushed workflow finishes deploying `gh-pages`.
+
+### Next Handoff
+- `NOW-CLOUDFLARE-PAGES-DEPLOY-001`
+- `NOW-FORMS-SUPABASE-001`
+- `NOW-ADMIN-AUTH-RLS-001`
+
 ## Entry Template (Use for Every Future Session)
 
 ### Date
