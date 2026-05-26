@@ -23,7 +23,7 @@ Docs-only and harness-only work should run:
 Cloudflare/Supabase implementation work should also follow the new verification profiles in `docs/agent/verification.md`.
 
 ## Last Runtime Baseline
-Measured 2026-05-25:
+Measured 2026-05-26 during the capabilities CTA and route update:
 - `npm run build`: pass
 - `npm run lint`: pass
 - `npx tsc -b`: pass

@@ -26,8 +26,8 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 - Historical evidence: `docs/WORKLOG.md`
 
 ## Latest Verification Snapshot
-- Last full runtime gate on 2026-05-25: `npm run build`, `npm run lint`, `npx tsc -b`, and `npm run agent:smoke` pass. Build keeps the previous healthy JavaScript chunk profile; Browserslist staleness notice remains.
-- Last docs/harness gate on 2026-05-25: `npm run agent:check` and `git diff --check` pass.
+- Last full runtime gate on 2026-05-26: `npm run build`, `npm run lint`, `npx tsc -b`, and `npm run agent:smoke` pass during the capabilities CTA and route update. Build keeps the previous healthy JavaScript chunk profile; Browserslist staleness notice remains.
+- Last docs/harness gate on 2026-05-26: `npm run agent:check` and `git diff --check` pass.
 - Recent title typography polish on 2026-05-25: global public page H1s now follow the Projects page title treatment, and Article detail no longer uses the old Space Grotesk uppercase H1.
 - Recent motion polish on 2026-05-25: route changes now use restrained pathname-keyed enter transitions, and proof metrics visibly count from 0 when scrolled into view.
 - Recent Stone Library overlay polish on 2026-05-25: list-card status badges, image provenance, zoom, and collapsed finish labels now use dark translucent surfaces with white text, reserving Urblo lime for confirmed/action signals rather than broad label fills.

@@ -357,7 +357,7 @@ Route state contract:
   - `Space Grotesk` local WOFF2
 - Homepage runtime no longer depends on remote WordPress font CSS/TTF/WOFF assets.
 
-## Last Runtime Quality Gate Status (Measured 2026-05-25)
+## Last Runtime Quality Gate Status (Measured 2026-05-26)
 - `npm run build`: pass
 - `npm run lint`: pass
 - `npx tsc -b`: pass
