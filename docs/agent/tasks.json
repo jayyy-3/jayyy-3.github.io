@@ -612,6 +612,8 @@
       "summary": "Reproduce approved Home, Our Story, Articles, and Contact Us UI from Figma and WordPress references.",
       "files": [
         "src/pages/Home.tsx",
+        "src/components/homepage/HomepageSections.tsx",
+        "src/data/homepage.ts",
         "src/pages/OurStory.tsx",
         "src/pages/ArticlesPage.tsx",
         "src/pages/ArticlePage.tsx",
@@ -623,7 +625,8 @@
         "2026-05-22 full-site QA found the overall shell is coherent, but Products, Articles, and legacy Project details still feel less resolved than Stone Library and Moon Gate.",
         "2026-05-22: Homepage Browse by stone type was removed by request. The next UI parity pass should consider a lighter, more Urblo-native Stone Library bridge if the client still wants a homepage material entry point.",
         "2026-05-25: Launch UI hardening pass fixed homepage full-viewport hero, route scroll restoration, no-banner RouteState header offsets, ArticlePage double hero, ArticlesPage state structure, legacy article mobile overflow, Contact empty-draft validation, Our Story mobile team overlays, global eyebrow contrast, project facts mobile stacking, Products copy/image treatment, ProductDetail geometry-preview honesty, and Stone Library finish image provenance labels.",
-        "2026-05-25: Broad legacy project detail migration remains paused by user direction; article claim cleanup remains paused under NOW-ARTICLE-STRUCTURE-CLAIMS-001."
+        "2026-05-25: Broad legacy project detail migration remains paused by user direction; article claim cleanup remains paused under NOW-ARTICLE-STRUCTURE-CLAIMS-001.",
+        "2026-05-26: Homepage sustainability/tabbed feature module is no longer rendered by request. The proof metrics section now sits directly after the hero with stone/city copy and updated 50+/130+/20+/3500+ metrics."
       ],
       "acceptance": [
         "Target pages reach agreed parity versus approved references.",
@@ -634,7 +637,8 @@
         "npm run build",
         "npm run lint",
         "npx tsc -b",
-        "npm run agent:smoke"
+        "npm run agent:smoke",
+        "Browser verification: homepage section order, removed sustainability copy, updated proof copy, and updated metrics"
       ]
     },
     {

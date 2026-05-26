@@ -2037,6 +2037,41 @@ Last updated: 2026-05-26
 - `NOW-FORMS-SUPABASE-001`
 - `NOW-ADMIN-AUTH-RLS-001`
 
+## Entry - 2026-05-26 (Homepage Proof Section Update)
+
+### Scope
+- Removed the rendered homepage sustainability/tabbed feature module from the page flow by request.
+- Moved the homepage proof metrics section into the removed module's position, directly after the hero.
+- Replaced the previous team-assistance copy with `Stone has always shaped cities.` and `We shape how stone is designed, specified, and delivered.`
+- Replaced the metrics with 50+ projects delivered, 130+ tonnes of CO2 offset, 20+ landscape architects nominated, and 3500+ linear metres stone blocks delivered.
+
+### Changed Files
+- `src/components/homepage/HomepageSections.tsx`
+- `src/data/homepage.ts`
+- `docs/ARCHITECTURE.md`
+- `docs/DESIGN.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- Browser verification on `http://127.0.0.1:5174/`: pass. The old sustainability copy and old team copy are absent; the new proof copy appears in section 1 directly after the hero; the partner banner follows the proof metrics section.
+- Browser scrolled verification: pass. Metrics animate to 50+, 130+, 20+, and 3,500+ with the requested labels.
+
+### Risks and Gaps
+- The old sustainability/tabbed module code remains available but is disabled from the rendered homepage flow. Treat any future reintroduction as a design/content rebuild, not a simple toggle-on.
+- The updated CO2 and delivery metrics are client-supplied copy in this task; deeper substantiation should be handled during CMS/content governance.
+
+### Next Handoff
+- `NEXT-UI-PARITY-001`
+- `NOW-CLOUDFLARE-PAGES-DEPLOY-001`
+- `NOW-FORMS-SUPABASE-001`
+
 ## Entry Template (Use for Every Future Session)
 
 ### Date

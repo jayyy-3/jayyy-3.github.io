@@ -249,12 +249,15 @@ export const homepageData = {
       },
     ] satisfies HomepageProductCategory[],
   },
-  metricsIntro: 'There’s a team always ready to assist you on your next project.',
+  metricsIntro: {
+    headline: 'Stone has always shaped cities.',
+    body: 'We shape how stone is designed, specified, and delivered.',
+  },
   metrics: [
-    { value: '30', label: 'Indoor / outdoor projects' },
-    { value: '430+', label: 'Clients' },
-    { value: '80+', label: 'Tonnes of CO2e tracked for offsetting' },
-    { value: '18', label: 'Landscape architects supported' },
+    { value: '50+', label: 'projects delivered' },
+    { value: '130+', label: 'tonnes of CO2 offset' },
+    { value: '20+', label: 'landscape architects nominated' },
+    { value: '3500+', label: 'linear metres stone blocks delivered' },
   ] satisfies HomepageMetric[],
   latestProjects: {
     title: 'Latest Projects',

@@ -348,6 +348,7 @@ Route state contract:
 - Homepage structure is driven by dedicated internal config in `src/data/homepage.ts`, not the legacy tabbed `FeatureSection`.
 - Homepage uses `HomepageLayout` with `HomepageHeader`/`HomepageFooter` proxy components that currently render the shared `SiteHeader`/`SiteFooter`.
 - The previous homepage `Browse by stone type` showcase has been removed by request; homepage material discovery should be reintroduced only through a new Urblo-aligned section if the client wants that pathway.
+- The previous homepage sustainability/tabbed feature section is currently not rendered by request. The proof metrics block now appears directly after the hero and uses the approved stone/city framing plus four proof metrics.
 - Homepage typography is self-hosted from local static assets under `/public/fonts/urblo`:
   - `Avenir LT Std` weights `300/400/500/600/800`
   - `Didot LT Std` italic `400` and normal `600`

@@ -246,6 +246,7 @@ function renderRichText(value: string) {
 }
 
 const heroStatements = ['DESIGN', 'SOURCE', 'DELIVER'] as const;
+const showSustainabilitySection = false;
 
 function HeroStatementLine({
   word,
@@ -907,11 +908,15 @@ function MetricCard({ metric }: { metric: HomepageMetric }) {
 
 function MetricsSection() {
   return (
-    <section className="bg-white px-6 py-20 md:px-10 lg:px-[93px]">
-      <div className="mx-auto grid max-w-[1440px] gap-12 lg:grid-cols-[0.95fr_1.05fr]">
-        <Reveal className="max-w-[40rem] text-[36px] font-semibold leading-[1.44] text-black md:text-[44px]">
-          There&apos;s a team always ready to assist you on your next project
-          <span className="text-[var(--urblo-lime)]">.</span>
+    <section className="bg-white px-6 py-20 md:px-10 lg:px-[93px] lg:py-28">
+      <div className="mx-auto grid max-w-[1440px] gap-12 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
+        <Reveal className="max-w-[43rem]">
+          <h2 className="font-display text-[34px] font-semibold leading-[1.28] text-black md:text-[44px]">
+            {homepageData.metricsIntro.headline}
+          </h2>
+          <p className="mt-6 max-w-[36rem] text-[22px] font-light leading-8 text-[var(--urblo-text)] md:text-[26px] md:leading-10">
+            {homepageData.metricsIntro.body}
+          </p>
         </Reveal>
 
         <div className="grid gap-x-12 gap-y-10 md:grid-cols-2">
@@ -1174,10 +1179,10 @@ export default function HomepageSections() {
   return (
     <>
       <HeroSection />
-      <SustainabilitySection />
+      {showSustainabilitySection ? <SustainabilitySection /> : null}
+      <MetricsSection />
       <PartnerBannerSection />
       <ProductShowcaseSection />
-      <MetricsSection />
       <LatestProjectsSection />
       <ManifestoSection />
       <LogoCarouselSection />

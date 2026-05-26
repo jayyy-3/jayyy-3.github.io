@@ -91,6 +91,7 @@ Source of truth: `docs/agent/tasks.json`.
 - `NEXT-HOME-HERO-EDGE-REVEAL-001`: homepage first viewport now uses edge-aligned header/hero gutters and a sequential all-caps `DESIGN. SOURCE. DELIVER.` hero title, with letter-by-letter reveal motion, the second line offset, and Urblo-green punctuation.
 - `NOW-DEPLOY-PAGES-HARDEN-001`: GitHub Pages preview deploy now generates `404.html` from `index.html` so direct clean-route visits can load the React app until Cloudflare Pages goes live.
 - `NEXT-UI-PARITY-001` partial launch polish: homepage hero now fills the first viewport, route transitions reset to top, no-banner error/loading states clear the header, article detail no longer double-renders a route banner, article mobile overflow has a CSS stopgap, Contact blocks empty email drafts, product renders are labeled as geometry previews with separate material previews, Stone Library images disclose finish-specific/reference status, and `react-helmet` was removed to clear React 19 strict-mode console noise.
+- `NEXT-UI-PARITY-001` homepage proof update: the old rendered sustainability/tabbed feature module was removed from the homepage flow by request; proof metrics now sit directly after the hero with approved stone/city copy and updated project, CO2, landscape architect, and delivered-stone metrics.
 
 Older completion details live in `docs/WORKLOG.md`.
 

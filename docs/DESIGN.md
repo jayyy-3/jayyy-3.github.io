@@ -132,6 +132,11 @@ Priorities:
 
 Avoid making it feel like a generic landing page with decorative cards and abstract claims.
 
+Current launch rhythm:
+- The proof metrics section sits immediately after the full-viewport hero.
+- Its approved copy is `Stone has always shaped cities.` followed by `We shape how stone is designed, specified, and delivered.`
+- The old sustainability/tabbed feature section should stay out of the rendered homepage unless it is rebuilt with clearer evidence, lighter UI, and approved claim scope.
+
 Hero behavior:
 - The first homepage viewport should feel full-screen on desktop and mobile.
 - Desktop video is acceptable when it does not slow first meaningfully visible content; mobile should use a poster or optimized mobile-specific media until a smaller video variant is approved.
