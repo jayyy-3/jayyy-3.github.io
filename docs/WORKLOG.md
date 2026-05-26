@@ -2023,11 +2023,14 @@ Last updated: 2026-05-26
 - `npm run agent:smoke`: pass.
 - `npm run agent:check`: pass.
 - `git diff --check`: pass.
+- Post-deploy `origin/gh-pages:404.html`: confirmed `404.html` exists and matches the Urblo app shell.
+- Post-deploy `curl -sS -D - https://jayyy-3.github.io/stone-library/angola-black`: returns GitHub Pages HTTP 404 status with the Urblo app shell body, not the default GitHub platform 404 body.
+- Browser verification: direct visit to `https://jayyy-3.github.io/stone-library/angola-black` renders `Stone Detail | Urblo`, `h1` = `Angola Black`, and the stone detail content.
 
 ### Risks and Gaps
 - GitHub Pages may still return HTTP 404 status for fallback-served deep links even though the React app renders the requested route; this is acceptable only as a short-term preview fix.
 - Cloudflare Pages should remove the need for this workaround by serving clean routes through `public/_redirects` with a 200 fallback.
-- Live GitHub Pages behavior can only be confirmed after the pushed workflow finishes deploying `gh-pages`.
+- Live GitHub Pages behavior has been confirmed after the pushed workflow deployed `gh-pages`; keep treating it as a preview-only compatibility patch.
 
 ### Next Handoff
 - `NOW-CLOUDFLARE-PAGES-DEPLOY-001`

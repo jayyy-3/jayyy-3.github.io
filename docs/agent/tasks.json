@@ -587,6 +587,7 @@
       "notes": [
         "2026-05-26: Direct clean-route visits on GitHub Pages, including /stone-library/angola-black, returned the platform 404 because GitHub Pages does not read public/_redirects.",
         "2026-05-26: The GitHub Pages workflow now copies dist/index.html to dist/404.html after build so deep links can load the React app during the short-term preview period.",
+        "2026-05-26: After the workflow deployed, https://jayyy-3.github.io/stone-library/angola-black returned the Urblo app shell and browser-rendered the Angola Black stone detail route. GitHub Pages still reports HTTP 404 for fallback-served deep links, which is acceptable only for preview.",
         "This does not change the launch target. Cloudflare Pages remains the approved production path and should continue using public/_redirects for 200-status SPA fallback."
       ],
       "acceptance": [
@@ -599,7 +600,9 @@
         "test -f dist/index.html && cp dist/index.html dist/404.html && cmp -s dist/index.html dist/404.html",
         "npm run agent:smoke",
         "npm run agent:check",
-        "git diff --check"
+        "git diff --check",
+        "curl -sS -D - https://jayyy-3.github.io/stone-library/angola-black -o /tmp/urblo-deeplink-live.html",
+        "Browser verification: direct deep link renders title Stone Detail | Urblo and h1 Angola Black"
       ]
     },
     {
