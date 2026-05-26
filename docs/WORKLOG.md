@@ -2072,6 +2072,39 @@ Last updated: 2026-05-26
 - `NOW-CLOUDFLARE-PAGES-DEPLOY-001`
 - `NOW-FORMS-SUPABASE-001`
 
+## Entry - 2026-05-26 (Homepage Partner Banner Copy)
+
+### Scope
+- Replaced the homepage partner banner copy with `Design-led stone solutions for streetscapes & civil landscapes.`
+- Changed the banner component to render the copy from `src/data/homepage.ts` instead of keeping a separate hardcoded JSX sentence.
+- Updated the brand baseline anchor line so future agents do not revive the old trusted-partner wording.
+
+### Changed Files
+- `src/components/homepage/HomepageSections.tsx`
+- `src/data/homepage.ts`
+- `docs/brand-baseline.md`
+- `docs/HANDOFF.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- Browser DOM verification on `http://127.0.0.1:5174/`: pass. The partner banner section text is `Design-led stone solutions for streetscapes & civil landscapes.`, and the old trusted-partner sentence is absent from the rendered section.
+- `npx playwright screenshot --wait-for-timeout=2500 --full-page --viewport-size=1280,720 http://127.0.0.1:5174/ /tmp/urblo-home-fullpage-partner-banner-check.png`: captured supplemental visual evidence.
+
+### Risks and Gaps
+- Browser screenshot capture through the in-app Browser timed out once; DOM verification and Playwright screenshot fallback were used instead.
+
+### Next Handoff
+- `NEXT-UI-PARITY-001`
+- `NOW-CLOUDFLARE-PAGES-DEPLOY-001`
+- `NOW-FORMS-SUPABASE-001`
+
 ## Entry Template (Use for Every Future Session)
 
 ### Date

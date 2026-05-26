@@ -214,7 +214,7 @@ export const homepageData = {
   },
   partnerBanner: {
     image: '/media/launch/contact/project-contact.jpg',
-    text: 'A trusted partner for your next streetscapes & civil landscape project.',
+    text: 'Design-led stone solutions for streetscapes & civil landscapes.',
   },
   productShowcase: {
     title: 'Explore our latest products',

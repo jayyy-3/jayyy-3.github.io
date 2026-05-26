@@ -43,11 +43,11 @@
 **EN (use as anchors across site & decks):**
 - `For Street.StoneSolutions`
 - `WE BUILD. YOU DESIGN.`
-- “A trusted partner for your next streetscapes & civil landscape project.”
+- “Design-led stone solutions for streetscapes & civil landscapes.”
 > **中文（可做全站锚点）：**  
 > - `For Street.StoneSolutions`（用荧光绿“.”做记忆符号）  
 > - `WE BUILD. YOU DESIGN.`（合作关系最强一句话）  
-> - “你下一次街景/市政景观项目的可信合作伙伴。”
+> - “面向街景与市政景观的设计主导石材解决方案。”
 
 ## 1.3 What Urblo is (and is not) / Urblo 是什么（不是什么）
 **EN:**

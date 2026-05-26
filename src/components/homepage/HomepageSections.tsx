@@ -757,8 +757,7 @@ function PartnerBannerSection() {
       <div className="absolute inset-0 bg-black/60" />
       <div className="relative mx-auto flex min-h-[516px] max-w-[1440px] items-center px-6 py-16 md:px-10 lg:px-[92px]">
         <Reveal className="max-w-[70rem] text-[38px] font-semibold uppercase leading-[1.35] text-white md:text-[52px] xl:text-[60px]">
-          A <span className="text-[var(--urblo-lime)]">trusted partner</span> for your next
-          streetscapes &amp; civil landscape project.
+          {homepageData.partnerBanner.text}
         </Reveal>
       </div>
     </section>
