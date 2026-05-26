@@ -135,6 +135,7 @@ Avoid making it feel like a generic landing page with decorative cards and abstr
 Current launch rhythm:
 - The proof metrics section sits immediately after the full-viewport hero.
 - Its approved copy is `Stone has always shaped cities.` followed by `We shape how stone is designed, specified, and delivered.`
+- The proof section may include a lightweight `Our Capabilities` CTA under the intro copy. It should feel like a quiet design-system control, not a heavy sales button.
 - The old sustainability/tabbed feature section should stay out of the rendered homepage unless it is rebuilt with clearer evidence, lighter UI, and approved claim scope.
 
 Hero behavior:
@@ -176,6 +177,20 @@ Each project should answer:
 - What result can another project team trust?
 
 Avoid purely visual gallery behavior without project facts.
+
+### Capabilities
+Capabilities should read as an operational capability map, not a generic services page.
+
+Priorities:
+- show how Urblo supports design translation, specification, sourcing, fabrication, delivery, and handover
+- connect visual ambition to concrete workflow evidence
+- keep the page short enough to scan before a project conversation
+- make the content easy to replace when client-approved capability copy arrives
+
+Avoid:
+- abstract service cards with no project workflow
+- broad claims that imply guaranteed cost, timing, carbon, or compliance outcomes without conditions
+- oversized hero drama that delays the actual capability framework
 
 Project Material Map pattern:
 - Use real project photography as an inspection surface, not a decorative gimmick.

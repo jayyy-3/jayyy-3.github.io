@@ -24,6 +24,7 @@ const OurStoryPage = lazy(() => import('./pages/OurStory'));
 const ArticlesPage = lazy(() => import('./pages/ArticlesPage'));
 const ArticlePage = lazy(() => import('./pages/ArticlePage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
+const CapabilitiesPage = lazy(() => import('./pages/CapabilitiesPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
 const SITE_URL = 'https://urblo.com.au';
@@ -32,6 +33,7 @@ const ROUTE_BANNERS = {
     products: '/media/launch/banners/products.jpg',
     materials: '/media/launch/banners/materials.jpg',
     projects: '/media/launch/banners/projects.jpg',
+    capabilities: '/media/launch/banners/projects.jpg',
     ourStory: '/media/launch/banners/our-story.jpg',
     contact: '/media/launch/banners/our-story.jpg',
     articles: '/media/launch/banners/articles.jpg',
@@ -104,6 +106,14 @@ function getRouteMeta(pathname: string): RouteMeta {
             title: 'Our Story | Urblo',
             description:
                 'Learn about Urblo, its natural stone system approach, and its role in public realm projects.',
+        };
+    }
+
+    if (pathname === '/capabilities') {
+        return {
+            title: 'Capabilities | Urblo',
+            description:
+                'Review how Urblo supports design translation, specification, sourcing, fabrication, and delivery coordination for stone streetscape projects.',
         };
     }
 
@@ -300,6 +310,15 @@ function AnimatedRoutes() {
                     element={
                         <DefaultLayout bgImage={ROUTE_BANNERS.ourStory}>
                             {loadPage(<OurStoryPage />)}
+                        </DefaultLayout>
+                    }
+                />
+
+                <Route
+                    path="/capabilities"
+                    element={
+                        <DefaultLayout bgImage={ROUTE_BANNERS.capabilities}>
+                            {loadPage(<CapabilitiesPage />)}
                         </DefaultLayout>
                     }
                 />

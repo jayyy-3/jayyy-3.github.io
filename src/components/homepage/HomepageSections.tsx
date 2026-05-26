@@ -921,6 +921,18 @@ function MetricsSection() {
           <p className="mt-6 max-w-[36rem] text-[22px] font-light leading-8 text-[var(--urblo-text)] md:text-[26px] md:leading-10">
             {homepageData.metricsIntro.body}
           </p>
+          <Link
+            to="/capabilities"
+            className="group mt-11 inline-flex min-h-[48px] items-center gap-4 rounded-full border border-black/[0.18] px-5 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-black transition duration-200 hover:border-[var(--urblo-lime)] hover:bg-[rgba(0,255,25,0.08)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--urblo-lime)]"
+          >
+            <span>Our Capabilities</span>
+            <span
+              className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-black/[0.15] text-black transition duration-200 group-hover:translate-x-1 group-hover:border-[var(--urblo-lime)] group-hover:text-black"
+              aria-hidden="true"
+            >
+              <ArrowIcon />
+            </span>
+          </Link>
         </Reveal>
 
         <div className="grid gap-x-12 gap-y-10 md:grid-cols-2">

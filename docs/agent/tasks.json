@@ -618,8 +618,11 @@
         "src/pages/ArticlesPage.tsx",
         "src/pages/ArticlePage.tsx",
         "src/pages/ContactPage.tsx",
+        "src/pages/CapabilitiesPage.tsx",
+        "src/App.tsx",
         "src/components/site/SiteHeader.tsx",
-        "src/components/site/SiteFooter.tsx"
+        "src/components/site/SiteFooter.tsx",
+        "scripts/agent-smoke.sh"
       ],
       "notes": [
         "2026-05-22 full-site QA found the overall shell is coherent, but Products, Articles, and legacy Project details still feel less resolved than Stone Library and Moon Gate.",
@@ -628,7 +631,8 @@
         "2026-05-25: Broad legacy project detail migration remains paused by user direction; article claim cleanup remains paused under NOW-ARTICLE-STRUCTURE-CLAIMS-001.",
         "2026-05-26: Homepage sustainability/tabbed feature module is no longer rendered by request. The proof metrics section now sits directly after the hero with stone/city copy and updated 50+/130+/20+/3500+ metrics.",
         "2026-05-26: Homepage partner banner wording now uses the approved anchor line: Design-led stone solutions for streetscapes & civil landscapes.",
-        "2026-05-26: The partner banner highlights Design-led in Urblo lime while keeping the rest of the sentence white."
+        "2026-05-26: The partner banner highlights Design-led in Urblo lime while keeping the rest of the sentence white.",
+        "2026-05-26: The homepage proof section now includes a lightweight Our Capabilities CTA that routes to a new provisional /capabilities page for the design/specification/sourcing/delivery capability framework."
       ],
       "acceptance": [
         "Target pages reach agreed parity versus approved references.",
@@ -640,7 +644,7 @@
         "npm run lint",
         "npx tsc -b",
         "npm run agent:smoke",
-        "Browser verification: homepage section order, removed sustainability copy, updated proof copy, updated metrics, partner banner wording, and Design-led lime highlight"
+        "Browser verification: homepage section order, removed sustainability copy, updated proof copy, updated metrics, partner banner wording, Design-led lime highlight, Our Capabilities CTA, and /capabilities page render"
       ]
     },
     {

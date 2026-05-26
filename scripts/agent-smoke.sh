@@ -35,6 +35,7 @@ const routes = [
   '/projects',
   '/projects/moon-gate-woolley-street',
   '/our-story',
+  '/capabilities',
   '/contact',
   '/articles',
   '/articles/modular-mastery-how-primeblock-core-transformed-aitken-college',
@@ -79,6 +80,10 @@ const ctaContracts = [
   {
     name: 'Footer Sample Request fallback',
     target: 'mailto:info@urblo.com.au?subject=Sample%20Request',
+  },
+  {
+    name: 'Homepage Capabilities navigation',
+    target: '/capabilities',
   },
   {
     name: 'Homepage Sample Request fallback',

@@ -2107,6 +2107,45 @@ Last updated: 2026-05-26
 - `NOW-CLOUDFLARE-PAGES-DEPLOY-001`
 - `NOW-FORMS-SUPABASE-001`
 
+## Entry - 2026-05-26 (Capabilities CTA and Route)
+
+### Scope
+- Added a lightweight `Our Capabilities` CTA under the homepage proof-section intro copy.
+- Added `/capabilities` as a dedicated provisional capability page covering design translation, specification support, sourcing/fabrication, and delivery coordination.
+- Updated route metadata, smoke route coverage, and Harness docs so the new public route is tracked.
+
+### Changed Files
+- `src/components/homepage/HomepageSections.tsx`
+- `src/pages/CapabilitiesPage.tsx`
+- `src/App.tsx`
+- `scripts/agent-smoke.sh`
+- `docs/ARCHITECTURE.md`
+- `docs/DESIGN.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass, including `/capabilities` route shell and the homepage capabilities CTA target.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- In-app Browser verification on `http://127.0.0.1:5174/`: pass. The homepage renders exactly one `Our Capabilities` link with `href="/capabilities"`, and clicking it navigates to `/capabilities` with title `Capabilities | Urblo`.
+- In-app Browser rendered-content verification: pass. `/capabilities` renders `Our Capabilities`, `Design translation`, and `Delivery coordination`. Console warnings were limited to the existing reduced-motion environment notice.
+- Playwright screenshot fallback on `http://127.0.0.1:5174/`: pass. Desktop and 390px mobile screenshots confirmed the homepage CTA placement and `/capabilities` page render with no console errors or mobile horizontal overflow. The fallback was used because in-app Browser screenshot capture timed out twice.
+
+### Risks and Gaps
+- `/capabilities` copy is provisional and should be replaced with client-approved capability content before treating it as final launch messaging.
+- The route currently reuses the projects banner until dedicated capability imagery is approved.
+
+### Next Handoff
+- `NEXT-UI-PARITY-001`
+- `NOW-CLOUDFLARE-PAGES-DEPLOY-001`
+- `NOW-FORMS-SUPABASE-001`
+
 ## Entry Template (Use for Every Future Session)
 
 ### Date

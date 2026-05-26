@@ -103,6 +103,7 @@ Routing uses clean paths through `BrowserRouter`. Cloudflare Pages direct refres
 | `/projects` | `Projects` | Project listing page. |
 | `/projects/:slug` | `ProjectDetails` | Project detail page. Uses page-owned project hero via `DefaultLayout showBanner={false}`. |
 | `/our-story` | `OurStory` | About page. |
+| `/capabilities` | `CapabilitiesPage` | Provisional capability framework page for design translation, specification support, sourcing/fabrication, and delivery coordination. |
 | `/contact` | `ContactPage` | Contact surface with direct contact channels and a local mailto project-brief composer that requires project notes plus email or phone before opening the draft. |
 | `/articles` | `ArticlesPage` | Article list page. |
 | `/articles/:slug` | `ArticlePage` | Article detail page. Uses page-owned article hero via `DefaultLayout showBanner={false}`. |
@@ -128,6 +129,7 @@ Route state contract:
 
 ### Implemented navigation surfaces
 - Shared header links: `/projects`, `/stone-library`, `/our-story`, `/articles`, `/products`, `/contact`
+- Homepage proof-section CTA: `/capabilities`
 - Shared footer links: `mailto:info@urblo.com.au?subject=Sample%20Request`, `/contact`
 - Shared footer social links: Instagram and LinkedIn use external links with `target="_blank"` plus `rel="noopener noreferrer"`; Facebook and YouTube are hidden until real destinations are available.
 
@@ -159,7 +161,7 @@ Route state contract:
 - Homepage hero uses `100svh` so the first viewport reads as a full-screen hero across desktop and mobile.
 - Homepage hero video uses `preload="none"` and is constrained to desktop/tablet width through `media="(min-width: 768px)"`; mobile viewports keep the poster and do not select the MP4 source.
 - The desktop MP4 was re-encoded from about 16MB to about 3MB for launch. Cloudflare Stream/R2 remains optional if the client later wants adaptive delivery, analytics, or non-repo video management.
-- Route banners are local launch media referenced from `src/App.tsx` through the `ROUTE_BANNERS` map.
+- Route banners are local launch media referenced from `src/App.tsx` through the `ROUTE_BANNERS` map. `/capabilities` currently reuses the projects banner until dedicated capability imagery is approved.
 - Contact image path: `public/media/launch/contact/project-contact.jpg`, referenced by `src/pages/ContactPage.tsx` and reused in homepage data where the same old WordPress image was previously used.
 - Homepage section imagery and partner logos now use controlled files under `public/media/launch/homepage`.
 - Our Story portraits now use controlled files under `public/media/launch/our-story`; the carbon banner uses the controlled route banner because the old WordPress carbon banner returned 404.
