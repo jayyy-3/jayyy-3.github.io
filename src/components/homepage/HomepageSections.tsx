@@ -747,6 +747,10 @@ function SustainabilitySection() {
 }
 
 function PartnerBannerSection() {
+  const highlight = 'Design-led';
+  const bannerText = homepageData.partnerBanner.text;
+  const bodyText = bannerText.startsWith(highlight) ? bannerText.slice(highlight.length) : ` ${bannerText}`;
+
   return (
     <section className="relative min-h-[516px] overflow-hidden bg-black text-white">
       <img
@@ -757,7 +761,8 @@ function PartnerBannerSection() {
       <div className="absolute inset-0 bg-black/60" />
       <div className="relative mx-auto flex min-h-[516px] max-w-[1440px] items-center px-6 py-16 md:px-10 lg:px-[92px]">
         <Reveal className="max-w-[70rem] text-[38px] font-semibold uppercase leading-[1.35] text-white md:text-[52px] xl:text-[60px]">
-          {homepageData.partnerBanner.text}
+          <span className="text-[var(--urblo-lime)]">{highlight}</span>
+          {bodyText}
         </Reveal>
       </div>
     </section>

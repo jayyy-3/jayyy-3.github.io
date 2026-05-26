@@ -2077,6 +2077,7 @@ Last updated: 2026-05-26
 ### Scope
 - Replaced the homepage partner banner copy with `Design-led stone solutions for streetscapes & civil landscapes.`
 - Changed the banner component to render the copy from `src/data/homepage.ts` instead of keeping a separate hardcoded JSX sentence.
+- Highlighted `Design-led` in Urblo lime while keeping the remainder of the banner sentence white.
 - Updated the brand baseline anchor line so future agents do not revive the old trusted-partner wording.
 
 ### Changed Files
@@ -2095,6 +2096,7 @@ Last updated: 2026-05-26
 - `npm run agent:check`: pass.
 - `git diff --check`: pass.
 - Browser DOM verification on `http://127.0.0.1:5174/`: pass. The partner banner section text is `Design-led stone solutions for streetscapes & civil landscapes.`, and the old trusted-partner sentence is absent from the rendered section.
+- Browser style verification on `http://127.0.0.1:5174/`: pass. `Design-led` renders as a separate span with computed color `rgb(0, 255, 25)`, matching `--urblo-lime`.
 - `npx playwright screenshot --wait-for-timeout=2500 --full-page --viewport-size=1280,720 http://127.0.0.1:5174/ /tmp/urblo-home-fullpage-partner-banner-check.png`: captured supplemental visual evidence.
 
 ### Risks and Gaps
