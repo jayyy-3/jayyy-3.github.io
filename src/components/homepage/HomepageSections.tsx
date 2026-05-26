@@ -245,7 +245,7 @@ function renderRichText(value: string) {
   });
 }
 
-const heroStatements = ['Design', 'Source', 'Deliver'] as const;
+const heroStatements = ['DESIGN', 'SOURCE', 'DELIVER'] as const;
 
 function HeroStatementLine({
   word,
@@ -256,16 +256,22 @@ function HeroStatementLine({
   index: number;
   reduceMotion: boolean;
 }) {
+  const lineOffset = index === 1 ? 'pl-[0.42em] sm:pl-[0.54em] lg:pl-[0.66em]' : '';
+
   return (
-    <span className="block overflow-hidden pb-[0.03em]">
+    <span className={`block overflow-hidden pb-[0.03em] ${lineOffset}`}>
       <motion.span
         className="block"
-        initial={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: '112%' }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={
+          reduceMotion
+            ? { clipPath: 'inset(0 0% 0 0)', opacity: 1 }
+            : { clipPath: 'inset(0 100% 0 0)', opacity: 0.6 }
+        }
+        animate={{ clipPath: 'inset(0 0% 0 0)', opacity: 1 }}
         transition={{
-          duration: reduceMotion ? 0 : 0.78,
-          delay: reduceMotion ? 0 : 0.18 + index * 0.22,
-          ease: [0.22, 1, 0.36, 1],
+          duration: reduceMotion ? 0 : 0.86,
+          delay: reduceMotion ? 0 : 0.16 + index * 0.24,
+          ease: [0.76, 0, 0.24, 1],
         }}
       >
         {word}
@@ -294,10 +300,10 @@ function HeroSection() {
       </video>
       <div className="absolute inset-0 bg-black/40" />
 
-      <div className="urblo-edge-container relative flex min-h-[100svh] items-end pb-[72px] pt-32 md:pb-[92px] lg:pb-[110px]">
+      <div className="urblo-edge-container relative flex min-h-[100svh] items-end pb-[38px] pt-32 md:pb-[52px] lg:pb-[64px]">
         <h1
-          className="text-[62px] font-light leading-[0.94] text-white sm:text-[78px] md:text-[104px] lg:text-[132px] xl:text-[158px] 2xl:text-[174px]"
-          aria-label="Design. Source. Deliver."
+          className="text-[54px] font-light leading-[0.9] text-white sm:text-[68px] md:text-[92px] lg:text-[116px] xl:text-[136px] 2xl:text-[152px]"
+          aria-label="DESIGN. SOURCE. DELIVER."
         >
           {heroStatements.map((statement, index) => (
             <HeroStatementLine

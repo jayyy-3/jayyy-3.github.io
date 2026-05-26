@@ -1,6 +1,6 @@
 # HANDOFF - Current Agent State
 
-Last updated: 2026-05-25
+Last updated: 2026-05-26
 
 ## Current Focus
 The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin CMS:
@@ -32,7 +32,7 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 - Recent motion polish on 2026-05-25: route changes now use restrained pathname-keyed enter transitions, and proof metrics visibly count from 0 when scrolled into view.
 - Recent Stone Library overlay polish on 2026-05-25: list-card status badges, image provenance, zoom, and collapsed finish labels now use dark translucent surfaces with white text, reserving Urblo lime for confirmed/action signals rather than broad label fills.
 - Recent Stone Library status polish on 2026-05-25: external Available/Upcoming/No states now use shared lightweight status pills across detail header, variant switch, finish selector, availability summary, finish capability, and cut option rows; heavy black status blocks and full lime fills are avoided.
-- Recent homepage hero polish on 2026-05-25: global header and homepage first-viewport copy now use an edge-aligned gutter, and the old `Stone Solutions for Street` hero copy has been replaced with sequential `Design. Source. Deliver.` lines with Urblo-green punctuation.
+- Recent homepage hero polish on 2026-05-26: global header and homepage first-viewport copy use an edge-aligned gutter, and the old `Stone Solutions for Street` hero copy has been replaced with sequential all-caps `DESIGN. SOURCE. DELIVER.` lines, second-line offset, left-to-right reveal motion, and Urblo-green punctuation.
 - Recent browser QA on 2026-05-25: homepage hero is full viewport at 1440x900 and 390x844; mobile does not select the MP4 source; desktop selects the MP4 with `preload="none"`.
 - Recent video QA on 2026-05-25: `public/media/launch/home/urblo-hero.mp4` was re-encoded from about 16MB to about 3MB while preserving 1280x720 playback; desktop video reached `readyState=4`, and mobile still selected no MP4 source.
 - Recent browser QA on 2026-05-25: article detail at 320px, contact at 390px, Products, Our Story, missing project, unknown route, Product detail, and Stone Library detail all reported zero horizontal overflow and no fresh console errors after `react-helmet` removal.

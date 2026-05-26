@@ -1,6 +1,6 @@
 # WORKLOG - Urblo Execution Log
 
-Last updated: 2026-05-25
+Last updated: 2026-05-26
 
 ## Entry - 2026-05-22 (Old-Site Favicon Restoration)
 
@@ -1954,6 +1954,44 @@ Last updated: 2026-05-25
 ### Risks and Gaps
 - The desktop hero video remains the controlled static MP4 with mobile poster-only behavior; Cloudflare preview should still verify actual LCP/network behavior after deployment.
 - The edge container is intentionally limited to the global header and homepage first viewport; future full-bleed sections should opt in deliberately rather than replacing the standard content container.
+
+### Next Handoff
+- `NEXT-UI-PARITY-001`
+- `NOW-FORMS-SUPABASE-001`
+- `NOW-ADMIN-AUTH-RLS-001`
+
+## Entry - 2026-05-26 (Homepage Hero Reference Alignment)
+
+### Scope
+- Adjusted the homepage hero after the user clarified the Richard Crookes reference target.
+- Changed the verb stack to all caps: `DESIGN.`, `SOURCE.`, `DELIVER.`
+- Offset the second line, reduced the hero type scale, and lowered the stack closer to the viewport bottom.
+- Changed hero motion from an upward line reveal to a left-to-right line reveal, while preserving reduced-motion behavior.
+- Rechecked desktop and mobile first-viewport rendering and mobile menu interaction.
+
+### Changed Files
+- `src/components/homepage/HomepageSections.tsx`
+- `docs/DESIGN.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- Browser QA at 1440x900: all-caps hero, edge-aligned first line, second-line offset, smaller type, and lower bottom anchoring render correctly.
+- Browser QA at 390x844: no horizontal overflow; all three lines fit and remain readable over the poster frame.
+- Browser interaction QA: mobile header menu button resolves uniquely, opens successfully, and exposes nav links.
+- Browser console: only the expected Framer Motion reduced-motion warning was present because the test browser has reduced motion enabled.
+
+### Risks and Gaps
+- The Browser test environment had reduced motion enabled, so the normal-motion reveal was validated by code path and final layout, not by observing live motion in that Browser session.
+- The hero remains tied to the current controlled video/poster asset; Cloudflare preview should still verify real network and LCP behavior after deployment.
 
 ### Next Handoff
 - `NEXT-UI-PARITY-001`
