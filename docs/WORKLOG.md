@@ -2,6 +2,57 @@
 
 Last updated: 2026-05-28
 
+## Entry - 2026-05-28 (Admin Media Storage and Library Source)
+
+### Scope
+- Added Supabase Storage foundation for Urblo media: `urblo-public-media` for public-safe assets and `urblo-admin-media` for private draft/review assets.
+- Added Storage RLS policies for active admin roles and removed broad public object listing after Supabase advisor flagged the risk.
+- Added `/admin/media` as the first media library source screen behind the Supabase Auth/profile gate.
+- The media screen supports upload-backed draft records, external media records, metadata editing, role-aware read-only behavior, and publish/archive validation.
+- Expanded smoke coverage to include `/admin/media`.
+
+### Changed Files
+- `scripts/agent-smoke.sh`
+- `src/pages/admin/AdminApp.tsx`
+- `src/pages/admin/AdminMediaPage.tsx`
+- `src/pages/admin/adminContent.ts`
+- `supabase/migrations/202605280002_media_storage_foundation.sql`
+- `supabase/migrations/202605280003_media_storage_listing_hardening.sql`
+- `supabase/migrations/README.md`
+- `AGENTS.md`
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/CLOUDFLARE_DEPLOYMENT.md`
+- `docs/DESIGN.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- Supabase migration list: pass. `media_storage_foundation` and `media_storage_listing_hardening` are listed on project `npkidywzwddbnfrnxlmo`.
+- Supabase bucket check: pass. `urblo-public-media` exists as a public bucket with a 25 MB limit; `urblo-admin-media` exists as a private bucket with a 50 MB limit; both allow the launch image/PDF/MP4 MIME set.
+- Supabase policy check: pass. Storage object SELECT is available to active admin viewer/editor/admin/owner roles; INSERT/UPDATE to editor/admin/owner; DELETE to owner/admin.
+- Supabase security advisor follow-up: pass for the new public bucket listing issue. The broad public `storage.objects` SELECT policy was removed. Existing security-definer function warnings from the foundation helper functions remain as a separate hardening follow-up.
+- `npm run build`: pass. Browserslist staleness notice remains; the admin chunk is about 271 kB before gzip.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass, including `/admin/media` route shell and Forms API checks.
+- Playwright browser QA: pass for `/admin/media` with no browser-safe Supabase key configured. The route shows the configuration-required state rather than media library content, and console output was limited to the React DevTools development notice.
+
+### Risks and Gaps
+- Live media upload/save verification is not complete because browser-safe Supabase key configuration and an active admin/editor profile are still required.
+- The media screen is source-ready but does not yet migrate existing static launch assets into Supabase records.
+- Lead inbox remains pending live form persistence and notification verification.
+- Supabase advisors still report existing security-definer helper function warnings and expected early-stage unused-index/permissive-policy warnings; those were not introduced by this media checkpoint except where Storage policies depend on the existing admin role helper.
+
+### Next Handoff
+- `NOW-FORMS-BACKEND-001`
+- `NOW-ADMIN-AUTH-RLS-001`
+- `NOW-ADMIN-MEDIA-LEADS-001`
+- `NOW-ADMIN-CONTENT-CRUD-001`
+
 ## Entry - 2026-05-28 (Admin Settings CRUD and RLS Hardening)
 
 ### Scope

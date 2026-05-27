@@ -56,8 +56,8 @@ export const adminModules: AdminModuleDefinition[] = [
         label: 'Media',
         path: '/admin/media',
         summary: 'Storage-backed media records, alt text, usage notes, and publication state.',
-        dependency: 'Supabase Storage buckets and policies',
-        state: 'scaffold',
+        dependency: 'Supabase Storage + media_assets RLS',
+        state: 'active',
         Icon: Image,
     },
     {

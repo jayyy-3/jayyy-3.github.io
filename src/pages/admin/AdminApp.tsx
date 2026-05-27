@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { AdminAuthProvider } from '../../lib/adminAuth';
 import AdminDashboardPage from './AdminDashboardPage';
 import AdminLoginPage from './AdminLoginPage';
+import AdminMediaPage from './AdminMediaPage';
 import AdminModulePage from './AdminModulePage';
 import AdminSettingsPage from './AdminSettingsPage';
 import AdminUnauthorizedPage from './AdminUnauthorizedPage';
@@ -14,7 +15,7 @@ export default function AdminApp() {
                 <Route path="login" element={<AdminLoginPage />} />
                 <Route path="unauthorized" element={<AdminUnauthorizedPage />} />
                 <Route path="leads" element={<AdminModulePage moduleKey="leads" />} />
-                <Route path="media" element={<AdminModulePage moduleKey="media" />} />
+                <Route path="media" element={<AdminMediaPage />} />
                 <Route path="stone-library" element={<AdminModulePage moduleKey="stone-library" />} />
                 <Route path="projects" element={<AdminModulePage moduleKey="projects" />} />
                 <Route path="products" element={<AdminModulePage moduleKey="products" />} />

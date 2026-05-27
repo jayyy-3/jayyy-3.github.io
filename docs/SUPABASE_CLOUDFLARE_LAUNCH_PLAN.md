@@ -92,6 +92,8 @@ Current execution split:
 - `NOW-SUPABASE-FOUNDATION-001`: complete; schema, constraints, indexes, helper functions, grants, and RLS posture are applied and verified.
 - `NOW-SUPABASE-SEED-BASELINE-001`: complete; finish definitions and default site settings are seeded and idempotency was verified.
 - `NOW-FORMS-BACKEND-001`: in progress; Pages Function source and public Contact UI wiring are implemented, with live Supabase insert verification pending server-side secrets.
+- `NOW-ADMIN-SETTINGS-CRUD-001`: source implemented; `/admin/settings` can manage the default settings row after live owner/admin access is configured.
+- `NOW-ADMIN-MEDIA-LEADS-001`: media source implemented; Supabase Storage buckets/policies and `/admin/media` are in place, with live upload/save verification pending browser-safe Supabase key configuration and an active admin/editor profile.
 
 Core tables:
 - `site_settings`

@@ -40,6 +40,7 @@ const routes = [
   '/admin',
   '/admin/login',
   '/admin/unauthorized',
+  '/admin/media',
   '/admin/settings',
   '/articles',
   '/articles/modular-mastery-how-primeblock-core-transformed-aitken-college',

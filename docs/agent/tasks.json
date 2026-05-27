@@ -419,7 +419,7 @@
     },
     {
       "id": "NOW-ADMIN-MEDIA-LEADS-001",
-      "status": "blocked",
+      "status": "now",
       "priority": 5.4,
       "summary": "Implement admin media library and lead-management workflow.",
       "files": [
@@ -427,15 +427,29 @@
         "docs/SUPABASE_SCHEMA.md",
         "docs/ASSET_MIGRATION_AUDIT.md",
         "docs/ARCHITECTURE.md",
+        "docs/ADMIN_IA_ACCESS.md",
+        "docs/CLOUDFLARE_DEPLOYMENT.md",
+        "docs/DESIGN.md",
         "docs/HANDOFF.md",
+        "docs/NEXT_STEPS.md",
         "docs/WORKLOG.md",
         "docs/agent/tasks.json",
         "public/media/launch",
-        "src/pages/ContactPage.tsx"
+        "scripts/agent-smoke.sh",
+        "src/pages/ContactPage.tsx",
+        "src/pages/admin/AdminApp.tsx",
+        "src/pages/admin/AdminMediaPage.tsx",
+        "src/pages/admin/adminContent.ts",
+        "supabase/migrations/202605280002_media_storage_foundation.sql",
+        "supabase/migrations/202605280003_media_storage_listing_hardening.sql"
       ],
       "notes": [
-        "Blocked until Supabase Storage, form submission endpoints, Turnstile verification, and transactional email secrets are available.",
-        "Use docs/ADMIN_IA_ACCESS.md for lead inbox, media library, status, export, and role behavior when Supabase Storage/forms/email secrets are available."
+        "2026-05-28: Applied and verified Supabase Storage buckets `urblo-public-media` and `urblo-admin-media` on project npkidywzwddbnfrnxlmo.",
+        "2026-05-28: Storage policies allow active viewer/editor/admin/owner profiles to read admin media, active editor/admin/owner profiles to insert/update objects, and owner/admin profiles to delete objects.",
+        "2026-05-28: Removed broad public `storage.objects` SELECT policy after Supabase advisor flagged public bucket listing risk.",
+        "2026-05-28: Added `/admin/media` source for upload-backed draft records, external records, metadata editing, read-only viewer behavior, and publish/archive validation.",
+        "Live media upload/save verification remains pending browser-safe Supabase key configuration and an active admin/editor profile.",
+        "Lead inbox remains pending live form persistence, Turnstile verification, and transactional email secrets."
       ],
       "acceptance": [
         "Admin users can manage uploaded media records with source, alt text, usage, and publish status.",
@@ -448,7 +462,10 @@
         "npm run lint",
         "npx tsc -b",
         "npm run agent:smoke",
-        "npm run agent:check"
+        "npm run agent:check",
+        "Supabase MCP: list_migrations includes media_storage_foundation and media_storage_listing_hardening",
+        "Supabase MCP: execute_sql verifies Urblo Storage buckets and policies",
+        "Playwright: /admin/media shows configuration-required state when no browser key is configured"
       ]
     },
     {
@@ -486,7 +503,7 @@
         "2026-05-25: Desktop homepage MP4 was re-encoded from about 16MB to about 3MB as H.264 1280x720, 30fps, no-audio, fast-start media. Browser QA confirmed desktop 1280x720 playback and mobile no-source behavior.",
         "2026-05-22: Legacy project media and Stone Library fallback media now use controlled local assets; direct old WordPress media references are removed from runtime data.",
         "2026-05-22: Article covers now use controlled local WebP assets and ArticlePage rewrites known email proxy images/campaign links before DOMPurify sanitization.",
-        "Task remains open for Supabase media records, structured article blocks, full media ownership metadata, and final Cloudflare R2/Stream review for homepage video."
+        "Task remains open for migrating static launch assets into Supabase media records, structured article blocks, full media ownership metadata, and final Cloudflare R2/Stream review for homepage video. `/admin/media` now provides the source screen for future media record maintenance."
       ],
       "acceptance": [
         "All first-viewport critical media, logo assets, homepage video/poster assets, and priority project/stone imagery have a controlled hosting path.",

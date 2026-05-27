@@ -5,7 +5,7 @@ Last updated: 2026-05-28
 ## Purpose
 This document defines the first production Supabase data model for the Urblo website launch.
 
-It is both the schema design contract and the current implementation checkpoint record. The foundation migrations and baseline seeds are applied, Cloudflare Pages Function source exists for forms, and the `/admin` auth shell source is implemented. Runtime work must still verify live form writes, configure browser-safe Supabase Auth keys, create the first admin profile, implement Storage policies, and build admin CRUD.
+It is both the schema design contract and the current implementation checkpoint record. The foundation migrations, baseline seeds, admin settings hardening, and media Storage policies are applied. Cloudflare Pages Function source exists for forms, and the `/admin` auth shell, `/admin/settings`, and `/admin/media` source screens are implemented. Runtime work must still verify live form writes, configure browser-safe Supabase Auth keys, create the first admin profile, verify live settings/media writes, and build broader content CRUD.
 
 ## Current Supabase Project
 
@@ -20,6 +20,7 @@ The Supabase connector can access the Urblo project directly. Do not ask the use
 | Foundation migrations | Applied on 2026-05-27: `foundation_schema`, `foundation_hardening`, `anon_read_only` |
 | Baseline seed migration | Applied on 2026-05-27: `baseline_seed` |
 | Admin hardening migration | Applied on 2026-05-28: `admin_settings_role_hardening` |
+| Media Storage migrations | Applied on 2026-05-28: `media_storage_foundation`, `media_storage_listing_hardening` |
 
 Secrets still must not be committed or pasted into repo docs. Service-role keys, database passwords, Turnstile secrets, and email provider secrets belong only in server-side environment variable stores.
 
@@ -102,6 +103,17 @@ Acceptance:
 - In progress on 2026-05-28. `/admin/settings` source implements the default `site_settings` read/create/update form with status, contact, social, SEO, and footer JSON fields.
 - Supabase migration `admin_settings_role_hardening` is applied and verified: `site_settings` SELECT remains available to active viewer/editor/admin/owner profiles, while INSERT/UPDATE/DELETE policies now require owner/admin.
 - Live browser save verification still requires browser-safe Supabase key configuration and an active owner/admin profile.
+
+### Phase 4b - Media Storage and Media Library
+Outcome: the first media workflow has controlled buckets, Storage RLS, and a protected admin metadata screen.
+
+Acceptance:
+- In progress on 2026-05-28. Supabase migrations `media_storage_foundation` and `media_storage_listing_hardening` are applied and verified.
+- Storage buckets exist: `urblo-public-media` is public-read for public-safe assets, and `urblo-admin-media` is private for draft/review assets.
+- Storage object policies allow active viewer/editor/admin/owner profiles to read admin media, active editor/admin/owner profiles to insert/update objects, and owner/admin profiles to delete objects.
+- The broad public `storage.objects` SELECT policy was removed after the Supabase advisor flagged public bucket listing risk. Public object URL access remains handled by the public bucket.
+- `/admin/media` source implements upload-backed draft media records, external media records, metadata editing, role-aware read-only behavior, and publish/archive validation.
+- Live browser upload/save verification still requires browser-safe Supabase key configuration and an active admin/editor profile.
 
 ### Phase 5 - Content Migration and CRUD
 Outcome: content can move out of static files in a controlled order.
@@ -221,9 +233,15 @@ Recommended first buckets:
 
 Policy:
 - Public users can read `urblo-public-media`.
-- Only active admin users can upload/update/delete objects.
+- Only active admin/editor users can upload/update objects.
+- Only active owner/admin users can delete objects.
 - Draft or unapproved assets should stay in the private bucket until publication.
 - Large homepage video should be reviewed separately for Cloudflare R2 or Stream if Supabase Storage is not the best delivery path.
+
+Current implementation:
+- Buckets are applied on project `npkidywzwddbnfrnxlmo`.
+- Public object listing is disabled by not granting a broad public `SELECT` policy on `storage.objects`.
+- Admin/editor upload/update and owner/admin delete are enforced by `storage.objects` RLS policies that call the active `admin_profiles` role helper.
 
 ### `media_assets`
 Purpose: metadata layer over storage objects and legacy external URLs.
@@ -646,7 +664,7 @@ Minimum indexes:
 
 ### Phase 1 - Schema and Security
 - Create tables, constraints, indexes, and RLS policies.
-- Create storage buckets and storage policies.
+- Create storage buckets and storage policies. Current buckets/policies are applied through `media_storage_foundation` and `media_storage_listing_hardening`.
 - Create one or more admin users.
 - Add seed data for finish definitions and site settings.
 

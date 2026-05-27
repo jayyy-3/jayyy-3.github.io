@@ -23,7 +23,7 @@ Docs-only and harness-only work should run:
 Cloudflare/Supabase implementation work should also follow the new verification profiles in `docs/agent/verification.md`.
 
 ## Last Runtime Baseline
-Measured 2026-05-26 during the capabilities CTA and route update:
+Measured 2026-05-28 during the admin media checkpoint:
 - `npm run build`: pass
 - `npm run lint`: pass
 - `npx tsc -b`: pass
@@ -43,6 +43,7 @@ Source of truth: `docs/agent/tasks.json`.
 - `NOW-FORMS-SUPABASE-001`: replace mailto-only Contact and Sample Request flows with Supabase-backed submissions.
 - `NOW-ADMIN-AUTH-RLS-001`: complete live admin auth verification after browser-safe Supabase key configuration and first admin email/profile are available. Source shell and config-gated routes are implemented.
 - `NOW-ADMIN-SETTINGS-CRUD-001`: complete live `/admin/settings` save verification after owner/admin profile access is available. Source form and owner/admin RLS hardening are implemented.
+- `NOW-ADMIN-MEDIA-LEADS-001`: continue after the media checkpoint. Supabase Storage buckets/policies and `/admin/media` source are implemented; live upload/save verification still requires browser-safe Supabase key configuration and an active admin/editor profile, and the lead inbox remains pending.
 - `NOW-ADMIN-CMS-001`: umbrella objective for customer-maintained Projects, Stone Library, Products, Articles, media, and leads; execute through the smaller admin child tasks.
 - `NOW-ASSET-MIGRATION-001`: migrate priority media away from old WordPress URLs and define controlled storage for launch.
 - `NOW-ARTICLE-STRUCTURE-CLAIMS-001`: move article details from raw newsletter HTML to mobile-safe, claim-reviewed structured article templates.
@@ -60,8 +61,8 @@ Source of truth: `docs/agent/tasks.json`.
 ## Blocked
 - `NOW-CLOUDFLARE-PAGES-DEPLOY-001`: repo-side Cloudflare Pages configuration is prepared; dashboard project creation, preview URL validation, production custom domain, DNS cutover, and rollback require Cloudflare account access.
 - `NOW-ADMIN-AUTH-RLS-001` live verification: protected admin shell source exists, but active admin access still waits for first admin email/profile and browser-safe Supabase key configuration.
-- `NOW-ADMIN-CONTENT-CRUD-001`: admin CRUD modules require the protected admin shell and Supabase content tables.
-- `NOW-ADMIN-MEDIA-LEADS-001`: media library and lead management require Supabase Storage, form endpoints, Turnstile, and email secrets.
+- `NOW-ADMIN-CONTENT-CRUD-001`: admin CRUD modules require the protected admin shell and Supabase content tables. Source-only CRUD can continue behind the config gate, but live write verification still requires browser-safe Supabase key configuration and active admin profiles.
+- `NOW-ADMIN-MEDIA-LEADS-001` live media verification and lead management: media source exists, but live uploads need browser-safe Supabase key configuration and an active admin/editor profile; lead management still requires live form persistence, Turnstile, and email-secret verification.
 
 ## Completed This Cycle
 - `DONE-DOCS-HARNESS-ROOT-001`: promoted `docs/README_AGENT.md` to root `AGENTS.md`, added `docs/DESIGN.md`, moved repo docs to relative paths, and separated brand authority from design execution authority.
@@ -101,6 +102,7 @@ Source of truth: `docs/agent/tasks.json`.
 - `NEXT-UI-PARITY-001` capabilities bridge: the homepage proof section now includes a lightweight `Our Capabilities` CTA, and `/capabilities` exists as a provisional design/specification/sourcing/delivery capability page pending final client copy.
 - `NOW-ADMIN-AUTH-RLS-001` partial source implementation: `/admin`, `/admin/login`, `/admin/unauthorized`, protected admin module scaffolds, Supabase Auth session/profile checks, config-required state, and dashboard query shell are implemented. Live active-admin verification remains pending first admin email/profile and browser-safe Supabase key configuration.
 - `NOW-ADMIN-SETTINGS-CRUD-001` partial source implementation: `/admin/settings` reads/creates/updates the default site settings row behind the admin gate, and Supabase `site_settings` write policies now require owner/admin. Live save verification remains pending first admin email/profile and browser-safe Supabase key configuration.
+- `NOW-ADMIN-MEDIA-LEADS-001` partial source implementation: Supabase Storage buckets `urblo-public-media` and `urblo-admin-media` are applied with admin/editor write policies and public object listing disabled; `/admin/media` supports upload-backed draft records, external media records, metadata editing, and publish/archive guardrails behind the admin gate. Live upload/save verification remains pending first admin email/profile and browser-safe Supabase key configuration.
 
 Older completion details live in `docs/WORKLOG.md`.
 

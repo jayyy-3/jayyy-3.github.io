@@ -264,6 +264,7 @@ Current source state:
 - Admin routes intentionally sit outside the public site chrome and suppress the public WelcomePopup.
 - Without browser-safe Supabase configuration, admin routes show a configuration-required state instead of placeholder dashboards.
 - `/admin/settings` is the first source CRUD surface and should remain dense, form-led, and status-led.
+- `/admin/media` is the first media library source surface and should remain operational: compact record list, upload panel, metadata editor, explicit draft/published/archived state, and clear publication guardrails.
 - Other module routes are protected scaffolds only; do not style them as completed CRUD until the relevant Supabase and Storage workflows are implemented.
 - free-form page-builder UI where structured fields are safer
 - implying backend submission or authentication works before Supabase is implemented

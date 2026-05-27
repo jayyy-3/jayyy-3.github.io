@@ -22,4 +22,9 @@ Applied admin hardening migration on 2026-05-28:
 
 - `admin_settings_role_hardening`
 
+Applied media Storage migrations on 2026-05-28:
+
+- `media_storage_foundation`
+- `media_storage_listing_hardening`
+
 Do not commit Supabase service role keys, database passwords, Turnstile secrets, or email provider secrets here.

@@ -5,7 +5,7 @@ Last updated: 2026-05-28
 ## Purpose
 This document defines the executable contract for Urblo's `/admin` site.
 
-Admin auth shell source is now implemented and config-gated. This does not mean Storage, live first-admin verification, or CRUD screens are complete; it defines and tracks what those implementation tasks must build next.
+Admin auth shell source is now implemented and config-gated. Settings and Media are the first source CRUD screens. This does not mean live first-admin verification, live upload/save verification, or broader content CRUD screens are complete; it defines and tracks what those implementation tasks must build next.
 
 ## Product Principle
 The admin site exists so Urblo can maintain launch-critical content without code edits while protecting public pages from drafts, unreviewed claims, missing media, and broken lead workflows.
@@ -156,6 +156,7 @@ Current implementation:
 - The admin shell uses Supabase Auth and `admin_profiles` lookup when browser-safe Supabase configuration is present.
 - Without `VITE_SUPABASE_ANON_KEY` or `VITE_SUPABASE_PUBLISHABLE_KEY`, admin routes render a configuration-required state and do not show dashboard content.
 - `/admin/settings` is the first CRUD source screen behind the auth gate, with owner/admin save controls for the default `site_settings` row.
+- `/admin/media` is the first media CRUD source screen behind the auth gate, with admin/editor upload and metadata controls, viewer read-only behavior, and publish/archive guardrails.
 - Other module CRUD screens are scaffolded behind the auth gate only; they are not editable CRUD modules yet.
 
 Do not do before credentials:
@@ -171,6 +172,6 @@ Do not do before credentials:
 |---|---|
 | `NOW-ADMIN-AUTH-RLS-001` | Auth shell, access states, roles, RLS expectations. |
 | `NOW-ADMIN-CONTENT-CRUD-001` | Stone Library, Projects, Products, Articles modules and field ownership. |
-| `NOW-ADMIN-MEDIA-LEADS-001` | Media library, leads inbox, sample request workflow. |
+| `NOW-ADMIN-MEDIA-LEADS-001` | Media library, Storage policies, leads inbox, sample request workflow. |
 | `NOW-FORMS-SUPABASE-001` | Lead statuses, source route, notification, Turnstile assumptions. |
 | `NOW-CLOUDFLARE-PAGES-DEPLOY-001` | `/admin` route protection, Pages Functions, environment variables, rollback expectations. |

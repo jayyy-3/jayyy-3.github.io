@@ -6,7 +6,7 @@ Last updated: 2026-05-28
 - Current implementation: frontend-only React application shipped as static assets.
 - Current implementation: Cloudflare Pages Function source now exists for `/api/enquiries` and `/api/sample-requests`.
 - Current implementation: the public Contact page submits enquiries and sample requests to those API routes, but live Supabase row creation still requires server-side Cloudflare environment variables.
-- Current Supabase project: `Urblo` (`npkidywzwddbnfrnxlmo`, `ap-southeast-2`) has the foundation schema/RLS migrations and baseline seeds applied. The `/admin` auth shell source is implemented and config-gated, but live admin login still requires browser-safe Supabase key configuration and a confirmed first admin profile. Storage policies and admin CRUD are not implemented yet.
+- Current Supabase project: `Urblo` (`npkidywzwddbnfrnxlmo`, `ap-southeast-2`) has the foundation schema/RLS migrations, baseline seeds, admin settings hardening, and media Storage policies applied. The `/admin` auth shell source is implemented and config-gated, but live admin login still requires browser-safe Supabase key configuration and a confirmed first admin profile. Settings and Media are the first source CRUD screens; broader content CRUD is not implemented yet.
 - Launch target: Cloudflare Pages static frontend, Cloudflare Pages Functions API endpoints, Supabase Postgres/Auth/Storage, and an Urblo-owned admin interface for content operations.
 - Planning source: `docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md`.
 - Supabase schema design source: `docs/SUPABASE_SCHEMA.md`.
@@ -32,7 +32,7 @@ Last updated: 2026-05-28
 - Transactional email: external email API such as Resend, wired from server-side API code only.
 - Media storage:
   - Current static stopgap: launch-critical identity, hero, contact, and route banner assets live under `public/media/launch`.
-  - Supabase Storage for normal editorial, Stone Library, project, and article imagery.
+  - Supabase Storage for normal editorial, Stone Library, project, and article imagery. Initial buckets are applied: `urblo-public-media` for public-safe assets and `urblo-admin-media` for private draft/review assets.
   - Cloudflare R2 or Stream remains the review path for large homepage video assets if Supabase Storage or Pages asset limits are a poor fit.
 - Cost planning:
   - Lean production target: about USD 30/month before tax/usage spikes.
@@ -61,6 +61,7 @@ Last updated: 2026-05-28
   - Current Pages Function source lives under `functions/api/enquiries.js` and `functions/api/sample-requests.js`.
   - Browser-side admin Auth requires `VITE_SUPABASE_ANON_KEY` or `VITE_SUPABASE_PUBLISHABLE_KEY`; `VITE_SUPABASE_URL` may be configured, but defaults to the Urblo project URL if omitted.
   - Current admin CRUD source: `/admin/settings` reads and saves the default `site_settings` row for owner/admin roles.
+  - Current admin media source: `/admin/media` reads and saves `media_assets` records and uploads Storage objects for active owner/admin/editor roles once browser-safe Supabase config and an active profile exist.
   - Form Functions require `SUPABASE_SERVICE_ROLE_KEY` server-side. `SUPABASE_URL` may be configured, but defaults to the Urblo project URL if omitted.
   - Optional server-side form secrets: `TURNSTILE_SECRET_KEY` or `CF_TURNSTILE_SECRET_KEY`, `RESEND_API_KEY`, `LEAD_NOTIFICATION_FROM`, `ENQUIRY_NOTIFICATION_TO`, and `SAMPLE_REQUEST_NOTIFICATION_TO`.
 - Vite base config: `vite.config.ts`
@@ -289,6 +290,8 @@ Route state contract:
 ### Supabase Launch Data Contract (Target)
 - Site settings:
   - Global SEO, logo, favicon, social links, footer content, and default share image.
+- Media:
+  - Storage-backed or external media records with source, status, alt text, credit, usage notes, technical metadata, and public/private bucket state.
 - Projects:
   - Project metadata, hero/gallery media, published status, SEO, evidence facts, material schedules, and hotspot records.
   - Hotspots store image-percentage coordinates and references to Stone Library records where possible.
@@ -309,6 +312,7 @@ Route state contract:
   - Current `/admin` source implements real Supabase Auth wiring, session/profile loading, login, unauthorized, dashboard, and protected module scaffolds.
   - The admin dashboard does not render private module content unless Supabase Auth returns a session and RLS allows the matching active `admin_profiles` row.
   - `/admin/settings` is the first CRUD screen and uses the `site_settings` row with owner/admin save controls.
+  - `/admin/media` is the first media CRUD screen and uses `media_assets` plus Supabase Storage buckets for upload-backed draft records, external records, metadata editing, and publish/archive guardrails.
   - The admin CMS must not ship fake production auth; live verification still requires browser-safe Supabase key configuration and a confirmed first admin profile.
 - Access control:
   - Public reads expose only published content.
@@ -359,6 +363,7 @@ Route state contract:
 - Launch target side effects:
   - Public read paths fetch published Supabase content either at build time or through a controlled API contract.
   - Admin paths require authenticated Supabase sessions.
+  - Media uploads use Supabase Storage only from authenticated admin/editor sessions and create/update `media_assets` metadata through RLS.
   - Form submissions create durable Supabase records and email notifications.
   - Old WordPress media URLs must not remain first-viewport production dependencies.
 
@@ -382,11 +387,11 @@ Route state contract:
 ## Known Architecture Risks
 - Cloudflare + Supabase is the approved launch target, and Supabase foundation schema/RLS plus baseline seeds are applied. Form endpoint source is implemented, but live row creation still needs server-side environment variables and Cloudflare endpoint verification.
 - Supabase Auth shell source now exists, but live admin access still needs browser-safe key configuration, first admin email/profile creation, and authenticated browser verification.
-- Supabase still needs Storage policies and admin CRUD before it can replace static/file-backed content behavior.
+- Supabase Storage policies and `/admin/media` source are implemented, but live upload verification still requires browser-safe Supabase key configuration and an active admin/editor profile. Broader content CRUD is still needed before Supabase can replace static/file-backed content behavior.
 - Cloudflare Pages repo-side clean URL configuration is in place, but dashboard project creation, preview validation, custom domain, DNS cutover, and rollback still require account access.
 - Sample Request now routes through the Contact page sample-request mode and Pages Function source, but production persistence has not been verified without the server-side service-role environment variable.
 - Projects, Stone Library, Products, and Articles remain file-backed until Supabase migration work is implemented.
-- Admin shell exists, but customer CRUD content management is not implemented yet.
+- Admin shell exists, with Settings and Media as the first source CRUD screens. Customer CRUD for Stone Library, Projects, Products, Articles, leads, audit, and admin-user management is not implemented yet.
 - Project and Stone Library content migration needs strict separation between confirmed facts and inferred MVP copy.
 - Raw article newsletter HTML still contains external source URLs as migration source material, but runtime article rendering now rewrites known email proxy image URLs and campaign links before render.
 - Long-term article quality still requires Supabase structured blocks, approved article image records, editorial review, and claim-safe copy approval.

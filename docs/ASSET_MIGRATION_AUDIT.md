@@ -195,7 +195,7 @@ Resolved in the local launch stopgap:
 ## Recommended Storage Targets
 
 ### Normal Images
-Use Supabase Storage when CMS migration starts:
+Use Supabase Storage for normal CMS-managed media. Initial buckets are now available as `urblo-public-media` and `urblo-admin-media`; existing local stopgap assets still need migration into `media_assets` records:
 - project images;
 - product images;
 - Stone Library images;
