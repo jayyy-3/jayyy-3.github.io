@@ -1,6 +1,6 @@
 # AGENTS - Urblo AI Harness Entry
 
-Last updated: 2026-05-25
+Last updated: 2026-05-27
 
 ## Project Mission
 Urblo web exists to communicate a design-led, engineering-backed, proof-driven natural stone solution system for streetscapes and civil landscapes.
@@ -77,12 +77,13 @@ Before declaring implementation complete, verify all checks below:
 - Root harness entry is `AGENTS.md`; the old `docs/README_AGENT.md` path is retired.
 - Current-state handoff is `docs/HANDOFF.md`; machine task state is `docs/agent/tasks.json`.
 - Launch target is now Cloudflare Pages + Supabase + Urblo-owned `/admin`; the long-form plan is `docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md`.
-- Current runtime remains static/file-backed until the new launch tasks are implemented.
+- Supabase foundation migrations are applied and verified for project `Urblo` (`npkidywzwddbnfrnxlmo`): 24 launch tables, RLS, policies, FK indexes, private lead/admin protection, and read-only anonymous public-content grants.
+- Current runtime remains static/file-backed until baseline seeds, forms backend, Auth, Storage, and admin CRUD are implemented.
 - `NOW-ADMIN-CMS-001` is an umbrella objective, not a single executable implementation task; admin IA/access is now defined in `docs/ADMIN_IA_ACCESS.md`, and implementation still uses the smaller auth/CRUD/media/leads tasks in `docs/agent/tasks.json`.
 - Stone Library migration is complete: old `/materials*` route family has been removed and replaced with `/stone-library` plus `/stone-library/:stoneGroupId`.
 - `NEXT-STONELIB-DRIVE-IMAGE-AUDIT-001` and `NEXT-STONELIB-IMG-001` are complete for current website stones only; Drive-only products remain out of scope until the client decides to add them.
 - Contact route is declared at `/contact`; shared header/footer navigation points to declared routes, with Sample Request remaining a `mailto:` fallback until `NOW-FORMS-SUPABASE-001` is implemented.
-- Last runtime gates were measured on 2026-05-25 and were green (`npm run build`, `npm run lint`, `npx tsc -b`, `npm run agent:smoke`).
+- Last runtime gates were measured on 2026-05-27 and were green (`npm run build`, `npm run lint`, `npx tsc -b`, `npm run agent:smoke`).
 - Route-level code splitting is in place and the previous `>500kB` chunk warning is resolved; continue monitoring bundle output as features are added.
 - GitHub Pages hardening is now a legacy fallback; Cloudflare Pages deployment is the active launch path.
 - Routing now uses clean paths through `BrowserRouter` with Cloudflare Pages SPA fallback files in `public/`; unknown public URLs render a branded not-found state instead of the homepage.

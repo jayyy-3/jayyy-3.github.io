@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lastUpdated": "2026-05-26",
+  "lastUpdated": "2026-05-27",
   "sourceOfTruth": "Machine-readable task queue for active and upcoming agent work. Human-readable roadmap lives in docs/NEXT_STEPS.md.",
   "tasks": [
     {
@@ -51,7 +51,7 @@
     },
     {
       "id": "NOW-SUPABASE-FOUNDATION-001",
-      "status": "now",
+      "status": "done",
       "priority": 2.1,
       "summary": "Apply the Supabase foundation schema, indexes, helper functions, and RLS posture to the Urblo project.",
       "files": [
@@ -65,6 +65,8 @@
       ],
       "notes": [
         "2026-05-26: Supabase connector can access the Urblo project directly: project ref npkidywzwddbnfrnxlmo, region ap-southeast-2, status ACTIVE_HEALTHY.",
+        "2026-05-27: Applied foundation_schema, foundation_hardening, and anon_read_only migrations to project npkidywzwddbnfrnxlmo.",
+        "2026-05-27: Verification confirmed 24 expected public tables exist, 24/24 have RLS enabled, anonymous users have no private lead/admin table privileges, anonymous public-content access is read-only, and no public-schema foreign keys are missing indexes.",
         "Do not request manual dashboard table creation while connector migrations are available.",
         "Do not commit or paste service-role keys, database passwords, Turnstile secrets, or email provider secrets."
       ],
@@ -86,7 +88,7 @@
     },
     {
       "id": "NOW-SUPABASE-SEED-BASELINE-001",
-      "status": "next",
+      "status": "now",
       "priority": 2.2,
       "summary": "Seed Supabase baseline rows needed before forms and admin work.",
       "files": [

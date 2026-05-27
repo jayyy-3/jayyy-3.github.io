@@ -1524,6 +1524,7 @@ Last updated: 2026-05-26
 - Updated product/detail architecture, design contract, handoff, roadmap, and task queue docs.
 
 ### Changed Files
+- `AGENTS.md`
 - `docs/ARCHITECTURE.md`
 - `docs/DESIGN.md`
 - `docs/HANDOFF.md`
@@ -2178,6 +2179,54 @@ Last updated: 2026-05-26
 - `NOW-SUPABASE-FOUNDATION-001`
 - `NOW-SUPABASE-SEED-BASELINE-001`
 - `NOW-FORMS-BACKEND-001`
+
+## Entry - 2026-05-27 (Supabase Foundation Applied)
+
+### Scope
+- Added reviewed Supabase foundation migrations under `supabase/migrations`.
+- Applied `foundation_schema`, `foundation_hardening`, and `anon_read_only` to Supabase project `npkidywzwddbnfrnxlmo`.
+- Created launch foundation tables for admin profiles, audit events, media assets, site settings, finish definitions, Stone Library, Products, Projects, Articles, enquiries, sample requests, and sample request items.
+- Added `updated_at` triggers, admin-role helper functions, status/FK/listing indexes, operational new-lead partial indexes, anonymous read-only grants for public content, and RLS policies.
+
+### Changed Files
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `supabase/migrations/README.md`
+- `supabase/migrations/202605270001_foundation_schema.sql`
+- `supabase/migrations/202605270002_foundation_hardening.sql`
+- `supabase/migrations/202605270003_anon_read_only.sql`
+
+### Verification Results
+- Supabase migration list: pass. `foundation_schema`, `foundation_hardening`, and `anon_read_only` are listed on project `npkidywzwddbnfrnxlmo`.
+- Supabase table existence check: pass. 24 expected foundation tables exist in `public`.
+- Supabase RLS check: pass. 24/24 public foundation tables have RLS enabled.
+- Supabase policy summary: pass. Public content tables have public-select policies plus admin policies; lead/admin private tables have admin policies and no public-select policies.
+- Supabase private grant check: pass. `anon` has no SELECT/INSERT/UPDATE/DELETE grants on `admin_profiles`, `admin_audit_events`, `enquiries`, `sample_requests`, or `sample_request_items`.
+- Supabase public grant check: pass. `anon` has SELECT and no INSERT/UPDATE/DELETE on checked public content tables.
+- Supabase FK index check: pass. No public-schema foreign-key columns are missing an index after hardening.
+- Supabase operational queue index check: pass. `enquiries_new_queue_idx` and `sample_requests_new_queue_idx` exist.
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run agent:smoke`: pass. Existing public route shells, redirects, and CTA contracts remain green.
+
+### Risks and Gaps
+- No seed data exists yet; `finish_definitions` and `site_settings` remain empty until `NOW-SUPABASE-SEED-BASELINE-001`.
+- No first admin user has been created because that requires Jay to confirm the first admin email.
+- No runtime code is connected to Supabase yet; public pages remain static/file-backed and forms remain mailto/local-only until the forms backend checkpoint.
+- Supabase Storage buckets/policies are not implemented yet; media CRUD remains part of the admin media checkpoint.
+
+### Next Handoff
+- `NOW-SUPABASE-SEED-BASELINE-001`
+- `NOW-FORMS-BACKEND-001`
+- `NOW-ADMIN-AUTH-RLS-001`
 
 ## Entry Template (Use for Every Future Session)
 

@@ -1,6 +1,6 @@
 # Urblo Cloudflare + Supabase Launch Plan
 
-Last updated: 2026-05-26
+Last updated: 2026-05-27
 
 ## Decision
 The launch target is Cloudflare Pages for the public website, Cloudflare Pages Functions for small API endpoints, Supabase for the operational database/auth/storage layer, and a Urblo-owned admin interface for customer-maintained content.
@@ -26,7 +26,7 @@ After launch:
 - The current deployment workflow still targets GitHub Pages.
 - Contact and Sample Request behavior still uses email links or local form state.
 - Projects, Stone Library, Products, and Articles are still file-backed content.
-- The Supabase project `Urblo` (`npkidywzwddbnfrnxlmo`, `ap-southeast-2`) is active and connector-accessible, but the production schema, RLS policies, seeds, and runtime integrations are not applied yet.
+- The Supabase project `Urblo` (`npkidywzwddbnfrnxlmo`, `ap-southeast-2`) is active and connector-accessible. Foundation schema/RLS migrations are applied; baseline seeds and runtime integrations are not applied yet.
 - P0/P1 visible runtime media now uses controlled local launch assets; raw article HTML remains migration source material and should still be converted into structured Supabase article blocks.
 
 ## Target Architecture
@@ -89,7 +89,7 @@ Validation:
 Outcome: content moves from code files into a maintainable structured database.
 
 Current execution split:
-- `NOW-SUPABASE-FOUNDATION-001`: apply schema, constraints, indexes, helper functions, and RLS posture.
+- `NOW-SUPABASE-FOUNDATION-001`: complete; schema, constraints, indexes, helper functions, grants, and RLS posture are applied and verified.
 - `NOW-SUPABASE-SEED-BASELINE-001`: seed finish definitions and default site settings after the foundation migration.
 - `NOW-FORMS-BACKEND-001`: connect Contact and Sample Request to server-side Supabase writes.
 

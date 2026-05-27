@@ -1,11 +1,11 @@
 # Urblo Supabase Schema Plan
 
-Last updated: 2026-05-26
+Last updated: 2026-05-27
 
 ## Purpose
 This document defines the first production Supabase data model for the Urblo website launch.
 
-It is a schema design contract, not proof that the database has already been created. Runtime work must still implement migrations, seed scripts, RLS policies, Cloudflare Pages Functions, and admin UI.
+It is both the schema design contract and the current implementation checkpoint record. The foundation migrations are applied, but runtime work must still implement baseline seeds, Cloudflare Pages Functions, Supabase Auth UI, Storage policies, and admin CRUD.
 
 ## Current Supabase Project
 
@@ -17,6 +17,7 @@ The Supabase connector can access the Urblo project directly. Do not ask the use
 | Project ref | `npkidywzwddbnfrnxlmo` |
 | Region | `ap-southeast-2` |
 | Status checked | `ACTIVE_HEALTHY` on 2026-05-26 |
+| Foundation migrations | Applied on 2026-05-27: `foundation_schema`, `foundation_hardening`, `anon_read_only` |
 
 Secrets still must not be committed or pasted into repo docs. Service-role keys, database passwords, Turnstile secrets, and email provider secrets belong only in server-side environment variable stores.
 
@@ -35,12 +36,14 @@ Scope:
 - RLS enabled on all public/admin/lead tables.
 
 Acceptance:
-- Supabase migration list includes the applied foundation migration on project `npkidywzwddbnfrnxlmo`.
-- Table listing confirms every foundation table exists in the `public` schema.
-- `pg_class.relrowsecurity` confirms RLS is enabled for all exposed tables.
-- `pg_policies` confirms anonymous users can only read published public content and cannot read leads, admin profiles, or audit events.
+- Complete on 2026-05-27. Supabase migration list includes `foundation_schema`, `foundation_hardening`, and `anon_read_only` on project `npkidywzwddbnfrnxlmo`.
+- Table listing confirms all 24 expected foundation tables exist in the `public` schema.
+- `pg_class.relrowsecurity` confirms RLS is enabled for all 24 foundation tables.
+- `pg_policies` confirms anonymous users can only read public content through public-select policies and cannot read leads, admin profiles, or audit events.
+- Private form/admin tables have no anonymous table privileges; public content tables have anonymous read-only grants.
 - Private form tables have operational partial indexes for new lead queues.
-- The migration is represented in repo review material under `supabase/migrations`.
+- All public-schema foreign-key columns are indexed.
+- The migrations are represented in repo review material under `supabase/migrations`.
 
 ### Phase 2 - Baseline Seeds
 Outcome: the database has enough safe baseline data for forms/admin work without moving all public content yet.
