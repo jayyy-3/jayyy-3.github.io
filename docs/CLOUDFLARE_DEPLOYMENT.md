@@ -1,6 +1,6 @@
 # Urblo Cloudflare Pages Deployment Runbook
 
-Last updated: 2026-05-27
+Last updated: 2026-05-28
 
 ## Purpose
 This runbook captures the repo-side Cloudflare Pages deployment contract and the manual account steps required before production cutover.
@@ -51,6 +51,7 @@ No Content Security Policy is added yet because current content still depends on
 Initial production variables needed for forms and later admin work:
 - `VITE_SUPABASE_URL`
 - `VITE_SUPABASE_ANON_KEY`
+- `VITE_SUPABASE_PUBLISHABLE_KEY` (preferred when Supabase provides a publishable key; otherwise use the anon key)
 - `SUPABASE_URL`
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `TURNSTILE_SECRET_KEY`
@@ -61,6 +62,7 @@ Initial production variables needed for forms and later admin work:
 
 Rules:
 - Public `VITE_` values may be exposed to browser code.
+- The admin shell requires either `VITE_SUPABASE_ANON_KEY` or `VITE_SUPABASE_PUBLISHABLE_KEY` before login can run.
 - `SUPABASE_URL` is server-side for Pages Functions and may match `VITE_SUPABASE_URL`.
 - Secret values must exist only in Cloudflare Pages project settings.
 - Service-role and email API keys must never be committed or shipped to browser code.
@@ -78,6 +80,8 @@ Before custom domain cutover, test the generated `*.pages.dev` URL:
 - `/stone-library/alpine-white`
 - `/articles`
 - `/contact`
+- `/admin`
+- `/admin/login`
 
 Each route should:
 - return HTTP 200 on direct refresh;
@@ -91,6 +95,7 @@ Current `/functions/api` endpoints:
 - Static routes like `/projects` and `/assets/...` should not invoke Functions.
 - Cloudflare analytics should show static traffic and API traffic separately.
 - Valid form tests require `SUPABASE_SERVICE_ROLE_KEY` in the Pages Function environment.
+- Admin route tests require a browser-safe Supabase key, a Supabase Auth user, and a matching active `admin_profiles` row.
 
 ### 5. Custom Domain Cutover
 Before switching production DNS:

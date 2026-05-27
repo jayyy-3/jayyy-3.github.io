@@ -1,11 +1,11 @@
 # Urblo Admin IA and Access Contract
 
-Last updated: 2026-05-25
+Last updated: 2026-05-28
 
 ## Purpose
-This document defines the first executable contract for Urblo's future `/admin` site before Supabase credentials are available.
+This document defines the executable contract for Urblo's `/admin` site.
 
-It does not mean admin authentication, RLS, Storage, forms, or CRUD screens have already been implemented. It defines what those implementation tasks must build.
+Admin auth shell source is now implemented and config-gated. This does not mean Storage, live first-admin verification, or CRUD screens are complete; it defines and tracks what those implementation tasks must build next.
 
 ## Product Principle
 The admin site exists so Urblo can maintain launch-critical content without code edits while protecting public pages from drafts, unreviewed claims, missing media, and broken lead workflows.
@@ -148,7 +148,14 @@ The dashboard should surface these before content can be considered publish-read
 Do now, before credentials:
 - keep this contract and task queue current;
 - design route map, access states, field ownership, and rollout order;
-- keep follow-up implementation tasks blocked where they require secrets.
+- keep follow-up implementation tasks blocked where they require secrets;
+- keep `/admin` protected by a configuration-required state when no browser-safe Supabase key is present.
+
+Current implementation:
+- `/admin`, `/admin/login`, `/admin/unauthorized`, and protected module routes exist outside the public site chrome.
+- The admin shell uses Supabase Auth and `admin_profiles` lookup when browser-safe Supabase configuration is present.
+- Without `VITE_SUPABASE_ANON_KEY` or `VITE_SUPABASE_PUBLISHABLE_KEY`, admin routes render a configuration-required state and do not show dashboard content.
+- Module CRUD screens are scaffolded behind the auth gate only; they are not editable CRUD modules yet.
 
 Do not do before credentials:
 - fake authentication in production routes;

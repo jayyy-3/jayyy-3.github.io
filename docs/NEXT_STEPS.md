@@ -1,6 +1,6 @@
 # NEXT_STEPS - Urblo Roadmap
 
-Last updated: 2026-05-27
+Last updated: 2026-05-28
 
 ## Purpose
 This file is the human-readable roadmap. The machine-readable task queue lives in `docs/agent/tasks.json` and is the source of truth for active task status, file ownership, acceptance criteria, and verification commands.
@@ -41,6 +41,7 @@ Source of truth: `docs/agent/tasks.json`.
 
 - `NOW-FORMS-BACKEND-001`: complete live verification for Cloudflare Pages Functions after server-side `SUPABASE_SERVICE_ROLE_KEY` is configured. Source and mock API checks are implemented.
 - `NOW-FORMS-SUPABASE-001`: replace mailto-only Contact and Sample Request flows with Supabase-backed submissions.
+- `NOW-ADMIN-AUTH-RLS-001`: complete live admin auth verification after browser-safe Supabase key configuration and first admin email/profile are available. Source shell and config-gated routes are implemented.
 - `NOW-ADMIN-CMS-001`: umbrella objective for customer-maintained Projects, Stone Library, Products, Articles, media, and leads; execute through the smaller admin child tasks.
 - `NOW-ASSET-MIGRATION-001`: migrate priority media away from old WordPress URLs and define controlled storage for launch.
 - `NOW-ARTICLE-STRUCTURE-CLAIMS-001`: move article details from raw newsletter HTML to mobile-safe, claim-reviewed structured article templates.
@@ -57,7 +58,7 @@ Source of truth: `docs/agent/tasks.json`.
 
 ## Blocked
 - `NOW-CLOUDFLARE-PAGES-DEPLOY-001`: repo-side Cloudflare Pages configuration is prepared; dashboard project creation, preview URL validation, production custom domain, DNS cutover, and rollback require Cloudflare account access.
-- `NOW-ADMIN-AUTH-RLS-001`: Supabase foundation schema/RLS is available, but the protected admin shell still waits for baseline seeds, first admin email, and browser-safe anon-key handling.
+- `NOW-ADMIN-AUTH-RLS-001` live verification: protected admin shell source exists, but active admin access still waits for first admin email/profile and browser-safe Supabase key configuration.
 - `NOW-ADMIN-CONTENT-CRUD-001`: admin CRUD modules require the protected admin shell and Supabase content tables.
 - `NOW-ADMIN-MEDIA-LEADS-001`: media library and lead management require Supabase Storage, form endpoints, Turnstile, and email secrets.
 
@@ -97,6 +98,7 @@ Source of truth: `docs/agent/tasks.json`.
 - `NEXT-UI-PARITY-001` partial launch polish: homepage hero now fills the first viewport, route transitions reset to top, no-banner error/loading states clear the header, article detail no longer double-renders a route banner, article mobile overflow has a CSS stopgap, Contact blocks empty email drafts, product renders are labeled as geometry previews with separate material previews, Stone Library images disclose finish-specific/reference status, and `react-helmet` was removed to clear React 19 strict-mode console noise.
 - `NEXT-UI-PARITY-001` homepage proof update: the old rendered sustainability/tabbed feature module was removed from the homepage flow by request; proof metrics now sit directly after the hero with approved stone/city copy and updated project, CO2, landscape architect, and delivered-stone metrics.
 - `NEXT-UI-PARITY-001` capabilities bridge: the homepage proof section now includes a lightweight `Our Capabilities` CTA, and `/capabilities` exists as a provisional design/specification/sourcing/delivery capability page pending final client copy.
+- `NOW-ADMIN-AUTH-RLS-001` partial source implementation: `/admin`, `/admin/login`, `/admin/unauthorized`, protected admin module scaffolds, Supabase Auth session/profile checks, config-required state, and dashboard query shell are implemented. Live active-admin verification remains pending first admin email/profile and browser-safe Supabase key configuration.
 
 Older completion details live in `docs/WORKLOG.md`.
 

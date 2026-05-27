@@ -1,16 +1,17 @@
 # HANDOFF - Current Agent State
 
-Last updated: 2026-05-27
+Last updated: 2026-05-28
 
 ## Current Focus
 The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin CMS:
 - Public website hosting should move to Cloudflare Pages.
 - Contact and Sample Request should move from mailto/local-only behavior to Supabase-backed submissions.
 - Projects, Stone Library, Products, Articles, media records, and lead records should become customer-maintainable through `/admin`.
-- The current runtime remains static/file-backed until implementation tasks are completed.
+- The current content runtime remains static/file-backed until content migration tasks are completed.
 - The long-form plan and cost baseline live in `docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md`.
 - Supabase project access is available through the connector for project `Urblo` (`npkidywzwddbnfrnxlmo`, `ap-southeast-2`); foundation and baseline seed migrations are applied.
 - Forms backend source is implemented for `/api/enquiries` and `/api/sample-requests`, with live Supabase insert verification pending server-side `SUPABASE_SERVICE_ROLE_KEY` configuration.
+- `/admin` auth shell source is implemented and config-gated. Without a browser-safe Supabase key, admin routes show a configuration-required state and do not render dashboard content. Live login/profile verification still requires `VITE_SUPABASE_ANON_KEY` or `VITE_SUPABASE_PUBLISHABLE_KEY` plus Jay's first admin email/profile.
 
 ## Current Branch State
 - Branch: `main`
@@ -31,6 +32,7 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 - Last Supabase foundation gate on 2026-05-27: `foundation_schema`, `foundation_hardening`, and `anon_read_only` migrations applied to project `npkidywzwddbnfrnxlmo`; Supabase checks confirmed three migrations listed, 24 expected tables, 24/24 RLS enabled, no anonymous private lead/admin privileges, anonymous public content grants are read-only, no missing public-schema foreign-key indexes, and `enquiries_new_queue_idx` / `sample_requests_new_queue_idx` exist. Local gates `npm run build`, `npm run lint`, `npx tsc -b`, `npm run agent:check`, `git diff --check`, and `npm run agent:smoke` pass.
 - Last Supabase baseline seed gate on 2026-05-27: `baseline_seed` migration applied to project `npkidywzwddbnfrnxlmo`; Supabase checks confirmed 12 distinct finish definitions, one published `default` site settings row, and idempotent rerun with no duplicate rows.
 - Last forms backend source gate on 2026-05-27: `/api/enquiries` and `/api/sample-requests` Pages Functions added; Contact page main submit flow posts to those endpoints; `node scripts/check-forms-api.mjs` confirms valid/invalid/Turnstile-failure behavior with mocked Supabase/Turnstile calls; local gates `npm run build`, `npm run lint`, `npx tsc -b`, and `npm run agent:smoke` pass.
+- Last admin auth shell source gate on 2026-05-28: `/admin`, `/admin/login`, `/admin/unauthorized`, and protected module scaffolds added outside the public site chrome; admin auth uses `@supabase/supabase-js`, browser-safe `VITE_SUPABASE_ANON_KEY`/`VITE_SUPABASE_PUBLISHABLE_KEY`, Supabase Auth session checks, and active `admin_profiles` lookup. Local gates `npm run build`, `npm run lint`, `npx tsc -b`, and `npm run agent:smoke` pass. Playwright verified `/admin` and `/admin/login` show configuration-required state without a browser key, no WelcomePopup, no dashboard content, and no console errors beyond React DevTools info.
 - Last full runtime gate on 2026-05-26: `npm run build`, `npm run lint`, `npx tsc -b`, and `npm run agent:smoke` pass during the capabilities CTA and route update. Build keeps the previous healthy JavaScript chunk profile; Browserslist staleness notice remains.
 - Last docs/harness gate on 2026-05-26: `npm run agent:check` and `git diff --check` pass.
 - Recent title typography polish on 2026-05-25: global public page H1s now follow the Projects page title treatment, and Article detail no longer uses the old Space Grotesk uppercase H1.
@@ -62,10 +64,10 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 ## Active Risks
 - Cloudflare + Supabase is approved as the launch target, but runtime implementation has not started.
 - Clean URL routing is implemented repo-side for Cloudflare Pages, but the live Cloudflare project, preview deployment, custom domain, DNS cutover, and rollback still require account access.
-- Supabase foundation schema/RLS and baseline seeds are applied and verified. Form API source is implemented, but live row creation still needs server-side environment variables. Auth, Storage, admin CRUD, and transactional email verification are not implemented yet.
+- Supabase foundation schema/RLS and baseline seeds are applied and verified. Form API source is implemented, but live row creation still needs server-side environment variables. Admin auth shell source is implemented, but live auth/profile verification still needs browser-safe Supabase key configuration and the first admin email/profile. Storage, admin CRUD, and transactional email verification are not implemented yet.
 - Contact and Sample Request no longer use mailto for the main submit path in source code, but production persistence is not verified until the Cloudflare Pages Function environment has `SUPABASE_SERVICE_ROLE_KEY`.
 - Projects, Stone Library, Products, and Articles are still file-backed rather than customer-editable.
-- The admin CMS does not exist yet. `NOW-ADMIN-CMS-001` is an umbrella objective; the no-secret admin IA/access contract is complete in `docs/ADMIN_IA_ACCESS.md`. Supabase foundation/RLS and baseline seeds are applied, but admin auth should wait until first admin email and browser-safe anon-key handling are confirmed.
+- The admin shell exists, but the admin CMS is not customer-operational yet. `NOW-ADMIN-CMS-001` is an umbrella objective; the auth shell is config-gated and uses real Supabase Auth/RLS when browser-safe config exists. First-admin verification must wait for Jay to confirm the admin email and for browser-safe key configuration.
 - P0/P1 old WordPress media references in runtime data have been migrated to controlled local assets under `public/media/launch`; article covers and known detail images now have a local runtime stopgap under `public/media/launch/articles`.
 - Stone Library current-site shared-drive image mapping is complete for Golden Crust, Tan Brown, Honey Comb, Ivory Sand, and Tuscany. Secondary frames are wired for Juparana and Zen Grey. Blueocean remains on the controlled fallback and Harcourt remains placeholder/TBC because no matching current-site shared-drive source was found.
 - Raw article newsletter HTML remains source material and still needs Supabase structured-block migration, claim-safety review, mobile-safe templates, and full editorial cleanup before the article system is considered final.
@@ -85,7 +87,7 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 - Homepage video is now a controlled, optimized static launch asset. Live Cloudflare preview should still verify actual LCP/network behavior after deployment, and Cloudflare Stream/R2 remains optional for adaptive video management.
 
 ## Next Recommended Action
-Continue `NOW-FORMS-BACKEND-001` by configuring a server-side `SUPABASE_SERVICE_ROLE_KEY` for local/Cloudflare Pages Function verification, then run live API tests proving valid enquiries and sample requests create Supabase rows and invalid submissions create no rows. Optional `TURNSTILE_SECRET_KEY`, `RESEND_API_KEY`, `LEAD_NOTIFICATION_FROM`, `ENQUIRY_NOTIFICATION_TO`, and `SAMPLE_REQUEST_NOTIFICATION_TO` can be added after the database write path is verified. Keep article claim cleanup and broad legacy project migration paused until the user resumes them. `NEXT-MOTION-POLISH-001`, `NEXT-PAGE-TITLE-TYPOGRAPHY-001`, `NEXT-STONELIB-IMAGE-LABEL-READABILITY-001`, `NEXT-STONELIB-STATUS-PILL-CONSISTENCY-001`, and `NEXT-HOME-HERO-EDGE-REVEAL-001` are complete unless browser QA finds a regression. Start Cloudflare production deployment/DNS cutover only after Supabase-backed form behavior is verified or the user explicitly accepts a static-only launch.
+Continue `NOW-FORMS-BACKEND-001` by configuring a server-side `SUPABASE_SERVICE_ROLE_KEY` for local/Cloudflare Pages Function verification, then run live API tests proving valid enquiries and sample requests create Supabase rows and invalid submissions create no rows. In parallel, continue `NOW-ADMIN-AUTH-RLS-001` only after Jay confirms the first admin email and browser-safe Supabase key configuration (`VITE_SUPABASE_ANON_KEY` or `VITE_SUPABASE_PUBLISHABLE_KEY`) is available; then verify unauthenticated redirect, unprofiled unauthorized, and active admin dashboard access. Optional `TURNSTILE_SECRET_KEY`, `RESEND_API_KEY`, `LEAD_NOTIFICATION_FROM`, `ENQUIRY_NOTIFICATION_TO`, and `SAMPLE_REQUEST_NOTIFICATION_TO` can be added after the database write path is verified. Keep article claim cleanup and broad legacy project migration paused until the user resumes them. Start Cloudflare production deployment/DNS cutover only after Supabase-backed form behavior is verified or the user explicitly accepts a static-only launch.
 
 ## Guardrails
 - Use repo-root relative paths in committed docs.

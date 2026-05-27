@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lastUpdated": "2026-05-27",
+  "lastUpdated": "2026-05-28",
   "sourceOfTruth": "Machine-readable task queue for active and upcoming agent work. Human-readable roadmap lives in docs/NEXT_STEPS.md.",
   "tasks": [
     {
@@ -274,7 +274,8 @@
       "notes": [
         "This is the no-secret admin task to run before Supabase credentials are available. It turns the admin umbrella into concrete route, permission, and module contracts without pretending backend auth exists.",
         "2026-05-25: Completed in docs/ADMIN_IA_ACCESS.md with route map, access states, role behavior, module rollout sequence, field ownership model, dashboard health checks, and implementation boundaries.",
-        "2026-05-25: No runtime /admin route was added because Supabase Auth, admin profiles, RLS, Storage policies, form endpoints, and secrets are still unavailable."
+        "2026-05-25: No runtime /admin route was added during this docs-only task because Supabase Auth, admin profiles, RLS, Storage policies, form endpoints, and secrets were still unavailable.",
+        "2026-05-28: Runtime /admin shell source is now implemented under NOW-ADMIN-AUTH-RLS-001; this IA task remains the completed contract source."
       ],
       "acceptance": [
         "Admin route map is explicit, including unauthenticated, authenticated, unauthorized, loading, and draft/published states.",
@@ -289,34 +290,49 @@
     },
     {
       "id": "NOW-ADMIN-AUTH-RLS-001",
-      "status": "blocked",
+      "status": "now",
       "priority": 5.2,
       "summary": "Implement Supabase Auth, RLS, and the protected Urblo admin shell.",
       "files": [
         "docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md",
         "docs/SUPABASE_SCHEMA.md",
+        "docs/ADMIN_IA_ACCESS.md",
         "docs/ARCHITECTURE.md",
         "docs/HANDOFF.md",
         "docs/WORKLOG.md",
         "docs/agent/tasks.json",
-        "src/App.tsx"
+        ".env.example",
+        ".gitignore",
+        "package.json",
+        "package-lock.json",
+        "scripts/agent-smoke.sh",
+        "src/App.tsx",
+        "src/lib/supabaseClient.ts",
+        "src/lib/adminAuth.tsx",
+        "src/lib/adminAuthHooks.ts",
+        "src/lib/adminAuthState.ts",
+        "src/pages/admin"
       ],
       "notes": [
-        "2026-05-26: Supabase project access is now available through the connector, but this task remains blocked until the foundation schema/RLS is applied and the first admin email plus browser-safe anon key handling are confirmed.",
-        "Use docs/ADMIN_IA_ACCESS.md for the protected admin shell route map, access states, and role behavior once Supabase credentials are available."
+        "2026-05-26: Supabase project access is now available through the connector. The remaining live-auth blockers are first admin email/profile creation and browser-safe Supabase key configuration.",
+        "Use docs/ADMIN_IA_ACCESS.md for the protected admin shell route map, access states, and role behavior once Supabase credentials are available.",
+        "2026-05-28: Added /admin, /admin/login, /admin/unauthorized, and protected module scaffolds outside public site chrome. The shell uses @supabase/supabase-js with VITE_SUPABASE_ANON_KEY or VITE_SUPABASE_PUBLISHABLE_KEY, validates sessions with getUser(), and checks active admin_profiles before dashboard render.",
+        "2026-05-28: Browser QA without browser-safe Supabase key confirmed /admin and /admin/login show a configuration-required state, suppress the public WelcomePopup, and do not render dashboard content. Live unauthenticated/profiled/admin-path verification still requires browser-safe key configuration and Jay's first admin email/profile."
       ],
       "acceptance": [
         "Admin shell route is protected by Supabase Auth.",
         "Unauthenticated and unauthorized users cannot access admin content.",
         "RLS policies are enabled and verified for public-read and admin-write boundaries.",
-        "Admin session behavior is documented and covered by browser or Playwright checks."
+        "Admin session behavior is documented and covered by browser or Playwright checks.",
+        "Without browser-safe Supabase configuration, admin routes render a configuration-required state and no dashboard content."
       ],
       "verification": [
         "npm run build",
         "npm run lint",
         "npx tsc -b",
         "npm run agent:smoke",
-        "npm run agent:check"
+        "npm run agent:check",
+        "Playwright: /admin and /admin/login show configuration-required state when no browser key is configured"
       ]
     },
     {
@@ -337,7 +353,7 @@
         "src/pages/ArticlePage.tsx"
       ],
       "notes": [
-        "Blocked until the admin auth/RLS shell and Supabase content tables are available. Article editing must use structured blocks, not raw newsletter HTML.",
+        "Blocked until live admin auth/profile verification is complete and the CRUD flow can rely on protected Supabase content access. Article editing must use structured blocks, not raw newsletter HTML.",
         "Use docs/ADMIN_IA_ACCESS.md for module sequencing and field ownership when implementing Projects, Stone Library, Products, and Articles CRUD."
       ],
       "acceptance": [

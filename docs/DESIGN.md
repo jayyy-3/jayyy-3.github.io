@@ -1,6 +1,6 @@
 # Urblo Design Contract
 
-Last updated: 2026-05-26
+Last updated: 2026-05-28
 
 ## Purpose
 This document governs Urblo's visual and UX execution. It is the design contract for Codex work in this repository.
@@ -258,6 +258,12 @@ Avoid:
 - marketing-style hero sections
 - decorative cards inside cards
 - ambiguous save/publish controls
+
+Current source state:
+- `/admin` now uses a black/white operational shell with compact navigation and status-led content.
+- Admin routes intentionally sit outside the public site chrome and suppress the public WelcomePopup.
+- Without browser-safe Supabase configuration, admin routes show a configuration-required state instead of placeholder dashboards.
+- Current module routes are protected scaffolds only; do not style them as completed CRUD until the relevant Supabase and Storage workflows are implemented.
 - free-form page-builder UI where structured fields are safer
 - implying backend submission or authentication works before Supabase is implemented
 

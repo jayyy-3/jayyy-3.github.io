@@ -13,6 +13,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.106.2",
     "@tailwindcss/typography": "^0.5.16",
     "lodash.throttle": "^4.1.1",
     "react": "^19.1.0",

@@ -25,6 +25,7 @@ const ArticlesPage = lazy(() => import('./pages/ArticlesPage'));
 const ArticlePage = lazy(() => import('./pages/ArticlePage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
 const CapabilitiesPage = lazy(() => import('./pages/CapabilitiesPage'));
+const AdminApp = lazy(() => import('./pages/admin/AdminApp'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
 const SITE_URL = 'https://urblo.com.au';
@@ -125,6 +126,14 @@ function getRouteMeta(pathname: string): RouteMeta {
         };
     }
 
+    if (pathname.startsWith('/admin')) {
+        return {
+            title: 'Admin | Urblo',
+            description:
+                'Protected Urblo admin console for content, media, lead, and launch operations.',
+        };
+    }
+
     if (pathname.startsWith('/articles/')) {
         return {
             title: 'Article | Urblo',
@@ -213,6 +222,16 @@ function ScrollRestoration() {
     }, [location.pathname, location.search, navigationType]);
 
     return null;
+}
+
+function WelcomePopupGate() {
+    const location = useLocation();
+
+    if (location.pathname.startsWith('/admin')) {
+        return null;
+    }
+
+    return <WelcomePopup />;
 }
 
 function PageLoading({ headerOffset = false }: { headerOffset?: boolean }) {
@@ -350,6 +369,8 @@ function AnimatedRoutes() {
                     }
                 />
 
+                <Route path="/admin/*" element={loadPage(<AdminApp />)} />
+
                 <Route
                     path="*"
                     element={
@@ -365,13 +386,11 @@ function AnimatedRoutes() {
 
 export default function App() {
     return (
-        <>
-            <WelcomePopup />
-            <BrowserRouter>
-                <TitleUpdater />
-                <ScrollRestoration />
-                <AnimatedRoutes />
-            </BrowserRouter>
-        </>
+        <BrowserRouter>
+            <WelcomePopupGate />
+            <TitleUpdater />
+            <ScrollRestoration />
+            <AnimatedRoutes />
+        </BrowserRouter>
     );
 }

@@ -1,11 +1,11 @@
 # Urblo Supabase Schema Plan
 
-Last updated: 2026-05-27
+Last updated: 2026-05-28
 
 ## Purpose
 This document defines the first production Supabase data model for the Urblo website launch.
 
-It is both the schema design contract and the current implementation checkpoint record. The foundation migrations are applied, but runtime work must still implement baseline seeds, Cloudflare Pages Functions, Supabase Auth UI, Storage policies, and admin CRUD.
+It is both the schema design contract and the current implementation checkpoint record. The foundation migrations and baseline seeds are applied, Cloudflare Pages Function source exists for forms, and the `/admin` auth shell source is implemented. Runtime work must still verify live form writes, configure browser-safe Supabase Auth keys, create the first admin profile, implement Storage policies, and build admin CRUD.
 
 ## Current Supabase Project
 
@@ -87,9 +87,11 @@ Scope:
 - Read-only dashboard shell with content/lead health placeholders.
 
 Acceptance:
-- Unauthenticated users cannot view admin content.
-- Authenticated users without an active admin profile see unauthorized state.
-- Active admin users can reach the dashboard.
+- In progress on 2026-05-28. Source implements `/admin`, `/admin/login`, `/admin/unauthorized`, protected module scaffolds, Supabase Auth email/password login, session bootstrap, `admin_profiles` role lookup, sign-out, and dashboard queries gated behind the active profile check.
+- Browser QA without `VITE_SUPABASE_ANON_KEY`/`VITE_SUPABASE_PUBLISHABLE_KEY` confirms `/admin` and `/admin/login` show a configuration-required state and do not render dashboard content.
+- Unauthenticated users cannot view admin content once browser Supabase key configuration is present.
+- Authenticated users without an active admin profile see unauthorized state once live auth can be exercised.
+- Active admin users can reach the dashboard only after Jay confirms the first admin email and an active `admin_profiles` row exists.
 - No service-role key is shipped to browser code.
 
 ### Phase 5 - Content Migration and CRUD

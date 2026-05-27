@@ -1,6 +1,58 @@
 # WORKLOG - Urblo Execution Log
 
-Last updated: 2026-05-27
+Last updated: 2026-05-28
+
+## Entry - 2026-05-28 (Admin Auth Shell Source)
+
+### Scope
+- Added the first `/admin` runtime shell outside the public site chrome.
+- Added browser-side Supabase client configuration using `VITE_SUPABASE_ANON_KEY` or `VITE_SUPABASE_PUBLISHABLE_KEY`, with no service-role key in browser code.
+- Added real Supabase Auth email/password login flow, session validation through `getUser()`, active `admin_profiles` lookup, sign-out, unauthorized state, config-required state, and protected dashboard/module scaffolds.
+- Suppressed the public WelcomePopup on admin routes.
+- Added `.env.example` for public/server environment variable names and expanded smoke route coverage for `/admin`, `/admin/login`, and `/admin/unauthorized`.
+
+### Changed Files
+- `.env.example`
+- `.gitignore`
+- `package.json`
+- `package-lock.json`
+- `scripts/agent-smoke.sh`
+- `src/App.tsx`
+- `src/vite-env.d.ts`
+- `src/lib/supabaseClient.ts`
+- `src/lib/adminAuth.tsx`
+- `src/lib/adminAuthHooks.ts`
+- `src/lib/adminAuthState.ts`
+- `src/pages/admin`
+- `AGENTS.md`
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/CLOUDFLARE_DEPLOYMENT.md`
+- `docs/DESIGN.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run build`: pass. Browserslist staleness notice remains; admin chunk output is about 240 kB before gzip.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass, including `/admin`, `/admin/login`, `/admin/unauthorized`, public route shells, CTA contracts, and Forms API checks.
+- Playwright browser QA: pass for `/admin` and `/admin/login` with no browser-safe Supabase key configured. Both routes show the configuration-required state, do not render dashboard content, suppress the public WelcomePopup, and report no console errors beyond React DevTools info.
+- `npm audit --omit=dev`: reports existing production dependency advisories in React Router, Swiper, glob/minimatch/picomatch, PostCSS, yaml, and brace-expansion. This checkpoint did not widen into dependency upgrades.
+
+### Risks and Gaps
+- Live admin login is not verified because browser-safe Supabase key configuration and Jay's first admin email/profile are still required.
+- Active-admin dashboard queries are implemented but unproven against a real authenticated admin session.
+- Module routes are protected scaffolds only; content CRUD, media upload, lead management, settings, and audit workflows are still pending.
+- Live form persistence still requires server-side `SUPABASE_SERVICE_ROLE_KEY` verification.
+
+### Next Handoff
+- `NOW-FORMS-BACKEND-001`
+- `NOW-ADMIN-AUTH-RLS-001`
+- `NOW-ADMIN-MEDIA-LEADS-001`
 
 ## Entry - 2026-05-22 (Old-Site Favicon Restoration)
 

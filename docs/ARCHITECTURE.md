@@ -1,12 +1,12 @@
 # Urblo Web - Architecture and Contracts
 
-Last updated: 2026-05-27
+Last updated: 2026-05-28
 
 ## System Boundary
 - Current implementation: frontend-only React application shipped as static assets.
 - Current implementation: Cloudflare Pages Function source now exists for `/api/enquiries` and `/api/sample-requests`.
 - Current implementation: the public Contact page submits enquiries and sample requests to those API routes, but live Supabase row creation still requires server-side Cloudflare environment variables.
-- Current Supabase project: `Urblo` (`npkidywzwddbnfrnxlmo`, `ap-southeast-2`) has the foundation schema/RLS migrations and baseline seeds applied. Auth UI, Storage policies, and admin CRUD are not implemented yet.
+- Current Supabase project: `Urblo` (`npkidywzwddbnfrnxlmo`, `ap-southeast-2`) has the foundation schema/RLS migrations and baseline seeds applied. The `/admin` auth shell source is implemented and config-gated, but live admin login still requires browser-safe Supabase key configuration and a confirmed first admin profile. Storage policies and admin CRUD are not implemented yet.
 - Launch target: Cloudflare Pages static frontend, Cloudflare Pages Functions API endpoints, Supabase Postgres/Auth/Storage, and an Urblo-owned admin interface for content operations.
 - Planning source: `docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md`.
 - Supabase schema design source: `docs/SUPABASE_SCHEMA.md`.
@@ -59,6 +59,7 @@ Last updated: 2026-05-27
   - Cloudflare environment variables and secrets must not be committed.
   - Function routing must be restricted so only `/api/*` invokes Pages Functions.
   - Current Pages Function source lives under `functions/api/enquiries.js` and `functions/api/sample-requests.js`.
+  - Browser-side admin Auth requires `VITE_SUPABASE_ANON_KEY` or `VITE_SUPABASE_PUBLISHABLE_KEY`; `VITE_SUPABASE_URL` may be configured, but defaults to the Urblo project URL if omitted.
   - Form Functions require `SUPABASE_SERVICE_ROLE_KEY` server-side. `SUPABASE_URL` may be configured, but defaults to the Urblo project URL if omitted.
   - Optional server-side form secrets: `TURNSTILE_SECRET_KEY` or `CF_TURNSTILE_SECRET_KEY`, `RESEND_API_KEY`, `LEAD_NOTIFICATION_FROM`, `ENQUIRY_NOTIFICATION_TO`, and `SAMPLE_REQUEST_NOTIFICATION_TO`.
 - Vite base config: `vite.config.ts`
@@ -112,6 +113,7 @@ Routing uses clean paths through `BrowserRouter`. Cloudflare Pages direct refres
 | `/contact` | `ContactPage` | Contact surface with direct contact channels and a local mailto project-brief composer that requires project notes plus email or phone before opening the draft. |
 | `/articles` | `ArticlesPage` | Article list page. |
 | `/articles/:slug` | `ArticlePage` | Article detail page. Uses page-owned article hero via `DefaultLayout showBanner={false}`. |
+| `/admin/*` | `AdminApp` | Protected admin shell outside public site chrome. Config-gated until browser-safe Supabase key is set; uses Supabase Auth plus `admin_profiles` once configured. |
 | `*` | `NotFoundPage` | Branded not-found state wrapped by `DefaultLayout showBanner={false}`. |
 
 Route state contract:
@@ -303,7 +305,9 @@ Route state contract:
   - Admin mutations should be attributable through audit fields or audit-event records.
 - Admin IA/access:
   - `/admin` route, login, unauthorized, loading, module, settings, and audit states are defined in `docs/ADMIN_IA_ACCESS.md`.
-  - The admin CMS must not ship fake production auth before Supabase Auth, `admin_profiles`, RLS, Storage policies, form endpoints, and secrets are available.
+  - Current `/admin` source implements real Supabase Auth wiring, session/profile loading, login, unauthorized, dashboard, and protected module scaffolds.
+  - The admin dashboard does not render private module content unless Supabase Auth returns a session and RLS allows the matching active `admin_profiles` row.
+  - The admin CMS must not ship fake production auth; live verification still requires browser-safe Supabase key configuration and a confirmed first admin profile.
 - Access control:
   - Public reads expose only published content.
   - Admin writes require Supabase Auth.
@@ -346,6 +350,7 @@ Route state contract:
 - Runtime fetches:
   - Static JSON/HTML from `public/articles`
   - Contact form POST requests to `/api/enquiries` and `/api/sample-requests`
+  - Admin routes use `@supabase/supabase-js` only when `VITE_SUPABASE_ANON_KEY` or `VITE_SUPABASE_PUBLISHABLE_KEY` is configured.
 - Contact side effects:
   - Contact page submit sends validated form payloads to Cloudflare Pages Functions.
   - Direct email and phone links remain available as manual contact channels.
@@ -366,7 +371,7 @@ Route state contract:
   - `Space Grotesk` local WOFF2
 - Homepage runtime no longer depends on remote WordPress font CSS/TTF/WOFF assets.
 
-## Last Runtime Quality Gate Status (Measured 2026-05-27)
+## Last Runtime Quality Gate Status (Measured 2026-05-28)
 - `npm run build`: pass
 - `npm run lint`: pass
 - `npx tsc -b`: pass
@@ -374,11 +379,12 @@ Route state contract:
 
 ## Known Architecture Risks
 - Cloudflare + Supabase is the approved launch target, and Supabase foundation schema/RLS plus baseline seeds are applied. Form endpoint source is implemented, but live row creation still needs server-side environment variables and Cloudflare endpoint verification.
-- Supabase still needs Auth, Storage policies, and admin CRUD before it can replace static/file-backed content behavior.
+- Supabase Auth shell source now exists, but live admin access still needs browser-safe key configuration, first admin email/profile creation, and authenticated browser verification.
+- Supabase still needs Storage policies and admin CRUD before it can replace static/file-backed content behavior.
 - Cloudflare Pages repo-side clean URL configuration is in place, but dashboard project creation, preview validation, custom domain, DNS cutover, and rollback still require account access.
 - Sample Request now routes through the Contact page sample-request mode and Pages Function source, but production persistence has not been verified without the server-side service-role environment variable.
 - Projects, Stone Library, Products, and Articles remain file-backed until Supabase migration work is implemented.
-- Admin CMS does not exist yet; customers cannot CRUD content without code changes.
+- Admin shell exists, but customer CRUD content management is not implemented yet.
 - Project and Stone Library content migration needs strict separation between confirmed facts and inferred MVP copy.
 - Raw article newsletter HTML still contains external source URLs as migration source material, but runtime article rendering now rewrites known email proxy image URLs and campaign links before render.
 - Long-term article quality still requires Supabase structured blocks, approved article image records, editorial review, and claim-safe copy approval.
