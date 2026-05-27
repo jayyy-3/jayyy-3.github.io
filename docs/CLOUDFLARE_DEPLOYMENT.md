@@ -1,6 +1,6 @@
 # Urblo Cloudflare Pages Deployment Runbook
 
-Last updated: 2026-05-22
+Last updated: 2026-05-27
 
 ## Purpose
 This runbook captures the repo-side Cloudflare Pages deployment contract and the manual account steps required before production cutover.
@@ -24,6 +24,9 @@ It does not prove that the Cloudflare Pages project already exists. Account-leve
 - `public/_routes.json` limits future Pages Functions invocation to:
   - `/api/*`
 - Static site requests should remain static and should not invoke Functions after API endpoints are added.
+- Current Pages Function routes:
+  - `/api/enquiries`
+  - `/api/sample-requests`
 
 ### Headers
 `public/_headers` adds conservative launch-safe headers:
@@ -45,19 +48,24 @@ No Content Security Policy is added yet because current content still depends on
 6. Save and run the first build.
 
 ### 2. Configure Environment Variables
-Initial production variables will be needed when Supabase and forms are implemented:
+Initial production variables needed for forms and later admin work:
 - `VITE_SUPABASE_URL`
 - `VITE_SUPABASE_ANON_KEY`
+- `SUPABASE_URL`
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `TURNSTILE_SECRET_KEY`
 - `RESEND_API_KEY`
+- `LEAD_NOTIFICATION_FROM`
 - `ENQUIRY_NOTIFICATION_TO`
 - `SAMPLE_REQUEST_NOTIFICATION_TO`
 
 Rules:
 - Public `VITE_` values may be exposed to browser code.
+- `SUPABASE_URL` is server-side for Pages Functions and may match `VITE_SUPABASE_URL`.
 - Secret values must exist only in Cloudflare Pages project settings.
 - Service-role and email API keys must never be committed or shipped to browser code.
+- `TURNSTILE_SECRET_KEY` may also be named `CF_TURNSTILE_SECRET_KEY`.
+- If Resend variables are not configured, form rows are stored with `notification_status = 'not_required'`.
 
 ### 3. Validate Preview Deployment
 Before custom domain cutover, test the generated `*.pages.dev` URL:
@@ -78,10 +86,11 @@ Each route should:
 - avoid console errors related to missing base paths.
 
 ### 4. Validate Function Routing After API Work Exists
-When `/functions/api` endpoints are added:
+Current `/functions/api` endpoints:
 - `/api/enquiries` and `/api/sample-requests` should invoke Pages Functions.
 - Static routes like `/projects` and `/assets/...` should not invoke Functions.
 - Cloudflare analytics should show static traffic and API traffic separately.
+- Valid form tests require `SUPABASE_SERVICE_ROLE_KEY` in the Pages Function environment.
 
 ### 5. Custom Domain Cutover
 Before switching production DNS:

@@ -71,11 +71,11 @@ Scope:
 - Replace public mailto-only submit flows with clear success/failure states.
 
 Acceptance:
-- Valid enquiry and sample request submissions create Supabase rows.
-- Invalid submissions return a clear validation error and create no rows.
-- Turnstile failure fails closed when Turnstile is enabled.
+- In progress on 2026-05-27. Pages Function source and Contact UI wiring are implemented for `/api/enquiries` and `/api/sample-requests`.
+- Mock API checks verify valid enquiry payloads target `enquiries`, valid sample request payloads target `sample_requests` plus `sample_request_items`, invalid payloads return validation errors before Supabase calls, and configured Turnstile failures fail closed before Supabase calls.
+- Live Supabase row creation through the HTTP endpoints is still pending server-side `SUPABASE_SERVICE_ROLE_KEY` configuration in the Cloudflare/Pages Function environment.
 - Visitor UI no longer depends on opening a local email client for the main submit action.
-- Admin/lead-management follow-up can read submitted records through protected access.
+- Admin/lead-management follow-up can read submitted records only after admin auth and lead inbox work are implemented.
 
 ### Phase 4 - Admin Auth Shell
 Outcome: `/admin` exists as a protected operating console, not a public placeholder.

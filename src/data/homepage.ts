@@ -74,13 +74,11 @@ export const homepageNavLinks: HomepageNavLink[] = [
   { label: 'Our Story', to: '/our-story' },
   {
     label: 'Sample Request',
-    href: 'mailto:info@urblo.com.au?subject=Sample%20Request',
-    external: true,
+    to: '/contact?intent=sample-request',
   },
   {
     label: 'Contact Us',
-    href: 'mailto:info@urblo.com.au?subject=Contact%20Us',
-    external: true,
+    to: '/contact',
   },
 ];
 

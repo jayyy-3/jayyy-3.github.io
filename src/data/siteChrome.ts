@@ -34,8 +34,7 @@ export const siteNavLinks: SiteNavLink[] = [
 export const siteFooterLinks: SiteNavLink[] = [
   {
     label: 'Sample Request',
-    href: 'mailto:info@urblo.com.au?subject=Sample%20Request',
-    external: true,
+    to: '/contact?intent=sample-request',
   },
   {
     label: 'Contact Us',

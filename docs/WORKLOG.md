@@ -2272,6 +2272,53 @@ Last updated: 2026-05-27
 - `NOW-ADMIN-AUTH-RLS-001`
 - `NOW-ADMIN-MEDIA-LEADS-001`
 
+## Entry - 2026-05-27 (Forms Backend Source and Contact Submit Flow)
+
+### Scope
+- Added Cloudflare Pages Function source for `/api/enquiries` and `/api/sample-requests`.
+- Added shared server-side validation, Turnstile fail-closed behavior when configured, Supabase REST writes using server-side credentials, and staged Resend notification handling.
+- Reworked the Contact page so the main enquiry flow submits to `/api/enquiries` instead of opening a local email draft.
+- Added Contact page Sample Request mode at `/contact?intent=sample-request`, with sample preference, finish, quantity, project name, shipping address, and notes fields that submit to `/api/sample-requests`.
+- Updated footer/sample request CTA contracts to route to the Contact sample-request mode.
+- Added `scripts/check-forms-api.mjs` and wired it into `npm run agent:smoke` so invalid submissions, valid Supabase write payloads, sample request item payloads, and Turnstile failure behavior are checked without secrets.
+
+### Changed Files
+- `functions/_lib/forms.js`
+- `functions/api/enquiries.js`
+- `functions/api/sample-requests.js`
+- `scripts/check-forms-api.mjs`
+- `scripts/agent-smoke.sh`
+- `src/pages/ContactPage.tsx`
+- `src/data/siteChrome.ts`
+- `src/data/homepage.ts`
+- `docs/ARCHITECTURE.md`
+- `docs/CLOUDFLARE_DEPLOYMENT.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `node scripts/check-forms-api.mjs`: pass. Valid enquiry targets `enquiries`; invalid enquiry returns validation failure before Supabase calls; valid sample request targets `sample_requests` and `sample_request_items`; configured Turnstile failure returns 403 before Supabase calls.
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass, including the Forms API checks and updated Sample Request CTA route contracts.
+- Playwright screenshot check: partial pass. A 390px mobile screenshot of `/contact` rendered without visible first-viewport layout breakage. Follow-up screenshots for `/contact?intent=sample-request` were blocked by local Playwright browser launch failures after the first capture.
+
+### Risks and Gaps
+- Live API row creation through `/api/enquiries` and `/api/sample-requests` has not been run because no local or Cloudflare server-side `SUPABASE_SERVICE_ROLE_KEY` is configured in the environment.
+- Turnstile and Resend notification code is staged but not production-verified because those secrets are not configured.
+- `NOW-FORMS-BACKEND-001` should stay open until live endpoint tests prove valid submissions create Supabase rows and invalid submissions create no rows.
+- Admin lead inbox and status updates are still pending under the admin auth/media/leads tasks.
+
+### Next Handoff
+- `NOW-FORMS-BACKEND-001`
+- `NOW-FORMS-SUPABASE-001`
+- `NOW-ADMIN-AUTH-RLS-001`
+
 ## Entry Template (Use for Every Future Session)
 
 ### Date

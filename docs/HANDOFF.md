@@ -9,7 +9,8 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 - Projects, Stone Library, Products, Articles, media records, and lead records should become customer-maintainable through `/admin`.
 - The current runtime remains static/file-backed until implementation tasks are completed.
 - The long-form plan and cost baseline live in `docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md`.
-- Supabase project access is available through the connector for project `Urblo` (`npkidywzwddbnfrnxlmo`, `ap-southeast-2`); foundation and baseline seed migrations are applied, and the next checkpoint is forms backend.
+- Supabase project access is available through the connector for project `Urblo` (`npkidywzwddbnfrnxlmo`, `ap-southeast-2`); foundation and baseline seed migrations are applied.
+- Forms backend source is implemented for `/api/enquiries` and `/api/sample-requests`, with live Supabase insert verification pending server-side `SUPABASE_SERVICE_ROLE_KEY` configuration.
 
 ## Current Branch State
 - Branch: `main`
@@ -29,6 +30,7 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 ## Latest Verification Snapshot
 - Last Supabase foundation gate on 2026-05-27: `foundation_schema`, `foundation_hardening`, and `anon_read_only` migrations applied to project `npkidywzwddbnfrnxlmo`; Supabase checks confirmed three migrations listed, 24 expected tables, 24/24 RLS enabled, no anonymous private lead/admin privileges, anonymous public content grants are read-only, no missing public-schema foreign-key indexes, and `enquiries_new_queue_idx` / `sample_requests_new_queue_idx` exist. Local gates `npm run build`, `npm run lint`, `npx tsc -b`, `npm run agent:check`, `git diff --check`, and `npm run agent:smoke` pass.
 - Last Supabase baseline seed gate on 2026-05-27: `baseline_seed` migration applied to project `npkidywzwddbnfrnxlmo`; Supabase checks confirmed 12 distinct finish definitions, one published `default` site settings row, and idempotent rerun with no duplicate rows.
+- Last forms backend source gate on 2026-05-27: `/api/enquiries` and `/api/sample-requests` Pages Functions added; Contact page main submit flow posts to those endpoints; `node scripts/check-forms-api.mjs` confirms valid/invalid/Turnstile-failure behavior with mocked Supabase/Turnstile calls; local gates `npm run build`, `npm run lint`, `npx tsc -b`, and `npm run agent:smoke` pass.
 - Last full runtime gate on 2026-05-26: `npm run build`, `npm run lint`, `npx tsc -b`, and `npm run agent:smoke` pass during the capabilities CTA and route update. Build keeps the previous healthy JavaScript chunk profile; Browserslist staleness notice remains.
 - Last docs/harness gate on 2026-05-26: `npm run agent:check` and `git diff --check` pass.
 - Recent title typography polish on 2026-05-25: global public page H1s now follow the Projects page title treatment, and Article detail no longer uses the old Space Grotesk uppercase H1.
@@ -42,6 +44,7 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 - Recent Supabase planning update on 2026-05-26: the Supabase line is now split into executable tasks: `NOW-SUPABASE-FOUNDATION-001`, `NOW-SUPABASE-SEED-BASELINE-001`, and `NOW-FORMS-BACKEND-001`, with acceptance checks based on Supabase migrations, table listings, RLS policy inspection, and form row creation tests.
 - Recent Supabase foundation update on 2026-05-27: `foundation_schema`, `foundation_hardening`, and `anon_read_only` migrations are applied to project `npkidywzwddbnfrnxlmo`; verification confirmed 24 expected tables, RLS enabled on all 24, private lead/admin tables inaccessible to anon, read-only anon grants for public content, and no missing public-schema foreign-key indexes.
 - Recent Supabase baseline seed update on 2026-05-27: `baseline_seed` migration is applied and verified with the current Stone Library finish dictionary plus one published default Urblo site settings row.
+- Recent forms backend source update on 2026-05-27: Contact form now submits enquiries to `/api/enquiries`; Sample Request mode is available at `/contact?intent=sample-request` and submits to `/api/sample-requests`; footer/sample CTAs now route to the Contact sample-request mode instead of mailto.
 - Recent browser QA on 2026-05-25: homepage hero is full viewport at 1440x900 and 390x844; mobile does not select the MP4 source; desktop selects the MP4 with `preload="none"`.
 - Recent video QA on 2026-05-25: `public/media/launch/home/urblo-hero.mp4` was re-encoded from about 16MB to about 3MB while preserving 1280x720 playback; desktop video reached `readyState=4`, and mobile still selected no MP4 source.
 - Recent browser QA on 2026-05-25: article detail at 320px, contact at 390px, Products, Our Story, missing project, unknown route, Product detail, and Stone Library detail all reported zero horizontal overflow and no fresh console errors after `react-helmet` removal.
@@ -59,9 +62,8 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 ## Active Risks
 - Cloudflare + Supabase is approved as the launch target, but runtime implementation has not started.
 - Clean URL routing is implemented repo-side for Cloudflare Pages, but the live Cloudflare project, preview deployment, custom domain, DNS cutover, and rollback still require account access.
-- Supabase foundation schema/RLS and baseline seeds are applied and verified. Auth, Storage, admin CRUD, form APIs, and transactional email are not implemented yet.
-- Contact and Sample Request remain mailto/local-only in current runtime.
-- Contact now validates the local mailto composer enough to avoid empty drafts, but it still does not persist leads until Supabase forms are implemented.
+- Supabase foundation schema/RLS and baseline seeds are applied and verified. Form API source is implemented, but live row creation still needs server-side environment variables. Auth, Storage, admin CRUD, and transactional email verification are not implemented yet.
+- Contact and Sample Request no longer use mailto for the main submit path in source code, but production persistence is not verified until the Cloudflare Pages Function environment has `SUPABASE_SERVICE_ROLE_KEY`.
 - Projects, Stone Library, Products, and Articles are still file-backed rather than customer-editable.
 - The admin CMS does not exist yet. `NOW-ADMIN-CMS-001` is an umbrella objective; the no-secret admin IA/access contract is complete in `docs/ADMIN_IA_ACCESS.md`. Supabase foundation/RLS and baseline seeds are applied, but admin auth should wait until first admin email and browser-safe anon-key handling are confirmed.
 - P0/P1 old WordPress media references in runtime data have been migrated to controlled local assets under `public/media/launch`; article covers and known detail images now have a local runtime stopgap under `public/media/launch/articles`.
@@ -83,7 +85,7 @@ The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin C
 - Homepage video is now a controlled, optimized static launch asset. Live Cloudflare preview should still verify actual LCP/network behavior after deployment, and Cloudflare Stream/R2 remains optional for adaptive video management.
 
 ## Next Recommended Action
-Run `NOW-FORMS-BACKEND-001` next: implement Cloudflare Pages Functions for Contact and Sample Request writes into Supabase, using server-side environment variables and no browser-exposed service-role key. Keep article claim cleanup and broad legacy project migration paused until the user resumes them. `NEXT-MOTION-POLISH-001`, `NEXT-PAGE-TITLE-TYPOGRAPHY-001`, `NEXT-STONELIB-IMAGE-LABEL-READABILITY-001`, `NEXT-STONELIB-STATUS-PILL-CONSISTENCY-001`, and `NEXT-HOME-HERO-EDGE-REVEAL-001` are complete unless browser QA finds a regression. Start Cloudflare production deployment/DNS cutover only after Supabase-backed form behavior is verified or the user explicitly accepts a static-only launch.
+Continue `NOW-FORMS-BACKEND-001` by configuring a server-side `SUPABASE_SERVICE_ROLE_KEY` for local/Cloudflare Pages Function verification, then run live API tests proving valid enquiries and sample requests create Supabase rows and invalid submissions create no rows. Optional `TURNSTILE_SECRET_KEY`, `RESEND_API_KEY`, `LEAD_NOTIFICATION_FROM`, `ENQUIRY_NOTIFICATION_TO`, and `SAMPLE_REQUEST_NOTIFICATION_TO` can be added after the database write path is verified. Keep article claim cleanup and broad legacy project migration paused until the user resumes them. `NEXT-MOTION-POLISH-001`, `NEXT-PAGE-TITLE-TYPOGRAPHY-001`, `NEXT-STONELIB-IMAGE-LABEL-READABILITY-001`, `NEXT-STONELIB-STATUS-PILL-CONSISTENCY-001`, and `NEXT-HOME-HERO-EDGE-REVEAL-001` are complete unless browser QA finds a regression. Start Cloudflare production deployment/DNS cutover only after Supabase-backed form behavior is verified or the user explicitly accepts a static-only launch.
 
 ## Guardrails
 - Use repo-root relative paths in committed docs.

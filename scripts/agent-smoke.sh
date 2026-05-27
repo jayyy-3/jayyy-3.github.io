@@ -78,21 +78,20 @@ const ctaContracts = [
     target: '/contact',
   },
   {
-    name: 'Footer Sample Request fallback',
-    target: 'mailto:info@urblo.com.au?subject=Sample%20Request',
+    name: 'Footer Sample Request navigation',
+    target: '/contact?intent=sample-request',
   },
   {
     name: 'Homepage Capabilities navigation',
     target: '/capabilities',
   },
   {
-    name: 'Homepage Sample Request fallback',
-    target:
-      'mailto:info@urblo.com.au?subject=Sample%20Request&body=Hi%20Urblo%2C%20I%20would%20like%20to%20request%20stone%20samples.',
+    name: 'Homepage Sample Request navigation',
+    target: '/contact?intent=sample-request',
   },
   {
-    name: 'Homepage Contact fallback',
-    target: 'mailto:info@urblo.com.au?subject=Contact%20Us',
+    name: 'Homepage Contact navigation',
+    target: '/contact',
   },
   {
     name: 'Moon Gate primary CTA',
@@ -211,3 +210,5 @@ for (const contract of ctaContracts) {
 
 console.log('Agent smoke passed.')
 NODE
+
+node scripts/check-forms-api.mjs

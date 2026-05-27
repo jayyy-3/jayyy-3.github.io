@@ -224,9 +224,9 @@ Use portrait/team content only when it strengthens credibility. Keep team UI sta
 ### Contact
 Contact should be direct and low-friction.
 
-Because the current app has no backend, avoid fake submission expectations. A local project-brief composer that opens a prefilled email draft is acceptable when clearly supported by direct email, phone, and address pathways.
+The main Contact form now targets the Pages Function form endpoints rather than a local email draft. Keep the experience operational and honest: success/error states should be visible inline, direct email and phone should remain available, and production copy must not imply delivery of a sample until the submission is stored successfully.
 
-Until Supabase forms are implemented, the mailto composer should block empty drafts and ask for useful project notes plus at least one contact method.
+Until live Supabase write verification is complete in the Cloudflare environment, keep fallback direct contact channels visible and document the environment gap in Harness docs.
 
 The page should help users choose a next step:
 - request samples

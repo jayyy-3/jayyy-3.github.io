@@ -4,9 +4,9 @@ Last updated: 2026-05-27
 
 ## System Boundary
 - Current implementation: frontend-only React application shipped as static assets.
-- Current implementation: no runtime backend service exists in this repository yet.
-- Current implementation: no production HTTP API contract has been implemented yet.
-- Current Supabase project: `Urblo` (`npkidywzwddbnfrnxlmo`, `ap-southeast-2`) has the foundation schema/RLS migrations and baseline seeds applied. Form APIs, Auth UI, Storage policies, and admin CRUD are not implemented yet.
+- Current implementation: Cloudflare Pages Function source now exists for `/api/enquiries` and `/api/sample-requests`.
+- Current implementation: the public Contact page submits enquiries and sample requests to those API routes, but live Supabase row creation still requires server-side Cloudflare environment variables.
+- Current Supabase project: `Urblo` (`npkidywzwddbnfrnxlmo`, `ap-southeast-2`) has the foundation schema/RLS migrations and baseline seeds applied. Auth UI, Storage policies, and admin CRUD are not implemented yet.
 - Launch target: Cloudflare Pages static frontend, Cloudflare Pages Functions API endpoints, Supabase Postgres/Auth/Storage, and an Urblo-owned admin interface for content operations.
 - Planning source: `docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md`.
 - Supabase schema design source: `docs/SUPABASE_SCHEMA.md`.
@@ -58,6 +58,9 @@ Last updated: 2026-05-27
   - Preview deployments are required for branch/PR review.
   - Cloudflare environment variables and secrets must not be committed.
   - Function routing must be restricted so only `/api/*` invokes Pages Functions.
+  - Current Pages Function source lives under `functions/api/enquiries.js` and `functions/api/sample-requests.js`.
+  - Form Functions require `SUPABASE_SERVICE_ROLE_KEY` server-side. `SUPABASE_URL` may be configured, but defaults to the Urblo project URL if omitted.
+  - Optional server-side form secrets: `TURNSTILE_SECRET_KEY` or `CF_TURNSTILE_SECRET_KEY`, `RESEND_API_KEY`, `LEAD_NOTIFICATION_FROM`, `ENQUIRY_NOTIFICATION_TO`, and `SAMPLE_REQUEST_NOTIFICATION_TO`.
 - Vite base config: `vite.config.ts`
   - `base: '/'` for root-domain Cloudflare Pages clean URL routing.
 - Cloudflare Pages static config:
@@ -132,11 +135,11 @@ Route state contract:
 ### Implemented navigation surfaces
 - Shared header links: `/projects`, `/stone-library`, `/our-story`, `/articles`, `/products`, `/contact`
 - Homepage proof-section CTA: `/capabilities`
-- Shared footer links: `mailto:info@urblo.com.au?subject=Sample%20Request`, `/contact`
+- Shared footer links: `/contact?intent=sample-request`, `/contact`
 - Shared footer social links: Instagram and LinkedIn use external links with `target="_blank"` plus `rel="noopener noreferrer"`; Facebook and YouTube are hidden until real destinations are available.
 
 ### Gaps
-- Current implementation gap: Sample Request is still a `mailto:` fallback.
+- Current implementation gap: live Contact and Sample Request persistence still requires server-side Cloudflare environment variables and production endpoint verification.
 - Launch target: Contact and Sample Request submit through Cloudflare Pages Functions into Supabase, with Turnstile protection, email notification, and admin-visible lead records.
 
 ## Metadata Contract
@@ -310,14 +313,17 @@ Route state contract:
 - Route: `/contact`
 - Page module: `src/pages/ContactPage.tsx`
 - Runtime behavior:
-  - No backend submission is attempted.
+  - The main form submits through `/api/enquiries` by default.
+  - Selecting `Sample request` or visiting `/contact?intent=sample-request` submits through `/api/sample-requests`.
+  - Sample Request mode shows sample preference, finish preference, quantity, project name, shipping address, and notes fields.
+  - Visitor-facing success/failure states are rendered inline and no longer depend on opening a local email client.
   - Direct contact channels use `mailto:` and `tel:` links.
-  - The project-brief form is local React state only; submit builds a prefilled `mailto:info@urblo.com.au` draft through `window.location.href`.
   - The page links back to `/stone-library` as a material discovery path.
-- Launch target behavior:
-  - Contact and Sample Request submit to server-side endpoints.
-  - Server-side endpoints validate payloads, verify Turnstile, write Supabase records, and send transactional email.
-  - Visitor-facing success/failure states must not depend on opening a local email client.
+- Server API behavior:
+  - Cloudflare Pages Functions validate payloads before Supabase writes.
+  - Turnstile fails closed when the Turnstile secret is configured; when absent, `turnstile_success` is stored as `null`.
+  - Email notification is staged through optional Resend environment variables; when absent, rows use `notification_status = 'not_required'`.
+  - No Supabase service-role key is referenced by browser code.
 
 ## State Contract (`src/store/productStore.ts`)
 - Store keys:
@@ -339,9 +345,10 @@ Route state contract:
   - `ArticlePage` renders sanitized article HTML
 - Runtime fetches:
   - Static JSON/HTML from `public/articles`
-  - No authenticated or server API fetches
+  - Contact form POST requests to `/api/enquiries` and `/api/sample-requests`
 - Contact side effects:
-  - Contact page submit opens a local email draft via `mailto:`; no form payload is stored in this application.
+  - Contact page submit sends validated form payloads to Cloudflare Pages Functions.
+  - Direct email and phone links remain available as manual contact channels.
 - Launch target side effects:
   - Public read paths fetch published Supabase content either at build time or through a controlled API contract.
   - Admin paths require authenticated Supabase sessions.
@@ -359,17 +366,17 @@ Route state contract:
   - `Space Grotesk` local WOFF2
 - Homepage runtime no longer depends on remote WordPress font CSS/TTF/WOFF assets.
 
-## Last Runtime Quality Gate Status (Measured 2026-05-26)
+## Last Runtime Quality Gate Status (Measured 2026-05-27)
 - `npm run build`: pass
 - `npm run lint`: pass
 - `npx tsc -b`: pass
 - `npm run agent:smoke`: pass
 
 ## Known Architecture Risks
-- Cloudflare + Supabase is the approved launch target, and Supabase foundation schema/RLS plus baseline seeds are applied, but runtime integration has not started in app code.
-- Supabase still needs form endpoints, Auth, Storage policies, and admin CRUD before it can replace static/file-backed behavior.
+- Cloudflare + Supabase is the approved launch target, and Supabase foundation schema/RLS plus baseline seeds are applied. Form endpoint source is implemented, but live row creation still needs server-side environment variables and Cloudflare endpoint verification.
+- Supabase still needs Auth, Storage policies, and admin CRUD before it can replace static/file-backed content behavior.
 - Cloudflare Pages repo-side clean URL configuration is in place, but dashboard project creation, preview validation, custom domain, DNS cutover, and rollback still require account access.
-- Sample Request has no backend/form workflow yet and remains a `mailto:` fallback in current runtime.
+- Sample Request now routes through the Contact page sample-request mode and Pages Function source, but production persistence has not been verified without the server-side service-role environment variable.
 - Projects, Stone Library, Products, and Articles remain file-backed until Supabase migration work is implemented.
 - Admin CMS does not exist yet; customers cannot CRUD content without code changes.
 - Project and Stone Library content migration needs strict separation between confirmed facts and inferred MVP copy.

@@ -1,7 +1,7 @@
-import { ArrowUpRight, Mail, MapPin, Phone, Send } from 'lucide-react';
+import { ArrowUpRight, CheckCircle, Mail, MapPin, Phone, Send } from 'lucide-react';
 import type { FormEvent } from 'react';
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 
 type ContactFormState = {
   name: string;
@@ -10,16 +10,14 @@ type ContactFormState = {
   phone: string;
   projectType: string;
   message: string;
+  projectName: string;
+  shippingAddress: string;
+  sampleStone: string;
+  sampleFinish: string;
+  sampleQuantity: string;
 };
 
-const initialFormState: ContactFormState = {
-  name: '',
-  company: '',
-  email: '',
-  phone: '',
-  projectType: 'Project enquiry',
-  message: '',
-};
+type SubmissionStatus = 'idle' | 'submitting' | 'success' | 'error';
 
 const projectTypes = [
   'Project enquiry',
@@ -29,26 +27,20 @@ const projectTypes = [
   'Installation coordination',
 ];
 
-function buildMailto(form: ContactFormState): string {
-  const subject = encodeURIComponent(`Urblo ${form.projectType}`);
-  const body = encodeURIComponent(
-    [
-      'Hi Urblo,',
-      '',
-      'I would like to discuss a streetscape or civil landscape project.',
-      '',
-      `Name: ${form.name || '-'}`,
-      `Company: ${form.company || '-'}`,
-      `Email: ${form.email || '-'}`,
-      `Phone: ${form.phone || '-'}`,
-      `Enquiry type: ${form.projectType}`,
-      '',
-      'Project notes:',
-      form.message || '-',
-    ].join('\n'),
-  );
-
-  return `mailto:info@urblo.com.au?subject=${subject}&body=${body}`;
+function createInitialFormState(projectType = 'Project enquiry', sampleStone = ''): ContactFormState {
+  return {
+    name: '',
+    company: '',
+    email: '',
+    phone: '',
+    projectType,
+    message: '',
+    projectName: '',
+    shippingAddress: '',
+    sampleStone,
+    sampleFinish: '',
+    sampleQuantity: '1',
+  };
 }
 
 function FieldLabel({ children, htmlFor }: { children: string; htmlFor: string }) {
@@ -63,28 +55,97 @@ const inputClassName =
   'w-full rounded-[4px] border border-black/15 bg-white px-4 py-3 text-[15px] font-medium text-black outline-none transition placeholder:text-black/35 focus:border-black focus:ring-2 focus:ring-[var(--urblo-lime)]';
 
 export default function ContactPage() {
-  const [form, setForm] = useState<ContactFormState>(initialFormState);
+  const [searchParams] = useSearchParams();
+  const queryProjectType =
+    searchParams.get('intent') === 'sample-request' ? 'Sample request' : 'Project enquiry';
+  const querySampleStone = searchParams.get('stone') || '';
+  const [form, setForm] = useState<ContactFormState>(() =>
+    createInitialFormState(queryProjectType, querySampleStone),
+  );
   const [formError, setFormError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [submissionStatus, setSubmissionStatus] = useState<SubmissionStatus>('idle');
+  const isSampleRequest = form.projectType === 'Sample request';
+
+  useEffect(() => {
+    setForm((current) => ({
+      ...current,
+      projectType: queryProjectType,
+      sampleStone: querySampleStone || current.sampleStone,
+    }));
+    setFormError(null);
+    setSuccessMessage(null);
+    setSubmissionStatus('idle');
+  }, [queryProjectType, querySampleStone]);
 
   function updateField(field: keyof ContactFormState, value: string) {
     setForm((current) => ({ ...current, [field]: value }));
     setFormError(null);
+    setSuccessMessage(null);
+    if (submissionStatus !== 'submitting') {
+      setSubmissionStatus('idle');
+    }
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const hasContactMethod = Boolean(form.email.trim() || form.phone.trim());
+    const hasCoreFields = Boolean(form.name.trim() && form.email.trim());
     const hasProjectNotes = Boolean(form.message.trim());
+    const hasSampleFields = Boolean(form.sampleStone.trim() && form.shippingAddress.trim());
 
-    if (!hasContactMethod || !hasProjectNotes) {
+    if (!hasCoreFields || (!isSampleRequest && !hasProjectNotes)) {
       setFormError(
-        'Add project notes and at least one contact method before opening the email draft.',
+        'Add your name, email, and project notes before sending the enquiry.',
       );
+      setSubmissionStatus('error');
       return;
     }
 
-    window.location.href = buildMailto(form);
+    if (isSampleRequest && !hasSampleFields) {
+      setFormError('Add the sample preference and shipping address before sending the request.');
+      setSubmissionStatus('error');
+      return;
+    }
+
+    const endpoint = isSampleRequest ? '/api/sample-requests' : '/api/enquiries';
+    const sourceRoute = `${window.location.pathname}${window.location.search}`;
+
+    setSubmissionStatus('submitting');
+    setFormError(null);
+    setSuccessMessage(null);
+
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...form,
+          sourceRoute,
+        }),
+      });
+      const body = await response.json().catch(() => null);
+
+      if (!response.ok || !body?.ok) {
+        const serverMessage =
+          body?.error?.message ||
+          'The request could not be submitted. Please contact Urblo directly.';
+        throw new Error(serverMessage);
+      }
+
+      setSubmissionStatus('success');
+      setSuccessMessage(
+        isSampleRequest
+          ? 'Sample request received. Urblo will confirm availability and next steps.'
+          : 'Project enquiry received. Urblo will review the brief and respond with practical next steps.',
+      );
+      setForm(createInitialFormState(form.projectType));
+    } catch (error) {
+      setSubmissionStatus('error');
+      setFormError(error instanceof Error ? error.message : 'The request could not be submitted.');
+    }
   }
 
   return (
@@ -180,7 +241,7 @@ export default function ContactPage() {
               <div>
                 <p className="urblo-eyebrow">Project brief</p>
                 <h2 className="mt-4 font-display text-[32px] font-semibold uppercase leading-[1.08] tracking-[0.03em] text-black md:text-[44px]">
-                  Open an email draft
+                  Send a project brief
                 </h2>
               </div>
               <Link to="/stone-library" className="urblo-button self-start">
@@ -200,6 +261,7 @@ export default function ContactPage() {
                     className={inputClassName}
                     autoComplete="name"
                     placeholder="Your name"
+                    required
                   />
                 </div>
 
@@ -227,6 +289,7 @@ export default function ContactPage() {
                     className={inputClassName}
                     autoComplete="email"
                     placeholder="name@example.com"
+                    required
                   />
                 </div>
 
@@ -259,8 +322,74 @@ export default function ContactPage() {
                 </select>
               </div>
 
+              {isSampleRequest ? (
+                <div className="grid gap-5 rounded-[4px] border border-black/10 bg-[rgba(239,239,239,0.28)] p-4 md:grid-cols-2 md:p-5">
+                  <div>
+                    <FieldLabel htmlFor="contact-sample-stone">Stone or sample preference</FieldLabel>
+                    <input
+                      id="contact-sample-stone"
+                      value={form.sampleStone}
+                      onChange={(event) => updateField('sampleStone', event.target.value)}
+                      className={inputClassName}
+                      placeholder="Angola Black, sawn bluestone, finish set"
+                      required={isSampleRequest}
+                    />
+                  </div>
+
+                  <div>
+                    <FieldLabel htmlFor="contact-sample-finish">Finish preference</FieldLabel>
+                    <input
+                      id="contact-sample-finish"
+                      value={form.sampleFinish}
+                      onChange={(event) => updateField('sampleFinish', event.target.value)}
+                      className={inputClassName}
+                      placeholder="Optional"
+                    />
+                  </div>
+
+                  <div>
+                    <FieldLabel htmlFor="contact-sample-quantity">Quantity</FieldLabel>
+                    <input
+                      id="contact-sample-quantity"
+                      type="number"
+                      min="1"
+                      max="20"
+                      value={form.sampleQuantity}
+                      onChange={(event) => updateField('sampleQuantity', event.target.value)}
+                      className={inputClassName}
+                      required={isSampleRequest}
+                    />
+                  </div>
+
+                  <div>
+                    <FieldLabel htmlFor="contact-project-name">Project name</FieldLabel>
+                    <input
+                      id="contact-project-name"
+                      value={form.projectName}
+                      onChange={(event) => updateField('projectName', event.target.value)}
+                      className={inputClassName}
+                      placeholder="Optional"
+                    />
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <FieldLabel htmlFor="contact-shipping-address">Shipping address</FieldLabel>
+                    <textarea
+                      id="contact-shipping-address"
+                      value={form.shippingAddress}
+                      onChange={(event) => updateField('shippingAddress', event.target.value)}
+                      className={`${inputClassName} min-h-[110px] resize-y leading-7`}
+                      placeholder="Address for sample delivery"
+                      required={isSampleRequest}
+                    />
+                  </div>
+                </div>
+              ) : null}
+
               <div>
-                <FieldLabel htmlFor="contact-message">Project notes</FieldLabel>
+                <FieldLabel htmlFor="contact-message">
+                  {isSampleRequest ? 'Additional notes' : 'Project notes'}
+                </FieldLabel>
                 <textarea
                   id="contact-message"
                   value={form.message}
@@ -268,8 +397,19 @@ export default function ContactPage() {
                   className={`${inputClassName} min-h-[170px] resize-y leading-7`}
                   placeholder="Tell us about location, project stage, stone intent, finish preference, timing, or sample needs."
                   aria-describedby={formError ? 'contact-form-error' : undefined}
+                  required={!isSampleRequest}
                 />
               </div>
+
+              {successMessage ? (
+                <p
+                  role="status"
+                  className="flex items-start gap-3 rounded-[4px] border border-[var(--urblo-lime)]/40 bg-[rgba(0,255,25,0.12)] px-4 py-3 text-[14px] font-semibold leading-6 text-black"
+                >
+                  <CheckCircle className="mt-0.5 h-4 w-4 flex-none" aria-hidden="true" />
+                  {successMessage}
+                </p>
+              ) : null}
 
               {formError ? (
                 <p
@@ -283,10 +423,19 @@ export default function ContactPage() {
 
               <div className="flex flex-col gap-4 border-t border-black/10 pt-6 md:flex-row md:items-center md:justify-between">
                 <p className="max-w-[30rem] text-[14px] leading-6 text-black/58">
-                  This prepares a message in your email app so the brief can be sent directly to Urblo.
+                  This stores the brief securely for Urblo. Direct email and phone remain available
+                  if you prefer to speak first.
                 </p>
-                <button type="submit" className="urblo-button-inverse">
-                  Open email draft
+                <button
+                  type="submit"
+                  className="urblo-button-inverse disabled:cursor-wait disabled:opacity-60"
+                  disabled={submissionStatus === 'submitting'}
+                >
+                  {submissionStatus === 'submitting'
+                    ? 'Sending...'
+                    : isSampleRequest
+                      ? 'Request samples'
+                      : 'Send enquiry'}
                   <Send className="h-4 w-4" aria-hidden="true" />
                 </button>
               </div>
