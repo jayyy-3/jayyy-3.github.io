@@ -102,7 +102,7 @@ export const adminModules: AdminModuleDefinition[] = [
         path: '/admin/settings',
         summary: 'Site settings, notification routing, admin users, and ownership controls.',
         dependency: 'Owner/admin role verification',
-        state: 'scaffold',
+        state: 'active',
         Icon: Settings,
     },
     {

@@ -2,6 +2,54 @@
 
 Last updated: 2026-05-28
 
+## Entry - 2026-05-28 (Admin Settings CRUD and RLS Hardening)
+
+### Scope
+- Added `/admin/settings` as the first real admin CRUD source screen behind the Supabase Auth/profile gate.
+- The settings form reads or creates the default `site_settings` row and supports status, company name, primary contact, social links, SEO defaults, and footer JSON editing.
+- Added role-aware UI so owner/admin can save while editor/viewer sessions stay read-only.
+- Added and applied Supabase migration `admin_settings_role_hardening` so `site_settings` INSERT/UPDATE/DELETE policies require owner/admin while SELECT remains available to active viewer/editor/admin/owner profiles.
+- Expanded smoke coverage to include `/admin/settings`.
+
+### Changed Files
+- `scripts/agent-smoke.sh`
+- `src/pages/admin/AdminApp.tsx`
+- `src/pages/admin/AdminSettingsPage.tsx`
+- `src/pages/admin/adminContent.ts`
+- `supabase/migrations/202605280001_admin_settings_role_hardening.sql`
+- `supabase/migrations/README.md`
+- `AGENTS.md`
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/CLOUDFLARE_DEPLOYMENT.md`
+- `docs/DESIGN.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- Supabase migration list: pass. `admin_settings_role_hardening` is listed on project `npkidywzwddbnfrnxlmo`.
+- Supabase policy check: pass. `site_settings_admin_insert`, `site_settings_admin_update`, and `site_settings_admin_delete` require owner/admin; `site_settings_admin_select` remains viewer/editor/admin/owner.
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass, including `/admin/settings` route shell and Forms API checks.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- Playwright browser QA: pass for `/admin/settings` with no browser-safe Supabase key configured. The route shows the configuration-required state rather than settings data.
+
+### Risks and Gaps
+- Live settings save is not verified because browser-safe Supabase key configuration and an active owner/admin profile are still required.
+- Settings is the only CRUD source screen so far; media, Stone Library, Projects, Products, Articles, leads, audit, and admin-user management remain pending.
+- The database policy is stricter than the original generic admin-write policy for `site_settings`; this matches `docs/ADMIN_IA_ACCESS.md`.
+
+### Next Handoff
+- `NOW-FORMS-BACKEND-001`
+- `NOW-ADMIN-AUTH-RLS-001`
+- `NOW-ADMIN-SETTINGS-CRUD-001`
+
 ## Entry - 2026-05-28 (Admin Auth Shell Source)
 
 ### Scope

@@ -79,9 +79,11 @@ Before declaring implementation complete, verify all checks below:
 - Launch target is now Cloudflare Pages + Supabase + Urblo-owned `/admin`; the long-form plan is `docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md`.
 - Supabase foundation migrations are applied and verified for project `Urblo` (`npkidywzwddbnfrnxlmo`): 24 launch tables, RLS, policies, FK indexes, private lead/admin protection, and read-only anonymous public-content grants.
 - Supabase baseline seed migration is applied and verified: 12 distinct published finish definitions and one published default site settings row.
+- Supabase admin settings hardening migration is applied and verified: `site_settings` writes are owner/admin only while read access remains available to active admin roles.
 - Forms backend source is implemented for `/api/enquiries` and `/api/sample-requests`, but live Supabase row creation still requires server-side `SUPABASE_SERVICE_ROLE_KEY` verification.
 - Current content runtime remains static/file-backed until Storage and admin CRUD are implemented.
 - `/admin` auth shell source is implemented and config-gated: routes exist outside public site chrome, use Supabase Auth/profile checks when browser-safe keys are configured, and show a configuration-required state without rendering dashboard content when keys are absent.
+- `/admin/settings` source is the first CRUD screen and can read/create/update the default `site_settings` row for owner/admin roles after live auth is configured.
 - `NOW-ADMIN-CMS-001` is an umbrella objective, not a single executable implementation task; admin IA/access is defined in `docs/ADMIN_IA_ACCESS.md`, and implementation still uses the smaller auth/CRUD/media/leads tasks in `docs/agent/tasks.json`.
 - Stone Library migration is complete: old `/materials*` route family has been removed and replaced with `/stone-library` plus `/stone-library/:stoneGroupId`.
 - `NEXT-STONELIB-DRIVE-IMAGE-AUDIT-001` and `NEXT-STONELIB-IMG-001` are complete for current website stones only; Drive-only products remain out of scope until the client decides to add them.

@@ -311,7 +311,8 @@
         "src/lib/adminAuth.tsx",
         "src/lib/adminAuthHooks.ts",
         "src/lib/adminAuthState.ts",
-        "src/pages/admin"
+        "src/pages/admin",
+        "supabase/migrations/202605280001_admin_settings_role_hardening.sql"
       ],
       "notes": [
         "2026-05-26: Supabase project access is now available through the connector. The remaining live-auth blockers are first admin email/profile creation and browser-safe Supabase key configuration.",
@@ -333,6 +334,52 @@
         "npm run agent:smoke",
         "npm run agent:check",
         "Playwright: /admin and /admin/login show configuration-required state when no browser key is configured"
+      ]
+    },
+    {
+      "id": "NOW-ADMIN-SETTINGS-CRUD-001",
+      "status": "now",
+      "priority": 5.25,
+      "summary": "Implement the first owner/admin Site Settings CRUD surface.",
+      "files": [
+        "docs/ADMIN_IA_ACCESS.md",
+        "docs/ARCHITECTURE.md",
+        "docs/CLOUDFLARE_DEPLOYMENT.md",
+        "docs/DESIGN.md",
+        "docs/HANDOFF.md",
+        "docs/NEXT_STEPS.md",
+        "docs/SUPABASE_SCHEMA.md",
+        "docs/WORKLOG.md",
+        "docs/agent/tasks.json",
+        "scripts/agent-smoke.sh",
+        "src/pages/admin/AdminSettingsPage.tsx",
+        "src/pages/admin/AdminApp.tsx",
+        "src/pages/admin/adminContent.ts",
+        "supabase/migrations/202605280001_admin_settings_role_hardening.sql",
+        "supabase/migrations/README.md"
+      ],
+      "notes": [
+        "Run after the admin auth shell source exists, but before broader content CRUD, because site settings are first in the goal's CRUD order.",
+        "2026-05-28: Added /admin/settings source for default site_settings read/create/update with status, contact, social, SEO, and footer JSON fields.",
+        "2026-05-28: Applied and verified admin_settings_role_hardening on Supabase project npkidywzwddbnfrnxlmo. site_settings SELECT remains active viewer/editor/admin/owner, while INSERT/UPDATE/DELETE require owner/admin.",
+        "Live save verification still requires browser-safe Supabase key configuration and an active owner/admin profile."
+      ],
+      "acceptance": [
+        "Owner/admin users can inspect and save the default site_settings row through /admin/settings.",
+        "Viewer/editor users can inspect but not save global settings in the UI.",
+        "Supabase RLS write policies for site_settings require owner/admin roles.",
+        "The form includes loading, empty, validation, save, success, read-only, and error states.",
+        "No service-role key is shipped to browser code."
+      ],
+      "verification": [
+        "Supabase MCP: list_migrations includes admin_settings_role_hardening",
+        "Supabase MCP: execute_sql verifies site_settings write policies require owner/admin",
+        "npm run build",
+        "npm run lint",
+        "npx tsc -b",
+        "npm run agent:smoke",
+        "npm run agent:check",
+        "Playwright: /admin/settings shows configuration-required state when no browser key is configured"
       ]
     },
     {

@@ -263,7 +263,8 @@ Current source state:
 - `/admin` now uses a black/white operational shell with compact navigation and status-led content.
 - Admin routes intentionally sit outside the public site chrome and suppress the public WelcomePopup.
 - Without browser-safe Supabase configuration, admin routes show a configuration-required state instead of placeholder dashboards.
-- Current module routes are protected scaffolds only; do not style them as completed CRUD until the relevant Supabase and Storage workflows are implemented.
+- `/admin/settings` is the first source CRUD surface and should remain dense, form-led, and status-led.
+- Other module routes are protected scaffolds only; do not style them as completed CRUD until the relevant Supabase and Storage workflows are implemented.
 - free-form page-builder UI where structured fields are safer
 - implying backend submission or authentication works before Supabase is implemented
 

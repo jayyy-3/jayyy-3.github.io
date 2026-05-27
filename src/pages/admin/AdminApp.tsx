@@ -3,6 +3,7 @@ import { AdminAuthProvider } from '../../lib/adminAuth';
 import AdminDashboardPage from './AdminDashboardPage';
 import AdminLoginPage from './AdminLoginPage';
 import AdminModulePage from './AdminModulePage';
+import AdminSettingsPage from './AdminSettingsPage';
 import AdminUnauthorizedPage from './AdminUnauthorizedPage';
 
 export default function AdminApp() {
@@ -18,7 +19,7 @@ export default function AdminApp() {
                 <Route path="projects" element={<AdminModulePage moduleKey="projects" />} />
                 <Route path="products" element={<AdminModulePage moduleKey="products" />} />
                 <Route path="articles" element={<AdminModulePage moduleKey="articles" />} />
-                <Route path="settings" element={<AdminModulePage moduleKey="settings" />} />
+                <Route path="settings" element={<AdminSettingsPage />} />
                 <Route path="audit" element={<AdminModulePage moduleKey="audit" />} />
                 <Route path="*" element={<Navigate to="/admin" replace />} />
             </Routes>

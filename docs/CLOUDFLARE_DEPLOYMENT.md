@@ -82,6 +82,7 @@ Before custom domain cutover, test the generated `*.pages.dev` URL:
 - `/contact`
 - `/admin`
 - `/admin/login`
+- `/admin/settings`
 
 Each route should:
 - return HTTP 200 on direct refresh;
@@ -96,6 +97,7 @@ Current `/functions/api` endpoints:
 - Cloudflare analytics should show static traffic and API traffic separately.
 - Valid form tests require `SUPABASE_SERVICE_ROLE_KEY` in the Pages Function environment.
 - Admin route tests require a browser-safe Supabase key, a Supabase Auth user, and a matching active `admin_profiles` row.
+- Settings save tests require an active owner/admin profile because `site_settings` write RLS is owner/admin only.
 
 ### 5. Custom Domain Cutover
 Before switching production DNS:

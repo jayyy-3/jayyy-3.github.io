@@ -42,6 +42,7 @@ Source of truth: `docs/agent/tasks.json`.
 - `NOW-FORMS-BACKEND-001`: complete live verification for Cloudflare Pages Functions after server-side `SUPABASE_SERVICE_ROLE_KEY` is configured. Source and mock API checks are implemented.
 - `NOW-FORMS-SUPABASE-001`: replace mailto-only Contact and Sample Request flows with Supabase-backed submissions.
 - `NOW-ADMIN-AUTH-RLS-001`: complete live admin auth verification after browser-safe Supabase key configuration and first admin email/profile are available. Source shell and config-gated routes are implemented.
+- `NOW-ADMIN-SETTINGS-CRUD-001`: complete live `/admin/settings` save verification after owner/admin profile access is available. Source form and owner/admin RLS hardening are implemented.
 - `NOW-ADMIN-CMS-001`: umbrella objective for customer-maintained Projects, Stone Library, Products, Articles, media, and leads; execute through the smaller admin child tasks.
 - `NOW-ASSET-MIGRATION-001`: migrate priority media away from old WordPress URLs and define controlled storage for launch.
 - `NOW-ARTICLE-STRUCTURE-CLAIMS-001`: move article details from raw newsletter HTML to mobile-safe, claim-reviewed structured article templates.
@@ -99,6 +100,7 @@ Source of truth: `docs/agent/tasks.json`.
 - `NEXT-UI-PARITY-001` homepage proof update: the old rendered sustainability/tabbed feature module was removed from the homepage flow by request; proof metrics now sit directly after the hero with approved stone/city copy and updated project, CO2, landscape architect, and delivered-stone metrics.
 - `NEXT-UI-PARITY-001` capabilities bridge: the homepage proof section now includes a lightweight `Our Capabilities` CTA, and `/capabilities` exists as a provisional design/specification/sourcing/delivery capability page pending final client copy.
 - `NOW-ADMIN-AUTH-RLS-001` partial source implementation: `/admin`, `/admin/login`, `/admin/unauthorized`, protected admin module scaffolds, Supabase Auth session/profile checks, config-required state, and dashboard query shell are implemented. Live active-admin verification remains pending first admin email/profile and browser-safe Supabase key configuration.
+- `NOW-ADMIN-SETTINGS-CRUD-001` partial source implementation: `/admin/settings` reads/creates/updates the default site settings row behind the admin gate, and Supabase `site_settings` write policies now require owner/admin. Live save verification remains pending first admin email/profile and browser-safe Supabase key configuration.
 
 Older completion details live in `docs/WORKLOG.md`.
 

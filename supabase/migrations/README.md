@@ -18,4 +18,8 @@ Applied baseline seed migration on 2026-05-27:
 
 - `baseline_seed`
 
+Applied admin hardening migration on 2026-05-28:
+
+- `admin_settings_role_hardening`
+
 Do not commit Supabase service role keys, database passwords, Turnstile secrets, or email provider secrets here.

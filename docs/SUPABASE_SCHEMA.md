@@ -19,6 +19,7 @@ The Supabase connector can access the Urblo project directly. Do not ask the use
 | Status checked | `ACTIVE_HEALTHY` on 2026-05-26 |
 | Foundation migrations | Applied on 2026-05-27: `foundation_schema`, `foundation_hardening`, `anon_read_only` |
 | Baseline seed migration | Applied on 2026-05-27: `baseline_seed` |
+| Admin hardening migration | Applied on 2026-05-28: `admin_settings_role_hardening` |
 
 Secrets still must not be committed or pasted into repo docs. Service-role keys, database passwords, Turnstile secrets, and email provider secrets belong only in server-side environment variable stores.
 
@@ -94,15 +95,24 @@ Acceptance:
 - Active admin users can reach the dashboard only after Jay confirms the first admin email and an active `admin_profiles` row exists.
 - No service-role key is shipped to browser code.
 
+### Phase 4a - Site Settings CRUD and RLS Hardening
+Outcome: the first admin CRUD surface follows the contract that global settings are owner/admin controlled.
+
+Acceptance:
+- In progress on 2026-05-28. `/admin/settings` source implements the default `site_settings` read/create/update form with status, contact, social, SEO, and footer JSON fields.
+- Supabase migration `admin_settings_role_hardening` is applied and verified: `site_settings` SELECT remains available to active viewer/editor/admin/owner profiles, while INSERT/UPDATE/DELETE policies now require owner/admin.
+- Live browser save verification still requires browser-safe Supabase key configuration and an active owner/admin profile.
+
 ### Phase 5 - Content Migration and CRUD
 Outcome: content can move out of static files in a controlled order.
 
 Order:
-1. Media records and Storage policy.
-2. Stone Library data.
-3. Projects and project material maps.
-4. Products.
-5. Articles as structured blocks.
+1. Site settings is started under Phase 4a.
+2. Media records and Storage policy.
+3. Stone Library data.
+4. Projects and project material maps.
+5. Products.
+6. Articles as structured blocks.
 
 Acceptance:
 - Public routes continue exposing only published content.
