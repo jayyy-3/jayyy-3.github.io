@@ -14,4 +14,8 @@ Applied foundation migrations on 2026-05-27:
 - `foundation_hardening`
 - `anon_read_only`
 
+Applied baseline seed migration on 2026-05-27:
+
+- `baseline_seed`
+
 Do not commit Supabase service role keys, database passwords, Turnstile secrets, or email provider secrets here.

@@ -39,14 +39,13 @@ For any user-facing layout/copy/IA task:
 ## Now
 Source of truth: `docs/agent/tasks.json`.
 
-- `NOW-SUPABASE-SEED-BASELINE-001`: seed finish definitions and the default Urblo site settings row after the foundation migration is in place.
+- `NOW-FORMS-BACKEND-001`: implement Cloudflare Pages Functions for Contact and Sample Request writes into Supabase.
 - `NOW-FORMS-SUPABASE-001`: replace mailto-only Contact and Sample Request flows with Supabase-backed submissions.
 - `NOW-ADMIN-CMS-001`: umbrella objective for customer-maintained Projects, Stone Library, Products, Articles, media, and leads; execute through the smaller admin child tasks.
 - `NOW-ASSET-MIGRATION-001`: migrate priority media away from old WordPress URLs and define controlled storage for launch.
 - `NOW-ARTICLE-STRUCTURE-CLAIMS-001`: move article details from raw newsletter HTML to mobile-safe, claim-reviewed structured article templates.
 
 ## Next
-- `NOW-FORMS-BACKEND-001`: implement Cloudflare Pages Functions for Contact and Sample Request writes into Supabase.
 - `NEXT-UI-PARITY-001`: bring Home, Our Story, Articles, and Contact Us toward approved visual references.
 - `NEXT-STONELIB-DATA-001`: replace generic finish behavior text with approved notes.
 - `NEXT-PROJECTS-INTAKE-001`: define the project intake template and migrate the next project into the material-map case study model.
@@ -70,6 +69,7 @@ Source of truth: `docs/agent/tasks.json`.
 - `NOW-CLOUDFLARE-SUPABASE-ARCH-001`: Cloudflare Pages + Supabase launch architecture, cost model, and customer-facing approval PDF are documented.
 - `NOW-SUPABASE-SCHEMA-001`: Supabase schema plan is documented for Projects, Stone Library, Products, Articles, media, admin access, and lead capture.
 - `NOW-SUPABASE-FOUNDATION-001`: Supabase foundation migrations are applied and verified for the Urblo project: 24 launch tables, RLS, policies, FK indexes, private lead/admin protection, and read-only anonymous public-content grants.
+- `NOW-SUPABASE-SEED-BASELINE-001`: Supabase baseline seed is applied and verified: 12 distinct finish definitions and one published default Urblo site settings row, with idempotent upsert behavior.
 - `NEXT-ROUTER-SEO-001`: clean Cloudflare Pages routing is implemented with `BrowserRouter`, root Vite base, and SPA fallback.
 - Asset migration stopgap: direct old WordPress media references have been removed from runtime data and replaced with controlled local assets under `public/media/launch`; article covers and known article detail images now use a local runtime cleanup layer, while CMS media records and structured article blocks remain open under the article/admin tracks.
 - Homepage video launch optimization: the controlled desktop MP4 is now about 3MB, H.264 1280x720, no-audio, fast-start media; mobile still uses poster-only behavior until a mobile-specific variant is approved.

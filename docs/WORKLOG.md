@@ -1,6 +1,6 @@
 # WORKLOG - Urblo Execution Log
 
-Last updated: 2026-05-26
+Last updated: 2026-05-27
 
 ## Entry - 2026-05-22 (Old-Site Favicon Restoration)
 
@@ -2227,6 +2227,50 @@ Last updated: 2026-05-26
 - `NOW-SUPABASE-SEED-BASELINE-001`
 - `NOW-FORMS-BACKEND-001`
 - `NOW-ADMIN-AUTH-RLS-001`
+
+## Entry - 2026-05-27 (Supabase Baseline Seed Applied)
+
+### Scope
+- Added the baseline seed migration under `supabase/migrations`.
+- Applied `baseline_seed` to Supabase project `npkidywzwddbnfrnxlmo`.
+- Seeded the first published finish dictionary from the current Stone Library data.
+- Seeded one published default Urblo `site_settings` row with contact, social, footer, and SEO baseline values.
+- Updated Harness docs so the next executable checkpoint is the forms backend.
+
+### Changed Files
+- `AGENTS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `supabase/migrations/README.md`
+- `supabase/migrations/202605270004_baseline_seed.sql`
+
+### Verification Results
+- Supabase migration list: pass. `baseline_seed` is listed on project `npkidywzwddbnfrnxlmo`.
+- Supabase finish seed check: pass. `finish_definitions` contains 12 rows and 12 distinct finish keys.
+- Supabase site settings check: pass. `site_settings` contains one published `default` row.
+- Supabase idempotency check: pass. Rerunning the seed upsert kept counts at 12 distinct finishes and one default settings row.
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run agent:smoke`: pass.
+
+### Risks and Gaps
+- Public runtime is still static/file-backed and does not read this seed data yet.
+- Contact and Sample Request still depend on local/mailto behavior until `NOW-FORMS-BACKEND-001`.
+- No first admin user has been created because that requires Jay to confirm the first admin email.
+- Supabase Storage buckets, media policies, Auth UI, and admin CRUD are still pending.
+
+### Next Handoff
+- `NOW-FORMS-BACKEND-001`
+- `NOW-ADMIN-AUTH-RLS-001`
+- `NOW-ADMIN-MEDIA-LEADS-001`
 
 ## Entry Template (Use for Every Future Session)
 

@@ -18,6 +18,7 @@ The Supabase connector can access the Urblo project directly. Do not ask the use
 | Region | `ap-southeast-2` |
 | Status checked | `ACTIVE_HEALTHY` on 2026-05-26 |
 | Foundation migrations | Applied on 2026-05-27: `foundation_schema`, `foundation_hardening`, `anon_read_only` |
+| Baseline seed migration | Applied on 2026-05-27: `baseline_seed` |
 
 Secrets still must not be committed or pasted into repo docs. Service-role keys, database passwords, Turnstile secrets, and email provider secrets belong only in server-side environment variable stores.
 
@@ -54,9 +55,9 @@ Scope:
 - Seed initial media placeholder records only where needed for future migration references.
 
 Acceptance:
-- `finish_definitions` contains the approved first finish dictionary.
-- `site_settings` contains one published `default` row.
-- Seed scripts are idempotent: rerunning them does not duplicate rows.
+- Complete on 2026-05-27. `finish_definitions` contains 12 distinct published finish keys from the current Stone Library dictionary.
+- `site_settings` contains one published `default` row with Urblo contact, social, footer, and SEO baseline values.
+- Seed script is idempotent: rerunning the seed upsert did not duplicate rows.
 
 ### Phase 3 - Forms Backend
 Outcome: Contact and Sample Request become durable business workflows.

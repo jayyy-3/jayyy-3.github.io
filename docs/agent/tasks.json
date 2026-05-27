@@ -88,7 +88,7 @@
     },
     {
       "id": "NOW-SUPABASE-SEED-BASELINE-001",
-      "status": "now",
+      "status": "done",
       "priority": 2.2,
       "summary": "Seed Supabase baseline rows needed before forms and admin work.",
       "files": [
@@ -101,7 +101,8 @@
       ],
       "notes": [
         "Run after NOW-SUPABASE-FOUNDATION-001 so seed statements can use stable table constraints.",
-        "Initial seed scope should stay small: finish definitions, one published site settings row, and only media placeholders needed by near-term migration work."
+        "Initial seed scope should stay small: finish definitions, one published site settings row, and only media placeholders needed by near-term migration work.",
+        "2026-05-27: Applied baseline_seed migration to project npkidywzwddbnfrnxlmo. Verification confirmed 12 distinct finish definitions and one published default site_settings row. Rerunning the seed upsert did not duplicate rows."
       ],
       "acceptance": [
         "finish_definitions contains the approved first finish dictionary.",
@@ -118,7 +119,7 @@
     },
     {
       "id": "NOW-FORMS-BACKEND-001",
-      "status": "next",
+      "status": "now",
       "priority": 4.1,
       "summary": "Implement Cloudflare Pages Functions for Contact and Sample Request Supabase writes.",
       "files": [

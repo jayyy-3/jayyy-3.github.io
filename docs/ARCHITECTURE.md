@@ -6,7 +6,7 @@ Last updated: 2026-05-27
 - Current implementation: frontend-only React application shipped as static assets.
 - Current implementation: no runtime backend service exists in this repository yet.
 - Current implementation: no production HTTP API contract has been implemented yet.
-- Current Supabase project: `Urblo` (`npkidywzwddbnfrnxlmo`, `ap-southeast-2`) has the foundation schema/RLS migrations applied. Baseline seed data, form APIs, Auth UI, Storage policies, and admin CRUD are not implemented yet.
+- Current Supabase project: `Urblo` (`npkidywzwddbnfrnxlmo`, `ap-southeast-2`) has the foundation schema/RLS migrations and baseline seeds applied. Form APIs, Auth UI, Storage policies, and admin CRUD are not implemented yet.
 - Launch target: Cloudflare Pages static frontend, Cloudflare Pages Functions API endpoints, Supabase Postgres/Auth/Storage, and an Urblo-owned admin interface for content operations.
 - Planning source: `docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md`.
 - Supabase schema design source: `docs/SUPABASE_SCHEMA.md`.
@@ -41,7 +41,7 @@ Last updated: 2026-05-27
 - Schema planning:
   - First production schema plan lives in `docs/SUPABASE_SCHEMA.md`.
   - First `/admin` route, access-state, role, module rollout, and field-ownership contract lives in `docs/ADMIN_IA_ACCESS.md`.
-  - Foundation migrations are applied; runtime is not considered migrated until baseline seed scripts, admin UI, and API contracts are implemented and verified.
+  - Foundation migrations and baseline seeds are applied; runtime is not considered migrated until admin UI and API contracts are implemented and verified.
   - Supabase execution order is foundation migration, baseline seeds, forms backend, admin auth shell, then content CRUD.
 
 ## Deployment and Build Contract
@@ -366,8 +366,8 @@ Route state contract:
 - `npm run agent:smoke`: pass
 
 ## Known Architecture Risks
-- Cloudflare + Supabase is the approved launch target, and the Supabase foundation schema/RLS is applied, but runtime integration has not started in app code.
-- Supabase still needs baseline seeds, form endpoints, Auth, Storage policies, and admin CRUD before it can replace static/file-backed behavior.
+- Cloudflare + Supabase is the approved launch target, and Supabase foundation schema/RLS plus baseline seeds are applied, but runtime integration has not started in app code.
+- Supabase still needs form endpoints, Auth, Storage policies, and admin CRUD before it can replace static/file-backed behavior.
 - Cloudflare Pages repo-side clean URL configuration is in place, but dashboard project creation, preview validation, custom domain, DNS cutover, and rollback still require account access.
 - Sample Request has no backend/form workflow yet and remains a `mailto:` fallback in current runtime.
 - Projects, Stone Library, Products, and Articles remain file-backed until Supabase migration work is implemented.

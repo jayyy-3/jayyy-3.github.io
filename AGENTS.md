@@ -78,7 +78,8 @@ Before declaring implementation complete, verify all checks below:
 - Current-state handoff is `docs/HANDOFF.md`; machine task state is `docs/agent/tasks.json`.
 - Launch target is now Cloudflare Pages + Supabase + Urblo-owned `/admin`; the long-form plan is `docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md`.
 - Supabase foundation migrations are applied and verified for project `Urblo` (`npkidywzwddbnfrnxlmo`): 24 launch tables, RLS, policies, FK indexes, private lead/admin protection, and read-only anonymous public-content grants.
-- Current runtime remains static/file-backed until baseline seeds, forms backend, Auth, Storage, and admin CRUD are implemented.
+- Supabase baseline seed migration is applied and verified: 12 distinct published finish definitions and one published default site settings row.
+- Current runtime remains static/file-backed until forms backend, Auth, Storage, and admin CRUD are implemented.
 - `NOW-ADMIN-CMS-001` is an umbrella objective, not a single executable implementation task; admin IA/access is now defined in `docs/ADMIN_IA_ACCESS.md`, and implementation still uses the smaller auth/CRUD/media/leads tasks in `docs/agent/tasks.json`.
 - Stone Library migration is complete: old `/materials*` route family has been removed and replaced with `/stone-library` plus `/stone-library/:stoneGroupId`.
 - `NEXT-STONELIB-DRIVE-IMAGE-AUDIT-001` and `NEXT-STONELIB-IMG-001` are complete for current website stones only; Drive-only products remain out of scope until the client decides to add them.
