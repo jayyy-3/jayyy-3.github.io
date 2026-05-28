@@ -2,6 +2,50 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Admin Readiness Browser-Key Boundary)
+
+### Scope
+- Strengthened `scripts/check-admin-live-readiness.mjs` so the read-only admin readiness gate now uses the configured browser-safe Supabase key, not just the service-role key.
+- The runner now verifies published `site_settings` and `finish_definitions` are readable through the browser-key anonymous boundary, while `admin_profiles` returns no private rows or an expected deny response without an authenticated admin session.
+- Updated Harness docs so future agents know `agent:admin-live-readiness` proves the browser-key public/private boundary before active-admin browser QA.
+- No Supabase rows, Auth users, Storage objects, credentials, Cloudflare state, or live writes were created or changed.
+
+### Changed Files
+- `AGENTS.md`
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `scripts/check-admin-live-readiness.mjs`
+
+### Verification Results
+- `node --check scripts/check-admin-live-readiness.mjs`: pass.
+- `npm run agent:admin-live-readiness -- --admin-email first@example.com`: expected credential-gated fail before Supabase calls because browser-safe and service-role keys are not configured.
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:admin-crud-live`: pass in plan-only no-write mode.
+- `npm run agent:public-supabase-readiness`: pass.
+- `npm run agent:live-readiness`: pass in report-only mode; live form/admin/Cloudflare inputs remain missing or approval-gated.
+- `npm run agent:cloudflare-readiness`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `node -e "JSON.parse(require('fs').readFileSync('docs/agent/tasks.json','utf8')); console.log('tasks json ok')"`: pass.
+
+### Risks and Gaps
+- The new browser-key boundary checks will execute only after `VITE_SUPABASE_PUBLISHABLE_KEY` or `VITE_SUPABASE_ANON_KEY` and a service-role key are configured.
+- Active-admin login, first-admin bootstrap, live form persistence, live admin CRUD writes, Storage upload, export audit rows, and Cloudflare preview smoke remain blocked by the same credential/account inputs.
+
+### Next Handoff
+- `NOW-FORMS-BACKEND-001`: configure service-role key and run `npm run agent:forms-live`.
+- `NOW-ADMIN-AUTH-RLS-001`: after first admin email and keys are available, run first-admin verify/bootstrap, then `npm run agent:admin-live-readiness -- --admin-email <first-admin-email>`.
+- `NOW-CLOUDFLARE-PAGES-DEPLOY-001`: run deployed preview smoke after a Cloudflare Pages preview URL exists.
+
 ## Entry - 2026-05-29 (Supabase Read-Only Launch Sanity)
 
 ### Scope

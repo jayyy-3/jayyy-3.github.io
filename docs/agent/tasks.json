@@ -382,6 +382,7 @@
         "2026-05-29: Browser QA with a publishable Supabase key supplied only through the local shell confirmed unauthenticated /admin and /admin/media route to /admin/login with next parameters, render the Supabase Auth login form, do not show the configuration-required state, and do not render dashboard/media private content. Active-admin and unprofiled-user live checks still require first-admin/profile setup and credentials.",
         "2026-05-28: Dashboard open launch checks now reflect current blockers: service-role form verification, first admin profile, live admin save/upload/export audit verification, and approved content import scope.",
         "2026-05-28: Added `npm run agent:admin-live-readiness` as the read-only credential/profile readiness runner. It requires a browser-safe Supabase key, service-role verification key, and first-admin email; verifies the active admin profile plus baseline seed rows; and performs no database mutations.",
+        "2026-05-29: `npm run agent:admin-live-readiness` now also uses the browser-safe key in read-only mode to verify published `site_settings` and `finish_definitions` are anonymously readable while `admin_profiles` returns no private rows or an expected deny response without an authenticated admin session.",
         "2026-05-29: Added `npm run agent:first-admin-bootstrap` as the guarded first-admin setup runner. Default mode prints the no-write plan, `--verify-only` performs service-role read checks, and write/invite mode requires Jay approval plus `--allow-writes` and a matching `--confirm-email`.",
         "2026-05-28: `npm run agent:admin-crud-coverage` now verifies /admin route registration, RequireAdmin state handling, active module registration, and browser-key-only Supabase client wiring before live auth QA.",
         "2026-05-28: `npm run agent:admin-crud-live` now stages the live write proof after auth readiness. Plan-only mode performs no writes; live mode requires a real owner/admin session and Jay approval for tagged QA rows."
@@ -401,7 +402,7 @@
         "npm run agent:check",
         "npm run agent:first-admin-bootstrap",
         "npm run agent:first-admin-bootstrap -- --verify-only --admin-email <first-admin-email> (after service key and first admin email are configured)",
-        "npm run agent:admin-live-readiness -- --admin-email <first-admin-email> (after browser/service keys and first admin profile are configured)",
+        "npm run agent:admin-live-readiness -- --admin-email <first-admin-email> (after browser/service keys and first admin profile are configured; verifies active profile, baseline seeds, and browser-key public/private boundary)",
         "Playwright: /admin and /admin/login show configuration-required state when no browser key is configured",
         "npm run agent:admin-crud-coverage",
         "npm run agent:admin-crud-live (plan-only)",

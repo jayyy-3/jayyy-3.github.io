@@ -117,7 +117,7 @@ function requireConfig(env, options) {
 
   const missing = [];
   if (!browserKeyName) missing.push('VITE_SUPABASE_PUBLISHABLE_KEY or VITE_SUPABASE_ANON_KEY');
-  if (!serviceKeyName) missing.push('SUPABASE_SERVICE_ROLE_KEY');
+  if (!serviceKeyName) missing.push('SUPABASE_SERVICE_ROLE_KEY or SUPABASE_SERVICE_KEY');
   if (!adminEmail) missing.push('URBLO_FIRST_ADMIN_EMAIL or --admin-email');
 
   if (missing.length > 0) {
@@ -126,6 +126,7 @@ function requireConfig(env, options) {
 
   return {
     adminEmail,
+    browserKey: env[browserKeyName],
     browserKeyName,
     requiredRoles: options.requiredRoles,
     serviceKey: env[serviceKeyName],
@@ -145,6 +146,19 @@ function restHeaders(config) {
   };
 }
 
+function browserKeyHeaders(config) {
+  const headers = {
+    apikey: config.browserKey,
+    'content-type': 'application/json',
+  };
+
+  if (!config.browserKey.startsWith('sb_publishable_')) {
+    headers.authorization = `Bearer ${config.browserKey}`;
+  }
+
+  return headers;
+}
+
 async function supabaseRest(config, path) {
   const response = await fetch(`${config.supabaseUrl}${path}`, {
     headers: restHeaders(config),
@@ -156,6 +170,29 @@ async function supabaseRest(config, path) {
   }
 
   return response.json();
+}
+
+async function supabaseBrowserKeyRest(config, path) {
+  const response = await fetch(`${config.supabaseUrl}${path}`, {
+    headers: browserKeyHeaders(config),
+  });
+  const text = await response.text();
+  let body = null;
+
+  if (text) {
+    try {
+      body = JSON.parse(text);
+    } catch {
+      body = text;
+    }
+  }
+
+  return {
+    body,
+    ok: response.ok,
+    status: response.status,
+    text,
+  };
 }
 
 async function selectRows(config, table, filters, select = '*') {
@@ -170,6 +207,69 @@ async function selectRows(config, table, filters, select = '*') {
 async function countRows(config, table, filters = {}) {
   const rows = await selectRows(config, table, filters, 'id');
   return rows.length;
+}
+
+function assertBrowserKeyRows(result, label) {
+  if (!result.ok) {
+    const detail =
+      typeof result.body === 'string' ? result.body : JSON.stringify(result.body ?? result.text);
+    throw new Error(`${label} failed with HTTP ${result.status}: ${detail.slice(0, 240)}`);
+  }
+
+  assert.ok(Array.isArray(result.body), `${label} did not return an array.`);
+  return result.body;
+}
+
+async function verifyBrowserKeyBoundary(config) {
+  const publicSettings = assertBrowserKeyRows(
+    await supabaseBrowserKeyRest(
+      config,
+      '/rest/v1/site_settings?select=id,settings_key,status&settings_key=eq.default&status=eq.published',
+    ),
+    'Browser-key published site_settings read',
+  );
+  assert.equal(publicSettings.length, 1, 'Browser key should read one published default site_settings row.');
+
+  const publishedFinishes = assertBrowserKeyRows(
+    await supabaseBrowserKeyRest(
+      config,
+      '/rest/v1/finish_definitions?select=id,finish_key&status=eq.published',
+    ),
+    'Browser-key published finish_definitions read',
+  );
+  assert.ok(
+    publishedFinishes.length >= 12,
+    `Browser key should read at least 12 published finish definitions, found ${publishedFinishes.length}.`,
+  );
+
+  const privateProfiles = await supabaseBrowserKeyRest(
+    config,
+    '/rest/v1/admin_profiles?select=user_id,email&limit=1',
+  );
+  if (privateProfiles.ok) {
+    assert.ok(
+      Array.isArray(privateProfiles.body),
+      'Browser-key admin_profiles private-boundary check did not return an array.',
+    );
+    assert.equal(
+      privateProfiles.body.length,
+      0,
+      'Browser key unexpectedly read admin_profiles rows without an authenticated admin session.',
+    );
+    return 'admin_profiles returned zero rows';
+  }
+
+  if (![401, 403].includes(privateProfiles.status)) {
+    const detail =
+      typeof privateProfiles.body === 'string'
+        ? privateProfiles.body
+        : JSON.stringify(privateProfiles.body ?? privateProfiles.text);
+    throw new Error(
+      `Browser-key admin_profiles private-boundary check failed with unexpected HTTP ${privateProfiles.status}: ${detail.slice(0, 240)}`,
+    );
+  }
+
+  return `admin_profiles denied with HTTP ${privateProfiles.status}`;
 }
 
 async function run() {
@@ -208,8 +308,11 @@ async function run() {
   const finishCount = await countRows(config, 'finish_definitions', { status: 'published' });
   assert.ok(finishCount >= 12, `Expected at least 12 published finish definitions, found ${finishCount}.`);
 
+  const browserBoundary = await verifyBrowserKeyBoundary(config);
+
   console.log(`Admin profile ready: ${profile.email} (${profile.role}).`);
   console.log('Baseline seed rows ready: site_settings default and finish_definitions.');
+  console.log(`Browser-key public/private boundary ready: ${browserBoundary}.`);
   console.log('Admin live readiness check passed.');
 }
 
