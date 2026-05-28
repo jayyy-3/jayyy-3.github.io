@@ -93,7 +93,7 @@ export const adminModules: AdminModuleDefinition[] = [
         path: '/admin/articles',
         summary: 'Structured article blocks, cover media, SEO, and claim-safe editorial review.',
         dependency: 'Article block migration',
-        state: 'scaffold',
+        state: 'active',
         Icon: BookOpenText,
     },
     {

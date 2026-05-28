@@ -258,6 +258,8 @@ Avoid:
 - marketing-style hero sections
 - decorative cards inside cards
 - ambiguous save/publish controls
+- free-form page-builder UI where structured fields are safer
+- implying backend submission or authentication works before Supabase is implemented
 
 Current source state:
 - `/admin` now uses a black/white operational shell with compact navigation and status-led content.
@@ -268,9 +270,8 @@ Current source state:
 - `/admin/stone-library` is the first content CRUD source surface and should remain operational: compact stone list, status-led group and variant forms, finish capability matrix, explicit TBC states, and publication guardrails.
 - `/admin/projects` is now a protected source CRUD surface and should remain proof-operational: compact project list, claim-review state, structured facts/material schedules, material-map and hotspot controls, and clear publication guardrails.
 - `/admin/products` is now a protected source CRUD surface and should remain configuration-operational: compact product list, model/spec/default-material controls, Stone Library references, and clear publication guardrails.
-- Articles, Leads, and Audit routes are protected scaffolds only; do not style them as completed CRUD until the relevant Supabase workflows are implemented.
-- free-form page-builder UI where structured fields are safer
-- implying backend submission or authentication works before Supabase is implemented
+- `/admin/articles` is now a protected structured editorial CRUD surface and should remain operational: compact article list, metadata form, structured block rows, reference linking, legacy-source provenance, and clear publication guardrails.
+- Leads and Audit routes are protected scaffolds only; do not style them as completed CRUD until the relevant Supabase workflows are implemented.
 
 ## Component Rules
 

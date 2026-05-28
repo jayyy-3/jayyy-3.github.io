@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { AdminAuthProvider } from '../../lib/adminAuth';
+import AdminArticlesPage from './AdminArticlesPage';
 import AdminDashboardPage from './AdminDashboardPage';
 import AdminLoginPage from './AdminLoginPage';
 import AdminMediaPage from './AdminMediaPage';
@@ -22,7 +23,7 @@ export default function AdminApp() {
                 <Route path="stone-library" element={<AdminStoneLibraryPage />} />
                 <Route path="projects" element={<AdminProjectsPage />} />
                 <Route path="products" element={<AdminProductsPage />} />
-                <Route path="articles" element={<AdminModulePage moduleKey="articles" />} />
+                <Route path="articles" element={<AdminArticlesPage />} />
                 <Route path="settings" element={<AdminSettingsPage />} />
                 <Route path="audit" element={<AdminModulePage moduleKey="audit" />} />
                 <Route path="*" element={<Navigate to="/admin" replace />} />

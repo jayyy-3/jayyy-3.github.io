@@ -402,6 +402,7 @@
         "src/pages/admin/AdminProjectsPage.tsx",
         "src/pages/admin/AdminProductsPage.tsx",
         "src/pages/admin/AdminStoneLibraryPage.tsx",
+        "src/pages/admin/AdminArticlesPage.tsx",
         "src/pages/admin/adminContent.ts",
         "src/data/projectData.ts",
         "src/data/productData.ts",
@@ -416,7 +417,9 @@
         "2026-05-28: Added `/admin/projects` source CRUD behind the auth/config gate. It loads project records, facts, material schedule rows, material maps, hotspots, Stone Library references, finish references, and media options from Supabase; supports create/update plus publish/archive flows for projects, maps, and hotspots; includes loading, empty, validation, save, claim-review, publish/archive, read-only, and error states.",
         "2026-05-28: Public Project runtime remains static/file-backed. Live Projects save verification and static-to-Supabase content import remain pending browser-safe Supabase config plus an active admin/editor profile. Physical delete controls remain intentionally hidden until destructive-delete policy is confirmed.",
         "2026-05-28: Added `/admin/products` source CRUD behind the auth/config gate. It loads product families, models, material defaults, specs, Stone Library references, and media options from Supabase; supports create/update plus publish/archive flows for products and models; includes loading, empty, validation, save, material-default, publish/archive, read-only, and error states.",
-        "2026-05-28: Public Product runtime remains static/file-backed. Live Products save verification and static-to-Supabase content import remain pending browser-safe Supabase config plus an active admin/editor profile. Physical delete controls remain intentionally hidden until destructive-delete policy is confirmed."
+        "2026-05-28: Public Product runtime remains static/file-backed. Live Products save verification and static-to-Supabase content import remain pending browser-safe Supabase config plus an active admin/editor profile. Physical delete controls remain intentionally hidden until destructive-delete policy is confirmed.",
+        "2026-05-28: Added `/admin/articles` source CRUD behind the auth/config gate. It loads article metadata, structured article blocks, media records, project references, and Stone Library references from Supabase; supports create/update plus publish/archive flows for articles and blocks; includes loading, empty, validation, save, legacy-source provenance, structured-block JSON, read-only, and error states.",
+        "2026-05-28: Public Article runtime remains static/file-backed and continues rendering sanitized legacy HTML. Live Articles save verification and static-to-Supabase content import remain pending browser-safe Supabase config plus an active admin/editor profile. Physical delete controls remain intentionally hidden until destructive-delete policy is confirmed."
       ],
       "acceptance": [
         "Admin users can draft, publish, edit, archive, and delete Projects, Stone Library records, Products, and Articles.",
@@ -432,7 +435,8 @@
         "npm run agent:check",
         "Playwright: /admin/stone-library shows configuration-required state when no browser key is configured",
         "Playwright: /admin/projects shows configuration-required state when no browser key is configured",
-        "Playwright: /admin/products shows configuration-required state when no browser key is configured"
+        "Playwright: /admin/products shows configuration-required state when no browser key is configured",
+        "Playwright: /admin/articles shows configuration-required state when no browser key is configured"
       ]
     },
     {
