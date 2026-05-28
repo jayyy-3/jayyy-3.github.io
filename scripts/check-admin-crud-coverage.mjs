@@ -307,6 +307,7 @@ function checkRoutes() {
   const client = readRequired('src/lib/supabaseClient.ts');
   const audit = readRequired('src/lib/adminAudit.ts');
   const firstAdminBootstrap = readRequired('scripts/bootstrap-first-admin.mjs');
+  const adminLiveReadiness = readRequired('scripts/check-admin-live-readiness.mjs');
 
   if (existsSync(join(root, 'src/pages/admin/AdminModulePage.tsx'))) {
     failures.push('src/pages/admin/AdminModulePage.tsx: retired scaffold component should not remain after all launch modules are active');
@@ -396,6 +397,11 @@ function checkRoutes() {
   requireIncludes(firstAdminBootstrap, "entity_type: 'admin_profiles'", 'scripts/bootstrap-first-admin.mjs');
   requireIncludes(firstAdminBootstrap, 'Expected profile role:', 'scripts/bootstrap-first-admin.mjs');
   requireIncludes(firstAdminBootstrap, 'profiles[0].role !== config.role', 'scripts/bootstrap-first-admin.mjs');
+  requireIncludes(firstAdminBootstrap, 'profiles[0].user_id !== user.id', 'scripts/bootstrap-first-admin.mjs');
+  requireIncludes(firstAdminBootstrap, 'Profile linked to Auth user:', 'scripts/bootstrap-first-admin.mjs');
+  requireIncludes(adminLiveReadiness, 'findAuthUserByEmail', 'scripts/check-admin-live-readiness.mjs');
+  requireIncludes(adminLiveReadiness, 'profile.user_id', 'scripts/check-admin-live-readiness.mjs');
+  requireIncludes(adminLiveReadiness, 'authUser.id', 'scripts/check-admin-live-readiness.mjs');
   requireIncludes(
     firstAdminBootstrap,
     'Bootstrap audit event recorded: admin_profile.bootstrap.',

@@ -2,6 +2,55 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Admin Auth Profile Link Readiness Guard)
+
+### Scope
+- Strengthened `scripts/bootstrap-first-admin.mjs` so read-only `--verify-only` now fails if the active admin profile is not linked to the matching Supabase Auth user id for the supplied first-admin email.
+- Strengthened `scripts/check-admin-live-readiness.mjs` so the read-only admin readiness gate also verifies the matching Auth user/profile link before browser login/save QA.
+- Added `npm run agent:admin-crud-coverage` source checks so the Auth/profile link contract cannot be silently removed.
+- Kept the checkpoint source-only. No Supabase Auth users, profiles, rows, Storage objects, Cloudflare state, credentials, or live writes were created or changed.
+
+### Changed Files
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `scripts/bootstrap-first-admin.mjs`
+- `scripts/check-admin-crud-coverage.mjs`
+- `scripts/check-admin-live-readiness.mjs`
+
+### Verification Results
+- `node --check scripts/bootstrap-first-admin.mjs`: pass.
+- `node --check scripts/check-admin-live-readiness.mjs`: pass.
+- `node --check scripts/check-admin-crud-coverage.mjs`: pass.
+- `npm run agent:first-admin-bootstrap`: pass in plan-only/no-write mode.
+- `npm run agent:first-admin-bootstrap -- --verify-only --admin-email first@example.com`: expected fail-closed result on missing service-role key.
+- `npm run agent:admin-live-readiness -- --admin-email first@example.com`: expected fail-closed result on missing browser-safe and service-role keys.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:admin-crud-live`: pass in plan-only/no-write mode.
+- `npm run agent:live-readiness`: pass in report-only mode; live form/admin/Cloudflare inputs remain missing or approval-gated.
+- `npm run agent:cloudflare-readiness`: pass.
+- `npm run agent:public-supabase-readiness`: pass.
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass, including public/admin route shells, Forms API checks, and Contact form UI source checks.
+- `npm run agent:forms-ui`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- This catches profile/Auth id mismatch before browser QA, but it still does not create or update any Auth user/profile.
+- Live first-admin and active-admin verification still require service-role credentials, browser-safe Supabase key configuration, Jay-confirmed first-admin email, Jay approval for any writes, and a real owner/admin session before tagged admin write QA.
+
+### Next Handoff
+- `NOW-ADMIN-AUTH-RLS-001`
+- `NOW-ADMIN-CMS-001`
+- `NOW-FORMS-BACKEND-001`
+
 ## Entry - 2026-05-29 (First Admin Verify-Only Role Guard)
 
 ### Scope

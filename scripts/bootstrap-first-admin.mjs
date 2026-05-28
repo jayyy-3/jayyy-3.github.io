@@ -393,9 +393,17 @@ async function verifyOnly(supabase, config) {
   for (const profile of profiles) {
     console.log(`- ${profile.email}: ${profile.role}, active=${profile.is_active}`);
   }
+  const profile = profiles.length === 1 ? profiles[0] : null;
+  console.log(`Profile linked to Auth user: ${user && profile?.user_id === user.id ? 'yes' : 'no'}`);
   console.log('Baseline seed rows ready: site_settings default and finish_definitions.');
 
-  if (!user || profiles.length !== 1 || !profiles[0].is_active || profiles[0].role !== config.role) {
+  if (
+    !user ||
+    profiles.length !== 1 ||
+    !profiles[0].is_active ||
+    profiles[0].role !== config.role ||
+    profiles[0].user_id !== user.id
+  ) {
     process.exitCode = 1;
   }
 }

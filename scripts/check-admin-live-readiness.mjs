@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import { createClient } from '@supabase/supabase-js';
 
 const DEFAULT_SUPABASE_URL = 'https://npkidywzwddbnfrnxlmo.supabase.co';
 const DEFAULT_ENV_FILES = ['.env.local', '.env', '.dev.vars'];
@@ -136,6 +137,34 @@ function requireConfig(env, options) {
       '',
     ),
   };
+}
+
+function normalizeEmail(value) {
+  return value.trim().toLowerCase();
+}
+
+function createServiceClient(config) {
+  return createClient(config.supabaseUrl, config.serviceKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  });
+}
+
+async function findAuthUserByEmail(supabase, email) {
+  const perPage = 1000;
+  for (let page = 1; page <= 10; page += 1) {
+    const { data, error } = await supabase.auth.admin.listUsers({ page, perPage });
+    if (error) throw error;
+
+    const users = data?.users || [];
+    const match = users.find((user) => normalizeEmail(user.email || '') === email);
+    if (match) return match;
+    if (users.length < perPage) return null;
+  }
+
+  throw new Error('Could not find user within the first 10000 Auth users; narrow the readiness check manually.');
 }
 
 function restHeaders(config) {
@@ -284,6 +313,10 @@ async function run() {
   console.log(`Admin email: ${config.adminEmail}`);
   console.log(`Required role: ${config.requiredRoles.join(' or ')}`);
 
+  const serviceClient = createServiceClient(config);
+  const authUser = await findAuthUserByEmail(serviceClient, config.adminEmail);
+  assert.ok(authUser, `Expected a Supabase Auth user for ${config.adminEmail}.`);
+
   const profiles = await selectRows(
     config,
     'admin_profiles',
@@ -293,6 +326,11 @@ async function run() {
   assert.equal(profiles.length, 1, `Expected one admin_profiles row for ${config.adminEmail}.`);
 
   const profile = profiles[0];
+  assert.equal(
+    profile.user_id,
+    authUser.id,
+    `Admin profile user_id does not match the Supabase Auth user for ${config.adminEmail}.`,
+  );
   assert.equal(profile.is_active, true, `Admin profile for ${config.adminEmail} is not active.`);
   assert.ok(
     config.requiredRoles.includes(profile.role),
@@ -311,6 +349,7 @@ async function run() {
   const browserBoundary = await verifyBrowserKeyBoundary(config);
 
   console.log(`Admin profile ready: ${profile.email} (${profile.role}).`);
+  console.log('Admin profile is linked to the matching Supabase Auth user.');
   console.log('Baseline seed rows ready: site_settings default and finish_definitions.');
   console.log(`Browser-key public/private boundary ready: ${browserBoundary}.`);
   console.log('Admin live readiness check passed.');
