@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { CheckCircle2, Inbox, Mail, PackageCheck, Save, ShieldAlert } from 'lucide-react';
+import { CheckCircle2, Download, Inbox, Mail, PackageCheck, Save, ShieldAlert } from 'lucide-react';
 import { recordAdminAuditEvent, withAuditNotice } from '../../lib/adminAudit';
 import { supabase } from '../../lib/supabaseClient';
 import { useAdminAuth } from '../../lib/adminAuthHooks';
@@ -145,6 +145,7 @@ function AdminLeadsContent() {
     const [form, setForm] = useState<LeadFormState>(emptyForm);
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
+    const [isExporting, setIsExporting] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [notice, setNotice] = useState<string | null>(null);
 
@@ -354,6 +355,40 @@ function AdminLeadsContent() {
         await loadLeads({ kind: selectedKind, id: selectedId });
     }
 
+    async function exportLeadCsv() {
+        if (!supabase || !canManageLeads || !user || combinedLeads.length === 0) return;
+
+        setIsExporting(true);
+        setError(null);
+        setNotice(null);
+
+        const auditError = await recordAdminAuditEvent(supabase, {
+            actorUserId: user.id,
+            action: 'leads.export_csv',
+            entityType: 'lead_export',
+            entityId: null,
+            metadata: {
+                enquiryCount: enquiries.length,
+                sampleRequestCount: sampleRequests.length,
+                sampleItemCount: sampleItems.length,
+                exportedVisibleRows: combinedLeads.length,
+                newestCreatedAt: combinedLeads[0]?.createdAt ?? null,
+                oldestCreatedAt: combinedLeads[combinedLeads.length - 1]?.createdAt ?? null,
+            },
+        });
+
+        if (auditError) {
+            setIsExporting(false);
+            setError(`Lead export was blocked because the audit event could not be recorded: ${auditError}`);
+            return;
+        }
+
+        const csv = buildLeadExportCsv(enquiries, sampleRequests, sampleItems, adminProfiles, stoneOptions, finishOptions);
+        downloadTextFile(csv, `urblo-leads-${new Date().toISOString().slice(0, 10)}.csv`);
+        setIsExporting(false);
+        setNotice(`Exported ${combinedLeads.length} visible lead records. Audit event recorded.`);
+    }
+
     const statusOptions = selectedKind === 'sample' ? sampleStatusOptions : enquiryStatusOptions;
 
     return (
@@ -361,9 +396,20 @@ function AdminLeadsContent() {
             title="Leads"
             eyebrow={canManageLeads ? 'Owner/Admin workflow' : 'Read only'}
             actions={
-                <div className="inline-flex min-h-10 items-center gap-2 rounded border border-black/15 bg-white px-3 text-xs font-bold uppercase tracking-[0.12em] text-black/58">
-                    <Inbox className="h-4 w-4" />
-                    {inboxSummary.total} visible
+                <div className="flex flex-wrap items-center gap-2">
+                    <button
+                        type="button"
+                        onClick={() => void exportLeadCsv()}
+                        disabled={!canManageLeads || isExporting || combinedLeads.length === 0}
+                        className="inline-flex min-h-10 items-center justify-center gap-2 rounded border border-black/15 bg-white px-3 text-xs font-bold uppercase tracking-[0.12em] text-black transition hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:bg-black/[0.04] disabled:text-black/35"
+                    >
+                        <Download className="h-4 w-4" />
+                        {isExporting ? 'Auditing export' : 'Export CSV'}
+                    </button>
+                    <div className="inline-flex min-h-10 items-center gap-2 rounded border border-black/15 bg-white px-3 text-xs font-bold uppercase tracking-[0.12em] text-black/58">
+                        <Inbox className="h-4 w-4" />
+                        {inboxSummary.total} visible
+                    </div>
                 </div>
             }
         >
@@ -584,7 +630,8 @@ function AdminLeadsContent() {
                         <ul className="mt-4 space-y-3 text-sm leading-6 text-black/62">
                             <li>Lead rows are created only through server-side form endpoints.</li>
                             <li>Owner/admin roles can update workflow status, assignment, and internal notes.</li>
-                            <li>Physical deletes and export controls stay hidden until privacy policy is confirmed.</li>
+                            <li>Owner/admin CSV exports are audit-gated and limited to the currently loaded queue.</li>
+                            <li>Physical deletes stay hidden until privacy policy and retention rules are confirmed.</li>
                             <li>Live usefulness still depends on verified Supabase form persistence.</li>
                         </ul>
                     </section>
@@ -789,6 +836,130 @@ function summarizeInbox(enquiries: EnquiryRow[], samples: SampleRequestRow[]) {
             enquiries.filter((lead) => lead.notification_status === 'failed').length +
             samples.filter((lead) => lead.notification_status === 'failed').length,
     };
+}
+
+function buildLeadExportCsv(
+    enquiries: EnquiryRow[],
+    sampleRequests: SampleRequestRow[],
+    sampleItems: SampleRequestItemRow[],
+    admins: AdminProfileRow[],
+    stones: StoneOptionRow[],
+    finishes: FinishOptionRow[],
+) {
+    const stoneMap = new Map(stones.map((stone) => [stone.id, stone.display_name]));
+    const finishMap = new Map(finishes.map((finish) => [finish.id, finish.display_name]));
+    const sampleItemsByRequest = new Map<number, SampleRequestItemRow[]>();
+    sampleItems.forEach((item) => {
+        sampleItemsByRequest.set(item.sample_request_id, [
+            ...(sampleItemsByRequest.get(item.sample_request_id) ?? []),
+            item,
+        ]);
+    });
+
+    const rows = [
+        [
+            'kind',
+            'id',
+            'status',
+            'created_at',
+            'updated_at',
+            'name',
+            'email',
+            'phone',
+            'company',
+            'context',
+            'source_route',
+            'notification_status',
+            'turnstile_success',
+            'assigned_to',
+            'message',
+            'shipping_address',
+            'sample_items',
+            'internal_notes',
+        ],
+        ...enquiries.map((lead) => [
+            'enquiry',
+            lead.id,
+            lead.status,
+            lead.created_at,
+            lead.updated_at,
+            lead.name,
+            lead.email,
+            lead.phone ?? '',
+            lead.company ?? '',
+            lead.project_type ?? '',
+            lead.source_route ?? '',
+            lead.notification_status,
+            turnstileLabel(lead.turnstile_success),
+            assigneeName(lead.assigned_to, admins),
+            lead.message ?? '',
+            '',
+            '',
+            lead.internal_notes ?? '',
+        ]),
+        ...sampleRequests.map((lead) => [
+            'sample_request',
+            lead.id,
+            lead.status,
+            lead.created_at,
+            lead.updated_at,
+            lead.name,
+            lead.email,
+            lead.phone ?? '',
+            lead.company ?? '',
+            lead.project_name ?? '',
+            lead.source_route ?? '',
+            lead.notification_status,
+            turnstileLabel(lead.turnstile_success),
+            assigneeName(lead.assigned_to, admins),
+            lead.message ?? '',
+            lead.shipping_address ?? '',
+            formatSampleItems(sampleItemsByRequest.get(lead.id) ?? [], stoneMap, finishMap),
+            lead.internal_notes ?? '',
+        ]),
+    ];
+
+    return `${rows.map((row) => row.map(csvCell).join(',')).join('\n')}\n`;
+}
+
+function formatSampleItems(
+    items: SampleRequestItemRow[],
+    stoneMap: Map<number, string>,
+    finishMap: Map<number, string>,
+) {
+    return items
+        .map((item) => {
+            const stone = item.stone_group_id ? stoneMap.get(item.stone_group_id) ?? 'Unknown stone' : 'Stone TBC';
+            const finish = item.finish_definition_id
+                ? finishMap.get(item.finish_definition_id) ?? 'Unknown finish'
+                : 'Finish TBC';
+            const notes = item.notes ? `; notes: ${item.notes}` : '';
+            return `${stone} / ${finish} / qty ${item.quantity}${notes}`;
+        })
+        .join(' | ');
+}
+
+function csvCell(value: unknown) {
+    const text = value === null || value === undefined ? '' : String(value);
+    return `"${text.replace(/"/g, '""')}"`;
+}
+
+function turnstileLabel(value: boolean | null) {
+    if (value === true) return 'passed';
+    if (value === false) return 'failed';
+    return 'not_recorded';
+}
+
+function downloadTextFile(content: string, filename: string) {
+    const blob = new Blob([content], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.append(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
 }
 
 function assigneeName(userId: string | null, admins: AdminProfileRow[]) {

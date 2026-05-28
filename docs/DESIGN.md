@@ -271,7 +271,7 @@ Current source state:
 - `/admin/projects` is now a protected source CRUD surface and should remain proof-operational: compact project list, claim-review state, structured facts/material schedules, material-map and hotspot controls, and clear publication guardrails.
 - `/admin/products` is now a protected source CRUD surface and should remain configuration-operational: compact product list, model/spec/default-material controls, Stone Library references, and clear publication guardrails.
 - `/admin/articles` is now a protected structured editorial CRUD surface and should remain operational: compact article list, metadata form, structured block rows, reference linking, legacy-source provenance, and clear publication guardrails.
-- `/admin/leads` is now a protected lead workflow source surface and should remain privacy-conscious: compact inbox, clear contact detail, sample item rows, status/assignment/notes workflow, notification state, and no decorative CRM clutter.
+- `/admin/leads` is now a protected lead workflow source surface and should remain privacy-conscious: compact inbox, clear contact detail, sample item rows, status/assignment/notes workflow, notification state, audit-gated owner/admin CSV export, and no decorative CRM clutter.
 - `/admin/audit` is now a protected read-only review surface and should remain restrained: compact event list, clear actor/entity metadata, JSON inspection, owner/admin restriction, and no destructive controls.
 
 ## Component Rules

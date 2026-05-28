@@ -5,7 +5,7 @@ Last updated: 2026-05-28
 ## Purpose
 This document defines the executable contract for Urblo's `/admin` site.
 
-Admin auth shell source is now implemented and config-gated. Settings/admin profiles, Media, Stone Library, Projects, Products, Articles, Leads, and Audit are the first source CRUD/workflow/review screens. Admin CRUD/workflow save flows now call a shared audit writer after successful primary mutations. This does not mean live first-admin verification, live admin-profile save verification, live upload/save verification, Stone Library/Projects/Products/Articles/Leads live save verification, or live audit row creation verification are complete; it defines and tracks what those implementation tasks must build next.
+Admin auth shell source is now implemented and config-gated. Settings/admin profiles, Media, Stone Library, Projects, Products, Articles, Leads, and Audit are the first source CRUD/workflow/review screens. Admin CRUD/workflow save flows now call a shared audit writer after successful primary mutations, and Leads now has an owner/admin CSV export path that must record an audit event before downloading. This does not mean live first-admin verification, live admin-profile save verification, live upload/save verification, Stone Library/Projects/Products/Articles/Leads live save/export verification, or live audit row creation verification are complete; it defines and tracks what those implementation tasks must build next.
 
 ## Product Principle
 The admin site exists so Urblo can maintain launch-critical content without code edits while protecting public pages from drafts, unreviewed claims, missing media, and broken lead workflows.
@@ -162,7 +162,7 @@ Current implementation:
 - `/admin/projects` is the next content CRUD source screen behind the auth gate, with project, fact, material schedule, material map, hotspot, validation, claim-review, publish/archive, and read-only states.
 - `/admin/products` is the next content CRUD source screen behind the auth gate, with product family, model, material default, spec, validation, publish/archive, and read-only states.
 - `/admin/articles` is the next content CRUD source screen behind the auth gate, with article metadata, structured block rows, reference links, legacy-source provenance, validation, publish/archive, and read-only states.
-- `/admin/leads` is the first lead workflow source screen behind the auth gate, with enquiry/sample request queues, contact detail, sample items, status updates, assignment, internal notes, notification state, and read-only states.
+- `/admin/leads` is the first lead workflow source screen behind the auth gate, with enquiry/sample request queues, contact detail, sample items, status updates, assignment, internal notes, notification state, read-only states, and an owner/admin CSV export action that is blocked unless an audit event is recorded.
 - `/admin/audit` is the first audit visibility source screen behind the auth gate, with owner/admin read access, actor/entity filters, metadata inspection, empty states, and no mutation/delete controls.
 - `src/lib/adminAudit.ts` is the shared browser-side audit writer used by admin Settings, Media, Stone Library, Projects, Products, Articles, and Leads save flows. It records successful primary mutations into `admin_audit_events`; audit insert failure is surfaced in the success notice without rolling back the primary save.
 - Supabase `admin_profile_owner_hardening` keeps owner-role assignment and owner-profile changes owner-protected, while admins can maintain non-owner profiles.

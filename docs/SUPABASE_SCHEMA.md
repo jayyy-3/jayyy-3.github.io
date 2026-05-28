@@ -5,7 +5,7 @@ Last updated: 2026-05-28
 ## Purpose
 This document defines the first production Supabase data model for the Urblo website launch.
 
-It is both the schema design contract and the current implementation checkpoint record. The foundation migrations, baseline seeds, admin settings/profile hardening, SECURITY DEFINER grant hardening, and media Storage policies are applied. Cloudflare Pages Function source exists for forms, and the `/admin` auth shell, `/admin/settings`, `/admin/media`, `/admin/stone-library`, `/admin/projects`, `/admin/products`, `/admin/articles`, `/admin/leads`, and `/admin/audit` source screens are implemented. Runtime work must still verify live form writes, configure browser-safe Supabase Auth keys, create the first admin profile, verify live settings/admin-profile/media/Stone Library/Projects/Products/Articles/Leads writes, and verify live audit row creation from the shared admin audit writer.
+It is both the schema design contract and the current implementation checkpoint record. The foundation migrations, baseline seeds, admin settings/profile hardening, SECURITY DEFINER grant hardening, and media Storage policies are applied. Cloudflare Pages Function source exists for forms, and the `/admin` auth shell, `/admin/settings`, `/admin/media`, `/admin/stone-library`, `/admin/projects`, `/admin/products`, `/admin/articles`, `/admin/leads`, and `/admin/audit` source screens are implemented. Leads now includes an owner/admin CSV export path that requires an audit event before download. Runtime work must still verify live form writes, configure browser-safe Supabase Auth keys, create the first admin profile, verify live settings/admin-profile/media/Stone Library/Projects/Products/Articles/Leads writes and export, and verify live audit row creation from the shared admin audit writer.
 
 ## Current Supabase Project
 
@@ -22,7 +22,7 @@ The Supabase connector can access the Urblo project directly. Do not ask the use
 | Admin hardening migrations | Applied on 2026-05-28: `admin_settings_role_hardening`, `admin_profile_owner_hardening`, `security_definer_function_grants` |
 | Media Storage migrations | Applied on 2026-05-28: `media_storage_foundation`, `media_storage_listing_hardening` |
 | First content CRUD sources | Implemented on 2026-05-28: `/admin/stone-library` source screen for Stone Library groups, variants, and finish capabilities; `/admin/projects` source screen for project records, facts, material schedules, material maps, and hotspots; `/admin/products` source screen for product families, models, material defaults, and specs; `/admin/articles` source screen for article metadata and structured article blocks |
-| First lead workflow source | Implemented on 2026-05-28: `/admin/leads` source screen for enquiry/sample request status, assignment, internal notes, notification state, and sample item inspection |
+| First lead workflow source | Implemented on 2026-05-28: `/admin/leads` source screen for enquiry/sample request status, assignment, internal notes, notification state, sample item inspection, and audit-gated owner/admin CSV export |
 | First audit visibility source | Implemented on 2026-05-28: `/admin/audit` source screen for owner/admin audit event inspection |
 | First admin audit writer source | Implemented on 2026-05-28: `src/lib/adminAudit.ts` inserts audit rows after successful admin CRUD/workflow saves; live row creation remains pending browser-safe Supabase config and active admin profiles |
 
@@ -169,10 +169,11 @@ Outcome: the private enquiry and sample request queues have a protected operatio
 
 Acceptance:
 - In progress on 2026-05-28. `/admin/leads` source implements enquiry/sample request queue inspection behind the existing Supabase Auth/profile gate.
-- The screen reads `enquiries`, `sample_requests`, `sample_request_items`, active `admin_profiles`, `stone_groups`, and `finish_definitions`; owner/admin roles can update lead status, assignment, and internal notes once live browser-safe Supabase config exists.
-- The screen includes loading, empty, detail, status, assignment, internal notes, notification state, sample item, read-only, and error states.
-- Lead rows are still expected to be created only through server-side form endpoints; manual lead creation, exports, and physical deletes remain intentionally hidden until privacy/export policy is confirmed.
-- Live browser save verification still requires browser-safe Supabase key configuration and an active owner/admin profile, and live usefulness requires server-side form persistence verification.
+- The screen reads `enquiries`, `sample_requests`, `sample_request_items`, active `admin_profiles`, `stone_groups`, and `finish_definitions`; owner/admin roles can update lead status, assignment, internal notes, and export the currently loaded queue to CSV once live browser-safe Supabase config exists.
+- The screen includes loading, empty, detail, status, assignment, internal notes, notification state, sample item, read-only, export, and error states.
+- Lead rows are still expected to be created only through server-side form endpoints; manual lead creation and physical deletes remain intentionally hidden until privacy/retention policy is confirmed.
+- CSV export is intentionally limited to the currently loaded queue and is blocked unless `admin_audit_events` accepts a `leads.export_csv` event first.
+- Live browser save/export verification still requires browser-safe Supabase key configuration and an active owner/admin profile, and live usefulness requires server-side form persistence verification.
 
 ### Phase 4h - Audit Visibility and Admin Audit Writer Source
 Outcome: private mutation history has a protected owner/admin review surface, and admin CRUD/workflow save flows attempt to write audit rows after successful primary mutations.

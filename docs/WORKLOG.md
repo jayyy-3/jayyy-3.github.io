@@ -2,6 +2,45 @@
 
 Last updated: 2026-05-28
 
+## Entry - 2026-05-28 (Leads CSV Export Source)
+
+### Scope
+- Added owner/admin CSV export to `/admin/leads` for the currently loaded enquiry and sample-request queue.
+- Export includes contact details, workflow status, assignment labels, notification/Turnstile state, message/internal notes, shipping address, and sample item summaries.
+- Export is audit-gated: the screen attempts a `leads.export_csv` row in `admin_audit_events` before creating the download and blocks the export if the audit write fails.
+- Kept physical deletes hidden; live export verification still requires browser-safe Supabase config plus an active owner/admin profile.
+
+### Changed Files
+- `AGENTS.md`
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/DESIGN.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `src/pages/admin/AdminLeadsPage.tsx`
+
+### Verification Results
+- `npm run build`: pass. Browserslist staleness notice remains; the admin chunk is about 430 kB before gzip.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass, including `/admin/leads` route shell coverage and Forms API mock checks.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `node -e "JSON.parse(require('fs').readFileSync('docs/agent/tasks.json','utf8')); console.log('tasks json ok')"`: pass.
+
+### Risks and Gaps
+- Live CSV export and its audit row are unverified until browser-safe Supabase configuration and an active owner/admin profile exist.
+- The export is limited to rows currently loaded by the admin screen; broader date/status-filtered export can be added after policy requirements are confirmed.
+- Server-side form row creation remains unverified until `SUPABASE_SERVICE_ROLE_KEY` is configured.
+
+### Next Handoff
+- `NOW-FORMS-BACKEND-001` live Supabase row/audit verification.
+- `NOW-ADMIN-AUTH-RLS-001` live auth/profile verification.
+- `NOW-ADMIN-MEDIA-LEADS-001` live Leads save/export verification.
+
 ## Entry - 2026-05-28 (Content Import Artifact Output)
 
 ### Scope
