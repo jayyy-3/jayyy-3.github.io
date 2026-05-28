@@ -116,7 +116,7 @@ Last updated: 2026-05-29
   - `npm run agent:content-import:apply-sql` also writes `.tmp/content-import-apply.sql`, a guarded draft import SQL artifact. It aborts unless `urblo.import_approved=true` is explicitly set inside the transaction, imports as draft only, and contains no delete/publish operation.
 - Public Supabase readiness:
   - `npm run agent:public-supabase-readiness` => `node scripts/check-public-supabase-readiness.mjs`
-  - Verifies the content import dry run has no warnings/blockers, all import rows with status remain `draft`, article block imports stay structured rather than placeholder/newsletter-artifact payloads, public RLS policy source is published-only, anonymous grants are read-only, public runtime code is still static/file-backed, and Cloudflare routes only invoke Functions under `/api/*`.
+  - Verifies the content import dry run has no warnings/blockers, all import rows with status remain `draft`, article block imports stay structured rather than placeholder/newsletter-artifact payloads, the generated guarded draft apply SQL keeps the approval gate manual, avoids destructive/publish statements, forces imported status to `draft`, public RLS policy source is published-only, anonymous grants are read-only, public runtime code is still static/file-backed, and Cloudflare routes only invoke Functions under `/api/*`.
   - This is a source/no-write verifier. It does not apply imported content, query Supabase, create a preview deployment, or replace live credential checks.
 - Agent startup:
   - `npm run agent:init` => `bash scripts/agent-init.sh`

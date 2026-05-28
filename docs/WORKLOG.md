@@ -2,6 +2,46 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Public Supabase Guarded Apply-SQL Readiness)
+
+### Scope
+- Strengthened `scripts/check-public-supabase-readiness.mjs` so the no-write public cutover gate now generates and inspects the guarded draft content import SQL, not only the JSON dry-run payload.
+- Added source checks that the generated apply SQL keeps the `urblo.import_approved` gate commented by default, still requires runtime approval, contains no destructive statements, contains no publish-status changes, forces imported content status to `draft`, and keeps the SQL verification summary aligned with dry-run plan counts.
+- Kept the checkpoint source-only. No Supabase rows, Storage objects, Auth users, Cloudflare state, credentials, or live writes were created or changed.
+
+### Changed Files
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `scripts/check-public-supabase-readiness.mjs`
+
+### Verification Results
+- `node --check scripts/check-public-supabase-readiness.mjs`: pass.
+- `npm run agent:public-supabase-readiness`: pass; now reports guarded draft apply-SQL safety along with draft-only payload, structured article blocks, public RLS, anon grants, static runtime, and Cloudflare route scope.
+- `npm run agent:content-import:apply-sql`: pass; wrote ignored `.tmp/` review/preflight/apply artifacts only.
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass, including public/admin route shells, Forms API checks, and Contact form UI source checks.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:admin-crud-live`: pass in plan-only/no-write mode.
+- `npm run agent:cloudflare-readiness`: pass.
+- `npm run agent:live-readiness`: pass in report-only mode; live form/admin/Cloudflare inputs remain missing or approval-gated.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- This strengthens source-only safety before an approved content import. It still does not apply content rows, migrate public reads to Supabase, verify live form persistence, create a first admin profile, run authenticated admin CRUD writes, upload Storage objects, or validate a Cloudflare preview URL.
+- Live completion still requires service-role and browser-safe Supabase keys, first-admin email/profile/session, Cloudflare preview URL, and Jay approval for tagged live writes.
+
+### Next Handoff
+- `NOW-ADMIN-CONTENT-CRUD-001`
+- `NOW-FORMS-BACKEND-001`
+- `NOW-ADMIN-AUTH-RLS-001`
+
 ## Entry - 2026-05-29 (Forms Live Audit Metadata Coverage)
 
 ### Scope

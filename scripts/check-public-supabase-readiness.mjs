@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { execFileSync } from 'node:child_process';
-import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
-import { join } from 'node:path';
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync } from 'node:fs';
+import { join, relative } from 'node:path';
 import { cwd, exit } from 'node:process';
 
 const root = cwd();
@@ -122,6 +122,41 @@ function getContentImportPayload() {
   return JSON.parse(stdout);
 }
 
+function getContentImportApplySql() {
+  const tmpRoot = join(root, '.tmp');
+  mkdirSync(tmpRoot, { recursive: true });
+
+  const tmpDir = mkdtempSync(join(tmpRoot, 'public-supabase-readiness-'));
+  const relativeTmpDir = relative(root, tmpDir);
+  const applySqlPath = join(relativeTmpDir, 'content-import-apply.sql');
+
+  try {
+    execFileSync(
+      process.execPath,
+      [
+        'scripts/check-content-import-readiness.mjs',
+        '--out',
+        join(relativeTmpDir, 'content-import-preview.json'),
+        '--plan-out',
+        join(relativeTmpDir, 'content-import-plan.md'),
+        '--preflight-sql-out',
+        join(relativeTmpDir, 'content-import-preflight.sql'),
+        '--apply-sql-out',
+        applySqlPath,
+      ],
+      {
+        cwd: root,
+        encoding: 'utf8',
+        maxBuffer: 64 * 1024 * 1024,
+      },
+    );
+
+    return readFileSync(join(root, applySqlPath), 'utf8');
+  } finally {
+    rmSync(tmpDir, { force: true, recursive: true });
+  }
+}
+
 function checkContentImportPayload(payload) {
   if (payload.summary.blockers !== 0) {
     failures.push(`content import dry run has ${payload.summary.blockers} blockers`);
@@ -158,6 +193,66 @@ function checkContentImportPayload(payload) {
     'Run public route smoke tests before switching any public read path from static files to Supabase',
     'content import plan verification',
   );
+}
+
+function checkDraftImportSqlArtifact(applySql, payload) {
+  for (const fragment of [
+    '-- Urblo guarded draft content import',
+    '-- It imports rows as draft/private review data only; it does not publish content or delete data.',
+    "-- set local urblo.import_approved = 'true';",
+    "current_setting('urblo.import_approved', true)",
+    "raise exception 'Urblo draft import is not approved.",
+    'begin;',
+    'commit;',
+  ]) {
+    requireIncludes(applySql, fragment, 'guarded draft content import SQL');
+  }
+
+  if (/^\s*set\s+local\s+urblo\.import_approved\s*=\s*'true';/im.test(applySql)) {
+    failures.push('guarded draft content import SQL: approval gate must remain commented by default');
+  }
+
+  const destructiveStatements = [
+    /^\s*delete\s+from\b/im,
+    /^\s*truncate\b/im,
+    /^\s*drop\s+(table|schema|policy|function|view)\b/im,
+    /^\s*alter\s+table\b.*\bdisable\s+row\s+level\s+security\b/im,
+  ];
+  for (const pattern of destructiveStatements) {
+    if (pattern.test(applySql)) {
+      failures.push(`guarded draft content import SQL: destructive statement matched ${pattern}`);
+    }
+  }
+
+  const publicationPatterns = [
+    /\bstatus\s*=\s*'published'\b/i,
+    /\bselect\s+'published'\b/i,
+    /\bpublished_at\s*=/i,
+  ];
+  for (const pattern of publicationPatterns) {
+    if (pattern.test(applySql)) {
+      failures.push(`guarded draft content import SQL: publication statement matched ${pattern}`);
+    }
+  }
+
+  const importedStatusPatterns = [
+    /\bstatus\s*=\s*excluded\.status\b/i,
+    /\bstatus\s*=\s*r\.status\b/i,
+    /\binsert\s+into\s+public\.\w+\s*\([^)]*\bstatus\b[^)]*\)\s*select[^;]*\br\.status\b/is,
+  ];
+  for (const pattern of importedStatusPatterns) {
+    if (pattern.test(applySql)) {
+      failures.push(`guarded draft content import SQL: status must be forced to draft, matched ${pattern}`);
+    }
+  }
+
+  for (const item of payload.importPlan.applyOrder) {
+    requireIncludes(
+      applySql,
+      `('${item.table}', ${item.count}::bigint)`,
+      'guarded draft content import SQL summary',
+    );
+  }
 }
 
 function blockText(block) {
@@ -329,8 +424,10 @@ function checkDocsContracts() {
 }
 
 const payload = getContentImportPayload();
+const applySql = getContentImportApplySql();
 
 checkContentImportPayload(payload);
+checkDraftImportSqlArtifact(applySql, payload);
 checkArticleBlockPayload(payload);
 checkSupabasePolicySource();
 checkPublicRuntimeBoundary();
@@ -348,6 +445,7 @@ console.log(
   [
     `Verified ${payload.summary.stone_groups} stone groups, ${payload.summary.products} products, ${payload.summary.projects} projects, and ${payload.summary.articles} articles remain draft in the import dry run.`,
     `Verified ${payload.summary.article_blocks} draft article blocks use structured extraction instead of placeholder HTML imports.`,
+    'Verified guarded draft import SQL keeps the approval gate manual, avoids destructive/publish statements, and forces imported content status to draft.',
     'Verified published-only public RLS policy source, read-only anon grants, static public runtime boundary, Cloudflare SPA/API routing scope, and cutover docs.',
   ].join('\n'),
 );

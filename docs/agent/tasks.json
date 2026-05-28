@@ -570,6 +570,7 @@
         "2026-05-29: Content import now extracts current static finish-specific Stone Library image mappings from `src/data/stoneFinishImages.ts` into 53 draft `stone_finish_images` rows, raising the dry-run media candidate count to 104 and including the table in the plan, preflight SQL, guarded draft apply SQL, and public-readiness checks.",
         "2026-05-29: Content import now extracts legacy newsletter HTML into draft structured article blocks, links image blocks to media candidates, skips newsletter footer/contact/social artifacts, and carries claim-review flags without treating source copy as approved.",
         "2026-05-29: Public Supabase readiness now guards the article structured import shape: it fails if article blocks regress to placeholders, lose image-to-media links, import newsletter footer/contact/social artifacts, or lose claim-review metadata.",
+        "2026-05-29: Public Supabase readiness now also generates the guarded draft apply SQL in a temporary ignored `.tmp/` folder and fails if the approval gate is uncommented by default, runtime approval is not required, destructive statements appear, publish-status changes appear, imported status can drift from `draft`, or the SQL summary stops matching dry-run plan counts.",
         "2026-05-29: Admin CRUD coverage verifier now checks Stone Library finish-image table/action coverage in addition to group, variant, capability, Projects, Products, and Articles source screens.",
         "2026-05-29: Admin CRUD coverage verifier now also checks Article structured-authoring guardrails: approved schema block types must remain available, published blocks must require structured content, and raw HTML/newsletter authoring helpers must not appear in `/admin/articles`.",
         "2026-05-29: Admin CRUD coverage verifier now also checks the archive/removal contract so launch-critical content acceptance stays non-destructive until a physical-delete policy is approved.",
@@ -586,6 +587,7 @@
         "The content import dry run can write a local ignored guarded draft import SQL artifact before any production import is approved.",
         "The content import dry run prepares draft structured article blocks from legacy newsletter HTML instead of one placeholder block per article.",
         "`npm run agent:public-supabase-readiness` fails if structured article import regresses to placeholder/newsletter-artifact payloads or loses claim-review metadata.",
+        "`npm run agent:public-supabase-readiness` fails if the guarded draft apply SQL loses its manual approval gate, introduces destructive/publish statements, or stops forcing imported content status to draft.",
         "`npm run agent:admin-crud-coverage` fails if `/admin/articles` loses approved structured block options, structured-content validation, or reintroduces raw HTML/newsletter authoring helpers."
       ],
       "verification": [
