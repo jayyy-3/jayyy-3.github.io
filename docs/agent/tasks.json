@@ -512,7 +512,8 @@
         "2026-05-28: Storage policies allow active viewer/editor/admin/owner profiles to read admin media, active editor/admin/owner profiles to insert/update objects, and owner/admin profiles to delete objects.",
         "2026-05-28: Removed broad public `storage.objects` SELECT policy after Supabase advisor flagged public bucket listing risk.",
         "2026-05-28: Added `/admin/media` source for upload-backed draft records, external records, metadata editing, read-only viewer behavior, and publish/archive validation.",
-        "Live media upload/save verification remains pending browser-safe Supabase key configuration and an active admin/editor profile.",
+        "2026-05-28: Media now includes an admin/editor CSV export action for the currently visible media manifest. Export first records a media_assets.export_manifest audit event and blocks the download if audit logging fails.",
+        "Live media upload/save/export verification remains pending browser-safe Supabase key configuration and an active admin/editor profile.",
         "2026-05-28: Added `/admin/leads` source for enquiry and sample request queues, sample items, status, assignment, internal notes, notification state, read-only role behavior, and privacy guardrails.",
         "Live lead workflow save verification remains pending browser-safe Supabase key configuration and an active owner/admin profile. Live lead row creation still requires server-side form persistence, Turnstile verification, and transactional email secrets.",
         "2026-05-28: Media and Leads save flows now call the shared admin audit writer after successful primary saves. Live audit row creation remains pending browser-safe Supabase config and active profiles.",
@@ -520,6 +521,7 @@
       ],
       "acceptance": [
         "Admin users can manage uploaded media records with source, alt text, usage, and publish status.",
+        "Admin/editor users can export the currently visible media manifest to CSV only after an audit event is recorded.",
         "Contact and Sample Request submissions are visible to admins with status, owner, notes, and notification state.",
         "Owner/admin users can export the currently loaded lead queue to CSV only after an audit event is recorded.",
         "Large homepage video delivery remains reviewed against Cloudflare R2 or Stream before becoming a CMS-managed default.",

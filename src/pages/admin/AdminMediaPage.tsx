@@ -4,6 +4,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import {
     Archive,
     CheckCircle2,
+    Download,
     FileUp,
     Image as ImageIcon,
     Plus,
@@ -113,6 +114,7 @@ function AdminMediaContent() {
     const [file, setFile] = useState<File | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
+    const [isExporting, setIsExporting] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [notice, setNotice] = useState<string | null>(null);
@@ -379,6 +381,40 @@ function AdminMediaContent() {
         );
     }
 
+    async function exportMediaManifest() {
+        if (!supabase || !canEdit || !user || assets.length === 0) {
+            return;
+        }
+
+        setIsExporting(true);
+        setError(null);
+        setNotice(null);
+
+        const auditError = await recordAdminAuditEvent(supabase, {
+            actorUserId: user.id,
+            action: 'media_assets.export_manifest',
+            entityType: 'media_assets',
+            entityId: null,
+            metadata: {
+                exportedVisibleRows: assets.length,
+                publishedCount: mediaCounts.published,
+                draftCount: mediaCounts.draft,
+                archivedCount: mediaCounts.archived,
+            },
+        });
+
+        if (auditError) {
+            setIsExporting(false);
+            setError(`Media export was blocked because the audit event could not be recorded: ${auditError}`);
+            return;
+        }
+
+        const csv = buildMediaExportCsv(assets);
+        downloadTextFile(csv, `urblo-media-manifest-${new Date().toISOString().slice(0, 10)}.csv`);
+        setIsExporting(false);
+        setNotice(`Exported ${assets.length} visible media records. Audit event recorded.`);
+    }
+
     const previewUrl = getMediaUrl(selectedAsset);
     const mediaCounts = useMemo(() => summarizeMedia(assets), [assets]);
 
@@ -387,15 +423,26 @@ function AdminMediaContent() {
             title="Media Library"
             eyebrow={canEdit ? 'Admin/Editor' : 'Read only'}
             actions={
-                <button
-                    type="button"
-                    onClick={startExternalRecord}
-                    disabled={!canEdit}
-                    className="inline-flex min-h-10 items-center gap-2 rounded border border-black/15 bg-white px-3 text-xs font-bold uppercase tracking-[0.12em] text-black transition hover:border-black disabled:cursor-not-allowed disabled:text-black/35"
-                >
-                    <Plus className="h-4 w-4" />
-                    External record
-                </button>
+                <div className="flex flex-wrap items-center gap-2">
+                    <button
+                        type="button"
+                        onClick={() => void exportMediaManifest()}
+                        disabled={!canEdit || isExporting || assets.length === 0}
+                        className="inline-flex min-h-10 items-center gap-2 rounded border border-black/15 bg-white px-3 text-xs font-bold uppercase tracking-[0.12em] text-black transition hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:bg-black/[0.04] disabled:text-black/35"
+                    >
+                        <Download className="h-4 w-4" />
+                        {isExporting ? 'Auditing export' : 'Export manifest'}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={startExternalRecord}
+                        disabled={!canEdit}
+                        className="inline-flex min-h-10 items-center gap-2 rounded border border-black/15 bg-white px-3 text-xs font-bold uppercase tracking-[0.12em] text-black transition hover:border-black disabled:cursor-not-allowed disabled:text-black/35"
+                    >
+                        <Plus className="h-4 w-4" />
+                        External record
+                    </button>
+                </div>
             }
         >
             <div className="grid gap-5 xl:grid-cols-[minmax(280px,420px)_1fr_340px]">
@@ -699,6 +746,7 @@ function AdminMediaContent() {
                             <li>Published storage assets must use `urblo-public-media`.</li>
                             <li>Published media requires usage notes.</li>
                             <li>Published images require alt text.</li>
+                            <li>CSV manifest exports are audit-gated and limited to visible records.</li>
                             <li>Viewer roles can inspect but not mutate media records.</li>
                         </ul>
                     </section>
@@ -948,6 +996,72 @@ async function getImageDimensions(file: File): Promise<{ width: number; height: 
 
         image.src = url;
     });
+}
+
+function buildMediaExportCsv(rows: MediaAssetRow[]) {
+    const outputRows = [
+        [
+            'id',
+            'status',
+            'source_kind',
+            'media_type',
+            'bucket',
+            'object_path',
+            'source_url',
+            'mime_type',
+            'width_px',
+            'height_px',
+            'size_bytes',
+            'alt',
+            'caption',
+            'credit',
+            'usage_notes',
+            'published_at',
+            'archived_at',
+            'created_at',
+            'updated_at',
+        ],
+        ...rows.map((asset) => [
+            asset.id,
+            asset.status,
+            asset.source_kind,
+            asset.media_type,
+            asset.bucket ?? '',
+            asset.object_path ?? '',
+            asset.source_url ?? '',
+            asset.mime_type ?? '',
+            asset.width_px ?? '',
+            asset.height_px ?? '',
+            asset.size_bytes ?? '',
+            asset.alt ?? '',
+            asset.caption ?? '',
+            asset.credit ?? '',
+            asset.usage_notes ?? '',
+            asset.published_at ?? '',
+            asset.archived_at ?? '',
+            asset.created_at,
+            asset.updated_at,
+        ]),
+    ];
+
+    return `${outputRows.map((row) => row.map(csvCell).join(',')).join('\n')}\n`;
+}
+
+function csvCell(value: unknown) {
+    const text = value === null || value === undefined ? '' : String(value);
+    return `"${text.replace(/"/g, '""')}"`;
+}
+
+function downloadTextFile(content: string, filename: string) {
+    const blob = new Blob([content], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.append(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
 }
 
 function getMediaUrl(asset: MediaAssetRow | null) {

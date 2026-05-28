@@ -85,7 +85,7 @@ Before declaring implementation complete, verify all checks below:
 - Current content runtime remains static/file-backed until content CRUD is implemented and public routes are migrated from static data.
 - `/admin` auth shell source is implemented and config-gated: routes exist outside public site chrome, use Supabase Auth/profile checks when browser-safe keys are configured, and show a configuration-required state without rendering dashboard content when keys are absent.
 - `/admin/settings` source can read/create/update the default `site_settings` row and manage existing Supabase Auth users' admin profile rows for owner/admin roles after live auth is configured; first admin bootstrap still requires Jay confirmation and external setup.
-- `/admin/media` source is implemented as the first media library screen: active admin/editor roles can upload Storage-backed draft records and edit media metadata, while publish/archive validation keeps private draft assets from being marked public.
+- `/admin/media` source is implemented as the first media library screen: active admin/editor roles can upload Storage-backed draft records, edit media metadata, export the currently loaded media manifest to CSV after audit logging, and use publish/archive validation that keeps private draft assets from being marked public.
 - `/admin/stone-library` source is implemented as the first content CRUD screen: active admin/editor roles can maintain stone groups, variants, and finish capability rows after live auth is configured.
 - `/admin/projects` source is implemented as the next content CRUD screen: active admin/editor roles can maintain project records, facts, material schedule rows, material maps, and hotspots after live auth is configured.
 - `/admin/products` source is implemented as the next content CRUD screen: active admin/editor roles can maintain product families, models, material defaults, and specs after live auth is configured.
@@ -97,7 +97,7 @@ Before declaring implementation complete, verify all checks below:
 - Stone Library migration is complete: old `/materials*` route family has been removed and replaced with `/stone-library` plus `/stone-library/:stoneGroupId`.
 - `NEXT-STONELIB-DRIVE-IMAGE-AUDIT-001` and `NEXT-STONELIB-IMG-001` are complete for current website stones only; Drive-only products remain out of scope until the client decides to add them.
 - Contact route is declared at `/contact`; shared header/footer navigation points to declared routes, with Sample Request remaining a `mailto:` fallback until `NOW-FORMS-SUPABASE-001` is implemented.
-- Last runtime gates were measured on 2026-05-28 and were green (`npm run build`, `npm run lint`, `npx tsc -b`, `npm run agent:smoke`) during the Leads CSV export source checkpoint.
+- Last runtime gates were measured on 2026-05-28 and were green (`npm run build`, `npm run lint`, `npx tsc -b`, `npm run agent:smoke`) during the Media manifest export source checkpoint.
 - Route-level code splitting is in place and the previous `>500kB` chunk warning is resolved; continue monitoring bundle output as features are added.
 - GitHub Pages hardening is now a legacy fallback; Cloudflare Pages deployment is the active launch path.
 - Routing now uses clean paths through `BrowserRouter` with Cloudflare Pages SPA fallback files in `public/`; unknown public URLs render a branded not-found state instead of the homepage.

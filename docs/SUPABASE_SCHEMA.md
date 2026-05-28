@@ -121,8 +121,8 @@ Acceptance:
 - Storage buckets exist: `urblo-public-media` is public-read for public-safe assets, and `urblo-admin-media` is private for draft/review assets.
 - Storage object policies allow active viewer/editor/admin/owner profiles to read admin media, active editor/admin/owner profiles to insert/update objects, and owner/admin profiles to delete objects.
 - The broad public `storage.objects` SELECT policy was removed after the Supabase advisor flagged public bucket listing risk. Public object URL access remains handled by the public bucket.
-- `/admin/media` source implements upload-backed draft media records, external media records, metadata editing, role-aware read-only behavior, and publish/archive validation.
-- Live browser upload/save verification still requires browser-safe Supabase key configuration and an active admin/editor profile.
+- `/admin/media` source implements upload-backed draft media records, external media records, metadata editing, audit-gated visible media manifest export, role-aware read-only behavior, and publish/archive validation.
+- Live browser upload/save/export verification still requires browser-safe Supabase key configuration and an active admin/editor profile.
 
 ### Phase 4c - Stone Library CRUD Source
 Outcome: the first content workflow has a protected source editing surface before public runtime migration.

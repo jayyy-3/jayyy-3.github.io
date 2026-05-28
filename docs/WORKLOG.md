@@ -2,6 +2,45 @@
 
 Last updated: 2026-05-28
 
+## Entry - 2026-05-28 (Media Manifest Export Source)
+
+### Scope
+- Added admin/editor CSV export to `/admin/media` for the currently visible media manifest.
+- Export includes storage/external source fields, media type, dimensions, size, alt/caption/credit/usage notes, and status timestamps.
+- Export is audit-gated: the screen attempts a `media_assets.export_manifest` row in `admin_audit_events` before creating the download and blocks export if the audit write fails.
+- Kept live export verification pending until browser-safe Supabase config and an active admin/editor profile exist.
+
+### Changed Files
+- `AGENTS.md`
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/DESIGN.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `src/pages/admin/AdminMediaPage.tsx`
+- `src/pages/admin/adminContent.ts`
+
+### Verification Results
+- `npm run build`: pass. Browserslist staleness notice remains; the admin chunk is about 432 kB before gzip.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass, including `/admin/media` route shell coverage and Forms API mock checks.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- Live media manifest export and its audit row are unverified until browser-safe Supabase configuration and an active admin/editor profile exist.
+- The export is limited to records currently visible in the admin media screen. Date/status filtering can be added later if operational policy requires it.
+- Server-side form row creation remains unverified until `SUPABASE_SERVICE_ROLE_KEY` is configured.
+
+### Next Handoff
+- `NOW-FORMS-BACKEND-001` live Supabase row/audit verification.
+- `NOW-ADMIN-AUTH-RLS-001` live auth/profile verification.
+- `NOW-ADMIN-MEDIA-LEADS-001` live media upload/save/export and lead save/export verification.
+
 ## Entry - 2026-05-28 (Content Import Plan Artifact)
 
 ### Scope

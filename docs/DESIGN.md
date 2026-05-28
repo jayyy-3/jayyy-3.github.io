@@ -266,7 +266,7 @@ Current source state:
 - Admin routes intentionally sit outside the public site chrome and suppress the public WelcomePopup.
 - Without browser-safe Supabase configuration, admin routes show a configuration-required state instead of placeholder dashboards.
 - `/admin/settings` is the first source CRUD surface and should remain dense, form-led, and status-led. Its admin team controls should feel like access operations, not a decorative people directory: compact rows, clear role/status pills, explicit owner protection, and no destructive controls.
-- `/admin/media` is the first media library source surface and should remain operational: compact record list, upload panel, metadata editor, explicit draft/published/archived state, and clear publication guardrails.
+- `/admin/media` is the first media library source surface and should remain operational: compact record list, upload panel, metadata editor, explicit draft/published/archived state, audit-gated media manifest export, and clear publication guardrails.
 - `/admin/stone-library` is the first content CRUD source surface and should remain operational: compact stone list, status-led group and variant forms, finish capability matrix, explicit TBC states, and publication guardrails.
 - `/admin/projects` is now a protected source CRUD surface and should remain proof-operational: compact project list, claim-review state, structured facts/material schedules, material-map and hotspot controls, and clear publication guardrails.
 - `/admin/products` is now a protected source CRUD surface and should remain configuration-operational: compact product list, model/spec/default-material controls, Stone Library references, and clear publication guardrails.
