@@ -1,4 +1,4 @@
-import{c}from"./arrow-up-right-Btp_bkI_.js";/**
+import{c}from"./arrow-up-right-CnIzriZd.js";/**
  * @license lucide-react v0.525.0 - ISC
  *
  * This source code is licensed under the ISC license.
