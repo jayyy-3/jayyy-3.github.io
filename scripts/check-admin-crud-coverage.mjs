@@ -397,6 +397,27 @@ function checkAdminLiveVerifierBoundaries() {
   const text = readRequired('scripts/check-admin-crud-live.mjs');
   requireIncludes(text, 'assertNotPubliclyVisible', 'scripts/check-admin-crud-live.mjs');
   requireIncludes(text, 'assertNotAnonymousReadable', 'scripts/check-admin-crud-live.mjs');
+  requireIncludes(
+    text,
+    'Publish then archive public-facing tagged QA rows before the final anonymous visibility check.',
+    'scripts/check-admin-crud-live.mjs',
+  );
+
+  for (const action of [
+    'media_asset.publish',
+    'stone_group.publish',
+    'stone_variant.publish',
+    'stone_finish_image.publish',
+    'product.publish',
+    'product_model.publish',
+    'project.publish',
+    'project_material_map.publish',
+    'project_hotspot.publish',
+    'article.publish',
+    'article_block.publish',
+  ]) {
+    requireIncludes(text, action, 'scripts/check-admin-crud-live.mjs');
+  }
 
   for (const table of ['enquiries', 'sample_requests', 'sample_request_items']) {
     requireRegex(
@@ -444,7 +465,7 @@ function checkAdminRemovalContract() {
   requireIncludes(adminIa, 'Current launch removal model', 'docs/ADMIN_IA_ACCESS.md');
   requireIncludes(
     adminIa,
-    'Live admin verification should prove archive behavior, public invisibility, and auditability',
+    'Live admin verification should prove publish/archive behavior, public invisibility, and auditability',
     'docs/ADMIN_IA_ACCESS.md',
   );
   requireIncludes(

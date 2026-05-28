@@ -16,15 +16,16 @@ const PNG_1X1 = Buffer.from(
 
 const livePlan = [
   'Verify the signed-in admin profile is active owner/admin by reading through RLS.',
-  'Create and archive a tagged draft site_settings row without touching the default settings row.',
-  'Create and archive a tagged media_assets row; optionally upload a tiny private Storage object.',
+  'Create, update, publish, and archive a tagged site_settings row without touching the default settings row.',
+  'Create, publish, and archive a tagged media_assets row; optionally upload a tiny private Storage object.',
   'Create tagged Stone Library group, variant, finish capability, and finish image records.',
   'Create tagged Product, model, material-default, and spec records.',
   'Create tagged Project, facts, material schedule, material map, and hotspot records.',
   'Create tagged Article metadata and structured block records.',
   'Create tagged private enquiry/sample-request QA rows, then update workflow fields.',
   'Record admin_audit_events for primary writes and export-gate actions.',
-  'Verify tagged draft/archived content and private lead rows are not anonymously visible through browser-key reads.',
+  'Publish then archive public-facing tagged QA rows before the final anonymous visibility check.',
+  'Verify tagged archived content and private lead rows are not anonymously visible through browser-key reads.',
   'Leave tagged QA rows archived or private for auditability; no physical deletes are attempted.',
 ];
 
@@ -441,6 +442,32 @@ async function updateById(config, accessToken, table, id, payload) {
   return rows[0];
 }
 
+async function transitionStatus(
+  config,
+  accessToken,
+  userId,
+  table,
+  id,
+  status,
+  action,
+  entityType,
+  metadata,
+  extraPayload = {},
+) {
+  const timestampColumn = status === 'published' ? 'published_at' : 'archived_at';
+  const row = await updateById(config, accessToken, table, id, {
+    ...extraPayload,
+    status,
+    updated_by: userId,
+    [timestampColumn]: new Date().toISOString(),
+  });
+  await recordAudit(config, accessToken, userId, action, entityType, id, {
+    ...metadata,
+    transition: status,
+  });
+  return row;
+}
+
 async function recordAudit(config, accessToken, userId, action, entityType, entityId, metadata) {
   return insertRow(config, accessToken, 'admin_audit_events', {
     actor_user_id: userId,
@@ -546,12 +573,18 @@ async function run() {
   });
   created.push(`site_settings#${settings.id}`);
   await recordAudit(config, accessToken, authUser.id, 'site_settings.create', 'site_settings', settings.id, metadata);
-  await updateById(config, accessToken, 'site_settings', settings.id, {
-    status: 'archived',
-    company_name: `Urblo QA archived ${marker}`,
-    updated_by: authUser.id,
-  });
-  await recordAudit(config, accessToken, authUser.id, 'site_settings.update', 'site_settings', settings.id, metadata);
+  await transitionStatus(
+    config,
+    accessToken,
+    authUser.id,
+    'site_settings',
+    settings.id,
+    'published',
+    'site_settings.update',
+    'site_settings',
+    metadata,
+    { company_name: `Urblo QA published ${marker}` },
+  );
 
   const storageRef = options.includeStorage ? await uploadStorageObject(config, accessToken, marker) : null;
   const media = await insertRow(config, accessToken, 'media_assets', {
@@ -573,11 +606,17 @@ async function run() {
   });
   created.push(`media_assets#${media.id}`);
   await recordAudit(config, accessToken, authUser.id, 'media_asset.create', 'media_assets', media.id, metadata);
-  await updateById(config, accessToken, 'media_assets', media.id, {
-    status: 'archived',
-    updated_by: authUser.id,
-  });
-  await recordAudit(config, accessToken, authUser.id, 'media_asset.archive', 'media_assets', media.id, metadata);
+  await transitionStatus(
+    config,
+    accessToken,
+    authUser.id,
+    'media_assets',
+    media.id,
+    'published',
+    'media_asset.publish',
+    'media_assets',
+    metadata,
+  );
 
   const stoneGroup = await insertRow(config, accessToken, 'stone_groups', {
     stone_group_key: slug,
@@ -879,6 +918,21 @@ async function run() {
   );
 
   for (const [table, id, action, entityType] of [
+    ['stone_groups', stoneGroup.id, 'stone_group.publish', 'stone_groups'],
+    ['stone_variants', stoneVariant.id, 'stone_variant.publish', 'stone_variants'],
+    ['stone_finish_images', finishImage.id, 'stone_finish_image.publish', 'stone_finish_images'],
+    ['products', product.id, 'product.publish', 'products'],
+    ['product_models', productModel.id, 'product_model.publish', 'product_models'],
+    ['projects', project.id, 'project.publish', 'projects'],
+    ['project_material_maps', materialMap.id, 'project_material_map.publish', 'project_material_maps'],
+    ['project_hotspots', hotspot.id, 'project_hotspot.publish', 'project_hotspots'],
+    ['articles', article.id, 'article.publish', 'articles'],
+    ['article_blocks', articleBlock.id, 'article_block.publish', 'article_blocks'],
+  ]) {
+    await transitionStatus(config, accessToken, authUser.id, table, id, 'published', action, entityType, metadata);
+  }
+
+  for (const [table, id, action, entityType] of [
     ['project_hotspots', hotspot.id, 'project_hotspot.archive', 'project_hotspots'],
     ['project_material_maps', materialMap.id, 'project_material_map.archive', 'project_material_maps'],
     ['projects', project.id, 'project.archive', 'projects'],
@@ -889,12 +943,23 @@ async function run() {
     ['stone_finish_images', finishImage.id, 'stone_finish_image.archive', 'stone_finish_images'],
     ['stone_variants', stoneVariant.id, 'stone_variant.archive', 'stone_variants'],
     ['stone_groups', stoneGroup.id, 'stone_group.archive', 'stone_groups'],
+    ['media_assets', media.id, 'media_asset.archive', 'media_assets'],
+    ['site_settings', settings.id, 'site_settings.update', 'site_settings'],
   ]) {
-    await updateById(config, accessToken, table, id, {
-      status: 'archived',
-      updated_by: authUser.id,
-    });
-    await recordAudit(config, accessToken, authUser.id, action, entityType, id, metadata);
+    const extraPayload =
+      table === 'site_settings' ? { company_name: `Urblo QA archived ${marker}` } : {};
+    await transitionStatus(
+      config,
+      accessToken,
+      authUser.id,
+      table,
+      id,
+      'archived',
+      action,
+      entityType,
+      metadata,
+      extraPayload,
+    );
   }
 
   await recordAudit(config, accessToken, authUser.id, 'media_assets.export_manifest', 'media_assets', null, {
@@ -919,7 +984,7 @@ async function run() {
   ]);
 
   const auditRows = await selectAuditRowsByMarker(config, accessToken, marker);
-  assert.ok(auditRows.length >= 26, `Expected at least 26 tagged audit rows, found ${auditRows.length}.`);
+  assert.ok(auditRows.length >= 40, `Expected at least 40 tagged audit rows, found ${auditRows.length}.`);
 
   console.log('Admin CRUD live verification passed.');
   console.log(`Created tagged QA rows: ${created.join(', ')}`);
@@ -927,6 +992,7 @@ async function run() {
     console.log(`Uploaded tagged private Storage object: ${storageRef.bucket}/${storageRef.objectPath}`);
   }
   console.log(`Audit rows recorded: ${auditRows.length}`);
+  console.log('Tagged QA content rows were published, archived, then checked for anonymous invisibility.');
   console.log('Anonymous browser-key reads returned zero tagged QA content rows and no private lead rows.');
   console.log('Tagged rows are retained for auditability; cleanup is intentionally not destructive.');
 }

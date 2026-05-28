@@ -67,7 +67,7 @@ Lead modules use operational status instead of public visibility:
 Current launch removal model:
 - Content and media records use archive/publish state changes as the customer-facing removal path.
 - Physical deletes are destructive operations and remain outside the launch-critical CMS path until Jay approves a retention and destructive-delete policy.
-- Live admin verification should prove archive behavior, public invisibility, and auditability; it should not physically delete production rows.
+- Live admin verification should prove publish/archive behavior, public invisibility, and auditability after archive; it should not physically delete production rows.
 
 ## Module Rollout Sequence
 
@@ -173,7 +173,7 @@ Current implementation:
 - `/admin/audit` is the first audit visibility source screen behind the auth gate, with owner/admin read access, actor/entity filters, metadata inspection, empty states, and no mutation/delete controls.
 - `src/lib/adminAudit.ts` is the shared browser-side audit writer used by admin Settings, Media, Stone Library, Projects, Products, Articles, and Leads save flows. It records successful primary mutations into `admin_audit_events`; audit insert failure is surfaced in the success notice without rolling back the primary save.
 - `npm run agent:admin-crud-coverage` is the source-only admin coverage check. It verifies active route/module registration, protected shell coverage, launch-critical table references, role-gated controls, publish/archive paths, shared audit writer usage, and audit-gated Media/Leads exports before live credential QA.
-- `npm run agent:admin-crud-live` is the credential-gated live admin write check. Default mode is plan-only and performs no writes. With `--allow-writes`, it requires a browser-safe key plus a real owner/admin Supabase Auth session, then creates tagged draft/archived QA records across launch-critical admin tables and audit-gated export actions through normal RLS, and verifies tagged public-content QA rows plus private lead QA rows are not anonymously visible through browser-key reads. It does not physically delete live data.
+- `npm run agent:admin-crud-live` is the credential-gated live admin write check. Default mode is plan-only and performs no writes. With `--allow-writes`, it requires a browser-safe key plus a real owner/admin Supabase Auth session, then creates tagged QA records across launch-critical admin tables, publishes and archives public-facing QA rows through normal RLS, records audit-gated export actions, and verifies tagged archived public-content QA rows plus private lead QA rows are not anonymously visible through browser-key reads. It does not physically delete live data.
 - Supabase `admin_profile_owner_hardening` keeps owner-role assignment and owner-profile changes owner-protected, while admins can maintain non-owner profiles.
 - Supabase `security_definer_function_grants` and `security_definer_private_helpers` revoke exposed public helper RPC execution from browser roles; authenticated RLS/Storage policy evaluation now uses private SECURITY DEFINER helpers from a non-exposed schema.
 

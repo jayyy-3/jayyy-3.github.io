@@ -2,6 +2,49 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Admin Live Publish Archive Verifier)
+
+### Scope
+- Strengthened `scripts/check-admin-crud-live.mjs` so the future approval-gated live admin verifier exercises publish-then-archive transitions for public-facing tagged QA rows.
+- The live plan now proves create/update/publish/archive more directly before the final anonymous browser-key invisibility check.
+- Hardened `scripts/check-admin-crud-coverage.mjs` so source coverage fails if the live verifier drops the public-facing publish actions.
+- Updated Harness docs to align the live admin verifier contract with the launch-critical non-destructive lifecycle.
+
+### Changed Files
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `scripts/check-admin-crud-coverage.mjs`
+- `scripts/check-admin-crud-live.mjs`
+
+### Verification Results
+- `node --check scripts/check-admin-crud-live.mjs`: pass.
+- `node --check scripts/check-admin-crud-coverage.mjs`: pass.
+- `npm run agent:admin-crud-live`: pass in plan-only/no-write mode and now lists publish-then-archive public-facing QA checks.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:public-supabase-readiness`: pass.
+- `npm run agent:live-readiness`: pass in report-only mode; live form/admin/Cloudflare inputs remain missing or approval-gated.
+- `npm run agent:cloudflare-readiness`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- Source/docs-only verifier hardening. No Supabase rows, Storage objects, Auth users, Cloudflare state, credentials, or live writes were created or changed.
+- The publish-then-archive proof will only execute after browser-safe Supabase config, a real owner/admin session, and Jay approval for tagged live admin QA writes exist.
+
+### Next Handoff
+- `NOW-ADMIN-CMS-001`
+- `NOW-ADMIN-CONTENT-CRUD-001`
+- `NOW-ADMIN-MEDIA-LEADS-001`
+
 ## Entry - 2026-05-29 (Admin Archive Contract Verifier Guard)
 
 ### Scope
