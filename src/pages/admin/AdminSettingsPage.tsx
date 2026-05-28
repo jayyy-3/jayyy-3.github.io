@@ -884,6 +884,18 @@ function validateAdminProfileForm(
         return 'A valid email address is required.';
     }
 
+    if (!editingUserId && existingProfiles.some((profile) => profile.user_id === userId)) {
+        return 'This Supabase Auth user ID already has an admin profile.';
+    }
+
+    const duplicateEmailProfile = existingProfiles.find(
+        (profile) =>
+            profile.user_id !== editingUserId && profile.email.trim().toLowerCase() === email.toLowerCase(),
+    );
+    if (duplicateEmailProfile) {
+        return 'Admin profile email is already assigned to another user.';
+    }
+
     if (currentRole !== 'owner') {
         if (form.role === 'owner') {
             return 'Only an owner can assign the owner role.';

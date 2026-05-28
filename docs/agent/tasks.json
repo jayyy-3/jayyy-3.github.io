@@ -492,6 +492,7 @@
         "2026-05-28: Applied and verified admin_profile_owner_hardening and security_definer_function_grants on Supabase project npkidywzwddbnfrnxlmo. Admins can maintain non-owner profiles, owner-role changes require owner, anon helper execution is revoked, and rls_auto_enable is not directly executable by anon/authenticated.",
         "2026-05-29: Applied and verified security_definer_private_helpers on Supabase project npkidywzwddbnfrnxlmo. RLS and Storage policies now call private.has_admin_role(...), zero policies call public.has_admin_role(...), public helper execution is revoked from authenticated, anon/authenticated public reads still work, and the Supabase security advisor reports zero security lints.",
         "2026-05-29: Applied and verified admin_profile_email_uniqueness on Supabase project npkidywzwddbnfrnxlmo. `admin_profiles_email_ci_unique_idx` prevents duplicate normalized profile emails so admin team and first-admin readiness lookups stay unambiguous.",
+        "2026-05-29: `/admin/settings` now validates duplicate Supabase Auth user IDs and duplicate normalized admin profile emails before save, and admin CRUD coverage guards those messages.",
         "Live settings/profile save verification still requires browser-safe Supabase key configuration and an active owner/admin profile.",
         "2026-05-28: Admin CRUD coverage verifier now checks settings/admin profile table references, owner/self-lockout guardrail copy, mutation paths, and site_settings/admin_profile audit actions.",
         "2026-05-28: Admin CRUD live verifier now includes a tagged site_settings create/update/publish/archive path through owner/admin RLS, but it does not create or mutate first-admin profile rows."
@@ -499,6 +500,7 @@
       "acceptance": [
         "Owner/admin users can inspect and save the default site_settings row through /admin/settings.",
         "Owner/admin users can create and update admin profile rows for existing Supabase Auth users through /admin/settings.",
+        "Admin profile form validation catches duplicate Supabase Auth user IDs and duplicate normalized admin profile emails before save.",
         "Owner-role assignment and owner-profile changes are owner-protected in UI and RLS; no destructive profile delete controls are shown.",
         "Viewer/editor users can inspect but not save global settings in the UI.",
         "Supabase RLS write policies for site_settings require owner/admin roles.",

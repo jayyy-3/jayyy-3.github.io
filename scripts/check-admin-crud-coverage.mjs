@@ -55,6 +55,8 @@ const pageChecks = [
       'Only an owner can assign the owner role.',
       'At least one active owner profile must remain.',
       'Do not remove your own active admin access from this screen.',
+      'This Supabase Auth user ID already has an admin profile.',
+      'Admin profile email is already assigned to another user.',
     ],
   },
   {

@@ -166,6 +166,7 @@ Current implementation:
 - When first-admin write mode is approved and run, the bootstrap script records a server-side `admin_profile.bootstrap` audit event with `actor_user_id = null` because the operation is performed by the guarded service-role setup path, not a signed-in browser admin.
 - `/admin/settings` is the first CRUD source screen behind the auth gate, with owner/admin save controls for the default `site_settings` row.
 - `/admin/settings` also includes a non-destructive admin team manager for existing Supabase Auth users, with owner/admin profile create/update controls, owner-role guardrails, self-lockout prevention, and no delete controls.
+- `/admin/settings` validates duplicate Supabase Auth user IDs and duplicate admin profile emails before save so database uniqueness failures are not the first user-facing feedback.
 - `/admin/media` is the first media CRUD source screen behind the auth gate, with admin/editor upload and metadata controls, audit-gated media manifest export, viewer read-only behavior, and publish/archive guardrails.
 - `/admin/stone-library` is the first content CRUD source screen behind the auth gate, with group, variant, finish capability, finish image link, validation, publish/archive, and read-only states.
 - `/admin/projects` is the next content CRUD source screen behind the auth gate, with project, fact, material schedule, material map, hotspot, validation, claim-review, publish/archive, and read-only states.

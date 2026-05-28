@@ -2,6 +2,50 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Admin Profile Form Duplicate Validation)
+
+### Scope
+- Added `/admin/settings` form validation for duplicate Supabase Auth user IDs before creating an admin profile.
+- Added `/admin/settings` form validation for duplicate normalized admin profile emails before save, matching the live `admin_profiles_email_ci_unique_idx` database constraint.
+- Expanded `npm run agent:admin-crud-coverage` to guard both validation messages.
+- Updated Harness docs to record the UI validation layer and remaining live save blockers.
+
+### Changed Files
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `scripts/check-admin-crud-coverage.mjs`
+- `src/pages/admin/AdminSettingsPage.tsx`
+
+### Verification Results
+- `node --check scripts/check-admin-crud-coverage.mjs`: pass.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass, including public/admin route shells, Forms API checks, and Contact form UI source checks.
+- `npm run agent:admin-crud-live`: pass in plan-only/no-write mode.
+- `npm run agent:live-readiness`: pass in report-only mode; live form/admin/Cloudflare inputs remain missing or approval-gated.
+- `npm run agent:cloudflare-readiness`: pass.
+- `npm run agent:public-supabase-readiness`: pass.
+- `npm run agent:forms-ui`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- This improves source/UI validation only. Live `/admin/settings` profile saves still require browser-safe Supabase config, a real owner/admin profile, and approved live QA writes.
+- It does not replace the live database uniqueness constraint or live first-admin/readiness checks.
+
+### Next Handoff
+- `NOW-ADMIN-SETTINGS-CRUD-001`
+- `NOW-ADMIN-AUTH-RLS-001`
+- `NOW-ADMIN-CMS-001`
+
 ## Entry - 2026-05-29 (Admin Profile Email Uniqueness)
 
 ### Scope
