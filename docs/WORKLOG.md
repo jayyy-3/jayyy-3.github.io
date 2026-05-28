@@ -2,6 +2,49 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Forms Live Audit Metadata Coverage)
+
+### Scope
+- Strengthened `scripts/check-forms-api-live.mjs` so approved live form verification checks valid enquiry/sample-request audit rows include the submitted source route metadata.
+- Added live verifier checks that invalid enquiry/sample-request payloads create no lead rows and no matching audit events.
+- Strengthened `scripts/check-forms-api.mjs` so mock/source Forms API checks guard enquiry and sample-request audit payload entity fields, source route metadata, item id, and quantity.
+- Kept the checkpoint source/mock-only. No Supabase rows, Storage objects, Auth users, Cloudflare state, credentials, or live writes were created or changed.
+
+### Changed Files
+- `AGENTS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `scripts/check-forms-api-live.mjs`
+- `scripts/check-forms-api.mjs`
+
+### Verification Results
+- `node --check scripts/check-forms-api-live.mjs`: pass.
+- `node --check scripts/check-forms-api.mjs`: pass.
+- `node scripts/check-forms-api.mjs`: pass.
+- `npm run agent:forms-ui`: pass.
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass, including public/admin route shells, Forms API checks, and Contact form UI source checks.
+- `npm run agent:check`: pass.
+- `npm run agent:live-readiness`: pass in report-only mode; live form/admin/Cloudflare inputs remain missing or approval-gated.
+- `npm run agent:public-supabase-readiness`: pass.
+- `npm run agent:cloudflare-readiness`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- This improves source/mock and future live verification coverage. It still does not prove production form persistence until a server-side Supabase service-role key is available and Jay approves tagged live form QA writes.
+- Turnstile, email delivery, deployed Cloudflare Function behavior, and private-row browser-key proof remain pending their documented credentials and approval gates.
+
+### Next Handoff
+- `NOW-FORMS-BACKEND-001`
+- `NOW-FORMS-SUPABASE-001`
+- `NOW-ADMIN-AUTH-RLS-001`
+
 ## Entry - 2026-05-29 (Admin Live Audit Action Coverage)
 
 ### Scope

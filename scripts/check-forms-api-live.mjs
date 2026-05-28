@@ -265,6 +265,12 @@ async function countRows(config, table, filters) {
   return rows.length;
 }
 
+async function selectAuditRowsByMetadata(config, metadata) {
+  const query = new URLSearchParams({ select: 'id,action,entity_type,entity_id,metadata' });
+  query.set('metadata', `cs.${JSON.stringify(metadata)}`);
+  return supabaseRest(config, `/rest/v1/admin_audit_events?${query.toString()}`);
+}
+
 function buildQuery(select, filters = {}) {
   const query = new URLSearchParams({ select });
   for (const [key, value] of Object.entries(filters)) {
@@ -308,7 +314,7 @@ async function assertNotAnonymousReadable(config, table, filters, label) {
   return true;
 }
 
-async function verifyAudit(config, action, entityType, entityId) {
+async function verifyAudit(config, action, entityType, entityId, expectedMetadata = {}) {
   const rows = await selectRows(
     config,
     'admin_audit_events',
@@ -317,9 +323,17 @@ async function verifyAudit(config, action, entityType, entityId) {
       entity_type: entityType,
       entity_id: entityId,
     },
-    'id,action,entity_type,entity_id',
+    'id,action,entity_type,entity_id,metadata',
   );
   assert.equal(rows.length, 1, `Expected one audit event for ${action} ${entityType} #${entityId}`);
+
+  for (const [key, value] of Object.entries(expectedMetadata)) {
+    assert.equal(
+      rows[0].metadata?.[key],
+      value,
+      `Expected audit event ${action} ${entityType} #${entityId} metadata.${key} to match.`,
+    );
+  }
 }
 
 function verifyNotificationStatus(row, responseBody, label) {
@@ -369,15 +383,20 @@ async function run() {
 
   const invalidEnquiryEmail = `invalid-enquiry-${marker}`;
   const invalidSampleEmail = `invalid-sample-${marker}`;
+  const invalidEnquiryRoute = `/contact?live_check=${marker}&invalid=enquiry`;
+  const invalidSampleRoute = `/contact?intent=sample-request&live_check=${marker}&invalid=sample`;
+  const enquiryRoute = `/contact?live_check=${marker}`;
+  const sampleRoute = `/contact?intent=sample-request&live_check=${marker}`;
 
   assert.equal(await countRows(config, 'enquiries', { email: invalidEnquiryEmail }), 0);
+  assert.equal((await selectAuditRowsByMetadata(config, { sourceRoute: invalidEnquiryRoute })).length, 0);
   const invalidEnquiryResponse = await submitForm(
     '/api/enquiries',
     {
       name: 'No',
       email: invalidEnquiryEmail,
       message: 'short',
-      sourceRoute: `/contact?live_check=${marker}`,
+      sourceRoute: invalidEnquiryRoute,
     },
     runtimeEnv,
     options,
@@ -386,7 +405,8 @@ async function run() {
   assert.equal(invalidEnquiryResponse.status, 400);
   assert.equal(invalidEnquiryBody.ok, false);
   assert.equal(await countRows(config, 'enquiries', { email: invalidEnquiryEmail }), 0);
-  console.log('Invalid enquiry created no rows.');
+  assert.equal((await selectAuditRowsByMetadata(config, { sourceRoute: invalidEnquiryRoute })).length, 0);
+  console.log('Invalid enquiry created no rows or audit events.');
 
   const enquiryEmail = `enquiry-${marker}@example.com`;
   const enquiryResponse = await submitForm(
@@ -398,7 +418,7 @@ async function run() {
         company: 'Urblo Verification',
         projectType: 'Live persistence check',
         message: `Live Supabase form persistence verification marker ${marker}.`,
-        sourceRoute: `/contact?live_check=${marker}`,
+        sourceRoute: enquiryRoute,
       },
       options,
     ),
@@ -412,9 +432,9 @@ async function run() {
   const enquiryRows = await selectRows(config, 'enquiries', { id: enquiryBody.id });
   assert.equal(enquiryRows.length, 1, 'Expected one live enquiry row.');
   assert.equal(enquiryRows[0].email, enquiryEmail);
-  assert.equal(enquiryRows[0].source_route, `/contact?live_check=${marker}`);
+  assert.equal(enquiryRows[0].source_route, enquiryRoute);
   verifyNotificationStatus(enquiryRows[0], enquiryBody, 'enquiry');
-  await verifyAudit(config, 'enquiry.create', 'enquiries', enquiryBody.id);
+  await verifyAudit(config, 'enquiry.create', 'enquiries', enquiryBody.id, { sourceRoute: enquiryRoute });
   const checkedEnquiryBoundary = await assertNotAnonymousReadable(
     config,
     'enquiries',
@@ -424,6 +444,7 @@ async function run() {
   console.log(`Valid enquiry created row and audit event: enquiries #${enquiryBody.id}.`);
 
   assert.equal(await countRows(config, 'sample_requests', { email: invalidSampleEmail }), 0);
+  assert.equal((await selectAuditRowsByMetadata(config, { sourceRoute: invalidSampleRoute })).length, 0);
   const invalidSampleResponse = await submitForm(
     '/api/sample-requests',
     {
@@ -431,7 +452,7 @@ async function run() {
       email: invalidSampleEmail,
       shippingAddress: 'x',
       sampleStone: '',
-      sourceRoute: `/contact?intent=sample-request&live_check=${marker}`,
+      sourceRoute: invalidSampleRoute,
     },
     runtimeEnv,
     options,
@@ -440,7 +461,8 @@ async function run() {
   assert.equal(invalidSampleResponse.status, 400);
   assert.equal(invalidSampleBody.ok, false);
   assert.equal(await countRows(config, 'sample_requests', { email: invalidSampleEmail }), 0);
-  console.log('Invalid sample request created no rows.');
+  assert.equal((await selectAuditRowsByMetadata(config, { sourceRoute: invalidSampleRoute })).length, 0);
+  console.log('Invalid sample request created no rows or audit events.');
 
   const sampleEmail = `sample-${marker}@example.com`;
   const sampleResponse = await submitForm(
@@ -456,7 +478,7 @@ async function run() {
         sampleFinish: 'Honed',
         sampleQuantity: '2',
         message: `Live sample request persistence verification marker ${marker}.`,
-        sourceRoute: `/contact?intent=sample-request&live_check=${marker}`,
+        sourceRoute: sampleRoute,
       },
       options,
     ),
@@ -470,7 +492,7 @@ async function run() {
   const sampleRows = await selectRows(config, 'sample_requests', { id: sampleBody.id });
   assert.equal(sampleRows.length, 1, 'Expected one live sample request row.');
   assert.equal(sampleRows[0].email, sampleEmail);
-  assert.equal(sampleRows[0].source_route, `/contact?intent=sample-request&live_check=${marker}`);
+  assert.equal(sampleRows[0].source_route, sampleRoute);
   verifyNotificationStatus(sampleRows[0], sampleBody, 'sample request');
 
   const itemRows = await selectRows(
@@ -482,7 +504,11 @@ async function run() {
   assert.equal(itemRows.length, 1, 'Expected one live sample request item row.');
   assert.equal(itemRows[0].quantity, 2);
   assert.match(itemRows[0].notes, /Angola Black/);
-  await verifyAudit(config, 'sample_request.create', 'sample_requests', sampleBody.id);
+  await verifyAudit(config, 'sample_request.create', 'sample_requests', sampleBody.id, {
+    sourceRoute: sampleRoute,
+    itemId: itemRows[0].id,
+    quantity: 2,
+  });
   const checkedSampleRequestBoundary = await assertNotAnonymousReadable(
     config,
     'sample_requests',

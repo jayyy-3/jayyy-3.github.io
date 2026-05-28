@@ -166,7 +166,11 @@ await withFetchMock(async (calls) => {
   assert.match(calls[0].url, /\/rest\/v1\/enquiries\?select=id$/);
   assert.equal(JSON.parse(calls[0].init.body).email, 'alex@example.com');
   assert.match(calls[1].url, /\/rest\/v1\/admin_audit_events$/);
-  assert.equal(JSON.parse(calls[1].init.body).action, 'enquiry.create');
+  const enquiryAuditBody = JSON.parse(calls[1].init.body);
+  assert.equal(enquiryAuditBody.action, 'enquiry.create');
+  assert.equal(enquiryAuditBody.entity_type, 'enquiries');
+  assert.equal(enquiryAuditBody.entity_id, 101);
+  assert.equal(enquiryAuditBody.metadata.sourceRoute, '/contact');
 });
 
 await withFetchMock(async (calls) => {
@@ -196,7 +200,13 @@ await withFetchMock(async (calls) => {
   assert.match(calls[1].url, /\/rest\/v1\/sample_request_items\?select=id$/);
   assert.equal(JSON.parse(calls[1].init.body).sample_request_id, 202);
   assert.match(calls[2].url, /\/rest\/v1\/admin_audit_events$/);
-  assert.equal(JSON.parse(calls[2].init.body).action, 'sample_request.create');
+  const sampleAuditBody = JSON.parse(calls[2].init.body);
+  assert.equal(sampleAuditBody.action, 'sample_request.create');
+  assert.equal(sampleAuditBody.entity_type, 'sample_requests');
+  assert.equal(sampleAuditBody.entity_id, 202);
+  assert.equal(sampleAuditBody.metadata.sourceRoute, '/contact?intent=sample-request');
+  assert.equal(sampleAuditBody.metadata.itemId, 303);
+  assert.equal(sampleAuditBody.metadata.quantity, 2);
 });
 
 await withFetchMock(async (calls) => {
