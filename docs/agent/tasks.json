@@ -138,8 +138,11 @@
         "functions/api/enquiries.js",
         "functions/api/sample-requests.js",
         "functions/_lib/forms.js",
+        "scripts/check-forms-api-live.mjs",
         "scripts/check-forms-api.mjs",
-        "scripts/agent-smoke.sh"
+        "scripts/agent-init.sh",
+        "scripts/agent-smoke.sh",
+        "package.json"
       ],
       "notes": [
         "Run after Supabase foundation and baseline seed work. Turnstile and email notification can be staged: database insert comes first, notification can remain pending until the email provider secret exists.",
@@ -147,7 +150,8 @@
         "2026-05-27: Added Pages Function source for /api/enquiries and /api/sample-requests. Contact page now posts enquiries to /api/enquiries; Sample Request mode posts to /api/sample-requests and creates a sample item payload. Footer/sample CTAs now route to /contact?intent=sample-request.",
         "2026-05-27: Mock API checks pass for valid enquiry, invalid enquiry, valid sample request with item row, and configured Turnstile failure. Live Supabase insert verification remains pending server-side SUPABASE_SERVICE_ROLE_KEY configuration.",
         "2026-05-28: Form handlers now attempt server-side admin_audit_events writes after successful enquiry/sample request inserts. Mock API checks verify audit calls, audit-failure resilience after lead storage, missing service-role fail-closed behavior before Supabase calls, and configured Turnstile failure.",
-        "2026-05-28: `.env.example`, Cloudflare deployment docs, and architecture docs now list canonical form/admin environment variables plus supported compatibility aliases for Supabase service key, Turnstile, Resend sender, and lead notification recipient configuration."
+        "2026-05-28: `.env.example`, Cloudflare deployment docs, and architecture docs now list canonical form/admin environment variables plus supported compatibility aliases for Supabase service key, Turnstile, Resend sender, and lead notification recipient configuration.",
+        "2026-05-28: Added `npm run agent:forms-live` as the credential-gated live verification runner for valid enquiry, invalid enquiry, valid sample request, invalid sample request, sample item, and server-side audit rows. The command intentionally fails when the service-role key is unavailable and retains tagged test rows for auditability unless Jay approves cleanup."
       ],
       "acceptance": [
         "Valid enquiry submissions create Supabase enquiry rows through a server-side endpoint.",
@@ -163,6 +167,7 @@
         "npx tsc -b",
         "npm run agent:smoke",
         "node scripts/check-forms-api.mjs",
+        "npm run agent:forms-live (after SUPABASE_SERVICE_ROLE_KEY is configured)",
         "Mock API test: successful enquiry attempts admin_audit_events insert",
         "Mock API test: successful sample request attempts admin_audit_events insert",
         "Mock API test: audit insert failure still returns success after lead storage",

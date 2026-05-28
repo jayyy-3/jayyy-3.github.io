@@ -107,6 +107,10 @@ Current `/functions/api` endpoints:
 - Static routes like `/projects` and `/assets/...` should not invoke Functions.
 - Cloudflare analytics should show static traffic and API traffic separately.
 - Valid form tests require `SUPABASE_SERVICE_ROLE_KEY` in the Pages Function environment.
+- Credential-gated live verification can be run with:
+  - `npm run agent:forms-live` for direct handler verification against local service-role credentials.
+  - `npm run agent:forms-live -- --base-url https://<preview>.pages.dev` for deployed endpoint verification, after the Pages environment has the service-role key.
+- The live verification command creates tagged test enquiry and sample-request rows, verifies their `admin_audit_events`, verifies invalid payloads create no rows, and keeps the test rows until Jay approves cleanup.
 - Admin route tests require a browser-safe Supabase key, a Supabase Auth user, and a matching active `admin_profiles` row.
 - Settings save tests require an active owner/admin profile because `site_settings` write RLS is owner/admin only. Admin profile save tests require existing Supabase Auth users and must verify owner-role changes are owner-protected.
 - Media upload/save tests require an active owner/admin/editor profile because Storage object writes and `media_assets` mutations are admin/editor only.
@@ -139,6 +143,12 @@ Run from the repo root before deploying:
 - `npm run agent:smoke`
 - `npm run agent:check`
 - `git diff --check`
+
+After form secrets are configured, run:
+- `npm run agent:forms-live`
+
+For deployed Pages preview form verification, run:
+- `npm run agent:forms-live -- --base-url https://<preview>.pages.dev`
 
 ## Current Blocker
 Repo-side Cloudflare Pages preparation can be committed now.

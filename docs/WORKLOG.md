@@ -2,6 +2,51 @@
 
 Last updated: 2026-05-28
 
+## Entry - 2026-05-28 (Live Forms Verification Runner)
+
+### Scope
+- Added `scripts/check-forms-api-live.mjs` as a credential-gated live verification runner for Contact and Sample Request persistence.
+- Added `npm run agent:forms-live`.
+- The runner supports direct handler verification by default and deployed endpoint verification with `--base-url`.
+- It verifies valid enquiry rows, valid sample request rows, sample item rows, server-side audit rows, invalid enquiry no-write behavior, and invalid sample-request no-write behavior once a service-role key is configured.
+- It intentionally fails when `SUPABASE_SERVICE_ROLE_KEY`/`SUPABASE_SERVICE_KEY` is absent and keeps tagged test rows for auditability until Jay approves cleanup.
+
+### Changed Files
+- `AGENTS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/CLOUDFLARE_DEPLOYMENT.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `package.json`
+- `scripts/agent-init.sh`
+- `scripts/check-forms-api-live.mjs`
+
+### Verification Results
+- `node --check scripts/check-forms-api-live.mjs`: pass.
+- `node scripts/check-forms-api.mjs`: pass.
+- `node -e "JSON.parse(require('fs').readFileSync('docs/agent/tasks.json','utf8')); JSON.parse(require('fs').readFileSync('package.json','utf8')); console.log('json ok')"`: pass.
+- `npm run agent:forms-live`: expected credential-gated fail. No local secret file is present, and the command stops with missing `SUPABASE_SERVICE_ROLE_KEY` before any Supabase calls.
+- Supabase connector pre-check: pass. Current live counts remain 0 admin profiles, 0 audit events, 0 enquiries, 0 sample requests, 0 sample request items, 12 finish definitions, and 1 site settings row.
+- Supabase connector migration check: pass. Applied migrations still include foundation, hardening, anon read-only, baseline seed, admin settings/profile hardening, SECURITY DEFINER grant hardening, and media Storage migrations.
+- `npm run build`: pass. Browserslist staleness notice remains; admin chunk is about 432 kB before gzip.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass, including `/admin/*` route shells and Forms API mock checks.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- Live form persistence is still unverified until a real server-side service-role key is configured locally or in Cloudflare Pages.
+- The live runner creates tagged test rows by design and does not delete them automatically; cleanup requires Jay approval because it is a destructive database action.
+- Turnstile and Resend production behavior remain staged; use `--turnstile-token` or `--allow-email` only when those checks are intentionally being exercised.
+
+### Next Handoff
+- `NOW-FORMS-BACKEND-001` live Supabase row/audit verification with `npm run agent:forms-live` after credentials are configured.
+- `NOW-ADMIN-AUTH-RLS-001` live auth/profile verification after browser-safe Supabase key and first admin profile are available.
+
 ## Entry - 2026-05-28 (Form Environment Example and Alias Docs)
 
 ### Scope

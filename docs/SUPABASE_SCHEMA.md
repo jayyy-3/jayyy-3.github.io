@@ -80,6 +80,7 @@ Acceptance:
 - In progress on 2026-05-27. Pages Function source and Contact UI wiring are implemented for `/api/enquiries` and `/api/sample-requests`.
 - Mock API checks verify valid enquiry payloads target `enquiries`, valid sample request payloads target `sample_requests` plus `sample_request_items`, invalid payloads return validation errors before Supabase calls, and configured Turnstile failures fail closed before Supabase calls.
 - Mock API checks also verify successful enquiry/sample request inserts attempt `admin_audit_events` writes, audit insert failure does not fail the visitor response, and missing server-side Supabase credentials fail closed before Supabase calls.
+- `npm run agent:forms-live` is now the credential-gated live verification command for this phase. It requires a service-role key, creates tagged test enquiry/sample-request rows, verifies their audit rows and sample item row, verifies invalid enquiry/sample-request payloads create no rows, and retains test rows for auditability until Jay approves cleanup.
 - Live Supabase row creation through the HTTP endpoints is still pending server-side `SUPABASE_SERVICE_ROLE_KEY` configuration in the Cloudflare/Pages Function environment.
 - Visitor UI no longer depends on opening a local email client for the main submit action.
 - Admin/lead-management follow-up can read submitted records only after admin auth and lead inbox work are implemented.
