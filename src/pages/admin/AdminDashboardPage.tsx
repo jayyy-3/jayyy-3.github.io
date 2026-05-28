@@ -218,7 +218,7 @@ function AdminDashboardContent() {
                             <h2 className="mt-2 text-2xl font-semibold text-black">Launch-critical CMS path</h2>
                         </div>
                         <div className="divide-y divide-black/10">
-                            {activeModules.map(({ key, label, path, summary, dependency, Icon, state }) => (
+                            {activeModules.map(({ key, label, path, summary, dependency, Icon }) => (
                                 <Link
                                     key={key}
                                     to={path}
@@ -235,12 +235,10 @@ function AdminDashboardContent() {
                                     <span
                                         className={[
                                             'inline-flex h-8 items-center justify-center rounded border px-3 text-[11px] font-bold uppercase tracking-[0.14em]',
-                                            state === 'active'
-                                                ? 'border-[var(--urblo-lime)] bg-[rgba(0,255,25,0.12)] text-black'
-                                                : 'border-black/15 bg-white text-black/50',
+                                            'border-[var(--urblo-lime)] bg-[rgba(0,255,25,0.12)] text-black',
                                         ].join(' ')}
                                     >
-                                        {state === 'active' ? 'Active' : 'Scaffolded'}
+                                        Source ready
                                     </span>
                                 </Link>
                             ))}

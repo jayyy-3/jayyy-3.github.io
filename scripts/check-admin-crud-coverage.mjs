@@ -38,7 +38,7 @@ const pageChecks = [
     label: 'Dashboard',
     file: 'src/pages/admin/AdminDashboardPage.tsx',
     tables: ['stone_groups', 'projects', 'products', 'articles', 'enquiries', 'sample_requests'],
-    requiredText: ['Verify live admin save, upload, and export audit rows', 'admin_profiles'],
+    requiredText: ['Verify live admin save, upload, and export audit rows', 'admin_profiles', 'Source ready'],
     mutates: false,
   },
   {
@@ -220,6 +220,12 @@ function requireIncludes(text, needle, context) {
   }
 }
 
+function requireNotIncludes(text, needle, context) {
+  if (text.includes(needle)) {
+    failures.push(`${context}: unexpected ${needle}`);
+  }
+}
+
 function requireRegex(text, pattern, context, label) {
   if (!pattern.test(text)) {
     failures.push(`${context}: missing ${label}`);
@@ -234,6 +240,10 @@ function checkRoutes() {
   const auth = readRequired('src/lib/adminAuth.tsx');
   const client = readRequired('src/lib/supabaseClient.ts');
   const audit = readRequired('src/lib/adminAudit.ts');
+
+  if (existsSync(join(root, 'src/pages/admin/AdminModulePage.tsx'))) {
+    failures.push('src/pages/admin/AdminModulePage.tsx: retired scaffold component should not remain after all launch modules are active');
+  }
 
   requireIncludes(app, 'path="/admin/*"', 'src/App.tsx');
   requireIncludes(app, 'location.pathname.startsWith(\'/admin\')', 'src/App.tsx');
@@ -257,20 +267,11 @@ function checkRoutes() {
 
   for (const module of requiredModules) {
     const marker = `key: '${module}'`;
-    const start = content.indexOf(marker);
-    if (start === -1) {
-      failures.push(`src/pages/admin/adminContent.ts: missing module key ${module}`);
-      continue;
-    }
-
-    const nextStarts = requiredModules
-      .filter((nextModule) => nextModule !== module)
-      .map((nextModule) => content.indexOf(`key: '${nextModule}'`, start + marker.length))
-      .filter((index) => index > start);
-    const end = nextStarts.length ? Math.min(...nextStarts) : content.length;
-    const block = content.slice(start, end);
-    requireIncludes(block, 'state: \'active\'', `src/pages/admin/adminContent.ts module ${module}`);
+    requireIncludes(content, marker, 'src/pages/admin/adminContent.ts');
   }
+
+  requireNotIncludes(content, "state: 'scaffold'", 'src/pages/admin/adminContent.ts');
+  requireNotIncludes(content, "state: 'locked'", 'src/pages/admin/adminContent.ts');
 
   for (const state of ['loading', 'config-missing', 'error', 'unauthenticated', 'unauthorized']) {
     requireIncludes(requireAdmin, `auth.status === '${state}'`, 'src/pages/admin/RequireAdmin.tsx');

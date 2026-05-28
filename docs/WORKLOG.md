@@ -2,6 +2,41 @@
 
 Last updated: 2026-05-28
 
+## Entry - 2026-05-28 (Admin Scaffold Cleanup)
+
+### Scope
+- Removed the retired `AdminModulePage` scaffold component now that all launch-critical admin modules have real source screens.
+- Removed unused `scaffold` / `locked` module state branches from `adminContent`, `AdminShell`, and the dashboard rollout list.
+- Updated admin CRUD coverage so the retired scaffold component cannot reappear unnoticed and the dashboard shows each module as `Source ready`.
+
+### Changed Files
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `scripts/check-admin-crud-coverage.mjs`
+- `src/pages/admin/AdminDashboardPage.tsx`
+- `src/pages/admin/AdminShell.tsx`
+- `src/pages/admin/adminContent.ts`
+- Deleted the retired admin module scaffold component.
+
+### Verification Results
+- `npm run build`: pass. Browserslist staleness notice remains; admin chunk is about 432 kB before gzip.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass, including `/admin/*` route shells.
+- `npm run agent:admin-crud-coverage`: pass. The runner now fails if the retired scaffold component reappears.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- This is a source cleanup only. It does not prove live admin login, live RLS writes, live audit rows, or Supabase-backed form persistence.
+
+### Next Handoff
+- `NOW-ADMIN-CMS-001`
+- `NOW-ADMIN-AUTH-RLS-001`
+- `NOW-FORMS-BACKEND-001`
+
 ## Entry - 2026-05-28 (Cloudflare Preview Smoke Runner)
 
 ### Scope

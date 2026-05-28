@@ -28,7 +28,6 @@ export interface AdminModuleDefinition {
     path: string;
     summary: string;
     dependency: string;
-    state: 'active' | 'scaffold' | 'locked';
     Icon: ComponentType<{ className?: string }>;
 }
 
@@ -39,7 +38,6 @@ export const adminModules: AdminModuleDefinition[] = [
         path: '/admin',
         summary: 'Content health, live leads, launch warnings, and next operational checks.',
         dependency: 'Supabase Auth + admin_profiles',
-        state: 'active',
         Icon: LayoutDashboard,
     },
     {
@@ -48,7 +46,6 @@ export const adminModules: AdminModuleDefinition[] = [
         path: '/admin/leads',
         summary: 'Contact enquiries and sample requests with owner, status, notes, and export controls.',
         dependency: 'Forms live-write verification',
-        state: 'active',
         Icon: Mailbox,
     },
     {
@@ -57,7 +54,6 @@ export const adminModules: AdminModuleDefinition[] = [
         path: '/admin/media',
         summary: 'Storage-backed media records, alt text, usage notes, publication state, and manifest export.',
         dependency: 'Supabase Storage + media_assets RLS',
-        state: 'active',
         Icon: Image,
     },
     {
@@ -66,7 +62,6 @@ export const adminModules: AdminModuleDefinition[] = [
         path: '/admin/stone-library',
         summary: 'Stone groups, variants, finish capabilities, and source imagery readiness.',
         dependency: 'Stone Library tables + admin_profiles RLS',
-        state: 'active',
         Icon: Archive,
     },
     {
@@ -75,7 +70,6 @@ export const adminModules: AdminModuleDefinition[] = [
         path: '/admin/projects',
         summary: 'Case studies, galleries, material maps, hotspot facts, and claim review state.',
         dependency: 'Media and Stone Library references',
-        state: 'active',
         Icon: FileText,
     },
     {
@@ -84,7 +78,6 @@ export const adminModules: AdminModuleDefinition[] = [
         path: '/admin/products',
         summary: 'Product families, models, specs, and default material references.',
         dependency: 'Stable Stone Library references',
-        state: 'active',
         Icon: Boxes,
     },
     {
@@ -93,7 +86,6 @@ export const adminModules: AdminModuleDefinition[] = [
         path: '/admin/articles',
         summary: 'Structured article blocks, cover media, SEO, and claim-safe editorial review.',
         dependency: 'Article block migration',
-        state: 'active',
         Icon: BookOpenText,
     },
     {
@@ -102,7 +94,6 @@ export const adminModules: AdminModuleDefinition[] = [
         path: '/admin/settings',
         summary: 'Site settings, notification routing, admin users, and ownership controls.',
         dependency: 'Owner/admin role verification',
-        state: 'active',
         Icon: Settings,
     },
     {
@@ -111,7 +102,6 @@ export const adminModules: AdminModuleDefinition[] = [
         path: '/admin/audit',
         summary: 'Mutation history, publish events, and sensitive operation review.',
         dependency: 'Admin mutation helpers',
-        state: 'active',
         Icon: ShieldCheck,
     },
 ];

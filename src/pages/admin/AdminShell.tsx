@@ -29,7 +29,7 @@ export default function AdminShell({ title, eyebrow = 'Urblo Admin', actions, ch
                         </div>
 
                         <nav className="flex gap-1 overflow-x-auto px-3 py-3 lg:flex-1 lg:flex-col lg:overflow-visible">
-                            {adminModules.map(({ key, label, path, Icon, state }) => (
+                            {adminModules.map(({ key, label, path, Icon }) => (
                                 <NavLink
                                     key={key}
                                     to={path}
@@ -45,11 +45,6 @@ export default function AdminShell({ title, eyebrow = 'Urblo Admin', actions, ch
                                 >
                                     <Icon className="h-4 w-4" />
                                     <span>{label}</span>
-                                    {state !== 'active' ? (
-                                        <span className="ml-auto hidden rounded border border-white/15 px-1.5 py-0.5 text-[10px] uppercase tracking-[0.14em] text-white/45 lg:inline-flex">
-                                            Next
-                                        </span>
-                                    ) : null}
                                 </NavLink>
                             ))}
                         </nav>
