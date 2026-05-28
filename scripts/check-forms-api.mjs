@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import { onRequest as onEnquiryRequest } from '../functions/api/enquiries.js';
 import { onRequest as onSampleRequest } from '../functions/api/sample-requests.js';
 import { handleEnquiryRequest, handleSampleRequest } from '../functions/_lib/forms.js';
@@ -7,6 +8,24 @@ const env = {
   SUPABASE_URL: 'https://example.supabase.co',
   SUPABASE_SERVICE_ROLE_KEY: 'test-service-key',
 };
+
+const sampleRequestAtomicMigration = fs.readFileSync(
+  'supabase/migrations/202605290003_sample_request_atomic_insert.sql',
+  'utf8',
+);
+
+for (const requiredText of [
+  'function public.submit_sample_request_with_item',
+  'security invoker',
+  'grant execute on function public.submit_sample_request_with_item(jsonb, jsonb) to service_role',
+  'revoke execute on function public.submit_sample_request_with_item(jsonb, jsonb) from anon',
+  'revoke execute on function public.submit_sample_request_with_item(jsonb, jsonb) from authenticated',
+]) {
+  assert.ok(
+    sampleRequestAtomicMigration.toLowerCase().includes(requiredText.toLowerCase()),
+    `Expected sample request atomic migration to contain: ${requiredText}`,
+  );
+}
 
 function jsonRequest(path, body) {
   return new Request(`https://urblo.test${path}`, {

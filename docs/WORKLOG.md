@@ -8,7 +8,7 @@ Last updated: 2026-05-29
 - Added and applied Supabase migration `sample_request_atomic_insert` for project `npkidywzwddbnfrnxlmo`.
 - Added service-role-only RPC function `public.submit_sample_request_with_item(jsonb, jsonb)` so the Pages Function creates a `sample_requests` row and first `sample_request_items` row inside one database transaction.
 - Updated `/api/sample-requests` source to call the RPC instead of two separate REST inserts, reducing the risk of a stored sample request without its requested item.
-- Updated Forms API mock checks so direct sample request/table item inserts now fail the source contract.
+- Updated Forms API mock checks so direct sample request/table item inserts now fail the source contract, and the migration source must retain the service-role-only RPC grants.
 
 ### Changed Files
 - `docs/ARCHITECTURE.md`
@@ -25,7 +25,7 @@ Last updated: 2026-05-29
 ### Verification Results
 - `node --check functions/_lib/forms.js`: pass.
 - `node --check scripts/check-forms-api.mjs`: pass.
-- `node scripts/check-forms-api.mjs`: pass; valid sample requests now use `submit_sample_request_with_item`, and mock checks fail on direct `sample_requests` / `sample_request_items` insert paths.
+- `node scripts/check-forms-api.mjs`: pass; valid sample requests now use `submit_sample_request_with_item`, mock checks fail on direct `sample_requests` / `sample_request_items` insert paths, and the migration source includes the expected service-role-only RPC grant/revoke contract.
 - Supabase connector syntax preflight in a rolled-back transaction: pass.
 - Supabase connector `apply_migration`: `sample_request_atomic_insert` applied successfully.
 - Supabase connector `list_migrations`: `sample_request_atomic_insert` present.
