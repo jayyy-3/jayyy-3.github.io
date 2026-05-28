@@ -2,6 +2,50 @@
 
 Last updated: 2026-05-28
 
+## Entry - 2026-05-28 (Admin Products CRUD Source)
+
+### Scope
+- Replaced the `/admin/products` scaffold with a protected source CRUD screen behind the existing Supabase Auth/profile gate.
+- The screen reads product families, product models, material defaults, product specs, Stone Library references, and media options from Supabase.
+- Active editor/admin/owner roles can create/update product, model, material-default, and spec records; publish/archive products and models; and keep product configuration structured once browser-safe Supabase config and an active profile exist.
+- Added loading, empty, validation, save, publish/archive, material-default, read-only, and error states.
+- Kept public Product runtime static/file-backed; static-to-Supabase content import and public read migration remain separate follow-ups.
+
+### Changed Files
+- `scripts/agent-smoke.sh`
+- `src/pages/admin/AdminApp.tsx`
+- `src/pages/admin/AdminProductsPage.tsx`
+- `src/pages/admin/adminContent.ts`
+- `AGENTS.md`
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/CLOUDFLARE_DEPLOYMENT.md`
+- `docs/DESIGN.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run build`: pass. Browserslist staleness notice remains; the admin chunk is about 364 kB before gzip.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass, including `/admin/products` route shell and Forms API checks.
+- Playwright CLI with Firefox: pass for `/admin/products` with no browser-safe Supabase key configured. The route shows the configuration-required state rather than Products CRUD content, and console output had 0 errors/warnings.
+
+### Risks and Gaps
+- Live Products save verification is not complete because browser-safe Supabase key configuration and an active admin/editor profile are still required.
+- Public Product routes still read `src/data/productData.ts`; public runtime migration from static data to Supabase remains pending.
+- Physical delete controls are intentionally not exposed in this checkpoint; archive is the safe operational path until destructive-delete policy is confirmed.
+
+### Next Handoff
+- `NOW-FORMS-BACKEND-001`
+- `NOW-ADMIN-AUTH-RLS-001`
+- `NOW-ADMIN-CONTENT-CRUD-001` next source-only checkpoint: Articles as structured blocks.
+- `NOW-ADMIN-MEDIA-LEADS-001`
+
 ## Entry - 2026-05-28 (Admin Projects CRUD Source)
 
 ### Scope

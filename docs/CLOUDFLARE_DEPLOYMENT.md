@@ -86,6 +86,7 @@ Before custom domain cutover, test the generated `*.pages.dev` URL:
 - `/admin/settings`
 - `/admin/stone-library`
 - `/admin/projects`
+- `/admin/products`
 
 Each route should:
 - return HTTP 200 on direct refresh;
@@ -104,6 +105,7 @@ Current `/functions/api` endpoints:
 - Media upload/save tests require an active owner/admin/editor profile because Storage object writes and `media_assets` mutations are admin/editor only.
 - Stone Library save tests require an active owner/admin/editor profile because `stone_groups`, `stone_variants`, and `stone_finish_capabilities` mutations are admin/editor only.
 - Projects save tests require an active owner/admin/editor profile because `projects`, `project_facts`, `project_materials`, `project_material_maps`, and `project_hotspots` mutations are admin/editor only.
+- Products save tests require an active owner/admin/editor profile because `products`, `product_models`, `product_material_defaults`, and `product_specs` mutations are admin/editor only.
 
 ### 5. Custom Domain Cutover
 Before switching production DNS:

@@ -84,7 +84,7 @@ export const adminModules: AdminModuleDefinition[] = [
         path: '/admin/products',
         summary: 'Product families, models, specs, and default material references.',
         dependency: 'Stable Stone Library references',
-        state: 'scaffold',
+        state: 'active',
         Icon: Boxes,
     },
     {

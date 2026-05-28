@@ -5,7 +5,7 @@ Last updated: 2026-05-28
 ## Purpose
 This document defines the executable contract for Urblo's `/admin` site.
 
-Admin auth shell source is now implemented and config-gated. Settings, Media, Stone Library, and Projects are the first source CRUD screens. This does not mean live first-admin verification, live upload/save verification, Stone Library/Projects live save verification, or broader Products/Articles/Leads CRUD screens are complete; it defines and tracks what those implementation tasks must build next.
+Admin auth shell source is now implemented and config-gated. Settings, Media, Stone Library, Projects, and Products are the first source CRUD screens. This does not mean live first-admin verification, live upload/save verification, Stone Library/Projects/Products live save verification, or broader Articles/Leads CRUD screens are complete; it defines and tracks what those implementation tasks must build next.
 
 ## Product Principle
 The admin site exists so Urblo can maintain launch-critical content without code edits while protecting public pages from drafts, unreviewed claims, missing media, and broken lead workflows.
@@ -159,7 +159,8 @@ Current implementation:
 - `/admin/media` is the first media CRUD source screen behind the auth gate, with admin/editor upload and metadata controls, viewer read-only behavior, and publish/archive guardrails.
 - `/admin/stone-library` is the first content CRUD source screen behind the auth gate, with group, variant, finish capability, validation, publish/archive, and read-only states.
 - `/admin/projects` is the next content CRUD source screen behind the auth gate, with project, fact, material schedule, material map, hotspot, validation, claim-review, publish/archive, and read-only states.
-- Products, Articles, Leads, and Audit module screens are scaffolded behind the auth gate only; they are not editable CRUD modules yet.
+- `/admin/products` is the next content CRUD source screen behind the auth gate, with product family, model, material default, spec, validation, publish/archive, and read-only states.
+- Articles, Leads, and Audit module screens are scaffolded behind the auth gate only; they are not editable CRUD modules yet.
 
 Do not do before credentials:
 - fake authentication in production routes;

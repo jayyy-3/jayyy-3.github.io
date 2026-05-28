@@ -25,7 +25,7 @@ After launch:
 - The current app is still a Vite/React static site.
 - The current deployment workflow still targets GitHub Pages.
 - Contact and Sample Request form source now posts to Cloudflare Pages Function routes; live Supabase persistence still requires server-side environment variables and preview verification.
-- Public Projects, Stone Library, Products, and Articles are still file-backed content. Admin source CRUD now exists for Stone Library and Projects, but live save verification and public read migration still require browser-safe Supabase config, active admin profiles, and content import work.
+- Public Projects, Stone Library, Products, and Articles are still file-backed content. Admin source CRUD now exists for Stone Library, Projects, and Products, but live save verification and public read migration still require browser-safe Supabase config, active admin profiles, and content import work.
 - The Supabase project `Urblo` (`npkidywzwddbnfrnxlmo`, `ap-southeast-2`) is active and connector-accessible. Foundation schema/RLS migrations and baseline seeds are applied; runtime integrations are not applied yet.
 - P0/P1 visible runtime media now uses controlled local launch assets; raw article HTML remains migration source material and should still be converted into structured Supabase article blocks.
 
@@ -94,7 +94,7 @@ Current execution split:
 - `NOW-FORMS-BACKEND-001`: in progress; Pages Function source and public Contact UI wiring are implemented, with live Supabase insert verification pending server-side secrets.
 - `NOW-ADMIN-SETTINGS-CRUD-001`: source implemented; `/admin/settings` can manage the default settings row after live owner/admin access is configured.
 - `NOW-ADMIN-MEDIA-LEADS-001`: media source implemented; Supabase Storage buckets/policies and `/admin/media` are in place, with live upload/save verification pending browser-safe Supabase key configuration and an active admin/editor profile.
-- `NOW-ADMIN-CONTENT-CRUD-001`: Stone Library and Projects source implemented; `/admin/stone-library` can manage stone groups, variants, and finish capability rows, and `/admin/projects` can manage project records, facts, material schedule rows, material maps, and hotspots after live admin/editor access is configured. Products, Articles, and Leads remain pending.
+- `NOW-ADMIN-CONTENT-CRUD-001`: Stone Library, Projects, and Products source implemented; `/admin/stone-library` can manage stone groups, variants, and finish capability rows, `/admin/projects` can manage project records, facts, material schedule rows, material maps, and hotspots, and `/admin/products` can manage product families, models, material defaults, and specs after live admin/editor access is configured. Articles and Leads remain pending.
 
 Core tables:
 - `site_settings`
