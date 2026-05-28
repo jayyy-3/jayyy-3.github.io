@@ -2,6 +2,45 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Admin Browser Secret and Config Gate Coverage)
+
+### Scope
+- Strengthened `scripts/check-admin-crud-coverage.mjs` so the source-only admin verifier scans all `src` browser source files for actual Supabase service-role env/client usage patterns instead of checking only `src/lib/supabaseClient.ts`.
+- Added machine checks for the admin config-missing state copy, login/unauthorized config handling, and admin-route WelcomePopup suppression.
+- Kept the checkpoint source-only. No Supabase rows, Storage objects, Auth users, Cloudflare state, credentials, or live writes were created or changed.
+
+### Changed Files
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `scripts/check-admin-crud-coverage.mjs`
+
+### Verification Results
+- `node --check scripts/check-admin-crud-coverage.mjs`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:live-readiness`: pass in report-only mode; live form/admin/Cloudflare inputs remain missing or approval-gated.
+- `npm run agent:admin-crud-live`: pass in plan-only/no-write mode.
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass, including public/admin route shells, Forms API checks, and Contact form UI source checks.
+- `npm run agent:check`: pass.
+- `npm run agent:public-supabase-readiness`: pass.
+- `npm run agent:cloudflare-readiness`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- This is source-only coverage hardening. It does not prove active admin login, first-admin bootstrap, live form persistence, admin CRUD writes, Storage upload, audit row creation, or Cloudflare preview deployment.
+- Live completion still requires service-role and browser-safe Supabase keys, first-admin email/profile/session, Cloudflare preview URL, and Jay approval for tagged live writes.
+
+### Next Handoff
+- `NOW-ADMIN-AUTH-RLS-001`
+- `NOW-ADMIN-CMS-001`
+- `NOW-FORMS-BACKEND-001`
+
 ## Entry - 2026-05-29 (Supabase Read-Only Sanity Snapshot)
 
 ### Scope

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { cwd, exit } from 'node:process';
 
@@ -221,6 +221,26 @@ const pageChecks = [
   },
 ];
 
+const browserSourceExtensions = new Set(['.js', '.jsx', '.ts', '.tsx']);
+const forbiddenBrowserSecretPatterns = [
+  {
+    pattern: /import\.meta\.env\.(?:VITE_)?SUPABASE_SERVICE(?:_ROLE)?_KEY/,
+    label: 'browser import.meta service-role env access',
+  },
+  {
+    pattern: /process\.env\.(?:VITE_)?SUPABASE_SERVICE(?:_ROLE)?_KEY/,
+    label: 'browser process.env service-role env access',
+  },
+  {
+    pattern: /(?:import\.meta\.env|process\.env)\[['"`](?:VITE_)?SUPABASE_SERVICE(?:_ROLE)?_KEY['"`]\]/,
+    label: 'browser bracket service-role env access',
+  },
+  {
+    pattern: /createClient\([\s\S]{0,400}(?:serviceRole|service_role|serviceKey|service_key)/,
+    label: 'browser Supabase client creation with service-role-like key',
+  },
+];
+
 function readRequired(path) {
   const fullPath = join(root, path);
   if (!existsSync(fullPath)) {
@@ -246,6 +266,35 @@ function requireRegex(text, pattern, context, label) {
   if (!pattern.test(text)) {
     failures.push(`${context}: missing ${label}`);
   }
+}
+
+function collectSourceFiles(directory) {
+  const entries = readdirSync(directory, { withFileTypes: true });
+  const files = [];
+
+  for (const entry of entries) {
+    const fullPath = join(directory, entry.name);
+
+    if (entry.isDirectory()) {
+      files.push(...collectSourceFiles(fullPath));
+      continue;
+    }
+
+    if (!entry.isFile()) {
+      continue;
+    }
+
+    const extension = entry.name.match(/\.[^.]+$/)?.[0] ?? '';
+    if (browserSourceExtensions.has(extension)) {
+      files.push(fullPath);
+    }
+  }
+
+  return files;
+}
+
+function toRepoPath(fullPath) {
+  return fullPath.replace(`${root}/`, '');
 }
 
 function checkRoutes() {
@@ -322,6 +371,24 @@ function checkRoutes() {
     failures.push('src/lib/supabaseClient.ts: browser client must not reference service-role keys');
   }
 
+  requireIncludes(app, 'function WelcomePopupGate()', 'src/App.tsx');
+  requireIncludes(app, "location.pathname.startsWith('/admin')", 'src/App.tsx');
+  requireIncludes(app, 'return null;', 'src/App.tsx WelcomePopupGate');
+  requireIncludes(app, '<WelcomePopup />', 'src/App.tsx WelcomePopupGate');
+
+  const adminState = readRequired('src/pages/admin/AdminState.tsx');
+  requireIncludes(adminState, 'AdminConfigMissingState', 'src/pages/admin/AdminState.tsx');
+  requireIncludes(adminState, 'Configuration required', 'src/pages/admin/AdminState.tsx');
+  requireIncludes(adminState, 'browser-safe Supabase key', 'src/pages/admin/AdminState.tsx');
+  requireIncludes(adminState, 'Return to site', 'src/pages/admin/AdminState.tsx');
+  requireIncludes(adminState, 'getAdminConfigStatus', 'src/pages/admin/AdminState.tsx');
+  requireIncludes(login, 'AdminConfigMissingState', 'src/pages/admin/AdminLoginPage.tsx');
+  requireIncludes(login, "auth.status === 'config-missing'", 'src/pages/admin/AdminLoginPage.tsx');
+
+  const unauthorized = readRequired('src/pages/admin/AdminUnauthorizedPage.tsx');
+  requireIncludes(unauthorized, 'AdminConfigMissingState', 'src/pages/admin/AdminUnauthorizedPage.tsx');
+  requireIncludes(unauthorized, "auth.status === 'config-missing'", 'src/pages/admin/AdminUnauthorizedPage.tsx');
+
   requireIncludes(audit, ".from('admin_audit_events')", 'src/lib/adminAudit.ts');
   requireIncludes(firstAdminBootstrap, ".from('admin_audit_events')", 'scripts/bootstrap-first-admin.mjs');
   requireIncludes(firstAdminBootstrap, 'admin_profile.bootstrap', 'scripts/bootstrap-first-admin.mjs');
@@ -332,6 +399,26 @@ function checkRoutes() {
     'Bootstrap audit event recorded: admin_profile.bootstrap.',
     'scripts/bootstrap-first-admin.mjs',
   );
+}
+
+function checkBrowserSecretBoundaries() {
+  const sourceRoot = join(root, 'src');
+
+  if (!existsSync(sourceRoot) || !statSync(sourceRoot).isDirectory()) {
+    failures.push('src: browser source directory is missing');
+    return;
+  }
+
+  for (const fullPath of collectSourceFiles(sourceRoot)) {
+    const text = readFileSync(fullPath, 'utf8');
+    const repoPath = toRepoPath(fullPath);
+
+    for (const forbidden of forbiddenBrowserSecretPatterns) {
+      if (forbidden.pattern.test(text)) {
+        failures.push(`${repoPath}: unexpected ${forbidden.label}`);
+      }
+    }
+  }
 }
 
 function checkPage(page) {
@@ -507,6 +594,7 @@ function checkAdminRemovalContract() {
 }
 
 checkRoutes();
+checkBrowserSecretBoundaries();
 pageChecks.forEach(checkPage);
 checkArticleStructuredAuthoring();
 checkAdminLiveVerifierBoundaries();
