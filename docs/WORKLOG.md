@@ -1,6 +1,39 @@
 # WORKLOG - Urblo Execution Log
 
-Last updated: 2026-05-28
+Last updated: 2026-05-29
+
+## Entry - 2026-05-29 (Admin Browser-Key Unauthenticated Gate)
+
+### Scope
+- Verified the admin shell with a real browser-safe Supabase publishable key supplied only through the local shell environment.
+- Confirmed the configured-key unauthenticated state now shows the Supabase Auth login form instead of the configuration-required state.
+- Confirmed unauthenticated direct visits to protected admin routes redirect to `/admin/login` with the intended `next` parameter and do not render private module content.
+- No Supabase data was queried or mutated beyond normal unauthenticated Auth/session checks, no first-admin/profile changes were made, no live writes were run, and no key was written to `.env` files or committed.
+
+### Changed Files
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- Supabase changelog scan: pass. Current relevant breaking-change note remains the April 28, 2026 Data/GraphQL API exposure change; this checkpoint performs no schema/API exposure change.
+- Supabase connector read-only sanity: pass. Nine launch migrations remain listed on project `npkidywzwddbnfrnxlmo`, and checked core public tables report RLS enabled.
+- Temporary Vite dev server with shell-only `VITE_SUPABASE_PUBLISHABLE_KEY`: pass.
+- Playwright CLI with Firefox on `http://127.0.0.1:5177/admin`: pass. URL resolves to `/admin/login?next=%2Fadmin`, renders the `Admin login` form, does not show the configuration-required state, and does not render dashboard launch checks.
+- Playwright CLI with Firefox on `http://127.0.0.1:5177/admin/media`: pass. URL resolves to `/admin/login?next=%2Fadmin%2Fmedia`, renders the `Admin login` form, and does not render Media Library private content.
+- Playwright console inspection: pass. 0 errors and 0 warnings; only React DevTools info appears.
+- `npm run agent:live-readiness`: pass in report-only mode. It still reports missing service-role key, persistent browser-safe key env, first-admin email, admin session credentials, Jay approval for tagged live QA writes, and Cloudflare preview URL.
+
+### Risks and Gaps
+- This proves the configured-key unauthenticated gate only. It does not prove active admin login, unprofiled-user unauthorized state, admin profile readiness, CRUD writes, media upload/export, lead workflow, or audit row creation.
+- Persistent local/Cloudflare browser-safe Supabase env configuration is still pending; the key was used only for this local no-write check.
+- First-admin email/profile, service-role key, real owner/admin session, Cloudflare preview URL, and Jay approval for tagged live QA writes remain required for the next live gates.
+
+### Next Handoff
+- `NOW-FORMS-BACKEND-001`: run `npm run agent:forms-live` after `SUPABASE_SERVICE_ROLE_KEY` is configured.
+- `NOW-ADMIN-AUTH-RLS-001`: run `npm run agent:admin-live-readiness -- --admin-email <first-admin-email>` after browser-safe and service-role keys plus first-admin profile are available.
+- `NOW-ADMIN-CMS-001`: run `npm run agent:admin-crud-live -- --allow-writes` only after Jay approves tagged QA writes and a real owner/admin session exists.
 
 ## Entry - 2026-05-28 (Live Readiness Non-Secret Overrides)
 
