@@ -134,6 +134,7 @@ Run:
 - `npm run lint`
 - `npx tsc -b`
 - `npm run agent:smoke`
+- `npm run agent:forms-ui` when changing Contact form UI state, submit routing, or sample-request mode.
 - API-level positive and negative submission tests when endpoints exist.
 
 Evidence to record:

@@ -223,3 +223,4 @@ console.log('Agent smoke passed.')
 NODE
 
 node scripts/check-forms-api.mjs
+node scripts/check-contact-form-ui-source.mjs

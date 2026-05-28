@@ -138,6 +138,7 @@
         "functions/api/enquiries.js",
         "functions/api/sample-requests.js",
         "functions/_lib/forms.js",
+        "scripts/check-contact-form-ui-source.mjs",
         "scripts/check-forms-api-live.mjs",
         "scripts/check-live-readiness.mjs",
         "scripts/check-forms-api.mjs",
@@ -158,7 +159,8 @@
         "2026-05-29: `npm run agent:forms-live -- --allow-writes` now checks created private lead rows against anonymous browser-key reads whenever a browser-safe key is configured, and `--require-browser-boundary` makes that privacy check mandatory for final launch proof.",
         "2026-05-28: Added `npm run agent:live-readiness` as a no-secret input audit for local/deployed form verification, admin readiness, first-admin profile/invite writes, tagged admin live writes, and Cloudflare preview smoke readiness. It accepts non-secret `--base-url`, `--admin-email`, `--form-writes-approved`, `--first-admin-writes-approved`, and `--admin-writes-approved` readiness flags; secret keys and admin session credentials still stay in env files or shell.",
         "2026-05-29: `npm run agent:live-readiness` now treats all live form persistence commands as manually gated until Jay's approval for tagged live form QA writes is represented with `--form-writes-approved`. The flag clears only the manual approval gate and never substitutes for `--allow-writes`, service-role credentials, or browser-safe credentials.",
-        "2026-05-29: `scripts/check-forms-api-live.mjs` now refuses to create tagged live form QA rows unless `--allow-writes` is supplied, so service-role credentials alone are not enough to run write verification."
+        "2026-05-29: `scripts/check-forms-api-live.mjs` now refuses to create tagged live form QA rows unless `--allow-writes` is supplied, so service-role credentials alone are not enough to run write verification.",
+        "2026-05-29: Added `npm run agent:forms-ui` as a no-secret Contact form UI source contract check. It keeps the main submit flow on `/api/enquiries` and `/api/sample-requests`, verifies inline validation/success/error states, sample-request mode fields, submitting state, direct contact fallbacks, and guards against submit-flow mailto/window-navigation regressions."
       ],
       "acceptance": [
         "Valid enquiry submissions create Supabase enquiry rows through a server-side endpoint.",
@@ -173,6 +175,7 @@
         "npm run lint",
         "npx tsc -b",
         "npm run agent:smoke",
+        "npm run agent:forms-ui",
         "node scripts/check-forms-api.mjs",
         "npm run agent:live-readiness",
         "npm run agent:forms-live -- --allow-writes (after SUPABASE_SERVICE_ROLE_KEY is configured and Jay approves tagged live form QA writes)",

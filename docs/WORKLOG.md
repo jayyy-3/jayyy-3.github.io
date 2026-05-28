@@ -2,6 +2,46 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Contact Form UI Source Contract)
+
+### Scope
+- Added a no-secret Contact form UI source contract check for the public enquiry and sample-request form.
+- The check verifies the main submit flow stays on `/api/enquiries` and `/api/sample-requests`, not a mailto/window-navigation fallback.
+- It also verifies inline validation, success, error, submitting, sample-request mode fields, direct email/phone fallback channels, and source-route payload handling.
+- Wired the check into `npm run agent:smoke` after the existing Forms API mock coverage.
+
+### Changed Files
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `docs/agent/verification.md`
+- `package.json`
+- `scripts/agent-smoke.sh`
+- `scripts/check-contact-form-ui-source.mjs`
+
+### Verification Results
+- `node --check scripts/check-contact-form-ui-source.mjs`: pass.
+- `npm run agent:forms-ui`: pass.
+- Supabase MCP read-only sanity: 10 migrations are present, 24/24 public launch tables have RLS enabled, 12 published finish definitions exist, one published default site settings row exists, and private workflow/admin tables remain at 0 rows.
+- `npm run agent:live-readiness`: pass in report-only mode; live form/admin/Cloudflare inputs remain missing or approval-gated.
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass, including Forms API mock checks and the new Contact form UI source contract check.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- This is source-only UI contract coverage. It does not submit live forms, create Supabase rows, send email, verify Turnstile, run responsive browser QA, or verify Cloudflare deployed endpoints.
+- Live Contact/Sample Request persistence still requires server-side `SUPABASE_SERVICE_ROLE_KEY` and Jay approval for tagged live form QA writes.
+
+### Next Handoff
+- `NOW-FORMS-BACKEND-001`
+- `NOW-FORMS-SUPABASE-001`
+- `NOW-ADMIN-AUTH-RLS-001`
+
 ## Entry - 2026-05-29 (Admin No-Config Route Gate QA)
 
 ### Scope

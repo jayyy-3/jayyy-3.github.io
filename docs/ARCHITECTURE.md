@@ -123,6 +123,11 @@ Last updated: 2026-05-29
   - `npm run agent:smoke` => `bash scripts/agent-smoke.sh`
   - Serves `dist/` with Vite preview and checks the React shell for key clean routes, `public/articles/index.json`, and critical CTA contracts.
   - Builds first only when `dist/` is missing; runtime tasks should still run `npm run build` before smoke.
+  - Runs `scripts/check-forms-api.mjs` and `scripts/check-contact-form-ui-source.mjs` after route/CTA shell checks so Contact submit routing, API mock behavior, inline visitor states, and no-mailto main submit contracts stay covered without secrets.
+- Contact form UI source verification:
+  - `npm run agent:forms-ui` => `node scripts/check-contact-form-ui-source.mjs`
+  - Verifies Contact page source keeps the main submit flow on `/api/enquiries` and `/api/sample-requests`, includes inline validation/success/error/submitting states, preserves sample-request mode fields, keeps direct email/phone fallback channels, and does not use submit-flow `mailto:` or window navigation.
+  - This is a source-only verifier. It does not replace live Supabase form persistence, Turnstile, email, browser-responsive QA, or Cloudflare endpoint verification.
 - Live form verification:
   - `npm run agent:forms-live -- --allow-writes` => `node scripts/check-forms-api-live.mjs --allow-writes`
   - Loads local environment values from `.env.local`, `.env`, `.dev.vars`, and the shell.
