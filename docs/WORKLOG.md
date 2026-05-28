@@ -2,6 +2,32 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Supabase Read-Only Sanity Snapshot)
+
+### Scope
+- Used the Supabase connector in read-only mode to re-check the current Urblo project state after the Forms API wrapper coverage checkpoint.
+- Confirmed the production foundation and seed posture still matches the Harness contract before any future live-write verification.
+- No SQL migration, DDL, insert, update, delete, Auth action, Storage upload, or Cloudflare action was performed.
+
+### Changed Files
+- `docs/HANDOFF.md`
+- `docs/WORKLOG.md`
+
+### Verification Results
+- Supabase migration list for project `npkidywzwddbnfrnxlmo`: pass. 10 migrations are applied: foundation schema/hardening/anon grants, baseline seed, admin settings/profile/helper hardening, and media Storage hardening.
+- Supabase table/RLS query: pass. 24/24 expected public launch tables exist and have RLS enabled.
+- Supabase baseline/private row query: pass. 12 published `finish_definitions`, one published default `site_settings` row, and zero private workflow/admin rows in `admin_profiles`, `admin_audit_events`, `enquiries`, `sample_requests`, and `sample_request_items`.
+- Supabase Storage bucket query: pass. `urblo-admin-media` exists as private and `urblo-public-media` exists as public.
+
+### Risks and Gaps
+- This is a read-only external-state snapshot. It does not verify live form persistence, first-admin bootstrap, active-admin login, admin CRUD writes, Storage upload, audit row creation, deployed Cloudflare preview behavior, or DNS.
+- The first attempted sanity query used stale local assumptions (`site_settings.key` and a 23-table list) and was corrected to the actual schema contract (`site_settings.settings_key` and the 24-table list including `project_media`) before recording this evidence.
+
+### Next Handoff
+- `NOW-FORMS-BACKEND-001`
+- `NOW-ADMIN-AUTH-RLS-001`
+- `NOW-CLOUDFLARE-PAGES-DEPLOY-001`
+
 ## Entry - 2026-05-29 (Forms API Wrapper Coverage)
 
 ### Scope
