@@ -2,6 +2,30 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Agent Init Forms Live Command)
+
+### Scope
+- Updated `npm run agent:init` output so the useful command list shows the write-gated live form verifier command: `npm run agent:forms-live -- --allow-writes`.
+- This keeps the startup briefing aligned with the new forms live write-mode guard.
+
+### Changed Files
+- `docs/HANDOFF.md`
+- `docs/WORKLOG.md`
+- `scripts/agent-init.sh`
+
+### Verification Results
+- `npm run agent:init`: pass and now lists `npm run agent:forms-live -- --allow-writes`.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- Source-only Harness usability update. No live writes, credentials, or Cloudflare changes.
+
+### Next Handoff
+- `NOW-FORMS-BACKEND-001`
+- `NOW-CLOUDFLARE-PAGES-DEPLOY-001`
+- `NOW-ADMIN-AUTH-RLS-001`
+
 ## Entry - 2026-05-29 (Forms Live Write-Mode Guard)
 
 ### Scope
