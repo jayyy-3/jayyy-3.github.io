@@ -81,7 +81,14 @@ const pageChecks = [
   {
     label: 'Stone Library',
     file: 'src/pages/admin/AdminStoneLibraryPage.tsx',
-    tables: ['stone_groups', 'stone_variants', 'finish_definitions', 'stone_finish_capabilities'],
+    tables: [
+      'stone_groups',
+      'stone_variants',
+      'finish_definitions',
+      'stone_finish_capabilities',
+      'stone_finish_images',
+      'media_assets',
+    ],
     actions: [
       'stone_group.create',
       'stone_group.update',
@@ -93,8 +100,17 @@ const pageChecks = [
       'stone_variant.archive',
       'stone_finish_capability.create',
       'stone_finish_capability.update',
+      'stone_finish_image.create',
+      'stone_finish_image.update',
+      'stone_finish_image.publish',
+      'stone_finish_image.archive',
     ],
-    requiredText: ['Current role is read-only for Stone Library', 'TBC records stay explicit'],
+    requiredText: [
+      'Current role is read-only for Stone Library',
+      'TBC records stay explicit',
+      'Published finish images require a published media record',
+      'Physical deletes remain hidden',
+    ],
   },
   {
     label: 'Projects',

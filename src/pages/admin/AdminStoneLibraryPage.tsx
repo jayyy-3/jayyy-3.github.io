@@ -4,6 +4,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import {
     Archive,
     CheckCircle2,
+    Image as ImageIcon,
     Layers2,
     ListChecks,
     Plus,
@@ -19,6 +20,8 @@ import RequireAdmin from './RequireAdmin';
 type StoneStatus = 'draft' | 'published' | 'archived' | 'tbc';
 type Capability = 'yes' | 'no' | 'tbc';
 type FinishStatus = 'draft' | 'published' | 'archived';
+type FinishImageStatus = 'draft' | 'published' | 'archived';
+type FinishImageRole = 'primary' | 'secondary' | 'detail' | 'swatch';
 
 interface StoneGroupRow {
     id: number;
@@ -78,6 +81,31 @@ interface CapabilityRow {
     updated_at: string;
 }
 
+interface MediaAssetOption {
+    id: number;
+    status: FinishImageStatus;
+    bucket: string | null;
+    object_path: string | null;
+    source_url: string | null;
+    media_type: string;
+    alt: string | null;
+    usage_notes: string | null;
+}
+
+interface StoneFinishImageRow {
+    id: number;
+    stone_group_id: number | null;
+    stone_variant_id: number | null;
+    finish_definition_id: number | null;
+    media_asset_id: number;
+    image_role: FinishImageRole;
+    sort_order: number;
+    status: FinishImageStatus;
+    published_at: string | null;
+    archived_at: string | null;
+    updated_at: string;
+}
+
 interface StoneGroupFormState {
     status: StoneStatus;
     stoneGroupKey: string;
@@ -114,6 +142,15 @@ interface CapabilityFormState {
     adminNote: string;
 }
 
+interface FinishImageFormState {
+    id: number | null;
+    status: FinishImageStatus;
+    finishDefinitionId: string;
+    mediaAssetId: string;
+    imageRole: FinishImageRole;
+    sortOrder: string;
+}
+
 const emptyGroupForm: StoneGroupFormState = {
     status: 'draft',
     stoneGroupKey: '',
@@ -142,6 +179,15 @@ const emptyVariantForm: StoneVariantFormState = {
     sortOrder: '0',
 };
 
+const emptyFinishImageForm: FinishImageFormState = {
+    id: null,
+    status: 'draft',
+    finishDefinitionId: '',
+    mediaAssetId: '',
+    imageRole: 'primary',
+    sortOrder: '0',
+};
+
 const fieldClass =
     'mt-2 min-h-11 w-full rounded border border-black/15 bg-white px-3 text-sm font-medium outline-none transition focus:border-black disabled:bg-black/[0.04] disabled:text-black/45';
 
@@ -159,14 +205,19 @@ function AdminStoneLibraryContent() {
     const [groups, setGroups] = useState<StoneGroupRow[]>([]);
     const [variants, setVariants] = useState<StoneVariantRow[]>([]);
     const [finishDefinitions, setFinishDefinitions] = useState<FinishDefinitionRow[]>([]);
+    const [mediaAssets, setMediaAssets] = useState<MediaAssetOption[]>([]);
+    const [finishImages, setFinishImages] = useState<StoneFinishImageRow[]>([]);
     const [selectedGroupId, setSelectedGroupId] = useState<number | null>(null);
     const [selectedVariantId, setSelectedVariantId] = useState<number | null>(null);
+    const [selectedImageId, setSelectedImageId] = useState<number | null>(null);
     const [groupForm, setGroupForm] = useState<StoneGroupFormState>(emptyGroupForm);
     const [variantForm, setVariantForm] = useState<StoneVariantFormState>(emptyVariantForm);
     const [capabilityForms, setCapabilityForms] = useState<Record<number, CapabilityFormState>>({});
+    const [finishImageForm, setFinishImageForm] = useState<FinishImageFormState>(emptyFinishImageForm);
     const [isLoading, setIsLoading] = useState(true);
     const [isSavingGroup, setIsSavingGroup] = useState(false);
     const [isSavingVariant, setIsSavingVariant] = useState(false);
+    const [isSavingFinishImage, setIsSavingFinishImage] = useState(false);
     const [savingCapabilityId, setSavingCapabilityId] = useState<number | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [notice, setNotice] = useState<string | null>(null);
@@ -184,6 +235,45 @@ function AdminStoneLibraryContent() {
         () => summarizeCapabilities(Object.values(capabilityForms)),
         [capabilityForms],
     );
+    const visibleFinishImages = useMemo(
+        () =>
+            finishImages.filter((image) => {
+                if (!selectedVariantId) {
+                    return true;
+                }
+                return image.stone_variant_id === selectedVariantId || image.stone_variant_id === null;
+            }),
+        [finishImages, selectedVariantId],
+    );
+
+    const finishById = useMemo(
+        () => new Map(finishDefinitions.map((finish) => [finish.id, finish])),
+        [finishDefinitions],
+    );
+    const variantById = useMemo(() => new Map(variants.map((variant) => [variant.id, variant])), [variants]);
+    const mediaById = useMemo(() => new Map(mediaAssets.map((asset) => [asset.id, asset])), [mediaAssets]);
+
+    const loadFinishImages = useCallback(async (client: SupabaseClient, groupId: number, preferredImageId?: number) => {
+        const { data, error: imageError } = await client
+            .from('stone_finish_images')
+            .select(
+                'id,stone_group_id,stone_variant_id,finish_definition_id,media_asset_id,image_role,sort_order,status,published_at,archived_at,updated_at',
+            )
+            .eq('stone_group_id', groupId)
+            .order('sort_order', { ascending: true })
+            .order('id', { ascending: true })
+            .returns<StoneFinishImageRow[]>();
+
+        if (imageError) {
+            throw new Error(imageError.message);
+        }
+
+        const nextImages = data ?? [];
+        const nextImage = nextImages.find((image) => image.id === preferredImageId) ?? null;
+        setFinishImages(nextImages);
+        setSelectedImageId(nextImage?.id ?? null);
+        setFinishImageForm(rowToFinishImageForm(nextImage));
+    }, []);
 
     const loadVariantBundle = useCallback(
         async (
@@ -246,7 +336,7 @@ function AdminStoneLibraryContent() {
             setIsLoading(true);
             setError(null);
 
-            const [groupsResult, finishesResult] = await Promise.all([
+            const [groupsResult, finishesResult, mediaResult] = await Promise.all([
                 client
                     .from('stone_groups')
                     .select(
@@ -260,6 +350,13 @@ function AdminStoneLibraryContent() {
                     .select('id,finish_key,display_name,sort_order,status')
                     .order('sort_order', { ascending: true })
                     .returns<FinishDefinitionRow[]>(),
+                client
+                    .from('media_assets')
+                    .select('id,status,bucket,object_path,source_url,media_type,alt,usage_notes')
+                    .in('media_type', ['image', 'video'])
+                    .order('updated_at', { ascending: false })
+                    .limit(160)
+                    .returns<MediaAssetOption[]>(),
             ]);
 
             if (groupsResult.error) {
@@ -274,34 +371,46 @@ function AdminStoneLibraryContent() {
                 return;
             }
 
+            if (mediaResult.error) {
+                setError(mediaResult.error.message);
+                setIsLoading(false);
+                return;
+            }
+
             const nextGroups = groupsResult.data ?? [];
             const finishes = finishesResult.data ?? [];
+            const media = mediaResult.data ?? [];
             const nextGroup =
                 nextGroups.find((group) => group.id === preferredGroupId) ?? nextGroups[0] ?? null;
 
             setGroups(nextGroups);
             setFinishDefinitions(finishes);
+            setMediaAssets(media);
             setSelectedGroupId(nextGroup?.id ?? null);
             setGroupForm(rowToGroupForm(nextGroup));
 
             if (!nextGroup) {
                 setVariants([]);
                 setSelectedVariantId(null);
+                setSelectedImageId(null);
                 setVariantForm(emptyVariantForm);
                 setCapabilityForms(createCapabilityForms(finishes, []));
+                setFinishImages([]);
+                setFinishImageForm(emptyFinishImageForm);
                 setIsLoading(false);
                 return;
             }
 
             try {
                 await loadVariantBundle(client, nextGroup.id, null, finishes);
+                await loadFinishImages(client, nextGroup.id);
             } catch (loadError) {
                 setError(loadError instanceof Error ? loadError.message : 'Stone Library detail load failed.');
             }
 
             setIsLoading(false);
         },
-        [loadVariantBundle],
+        [loadFinishImages, loadVariantBundle],
     );
 
     useEffect(() => {
@@ -339,6 +448,14 @@ function AdminStoneLibraryContent() {
         setNotice(null);
     }
 
+    function updateFinishImageField<Key extends keyof FinishImageFormState>(
+        key: Key,
+        value: FinishImageFormState[Key],
+    ) {
+        setFinishImageForm((current) => ({ ...current, [key]: value }));
+        setNotice(null);
+    }
+
     async function selectGroup(group: StoneGroupRow) {
         setSelectedGroupId(group.id);
         setGroupForm(rowToGroupForm(group));
@@ -348,6 +465,7 @@ function AdminStoneLibraryContent() {
         if (supabase) {
             try {
                 await loadVariantBundle(supabase, group.id, null, finishDefinitions);
+                await loadFinishImages(supabase, group.id);
             } catch (loadError) {
                 setError(loadError instanceof Error ? loadError.message : 'Stone Library detail load failed.');
             }
@@ -356,7 +474,9 @@ function AdminStoneLibraryContent() {
 
     async function selectVariant(variant: StoneVariantRow) {
         setSelectedVariantId(variant.id);
+        setSelectedImageId(null);
         setVariantForm(rowToVariantForm(variant));
+        setFinishImageForm(emptyFinishImageForm);
         setError(null);
         setNotice(null);
 
@@ -381,10 +501,13 @@ function AdminStoneLibraryContent() {
     function startNewGroup() {
         setSelectedGroupId(null);
         setSelectedVariantId(null);
+        setSelectedImageId(null);
         setGroupForm(emptyGroupForm);
         setVariantForm(emptyVariantForm);
         setVariants([]);
         setCapabilityForms(createCapabilityForms(finishDefinitions, []));
+        setFinishImages([]);
+        setFinishImageForm(emptyFinishImageForm);
         setError(null);
         setNotice('New stone group started.');
     }
@@ -396,10 +519,34 @@ function AdminStoneLibraryContent() {
         }
 
         setSelectedVariantId(null);
+        setSelectedImageId(null);
         setVariantForm(emptyVariantForm);
         setCapabilityForms(createCapabilityForms(finishDefinitions, []));
+        setFinishImageForm(emptyFinishImageForm);
         setError(null);
         setNotice('New variant started.');
+    }
+
+    function selectFinishImage(image: StoneFinishImageRow) {
+        setSelectedImageId(image.id);
+        setFinishImageForm(rowToFinishImageForm(image));
+        setError(null);
+        setNotice(null);
+    }
+
+    function startNewFinishImage() {
+        if (!selectedGroup || !selectedVariant) {
+            setError('Select a stone group and variant before adding finish images.');
+            return;
+        }
+
+        setSelectedImageId(null);
+        setFinishImageForm({
+            ...emptyFinishImageForm,
+            finishDefinitionId: finishDefinitions[0] ? String(finishDefinitions[0].id) : '',
+        });
+        setError(null);
+        setNotice('New finish image link started.');
     }
 
     async function handleGroupSubmit(event: FormEvent<HTMLFormElement>) {
@@ -410,6 +557,11 @@ function AdminStoneLibraryContent() {
     async function handleVariantSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         await saveVariant(variantForm.status);
+    }
+
+    async function handleFinishImageSubmit(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        await saveFinishImage(finishImageForm.status);
     }
 
     async function saveGroup(nextStatus: StoneStatus) {
@@ -575,6 +727,7 @@ function AdminStoneLibraryContent() {
         });
         setNotice(withAuditNotice(nextStatus === 'published' ? 'Variant published.' : 'Variant saved.', auditError));
         await loadVariantBundle(supabase, selectedGroup.id, response.data.id, finishDefinitions);
+        await loadFinishImages(supabase, selectedGroup.id);
     }
 
     async function saveCapability(finish: FinishDefinitionRow) {
@@ -634,6 +787,96 @@ function AdminStoneLibraryContent() {
             },
         });
         setNotice(withAuditNotice(`${finish.display_name} capability saved.`, auditError));
+    }
+
+    async function saveFinishImage(nextStatus: FinishImageStatus) {
+        if (!supabase || !canEdit || !user || !selectedGroup || !selectedVariant) {
+            return;
+        }
+
+        const validation = validateFinishImageForm({ ...finishImageForm, status: nextStatus });
+        if (validation.error) {
+            setError(validation.error);
+            return;
+        }
+
+        const linkedMedia = mediaById.get(validation.mediaAssetId);
+        if (nextStatus === 'published' && linkedMedia?.status !== 'published') {
+            setError('Published finish images require a published media record.');
+            return;
+        }
+
+        const now = new Date().toISOString();
+        const selectedImage = finishImages.find((image) => image.id === selectedImageId) ?? null;
+        const payload = {
+            stone_group_id: selectedGroup.id,
+            stone_variant_id: selectedVariant.id,
+            finish_definition_id: validation.finishDefinitionId,
+            media_asset_id: validation.mediaAssetId,
+            image_role: finishImageForm.imageRole,
+            status: nextStatus,
+            sort_order: validation.sortOrder,
+            updated_by: user.id,
+            published_at:
+                nextStatus === 'published' ? (selectedImage?.published_at ?? now) : (selectedImage?.published_at ?? null),
+            archived_at: nextStatus === 'archived' ? now : null,
+        };
+
+        setIsSavingFinishImage(true);
+        setError(null);
+        setNotice(null);
+
+        const response = selectedImageId
+            ? await supabase
+                  .from('stone_finish_images')
+                  .update(payload)
+                  .eq('id', selectedImageId)
+                  .select(
+                      'id,stone_group_id,stone_variant_id,finish_definition_id,media_asset_id,image_role,sort_order,status,published_at,archived_at,updated_at',
+                  )
+                  .single<StoneFinishImageRow>()
+            : await supabase
+                  .from('stone_finish_images')
+                  .insert({ ...payload, created_by: user.id })
+                  .select(
+                      'id,stone_group_id,stone_variant_id,finish_definition_id,media_asset_id,image_role,sort_order,status,published_at,archived_at,updated_at',
+                  )
+                  .single<StoneFinishImageRow>();
+
+        setIsSavingFinishImage(false);
+
+        if (response.error) {
+            setError(response.error.message);
+            return;
+        }
+
+        const auditError = await recordAdminAuditEvent(supabase, {
+            actorUserId: user.id,
+            action: selectedImageId
+                ? nextStatus === 'published'
+                    ? 'stone_finish_image.publish'
+                    : nextStatus === 'archived'
+                      ? 'stone_finish_image.archive'
+                      : 'stone_finish_image.update'
+                : 'stone_finish_image.create',
+            entityType: 'stone_finish_images',
+            entityId: response.data.id,
+            metadata: {
+                stoneGroupId: response.data.stone_group_id,
+                stoneVariantId: response.data.stone_variant_id,
+                finishDefinitionId: response.data.finish_definition_id,
+                mediaAssetId: response.data.media_asset_id,
+                imageRole: response.data.image_role,
+                status: response.data.status,
+            },
+        });
+        setNotice(
+            withAuditNotice(
+                nextStatus === 'published' ? 'Finish image published.' : 'Finish image link saved.',
+                auditError,
+            ),
+        );
+        await loadFinishImages(supabase, selectedGroup.id, response.data.id);
     }
 
     return (
@@ -1072,6 +1315,190 @@ function AdminStoneLibraryContent() {
                             </button>
                         </div>
                     </form>
+
+                    <section className="border border-black/10 bg-white p-5 md:p-6">
+                        <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                            <div>
+                                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-black/45">
+                                    Finish images
+                                </p>
+                                <h2 className="mt-2 text-2xl font-semibold text-black">
+                                    {selectedImageId ? 'Edit image link' : 'New image link'}
+                                </h2>
+                                <p className="mt-2 text-sm leading-6 text-black/58">
+                                    Link approved media records to a variant and finish so texture evidence remains
+                                    explicit before public migration.
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={startNewFinishImage}
+                                disabled={!canEdit || !selectedGroup || !selectedVariant}
+                                className="inline-flex min-h-10 items-center gap-2 rounded border border-black/15 bg-white px-3 text-xs font-bold uppercase tracking-[0.12em] text-black transition hover:border-black disabled:cursor-not-allowed disabled:text-black/35"
+                            >
+                                <Plus className="h-4 w-4" />
+                                New image
+                            </button>
+                        </div>
+
+                        <div className="mt-6 grid gap-3 md:grid-cols-2">
+                            {visibleFinishImages.length ? (
+                                visibleFinishImages.map((image) => {
+                                    const finish = image.finish_definition_id
+                                        ? finishById.get(image.finish_definition_id)
+                                        : null;
+                                    const variant = image.stone_variant_id ? variantById.get(image.stone_variant_id) : null;
+                                    const media = mediaById.get(image.media_asset_id);
+
+                                    return (
+                                        <button
+                                            key={image.id}
+                                            type="button"
+                                            onClick={() => selectFinishImage(image)}
+                                            className={[
+                                                'rounded border p-3 text-left transition',
+                                                selectedImageId === image.id
+                                                    ? 'border-black bg-[#f8f9f5]'
+                                                    : 'border-black/10 bg-white hover:border-black/30',
+                                            ].join(' ')}
+                                        >
+                                            <div className="flex items-start justify-between gap-3">
+                                                <div className="min-w-0">
+                                                    <p className="truncate text-sm font-semibold text-black">
+                                                        {finish?.display_name ?? 'Finish not set'}
+                                                    </p>
+                                                    <p className="mt-1 truncate text-[11px] font-semibold uppercase tracking-[0.12em] text-black/40">
+                                                        {variant?.variant_key ?? 'Group level'} / {image.image_role}
+                                                    </p>
+                                                </div>
+                                                <StatusPill status={image.status} />
+                                            </div>
+                                            <p className="mt-3 truncate text-xs text-black/50">
+                                                {mediaLabel(media, image.media_asset_id)}
+                                            </p>
+                                        </button>
+                                    );
+                                })
+                            ) : (
+                                <div className="rounded border border-black/10 bg-[#f8f9f5] p-4 text-sm leading-6 text-black/58 md:col-span-2">
+                                    No finish image links for this selected variant yet. Add media records in
+                                    `/admin/media`, then attach them here as primary, secondary, detail, or swatch
+                                    evidence.
+                                </div>
+                            )}
+                        </div>
+
+                        <form onSubmit={(event) => void handleFinishImageSubmit(event)} className="mt-6 border-t border-black/10 pt-6">
+                            <div className="grid gap-4 md:grid-cols-2">
+                                <label className="text-xs font-bold uppercase tracking-[0.14em] text-black/55">
+                                    Finish
+                                    <select
+                                        value={finishImageForm.finishDefinitionId}
+                                        onChange={(event) =>
+                                            updateFinishImageField('finishDefinitionId', event.target.value)
+                                        }
+                                        disabled={!canEdit || isSavingFinishImage || !selectedVariant}
+                                        required
+                                        className={fieldClass}
+                                    >
+                                        <option value="">Select finish</option>
+                                        {finishDefinitions.map((finish) => (
+                                            <option key={finish.id} value={finish.id}>
+                                                {finish.display_name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </label>
+                                <label className="text-xs font-bold uppercase tracking-[0.14em] text-black/55">
+                                    Media record
+                                    <select
+                                        value={finishImageForm.mediaAssetId}
+                                        onChange={(event) => updateFinishImageField('mediaAssetId', event.target.value)}
+                                        disabled={!canEdit || isSavingFinishImage || !selectedVariant}
+                                        required
+                                        className={fieldClass}
+                                    >
+                                        <option value="">Select media</option>
+                                        {mediaAssets.map((asset) => (
+                                            <option key={asset.id} value={asset.id}>
+                                                {mediaLabel(asset, asset.id)}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </label>
+                                <label className="text-xs font-bold uppercase tracking-[0.14em] text-black/55">
+                                    Role
+                                    <select
+                                        value={finishImageForm.imageRole}
+                                        onChange={(event) =>
+                                            updateFinishImageField('imageRole', event.target.value as FinishImageRole)
+                                        }
+                                        disabled={!canEdit || isSavingFinishImage || !selectedVariant}
+                                        className={fieldClass}
+                                    >
+                                        <option value="primary">Primary</option>
+                                        <option value="secondary">Secondary</option>
+                                        <option value="detail">Detail</option>
+                                        <option value="swatch">Swatch</option>
+                                    </select>
+                                </label>
+                                <label className="text-xs font-bold uppercase tracking-[0.14em] text-black/55">
+                                    Status
+                                    <select
+                                        value={finishImageForm.status}
+                                        onChange={(event) =>
+                                            updateFinishImageField('status', event.target.value as FinishImageStatus)
+                                        }
+                                        disabled={!canEdit || isSavingFinishImage || !selectedVariant}
+                                        className={fieldClass}
+                                    >
+                                        <option value="draft">Draft</option>
+                                        <option value="published">Published</option>
+                                        <option value="archived">Archived</option>
+                                    </select>
+                                </label>
+                                <label className="text-xs font-bold uppercase tracking-[0.14em] text-black/55">
+                                    Sort order
+                                    <input
+                                        value={finishImageForm.sortOrder}
+                                        onChange={(event) => updateFinishImageField('sortOrder', event.target.value)}
+                                        disabled={!canEdit || isSavingFinishImage || !selectedVariant}
+                                        inputMode="numeric"
+                                        className={fieldClass}
+                                    />
+                                </label>
+                            </div>
+
+                            <div className="mt-6 flex flex-wrap gap-2">
+                                <button
+                                    type="submit"
+                                    disabled={!canEdit || isSavingFinishImage || !selectedVariant}
+                                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded border border-black/15 bg-white px-4 text-xs font-bold uppercase tracking-[0.14em] text-black transition hover:border-black disabled:cursor-not-allowed disabled:text-black/35"
+                                >
+                                    <Save className="h-4 w-4" />
+                                    {isSavingFinishImage ? 'Saving' : 'Save image link'}
+                                </button>
+                                <button
+                                    type="button"
+                                    disabled={!canEdit || isSavingFinishImage || !selectedVariant}
+                                    onClick={() => void saveFinishImage('published')}
+                                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded bg-[var(--urblo-lime)] px-4 text-xs font-bold uppercase tracking-[0.14em] text-black transition hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:bg-black/20 disabled:text-black/35"
+                                >
+                                    <CheckCircle2 className="h-4 w-4" />
+                                    Publish image
+                                </button>
+                                <button
+                                    type="button"
+                                    disabled={!canEdit || isSavingFinishImage || !selectedVariant}
+                                    onClick={() => void saveFinishImage('archived')}
+                                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded bg-black px-4 text-xs font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#33363f] disabled:cursor-not-allowed disabled:bg-black/25"
+                                >
+                                    <Archive className="h-4 w-4" />
+                                    Archive image
+                                </button>
+                            </div>
+                        </form>
+                    </section>
                 </section>
 
                 <aside className="space-y-5">
@@ -1084,18 +1511,25 @@ function AdminStoneLibraryContent() {
                                 {capabilityCounts.yes} yes, {capabilityCounts.tbc} TBC, {capabilityCounts.no} no finish
                                 capability rows for the selected variant.
                             </p>
+                            <p>{visibleFinishImages.length} finish image links visible for the selected variant.</p>
                             <p>{finishDefinitions.length} canonical finish definitions loaded from Supabase.</p>
+                            <p>{mediaAssets.length} image/video media records available for linking.</p>
                         </div>
                     </section>
 
                     <section className="border border-black/10 bg-white p-5">
-                        <ShieldAlert className="h-5 w-5 text-black" />
+                        <div className="flex items-center gap-2">
+                            <ShieldAlert className="h-5 w-5 text-black" />
+                            <ImageIcon className="h-5 w-5 text-black/45" />
+                        </div>
                         <h2 className="mt-5 text-xl font-semibold text-black">Publication guardrails</h2>
                         <ul className="mt-4 space-y-3 text-sm leading-6 text-black/62">
                             <li>Published groups require a name, key, type display, summary, and at least one variant.</li>
                             <li>Published variants require a variant key and at least one yes or TBC finish capability.</li>
+                            <li>Published finish images require a selected finish and media record.</li>
                             <li>TBC records stay explicit and admin-visible instead of being hidden in notes.</li>
                             <li>Viewer roles can inspect but not mutate Stone Library records.</li>
+                            <li>Physical deletes remain hidden; archive is the safe operational path.</li>
                         </ul>
                     </section>
 
@@ -1306,6 +1740,21 @@ function rowToCapabilityForm(row: CapabilityRow): CapabilityFormState {
     };
 }
 
+function rowToFinishImageForm(row: StoneFinishImageRow | null): FinishImageFormState {
+    if (!row) {
+        return emptyFinishImageForm;
+    }
+
+    return {
+        id: row.id,
+        status: row.status,
+        finishDefinitionId: row.finish_definition_id === null ? '' : String(row.finish_definition_id),
+        mediaAssetId: String(row.media_asset_id),
+        imageRole: row.image_role,
+        sortOrder: String(row.sort_order),
+    };
+}
+
 function emptyCapabilityForm(): CapabilityFormState {
     return {
         id: null,
@@ -1409,6 +1858,38 @@ function validateVariantForm(form: StoneVariantFormState): { error: string | nul
     return { error: null, sortOrder: sortOrder.value };
 }
 
+function validateFinishImageForm(form: FinishImageFormState): {
+    error: string | null;
+    finishDefinitionId: number;
+    mediaAssetId: number;
+    sortOrder: number;
+} {
+    const finishDefinitionId = requiredPositiveInteger(form.finishDefinitionId, 'Finish');
+    if (finishDefinitionId.error) return finishImageValidationFailure('Finish image links require a finish.');
+
+    const mediaAssetId = requiredPositiveInteger(form.mediaAssetId, 'Media record');
+    if (mediaAssetId.error) return finishImageValidationFailure('Finish image links require a media record.');
+
+    const sortOrder = requiredInteger(form.sortOrder, 'Sort order');
+    if (sortOrder.error) return finishImageValidationFailure(sortOrder.error);
+
+    return {
+        error: null,
+        finishDefinitionId: finishDefinitionId.value,
+        mediaAssetId: mediaAssetId.value,
+        sortOrder: sortOrder.value,
+    };
+}
+
+function finishImageValidationFailure(error: string): ReturnType<typeof validateFinishImageForm> {
+    return {
+        error,
+        finishDefinitionId: 0,
+        mediaAssetId: 0,
+        sortOrder: 0,
+    };
+}
+
 function optionalPriceTier(value: string): { error: string | null; value: number | null } {
     if (!value.trim()) {
         return { error: null, value: null };
@@ -1426,6 +1907,15 @@ function requiredInteger(value: string, label: string): { error: string | null; 
     const parsed = Number(value);
     if (!Number.isInteger(parsed)) {
         return { error: `${label} must be a whole number.`, value: 0 };
+    }
+
+    return { error: null, value: parsed };
+}
+
+function requiredPositiveInteger(value: string, label: string): { error: string | null; value: number } {
+    const parsed = Number(value);
+    if (!Number.isInteger(parsed) || parsed <= 0) {
+        return { error: `${label} is required.`, value: 0 };
     }
 
     return { error: null, value: parsed };
@@ -1476,4 +1966,13 @@ function summarizeCapabilities(forms: CapabilityFormState[]) {
 
 function hasAvailableCapability(forms: Record<number, CapabilityFormState>) {
     return Object.values(forms).some((form) => form.capability === 'yes' || form.capability === 'tbc');
+}
+
+function mediaLabel(asset: MediaAssetOption | undefined, id: number) {
+    if (!asset) {
+        return `Media #${id}`;
+    }
+
+    const source = asset.source_url || [asset.bucket, asset.object_path].filter(Boolean).join('/');
+    return `${asset.alt || source || `Media #${id}`} (${asset.status})`;
 }

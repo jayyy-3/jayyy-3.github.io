@@ -2,6 +2,53 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Stone Library Finish Image Admin Source)
+
+### Scope
+- Expanded `/admin/stone-library` from group/variant/finish capability editing to include finish image links backed by `stone_finish_images`.
+- The Stone Library admin screen now loads `media_assets`, lists finish image links for the selected stone group/variant, and lets active editor/admin/owner roles create, update, publish, and archive image links for selected variants and finishes.
+- Published finish image links are guarded so they must reference a published media record.
+- Added `stone_finish_image.create`, `stone_finish_image.update`, `stone_finish_image.publish`, and `stone_finish_image.archive` audit actions after successful primary saves.
+- Updated admin source coverage and the plan-only live CRUD verifier so later credential-gated live runs include `stone_finish_images`.
+
+### Changed Files
+- `AGENTS.md`
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/DESIGN.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `scripts/check-admin-crud-coverage.mjs`
+- `scripts/check-admin-crud-live.mjs`
+- `src/pages/admin/AdminStoneLibraryPage.tsx`
+
+### Verification Results
+- `node --check scripts/check-admin-crud-coverage.mjs`: pass.
+- `node --check scripts/check-admin-crud-live.mjs`: pass.
+- `npm run agent:admin-crud-coverage`: pass. Stone Library coverage now includes `stone_finish_images` and `media_assets`.
+- `npm run agent:admin-crud-live`: pass in plan-only mode; no Supabase writes, Storage uploads, or deletes were attempted.
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass, including public/admin route shells and Forms API mock checks.
+- `npm run agent:live-readiness`: pass in report-only mode. It still reports missing service-role key, persistent browser-safe key env, first-admin email, admin session credentials, Jay approval for tagged live QA writes, and Cloudflare preview URL.
+- `npm run agent:cloudflare-readiness`: pass.
+- Playwright Firefox rendered check on `http://127.0.0.1:5182/admin/stone-library`: pass. With no browser-safe Supabase key configured, the route shows the configuration-required auth state, hides Stone Library private content including the new finish-image surface, suppresses WelcomePopup content, and reports 0 browser console warnings/errors.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- This checkpoint is source-only. It does not verify live Stone Library saves, live media upload, live finish-image publish/archive, or audit row creation because browser-safe Supabase config and an active admin/editor profile are still missing.
+- Static-to-Supabase content import still prepares media candidates and Stone Library records as draft review material; applying/importing production rows still requires Jay approval and the credential path.
+
+### Next Handoff
+- `NOW-FORMS-BACKEND-001`: run `npm run agent:forms-live` after `SUPABASE_SERVICE_ROLE_KEY` is configured.
+- `NOW-ADMIN-AUTH-RLS-001`: run `npm run agent:admin-live-readiness -- --admin-email <first-admin-email>` after browser-safe and service-role keys plus first-admin profile are available.
+- `NOW-ADMIN-CONTENT-CRUD-001`: continue source-only content import/public-read preparation if credentials remain unavailable; run live Stone Library image-link verification only after browser-safe config and an active admin/editor profile exist.
+
 ## Entry - 2026-05-29 (Guarded Content Import Apply SQL)
 
 ### Scope

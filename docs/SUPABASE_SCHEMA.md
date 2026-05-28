@@ -5,7 +5,7 @@ Last updated: 2026-05-29
 ## Purpose
 This document defines the first production Supabase data model for the Urblo website launch.
 
-It is both the schema design contract and the current implementation checkpoint record. The foundation migrations, baseline seeds, admin settings/profile/helper hardening, and media Storage policies are applied. Admin role helper RPC execution is revoked from browser roles in the exposed public schema, while RLS and Storage policies call private SECURITY DEFINER helpers from a non-exposed schema; the Supabase security advisor currently reports zero security lints. Cloudflare Pages Function source exists for forms, and the `/admin` auth shell, `/admin/settings`, `/admin/media`, `/admin/stone-library`, `/admin/projects`, `/admin/products`, `/admin/articles`, `/admin/leads`, and `/admin/audit` source screens are implemented. Leads now includes an owner/admin CSV export path that requires an audit event before download. `npm run agent:admin-crud-coverage` provides source-only coverage for the implemented `/admin` route/module/table/audit/export paths before live credential checks run. Runtime work must still verify live form writes, configure browser-safe Supabase Auth keys, create the first admin profile, verify live settings/admin-profile/media/Stone Library/Projects/Products/Articles/Leads writes and export, and verify live audit row creation from the shared admin audit writer.
+It is both the schema design contract and the current implementation checkpoint record. The foundation migrations, baseline seeds, admin settings/profile/helper hardening, and media Storage policies are applied. Admin role helper RPC execution is revoked from browser roles in the exposed public schema, while RLS and Storage policies call private SECURITY DEFINER helpers from a non-exposed schema; the Supabase security advisor currently reports zero security lints. Cloudflare Pages Function source exists for forms, and the `/admin` auth shell, `/admin/settings`, `/admin/media`, `/admin/stone-library`, `/admin/projects`, `/admin/products`, `/admin/articles`, `/admin/leads`, and `/admin/audit` source screens are implemented. Stone Library source now includes finish image links from `stone_finish_images` to `media_assets`. Leads includes an owner/admin CSV export path that requires an audit event before download. `npm run agent:admin-crud-coverage` provides source-only coverage for the implemented `/admin` route/module/table/audit/export paths before live credential checks run. Runtime work must still verify live form writes, configure browser-safe Supabase Auth keys, create the first admin profile, verify live settings/admin-profile/media/Stone Library/Projects/Products/Articles/Leads writes and export, and verify live audit row creation from the shared admin audit writer.
 
 ## Current Supabase Project
 
@@ -21,7 +21,7 @@ The Supabase connector can access the Urblo project directly. Do not ask the use
 | Baseline seed migration | Applied on 2026-05-27: `baseline_seed` |
 | Admin hardening migrations | Applied on 2026-05-28: `admin_settings_role_hardening`, `admin_profile_owner_hardening`, `security_definer_function_grants`; applied on 2026-05-29: `security_definer_private_helpers` |
 | Media Storage migrations | Applied on 2026-05-28: `media_storage_foundation`, `media_storage_listing_hardening` |
-| First content CRUD sources | Implemented on 2026-05-28: `/admin/stone-library` source screen for Stone Library groups, variants, and finish capabilities; `/admin/projects` source screen for project records, facts, material schedules, material maps, and hotspots; `/admin/products` source screen for product families, models, material defaults, and specs; `/admin/articles` source screen for article metadata and structured article blocks |
+| First content CRUD sources | Implemented on 2026-05-28: `/admin/stone-library` source screen for Stone Library groups, variants, and finish capabilities; expanded on 2026-05-29 with finish image links to media records. `/admin/projects` source screen for project records, facts, material schedules, material maps, and hotspots; `/admin/products` source screen for product families, models, material defaults, and specs; `/admin/articles` source screen for article metadata and structured article blocks |
 | First lead workflow source | Implemented on 2026-05-28: `/admin/leads` source screen for enquiry/sample request status, assignment, internal notes, notification state, sample item inspection, and audit-gated owner/admin CSV export |
 | First audit visibility source | Implemented on 2026-05-28: `/admin/audit` source screen for owner/admin audit event inspection |
 | First admin audit writer source | Implemented on 2026-05-28: `src/lib/adminAudit.ts` inserts audit rows after successful admin CRUD/workflow saves; live row creation remains pending browser-safe Supabase config and active admin profiles |
@@ -133,9 +133,9 @@ Acceptance:
 Outcome: the first content workflow has a protected source editing surface before public runtime migration.
 
 Acceptance:
-- In progress on 2026-05-28. `/admin/stone-library` source implements Stone Library group, variant, and finish capability editing behind the existing Supabase Auth/profile gate.
-- The screen reads `stone_groups`, `stone_variants`, `finish_definitions`, and `stone_finish_capabilities`; editor/admin/owner roles can save group and variant records, publish/archive them, and update per-finish capability rows once live browser-safe Supabase config exists.
-- The screen includes loading, empty, validation, save, publish/archive, read-only, and error states.
+- In progress on 2026-05-29. `/admin/stone-library` source implements Stone Library group, variant, finish capability, and finish image link editing behind the existing Supabase Auth/profile gate.
+- The screen reads `stone_groups`, `stone_variants`, `finish_definitions`, `stone_finish_capabilities`, `stone_finish_images`, and `media_assets`; editor/admin/owner roles can save group and variant records, publish/archive them, update per-finish capability rows, and link finish imagery to media records once live browser-safe Supabase config exists.
+- The screen includes loading, empty, validation, save, publish/archive, read-only, error, image-link, and published-media guard states.
 - Public Stone Library routes remain static/file-backed until static data is imported into Supabase and the public read path is deliberately migrated.
 - Live browser save verification still requires browser-safe Supabase key configuration and an active admin/editor profile.
 
@@ -190,7 +190,7 @@ Acceptance:
 - Audit event mutation remains intentionally absent from the screen.
 - Admin Settings, Media, Stone Library, Projects, Products, Articles, and Leads save flows call `recordAdminAuditEvent` after successful primary mutations. If the audit insert fails, the UI appends an audit warning to the success notice instead of rolling back the primary save.
 - Live audit row creation verification still requires browser-safe Supabase key configuration and an active profile. Server-side form audit events remain pending live form persistence verification.
-- `npm run agent:admin-crud-live` is now staged for that live proof. Default mode is no-write. With `--allow-writes`, it signs in or uses an admin access token and writes tagged QA rows across Settings, Media, Stone Library, Projects, Products, Articles, private lead workflow rows, and export-audit actions through authenticated RLS. It archives public-facing QA parents where possible and performs no physical deletes.
+- `npm run agent:admin-crud-live` is now staged for that live proof. Default mode is no-write. With `--allow-writes`, it signs in or uses an admin access token and writes tagged QA rows across Settings, Media, Stone Library including finish images, Projects, Products, Articles, private lead workflow rows, and export-audit actions through authenticated RLS. It archives public-facing QA parents where possible and performs no physical deletes.
 
 ### Phase 5 - Content Migration and CRUD
 Outcome: content can move out of static files in a controlled order.
@@ -209,7 +209,7 @@ Current preparation:
 Order:
 1. Site settings is started under Phase 4a.
 2. Media records and Storage policy.
-3. Stone Library data. Source CRUD is implemented under `/admin/stone-library`; live save verification and static-to-Supabase content import are pending browser-safe Supabase config and active admin/editor profile access.
+3. Stone Library data. Source CRUD is implemented under `/admin/stone-library` for groups, variants, finish capabilities, and finish image links; live save verification and static-to-Supabase content import are pending browser-safe Supabase config and active admin/editor profile access.
 4. Projects and project material maps. Source CRUD is implemented under `/admin/projects`; live save verification and static-to-Supabase content import are pending browser-safe Supabase config and active admin/editor profile access.
 5. Products. Source CRUD is implemented under `/admin/products`; live save verification and static-to-Supabase content import are pending browser-safe Supabase config and active admin/editor profile access.
 6. Articles as structured blocks. Source CRUD is implemented under `/admin/articles`; live save verification and static-to-Supabase content import are pending browser-safe Supabase config and active admin/editor profile access.

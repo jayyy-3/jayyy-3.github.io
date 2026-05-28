@@ -18,7 +18,7 @@ const livePlan = [
   'Verify the signed-in admin profile is active owner/admin by reading through RLS.',
   'Create and archive a tagged draft site_settings row without touching the default settings row.',
   'Create and archive a tagged media_assets row; optionally upload a tiny private Storage object.',
-  'Create tagged Stone Library group, variant, and finish capability records.',
+  'Create tagged Stone Library group, variant, finish capability, and finish image records.',
   'Create tagged Product, model, material-default, and spec records.',
   'Create tagged Project, facts, material schedule, material map, and hotspot records.',
   'Create tagged Article metadata and structured block records.',
@@ -543,6 +543,28 @@ async function run() {
     metadata,
   );
 
+  const finishImage = await insertRow(config, accessToken, 'stone_finish_images', {
+    stone_group_id: stoneGroup.id,
+    stone_variant_id: stoneVariant.id,
+    finish_definition_id: finish.id,
+    media_asset_id: media.id,
+    image_role: 'primary',
+    status: 'draft',
+    sort_order: 0,
+    created_by: authUser.id,
+    updated_by: authUser.id,
+  });
+  created.push(`stone_finish_images#${finishImage.id}`);
+  await recordAudit(
+    config,
+    accessToken,
+    authUser.id,
+    'stone_finish_image.create',
+    'stone_finish_images',
+    finishImage.id,
+    metadata,
+  );
+
   const product = await insertRow(config, accessToken, 'products', {
     slug,
     name: `Admin Live Product ${marker}`,
@@ -781,6 +803,7 @@ async function run() {
     ['articles', article.id, 'article.archive', 'articles'],
     ['product_models', productModel.id, 'product_model.archive', 'product_models'],
     ['products', product.id, 'product.archive', 'products'],
+    ['stone_finish_images', finishImage.id, 'stone_finish_image.archive', 'stone_finish_images'],
     ['stone_variants', stoneVariant.id, 'stone_variant.archive', 'stone_variants'],
     ['stone_groups', stoneGroup.id, 'stone_group.archive', 'stone_groups'],
   ]) {
@@ -801,7 +824,7 @@ async function run() {
   });
 
   const auditRows = await selectAuditRowsByMarker(config, accessToken, marker);
-  assert.ok(auditRows.length >= 24, `Expected at least 24 tagged audit rows, found ${auditRows.length}.`);
+  assert.ok(auditRows.length >= 26, `Expected at least 26 tagged audit rows, found ${auditRows.length}.`);
 
   console.log('Admin CRUD live verification passed.');
   console.log(`Created tagged QA rows: ${created.join(', ')}`);
