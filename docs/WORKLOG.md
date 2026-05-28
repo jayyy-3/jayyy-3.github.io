@@ -2,6 +2,55 @@
 
 Last updated: 2026-05-28
 
+## Entry - 2026-05-28 (Live Verification Readiness Audit Runner)
+
+### Scope
+- Added `npm run agent:live-readiness` as a no-secret audit for the live inputs needed by form persistence, deployed form verification, first-admin readiness, tagged admin CRUD/audit writes, and Cloudflare preview smoke.
+- Added optional local preview URL helper variables to `.env.example`.
+- Updated Harness, architecture, Cloudflare, task, roadmap, and startup docs so this runner is visible before credential-gated checks.
+- No Supabase queries, Supabase mutations, Cloudflare project changes, DNS changes, live writes, or credential handling were performed.
+
+### Changed Files
+- `.env.example`
+- `AGENTS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/CLOUDFLARE_DEPLOYMENT.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `docs/agent/verification.md`
+- `package.json`
+- `scripts/agent-init.sh`
+- `scripts/check-live-readiness.mjs`
+
+### Verification Results
+- `node --check scripts/check-live-readiness.mjs`: pass.
+- `npm run agent:init`: pass and lists `npm run agent:live-readiness`.
+- `npm run agent:live-readiness`: pass in report-only mode. With no env files found, it reports missing service-role key, preview URL, browser-safe Supabase key, first-admin email, admin session credentials, and Jay approval for tagged live QA writes.
+- `npm run agent:live-readiness -- --json`: pass.
+- `npm run agent:live-readiness -- --strict`: expected fail. Strict mode exits non-zero when the same live inputs are missing or manually gated.
+- `npm run agent:cloudflare-readiness`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:admin-crud-live`: pass in plan-only mode; no writes, Storage uploads, or deletes were attempted.
+- `npm run agent:public-supabase-readiness`: pass.
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass, including public/admin route shells, critical CTA contracts, redirects, and Forms API mock checks.
+
+### Risks and Gaps
+- This checkpoint improves live-verification ergonomics but does not replace credential-gated live checks.
+- Live form persistence still needs `SUPABASE_SERVICE_ROLE_KEY`/`SUPABASE_SERVICE_KEY`.
+- Admin readiness still needs a browser-safe Supabase key, service-role verification key, and Jay-confirmed first-admin email/profile.
+- Tagged admin CRUD/audit live writes still need a real owner/admin session and Jay approval.
+- Cloudflare preview smoke still needs a Pages preview URL or explicit `--base-url`.
+
+### Next Handoff
+- `NOW-FORMS-BACKEND-001`: run `npm run agent:forms-live` after service-role credentials are configured.
+- `NOW-ADMIN-AUTH-RLS-001`: run `npm run agent:admin-live-readiness -- --admin-email <first-admin-email>` after browser/service keys and first-admin profile are available.
+- `NOW-ADMIN-CMS-001`: run `npm run agent:admin-crud-live -- --allow-writes` only after Jay approves tagged QA writes and a real owner/admin session exists.
+
 ## Entry - 2026-05-28 (Post-Alignment Baseline Verification)
 
 ### Scope

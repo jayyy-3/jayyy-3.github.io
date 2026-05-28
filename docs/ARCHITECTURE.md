@@ -141,6 +141,12 @@ Last updated: 2026-05-28
   - Requires `VITE_SUPABASE_PUBLISHABLE_KEY` or `VITE_SUPABASE_ANON_KEY`, plus `SUPABASE_SERVICE_ROLE_KEY` or `SUPABASE_SERVICE_KEY`.
   - Reads `admin_profiles`, `site_settings`, and `finish_definitions` only; it does not create users, create profiles, mutate content, or delete rows.
   - Defaults to requiring an active `owner` profile. Use `--required-role owner,admin` only when intentionally verifying a non-owner admin profile.
+- Live input readiness:
+  - `npm run agent:live-readiness` => `node scripts/check-live-readiness.mjs`
+  - Loads local environment values from `.env.local`, `.env`, `.dev.vars`, and the shell.
+  - Reports, without printing secret values, whether the inputs for `agent:forms-live`, deployed form verification, `agent:admin-live-readiness`, `agent:admin-crud-live -- --allow-writes`, and `agent:cloudflare-preview-smoke` are present.
+  - Default mode is report-only and exits 0 even when inputs are missing; `--strict` exits 1 when live inputs are missing or manually gated.
+  - This command does not query Supabase, create users, run live writes, create Cloudflare projects, or touch DNS.
 - Admin CRUD source coverage:
   - `npm run agent:admin-crud-coverage` => `node scripts/check-admin-crud-coverage.mjs`
   - Verifies `/admin` route registration, active module registration, `RequireAdmin` state coverage, browser-safe Supabase client wiring, launch-critical table references, role-gated mutation controls, publish/archive paths, shared audit writer usage, and Media/Leads export audit gates.

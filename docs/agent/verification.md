@@ -10,6 +10,7 @@ Use when resuming work or handing off between agents.
 
 Run:
 - `npm run agent:init`
+- `npm run agent:live-readiness` when continuing form/admin/Cloudflare live verification work.
 
 This command is informational and does not replace verification gates.
 
