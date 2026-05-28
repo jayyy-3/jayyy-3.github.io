@@ -148,6 +148,7 @@ Run:
 - `npx tsc -b`
 - `npm run agent:smoke`
 - `npm run agent:admin-crud-coverage` when changing admin routes, module screens, table coverage, audit writers, export controls, or role gates.
+- `npm run agent:admin-crud-live` in plan-only mode when changing live admin verification contracts; run `npm run agent:admin-crud-live -- --allow-writes` only after browser-safe Supabase config and a real owner/admin session are available and Jay has approved tagged QA writes.
 - Browser or Playwright checks for authenticated and unauthenticated admin routes when possible.
 
 Evidence to record:

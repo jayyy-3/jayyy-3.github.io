@@ -26,6 +26,7 @@ The Supabase connector can access the Urblo project directly. Do not ask the use
 | First audit visibility source | Implemented on 2026-05-28: `/admin/audit` source screen for owner/admin audit event inspection |
 | First admin audit writer source | Implemented on 2026-05-28: `src/lib/adminAudit.ts` inserts audit rows after successful admin CRUD/workflow saves; live row creation remains pending browser-safe Supabase config and active admin profiles |
 | Admin source coverage runner | Implemented on 2026-05-28: `npm run agent:admin-crud-coverage` verifies route/module/table/action/audit/export coverage without mutating Supabase |
+| Admin live CRUD runner | Implemented on 2026-05-28: `npm run agent:admin-crud-live` defaults to a no-write plan; `--allow-writes` requires a real owner/admin Supabase Auth session and creates tagged draft/archived QA rows plus audit events through browser-key RLS |
 
 Secrets still must not be committed or pasted into repo docs. Service-role keys, database passwords, Turnstile secrets, and email provider secrets belong only in server-side environment variable stores.
 
@@ -188,6 +189,7 @@ Acceptance:
 - Audit event mutation remains intentionally absent from the screen.
 - Admin Settings, Media, Stone Library, Projects, Products, Articles, and Leads save flows call `recordAdminAuditEvent` after successful primary mutations. If the audit insert fails, the UI appends an audit warning to the success notice instead of rolling back the primary save.
 - Live audit row creation verification still requires browser-safe Supabase key configuration and an active profile. Server-side form audit events remain pending live form persistence verification.
+- `npm run agent:admin-crud-live` is now staged for that live proof. Default mode is no-write. With `--allow-writes`, it signs in or uses an admin access token and writes tagged QA rows across Settings, Media, Stone Library, Projects, Products, Articles, private lead workflow rows, and export-audit actions through authenticated RLS. It archives public-facing QA parents where possible and performs no physical deletes.
 
 ### Phase 5 - Content Migration and CRUD
 Outcome: content can move out of static files in a controlled order.

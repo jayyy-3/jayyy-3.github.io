@@ -2,6 +2,56 @@
 
 Last updated: 2026-05-28
 
+## Entry - 2026-05-28 (Admin CRUD Live Verifier)
+
+### Scope
+- Added `scripts/check-admin-crud-live.mjs` as a credential-gated live write verifier for the implemented `/admin` CMS.
+- Added `npm run agent:admin-crud-live` and listed it in `npm run agent:init`.
+- Default mode is plan-only and performs no Supabase writes, Storage uploads, or deletes.
+- Live mode requires `--allow-writes`, a browser-safe Supabase key, and a real owner/admin Supabase Auth session through `URBLO_ADMIN_ACCESS_TOKEN` or `URBLO_ADMIN_EMAIL`/`URBLO_ADMIN_PASSWORD`.
+- The live flow is designed to create tagged draft/archived QA rows across Settings, Media, Stone Library, Projects, Products, Articles, private lead workflow rows, and export audit actions through browser-key RLS. Optional `--include-storage` uploads a tiny private `urblo-admin-media` object.
+
+### Changed Files
+- `.env.example`
+- `AGENTS.md`
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/CLOUDFLARE_DEPLOYMENT.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `docs/agent/verification.md`
+- `package.json`
+- `scripts/agent-init.sh`
+- `scripts/check-admin-crud-live.mjs`
+
+### Verification Results
+- Supabase changelog check: pass. The relevant recent Data API exposure change is already covered by existing grants/RLS posture; no new schema or Data API exposure change was made.
+- `node --check scripts/check-admin-crud-live.mjs`: pass.
+- `npm run agent:admin-crud-live`: pass in plan-only mode. It reported missing local admin credentials and performed no writes.
+- `npm run agent:admin-crud-coverage`: pass. Existing admin source route/module/table/action/export coverage remains green.
+- `npm run agent:cloudflare-readiness`: pass. Cloudflare Pages build contract, SPA fallback, Function routing scope, headers, API handlers, env placeholders, and deployment runbook remain valid after documentation updates.
+- Supabase migration list: pass. The nine applied launch migrations are still present on project `npkidywzwddbnfrnxlmo`.
+- Supabase RLS sanity: pass. All 24 public launch tables report `relrowsecurity = true`.
+- Supabase private workflow row-count sanity: pass. `admin_profiles`, `admin_audit_events`, `enquiries`, `sample_requests`, and `sample_request_items` remain at 0 rows after plan-only verification; `finish_definitions` remains 12 and `site_settings` remains 1.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run build`: pass. Browserslist staleness notice remains; admin chunk is about 432 kB before gzip.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass, including `/admin/*` route shells and Forms API mock checks.
+
+### Risks and Gaps
+- Live admin writes remain unverified until browser-safe Supabase config, a real owner/admin session, and Jay approval for tagged QA writes are available.
+- The live verifier intentionally does not create or change first-admin profile rows and intentionally does not physically delete tagged QA rows.
+
+### Next Handoff
+- `NOW-ADMIN-AUTH-RLS-001` live auth/profile verification.
+- `NOW-ADMIN-CMS-001` live tagged CRUD/audit verification with `npm run agent:admin-crud-live -- --allow-writes`.
+- `NOW-FORMS-BACKEND-001` live Supabase row/audit verification.
+
 ## Entry - 2026-05-28 (Cloudflare Pages Readiness Runner)
 
 ### Scope

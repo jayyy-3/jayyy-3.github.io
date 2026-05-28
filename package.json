@@ -6,6 +6,7 @@
   "scripts": {
     "agent:check": "node scripts/check-harness.mjs",
     "agent:admin-crud-coverage": "node scripts/check-admin-crud-coverage.mjs",
+    "agent:admin-crud-live": "node scripts/check-admin-crud-live.mjs",
     "agent:admin-live-readiness": "node scripts/check-admin-live-readiness.mjs",
     "agent:content-import": "node scripts/check-content-import-readiness.mjs",
     "agent:content-import:json": "node scripts/check-content-import-readiness.mjs --json",

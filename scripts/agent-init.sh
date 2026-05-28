@@ -37,6 +37,7 @@ echo
 
 echo "Useful commands:"
 echo "- npm run agent:admin-crud-coverage"
+echo "- npm run agent:admin-crud-live"
 echo "- npm run agent:admin-live-readiness"
 echo "- npm run agent:check"
 echo "- npm run agent:cloudflare-readiness"

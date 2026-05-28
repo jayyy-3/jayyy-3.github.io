@@ -70,6 +70,7 @@ Last updated: 2026-05-28
   - Current Audit admin source: `/admin/audit` reads `admin_audit_events` for active owner/admin roles once browser-safe Supabase config and an active profile exist.
   - Current audit-write source: `src/lib/adminAudit.ts` inserts `admin_audit_events` after successful admin Settings, admin profile, Media, Stone Library, Projects, Products, Articles, and Leads mutations. Audit insert failures are appended to the success notice and do not roll back the already-saved primary change.
   - Admin credential/profile readiness verification is staged through `npm run agent:admin-live-readiness -- --admin-email <first-admin-email>`. The command is read-only, requires a browser-safe Supabase key plus a service-role key, verifies the named active admin profile role, and checks the baseline `site_settings` and `finish_definitions` seed rows before browser login/save QA begins.
+  - Admin live write verification is staged through `npm run agent:admin-crud-live`. Default mode is a no-write plan. With `--allow-writes`, the command requires a browser-safe Supabase key plus a real owner/admin Supabase Auth session via `URBLO_ADMIN_ACCESS_TOKEN` or `URBLO_ADMIN_EMAIL`/`URBLO_ADMIN_PASSWORD`; it then creates tagged draft/archived QA rows across Settings, Media, Stone Library, Projects, Products, Articles, Leads, and audit-export actions through normal browser-key RLS. It does not physically delete rows.
   - Form Functions require `SUPABASE_SERVICE_ROLE_KEY` server-side; `SUPABASE_SERVICE_KEY` remains a compatibility alias only. `SUPABASE_URL` may be configured, but defaults to the Urblo project URL if omitted.
   - Form Functions attempt `admin_audit_events` writes with `actor_user_id = null` after successful enquiry/sample request inserts. Audit write failure does not fail the visitor response.
   - Live form persistence verification is staged through `npm run agent:forms-live`. The command requires a server-side Supabase service-role key, verifies valid enquiry/sample request rows plus audit rows, verifies invalid enquiry/sample request payloads create no rows, and retains tagged test rows for auditability until Jay approves cleanup.
@@ -134,6 +135,12 @@ Last updated: 2026-05-28
   - `npm run agent:admin-crud-coverage` => `node scripts/check-admin-crud-coverage.mjs`
   - Verifies `/admin` route registration, active module registration, `RequireAdmin` state coverage, browser-safe Supabase client wiring, launch-critical table references, role-gated mutation controls, publish/archive paths, shared audit writer usage, and Media/Leads export audit gates.
   - This is a source-only verifier. It never mutates Supabase and does not replace live browser QA with a configured admin profile.
+- Admin CRUD live verification:
+  - `npm run agent:admin-crud-live` => `node scripts/check-admin-crud-live.mjs`
+  - Default mode prints the live verification plan and performs no writes.
+  - Live write mode uses `npm run agent:admin-crud-live -- --allow-writes` after browser-safe Supabase config and a real owner/admin session are available.
+  - The command uses browser-key PostgREST/Auth requests, not a service-role key, so writes exercise RLS for the signed-in admin profile.
+  - The command creates tagged QA rows and archives public-facing parents where possible; it intentionally avoids physical deletes. Optional `--include-storage` uploads a tiny private `urblo-admin-media` object for Storage-policy verification.
 
 ## Route Interface Contract (`src/App.tsx`)
 
