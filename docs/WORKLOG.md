@@ -8,6 +8,7 @@ Last updated: 2026-05-29
 - Added a distinct `npm run agent:live-readiness` check for the final media upload policy proof: `npm run agent:admin-crud-live -- --allow-writes --include-storage`.
 - Hardened `npm run agent:cloudflare-readiness` so the Cloudflare deployment runbook must keep the Storage-inclusive admin live verification command.
 - Updated Harness docs so media Storage upload proof is not hidden behind the general admin CRUD/audit live check.
+- Corrected stale architecture risk wording that still implied broader admin content CRUD source screens were missing; the current blocker is live save verification, approved content import, and public read cutover.
 
 ### Changed Files
 - `docs/ARCHITECTURE.md`
