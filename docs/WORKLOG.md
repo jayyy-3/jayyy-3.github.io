@@ -2,6 +2,40 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Cloudflare Forms Boundary Runbook)
+
+### Scope
+- Updated `docs/CLOUDFLARE_DEPLOYMENT.md` so the Cloudflare preview/production handoff includes `npm run agent:forms-live -- --require-browser-boundary` after both service-role and browser-safe Supabase keys are configured.
+- Strengthened `scripts/check-cloudflare-pages-readiness.mjs` so repo-side Cloudflare readiness fails if the deployment runbook drops that final private-row form proof command.
+- No Supabase rows, Auth users, Storage objects, credentials, Cloudflare state, or live writes were created or changed.
+
+### Changed Files
+- `docs/CLOUDFLARE_DEPLOYMENT.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `scripts/check-cloudflare-pages-readiness.mjs`
+
+### Verification Results
+- `node --check scripts/check-cloudflare-pages-readiness.mjs`: pass.
+- `npm run agent:cloudflare-readiness`: pass.
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:live-readiness`: pass in report-only mode; live form/admin/Cloudflare inputs remain missing or approval-gated.
+- `npm run agent:public-supabase-readiness`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `node -e "JSON.parse(require('fs').readFileSync('docs/agent/tasks.json','utf8')); console.log('tasks json ok')"`: pass.
+
+### Risks and Gaps
+- This is a runbook/source readiness checkpoint only. It does not create a Cloudflare Pages project, configure environment variables, run deployed preview smoke, or submit live form rows.
+
+### Next Handoff
+- `NOW-CLOUDFLARE-PAGES-DEPLOY-001`: create/verify the Pages preview URL, then run `npm run agent:cloudflare-preview-smoke -- --base-url https://<preview>.pages.dev`.
+
 ## Entry - 2026-05-29 (Live Forms Private Lead Boundary)
 
 ### Scope

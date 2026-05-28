@@ -130,8 +130,9 @@ Current `/functions/api` endpoints:
 - Valid form tests require `SUPABASE_SERVICE_ROLE_KEY` in the Pages Function environment.
 - Credential-gated live verification can be run with:
   - `npm run agent:forms-live` for direct handler verification against local service-role credentials.
+  - `npm run agent:forms-live -- --require-browser-boundary` for final private-row proof after both service-role and browser-safe Supabase keys are configured.
   - `npm run agent:forms-live -- --base-url https://<preview>.pages.dev` for deployed endpoint verification, after the Pages environment has the service-role key.
-- The live verification command creates tagged test enquiry and sample-request rows, verifies their `admin_audit_events`, verifies invalid payloads create no rows, and keeps the test rows until Jay approves cleanup.
+- The live verification command creates tagged test enquiry and sample-request rows, verifies their `admin_audit_events`, verifies invalid payloads create no rows, checks response-vs-stored notification status, and keeps the test rows until Jay approves cleanup. With `--require-browser-boundary`, it also proves those private lead rows are not anonymously readable through browser-key REST access.
 - Admin route tests require a browser-safe Supabase key, a Supabase Auth user, and a matching active `admin_profiles` row.
 - Before browser admin QA, run `npm run agent:admin-live-readiness -- --admin-email <first-admin-email>` to verify the browser-safe key, service-role verification key, active admin profile, and baseline seed rows without mutating Supabase.
 - Before live admin save/export QA, run `npm run agent:admin-crud-live` in plan-only mode, then run `npm run agent:admin-crud-live -- --allow-writes` only after a real owner/admin Supabase Auth session is available and Jay approves tagged QA writes. Use `--include-storage` when intentionally verifying private Storage object upload policy.
@@ -170,6 +171,7 @@ Run from the repo root before deploying:
 
 After form secrets are configured, run:
 - `npm run agent:forms-live`
+- `npm run agent:forms-live -- --require-browser-boundary` after the browser-safe Supabase key is configured
 
 For deployed Pages preview form verification, run:
 - `npm run agent:forms-live -- --base-url https://<preview>.pages.dev`
