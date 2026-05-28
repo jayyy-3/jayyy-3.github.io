@@ -146,7 +146,7 @@
       ],
       "notes": [
         "Run after Supabase foundation and baseline seed work. Turnstile and email notification can be staged: database insert comes first, notification can remain pending until the email provider secret exists.",
-        "The main public submit path should stop depending on a local mail client once this is complete.",
+        "The main public submit source now posts to Pages Functions; remaining completion proof is live persistence, notification behavior, and admin-visible lead workflow verification.",
         "2026-05-27: Added Pages Function source for /api/enquiries and /api/sample-requests. Contact page now posts enquiries to /api/enquiries; Sample Request mode posts to /api/sample-requests and creates a sample item payload. Footer/sample CTAs now route to /contact?intent=sample-request.",
         "2026-05-27: Mock API checks pass for valid enquiry, invalid enquiry, valid sample request with item row, and configured Turnstile failure. Live Supabase insert verification remains pending server-side SUPABASE_SERVICE_ROLE_KEY configuration.",
         "2026-05-28: Form handlers now attempt server-side admin_audit_events writes after successful enquiry/sample request inserts. Mock API checks verify audit calls, audit-failure resilience after lead storage, missing service-role fail-closed behavior before Supabase calls, and configured Turnstile failure.",
@@ -222,7 +222,7 @@
       "id": "NOW-FORMS-SUPABASE-001",
       "status": "now",
       "priority": 4,
-      "summary": "Replace mailto-only Contact and Sample Request flows with Supabase-backed submissions.",
+      "summary": "Complete Supabase-backed Contact and Sample Request persistence, notifications, and admin lead workflow.",
       "files": [
         "docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md",
         "docs/ARCHITECTURE.md",

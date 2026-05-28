@@ -5,7 +5,7 @@ Last updated: 2026-05-28
 ## Current Focus
 The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin CMS:
 - Public website hosting should move to Cloudflare Pages.
-- Contact and Sample Request should move from mailto/local-only behavior to Supabase-backed submissions.
+- Contact and Sample Request source now uses Supabase-backed Pages Function submissions instead of mailto/local-only main submit behavior; production persistence still depends on server-side environment verification.
 - Projects, Stone Library, Products, Articles, media records, and lead records should become customer-maintainable through `/admin`.
 - The current content runtime remains static/file-backed until content migration tasks are completed.
 - The long-form plan and cost baseline live in `docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md`.

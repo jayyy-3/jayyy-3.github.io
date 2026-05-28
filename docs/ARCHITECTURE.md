@@ -167,7 +167,7 @@ Routing uses clean paths through `BrowserRouter`. Cloudflare Pages direct refres
 | `/projects/:slug` | `ProjectDetails` | Project detail page. Uses page-owned project hero via `DefaultLayout showBanner={false}`. |
 | `/our-story` | `OurStory` | About page. |
 | `/capabilities` | `CapabilitiesPage` | Provisional capability framework page for design translation, specification support, sourcing/fabrication, and delivery coordination. |
-| `/contact` | `ContactPage` | Contact surface with direct contact channels and a local mailto project-brief composer that requires project notes plus email or phone before opening the draft. |
+| `/contact` | `ContactPage` | Contact surface with direct contact channels plus API-backed enquiry/sample-request submit flows. Sample mode is available at `/contact?intent=sample-request`; direct email and phone remain manual fallback channels. |
 | `/articles` | `ArticlesPage` | Article list page. |
 | `/articles/:slug` | `ArticlePage` | Article detail page. Uses page-owned article hero via `DefaultLayout showBanner={false}`. |
 | `/admin/*` | `AdminApp` | Protected admin shell outside public site chrome. Config-gated until browser-safe Supabase key is set; uses Supabase Auth plus `admin_profiles` once configured. Current source CRUD/workflow/review screens: Settings/admin profiles, Media, Stone Library, Projects, Products, Articles, Leads, Audit. |

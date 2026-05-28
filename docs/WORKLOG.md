@@ -2,6 +2,38 @@
 
 Last updated: 2026-05-28
 
+## Entry - 2026-05-28 (Forms Current-State Harness Alignment)
+
+### Scope
+- Corrected current-state Harness wording that still implied Contact and Sample Request main submit behavior was mailto/local-only.
+- Aligned `AGENTS.md`, `docs/HANDOFF.md`, `docs/ARCHITECTURE.md`, `docs/NEXT_STEPS.md`, and `docs/agent/tasks.json` with current source reality: Contact and Sample Request now post to Pages Functions, while production persistence still awaits service-role environment verification.
+- Clarified that direct email/phone links remain manual contact channels, not the primary form submit path.
+- Clarified that public content runtime is still static/file-backed until content import and public read migration are explicitly approved/applied, even though source CRUD screens now exist.
+- No runtime source, Supabase schema/data, Cloudflare account state, credentials, or live content was changed.
+
+### Changed Files
+- `AGENTS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run agent:init`: pass. It showed this docs-only working tree plus an unrelated untracked `test-results/` directory.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- Runtime gates were intentionally skipped because this checkpoint only changes Harness/current-state documentation.
+
+### Risks and Gaps
+- This does not prove live form persistence, email notification, first-admin access, admin live writes, media upload/export, lead workflow, or Cloudflare preview behavior.
+- The active goal remains incomplete until credential-gated live checks and approved QA writes pass.
+
+### Next Handoff
+- Continue `NOW-FORMS-BACKEND-001` with `npm run agent:forms-live` after `SUPABASE_SERVICE_ROLE_KEY` is configured.
+- Continue `NOW-ADMIN-AUTH-RLS-001` with `npm run agent:admin-live-readiness -- --admin-email <first-admin-email>` after browser-safe/service keys and first-admin profile details are available.
+- Run `npm run agent:admin-crud-live -- --allow-writes` only after Jay approves tagged QA writes and a real owner/admin session exists.
+
 ## Entry - 2026-05-28 (Goal Resume Readiness Audit)
 
 ### Scope
