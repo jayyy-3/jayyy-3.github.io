@@ -2,12 +2,12 @@
 
 Last updated: 2026-05-29
 
-## Entry - 2026-05-29 (Admin Storage Anonymous Read Guard)
+## Entry - 2026-05-29 (Admin Storage Readback and Anonymous Read Guard)
 
 ### Scope
 - Strengthened `scripts/check-admin-crud-live.mjs` so the approval-gated `--include-storage` live run no longer proves only private Storage upload success.
-- The live verifier now checks the tagged tiny `urblo-admin-media` object against anonymous browser-key reads through both private and public Storage object endpoints.
-- Expanded `scripts/check-admin-crud-coverage.mjs` so the Storage anonymous-read guard cannot be silently removed.
+- The live verifier now checks the tagged tiny `urblo-admin-media` object can be read back by the signed-in admin and is denied to anonymous browser-key reads through both private and public Storage object endpoints.
+- Expanded `scripts/check-admin-crud-coverage.mjs` so the Storage signed-in readback and anonymous-read guards cannot be silently removed.
 
 ### Changed Files
 - `docs/ADMIN_IA_ACCESS.md`
@@ -26,9 +26,9 @@ Last updated: 2026-05-29
 - `node --check scripts/check-admin-crud-coverage.mjs`: pass.
 - `node --check scripts/check-live-readiness.mjs`: pass.
 - `jq empty docs/agent/tasks.json`: pass.
-- `npm run agent:admin-crud-live -- --include-storage`: pass in plan-only/no-write mode; plan now includes the private Storage anonymous-read denial check.
+- `npm run agent:admin-crud-live -- --include-storage`: pass in plan-only/no-write mode; plan now includes the private Storage signed-in readback and anonymous-read denial checks.
 - `npm run agent:admin-crud-coverage`: pass.
-- `npm run agent:live-readiness`: pass in report-only mode; live form/admin/Cloudflare inputs remain missing or approval-gated, and Storage proof messaging now names anonymous-read denial.
+- `npm run agent:live-readiness`: pass in report-only mode; live form/admin/Cloudflare inputs remain missing or approval-gated, and Storage proof messaging now names signed-in readback plus anonymous-read denial.
 - `npm run agent:check`: pass.
 - `git diff --check`: pass.
 - `npm run build`: pass. Browserslist staleness notice remains.

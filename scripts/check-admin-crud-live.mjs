@@ -26,7 +26,7 @@ const livePlan = [
   'Record admin_audit_events for primary writes and export-gate actions.',
   'Publish then archive public-facing tagged QA rows before the final anonymous visibility check.',
   'Verify tagged archived content and private lead rows are not anonymously visible through browser-key reads.',
-  'When --include-storage is used, verify the uploaded private Storage object is not anonymously readable.',
+  'When --include-storage is used, verify the signed-in admin can read back the private Storage object and anonymous reads are denied.',
   'Leave tagged QA rows archived or private for auditability; no physical deletes are attempted.',
 ];
 
@@ -541,6 +541,26 @@ async function assertStorageObjectNotAnonymousReadable(config, storageRef) {
       `Anonymous Storage read via ${check.label} failed with unexpected HTTP ${response.status}.`,
     );
   }
+}
+
+async function assertStorageObjectReadableByAdmin(config, accessToken, storageRef) {
+  if (!storageRef) return;
+
+  const objectKey = storageRef.objectPath.split('/').map(encodeURIComponent).join('/');
+  const response = await fetch(`${config.supabaseUrl}/storage/v1/object/${storageRef.bucket}/${objectKey}`, {
+    headers: authHeaders(config, accessToken),
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Signed-in admin Storage readback failed with HTTP ${response.status}: ${text.slice(0, 320)}`);
+  }
+
+  const bytes = Buffer.from(await response.arrayBuffer());
+  assert.ok(
+    PNG_1X1.equals(bytes),
+    `Signed-in admin Storage readback returned ${bytes.length} bytes instead of the uploaded verification image.`,
+  );
 }
 
 async function insertRow(config, accessToken, table, payload) {
@@ -1106,6 +1126,7 @@ async function run() {
     assertNotAnonymousReadable(config, 'enquiries', { id: enquiry.id }, 'Tagged enquiry row'),
     assertNotAnonymousReadable(config, 'sample_requests', { id: sampleRequest.id }, 'Tagged sample_request row'),
     assertNotAnonymousReadable(config, 'sample_request_items', { id: sampleItem.id }, 'Tagged sample_request_item row'),
+    assertStorageObjectReadableByAdmin(config, accessToken, storageRef),
     assertStorageObjectNotAnonymousReadable(config, storageRef),
   ]);
 
@@ -1116,6 +1137,7 @@ async function run() {
   console.log(`Created tagged QA rows: ${created.join(', ')}`);
   if (storageRef) {
     console.log(`Uploaded tagged private Storage object: ${storageRef.bucket}/${storageRef.objectPath}`);
+    console.log('Signed-in admin readback for the tagged private Storage object passed.');
     console.log('Anonymous reads for the tagged private Storage object were denied.');
   }
   console.log(`Audit rows recorded: ${auditRows.length}`);

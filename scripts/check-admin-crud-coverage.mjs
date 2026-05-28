@@ -547,6 +547,7 @@ function checkAdminLiveVerifierBoundaries() {
   const text = readRequired('scripts/check-admin-crud-live.mjs');
   requireIncludes(text, 'assertNotPubliclyVisible', 'scripts/check-admin-crud-live.mjs');
   requireIncludes(text, 'assertNotAnonymousReadable', 'scripts/check-admin-crud-live.mjs');
+  requireIncludes(text, 'assertStorageObjectReadableByAdmin', 'scripts/check-admin-crud-live.mjs');
   requireIncludes(text, 'assertStorageObjectNotAnonymousReadable', 'scripts/check-admin-crud-live.mjs');
   requireIncludes(text, 'BROWSER_KEY_NAMES', 'scripts/check-admin-crud-live.mjs');
   requireIncludes(text, 'ADMIN_TOKEN_NAMES', 'scripts/check-admin-crud-live.mjs');
@@ -592,7 +593,12 @@ function checkAdminLiveVerifierBoundaries() {
   );
   requireIncludes(
     text,
-    'When --include-storage is used, verify the uploaded private Storage object is not anonymously readable.',
+    'When --include-storage is used, verify the signed-in admin can read back the private Storage object and anonymous reads are denied.',
+    'scripts/check-admin-crud-live.mjs',
+  );
+  requireIncludes(
+    text,
+    'Signed-in admin readback for the tagged private Storage object passed.',
     'scripts/check-admin-crud-live.mjs',
   );
   requireIncludes(
