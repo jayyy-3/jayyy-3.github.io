@@ -2,6 +2,34 @@
 
 Last updated: 2026-05-28
 
+## Entry - 2026-05-28 (Form Environment Example and Alias Docs)
+
+### Scope
+- Updated `.env.example` so local/Cloudflare configuration shows the server-side `SUPABASE_URL` plus supported compatibility aliases used by the Pages Function source.
+- Updated `docs/CLOUDFLARE_DEPLOYMENT.md` and `docs/ARCHITECTURE.md` to distinguish canonical environment variable names from compatibility aliases.
+- No secrets were added; all values remain blank placeholders except the public/project Supabase URL.
+
+### Changed Files
+- `.env.example`
+- `docs/ARCHITECTURE.md`
+- `docs/CLOUDFLARE_DEPLOYMENT.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- Live form persistence is still unverified until the actual server-side `SUPABASE_SERVICE_ROLE_KEY` is configured in the local/Cloudflare Pages Function environment.
+- Turnstile and Resend remain staged but unverified until their real secrets are configured.
+
+### Next Handoff
+- `NOW-FORMS-BACKEND-001` live Supabase row/audit verification.
+- `NOW-ADMIN-AUTH-RLS-001` live auth/profile verification.
+
 ## Entry - 2026-05-28 (Content Import Preflight SQL Artifact)
 
 ### Scope

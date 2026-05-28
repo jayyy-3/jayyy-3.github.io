@@ -69,9 +69,9 @@ Last updated: 2026-05-28
   - Current Leads admin source: `/admin/leads` reads `enquiries`, `sample_requests`, and `sample_request_items`; active owner/admin roles can update lead status, assignment, internal notes, and export the currently loaded lead queue to CSV once browser-safe Supabase config and an active profile exist. CSV export must write an `admin_audit_events` row before downloading.
   - Current Audit admin source: `/admin/audit` reads `admin_audit_events` for active owner/admin roles once browser-safe Supabase config and an active profile exist.
   - Current audit-write source: `src/lib/adminAudit.ts` inserts `admin_audit_events` after successful admin Settings, admin profile, Media, Stone Library, Projects, Products, Articles, and Leads mutations. Audit insert failures are appended to the success notice and do not roll back the already-saved primary change.
-  - Form Functions require `SUPABASE_SERVICE_ROLE_KEY` server-side. `SUPABASE_URL` may be configured, but defaults to the Urblo project URL if omitted.
+  - Form Functions require `SUPABASE_SERVICE_ROLE_KEY` server-side; `SUPABASE_SERVICE_KEY` remains a compatibility alias only. `SUPABASE_URL` may be configured, but defaults to the Urblo project URL if omitted.
   - Form Functions attempt `admin_audit_events` writes with `actor_user_id = null` after successful enquiry/sample request inserts. Audit write failure does not fail the visitor response.
-  - Optional server-side form secrets: `TURNSTILE_SECRET_KEY` or `CF_TURNSTILE_SECRET_KEY`, `RESEND_API_KEY`, `LEAD_NOTIFICATION_FROM`, `ENQUIRY_NOTIFICATION_TO`, and `SAMPLE_REQUEST_NOTIFICATION_TO`.
+  - Optional server-side form secrets: `TURNSTILE_SECRET_KEY` or `CF_TURNSTILE_SECRET_KEY`, `RESEND_API_KEY`, `LEAD_NOTIFICATION_FROM` or `RESEND_FROM_EMAIL`, `LEAD_NOTIFICATION_TO`, `ENQUIRY_NOTIFICATION_TO`, and `SAMPLE_REQUEST_NOTIFICATION_TO`.
 - Vite base config: `vite.config.ts`
   - `base: '/'` for root-domain Cloudflare Pages clean URL routing.
 - Cloudflare Pages static config:

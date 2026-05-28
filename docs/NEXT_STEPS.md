@@ -39,7 +39,7 @@ For any user-facing layout/copy/IA task:
 ## Now
 Source of truth: `docs/agent/tasks.json`.
 
-- `NOW-FORMS-BACKEND-001`: complete live verification for Cloudflare Pages Functions after server-side `SUPABASE_SERVICE_ROLE_KEY` is configured. Source and mock API checks are implemented, including server-side audit-event attempts after successful lead inserts.
+- `NOW-FORMS-BACKEND-001`: complete live verification for Cloudflare Pages Functions after server-side `SUPABASE_SERVICE_ROLE_KEY` is configured. Source and mock API checks are implemented, including server-side audit-event attempts after successful lead inserts; `.env.example` and Cloudflare docs now list canonical variables plus supported compatibility aliases.
 - `NOW-FORMS-SUPABASE-001`: replace mailto-only Contact and Sample Request flows with Supabase-backed submissions.
 - `NOW-ADMIN-AUTH-RLS-001`: complete live admin auth verification after browser-safe Supabase key configuration and first admin email/profile are available. Source shell and config-gated routes are implemented.
 - `NOW-ADMIN-SETTINGS-CRUD-001`: complete live `/admin/settings` and admin profile save verification after owner/admin profile access is available. Source form, admin team manager, owner/admin RLS hardening, owner-role protection, and SECURITY DEFINER grant hardening are implemented.

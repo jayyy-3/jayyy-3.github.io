@@ -54,9 +54,13 @@ Initial production variables needed for forms and later admin work:
 - `VITE_SUPABASE_PUBLISHABLE_KEY` (preferred when Supabase provides a publishable key; otherwise use the anon key)
 - `SUPABASE_URL`
 - `SUPABASE_SERVICE_ROLE_KEY`
+- `SUPABASE_SERVICE_KEY` (optional compatibility alias; prefer `SUPABASE_SERVICE_ROLE_KEY`)
 - `TURNSTILE_SECRET_KEY`
+- `CF_TURNSTILE_SECRET_KEY` (optional compatibility alias; prefer `TURNSTILE_SECRET_KEY`)
 - `RESEND_API_KEY`
 - `LEAD_NOTIFICATION_FROM`
+- `RESEND_FROM_EMAIL` (optional compatibility alias; prefer `LEAD_NOTIFICATION_FROM`)
+- `LEAD_NOTIFICATION_TO` (optional fallback if enquiry/sample-specific recipients are not set)
 - `ENQUIRY_NOTIFICATION_TO`
 - `SAMPLE_REQUEST_NOTIFICATION_TO`
 
@@ -66,7 +70,7 @@ Rules:
 - `SUPABASE_URL` is server-side for Pages Functions and may match `VITE_SUPABASE_URL`.
 - Secret values must exist only in Cloudflare Pages project settings.
 - Service-role and email API keys must never be committed or shipped to browser code.
-- `TURNSTILE_SECRET_KEY` may also be named `CF_TURNSTILE_SECRET_KEY`.
+- `SUPABASE_SERVICE_KEY`, `CF_TURNSTILE_SECRET_KEY`, and `RESEND_FROM_EMAIL` are compatibility aliases only; prefer the canonical names above for new Cloudflare configuration.
 - If Resend variables are not configured, form rows are stored with `notification_status = 'not_required'`.
 
 ### 3. Validate Preview Deployment
