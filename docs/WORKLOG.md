@@ -2,6 +2,45 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Article Structured Import Draft Blocks)
+
+### Scope
+- Expanded `scripts/check-content-import-readiness.mjs` so the no-write static-to-Supabase import prepares draft structured article blocks from legacy newsletter HTML.
+- The importer now extracts source-ordered `rich_text`, `image`, `cta`, and `project_spotlight` blocks, links image blocks to `media_assets` through `media_source_url`, and skips newsletter footer/contact/social artifacts.
+- Claim-sensitive source text is not rewritten in this import path; it remains draft-only and carries `reviewFlags` plus `claimReviewStatus` metadata for later editorial review.
+- No Supabase rows, Storage objects, Cloudflare state, credentials, public runtime code, or approved copy were changed.
+
+### Changed Files
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `scripts/check-content-import-readiness.mjs`
+
+### Verification Results
+- `node --check scripts/check-content-import-readiness.mjs`: pass.
+- `npm run agent:content-import`: pass with 115 media candidates, 4 articles, 95 article blocks, 0 warnings, and 0 blockers.
+- `npm run agent:content-import -- --out .tmp/content-import-preview.json`: pass; local ignored review artifact confirms per-article block extraction and review flags.
+- `npm run agent:content-import:apply-sql`: pass; generated ignored JSON, Markdown, preflight SQL, and guarded draft apply SQL artifacts.
+- `npm run agent:public-supabase-readiness`: pass; import candidates remain draft-only and public runtime remains static/file-backed.
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass, including public/admin route shells and Forms API mock checks.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- Article source copy still needs editorial and claim review before publication; this checkpoint only prepares draft CMS-shaped rows.
+- The generated apply SQL was not run against Supabase and remains approval-gated.
+- Public article runtime still renders sanitized legacy HTML until a deliberate public-read migration is approved and verified.
+
+### Next Handoff
+- Continue source-only import/public-read preparation while credentials are unavailable.
+- Do not publish imported article blocks or treat newsletter source copy as approved without Jay/content review.
+
 ## Entry - 2026-05-29 (Live Forms Notification Status Gate)
 
 ### Scope

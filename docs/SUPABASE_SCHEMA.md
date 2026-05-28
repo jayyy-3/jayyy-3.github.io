@@ -202,6 +202,7 @@ Current preparation:
 - In progress on 2026-05-28. `scripts/check-content-import-readiness.mjs` and `npm run agent:content-import` provide a no-write dry run for static-to-Supabase import preparation.
 - The dry run reads current Stone Library JSON, Stone Library finish-image mappings, Products data, Projects data, Articles manifest/source HTML, and referenced local media, then builds Supabase-shaped candidates with natural keys.
 - The dry run extracts finish-specific Stone Library imagery from `src/data/stoneFinishImages.ts` into draft `stone_finish_images` rows linked by stone group, variant, finish, media source, image role, and sort order.
+- The dry run extracts current legacy newsletter HTML into draft structured article blocks (`rich_text`, `image`, `cta`, and `project_spotlight`), links image blocks to media candidates, skips newsletter footer/contact/social artifacts, and carries claim-review flags without treating the source copy as approved.
 - The dry run marks content candidates as `draft` and fails on missing local media, duplicate slugs/keys, or unknown stone/finish references. It does not write Supabase rows and does not treat provisional content as final client-approved published content.
 - The dry run can write a local ignored review artifact with `npm run agent:content-import -- --out .tmp/content-import-preview.json`. This artifact is still no-write review material, not an approved production import.
 - The dry run can also write a local ignored Markdown apply/rollback plan with `npm run agent:content-import:plan`. This records the table order, reverse rollback order, preflight checks, and verification expectations without writing Supabase rows.
@@ -216,7 +217,7 @@ Order:
 3. Stone Library data. Source CRUD is implemented under `/admin/stone-library` for groups, variants, finish capabilities, and finish image links; live save verification and static-to-Supabase content import are pending browser-safe Supabase config and active admin/editor profile access.
 4. Projects and project material maps. Source CRUD is implemented under `/admin/projects`; live save verification and static-to-Supabase content import are pending browser-safe Supabase config and active admin/editor profile access.
 5. Products. Source CRUD is implemented under `/admin/products`; live save verification and static-to-Supabase content import are pending browser-safe Supabase config and active admin/editor profile access.
-6. Articles as structured blocks. Source CRUD is implemented under `/admin/articles`; live save verification and static-to-Supabase content import are pending browser-safe Supabase config and active admin/editor profile access.
+6. Articles as structured blocks. Source CRUD is implemented under `/admin/articles`; the no-write content import now prepares draft structured article blocks from legacy newsletter HTML, while live save verification and approved static-to-Supabase content import are pending browser-safe Supabase config and active admin/editor profile access.
 
 Acceptance:
 - Public routes continue exposing only published content.

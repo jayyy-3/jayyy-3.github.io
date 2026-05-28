@@ -532,6 +532,7 @@
         "2026-05-28: Tightened the content import dry run so Stone Library rows also remain draft instead of inheriting current public active/TBC state. Added `npm run agent:public-supabase-readiness` to verify draft-only import payloads, zero import warnings/blockers, published-only public RLS policy source, read-only anonymous grants, static public runtime boundaries, and Cloudflare `/api/*` Function routing scope before any public read cutover.",
         "2026-05-29: Added `--apply-sql-out` and `npm run agent:content-import:apply-sql` to write a local ignored guarded draft import SQL artifact. It aborts unless `urblo.import_approved=true` is explicitly set in the transaction, imports draft rows only, and performs no delete/drop/truncate/publish operation.",
         "2026-05-29: Content import now extracts current static finish-specific Stone Library image mappings from `src/data/stoneFinishImages.ts` into 53 draft `stone_finish_images` rows, raising the dry-run media candidate count to 104 and including the table in the plan, preflight SQL, guarded draft apply SQL, and public-readiness checks.",
+        "2026-05-29: Content import now extracts legacy newsletter HTML into draft structured article blocks, links image blocks to media candidates, skips newsletter footer/contact/social artifacts, and carries claim-review flags without treating source copy as approved.",
         "2026-05-29: Admin CRUD coverage verifier now checks Stone Library finish-image table/action coverage in addition to group, variant, capability, Projects, Products, and Articles source screens.",
         "2026-05-29: Admin CRUD live verifier plan now includes tagged `stone_finish_images` create/archive coverage through authenticated RLS for the later credential-gated live run. It archives public-facing QA parent rows and performs no physical deletes."
       ],
@@ -542,7 +543,8 @@
         "Static file-backed data sources have a documented migration or fallback path.",
         "The content import dry run can write a local ignored draft review artifact without applying production rows.",
         "The content import dry run can write a local ignored Markdown apply/rollback plan before any production import is approved.",
-        "The content import dry run can write a local ignored guarded draft import SQL artifact before any production import is approved."
+        "The content import dry run can write a local ignored guarded draft import SQL artifact before any production import is approved.",
+        "The content import dry run prepares draft structured article blocks from legacy newsletter HTML instead of one placeholder block per article."
       ],
       "verification": [
         "npm run build",

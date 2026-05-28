@@ -106,7 +106,8 @@ Last updated: 2026-05-29
 - Content import dry run:
   - `npm run agent:content-import` => `node scripts/check-content-import-readiness.mjs`
   - Reads current static Stone Library JSON, Stone Library finish-image mappings, Projects data, Products data, Articles manifest, and referenced local media.
-  - Produces Supabase-shaped import candidates with natural keys, forces content rows to `draft`, and fails before any database write if local media is missing, slugs duplicate, or project/material references use unknown stone or finish keys.
+  - Produces Supabase-shaped import candidates with natural keys, forces content rows to `draft`, extracts legacy newsletter HTML into draft structured article blocks, and fails before any database write if local media is missing, slugs duplicate, or project/material references use unknown stone or finish keys.
+  - Article block extraction currently creates draft `rich_text`, `image`, `cta`, and `project_spotlight` rows, links image blocks through `media_assets`, skips newsletter footer/contact/social artifacts, and flags claim-sensitive source copy for review instead of rewriting it.
   - Can write a local ignored review artifact with `npm run agent:content-import -- --out .tmp/content-import-preview.json`; the artifact remains a draft/no-write payload and must not be applied as final published content without approval.
   - `npm run agent:content-import:plan` writes both `.tmp/content-import-preview.json` and `.tmp/content-import-plan.md`, including import safety notes, preflight checks, table apply order, reverse rollback order, and verification expectations.
   - `npm run agent:content-import:preflight-sql` also writes `.tmp/content-import-preflight.sql`, a read-only Supabase target preflight SQL artifact for row-count, status, RLS, and policy inspection before any approved import/apply step.
@@ -383,6 +384,7 @@ Route state contract:
 - Content import readiness:
   - `scripts/check-content-import-readiness.mjs` is the source-only dry run for static-to-Supabase import preparation.
   - It intentionally marks import candidates as `draft` and uses natural keys/source URLs so provisional static content is not treated as final published client-approved content.
+  - It extracts current legacy article newsletter HTML into draft structured blocks with claim-review metadata, while keeping source copy unpublished and review-gated.
   - The optional `--out` flag writes a local ignored JSON artifact for review without writing Supabase rows.
   - The optional `--plan-out` flag writes a local ignored Markdown apply/rollback plan for review without writing Supabase rows.
   - The optional `--preflight-sql-out` flag writes a local ignored read-only SQL artifact for reviewing current target table counts, status distribution, RLS state, and policies before any import is approved.

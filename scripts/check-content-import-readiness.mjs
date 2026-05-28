@@ -811,19 +811,21 @@ function buildDraftImportSql(payload) {
         '  legacy_source_path = excluded.legacy_source_path,',
         '  sort_order = excluded.sort_order;',
         '',
-        '-- Article blocks remain draft placeholders until legacy newsletter content is structurally reviewed.',
+        '-- Article blocks are draft structured extraction rows until legacy newsletter content is reviewed.',
         'with',
         jsonRecordset(payload.rows.article_blocks, 'article_block_rows', [
             'article_slug text',
             'block_type text',
             'status text',
             'sort_order integer',
+            'media_source_url text',
             'content jsonb',
         ]),
-        'insert into public.article_blocks (article_id, block_type, content, sort_order, status)',
-        "select a.id, r.block_type, r.content, r.sort_order, 'draft'",
+        'insert into public.article_blocks (article_id, block_type, content, media_asset_id, sort_order, status)',
+        "select a.id, r.block_type, r.content, media.id, r.sort_order, 'draft'",
         'from article_block_rows r',
         'join public.articles a on a.slug = r.article_slug',
+        'left join public.media_assets media on media.source_url = r.media_source_url',
         'where not exists (',
         '  select 1 from public.article_blocks existing',
         '  where existing.article_id = a.id and existing.block_type = r.block_type and existing.sort_order = r.sort_order',
@@ -875,6 +877,245 @@ function addMediaCandidate(url, usage, alt) {
     }
 
     return url;
+}
+
+function loadArticleImageReplacements() {
+    const source = fs.readFileSync(path.join(root, 'src/lib/articleMedia.ts'), 'utf8');
+    const entries = new Map();
+    const matchPattern = /'([^']+)':\s*(null|'([^']+)')/g;
+    let match = matchPattern.exec(source);
+
+    while (match) {
+        entries.set(match[1], match[2] === 'null' ? null : match[3]);
+        match = matchPattern.exec(source);
+    }
+
+    return entries;
+}
+
+function decodeHtmlEntities(value) {
+    const namedEntities = {
+        amp: '&',
+        apos: "'",
+        gt: '>',
+        lt: '<',
+        nbsp: ' ',
+        quot: '"',
+    };
+
+    return value.replace(/&(#x?[0-9a-f]+|[a-z]+);/gi, (entity, body) => {
+        const normalized = body.toLowerCase();
+
+        if (normalized.startsWith('#x')) {
+            return String.fromCodePoint(Number.parseInt(normalized.slice(2), 16));
+        }
+
+        if (normalized.startsWith('#')) {
+            return String.fromCodePoint(Number.parseInt(normalized.slice(1), 10));
+        }
+
+        return namedEntities[normalized] ?? entity;
+    });
+}
+
+function textFromHtml(html) {
+    return decodeHtmlEntities(
+        html
+            .replace(/<br\s*\/?>/gi, '\n')
+            .replace(/<[^>]+>/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim(),
+    );
+}
+
+function getAttributeValue(html, attributeName) {
+    const pattern = new RegExp(`${attributeName}\\s*=\\s*("([^"]*)"|'([^']*)'|([^\\s>]+))`, 'i');
+    const match = pattern.exec(html);
+    return match ? decodeHtmlEntities(match[2] ?? match[3] ?? match[4] ?? '') : '';
+}
+
+function extractSourceUrl(rawValue) {
+    const htmlDecoded = rawValue.replace(/&amp;/g, '&');
+    const fragmentIndex = htmlDecoded.indexOf('#https://images.squarespace-cdn.com');
+
+    return fragmentIndex >= 0 ? htmlDecoded.slice(fragmentIndex + 1) : htmlDecoded;
+}
+
+function getSquarespaceAssetId(rawValue) {
+    const source = extractSourceUrl(rawValue);
+
+    try {
+        const url = new URL(source);
+        if (url.hostname !== 'images.squarespace-cdn.com') {
+            return null;
+        }
+
+        const parts = url.pathname.split('/').filter(Boolean);
+        const contentIndex = parts.indexOf('content');
+        return contentIndex >= 0 ? parts[contentIndex + 2] : null;
+    } catch {
+        return null;
+    }
+}
+
+function resolveArticleImageSource(rawSrc, articleImageReplacements) {
+    if (!rawSrc || rawSrc.includes('fonts.gstatic.com/s/e/notoemoji')) {
+        return null;
+    }
+
+    if (rawSrc.startsWith('/media/')) {
+        return rawSrc;
+    }
+
+    const assetId = getSquarespaceAssetId(rawSrc);
+    if (!assetId || !articleImageReplacements.has(assetId)) {
+        return null;
+    }
+
+    return articleImageReplacements.get(assetId);
+}
+
+function isNewsletterChromeText(tagName, text) {
+    const normalized = text.toLowerCase();
+
+    if (!normalized) return true;
+    if (normalized === 'powered by' || normalized.includes('powered by squarespace')) return true;
+    if (normalized.includes('unsubscribe') || normalized.includes('campaign preferences')) return true;
+    if (normalized.includes('view entire message')) return true;
+    if (/^ready to (transform|experiment)/i.test(text)) return true;
+    if (/^let.?s (craft|discuss)/i.test(text)) return true;
+    if (/^reply to this email/i.test(text)) return true;
+    if (/^call:\s*1300/i.test(text)) return true;
+    if (/^urblo,\s*5 hamilton/i.test(text) || /^5 hamilton street/i.test(text)) return true;
+    if (normalized.includes('explore solutions: urblo.com.au')) return true;
+    if (tagName === 'p' && /^project spotlight\s*\|/i.test(text)) return true;
+
+    return false;
+}
+
+function claimReviewFlags(text) {
+    const checks = [
+        ['carbon_scope', /\bcarbon[-\s]?neutral\b|\bco2\b|\bprotecting the planet\b/i],
+        ['absolute_quality', /\bzero onsite errors\b|\bzero cracks\b|\bguaranteed\b|\bflawless\b|\bperfect alignment\b/i],
+        ['time_or_cost_percent', /\b\d+\s*%|\b1\/3\b|\bslash project timelines\b|\bcost[-\s]?smart\b/i],
+        ['broad_sustainability', /\bsustainability\b|\bsustainable\b|\breduce waste\b/i],
+    ];
+
+    return checks.filter(([, pattern]) => pattern.test(text)).map(([flag]) => flag);
+}
+
+function blockFromTextToken(articleSlug, sourcePath, tagName, text, sortOrder) {
+    const reviewFlags = claimReviewFlags(text);
+
+    if (/^download\s+to\s+explore/i.test(text)) {
+        return {
+            article_slug: articleSlug,
+            block_type: 'cta',
+            status: 'draft',
+            sort_order: sortOrder,
+            media_source_url: null,
+            content: {
+                label: 'Download',
+                body: text,
+                reviewFlags,
+                migrationStatus: 'legacy_cta_requires_review',
+                sourcePath,
+            },
+        };
+    }
+
+    if (/^project spotlight\s*\|/i.test(text)) {
+        return {
+            article_slug: articleSlug,
+            block_type: 'project_spotlight',
+            status: 'draft',
+            sort_order: sortOrder,
+            media_source_url: null,
+            content: {
+                title: text,
+                reviewFlags,
+                migrationStatus: 'legacy_project_spotlight_requires_review',
+                sourcePath,
+            },
+        };
+    }
+
+    return {
+        article_slug: articleSlug,
+        block_type: 'rich_text',
+        status: 'draft',
+        sort_order: sortOrder,
+        media_source_url: null,
+        content: {
+            body: text,
+            sourceTag: tagName,
+            headingLevel: /^h[1-6]$/i.test(tagName) ? Number(tagName.slice(1)) : null,
+            reviewFlags,
+            claimReviewStatus: reviewFlags.length ? 'needs_review' : 'source_review_required',
+            migrationStatus: 'legacy_newsletter_extracted_for_review',
+            sourcePath,
+        },
+    };
+}
+
+function extractArticleBlocks(article, sourcePath, rawHtml, articleImageReplacements) {
+    const blocks = [];
+    const tokenPattern = /<(h[1-6]|p)\b[^>]*>([\s\S]*?)<\/\1>|<img\b[^>]*>/gi;
+    let match = tokenPattern.exec(rawHtml);
+
+    while (match) {
+        const [token, tagName, innerHtml] = match;
+
+        if (tagName) {
+            const text = textFromHtml(innerHtml);
+            if (!isNewsletterChromeText(tagName.toLowerCase(), text)) {
+                blocks.push(blockFromTextToken(article.slug, sourcePath, tagName.toLowerCase(), text, blocks.length));
+            }
+        } else {
+            const imageSource = resolveArticleImageSource(getAttributeValue(token, 'src'), articleImageReplacements);
+            const alt = textFromHtml(getAttributeValue(token, 'alt'));
+
+            if (
+                imageSource &&
+                imageSource !== '/media/launch/identity/urblo-logo.png' &&
+                !imageSource.includes('/media/launch/articles/shared/')
+            ) {
+                blocks.push({
+                    article_slug: article.slug,
+                    block_type: 'image',
+                    status: 'draft',
+                    sort_order: blocks.length,
+                    media_source_url: imageSource,
+                    content: {
+                        alt: alt || null,
+                        caption: null,
+                        migrationStatus: 'legacy_newsletter_image_extracted_for_review',
+                        sourcePath,
+                    },
+                });
+            }
+        }
+
+        match = tokenPattern.exec(rawHtml);
+    }
+
+    if (blocks.length > 0) {
+        return blocks.map((block, index) => ({ ...block, sort_order: index }));
+    }
+
+    return [
+        {
+            article_slug: article.slug,
+            block_type: 'rich_text',
+            status: 'draft',
+            sort_order: 0,
+            media_source_url: null,
+            content: {
+                migrationStatus: 'legacy_newsletter_requires_structured_review',
+                sourcePath,
+            },
+        },
+    ];
 }
 
 function propertyNameText(name) {
@@ -1049,6 +1290,7 @@ const stoneLibrary = readJson('data/clean/stone_library.json');
 const articles = readJson('public/articles/index.json');
 const { projects } = loadTypeScriptModule('src/data/projectData.ts');
 const { products } = loadTypeScriptModule('src/data/productData.ts');
+const articleImageReplacements = loadArticleImageReplacements();
 
 const finishKeys = new Set(stoneLibrary.finishes.map((finish) => finishKeyFromParts(finish.finishId, finish.finishVariantId)));
 const stoneGroupKeys = new Set(stoneLibrary.stones.map((stone) => stone.stoneGroupId));
@@ -1295,9 +1537,12 @@ articles.forEach((article, articleIndex) => {
     const sourceSlug = article.sourceSlug || article.slug;
     const sourcePath = `/articles/${sourceSlug}/content.html`;
     const absoluteSourcePath = path.join(root, 'public', sourcePath.slice(1));
+    let rawArticleHtml = '';
 
     if (!fs.existsSync(absoluteSourcePath)) {
         blockers.push(`Missing article source HTML for ${article.slug}: ${sourcePath}`);
+    } else {
+        rawArticleHtml = fs.readFileSync(absoluteSourcePath, 'utf8');
     }
 
     addMediaCandidate(article.cover, `article cover ${article.slug}`, `${article.title} cover`);
@@ -1313,15 +1558,17 @@ articles.forEach((article, articleIndex) => {
         legacy_source_path: sourcePath,
         sort_order: articleIndex,
     });
-    articleBlocks.push({
-        article_slug: article.slug,
-        block_type: 'rich_text',
-        status: 'draft',
-        sort_order: 0,
-        content: {
-            migrationStatus: 'legacy_newsletter_requires_structured_review',
-            sourcePath,
-        },
+
+    extractArticleBlocks(article, sourcePath, rawArticleHtml, articleImageReplacements).forEach((block) => {
+        if (block.media_source_url) {
+            addMediaCandidate(
+                block.media_source_url,
+                `article block image ${article.slug}/${block.sort_order}`,
+                block.content?.alt ?? `${article.title} image`,
+            );
+        }
+
+        articleBlocks.push(block);
     });
 });
 
