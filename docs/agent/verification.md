@@ -1,6 +1,6 @@
 # Agent Verification Matrix
 
-Last updated: 2026-05-28
+Last updated: 2026-05-29
 
 ## Purpose
 Use this matrix to choose the smallest verification set that proves a change is safe. Runtime changes still need the full build/lint/typecheck gate unless a task explicitly defines a temporary exception.
@@ -51,6 +51,7 @@ Run:
 - `npx tsc -b`
 - `npm run agent:check`
 - `npm run agent:content-import` when changing static-to-Supabase import mapping or source content used by that dry run.
+- `npm run agent:content-import:apply-sql` when changing static-to-Supabase import SQL artifact generation.
 - `npm run agent:public-supabase-readiness` when changing public-content import status rules, public read cutover assumptions, static/public route boundaries, or Supabase published-only policy checks.
 - `npm run agent:smoke` when route output changes.
 

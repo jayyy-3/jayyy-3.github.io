@@ -108,6 +108,7 @@ Last updated: 2026-05-29
   - Can write a local ignored review artifact with `npm run agent:content-import -- --out .tmp/content-import-preview.json`; the artifact remains a draft/no-write payload and must not be applied as final published content without approval.
   - `npm run agent:content-import:plan` writes both `.tmp/content-import-preview.json` and `.tmp/content-import-plan.md`, including import safety notes, preflight checks, table apply order, reverse rollback order, and verification expectations.
   - `npm run agent:content-import:preflight-sql` also writes `.tmp/content-import-preflight.sql`, a read-only Supabase target preflight SQL artifact for row-count, status, RLS, and policy inspection before any approved import/apply step.
+  - `npm run agent:content-import:apply-sql` also writes `.tmp/content-import-apply.sql`, a guarded draft import SQL artifact. It aborts unless `urblo.import_approved=true` is explicitly set inside the transaction, imports as draft only, and contains no delete/publish operation.
 - Public Supabase readiness:
   - `npm run agent:public-supabase-readiness` => `node scripts/check-public-supabase-readiness.mjs`
   - Verifies the content import dry run has no warnings/blockers, all import rows with status remain `draft`, public RLS policy source is published-only, anonymous grants are read-only, public runtime code is still static/file-backed, and Cloudflare routes only invoke Functions under `/api/*`.
@@ -376,6 +377,7 @@ Route state contract:
   - The optional `--out` flag writes a local ignored JSON artifact for review without writing Supabase rows.
   - The optional `--plan-out` flag writes a local ignored Markdown apply/rollback plan for review without writing Supabase rows.
   - The optional `--preflight-sql-out` flag writes a local ignored read-only SQL artifact for reviewing current target table counts, status distribution, RLS state, and policies before any import is approved.
+  - The optional `--apply-sql-out` flag writes a local ignored guarded draft import SQL artifact. It is not executed by the harness, aborts by default unless an explicit in-transaction approval setting is added, and keeps imported content in `draft`.
 - Admin IA/access:
   - `/admin` route, login, unauthorized, loading, module, settings, and audit states are defined in `docs/ADMIN_IA_ACCESS.md`.
   - Current `/admin` source implements real Supabase Auth wiring, session/profile loading, login, unauthorized, dashboard, and protected module scaffolds.
