@@ -157,7 +157,7 @@ Last updated: 2026-05-29
 - Live input readiness:
   - `npm run agent:live-readiness` => `node scripts/check-live-readiness.mjs`
   - Loads local environment values from `.env.local`, `.env`, `.dev.vars`, and the shell.
-  - Reports, without printing secret values, whether the inputs for `agent:forms-live -- --allow-writes`, deployed form verification, `agent:forms-live -- --allow-writes --require-browser-boundary`, `agent:admin-live-readiness`, `agent:first-admin-bootstrap -- --allow-writes`, `agent:admin-crud-live -- --allow-writes`, and `agent:cloudflare-preview-smoke` are present.
+  - Reports, without printing secret values, whether the inputs for `agent:forms-live -- --allow-writes`, deployed form verification, `agent:forms-live -- --allow-writes --require-browser-boundary`, `agent:admin-live-readiness`, `agent:first-admin-bootstrap -- --allow-writes`, `agent:admin-crud-live -- --allow-writes`, `agent:admin-crud-live -- --allow-writes --include-storage`, and `agent:cloudflare-preview-smoke` are present.
   - Accepts non-secret readiness overrides: `--base-url <origin>`, `--admin-email <email>`, `--form-writes-approved`, `--first-admin-writes-approved`, and `--admin-writes-approved`. Secret keys and admin session credentials must still come from env files or the shell and must not be printed.
   - `--form-writes-approved` only represents Jay's approval to run tagged live form QA writes; it does not provide service-role credentials, browser-safe credentials, or a preview URL.
   - `--first-admin-writes-approved` only represents Jay's approval to run the first-admin profile/invite write path; it does not provide a service-role key or replace the `--allow-writes` and `--confirm-email` guards on `agent:first-admin-bootstrap`.
@@ -172,7 +172,7 @@ Last updated: 2026-05-29
   - Default mode prints the live verification plan and performs no writes.
   - Live write mode uses `npm run agent:admin-crud-live -- --allow-writes` after browser-safe Supabase config and a real owner/admin session are available.
   - The command uses browser-key PostgREST/Auth requests, not a service-role key, so writes exercise RLS for the signed-in admin profile.
-  - The command creates tagged QA rows, archives public-facing parents where possible, verifies those tagged public-content rows and private lead rows are not anonymously visible, and intentionally avoids physical deletes. Optional `--include-storage` uploads a tiny private `urblo-admin-media` object for Storage-policy verification.
+  - The command creates tagged QA rows, archives public-facing parents where possible, verifies those tagged public-content rows and private lead rows are not anonymously visible, and intentionally avoids physical deletes. `--include-storage` uploads a tiny private `urblo-admin-media` object for the final media upload policy proof.
 
 ## Route Interface Contract (`src/App.tsx`)
 

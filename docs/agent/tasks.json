@@ -303,6 +303,7 @@
         "2026-05-29: Added `npm run agent:first-admin-bootstrap` as the one-time first-admin path. It is no-write by default, supports read-only service-role verification, and blocks profile/invite writes unless `--allow-writes` and a matching `--confirm-email` are supplied after Jay approval.",
         "2026-05-28: Added `npm run agent:live-readiness` as a no-secret input audit for first-admin readiness, admin live-write session availability, and Jay approval/manual-gate visibility before running live admin verification. It accepts non-secret `--admin-email`, `--first-admin-writes-approved`, and `--admin-writes-approved` readiness flags, but still performs no writes.",
         "2026-05-29: `npm run agent:live-readiness` now reports the first-admin profile/invite live write path separately from read-only first-admin verification. `--first-admin-writes-approved` only clears the manual approval gate and does not replace `--allow-writes`, `--confirm-email`, or the service-role credential requirement on `npm run agent:first-admin-bootstrap`.",
+        "2026-05-29: `npm run agent:live-readiness` now reports `npm run agent:admin-crud-live -- --allow-writes --include-storage` as the final media Storage upload policy proof, separate from the general admin CRUD/audit live write check.",
         "2026-05-28: Removed the retired AdminModulePage scaffold component and unused scaffold/locked module-state branches now that all launch-critical admin modules have real source screens. Admin CRUD coverage now fails if the retired scaffold component returns."
       ],
       "acceptance": [
@@ -318,7 +319,8 @@
         "npm run agent:admin-crud-coverage",
         "npm run agent:live-readiness",
         "npm run agent:admin-crud-live (plan-only)",
-        "npm run agent:admin-crud-live -- --allow-writes (after browser-safe keys, real owner/admin session, and Jay approval for tagged QA writes; verifies tagged public-content rows and private lead rows are not anonymously visible)"
+        "npm run agent:admin-crud-live -- --allow-writes (after browser-safe keys, real owner/admin session, and Jay approval for tagged QA writes; verifies tagged public-content rows and private lead rows are not anonymously visible)",
+        "npm run agent:admin-crud-live -- --allow-writes --include-storage (after the same live-write gate, for final private Storage upload policy proof)"
       ]
     },
     {
@@ -448,8 +450,9 @@
         "supabase/migrations/202605280005_security_definer_function_grants.sql",
         "supabase/migrations/202605290001_security_definer_private_helpers.sql",
         "supabase/migrations/README.md",
-        "scripts/check-admin-crud-coverage.mjs",
-        "scripts/check-admin-crud-live.mjs"
+    "scripts/check-admin-crud-coverage.mjs",
+    "scripts/check-admin-crud-live.mjs",
+    "scripts/check-live-readiness.mjs"
       ],
       "notes": [
         "Run after the admin auth shell source exists, but before broader content CRUD, because site settings are first in the goal's CRUD order.",
@@ -627,7 +630,8 @@
         "2026-05-28: Media and Leads save flows now call the shared admin audit writer after successful primary saves. Live audit row creation remains pending browser-safe Supabase config and active profiles.",
         "2026-05-28: Leads now includes an owner/admin CSV export action for the currently loaded queue. Export first records a leads.export_csv audit event and blocks the download if audit logging fails.",
         "2026-05-28: Admin CRUD coverage verifier now checks Media and Leads table references, Storage upload source, read-only states, shared audit writer coverage, and audit-gated CSV/manifest exports before live credential QA.",
-        "2026-05-28: Admin CRUD live verifier now includes tagged media metadata writes, private lead workflow writes, media manifest export audit, and leads CSV export audit through authenticated RLS. Optional `--include-storage` verifies a tiny private `urblo-admin-media` upload."
+        "2026-05-28: Admin CRUD live verifier now includes tagged media metadata writes, private lead workflow writes, media manifest export audit, and leads CSV export audit through authenticated RLS. Optional `--include-storage` verifies a tiny private `urblo-admin-media` upload.",
+        "2026-05-29: Live readiness now reports the `npm run agent:admin-crud-live -- --allow-writes --include-storage` command as the final media upload policy proof so Storage verification is not hidden behind the general CRUD live check."
       ],
       "acceptance": [
         "Admin users can manage uploaded media records with source, alt text, usage, and publish status.",
@@ -650,7 +654,7 @@
         "npm run agent:admin-crud-coverage",
         "npm run agent:admin-crud-live (plan-only)",
         "npm run agent:admin-crud-live -- --allow-writes (after browser-safe keys, real owner/admin session, and Jay approval for tagged QA writes; verifies tagged public-content rows and private lead rows are not anonymously visible)",
-        "npm run agent:admin-crud-live -- --allow-writes --include-storage (when intentionally verifying private Storage upload policy)"
+        "npm run agent:admin-crud-live -- --allow-writes --include-storage (for final private Storage upload policy proof after the same credentials/session/approval gate)"
       ]
     },
     {

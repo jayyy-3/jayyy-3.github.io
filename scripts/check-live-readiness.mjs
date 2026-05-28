@@ -325,6 +325,29 @@ function buildChecks(env, sources, options) {
         : ['Jay approval for tagged live QA writes is required before running --allow-writes'],
     }),
     makeCheck({
+      id: 'admin-crud-live-storage',
+      label: 'Tagged admin media Storage upload policy',
+      command: 'npm run agent:admin-crud-live -- --allow-writes --include-storage',
+      present: [
+        describeSource(browserKey, sources),
+        describeSource(adminToken, sources),
+        adminPasswordSession ? 'URBLO_ADMIN_EMAIL and URBLO_ADMIN_PASSWORD configured' : '',
+        options.adminWritesApproved ? 'Jay approval flag supplied for tagged live QA writes' : '',
+      ].filter(Boolean),
+      missing: [
+        browserKey ? '' : 'VITE_SUPABASE_PUBLISHABLE_KEY or VITE_SUPABASE_ANON_KEY',
+        adminToken || adminPasswordSession
+          ? ''
+          : 'URBLO_ADMIN_ACCESS_TOKEN, or URBLO_ADMIN_EMAIL plus URBLO_ADMIN_PASSWORD',
+      ].filter(Boolean),
+      manual: options.adminWritesApproved
+        ? []
+        : ['Jay approval for tagged live QA writes is required before running --allow-writes --include-storage'],
+      optional: [
+        'Runs the admin CRUD live verifier and additionally uploads a tiny private urblo-admin-media object to verify Storage insert policy.',
+      ],
+    }),
+    makeCheck({
       id: 'cloudflare-preview-smoke',
       label: 'Cloudflare deployed-preview route/API smoke',
       command: 'npm run agent:cloudflare-preview-smoke -- --base-url <preview-origin>',

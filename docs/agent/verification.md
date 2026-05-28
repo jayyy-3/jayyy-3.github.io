@@ -155,6 +155,7 @@ Run:
 - `npm run agent:admin-crud-coverage` when changing admin routes, module screens, table coverage, audit writers, export controls, or role gates.
 - `npm run agent:first-admin-bootstrap` when changing first-admin bootstrap tooling. Use `--verify-only` only after a service-role key and first admin email are configured; write mode requires explicit approval.
 - `npm run agent:admin-crud-live` in plan-only mode when changing live admin verification contracts; run `npm run agent:admin-crud-live -- --allow-writes` only after browser-safe Supabase config and a real owner/admin session are available and Jay has approved tagged QA writes.
+- `npm run agent:admin-crud-live -- --allow-writes --include-storage` for final media upload policy proof after the same credentials/session/approval gate is satisfied.
 - Browser or Playwright checks for authenticated and unauthenticated admin routes when possible.
 
 Evidence to record:

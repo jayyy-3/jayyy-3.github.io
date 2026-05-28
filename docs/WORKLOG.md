@@ -2,6 +2,47 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Admin Storage Live Readiness Gate)
+
+### Scope
+- Added a distinct `npm run agent:live-readiness` check for the final media upload policy proof: `npm run agent:admin-crud-live -- --allow-writes --include-storage`.
+- Hardened `npm run agent:cloudflare-readiness` so the Cloudflare deployment runbook must keep the Storage-inclusive admin live verification command.
+- Updated Harness docs so media Storage upload proof is not hidden behind the general admin CRUD/audit live check.
+
+### Changed Files
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `docs/agent/verification.md`
+- `scripts/check-cloudflare-pages-readiness.mjs`
+- `scripts/check-live-readiness.mjs`
+
+### Verification Results
+- `node --check scripts/check-live-readiness.mjs`: pass.
+- `node --check scripts/check-cloudflare-pages-readiness.mjs`: pass.
+- `node -e "JSON.parse(require('fs').readFileSync('docs/agent/tasks.json','utf8')); console.log('tasks json ok')"`: pass.
+- `npm run agent:live-readiness -- --json`: pass and includes `admin-crud-live-storage`.
+- `npm run agent:live-readiness`: pass in report-only mode and lists the new `Tagged admin media Storage upload policy` check as missing/manual-gated until browser-safe key, owner/admin session, and Jay approval exist.
+- `npm run agent:cloudflare-readiness`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:admin-crud-live`: pass in plan-only/no-write mode.
+- `npm run agent:public-supabase-readiness`: pass.
+- `npm run agent:check`: pass.
+- `npm run lint`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- Source-only readiness hardening. No Supabase rows, Storage objects, Auth users, credentials, Cloudflare state, or live writes were created or changed.
+- Final media upload proof still requires browser-safe Supabase config, a real owner/admin session, Jay approval for tagged admin QA writes, and `npm run agent:admin-crud-live -- --allow-writes --include-storage`.
+
+### Next Handoff
+- `NOW-ADMIN-MEDIA-LEADS-001`
+- `NOW-ADMIN-CMS-001`
+- `NOW-CLOUDFLARE-PAGES-DEPLOY-001`
+
 ## Entry - 2026-05-29 (Cloudflare First Admin Approval Gate Guard)
 
 ### Scope

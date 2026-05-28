@@ -176,6 +176,7 @@ function checkEnvAndDocs() {
     'npm run agent:first-admin-bootstrap -- --verify-only --admin-email <first-admin-email>',
     'npm run agent:first-admin-bootstrap -- --allow-writes --admin-email <first-admin-email> --confirm-email <first-admin-email>',
     'npm run agent:admin-live-readiness -- --admin-email <first-admin-email>',
+    'npm run agent:admin-crud-live -- --allow-writes --include-storage',
   ]) {
     requireIncludes(runbook, command, 'docs/CLOUDFLARE_DEPLOYMENT.md');
   }
