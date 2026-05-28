@@ -71,6 +71,7 @@ Last updated: 2026-05-29
   - Current Audit admin source: `/admin/audit` reads `admin_audit_events` for active owner/admin roles once browser-safe Supabase config and an active profile exist.
   - Current audit-write source: `src/lib/adminAudit.ts` inserts `admin_audit_events` after successful admin Settings, admin profile, Media, Stone Library, Projects, Products, Articles, and Leads mutations. Audit insert failures are appended to the success notice and do not roll back the already-saved primary change.
   - Admin credential/profile readiness verification is staged through `npm run agent:admin-live-readiness -- --admin-email <first-admin-email>`. The command is read-only, requires a browser-safe Supabase key plus a service-role key, verifies the named active admin profile role, and checks the baseline `site_settings` and `finish_definitions` seed rows before browser login/save QA begins.
+  - First-admin bootstrap is staged through `npm run agent:first-admin-bootstrap`. Default mode is no-write and makes no Supabase calls; `--verify-only` reads Auth/profile/seed state with a service-role key; `--allow-writes` requires a matching `--confirm-email` and Jay approval before inviting an Auth user or upserting the first `admin_profiles` row.
   - Admin live write verification is staged through `npm run agent:admin-crud-live`. Default mode is a no-write plan. With `--allow-writes`, the command requires a browser-safe Supabase key plus a real owner/admin Supabase Auth session via `URBLO_ADMIN_ACCESS_TOKEN` or `URBLO_ADMIN_EMAIL`/`URBLO_ADMIN_PASSWORD`; it then creates tagged draft/archived QA rows across Settings, Media, Stone Library including finish images, Projects, Products, Articles, Leads, and audit-export actions through normal browser-key RLS. It does not physically delete rows.
   - Form Functions require `SUPABASE_SERVICE_ROLE_KEY` server-side; `SUPABASE_SERVICE_KEY` remains a compatibility alias only. `SUPABASE_URL` may be configured, but defaults to the Urblo project URL if omitted.
   - Form Functions attempt `admin_audit_events` writes with `actor_user_id = null` after successful enquiry/sample request inserts. Audit write failure does not fail the visitor response.
@@ -142,6 +143,12 @@ Last updated: 2026-05-29
   - Requires `VITE_SUPABASE_PUBLISHABLE_KEY` or `VITE_SUPABASE_ANON_KEY`, plus `SUPABASE_SERVICE_ROLE_KEY` or `SUPABASE_SERVICE_KEY`.
   - Reads `admin_profiles`, `site_settings`, and `finish_definitions` only; it does not create users, create profiles, mutate content, or delete rows.
   - Defaults to requiring an active `owner` profile. Use `--required-role owner,admin` only when intentionally verifying a non-owner admin profile.
+- First-admin bootstrap:
+  - `npm run agent:first-admin-bootstrap` => `node scripts/bootstrap-first-admin.mjs`
+  - Default mode prints the approved bootstrap path and performs no Supabase calls, invites, profile writes, or deletes.
+  - `--verify-only --admin-email <first-admin-email>` requires a service-role key and checks whether the Supabase Auth user, `admin_profiles` row, and baseline seed rows are ready.
+  - `--allow-writes --admin-email <first-admin-email> --confirm-email <first-admin-email>` is the guarded live mode for creating/upserting the first `admin_profiles` row for an existing Auth user. Add `--invite` only when Jay explicitly approves sending the Supabase Auth invitation.
+  - Existing active owner profiles block a new first-admin bootstrap unless `--allow-existing-owner` is intentionally supplied.
 - Live input readiness:
   - `npm run agent:live-readiness` => `node scripts/check-live-readiness.mjs`
   - Loads local environment values from `.env.local`, `.env`, `.dev.vars`, and the shell.

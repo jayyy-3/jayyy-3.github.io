@@ -8,6 +8,7 @@
     "agent:admin-crud-coverage": "node scripts/check-admin-crud-coverage.mjs",
     "agent:admin-crud-live": "node scripts/check-admin-crud-live.mjs",
     "agent:admin-live-readiness": "node scripts/check-admin-live-readiness.mjs",
+    "agent:first-admin-bootstrap": "node scripts/bootstrap-first-admin.mjs",
     "agent:content-import": "node scripts/check-content-import-readiness.mjs",
     "agent:content-import:json": "node scripts/check-content-import-readiness.mjs --json",
     "agent:content-import:plan": "node scripts/check-content-import-readiness.mjs --out .tmp/content-import-preview.json --plan-out .tmp/content-import-plan.md",

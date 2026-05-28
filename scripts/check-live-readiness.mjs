@@ -222,6 +222,22 @@ function buildChecks(env, sources, options) {
       ].filter(Boolean),
     }),
     makeCheck({
+      id: 'first-admin-bootstrap',
+      label: 'First-admin bootstrap plan/read-only verifier',
+      command: 'npm run agent:first-admin-bootstrap -- --verify-only --admin-email <first-admin-email>',
+      present: [
+        describeSource(serviceKey, sources),
+        presentSource(firstAdminEmailEnv, sources, firstAdminEmailSource),
+      ].filter(Boolean),
+      missing: [
+        serviceKey ? '' : 'SUPABASE_SERVICE_ROLE_KEY or SUPABASE_SERVICE_KEY',
+        firstAdminEmail ? '' : 'URBLO_FIRST_ADMIN_EMAIL or --admin-email',
+      ].filter(Boolean),
+      optional: [
+        'Live bootstrap writes require Jay approval plus --allow-writes and a matching --confirm-email.',
+      ],
+    }),
+    makeCheck({
       id: 'admin-crud-live',
       label: 'Tagged admin CRUD/audit live writes',
       command: 'npm run agent:admin-crud-live -- --allow-writes',

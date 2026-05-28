@@ -2,6 +2,47 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (First Admin Bootstrap Runner)
+
+### Scope
+- Added `npm run agent:first-admin-bootstrap` as a guarded first-admin operational runner.
+- Default mode prints the approved setup path and performs no Supabase calls, Auth invites, profile writes, or deletes.
+- Added `--verify-only` for read-only service-role inspection of the Auth user, `admin_profiles` row, and baseline seed rows once Jay provides the first admin email and service-role key.
+- Added live write mode guardrails: `--allow-writes` requires a matching `--confirm-email`; `--invite` is explicit; existing active owners block a new bootstrap unless `--allow-existing-owner` is intentional.
+- Updated live readiness reporting and Harness docs so first-admin setup has a clear no-write, read-only, and approval-gated write path.
+
+### Changed Files
+- `AGENTS.md`
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `docs/agent/verification.md`
+- `package.json`
+- `scripts/agent-init.sh`
+- `scripts/bootstrap-first-admin.mjs`
+- `scripts/check-live-readiness.mjs`
+
+### Verification Results
+- `node --check scripts/bootstrap-first-admin.mjs`: pass.
+- `node --check scripts/check-live-readiness.mjs`: pass.
+- `npm run agent:first-admin-bootstrap`: pass; plan-only, no Supabase calls, invites, writes, or deletes attempted.
+- `npm run agent:first-admin-bootstrap -- --verify-only --admin-email first@example.com`: expected fail-closed behavior because no service-role key is configured.
+- `npm run agent:live-readiness`: pass in report-only mode and now reports the first-admin bootstrap verifier inputs.
+
+### Risks and Gaps
+- No first admin Auth user, profile row, invite, or credential was created in this checkpoint.
+- Live first-admin bootstrap still requires Jay to confirm the email and approve write/invite mode, plus a service-role key in an untracked environment.
+- Active-admin browser QA and admin CRUD live writes remain blocked until browser-safe keys, first-admin profile, admin session credentials, and write approval exist.
+
+### Next Handoff
+- `NOW-FORMS-BACKEND-001`: run `npm run agent:forms-live` after `SUPABASE_SERVICE_ROLE_KEY` is configured.
+- `NOW-ADMIN-AUTH-RLS-001`: run `npm run agent:first-admin-bootstrap -- --verify-only --admin-email <first-admin-email>` after service-role key and first admin email are available; run write mode only after Jay approval.
+- `NOW-ADMIN-CMS-001`: continue source-only content import/public-read preparation while credentials remain unavailable.
+
 ## Entry - 2026-05-29 (Stone Library Finish Image Import Payload)
 
 ### Scope
