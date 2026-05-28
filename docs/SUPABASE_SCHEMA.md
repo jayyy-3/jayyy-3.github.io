@@ -192,6 +192,7 @@ Current preparation:
 - In progress on 2026-05-28. `scripts/check-content-import-readiness.mjs` and `npm run agent:content-import` provide a no-write dry run for static-to-Supabase import preparation.
 - The dry run reads current Stone Library JSON, Products data, Projects data, Articles manifest/source HTML, and referenced local media, then builds Supabase-shaped candidates with natural keys.
 - The dry run marks content candidates as `draft` and fails on missing local media, duplicate slugs/keys, or unknown stone/finish references. It does not write Supabase rows and does not treat provisional content as final client-approved published content.
+- The dry run can write a local ignored review artifact with `npm run agent:content-import -- --out .tmp/content-import-preview.json`. This artifact is still no-write review material, not an approved production import.
 
 Order:
 1. Site settings is started under Phase 4a.

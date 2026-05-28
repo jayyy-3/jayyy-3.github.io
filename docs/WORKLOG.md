@@ -2,6 +2,44 @@
 
 Last updated: 2026-05-28
 
+## Entry - 2026-05-28 (Content Import Artifact Output)
+
+### Scope
+- Added `--out` support to `scripts/check-content-import-readiness.mjs`.
+- Added `.tmp/` to `.gitignore` so local review artifacts are not accidentally committed.
+- Added `npm run agent:content-import:json` for stdout JSON output and documented the quieter artifact command through agent init.
+- Kept the import flow strictly no-write: generated artifacts remain draft review payloads and do not write Supabase rows.
+
+### Changed Files
+- `.gitignore`
+- `AGENTS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `package.json`
+- `scripts/agent-init.sh`
+- `scripts/check-content-import-readiness.mjs`
+
+### Verification Results
+- `npm run agent:content-import`: pass. Latest run prepared 51 media candidates, 13 stone groups, 15 stone variants, 153 finish capability rows, 6 products, 28 product models, 18 product material defaults, 18 product specs, 5 projects, 41 project facts, 2 project materials, 1 material map, 2 hotspots, 4 articles, and 4 article block placeholders with 0 warnings and 0 blockers.
+- `npm run agent:content-import -- --out .tmp/content-import-preview.json`: pass. Wrote the local ignored draft artifact and preserved the same summary counts.
+- `npm run lint`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- The artifact is intentionally draft/no-write material. It must not be applied to production Supabase or treated as client-approved published content without explicit approval.
+- The future apply/import step still needs a separate approval gate, service-role credentials, rollback/export planning, and live verification.
+
+### Next Handoff
+- `NOW-FORMS-BACKEND-001` live Supabase row/audit verification.
+- `NOW-ADMIN-AUTH-RLS-001` live auth/profile verification.
+- `NOW-ADMIN-CONTENT-CRUD-001` explicit import/apply planning after Jay approves the draft content scope.
+
 ## Entry - 2026-05-28 (Admin Profile Management and RLS Hardening)
 
 ### Scope

@@ -6,7 +6,25 @@ import vm from 'node:vm';
 import ts from 'typescript';
 
 const root = process.cwd();
-const printJson = process.argv.includes('--json');
+const args = process.argv.slice(2);
+const printJson = args.includes('--json');
+const outputPath = getFlagValue('--out');
+
+function getFlagValue(flag) {
+    const index = args.indexOf(flag);
+
+    if (index === -1) {
+        return null;
+    }
+
+    const value = args[index + 1];
+
+    if (!value || value.startsWith('--')) {
+        throw new Error(`${flag} requires a file path.`);
+    }
+
+    return value;
+}
 
 function readJson(relativePath) {
     return JSON.parse(fs.readFileSync(path.join(root, relativePath), 'utf8'));
@@ -82,6 +100,18 @@ function publicFileExists(url) {
 
 function compactObject(value) {
     return Object.fromEntries(Object.entries(value).filter(([, entry]) => entry !== undefined && entry !== null));
+}
+
+function writeOutputArtifact(relativePath, payload) {
+    const absolutePath = path.resolve(root, relativePath);
+
+    if (!absolutePath.startsWith(`${root}${path.sep}`)) {
+        throw new Error(`Refusing to write outside the repository: ${relativePath}`);
+    }
+
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, `${JSON.stringify(payload, null, 2)}\n`);
+    return path.relative(root, absolutePath);
 }
 
 const blockers = [];
@@ -406,6 +436,26 @@ const payload = {
         note: 'Dry-run only. Do not apply as published client-approved content without review.',
         mediaSourceKind: 'external_legacy',
     },
+    summary: {
+        media_assets: mediaCandidates.size,
+        stone_groups: stoneGroups.length,
+        stone_variants: stoneVariants.length,
+        stone_finish_capabilities: stoneFinishCapabilities.length,
+        products: productRows.length,
+        product_models: productModels.length,
+        product_material_defaults: productMaterialDefaults.length,
+        product_specs: productSpecs.length,
+        projects: projectRows.length,
+        project_facts: projectFacts.length,
+        project_media: projectMedia.length,
+        project_materials: projectMaterials.length,
+        project_material_maps: projectMaterialMaps.length,
+        project_hotspots: projectHotspots.length,
+        articles: articleRows.length,
+        article_blocks: articleBlocks.length,
+        warnings: warnings.length,
+        blockers: blockers.length,
+    },
     rows: {
         media_assets: [...mediaCandidates.values()],
         stone_groups: stoneGroups,
@@ -427,6 +477,11 @@ const payload = {
     warnings,
     blockers,
 };
+
+if (outputPath) {
+    const writtenPath = writeOutputArtifact(outputPath, payload);
+    console.log(`wrote content import artifact: ${writtenPath}`);
+}
 
 if (printJson) {
     console.log(JSON.stringify(payload, null, 2));

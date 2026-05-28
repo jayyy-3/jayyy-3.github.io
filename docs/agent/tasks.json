@@ -423,6 +423,10 @@
         "docs/NEXT_STEPS.md",
         "docs/WORKLOG.md",
         "docs/agent/tasks.json",
+        ".gitignore",
+        "package.json",
+        "scripts/agent-init.sh",
+        "scripts/check-content-import-readiness.mjs",
         "scripts/agent-smoke.sh",
         "src/lib/adminAudit.ts",
         "src/pages/admin/AdminApp.tsx",
@@ -448,13 +452,15 @@
         "2026-05-28: Added `/admin/articles` source CRUD behind the auth/config gate. It loads article metadata, structured article blocks, media records, project references, and Stone Library references from Supabase; supports create/update plus publish/archive flows for articles and blocks; includes loading, empty, validation, save, legacy-source provenance, structured-block JSON, read-only, and error states.",
         "2026-05-28: Public Article runtime remains static/file-backed and continues rendering sanitized legacy HTML. Live Articles save verification and static-to-Supabase content import remain pending browser-safe Supabase config plus an active admin/editor profile. Physical delete controls remain intentionally hidden until destructive-delete policy is confirmed.",
         "2026-05-28: Stone Library, Projects, Products, and Articles save flows now call the shared admin audit writer after successful primary saves. Live audit row creation remains pending browser-safe Supabase config and active admin/editor profile.",
-        "2026-05-28: Added `npm run agent:content-import` as a no-write dry run that maps current static Stone Library, Products, Projects, Articles, and media candidates into Supabase-shaped draft payloads. Latest run prepared 51 media candidates, 13 stone groups, 15 stone variants, 153 finish capability rows, 6 products, 28 product models, 5 projects, 4 articles, and zero warnings/blockers."
+        "2026-05-28: Added `npm run agent:content-import` as a no-write dry run that maps current static Stone Library, Products, Projects, Articles, and media candidates into Supabase-shaped draft payloads. Latest run prepared 51 media candidates, 13 stone groups, 15 stone variants, 153 finish capability rows, 6 products, 28 product models, 5 projects, 4 articles, and zero warnings/blockers.",
+        "2026-05-28: Added `--out` support for the content import dry run and ignored `.tmp/` so agents can write a local review artifact without committing generated payloads or writing Supabase rows."
       ],
       "acceptance": [
         "Admin users can draft, publish, edit, archive, and delete Projects, Stone Library records, Products, and Articles.",
         "Public routes expose only published content and preserve current route contracts.",
         "Article CRUD uses approved structured blocks and strips newsletter artifacts from the authoring model.",
-        "Static file-backed data sources have a documented migration or fallback path."
+        "Static file-backed data sources have a documented migration or fallback path.",
+        "The content import dry run can write a local ignored draft review artifact without applying production rows."
       ],
       "verification": [
         "npm run build",
@@ -463,6 +469,7 @@
         "npm run agent:smoke",
         "npm run agent:check",
         "npm run agent:content-import",
+        "npm run agent:content-import -- --out .tmp/content-import-preview.json",
         "Playwright: /admin/stone-library shows configuration-required state when no browser key is configured",
         "Playwright: /admin/projects shows configuration-required state when no browser key is configured",
         "Playwright: /admin/products shows configuration-required state when no browser key is configured",
