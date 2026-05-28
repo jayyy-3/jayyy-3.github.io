@@ -49,6 +49,7 @@ Run:
 - `npm run lint`
 - `npx tsc -b`
 - `npm run agent:check`
+- `npm run agent:content-import` when changing static-to-Supabase import mapping or source content used by that dry run.
 - `npm run agent:smoke` when route output changes.
 
 Evidence to record:

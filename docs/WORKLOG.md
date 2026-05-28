@@ -2,6 +2,47 @@
 
 Last updated: 2026-05-28
 
+## Entry - 2026-05-28 (Content Import Dry Run)
+
+### Scope
+- Added `scripts/check-content-import-readiness.mjs` and `npm run agent:content-import`.
+- The script reads current static Stone Library JSON, Products data, Projects data, Articles manifest/source HTML, and referenced local media.
+- It prepares Supabase-shaped draft import candidates with natural keys and fails before any database write if local media is missing, slugs/keys duplicate, or project material-map references use unknown stone/finish keys.
+- The script is intentionally no-write and does not treat provisional static content as final client-approved published content.
+
+### Changed Files
+- `package.json`
+- `scripts/agent-init.sh`
+- `scripts/check-content-import-readiness.mjs`
+- `AGENTS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `docs/agent/verification.md`
+
+### Verification Results
+- Supabase read-only count check: content tables and `admin_audit_events` currently have zero rows before import.
+- `npm run agent:content-import`: pass. Prepared 51 media candidates, 13 stone groups, 15 stone variants, 153 finish capability rows, 6 products, 28 product models, 18 product material defaults, 18 product specs, 5 projects, 41 project facts, 2 project materials, 1 material map, 2 hotspots, 4 articles, and 4 article block placeholders with 0 warnings and 0 blockers.
+- `npm run build`: pass. Browserslist staleness notice remains; the admin chunk is about 416 kB before gzip.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass, including all current `/admin/*` route shells and Forms API mock checks.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- This is import preparation only; no rows were written to Supabase.
+- Draft import candidates still need review before any production import, especially article structured-block cleanup and project claim approval.
+- Live content import and public read migration still require browser-safe Supabase config, active admin profiles, and an explicit import/apply checkpoint.
+
+### Next Handoff
+- `NOW-FORMS-BACKEND-001`
+- `NOW-ADMIN-AUTH-RLS-001`
+- `NOW-ADMIN-CONTENT-CRUD-001` live import/apply and public-read migration after credentials and approval.
+
 ## Entry - 2026-05-28 (Admin Audit Writer Source)
 
 ### Scope

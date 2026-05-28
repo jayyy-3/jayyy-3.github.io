@@ -35,6 +35,7 @@ echo
 
 echo "Useful commands:"
 echo "- npm run agent:check"
+echo "- npm run agent:content-import"
 echo "- npm run agent:smoke"
 echo "- npm run build"
 echo "- npm run lint"

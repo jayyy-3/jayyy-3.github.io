@@ -26,6 +26,7 @@ After launch:
 - The current deployment workflow still targets GitHub Pages.
 - Contact and Sample Request form source now posts to Cloudflare Pages Function routes; live Supabase persistence still requires server-side environment variables and preview verification.
 - Public Projects, Stone Library, Products, and Articles are still file-backed content. Admin source CRUD/workflow/review now exists for Stone Library, Projects, Products, Articles, Leads, and Audit, and admin CRUD/workflow save flows now call a shared audit writer. Live save verification, public read migration, live form-row creation, live audit row creation, server-side form audit events, and content import work still require browser-safe Supabase config, active admin profiles, server-side form secrets, and follow-up verification.
+- Source-only static-to-Supabase import preparation now exists through `npm run agent:content-import`. It dry-runs current static Stone Library, Products, Projects, Articles, and media candidates into draft payloads without writing Supabase rows.
 - The Supabase project `Urblo` (`npkidywzwddbnfrnxlmo`, `ap-southeast-2`) is active and connector-accessible. Foundation schema/RLS migrations and baseline seeds are applied; runtime integrations are not applied yet.
 - P0/P1 visible runtime media now uses controlled local launch assets; raw article HTML remains migration source material and should still be converted into structured Supabase article blocks.
 
@@ -96,6 +97,7 @@ Current execution split:
 - `NOW-ADMIN-MEDIA-LEADS-001`: media and lead source screens implemented; Supabase Storage buckets/policies, `/admin/media`, and `/admin/leads` are in place, with live upload/save and lead workflow verification pending browser-safe Supabase key configuration and active admin profiles.
 - Audit visibility source is implemented under `/admin/audit`; admin CRUD/workflow saves now call a shared audit writer, while live audit row creation and server-side form audit events remain pending.
 - `NOW-ADMIN-CONTENT-CRUD-001`: Stone Library, Projects, Products, and Articles source implemented; `/admin/stone-library` can manage stone groups, variants, and finish capability rows, `/admin/projects` can manage project records, facts, material schedule rows, material maps, and hotspots, `/admin/products` can manage product families, models, material defaults, and specs, and `/admin/articles` can manage article metadata and structured article block rows after live admin/editor access is configured. Leads remain pending.
+- Static content import dry run is implemented through `scripts/check-content-import-readiness.mjs`; it prepares draft candidates and blocks missing local media or unknown stone/finish references before any apply step.
 
 Core tables:
 - `site_settings`

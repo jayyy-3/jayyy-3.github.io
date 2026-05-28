@@ -96,6 +96,10 @@ Last updated: 2026-05-28
   - `npm run agent:check` => `node scripts/check-harness.mjs`
   - `scripts/check-harness.mjs` verifies required harness files and delegates doc path/task checks.
   - `scripts/check-doc-paths.mjs` rejects machine-specific paths and validates repo-relative path references in docs/task state.
+- Content import dry run:
+  - `npm run agent:content-import` => `node scripts/check-content-import-readiness.mjs`
+  - Reads current static Stone Library JSON, Projects data, Products data, Articles manifest, and referenced local media.
+  - Produces Supabase-shaped import candidates with natural keys and fails before any database write if local media is missing, slugs duplicate, or project/material references use unknown stone or finish keys.
 - Agent startup:
   - `npm run agent:init` => `bash scripts/agent-init.sh`
   - Prints repo path, git status, recent commits, runtime versions, read order, and common commands.
@@ -314,6 +318,9 @@ Route state contract:
   - Enquiries and sample requests store submitted fields, source route, Turnstile result, notification status, admin status, owner, and internal notes.
 - Admin audit:
   - Admin mutations should be attributable through audit fields or audit-event records.
+- Content import readiness:
+  - `scripts/check-content-import-readiness.mjs` is the source-only dry run for static-to-Supabase import preparation.
+  - It intentionally marks import candidates as `draft` and uses natural keys/source URLs so provisional static content is not treated as final published client-approved content.
 - Admin IA/access:
   - `/admin` route, login, unauthorized, loading, module, settings, and audit states are defined in `docs/ADMIN_IA_ACCESS.md`.
   - Current `/admin` source implements real Supabase Auth wiring, session/profile loading, login, unauthorized, dashboard, and protected module scaffolds.
