@@ -27,6 +27,7 @@ Applied admin hardening migration on 2026-05-28:
 Applied admin helper hardening migration on 2026-05-29:
 
 - `security_definer_private_helpers`
+- `admin_profile_email_uniqueness`
 
 Applied media Storage migrations on 2026-05-28:
 

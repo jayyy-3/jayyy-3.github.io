@@ -308,6 +308,9 @@ function checkRoutes() {
   const audit = readRequired('src/lib/adminAudit.ts');
   const firstAdminBootstrap = readRequired('scripts/bootstrap-first-admin.mjs');
   const adminLiveReadiness = readRequired('scripts/check-admin-live-readiness.mjs');
+  const adminProfileEmailMigration = readRequired(
+    'supabase/migrations/202605290002_admin_profile_email_uniqueness.sql',
+  );
 
   if (existsSync(join(root, 'src/pages/admin/AdminModulePage.tsx'))) {
     failures.push('src/pages/admin/AdminModulePage.tsx: retired scaffold component should not remain after all launch modules are active');
@@ -399,6 +402,16 @@ function checkRoutes() {
   requireIncludes(firstAdminBootstrap, 'profiles[0].role !== config.role', 'scripts/bootstrap-first-admin.mjs');
   requireIncludes(firstAdminBootstrap, 'profiles[0].user_id !== user.id', 'scripts/bootstrap-first-admin.mjs');
   requireIncludes(firstAdminBootstrap, 'Profile linked to Auth user:', 'scripts/bootstrap-first-admin.mjs');
+  requireIncludes(
+    firstAdminBootstrap,
+    'assertProfileEmailIsUnambiguous(existingProfiles, user, config)',
+    'scripts/bootstrap-first-admin.mjs',
+  );
+  requireIncludes(
+    firstAdminBootstrap,
+    'already linked to a different Supabase Auth user',
+    'scripts/bootstrap-first-admin.mjs',
+  );
   requireIncludes(adminLiveReadiness, 'findAuthUserByEmail', 'scripts/check-admin-live-readiness.mjs');
   requireIncludes(adminLiveReadiness, 'profile.user_id', 'scripts/check-admin-live-readiness.mjs');
   requireIncludes(adminLiveReadiness, 'authUser.id', 'scripts/check-admin-live-readiness.mjs');
@@ -406,6 +419,16 @@ function checkRoutes() {
     firstAdminBootstrap,
     'Bootstrap audit event recorded: admin_profile.bootstrap.',
     'scripts/bootstrap-first-admin.mjs',
+  );
+  requireIncludes(
+    adminProfileEmailMigration,
+    'admin_profiles_email_ci_unique_idx',
+    'supabase/migrations/202605290002_admin_profile_email_uniqueness.sql',
+  );
+  requireIncludes(
+    adminProfileEmailMigration,
+    'lower(btrim(email))',
+    'supabase/migrations/202605290002_admin_profile_email_uniqueness.sql',
   );
 }
 

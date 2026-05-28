@@ -2,6 +2,61 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Admin Profile Email Uniqueness)
+
+### Scope
+- Added and applied Supabase migration `admin_profile_email_uniqueness` for project `npkidywzwddbnfrnxlmo`.
+- Added `admin_profiles_email_ci_unique_idx` on `lower(btrim(email))` so admin profile email lookups stay case-insensitively unambiguous for first-admin bootstrap, admin readiness, and `/admin/settings` profile management.
+- Strengthened `scripts/bootstrap-first-admin.mjs` so approved write mode refuses to bootstrap when the target profile email is already linked to a different Supabase Auth user before attempting the upsert.
+- Added `npm run agent:admin-crud-coverage` checks for the migration/source contract.
+- Updated Harness docs to reflect the applied data integrity constraint and remaining live credential/approval blockers.
+
+### Changed Files
+- `AGENTS.md`
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `scripts/bootstrap-first-admin.mjs`
+- `scripts/check-admin-crud-coverage.mjs`
+- `supabase/migrations/202605290002_admin_profile_email_uniqueness.sql`
+- `supabase/migrations/README.md`
+
+### Verification Results
+- Supabase connector `list_migrations`: `admin_profile_email_uniqueness` present.
+- Supabase connector `execute_sql`: `admin_profiles_email_ci_unique_idx` exists as a unique index on `lower(btrim(email))`.
+- Supabase connector `execute_sql`: duplicate normalized admin profile email groups = 0.
+- `node --check scripts/bootstrap-first-admin.mjs`: pass.
+- `node --check scripts/check-admin-crud-coverage.mjs`: pass.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:first-admin-bootstrap`: pass in plan-only/no-write mode.
+- `npm run agent:first-admin-bootstrap -- --verify-only --admin-email first@example.com`: expected fail-closed result on missing service-role key.
+- `npm run agent:admin-live-readiness -- --admin-email first@example.com`: expected fail-closed result on missing browser-safe and service-role keys.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:admin-crud-live`: pass in plan-only/no-write mode.
+- `npm run agent:live-readiness`: pass in report-only mode; live form/admin/Cloudflare inputs remain missing or approval-gated.
+- `npm run agent:cloudflare-readiness`: pass.
+- `npm run agent:public-supabase-readiness`: pass.
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass, including public/admin route shells, Forms API checks, and Contact form UI source checks.
+- `npm run agent:forms-ui`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- This is a live schema hardening migration plus source guard. It does not create a Supabase Auth user, create an admin profile, run first-admin write mode, perform admin CRUD live writes, upload Storage objects, submit live forms, or touch Cloudflare state.
+- Live completion still requires service-role and browser-safe Supabase keys, Jay-confirmed first-admin email, Jay approval for first-admin/profile writes, a real owner/admin session, Jay approval for tagged admin/form QA writes, and a Cloudflare preview URL.
+
+### Next Handoff
+- `NOW-ADMIN-AUTH-RLS-001`
+- `NOW-ADMIN-CMS-001`
+- `NOW-FORMS-BACKEND-001`
+
 ## Entry - 2026-05-29 (Admin Auth Profile Link Readiness Guard)
 
 ### Scope

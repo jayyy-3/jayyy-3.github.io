@@ -402,6 +402,7 @@
         "src/lib/adminAuthState.ts",
         "src/pages/admin",
         "supabase/migrations/202605280001_admin_settings_role_hardening.sql",
+        "supabase/migrations/202605290002_admin_profile_email_uniqueness.sql",
         "scripts/check-admin-crud-coverage.mjs"
       ],
       "notes": [
@@ -419,6 +420,7 @@
         "2026-05-29: Approved first-admin write mode now records `admin_profile.bootstrap` in `admin_audit_events` with service-role setup metadata, and `npm run agent:admin-crud-coverage` guards that audit source contract.",
         "2026-05-29: First-admin read-only `--verify-only` now also fails if the existing active admin profile has the wrong role for the planned bootstrap role, and `npm run agent:admin-crud-coverage` guards that source contract.",
         "2026-05-29: First-admin and admin-live read-only readiness now fail if the active admin profile is not linked to the matching Supabase Auth user id for the supplied email, and source coverage guards that contract.",
+        "2026-05-29: Applied and verified admin_profile_email_uniqueness on Supabase project npkidywzwddbnfrnxlmo. `admin_profiles_email_ci_unique_idx` keeps normalized profile emails case-insensitively unique, and first-admin write mode now refuses a target email already linked to a different Auth user before upsert.",
         "2026-05-28: `npm run agent:admin-crud-coverage` now verifies /admin route registration, RequireAdmin state handling, active module registration, and browser-key-only Supabase client wiring before live auth QA.",
         "2026-05-29: `npm run agent:admin-crud-coverage` now also guards the config-missing state copy, login/unauthorized config handling, admin-route WelcomePopup suppression, whole-browser-source service-role env/client boundary, and browser-key/RLS-only admin live verifier boundary.",
         "2026-05-28: `npm run agent:admin-crud-live` now stages the live write proof after auth readiness. Plan-only mode performs no writes; live mode requires a real owner/admin session and Jay approval for tagged QA rows."
@@ -429,7 +431,8 @@
         "RLS policies are enabled and verified for public-read and admin-write boundaries.",
         "Admin session behavior is documented and covered by browser or Playwright checks.",
         "Without browser-safe Supabase configuration, admin routes render a configuration-required state and no dashboard content.",
-        "First-admin read-only verification fails unless the target Auth user has exactly one active admin profile linked to that Auth user with the planned bootstrap role."
+        "First-admin read-only verification fails unless the target Auth user has exactly one active admin profile linked to that Auth user with the planned bootstrap role.",
+        "Admin profile email lookups are unambiguous through a case-insensitive normalized unique index, and first-admin write mode refuses email/Auth-user mismatches before upsert."
       ],
       "verification": [
         "npm run build",
@@ -437,6 +440,8 @@
         "npx tsc -b",
         "npm run agent:smoke",
         "npm run agent:check",
+        "Supabase MCP: list_migrations includes admin_profile_email_uniqueness",
+        "Supabase MCP: execute_sql verifies admin_profiles_email_ci_unique_idx exists on lower(btrim(email))",
         "npm run agent:first-admin-bootstrap",
         "npm run agent:first-admin-bootstrap -- --verify-only --admin-email <first-admin-email> (after service key and first admin email are configured)",
         "npm run agent:admin-live-readiness -- --admin-email <first-admin-email> (after browser/service keys and first admin profile are configured; verifies active profile, baseline seeds, and browser-key public/private boundary)",
@@ -472,6 +477,7 @@
         "supabase/migrations/202605280004_admin_profile_owner_hardening.sql",
         "supabase/migrations/202605280005_security_definer_function_grants.sql",
         "supabase/migrations/202605290001_security_definer_private_helpers.sql",
+        "supabase/migrations/202605290002_admin_profile_email_uniqueness.sql",
         "supabase/migrations/README.md",
     "scripts/check-admin-crud-coverage.mjs",
     "scripts/check-admin-crud-live.mjs",
@@ -485,6 +491,7 @@
         "2026-05-28: Added /admin/settings source for non-destructive admin profile management of existing Supabase Auth users, with owner/admin create/update controls, owner-role guardrails, self-lockout prevention, and profile audit attempts.",
         "2026-05-28: Applied and verified admin_profile_owner_hardening and security_definer_function_grants on Supabase project npkidywzwddbnfrnxlmo. Admins can maintain non-owner profiles, owner-role changes require owner, anon helper execution is revoked, and rls_auto_enable is not directly executable by anon/authenticated.",
         "2026-05-29: Applied and verified security_definer_private_helpers on Supabase project npkidywzwddbnfrnxlmo. RLS and Storage policies now call private.has_admin_role(...), zero policies call public.has_admin_role(...), public helper execution is revoked from authenticated, anon/authenticated public reads still work, and the Supabase security advisor reports zero security lints.",
+        "2026-05-29: Applied and verified admin_profile_email_uniqueness on Supabase project npkidywzwddbnfrnxlmo. `admin_profiles_email_ci_unique_idx` prevents duplicate normalized profile emails so admin team and first-admin readiness lookups stay unambiguous.",
         "Live settings/profile save verification still requires browser-safe Supabase key configuration and an active owner/admin profile.",
         "2026-05-28: Admin CRUD coverage verifier now checks settings/admin profile table references, owner/self-lockout guardrail copy, mutation paths, and site_settings/admin_profile audit actions.",
         "2026-05-28: Admin CRUD live verifier now includes a tagged site_settings create/update/publish/archive path through owner/admin RLS, but it does not create or mutate first-admin profile rows."
@@ -496,14 +503,16 @@
         "Viewer/editor users can inspect but not save global settings in the UI.",
         "Supabase RLS write policies for site_settings require owner/admin roles.",
         "Supabase RLS policies for admin_profiles prevent admin users from changing owner profiles or assigning owner role.",
+        "Supabase admin_profiles enforces case-insensitive normalized email uniqueness.",
         "Anonymous users cannot directly execute admin SECURITY DEFINER helper functions.",
         "The form includes loading, empty, validation, save, success, read-only, and error states.",
         "No service-role key is shipped to browser code."
       ],
       "verification": [
-        "Supabase MCP: list_migrations includes admin_settings_role_hardening, admin_profile_owner_hardening, security_definer_function_grants, and security_definer_private_helpers",
+        "Supabase MCP: list_migrations includes admin_settings_role_hardening, admin_profile_owner_hardening, security_definer_function_grants, security_definer_private_helpers, and admin_profile_email_uniqueness",
         "Supabase MCP: execute_sql verifies site_settings write policies require owner/admin",
         "Supabase MCP: execute_sql verifies admin profile owner-role policies",
+        "Supabase MCP: execute_sql verifies admin_profiles_email_ci_unique_idx exists on lower(btrim(email))",
         "Supabase MCP: execute_sql verifies public helper RPC execution is revoked from anon/authenticated browser roles and RLS/Storage policies call private helpers",
         "npm run build",
         "npm run lint",

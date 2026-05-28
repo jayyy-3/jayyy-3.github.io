@@ -305,6 +305,21 @@ async function readActiveOwners(supabase) {
   return data || [];
 }
 
+function assertProfileEmailIsUnambiguous(profiles, user, config) {
+  if (profiles.length > 1) {
+    throw new Error(
+      `Expected at most one admin_profiles row for ${config.adminEmail}; found ${profiles.length}. Resolve duplicate profile emails before bootstrapping.`,
+    );
+  }
+
+  const existingProfile = profiles[0];
+  if (existingProfile && existingProfile.user_id !== user.id) {
+    throw new Error(
+      `The admin profile email ${config.adminEmail} is already linked to a different Supabase Auth user. Resolve the profile before bootstrapping this user.`,
+    );
+  }
+}
+
 async function verifySeeds(supabase) {
   const { data: settingsRows, error: settingsError } = await supabase
     .from('site_settings')
@@ -410,7 +425,10 @@ async function verifyOnly(supabase, config) {
 
 async function writeBootstrap(supabase, config, options) {
   let user = await findAuthUserByEmail(supabase, config.adminEmail);
-  const activeOwners = await readActiveOwners(supabase);
+  const [activeOwners, existingProfiles] = await Promise.all([
+    readActiveOwners(supabase),
+    readProfileByEmail(supabase, config.adminEmail),
+  ]);
   if (!user && activeOwners.length > 0 && !options.allowExistingOwner) {
     throw new Error(
       'An active owner profile already exists. Refusing to invite a new first-admin user unless --allow-existing-owner is explicitly supplied.',
@@ -424,6 +442,7 @@ async function writeBootstrap(supabase, config, options) {
     user = await inviteAuthUser(supabase, config, options);
   }
 
+  assertProfileEmailIsUnambiguous(existingProfiles, user, config);
   assertOwnerBootstrapAllowed(activeOwners, user.id, options);
   const profile = await upsertAdminProfile(supabase, user, config);
   await recordBootstrapAuditEvent(supabase, user, config, options);
