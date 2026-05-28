@@ -1,6 +1,6 @@
 # Agent Verification Matrix
 
-Last updated: 2026-05-22
+Last updated: 2026-05-28
 
 ## Purpose
 Use this matrix to choose the smallest verification set that proves a change is safe. Runtime changes still need the full build/lint/typecheck gate unless a task explicitly defines a temporary exception.
@@ -90,6 +90,7 @@ Use when changing the Cloudflare Pages launch contract, Pages Functions routing,
 
 Run:
 - `npm run agent:cloudflare-readiness`
+- `npm run agent:cloudflare-preview-smoke -- --base-url https://<preview>.pages.dev` after a Pages preview URL exists
 - `npm run build`
 - `npm run lint`
 - `npx tsc -b`

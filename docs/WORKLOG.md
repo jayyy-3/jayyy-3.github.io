@@ -2,6 +2,43 @@
 
 Last updated: 2026-05-28
 
+## Entry - 2026-05-28 (Cloudflare Preview Smoke Runner)
+
+### Scope
+- Added `scripts/check-cloudflare-preview-smoke.mjs` as a no-secret HTTP verifier for deployed Cloudflare Pages preview URLs.
+- Added `npm run agent:cloudflare-preview-smoke`.
+- The runner verifies direct-refresh public/admin route shells, unknown-route fallback shell, deployed `/assets/*`, legacy product/article redirects, and no-write API safe-failure behavior for `/api/enquiries` and `/api/sample-requests`.
+- Local Vite preview URLs are supported for script validation; Cloudflare-only redirect and Function checks are skipped on local hosts.
+
+### Changed Files
+- `AGENTS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/CLOUDFLARE_DEPLOYMENT.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `docs/agent/verification.md`
+- `package.json`
+- `scripts/agent-init.sh`
+- `scripts/check-cloudflare-pages-readiness.mjs`
+- `scripts/check-cloudflare-preview-smoke.mjs`
+
+### Verification Results
+- Cloudflare docs check: pass. Current Pages documentation confirms `_redirects`-based routing and Pages Functions routing remain relevant for this preview smoke scope.
+- `node --check scripts/check-cloudflare-preview-smoke.mjs`: pass.
+- `npm run agent:cloudflare-preview-smoke -- --base-url http://127.0.0.1:4184`: pass against local Vite preview. Verified public/admin route shells, unknown-route fallback shell, and asset references. Redirect and Function checks were skipped because the base URL was local.
+
+### Risks and Gaps
+- This does not create a Cloudflare Pages project, deploy a preview, configure environment variables, validate production DNS, or prove live Supabase row creation.
+- Cloudflare-only redirect and Function checks still need to run against the real `*.pages.dev` URL.
+- Valid form persistence still requires `npm run agent:forms-live -- --base-url https://<preview>.pages.dev` after server-side `SUPABASE_SERVICE_ROLE_KEY` is configured.
+
+### Next Handoff
+- `NOW-CLOUDFLARE-PAGES-DEPLOY-001`
+- `NOW-FORMS-BACKEND-001`
+- `NOW-ADMIN-AUTH-RLS-001`
+
 ## Entry - 2026-05-28 (Public Supabase Readiness Runner)
 
 ### Scope

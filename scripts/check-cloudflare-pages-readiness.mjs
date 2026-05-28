@@ -170,6 +170,7 @@ function checkEnvAndDocs() {
     'npx tsc -b',
     'npm run agent:smoke',
     'npm run agent:check',
+    'npm run agent:cloudflare-preview-smoke -- --base-url https://<preview>.pages.dev',
     'npm run agent:forms-live',
     'npm run agent:admin-live-readiness -- --admin-email <first-admin-email>',
   ]) {

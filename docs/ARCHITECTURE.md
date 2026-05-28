@@ -58,6 +58,7 @@ Last updated: 2026-05-28
   - Preview deployments are required for branch/PR review.
   - Cloudflare environment variables and secrets must not be committed.
   - Function routing must be restricted so only `/api/*` invokes Pages Functions.
+  - Deployed preview route/asset/redirect/API safe-failure smoke is staged through `npm run agent:cloudflare-preview-smoke -- --base-url https://<preview>.pages.dev`. The command requires no secrets, verifies direct-refresh route shells and static assets, checks Cloudflare-applied legacy redirects, and verifies `/api/enquiries` and `/api/sample-requests` reject unsafe methods/invalid payloads without creating rows.
   - Current Pages Function source lives under `functions/api/enquiries.js` and `functions/api/sample-requests.js`.
   - Browser-side admin Auth requires `VITE_SUPABASE_ANON_KEY` or `VITE_SUPABASE_PUBLISHABLE_KEY`; `VITE_SUPABASE_URL` may be configured, but defaults to the Urblo project URL if omitted.
   - Current admin CRUD source: `/admin/settings` reads and saves the default `site_settings` row and manages existing Supabase Auth users' admin profile rows for owner/admin roles. First admin bootstrap still happens outside the screen after Jay confirms the email.
@@ -129,6 +130,11 @@ Last updated: 2026-05-28
   - `npm run agent:cloudflare-readiness` => `node scripts/check-cloudflare-pages-readiness.mjs`
   - Verifies the repo-side Pages contract: `npm run build`, Vite root base, SPA fallback, `/api/*` Function routing scope, launch headers, API handler files, environment placeholders, and deployment runbook coverage.
   - This command does not create a Cloudflare Pages project, set environment variables, validate a preview URL, change custom domains, or touch DNS.
+- Cloudflare preview smoke:
+  - `npm run agent:cloudflare-preview-smoke -- --base-url https://<preview>.pages.dev` => `node scripts/check-cloudflare-preview-smoke.mjs`
+  - Verifies deployed direct-refresh shells for public/admin routes, deployed `/assets/*`, legacy `_redirects` behavior, and no-write API safe-failure behavior for `/api/enquiries` and `/api/sample-requests`.
+  - Local Vite preview URLs are supported for route/asset script validation; Cloudflare-only redirect and Function checks are skipped on local hosts.
+  - This command does not create a Pages project, set environment variables, submit valid form rows, verify Supabase persistence, change custom domains, or touch DNS.
 - Admin live readiness:
   - `npm run agent:admin-live-readiness -- --admin-email <first-admin-email>` => `node scripts/check-admin-live-readiness.mjs`
   - Loads local environment values from `.env.local`, `.env`, `.dev.vars`, and the shell.

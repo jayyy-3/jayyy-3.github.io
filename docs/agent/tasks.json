@@ -195,23 +195,27 @@
         "vite.config.ts",
         "src/App.tsx",
         "scripts/check-cloudflare-pages-readiness.mjs",
+        "scripts/check-cloudflare-preview-smoke.mjs",
         "scripts/agent-init.sh"
       ],
       "acceptance": [
         "Repo-side Cloudflare Pages build command, output directory, SPA fallback, function routing, and launch headers are documented and verified locally.",
         "Only future API routes are configured to invoke Pages Functions; static site traffic remains static.",
         "Clean URL direct refresh works locally for declared routes.",
-        "Cloudflare Pages project creation, preview URL validation, production custom domain, DNS cutover, and rollback require account access before this task can be marked done."
+        "Cloudflare Pages project creation, production custom domain, DNS cutover, and rollback require account access before this task can be marked done.",
+        "After a preview URL exists, direct-refresh routes, deployed assets, Cloudflare redirects, and API safe-failure behavior can be checked with `npm run agent:cloudflare-preview-smoke -- --base-url https://<preview>.pages.dev`."
       ],
       "verification": [
         "npm run build",
         "npm run lint",
         "npx tsc -b",
         "npm run agent:smoke",
-        "npm run agent:cloudflare-readiness"
+        "npm run agent:cloudflare-readiness",
+        "npm run agent:cloudflare-preview-smoke -- --base-url https://<preview>.pages.dev (after Cloudflare preview deployment exists)"
       ],
       "notes": [
-        "2026-05-28: Added `npm run agent:cloudflare-readiness` as a no-secret repo-side verifier for Cloudflare Pages. It checks the build script, Vite root base, SPA fallback, Function routing scope, headers, API handler files, environment placeholders, and deployment runbook. Account-level Pages project creation, production env vars, preview URL, custom domain, DNS, and rollback remain blocked on Cloudflare account access."
+        "2026-05-28: Added `npm run agent:cloudflare-readiness` as a no-secret repo-side verifier for Cloudflare Pages. It checks the build script, Vite root base, SPA fallback, Function routing scope, headers, API handler files, environment placeholders, and deployment runbook. Account-level Pages project creation, production env vars, preview URL, custom domain, DNS, and rollback remain blocked on Cloudflare account access.",
+        "2026-05-28: Added `npm run agent:cloudflare-preview-smoke` as a no-secret deployed-preview verifier. It requires `--base-url`, checks direct-refresh public/admin route shells and deployed assets, verifies Cloudflare-applied legacy redirects, and verifies `/api/enquiries` and `/api/sample-requests` reject GET/invalid POST safely. Local preview URLs skip redirect/Function checks so the script can be validated before a Pages preview exists."
       ]
     },
     {

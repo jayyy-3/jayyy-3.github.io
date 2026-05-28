@@ -9,6 +9,8 @@ It does not prove that the Cloudflare Pages project already exists. Account-leve
 
 Repo-side readiness is checked by `npm run agent:cloudflare-readiness`. This command verifies the build contract, SPA fallback, Pages Functions routing scope, headers, API handler files, environment placeholders, and this runbook without touching Cloudflare account state.
 
+After a preview deployment exists, preview HTTP smoke is checked by `npm run agent:cloudflare-preview-smoke -- --base-url https://<preview>.pages.dev`. This command verifies direct-refresh route shells, deployed static assets, Cloudflare redirect behavior, and no-write API safe-failure behavior for `/api/enquiries` and `/api/sample-requests`.
+
 ## Repo-Side Contract
 
 ### Build Settings
@@ -103,6 +105,15 @@ Each route should:
 - load CSS and JavaScript assets from `/assets/...`;
 - avoid console errors related to missing base paths.
 
+Run the deployed preview smoke runner:
+- `npm run agent:cloudflare-preview-smoke -- --base-url https://<preview>.pages.dev`
+
+This runner does not require secrets. It checks:
+- direct refresh for public routes, unknown-route fallback, and `/admin/*` route shells;
+- deployed `/assets/*` JavaScript/CSS availability;
+- legacy product/article 301 redirects from `_redirects`;
+- `/api/enquiries` and `/api/sample-requests` GET/OPTIONS/invalid POST safe-failure behavior. Invalid POST checks are deliberately no-write and do not replace the credential-gated live form persistence command.
+
 ### 4. Validate Function Routing After API Work Exists
 Current `/functions/api` endpoints:
 - `/api/enquiries` and `/api/sample-requests` should invoke Pages Functions.
@@ -155,6 +166,9 @@ After form secrets are configured, run:
 For deployed Pages preview form verification, run:
 - `npm run agent:forms-live -- --base-url https://<preview>.pages.dev`
 
+For deployed Pages preview route/asset/redirect/API safe-failure smoke, run:
+- `npm run agent:cloudflare-preview-smoke -- --base-url https://<preview>.pages.dev`
+
 After admin browser-safe keys and the first admin profile are configured, run:
 - `npm run agent:admin-live-readiness -- --admin-email <first-admin-email>`
 
@@ -168,7 +182,7 @@ Repo-side Cloudflare Pages preparation can be committed now.
 The following still require account access:
 - creating the Cloudflare Pages project;
 - adding environment variables;
-- validating the `*.pages.dev` preview URL;
+- validating the `*.pages.dev` preview URL with `npm run agent:cloudflare-preview-smoke -- --base-url https://<preview>.pages.dev`;
 - adding the production custom domain;
 - DNS cutover and rollback testing.
 
