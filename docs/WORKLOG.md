@@ -2,6 +2,38 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Cloudflare Preview Route Checklist Alignment)
+
+### Scope
+- Aligned the Cloudflare deployment runbook's deployed-preview manual route checklist with the canonical public routes used by the actual preview smoke runner.
+- Replaced the stale direct-refresh `/products/primeBlock` checklist item with canonical `/products/prime-block`.
+- Added canonical article detail and `/capabilities` direct-refresh checks to the runbook.
+- Hardened `npm run agent:cloudflare-readiness` so it fails if those canonical preview route checks drop from the runbook.
+
+### Changed Files
+- `docs/CLOUDFLARE_DEPLOYMENT.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `scripts/check-cloudflare-pages-readiness.mjs`
+
+### Verification Results
+- `node --check scripts/check-cloudflare-pages-readiness.mjs`: pass.
+- `node -e "JSON.parse(require('fs').readFileSync('docs/agent/tasks.json','utf8')); console.log('tasks json ok')"`: pass.
+- `npm run agent:cloudflare-readiness`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- Source/docs-only deployment readiness alignment. No Cloudflare project, DNS record, Supabase row, Storage object, Auth user, credential, or live write was created or changed.
+- Actual deployed-preview smoke still requires a real `*.pages.dev` URL.
+
+### Next Handoff
+- `NOW-CLOUDFLARE-PAGES-DEPLOY-001`
+- `NOW-FORMS-BACKEND-001`
+- `NOW-ADMIN-AUTH-RLS-001`
+
 ## Entry - 2026-05-29 (Admin Live Publish Archive Verifier)
 
 ### Scope

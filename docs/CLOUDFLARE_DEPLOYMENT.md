@@ -89,10 +89,12 @@ Before custom domain cutover, test the generated `*.pages.dev` URL:
 - `/projects`
 - `/projects/moon-gate-woolley-street`
 - `/products`
-- `/products/primeBlock`
+- `/products/prime-block`
 - `/stone-library`
 - `/stone-library/alpine-white`
 - `/articles`
+- `/articles/modular-mastery-how-primeblock-core-transformed-aitken-college`
+- `/capabilities`
 - `/contact`
 - `/admin`
 - `/admin/login`
@@ -110,6 +112,8 @@ Each route should:
 - render the correct route, not the homepage fallback;
 - load CSS and JavaScript assets from `/assets/...`;
 - avoid console errors related to missing base paths.
+
+Legacy URLs such as `/products/primeBlock` and `/articles/Modular-Mastery-How-PrimeBlock-Core-Transformed-Aitken-College` should be validated as redirect checks, not as canonical direct-refresh route checks.
 
 Run the deployed preview smoke runner:
 - `npm run agent:cloudflare-preview-smoke -- --base-url https://<preview>.pages.dev`
