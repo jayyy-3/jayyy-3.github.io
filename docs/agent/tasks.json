@@ -151,6 +151,7 @@
         "2026-05-27: Added Pages Function source for /api/enquiries and /api/sample-requests. Contact page now posts enquiries to /api/enquiries; Sample Request mode posts to /api/sample-requests and creates a sample item payload. Footer/sample CTAs now route to /contact?intent=sample-request.",
         "2026-05-27: Mock API checks pass for valid enquiry, invalid enquiry, valid sample request with item row, and configured Turnstile failure. Live Supabase insert verification remains pending server-side SUPABASE_SERVICE_ROLE_KEY configuration.",
         "2026-05-28: Form handlers now attempt server-side admin_audit_events writes after successful enquiry/sample request inserts. Mock API checks verify audit calls, audit-failure resilience after lead storage, missing service-role fail-closed behavior before Supabase calls, and configured Turnstile failure.",
+        "2026-05-29: Mock API checks now cover configured Resend notification success/failure paths without real email secrets, including pending initial row status, Resend call shape, and final notification_status patches to sent or failed.",
         "2026-05-28: `.env.example`, Cloudflare deployment docs, and architecture docs now list canonical form/admin environment variables plus supported compatibility aliases for Supabase service key, Turnstile, Resend sender, and lead notification recipient configuration.",
         "2026-05-28: Added `npm run agent:forms-live` as the credential-gated live verification runner for valid enquiry, invalid enquiry, valid sample request, invalid sample request, sample item, and server-side audit rows. The command intentionally fails when the service-role key is unavailable and retains tagged test rows for auditability unless Jay approves cleanup.",
         "2026-05-28: Added `npm run agent:live-readiness` as a no-secret input audit for local/deployed form verification, admin readiness, tagged admin live writes, and Cloudflare preview smoke readiness. It accepts non-secret `--base-url`, `--admin-email`, and `--admin-writes-approved` readiness flags; secret keys and admin session credentials still stay in env files or shell."
@@ -175,6 +176,8 @@
         "Mock API test: successful sample request attempts admin_audit_events insert",
         "Mock API test: audit insert failure still returns success after lead storage",
         "Mock API test: missing service-role key creates no Supabase calls",
+        "Mock API test: configured notification success patches notification_status to sent",
+        "Mock API test: configured notification failure patches notification_status to failed",
         "API test: valid enquiry creates one Supabase row",
         "API test: invalid enquiry creates no Supabase row",
         "API test: valid sample request creates request and item rows",

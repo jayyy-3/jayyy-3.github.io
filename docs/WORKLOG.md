@@ -2,6 +2,36 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Forms Notification Mock Coverage)
+
+### Scope
+- Expanded `scripts/check-forms-api.mjs` so the no-secret Forms API gate covers configured Resend notification behavior.
+- Added mocked enquiry notification success coverage: initial Supabase insert uses `notification_status = pending`, Resend is called with the configured enquiry recipient, and the row is patched to `sent`.
+- Added mocked sample-request notification failure coverage: the visitor response still succeeds after the lead and sample item are stored, Resend failure is captured, and the row is patched to `failed`.
+- No real Resend call, Supabase write, credential, or Cloudflare state change was performed.
+
+### Changed Files
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `scripts/check-forms-api.mjs`
+
+### Verification Results
+- `node --check scripts/check-forms-api.mjs`: pass.
+- `node scripts/check-forms-api.mjs`: pass, including notification success/failure mocks.
+
+### Risks and Gaps
+- Live Supabase row creation remains unverified until `SUPABASE_SERVICE_ROLE_KEY` is configured.
+- Real Resend delivery remains unverified until `RESEND_API_KEY`, sender, and recipient environment variables are configured in a controlled environment.
+- Turnstile production verification remains staged but unverified until the Turnstile secret exists.
+
+### Next Handoff
+- `NOW-FORMS-BACKEND-001`: run `npm run agent:forms-live` after service-role credentials exist.
+- `NOW-FORMS-SUPABASE-001`: verify live persistence, real notification delivery, and admin-visible lead workflow after credentials and preview environment exist.
+
 ## Entry - 2026-05-29 (First Admin Bootstrap Runner)
 
 ### Scope
