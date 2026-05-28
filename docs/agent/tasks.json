@@ -417,6 +417,7 @@
         "2026-05-29: `npm run agent:admin-live-readiness` now also uses the browser-safe key in read-only mode to verify published `site_settings` and `finish_definitions` are anonymously readable while `admin_profiles` returns no private rows or an expected deny response without an authenticated admin session.",
         "2026-05-29: Added `npm run agent:first-admin-bootstrap` as the guarded first-admin setup runner. Default mode prints the no-write plan, `--verify-only` performs service-role read checks, and write/invite mode requires Jay approval plus `--allow-writes` and a matching `--confirm-email`.",
         "2026-05-29: Approved first-admin write mode now records `admin_profile.bootstrap` in `admin_audit_events` with service-role setup metadata, and `npm run agent:admin-crud-coverage` guards that audit source contract.",
+        "2026-05-29: First-admin read-only `--verify-only` now also fails if the existing active admin profile has the wrong role for the planned bootstrap role, and `npm run agent:admin-crud-coverage` guards that source contract.",
         "2026-05-28: `npm run agent:admin-crud-coverage` now verifies /admin route registration, RequireAdmin state handling, active module registration, and browser-key-only Supabase client wiring before live auth QA.",
         "2026-05-29: `npm run agent:admin-crud-coverage` now also guards the config-missing state copy, login/unauthorized config handling, admin-route WelcomePopup suppression, whole-browser-source service-role env/client boundary, and browser-key/RLS-only admin live verifier boundary.",
         "2026-05-28: `npm run agent:admin-crud-live` now stages the live write proof after auth readiness. Plan-only mode performs no writes; live mode requires a real owner/admin session and Jay approval for tagged QA rows."
@@ -426,7 +427,8 @@
         "Unauthenticated and unauthorized users cannot access admin content.",
         "RLS policies are enabled and verified for public-read and admin-write boundaries.",
         "Admin session behavior is documented and covered by browser or Playwright checks.",
-        "Without browser-safe Supabase configuration, admin routes render a configuration-required state and no dashboard content."
+        "Without browser-safe Supabase configuration, admin routes render a configuration-required state and no dashboard content.",
+        "First-admin read-only verification fails unless the target Auth user has exactly one active admin profile with the planned bootstrap role."
       ],
       "verification": [
         "npm run build",

@@ -387,6 +387,7 @@ async function verifyOnly(supabase, config) {
   console.log(`Supabase URL: ${config.supabaseUrl}`);
   console.log(`Service key source: ${config.serviceKeyName}`);
   console.log(`Admin email: ${config.adminEmail}`);
+  console.log(`Expected profile role: ${config.role}`);
   console.log(`Auth user: ${user ? 'found' : 'missing'}`);
   console.log(`Admin profile rows: ${profiles.length}`);
   for (const profile of profiles) {
@@ -394,7 +395,7 @@ async function verifyOnly(supabase, config) {
   }
   console.log('Baseline seed rows ready: site_settings default and finish_definitions.');
 
-  if (!user || profiles.length !== 1 || !profiles[0].is_active) {
+  if (!user || profiles.length !== 1 || !profiles[0].is_active || profiles[0].role !== config.role) {
     process.exitCode = 1;
   }
 }

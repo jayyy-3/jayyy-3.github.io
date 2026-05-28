@@ -2,6 +2,50 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (First Admin Verify-Only Role Guard)
+
+### Scope
+- Strengthened `scripts/bootstrap-first-admin.mjs` so read-only `--verify-only` now fails unless the existing active `admin_profiles` row has the planned bootstrap role (`owner` by default, or explicit `--role admin`).
+- Added `npm run agent:admin-crud-coverage` source checks so the first-admin verify-only role contract cannot be silently removed.
+- Kept the checkpoint source-only. No Supabase Auth users, profiles, rows, Storage objects, Cloudflare state, credentials, or live writes were created or changed.
+
+### Changed Files
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `scripts/bootstrap-first-admin.mjs`
+- `scripts/check-admin-crud-coverage.mjs`
+
+### Verification Results
+- `node --check scripts/bootstrap-first-admin.mjs`: pass.
+- `node --check scripts/check-admin-crud-coverage.mjs`: pass.
+- `npm run agent:first-admin-bootstrap`: pass in plan-only/no-write mode.
+- `npm run agent:first-admin-bootstrap -- --verify-only --admin-email first@example.com`: expected fail-closed result on missing service-role key.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:admin-crud-live`: pass in plan-only/no-write mode.
+- `npm run agent:live-readiness`: pass in report-only mode; live form/admin/Cloudflare inputs remain missing or approval-gated.
+- `npm run agent:cloudflare-readiness`: pass.
+- `npm run agent:public-supabase-readiness`: pass.
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass, including public/admin route shells, Forms API checks, and Contact form UI source checks.
+- `npm run agent:forms-ui`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- This prevents a wrong-role first-admin profile from passing the read-only bootstrap check, but it still does not create or update any Auth user/profile.
+- Live first-admin bootstrap still requires service-role credentials, Jay-confirmed first-admin email, Jay approval, `--allow-writes`, and matching `--confirm-email`.
+
+### Next Handoff
+- `NOW-ADMIN-AUTH-RLS-001`
+- `NOW-ADMIN-CMS-001`
+- `NOW-FORMS-BACKEND-001`
+
 ## Entry - 2026-05-29 (Public Supabase Guarded Apply-SQL Readiness)
 
 ### Scope

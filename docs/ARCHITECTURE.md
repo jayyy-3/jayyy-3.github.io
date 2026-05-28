@@ -159,7 +159,7 @@ Last updated: 2026-05-29
 - First-admin bootstrap:
   - `npm run agent:first-admin-bootstrap` => `node scripts/bootstrap-first-admin.mjs`
   - Default mode prints the approved bootstrap path and performs no Supabase calls, invites, profile writes, or deletes.
-  - `--verify-only --admin-email <first-admin-email>` requires a service-role key and checks whether the Supabase Auth user, `admin_profiles` row, and baseline seed rows are ready.
+  - `--verify-only --admin-email <first-admin-email>` requires a service-role key and checks whether the Supabase Auth user, exactly one active `admin_profiles` row with the planned role (`owner` by default or explicit `--role admin`), and baseline seed rows are ready.
   - `--allow-writes --admin-email <first-admin-email> --confirm-email <first-admin-email>` is the guarded live mode for creating/upserting the first `admin_profiles` row for an existing Auth user. Add `--invite` only when Jay explicitly approves sending the Supabase Auth invitation.
   - Live write mode also inserts an `admin_profile.bootstrap` audit event; if that audit insert fails, the command fails instead of silently treating the access-control change as fully verified.
   - Existing active owner profiles block a new first-admin bootstrap unless `--allow-existing-owner` is intentionally supplied.

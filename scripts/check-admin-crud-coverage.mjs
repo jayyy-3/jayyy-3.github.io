@@ -394,6 +394,8 @@ function checkRoutes() {
   requireIncludes(firstAdminBootstrap, 'admin_profile.bootstrap', 'scripts/bootstrap-first-admin.mjs');
   requireIncludes(firstAdminBootstrap, 'actor_user_id: null', 'scripts/bootstrap-first-admin.mjs');
   requireIncludes(firstAdminBootstrap, "entity_type: 'admin_profiles'", 'scripts/bootstrap-first-admin.mjs');
+  requireIncludes(firstAdminBootstrap, 'Expected profile role:', 'scripts/bootstrap-first-admin.mjs');
+  requireIncludes(firstAdminBootstrap, 'profiles[0].role !== config.role', 'scripts/bootstrap-first-admin.mjs');
   requireIncludes(
     firstAdminBootstrap,
     'Bootstrap audit event recorded: admin_profile.bootstrap.',
