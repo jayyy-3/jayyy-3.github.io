@@ -266,7 +266,8 @@ Current source state:
 - `/admin/settings` is the first source CRUD surface and should remain dense, form-led, and status-led.
 - `/admin/media` is the first media library source surface and should remain operational: compact record list, upload panel, metadata editor, explicit draft/published/archived state, and clear publication guardrails.
 - `/admin/stone-library` is the first content CRUD source surface and should remain operational: compact stone list, status-led group and variant forms, finish capability matrix, explicit TBC states, and publication guardrails.
-- Projects, Products, Articles, Leads, and Audit routes are protected scaffolds only; do not style them as completed CRUD until the relevant Supabase workflows are implemented.
+- `/admin/projects` is now a protected source CRUD surface and should remain proof-operational: compact project list, claim-review state, structured facts/material schedules, material-map and hotspot controls, and clear publication guardrails.
+- Products, Articles, Leads, and Audit routes are protected scaffolds only; do not style them as completed CRUD until the relevant Supabase workflows are implemented.
 - free-form page-builder UI where structured fields are safer
 - implying backend submission or authentication works before Supabase is implemented
 

@@ -6,7 +6,7 @@ Last updated: 2026-05-28
 - Current implementation: frontend-only React application shipped as static assets.
 - Current implementation: Cloudflare Pages Function source now exists for `/api/enquiries` and `/api/sample-requests`.
 - Current implementation: the public Contact page submits enquiries and sample requests to those API routes, but live Supabase row creation still requires server-side Cloudflare environment variables.
-- Current Supabase project: `Urblo` (`npkidywzwddbnfrnxlmo`, `ap-southeast-2`) has the foundation schema/RLS migrations, baseline seeds, admin settings hardening, and media Storage policies applied. The `/admin` auth shell source is implemented and config-gated, but live admin login still requires browser-safe Supabase key configuration and a confirmed first admin profile. Settings, Media, and Stone Library are the first source CRUD screens; broader Projects, Products, Articles, leads, and audit CRUD are not implemented yet.
+- Current Supabase project: `Urblo` (`npkidywzwddbnfrnxlmo`, `ap-southeast-2`) has the foundation schema/RLS migrations, baseline seeds, admin settings hardening, and media Storage policies applied. The `/admin` auth shell source is implemented and config-gated, but live admin login still requires browser-safe Supabase key configuration and a confirmed first admin profile. Settings, Media, Stone Library, and Projects are the first source CRUD screens; broader Products, Articles, leads, and audit CRUD are not implemented yet.
 - Launch target: Cloudflare Pages static frontend, Cloudflare Pages Functions API endpoints, Supabase Postgres/Auth/Storage, and an Urblo-owned admin interface for content operations.
 - Planning source: `docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md`.
 - Supabase schema design source: `docs/SUPABASE_SCHEMA.md`.
@@ -63,6 +63,7 @@ Last updated: 2026-05-28
   - Current admin CRUD source: `/admin/settings` reads and saves the default `site_settings` row for owner/admin roles.
   - Current admin media source: `/admin/media` reads and saves `media_assets` records and uploads Storage objects for active owner/admin/editor roles once browser-safe Supabase config and an active profile exist.
   - Current Stone Library admin source: `/admin/stone-library` reads and saves `stone_groups`, `stone_variants`, and `stone_finish_capabilities` records for active owner/admin/editor roles once browser-safe Supabase config and an active profile exist.
+  - Current Projects admin source: `/admin/projects` reads and saves `projects`, `project_facts`, `project_materials`, `project_material_maps`, and `project_hotspots` records for active owner/admin/editor roles once browser-safe Supabase config and an active profile exist.
   - Form Functions require `SUPABASE_SERVICE_ROLE_KEY` server-side. `SUPABASE_URL` may be configured, but defaults to the Urblo project URL if omitted.
   - Optional server-side form secrets: `TURNSTILE_SECRET_KEY` or `CF_TURNSTILE_SECRET_KEY`, `RESEND_API_KEY`, `LEAD_NOTIFICATION_FROM`, `ENQUIRY_NOTIFICATION_TO`, and `SAMPLE_REQUEST_NOTIFICATION_TO`.
 - Vite base config: `vite.config.ts`
@@ -116,7 +117,7 @@ Routing uses clean paths through `BrowserRouter`. Cloudflare Pages direct refres
 | `/contact` | `ContactPage` | Contact surface with direct contact channels and a local mailto project-brief composer that requires project notes plus email or phone before opening the draft. |
 | `/articles` | `ArticlesPage` | Article list page. |
 | `/articles/:slug` | `ArticlePage` | Article detail page. Uses page-owned article hero via `DefaultLayout showBanner={false}`. |
-| `/admin/*` | `AdminApp` | Protected admin shell outside public site chrome. Config-gated until browser-safe Supabase key is set; uses Supabase Auth plus `admin_profiles` once configured. Current source CRUD screens: Settings, Media, Stone Library. |
+| `/admin/*` | `AdminApp` | Protected admin shell outside public site chrome. Config-gated until browser-safe Supabase key is set; uses Supabase Auth plus `admin_profiles` once configured. Current source CRUD screens: Settings, Media, Stone Library, Projects. |
 | `*` | `NotFoundPage` | Branded not-found state wrapped by `DefaultLayout showBanner={false}`. |
 
 Route state contract:
@@ -314,6 +315,8 @@ Route state contract:
   - The admin dashboard does not render private module content unless Supabase Auth returns a session and RLS allows the matching active `admin_profiles` row.
   - `/admin/settings` is the first CRUD screen and uses the `site_settings` row with owner/admin save controls.
   - `/admin/media` is the first media CRUD screen and uses `media_assets` plus Supabase Storage buckets for upload-backed draft records, external records, metadata editing, and publish/archive guardrails.
+  - `/admin/stone-library` is the first content CRUD screen and uses Stone Library group, variant, finish definition, and finish capability records.
+  - `/admin/projects` is the next content CRUD screen and uses project records, facts, material schedule rows, material maps, and hotspots.
   - The admin CMS must not ship fake production auth; live verification still requires browser-safe Supabase key configuration and a confirmed first admin profile.
 - Access control:
   - Public reads expose only published content.
@@ -391,8 +394,8 @@ Route state contract:
 - Supabase Storage policies and `/admin/media` source are implemented, but live upload verification still requires browser-safe Supabase key configuration and an active admin/editor profile. Broader content CRUD is still needed before Supabase can replace static/file-backed content behavior.
 - Cloudflare Pages repo-side clean URL configuration is in place, but dashboard project creation, preview validation, custom domain, DNS cutover, and rollback still require account access.
 - Sample Request now routes through the Contact page sample-request mode and Pages Function source, but production persistence has not been verified without the server-side service-role environment variable.
-- Projects, Stone Library, Products, and Articles remain file-backed until Supabase migration work is implemented.
-- Admin shell exists, with Settings and Media as the first source CRUD screens. Customer CRUD for Stone Library, Projects, Products, Articles, leads, audit, and admin-user management is not implemented yet.
+- Public Projects, Stone Library, Products, and Articles remain file-backed until Supabase migration work is implemented.
+- Admin shell exists, with Settings, Media, Stone Library, and Projects as the first source CRUD screens. Customer CRUD for Products, Articles, leads, audit, and admin-user management is not implemented yet.
 - Project and Stone Library content migration needs strict separation between confirmed facts and inferred MVP copy.
 - Raw article newsletter HTML still contains external source URLs as migration source material, but runtime article rendering now rewrites known email proxy image URLs and campaign links before render.
 - Long-term article quality still requires Supabase structured blocks, approved article image records, editorial review, and claim-safe copy approval.

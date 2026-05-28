@@ -5,7 +5,7 @@ Last updated: 2026-05-28
 ## Purpose
 This document defines the first production Supabase data model for the Urblo website launch.
 
-It is both the schema design contract and the current implementation checkpoint record. The foundation migrations, baseline seeds, admin settings hardening, and media Storage policies are applied. Cloudflare Pages Function source exists for forms, and the `/admin` auth shell, `/admin/settings`, `/admin/media`, and `/admin/stone-library` source screens are implemented. Runtime work must still verify live form writes, configure browser-safe Supabase Auth keys, create the first admin profile, verify live settings/media/Stone Library writes, and build broader Projects, Products, Articles, lead, and audit CRUD.
+It is both the schema design contract and the current implementation checkpoint record. The foundation migrations, baseline seeds, admin settings hardening, and media Storage policies are applied. Cloudflare Pages Function source exists for forms, and the `/admin` auth shell, `/admin/settings`, `/admin/media`, `/admin/stone-library`, and `/admin/projects` source screens are implemented. Runtime work must still verify live form writes, configure browser-safe Supabase Auth keys, create the first admin profile, verify live settings/media/Stone Library/Projects writes, and build broader Products, Articles, lead, and audit CRUD.
 
 ## Current Supabase Project
 
@@ -21,7 +21,7 @@ The Supabase connector can access the Urblo project directly. Do not ask the use
 | Baseline seed migration | Applied on 2026-05-27: `baseline_seed` |
 | Admin hardening migration | Applied on 2026-05-28: `admin_settings_role_hardening` |
 | Media Storage migrations | Applied on 2026-05-28: `media_storage_foundation`, `media_storage_listing_hardening` |
-| First content CRUD source | Implemented on 2026-05-28: `/admin/stone-library` source screen for Stone Library groups, variants, and finish capabilities |
+| First content CRUD sources | Implemented on 2026-05-28: `/admin/stone-library` source screen for Stone Library groups, variants, and finish capabilities; `/admin/projects` source screen for project records, facts, material schedules, material maps, and hotspots |
 
 Secrets still must not be committed or pasted into repo docs. Service-role keys, database passwords, Turnstile secrets, and email provider secrets belong only in server-side environment variable stores.
 
@@ -126,6 +126,16 @@ Acceptance:
 - Public Stone Library routes remain static/file-backed until static data is imported into Supabase and the public read path is deliberately migrated.
 - Live browser save verification still requires browser-safe Supabase key configuration and an active admin/editor profile.
 
+### Phase 4d - Projects CRUD Source
+Outcome: the project proof workflow has a protected source editing surface before public runtime migration.
+
+Acceptance:
+- In progress on 2026-05-28. `/admin/projects` source implements project, fact, material schedule, material map, and hotspot editing behind the existing Supabase Auth/profile gate.
+- The screen reads `projects`, `project_facts`, `project_materials`, `project_material_maps`, `project_hotspots`, `stone_groups`, `finish_definitions`, and `media_assets`; editor/admin/owner roles can save records and publish/archive projects, maps, and hotspots once live browser-safe Supabase config exists.
+- The screen includes loading, empty, validation, save, publish/archive, read-only, claim-review, and error states.
+- Public Project routes remain static/file-backed until static project data is imported into Supabase and the public read path is deliberately migrated.
+- Live browser save verification still requires browser-safe Supabase key configuration and an active admin/editor profile.
+
 ### Phase 5 - Content Migration and CRUD
 Outcome: content can move out of static files in a controlled order.
 
@@ -133,7 +143,7 @@ Order:
 1. Site settings is started under Phase 4a.
 2. Media records and Storage policy.
 3. Stone Library data. Source CRUD is implemented under `/admin/stone-library`; live save verification and static-to-Supabase content import are pending browser-safe Supabase config and active admin/editor profile access.
-4. Projects and project material maps.
+4. Projects and project material maps. Source CRUD is implemented under `/admin/projects`; live save verification and static-to-Supabase content import are pending browser-safe Supabase config and active admin/editor profile access.
 5. Products.
 6. Articles as structured blocks.
 

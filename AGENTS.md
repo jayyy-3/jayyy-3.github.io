@@ -87,11 +87,12 @@ Before declaring implementation complete, verify all checks below:
 - `/admin/settings` source is the first CRUD screen and can read/create/update the default `site_settings` row for owner/admin roles after live auth is configured.
 - `/admin/media` source is implemented as the first media library screen: active admin/editor roles can upload Storage-backed draft records and edit media metadata, while publish/archive validation keeps private draft assets from being marked public.
 - `/admin/stone-library` source is implemented as the first content CRUD screen: active admin/editor roles can maintain stone groups, variants, and finish capability rows after live auth is configured.
+- `/admin/projects` source is implemented as the next content CRUD screen: active admin/editor roles can maintain project records, facts, material schedule rows, material maps, and hotspots after live auth is configured.
 - `NOW-ADMIN-CMS-001` is an umbrella objective, not a single executable implementation task; admin IA/access is defined in `docs/ADMIN_IA_ACCESS.md`, and implementation still uses the smaller auth/CRUD/media/leads tasks in `docs/agent/tasks.json`.
 - Stone Library migration is complete: old `/materials*` route family has been removed and replaced with `/stone-library` plus `/stone-library/:stoneGroupId`.
 - `NEXT-STONELIB-DRIVE-IMAGE-AUDIT-001` and `NEXT-STONELIB-IMG-001` are complete for current website stones only; Drive-only products remain out of scope until the client decides to add them.
 - Contact route is declared at `/contact`; shared header/footer navigation points to declared routes, with Sample Request remaining a `mailto:` fallback until `NOW-FORMS-SUPABASE-001` is implemented.
-- Last runtime gates were measured on 2026-05-28 and were green (`npm run build`, `npm run lint`, `npx tsc -b`, `npm run agent:smoke`).
+- Last runtime gates were measured on 2026-05-28 and were green (`npm run build`, `npm run lint`, `npx tsc -b`, `npm run agent:smoke`) during the admin Projects checkpoint.
 - Route-level code splitting is in place and the previous `>500kB` chunk warning is resolved; continue monitoring bundle output as features are added.
 - GitHub Pages hardening is now a legacy fallback; Cloudflare Pages deployment is the active launch path.
 - Routing now uses clean paths through `BrowserRouter` with Cloudflare Pages SPA fallback files in `public/`; unknown public URLs render a branded not-found state instead of the homepage.

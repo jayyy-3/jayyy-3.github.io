@@ -4,6 +4,7 @@ import AdminDashboardPage from './AdminDashboardPage';
 import AdminLoginPage from './AdminLoginPage';
 import AdminMediaPage from './AdminMediaPage';
 import AdminModulePage from './AdminModulePage';
+import AdminProjectsPage from './AdminProjectsPage';
 import AdminSettingsPage from './AdminSettingsPage';
 import AdminStoneLibraryPage from './AdminStoneLibraryPage';
 import AdminUnauthorizedPage from './AdminUnauthorizedPage';
@@ -18,7 +19,7 @@ export default function AdminApp() {
                 <Route path="leads" element={<AdminModulePage moduleKey="leads" />} />
                 <Route path="media" element={<AdminMediaPage />} />
                 <Route path="stone-library" element={<AdminStoneLibraryPage />} />
-                <Route path="projects" element={<AdminModulePage moduleKey="projects" />} />
+                <Route path="projects" element={<AdminProjectsPage />} />
                 <Route path="products" element={<AdminModulePage moduleKey="products" />} />
                 <Route path="articles" element={<AdminModulePage moduleKey="articles" />} />
                 <Route path="settings" element={<AdminSettingsPage />} />

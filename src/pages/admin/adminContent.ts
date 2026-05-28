@@ -75,7 +75,7 @@ export const adminModules: AdminModuleDefinition[] = [
         path: '/admin/projects',
         summary: 'Case studies, galleries, material maps, hotspot facts, and claim review state.',
         dependency: 'Media and Stone Library references',
-        state: 'scaffold',
+        state: 'active',
         Icon: FileText,
     },
     {

@@ -43,6 +43,7 @@ const routes = [
   '/admin/media',
   '/admin/settings',
   '/admin/stone-library',
+  '/admin/projects',
   '/articles',
   '/articles/modular-mastery-how-primeblock-core-transformed-aitken-college',
 ]
