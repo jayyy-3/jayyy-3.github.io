@@ -23,7 +23,7 @@ Docs-only and harness-only work should run:
 Cloudflare/Supabase implementation work should also follow the new verification profiles in `docs/agent/verification.md`.
 
 ## Last Runtime Baseline
-Measured 2026-05-28 during the admin Leads checkpoint:
+Measured 2026-05-28 during the admin Audit checkpoint:
 - `npm run build`: pass
 - `npm run lint`: pass
 - `npx tsc -b`: pass
@@ -109,6 +109,7 @@ Source of truth: `docs/agent/tasks.json`.
 - `NOW-ADMIN-CONTENT-CRUD-001` Products source checkpoint: `/admin/products` now supports product families, models, material defaults, and specs behind the admin gate, with loading, empty, validation, save, publish/archive, read-only, and error states. Public Product runtime remains static/file-backed until content import and public read migration are completed.
 - `NOW-ADMIN-CONTENT-CRUD-001` Articles source checkpoint: `/admin/articles` now supports article metadata and structured article block rows behind the admin gate, with loading, empty, validation, save, publish/archive, legacy-source provenance, reference linking, read-only, and error states. Public Article runtime remains static/file-backed and sanitized legacy HTML until content import and public read migration are completed.
 - `NOW-ADMIN-MEDIA-LEADS-001` Leads source checkpoint: `/admin/leads` now supports enquiry and sample request queues behind the admin gate, with contact detail, sample item inspection, status, assignment, internal notes, notification state, read-only, and error states. Live lead row creation, notification emails, exports, and save verification remain pending credentials and policy confirmation.
+- Audit visibility source checkpoint: `/admin/audit` now supports owner/admin audit event inspection behind the admin gate, with event filters, actor/entity detail, metadata JSON, restricted-role, empty, and error states. Shared audit event writers remain pending.
 
 Older completion details live in `docs/WORKLOG.md`.
 

@@ -89,6 +89,7 @@ Before custom domain cutover, test the generated `*.pages.dev` URL:
 - `/admin/projects`
 - `/admin/products`
 - `/admin/articles`
+- `/admin/audit`
 
 Each route should:
 - return HTTP 200 on direct refresh;
@@ -110,6 +111,7 @@ Current `/functions/api` endpoints:
 - Projects save tests require an active owner/admin/editor profile because `projects`, `project_facts`, `project_materials`, `project_material_maps`, and `project_hotspots` mutations are admin/editor only.
 - Products save tests require an active owner/admin/editor profile because `products`, `product_models`, `product_material_defaults`, and `product_specs` mutations are admin/editor only.
 - Articles save tests require an active owner/admin/editor profile because `articles` and `article_blocks` mutations are admin/editor only.
+- Audit visibility tests require an active owner/admin profile because `admin_audit_events` is private operational history.
 
 ### 5. Custom Domain Cutover
 Before switching production DNS:

@@ -25,7 +25,7 @@ After launch:
 - The current app is still a Vite/React static site.
 - The current deployment workflow still targets GitHub Pages.
 - Contact and Sample Request form source now posts to Cloudflare Pages Function routes; live Supabase persistence still requires server-side environment variables and preview verification.
-- Public Projects, Stone Library, Products, and Articles are still file-backed content. Admin source CRUD/workflow now exists for Stone Library, Projects, Products, Articles, and Leads, but live save verification, public read migration, and live form-row creation still require browser-safe Supabase config, active admin profiles, server-side form secrets, and content import work.
+- Public Projects, Stone Library, Products, and Articles are still file-backed content. Admin source CRUD/workflow/review now exists for Stone Library, Projects, Products, Articles, Leads, and Audit, but live save verification, public read migration, live form-row creation, and audit event writing still require browser-safe Supabase config, active admin profiles, server-side form secrets, shared mutation helpers, and content import work.
 - The Supabase project `Urblo` (`npkidywzwddbnfrnxlmo`, `ap-southeast-2`) is active and connector-accessible. Foundation schema/RLS migrations and baseline seeds are applied; runtime integrations are not applied yet.
 - P0/P1 visible runtime media now uses controlled local launch assets; raw article HTML remains migration source material and should still be converted into structured Supabase article blocks.
 
@@ -94,6 +94,7 @@ Current execution split:
 - `NOW-FORMS-BACKEND-001`: in progress; Pages Function source and public Contact UI wiring are implemented, with live Supabase insert verification pending server-side secrets.
 - `NOW-ADMIN-SETTINGS-CRUD-001`: source implemented; `/admin/settings` can manage the default settings row after live owner/admin access is configured.
 - `NOW-ADMIN-MEDIA-LEADS-001`: media and lead source screens implemented; Supabase Storage buckets/policies, `/admin/media`, and `/admin/leads` are in place, with live upload/save and lead workflow verification pending browser-safe Supabase key configuration and active admin profiles.
+- Audit visibility source is implemented under `/admin/audit`; shared mutation helpers still need to write audit events from admin CRUD and form workflows.
 - `NOW-ADMIN-CONTENT-CRUD-001`: Stone Library, Projects, Products, and Articles source implemented; `/admin/stone-library` can manage stone groups, variants, and finish capability rows, `/admin/projects` can manage project records, facts, material schedule rows, material maps, and hotspots, `/admin/products` can manage product families, models, material defaults, and specs, and `/admin/articles` can manage article metadata and structured article block rows after live admin/editor access is configured. Leads remain pending.
 
 Core tables:

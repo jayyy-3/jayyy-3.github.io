@@ -111,7 +111,7 @@ export const adminModules: AdminModuleDefinition[] = [
         path: '/admin/audit',
         summary: 'Mutation history, publish events, and sensitive operation review.',
         dependency: 'Admin mutation helpers',
-        state: 'scaffold',
+        state: 'active',
         Icon: ShieldCheck,
     },
 ];

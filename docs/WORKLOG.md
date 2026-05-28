@@ -2,6 +2,52 @@
 
 Last updated: 2026-05-28
 
+## Entry - 2026-05-28 (Admin Audit Visibility Source)
+
+### Scope
+- Replaced the `/admin/audit` scaffold with a protected owner/admin read-only review screen behind the existing Supabase Auth/profile gate.
+- The screen reads audit events and active admin profile labels from Supabase.
+- Owner/admin roles can inspect actor, action, entity, timestamp, and metadata JSON once browser-safe Supabase config and an active profile exist.
+- Added loading, empty, filter, detail, metadata JSON, restricted-role, read-only, and error states.
+- Kept audit event mutation out of this screen; shared mutation helpers still need to write audit rows from admin CRUD and form workflows.
+
+### Changed Files
+- `scripts/agent-smoke.sh`
+- `src/pages/admin/AdminApp.tsx`
+- `src/pages/admin/AdminAuditPage.tsx`
+- `src/pages/admin/adminContent.ts`
+- `AGENTS.md`
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/CLOUDFLARE_DEPLOYMENT.md`
+- `docs/DESIGN.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run build`: pass.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass, including `/admin/audit` route shell coverage.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- Playwright CLI with Firefox: pass for `/admin/audit` with no browser-safe Supabase key configured. The route shows the configuration-required state rather than Audit content.
+
+### Risks and Gaps
+- Live Audit visibility verification is not complete because browser-safe Supabase key configuration and an active owner/admin profile are still required.
+- The admin CRUD and form workflows do not yet write audit event rows; this screen will be empty until mutation helpers or server-side event writers are added.
+- Export, retention policy, and sensitive-operation review rules remain pending.
+
+### Next Handoff
+- `NOW-FORMS-BACKEND-001`
+- `NOW-ADMIN-AUTH-RLS-001`
+- Shared audit event writers for admin CRUD and form workflows.
+- Source-only content import preparation if credentials remain unavailable.
+
 ## Entry - 2026-05-28 (Admin Leads Workflow Source)
 
 ### Scope

@@ -1,11 +1,11 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { AdminAuthProvider } from '../../lib/adminAuth';
+import AdminAuditPage from './AdminAuditPage';
 import AdminArticlesPage from './AdminArticlesPage';
 import AdminDashboardPage from './AdminDashboardPage';
 import AdminLeadsPage from './AdminLeadsPage';
 import AdminLoginPage from './AdminLoginPage';
 import AdminMediaPage from './AdminMediaPage';
-import AdminModulePage from './AdminModulePage';
 import AdminProjectsPage from './AdminProjectsPage';
 import AdminProductsPage from './AdminProductsPage';
 import AdminSettingsPage from './AdminSettingsPage';
@@ -26,7 +26,7 @@ export default function AdminApp() {
                 <Route path="products" element={<AdminProductsPage />} />
                 <Route path="articles" element={<AdminArticlesPage />} />
                 <Route path="settings" element={<AdminSettingsPage />} />
-                <Route path="audit" element={<AdminModulePage moduleKey="audit" />} />
+                <Route path="audit" element={<AdminAuditPage />} />
                 <Route path="*" element={<Navigate to="/admin" replace />} />
             </Routes>
         </AdminAuthProvider>
