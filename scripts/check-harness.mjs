@@ -16,11 +16,13 @@ const requiredFiles = [
   'docs/agent/verification.md',
   'scripts/agent-init.sh',
   'scripts/agent-smoke.sh',
+  'scripts/check-contact-form-ui-source.mjs',
   'scripts/check-doc-paths.mjs',
   'scripts/check-harness.mjs',
 ]
 const requiredPackageScripts = {
   'agent:check': 'node scripts/check-harness.mjs',
+  'agent:forms-ui': 'node scripts/check-contact-form-ui-source.mjs',
   'agent:init': 'bash scripts/agent-init.sh',
   'agent:smoke': 'bash scripts/agent-smoke.sh',
 }
@@ -46,6 +48,15 @@ try {
   }
 } catch (error) {
   failures.push(`Unable to parse package.json: ${error.message}`)
+}
+
+try {
+  const smoke = readFileSync(join(root, 'scripts/agent-smoke.sh'), 'utf8')
+  if (!smoke.includes('node scripts/check-contact-form-ui-source.mjs')) {
+    failures.push('scripts/agent-smoke.sh must run the Contact form UI source contract check.')
+  }
+} catch (error) {
+  failures.push(`Unable to read scripts/agent-smoke.sh: ${error.message}`)
 }
 
 if (!failures.length) {

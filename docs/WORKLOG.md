@@ -9,6 +9,7 @@ Last updated: 2026-05-29
 - The check verifies the main submit flow stays on `/api/enquiries` and `/api/sample-requests`, not a mailto/window-navigation fallback.
 - It also verifies inline validation, success, error, submitting, sample-request mode fields, direct email/phone fallback channels, and source-route payload handling.
 - Wired the check into `npm run agent:smoke` after the existing Forms API mock coverage.
+- Added Harness protection so `npm run agent:check` verifies the `agent:forms-ui` package script exists and `npm run agent:smoke` keeps running the Contact form UI source contract check.
 
 ### Changed Files
 - `docs/ARCHITECTURE.md`
@@ -18,11 +19,14 @@ Last updated: 2026-05-29
 - `docs/agent/tasks.json`
 - `docs/agent/verification.md`
 - `package.json`
+- `scripts/agent-init.sh`
 - `scripts/agent-smoke.sh`
 - `scripts/check-contact-form-ui-source.mjs`
+- `scripts/check-harness.mjs`
 
 ### Verification Results
 - `node --check scripts/check-contact-form-ui-source.mjs`: pass.
+- `node --check scripts/check-harness.mjs`: pass.
 - `npm run agent:forms-ui`: pass.
 - Supabase MCP read-only sanity: 10 migrations are present, 24/24 public launch tables have RLS enabled, 12 published finish definitions exist, one published default site settings row exists, and private workflow/admin tables remain at 0 rows.
 - `npm run agent:live-readiness`: pass in report-only mode; live form/admin/Cloudflare inputs remain missing or approval-gated.
@@ -30,8 +34,14 @@ Last updated: 2026-05-29
 - `npm run lint`: pass.
 - `npx tsc -b`: pass.
 - `npm run agent:smoke`: pass, including Forms API mock checks and the new Contact form UI source contract check.
+- `npm run agent:init`: pass and now lists `npm run agent:forms-ui`.
 - `npm run agent:check`: pass.
 - `git diff --check`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:admin-crud-live`: pass in plan-only/no-write mode.
+- `npm run agent:public-supabase-readiness`: pass.
+- `npm run agent:cloudflare-readiness`: pass.
+- `npm run agent:content-import:apply-sql`: pass; wrote ignored `.tmp/` review/preflight/apply artifacts only.
 
 ### Risks and Gaps
 - This is source-only UI contract coverage. It does not submit live forms, create Supabase rows, send email, verify Turnstile, run responsive browser QA, or verify Cloudflare deployed endpoints.

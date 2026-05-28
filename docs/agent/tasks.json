@@ -144,6 +144,7 @@
         "scripts/check-forms-api.mjs",
         "scripts/agent-init.sh",
         "scripts/agent-smoke.sh",
+        "scripts/check-harness.mjs",
         "package.json"
       ],
       "notes": [
@@ -160,7 +161,8 @@
         "2026-05-28: Added `npm run agent:live-readiness` as a no-secret input audit for local/deployed form verification, admin readiness, first-admin profile/invite writes, tagged admin live writes, and Cloudflare preview smoke readiness. It accepts non-secret `--base-url`, `--admin-email`, `--form-writes-approved`, `--first-admin-writes-approved`, and `--admin-writes-approved` readiness flags; secret keys and admin session credentials still stay in env files or shell.",
         "2026-05-29: `npm run agent:live-readiness` now treats all live form persistence commands as manually gated until Jay's approval for tagged live form QA writes is represented with `--form-writes-approved`. The flag clears only the manual approval gate and never substitutes for `--allow-writes`, service-role credentials, or browser-safe credentials.",
         "2026-05-29: `scripts/check-forms-api-live.mjs` now refuses to create tagged live form QA rows unless `--allow-writes` is supplied, so service-role credentials alone are not enough to run write verification.",
-        "2026-05-29: Added `npm run agent:forms-ui` as a no-secret Contact form UI source contract check. It keeps the main submit flow on `/api/enquiries` and `/api/sample-requests`, verifies inline validation/success/error states, sample-request mode fields, submitting state, direct contact fallbacks, and guards against submit-flow mailto/window-navigation regressions."
+        "2026-05-29: Added `npm run agent:forms-ui` as a no-secret Contact form UI source contract check. It keeps the main submit flow on `/api/enquiries` and `/api/sample-requests`, verifies inline validation/success/error states, sample-request mode fields, submitting state, direct contact fallbacks, and guards against submit-flow mailto/window-navigation regressions.",
+        "2026-05-29: `npm run agent:check` now also guards the `agent:forms-ui` package script and its `npm run agent:smoke` integration so the Contact form UI source contract cannot be silently removed from the harness."
       ],
       "acceptance": [
         "Valid enquiry submissions create Supabase enquiry rows through a server-side endpoint.",
