@@ -2,6 +2,51 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Admin CRUD Live Private Lead RLS Guard)
+
+### Scope
+- Strengthened `scripts/check-admin-crud-live.mjs` so the approval-gated live write verifier will also prove tagged private lead QA rows are not anonymously readable through browser-key access.
+- The live run now checks tagged `enquiries`, `sample_requests`, and `sample_request_items` rows after authenticated RLS writes, accepting either zero visible rows or an expected deny response.
+- Strengthened `scripts/check-admin-crud-coverage.mjs` so source coverage fails if the private-lead browser-key boundary guard is removed from the live verifier.
+- No Supabase rows, Auth users, Storage objects, credentials, Cloudflare state, or live writes were created or changed.
+
+### Changed Files
+- `AGENTS.md`
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `scripts/check-admin-crud-coverage.mjs`
+- `scripts/check-admin-crud-live.mjs`
+
+### Verification Results
+- `node --check scripts/check-admin-crud-live.mjs`: pass.
+- `node --check scripts/check-admin-crud-coverage.mjs`: pass.
+- `npm run agent:admin-crud-live`: pass in plan-only no-write mode and includes the private-lead browser-key boundary check in the printed live plan.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:public-supabase-readiness`: pass.
+- `npm run agent:live-readiness`: pass in report-only mode; live form/admin/Cloudflare inputs remain missing or approval-gated.
+- `npm run agent:cloudflare-readiness`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `node -e "JSON.parse(require('fs').readFileSync('docs/agent/tasks.json','utf8')); console.log('tasks json ok')"`: pass.
+- Supabase MCP read-only private row count check: pass. `admin_profiles`, `admin_audit_events`, `enquiries`, `sample_requests`, and `sample_request_items` remain at 0 rows.
+
+### Risks and Gaps
+- The new private-lead boundary check executes only in `--allow-writes` mode after browser-safe Supabase config, a real owner/admin session, and Jay approval for tagged QA writes exist.
+- Live form persistence, first-admin setup, active-admin browser QA, Storage upload, and Cloudflare preview smoke remain blocked by credential/account inputs.
+
+### Next Handoff
+- `NOW-ADMIN-CMS-001`: run `npm run agent:admin-crud-live -- --allow-writes` only after Jay approves tagged live QA writes and a real owner/admin session exists.
+- `NOW-FORMS-BACKEND-001`: configure service-role key and run `npm run agent:forms-live`.
+
 ## Entry - 2026-05-29 (Admin CRUD Live Public RLS Invisibility)
 
 ### Scope

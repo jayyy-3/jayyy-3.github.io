@@ -24,7 +24,7 @@ const livePlan = [
   'Create tagged Article metadata and structured block records.',
   'Create tagged private enquiry/sample-request QA rows, then update workflow fields.',
   'Record admin_audit_events for primary writes and export-gate actions.',
-  'Verify tagged draft/archived content is not anonymously visible through public RLS.',
+  'Verify tagged draft/archived content and private lead rows are not anonymously visible through browser-key reads.',
   'Leave tagged QA rows archived or private for auditability; no physical deletes are attempted.',
 ];
 
@@ -385,6 +385,36 @@ async function selectAuditRowsByMarker(config, accessToken, marker) {
 async function assertNotPubliclyVisible(config, table, filters, label) {
   const rows = await selectPublicRows(config, table, filters);
   assert.equal(rows.length, 0, `${label} unexpectedly visible through anonymous public RLS.`);
+}
+
+async function assertNotAnonymousReadable(config, table, filters, label) {
+  const suffix = `?${buildQuery('id', filters)}`;
+  const response = await fetch(`${config.supabaseUrl}/rest/v1/${table}${suffix}`, {
+    headers: browserKeyHeaders(config),
+  });
+
+  const text = await response.text();
+  let json = null;
+  if (text) {
+    try {
+      json = JSON.parse(text);
+    } catch {
+      json = text;
+    }
+  }
+
+  if (response.ok) {
+    assert.ok(Array.isArray(json), `${label} anonymous read returned a non-array response.`);
+    assert.equal(json.length, 0, `${label} unexpectedly returned rows through anonymous browser-key access.`);
+    return;
+  }
+
+  assert.ok(
+    [401, 403, 404].includes(response.status),
+    `${label} anonymous read failed with unexpected HTTP ${response.status}: ${
+      typeof json === 'string' ? json : JSON.stringify(json)
+    }`,
+  );
 }
 
 async function insertRow(config, accessToken, table, payload) {
@@ -883,6 +913,9 @@ async function run() {
     assertNotPubliclyVisible(config, 'products', { slug }, 'Tagged products row'),
     assertNotPubliclyVisible(config, 'projects', { slug }, 'Tagged projects row'),
     assertNotPubliclyVisible(config, 'articles', { slug }, 'Tagged articles row'),
+    assertNotAnonymousReadable(config, 'enquiries', { id: enquiry.id }, 'Tagged enquiry row'),
+    assertNotAnonymousReadable(config, 'sample_requests', { id: sampleRequest.id }, 'Tagged sample_request row'),
+    assertNotAnonymousReadable(config, 'sample_request_items', { id: sampleItem.id }, 'Tagged sample_request_item row'),
   ]);
 
   const auditRows = await selectAuditRowsByMarker(config, accessToken, marker);
@@ -894,7 +927,7 @@ async function run() {
     console.log(`Uploaded tagged private Storage object: ${storageRef.bucket}/${storageRef.objectPath}`);
   }
   console.log(`Audit rows recorded: ${auditRows.length}`);
-  console.log('Anonymous public RLS returned zero tagged QA content rows.');
+  console.log('Anonymous browser-key reads returned zero tagged QA content rows and no private lead rows.');
   console.log('Tagged rows are retained for auditability; cleanup is intentionally not destructive.');
 }
 

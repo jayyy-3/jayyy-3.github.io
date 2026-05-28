@@ -393,9 +393,31 @@ function checkArticleStructuredAuthoring() {
   requireIncludes(text, 'do not paste newsletter HTML as normal authoring', 'src/pages/admin/AdminArticlesPage.tsx');
 }
 
+function checkAdminLiveVerifierBoundaries() {
+  const text = readRequired('scripts/check-admin-crud-live.mjs');
+  requireIncludes(text, 'assertNotPubliclyVisible', 'scripts/check-admin-crud-live.mjs');
+  requireIncludes(text, 'assertNotAnonymousReadable', 'scripts/check-admin-crud-live.mjs');
+
+  for (const table of ['enquiries', 'sample_requests', 'sample_request_items']) {
+    requireRegex(
+      text,
+      new RegExp(`assertNotAnonymousReadable\\(config, '${table}'`),
+      'scripts/check-admin-crud-live.mjs',
+      `anonymous private ${table} boundary check`,
+    );
+  }
+
+  requireIncludes(
+    text,
+    'Anonymous browser-key reads returned zero tagged QA content rows and no private lead rows.',
+    'scripts/check-admin-crud-live.mjs',
+  );
+}
+
 checkRoutes();
 pageChecks.forEach(checkPage);
 checkArticleStructuredAuthoring();
+checkAdminLiveVerifierBoundaries();
 
 if (failures.length) {
   console.error('Admin CRUD coverage checks failed:');
