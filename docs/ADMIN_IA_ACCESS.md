@@ -166,6 +166,7 @@ Current implementation:
 - `/admin/leads` is the first lead workflow source screen behind the auth gate, with enquiry/sample request queues, contact detail, sample items, status updates, assignment, internal notes, notification state, read-only states, and an owner/admin CSV export action that is blocked unless an audit event is recorded.
 - `/admin/audit` is the first audit visibility source screen behind the auth gate, with owner/admin read access, actor/entity filters, metadata inspection, empty states, and no mutation/delete controls.
 - `src/lib/adminAudit.ts` is the shared browser-side audit writer used by admin Settings, Media, Stone Library, Projects, Products, Articles, and Leads save flows. It records successful primary mutations into `admin_audit_events`; audit insert failure is surfaced in the success notice without rolling back the primary save.
+- `npm run agent:admin-crud-coverage` is the source-only admin coverage check. It verifies active route/module registration, protected shell coverage, launch-critical table references, role-gated controls, publish/archive paths, shared audit writer usage, and audit-gated Media/Leads exports before live credential QA.
 - Supabase `admin_profile_owner_hardening` keeps owner-role assignment and owner-profile changes owner-protected, while admins can maintain non-owner profiles.
 - Supabase `security_definer_function_grants` revokes anonymous direct execution of admin SECURITY DEFINER helpers; authenticated helper execution remains for RLS policy evaluation.
 

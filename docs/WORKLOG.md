@@ -2,6 +2,47 @@
 
 Last updated: 2026-05-28
 
+## Entry - 2026-05-28 (Admin CRUD Coverage Runner)
+
+### Scope
+- Added `scripts/check-admin-crud-coverage.mjs` as a no-secret source coverage verifier for the implemented `/admin` CMS.
+- Added `npm run agent:admin-crud-coverage` and listed it in `npm run agent:init`.
+- The runner checks `/admin` route registration, active module registration, `RequireAdmin` access states, browser-key-only Supabase client wiring, launch-critical table references, role-gated controls, publish/archive paths, shared admin audit writer actions, and audit-gated Media/Leads exports.
+- It does not mutate Supabase and does not replace live browser QA with a configured admin profile.
+
+### Changed Files
+- `AGENTS.md`
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `docs/agent/verification.md`
+- `package.json`
+- `scripts/agent-init.sh`
+- `scripts/check-admin-crud-coverage.mjs`
+
+### Verification Results
+- `node --check scripts/check-admin-crud-coverage.mjs`: pass.
+- `npm run agent:admin-crud-coverage`: pass. Covered Dashboard, Settings/admin profiles, Media, Stone Library, Projects, Products, Articles, Leads, and Audit table/action coverage.
+- Supabase connector read-only sanity check: pass. The nine applied launch migrations are still present, 24 public tables have RLS enabled, live private workflow counts remain 0 admin profiles / 0 audit events / 0 enquiries / 0 sample requests / 0 sample items, and baseline seeds remain 12 finish definitions plus 1 site settings row.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run build`: pass. Browserslist staleness notice remains; admin chunk is about 432 kB before gzip.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass, including `/admin/*` route shells and Forms API mock checks.
+
+### Risks and Gaps
+- Live admin save/upload/export/audit verification still requires browser-safe Supabase config and active admin profiles.
+- The runner proves source coverage only; it cannot prove RLS write success or browser session behavior without credentials.
+
+### Next Handoff
+- `NOW-ADMIN-AUTH-RLS-001` live admin profile readiness with `npm run agent:admin-live-readiness -- --admin-email <first-admin-email>` after credentials are configured.
+- `NOW-FORMS-BACKEND-001` live form persistence/audit verification with `npm run agent:forms-live`.
+
 ## Entry - 2026-05-28 (Admin Live Readiness Runner)
 
 ### Scope

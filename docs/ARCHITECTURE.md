@@ -126,6 +126,10 @@ Last updated: 2026-05-28
   - Requires `VITE_SUPABASE_PUBLISHABLE_KEY` or `VITE_SUPABASE_ANON_KEY`, plus `SUPABASE_SERVICE_ROLE_KEY` or `SUPABASE_SERVICE_KEY`.
   - Reads `admin_profiles`, `site_settings`, and `finish_definitions` only; it does not create users, create profiles, mutate content, or delete rows.
   - Defaults to requiring an active `owner` profile. Use `--required-role owner,admin` only when intentionally verifying a non-owner admin profile.
+- Admin CRUD source coverage:
+  - `npm run agent:admin-crud-coverage` => `node scripts/check-admin-crud-coverage.mjs`
+  - Verifies `/admin` route registration, active module registration, `RequireAdmin` state coverage, browser-safe Supabase client wiring, launch-critical table references, role-gated mutation controls, publish/archive paths, shared audit writer usage, and Media/Leads export audit gates.
+  - This is a source-only verifier. It never mutates Supabase and does not replace live browser QA with a configured admin profile.
 
 ## Route Interface Contract (`src/App.tsx`)
 

@@ -146,6 +146,7 @@ Run:
 - `npm run lint`
 - `npx tsc -b`
 - `npm run agent:smoke`
+- `npm run agent:admin-crud-coverage` when changing admin routes, module screens, table coverage, audit writers, export controls, or role gates.
 - Browser or Playwright checks for authenticated and unauthenticated admin routes when possible.
 
 Evidence to record:

@@ -5,7 +5,7 @@ Last updated: 2026-05-28
 ## Purpose
 This document defines the first production Supabase data model for the Urblo website launch.
 
-It is both the schema design contract and the current implementation checkpoint record. The foundation migrations, baseline seeds, admin settings/profile hardening, SECURITY DEFINER grant hardening, and media Storage policies are applied. Cloudflare Pages Function source exists for forms, and the `/admin` auth shell, `/admin/settings`, `/admin/media`, `/admin/stone-library`, `/admin/projects`, `/admin/products`, `/admin/articles`, `/admin/leads`, and `/admin/audit` source screens are implemented. Leads now includes an owner/admin CSV export path that requires an audit event before download. Runtime work must still verify live form writes, configure browser-safe Supabase Auth keys, create the first admin profile, verify live settings/admin-profile/media/Stone Library/Projects/Products/Articles/Leads writes and export, and verify live audit row creation from the shared admin audit writer.
+It is both the schema design contract and the current implementation checkpoint record. The foundation migrations, baseline seeds, admin settings/profile hardening, SECURITY DEFINER grant hardening, and media Storage policies are applied. Cloudflare Pages Function source exists for forms, and the `/admin` auth shell, `/admin/settings`, `/admin/media`, `/admin/stone-library`, `/admin/projects`, `/admin/products`, `/admin/articles`, `/admin/leads`, and `/admin/audit` source screens are implemented. Leads now includes an owner/admin CSV export path that requires an audit event before download. `npm run agent:admin-crud-coverage` provides source-only coverage for the implemented `/admin` route/module/table/audit/export paths before live credential checks run. Runtime work must still verify live form writes, configure browser-safe Supabase Auth keys, create the first admin profile, verify live settings/admin-profile/media/Stone Library/Projects/Products/Articles/Leads writes and export, and verify live audit row creation from the shared admin audit writer.
 
 ## Current Supabase Project
 
@@ -25,6 +25,7 @@ The Supabase connector can access the Urblo project directly. Do not ask the use
 | First lead workflow source | Implemented on 2026-05-28: `/admin/leads` source screen for enquiry/sample request status, assignment, internal notes, notification state, sample item inspection, and audit-gated owner/admin CSV export |
 | First audit visibility source | Implemented on 2026-05-28: `/admin/audit` source screen for owner/admin audit event inspection |
 | First admin audit writer source | Implemented on 2026-05-28: `src/lib/adminAudit.ts` inserts audit rows after successful admin CRUD/workflow saves; live row creation remains pending browser-safe Supabase config and active admin profiles |
+| Admin source coverage runner | Implemented on 2026-05-28: `npm run agent:admin-crud-coverage` verifies route/module/table/action/audit/export coverage without mutating Supabase |
 
 Secrets still must not be committed or pasted into repo docs. Service-role keys, database passwords, Turnstile secrets, and email provider secrets belong only in server-side environment variable stores.
 
