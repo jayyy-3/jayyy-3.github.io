@@ -2,6 +2,53 @@
 
 Last updated: 2026-05-28
 
+## Entry - 2026-05-28 (Admin Profile Management and RLS Hardening)
+
+### Scope
+- Added non-destructive admin profile management to `/admin/settings` for existing Supabase Auth users.
+- Owner/admin roles can create/update profile rows once live auth is configured; the UI blocks self-lockout, preserves at least one active owner, and does not expose delete controls.
+- Applied `admin_profile_owner_hardening` so admins can maintain non-owner profiles while owner-role assignment and owner-profile changes require owner.
+- Applied `security_definer_function_grants` so anonymous users cannot directly execute admin SECURITY DEFINER helpers and `rls_auto_enable` is not directly executable by anon/authenticated.
+- Kept live profile save verification pending until browser-safe Supabase config and first-admin access are available.
+
+### Changed Files
+- `src/pages/admin/AdminSettingsPage.tsx`
+- `AGENTS.md`
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/DESIGN.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `supabase/migrations/202605280004_admin_profile_owner_hardening.sql`
+- `supabase/migrations/202605280005_security_definer_function_grants.sql`
+- `supabase/migrations/README.md`
+
+### Verification Results
+- Supabase migration list: pass. `admin_profile_owner_hardening` and `security_definer_function_grants` are listed on project `npkidywzwddbnfrnxlmo`.
+- Supabase policy check: pass. `admin_profiles` INSERT/UPDATE allow owner broadly, allow admin only for `admin/editor/viewer` rows, and DELETE is owner-only for non-owner rows.
+- Supabase function grant check: pass. `anon` cannot execute `current_admin_role()` or `has_admin_role(text[])`; `rls_auto_enable()` is not directly executable by anon/authenticated.
+- Supabase security advisor: partial pass. The previous anonymous SECURITY DEFINER warnings are cleared; authenticated warnings remain for `current_admin_role()` and `has_admin_role(text[])` because they remain executable for RLS policy evaluation.
+- `npm run build`: pass. Browserslist staleness notice remains; the admin chunk is about 427 kB before gzip.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- Live admin profile create/update is still unverified until `VITE_SUPABASE_ANON_KEY` or `VITE_SUPABASE_PUBLISHABLE_KEY`, an active first-admin profile, and a browser session are available.
+- First admin bootstrap still happens outside `/admin/settings` and requires Jay to confirm the first admin email/profile.
+- Authenticated SECURITY DEFINER helper warnings remain because moving RLS helpers out of the exposed public schema would require a separate helper-function refactor and policy migration.
+
+### Next Handoff
+- `NOW-FORMS-BACKEND-001` live Supabase row/audit verification.
+- `NOW-ADMIN-AUTH-RLS-001` live auth/profile verification.
+- `NOW-ADMIN-SETTINGS-CRUD-001` live settings/admin-profile save verification.
+- Source-only content import/public-read preparation if credentials remain unavailable.
+
 ## Entry - 2026-05-28 (Server-Side Form Audit Source)
 
 ### Scope

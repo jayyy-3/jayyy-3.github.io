@@ -352,7 +352,7 @@
       "id": "NOW-ADMIN-SETTINGS-CRUD-001",
       "status": "now",
       "priority": 5.25,
-      "summary": "Implement the first owner/admin Site Settings CRUD surface.",
+      "summary": "Implement the first owner/admin Site Settings and admin profile CRUD surface.",
       "files": [
         "docs/ADMIN_IA_ACCESS.md",
         "docs/ARCHITECTURE.md",
@@ -371,6 +371,8 @@
         "src/pages/admin/AdminApp.tsx",
         "src/pages/admin/adminContent.ts",
         "supabase/migrations/202605280001_admin_settings_role_hardening.sql",
+        "supabase/migrations/202605280004_admin_profile_owner_hardening.sql",
+        "supabase/migrations/202605280005_security_definer_function_grants.sql",
         "supabase/migrations/README.md"
       ],
       "notes": [
@@ -378,18 +380,26 @@
         "2026-05-28: Added /admin/settings source for default site_settings read/create/update with status, contact, social, SEO, and footer JSON fields.",
         "2026-05-28: Applied and verified admin_settings_role_hardening on Supabase project npkidywzwddbnfrnxlmo. site_settings SELECT remains active viewer/editor/admin/owner, while INSERT/UPDATE/DELETE require owner/admin.",
         "2026-05-28: Settings saves now call the shared admin audit writer after successful primary save. Live audit row creation remains pending browser-safe Supabase config and active owner/admin profile.",
-        "Live save verification still requires browser-safe Supabase key configuration and an active owner/admin profile."
+        "2026-05-28: Added /admin/settings source for non-destructive admin profile management of existing Supabase Auth users, with owner/admin create/update controls, owner-role guardrails, self-lockout prevention, and profile audit attempts.",
+        "2026-05-28: Applied and verified admin_profile_owner_hardening and security_definer_function_grants on Supabase project npkidywzwddbnfrnxlmo. Admins can maintain non-owner profiles, owner-role changes require owner, anon helper execution is revoked, and rls_auto_enable is not directly executable by anon/authenticated.",
+        "Live settings/profile save verification still requires browser-safe Supabase key configuration and an active owner/admin profile."
       ],
       "acceptance": [
         "Owner/admin users can inspect and save the default site_settings row through /admin/settings.",
+        "Owner/admin users can create and update admin profile rows for existing Supabase Auth users through /admin/settings.",
+        "Owner-role assignment and owner-profile changes are owner-protected in UI and RLS; no destructive profile delete controls are shown.",
         "Viewer/editor users can inspect but not save global settings in the UI.",
         "Supabase RLS write policies for site_settings require owner/admin roles.",
+        "Supabase RLS policies for admin_profiles prevent admin users from changing owner profiles or assigning owner role.",
+        "Anonymous users cannot directly execute admin SECURITY DEFINER helper functions.",
         "The form includes loading, empty, validation, save, success, read-only, and error states.",
         "No service-role key is shipped to browser code."
       ],
       "verification": [
-        "Supabase MCP: list_migrations includes admin_settings_role_hardening",
+        "Supabase MCP: list_migrations includes admin_settings_role_hardening, admin_profile_owner_hardening, and security_definer_function_grants",
         "Supabase MCP: execute_sql verifies site_settings write policies require owner/admin",
+        "Supabase MCP: execute_sql verifies admin profile owner-role policies",
+        "Supabase MCP: execute_sql verifies anon cannot execute admin SECURITY DEFINER helpers",
         "npm run build",
         "npm run lint",
         "npx tsc -b",

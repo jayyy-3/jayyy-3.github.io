@@ -104,7 +104,7 @@ Current `/functions/api` endpoints:
 - Cloudflare analytics should show static traffic and API traffic separately.
 - Valid form tests require `SUPABASE_SERVICE_ROLE_KEY` in the Pages Function environment.
 - Admin route tests require a browser-safe Supabase key, a Supabase Auth user, and a matching active `admin_profiles` row.
-- Settings save tests require an active owner/admin profile because `site_settings` write RLS is owner/admin only.
+- Settings save tests require an active owner/admin profile because `site_settings` write RLS is owner/admin only. Admin profile save tests require existing Supabase Auth users and must verify owner-role changes are owner-protected.
 - Media upload/save tests require an active owner/admin/editor profile because Storage object writes and `media_assets` mutations are admin/editor only.
 - Leads workflow save tests require an active owner/admin profile because lead status, assignment, and internal notes are private operational fields.
 - Stone Library save tests require an active owner/admin/editor profile because `stone_groups`, `stone_variants`, and `stone_finish_capabilities` mutations are admin/editor only.

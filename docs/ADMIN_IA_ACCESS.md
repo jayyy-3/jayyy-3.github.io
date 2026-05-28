@@ -5,7 +5,7 @@ Last updated: 2026-05-28
 ## Purpose
 This document defines the executable contract for Urblo's `/admin` site.
 
-Admin auth shell source is now implemented and config-gated. Settings, Media, Stone Library, Projects, Products, Articles, Leads, and Audit are the first source CRUD/workflow/review screens. Admin CRUD/workflow save flows now call a shared audit writer after successful primary mutations. This does not mean live first-admin verification, live upload/save verification, Stone Library/Projects/Products/Articles/Leads live save verification, or live audit row creation verification are complete; it defines and tracks what those implementation tasks must build next.
+Admin auth shell source is now implemented and config-gated. Settings/admin profiles, Media, Stone Library, Projects, Products, Articles, Leads, and Audit are the first source CRUD/workflow/review screens. Admin CRUD/workflow save flows now call a shared audit writer after successful primary mutations. This does not mean live first-admin verification, live admin-profile save verification, live upload/save verification, Stone Library/Projects/Products/Articles/Leads live save verification, or live audit row creation verification are complete; it defines and tracks what those implementation tasks must build next.
 
 ## Product Principle
 The admin site exists so Urblo can maintain launch-critical content without code edits while protecting public pages from drafts, unreviewed claims, missing media, and broken lead workflows.
@@ -156,6 +156,7 @@ Current implementation:
 - The admin shell uses Supabase Auth and `admin_profiles` lookup when browser-safe Supabase configuration is present.
 - Without `VITE_SUPABASE_ANON_KEY` or `VITE_SUPABASE_PUBLISHABLE_KEY`, admin routes render a configuration-required state and do not show dashboard content.
 - `/admin/settings` is the first CRUD source screen behind the auth gate, with owner/admin save controls for the default `site_settings` row.
+- `/admin/settings` also includes a non-destructive admin team manager for existing Supabase Auth users, with owner/admin profile create/update controls, owner-role guardrails, self-lockout prevention, and no delete controls.
 - `/admin/media` is the first media CRUD source screen behind the auth gate, with admin/editor upload and metadata controls, viewer read-only behavior, and publish/archive guardrails.
 - `/admin/stone-library` is the first content CRUD source screen behind the auth gate, with group, variant, finish capability, validation, publish/archive, and read-only states.
 - `/admin/projects` is the next content CRUD source screen behind the auth gate, with project, fact, material schedule, material map, hotspot, validation, claim-review, publish/archive, and read-only states.
@@ -164,6 +165,8 @@ Current implementation:
 - `/admin/leads` is the first lead workflow source screen behind the auth gate, with enquiry/sample request queues, contact detail, sample items, status updates, assignment, internal notes, notification state, and read-only states.
 - `/admin/audit` is the first audit visibility source screen behind the auth gate, with owner/admin read access, actor/entity filters, metadata inspection, empty states, and no mutation/delete controls.
 - `src/lib/adminAudit.ts` is the shared browser-side audit writer used by admin Settings, Media, Stone Library, Projects, Products, Articles, and Leads save flows. It records successful primary mutations into `admin_audit_events`; audit insert failure is surfaced in the success notice without rolling back the primary save.
+- Supabase `admin_profile_owner_hardening` keeps owner-role assignment and owner-profile changes owner-protected, while admins can maintain non-owner profiles.
+- Supabase `security_definer_function_grants` revokes anonymous direct execution of admin SECURITY DEFINER helpers; authenticated helper execution remains for RLS policy evaluation.
 
 Do not do before credentials:
 - fake authentication in production routes;

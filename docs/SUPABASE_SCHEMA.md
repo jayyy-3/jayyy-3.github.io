@@ -5,7 +5,7 @@ Last updated: 2026-05-28
 ## Purpose
 This document defines the first production Supabase data model for the Urblo website launch.
 
-It is both the schema design contract and the current implementation checkpoint record. The foundation migrations, baseline seeds, admin settings hardening, and media Storage policies are applied. Cloudflare Pages Function source exists for forms, and the `/admin` auth shell, `/admin/settings`, `/admin/media`, `/admin/stone-library`, `/admin/projects`, `/admin/products`, `/admin/articles`, `/admin/leads`, and `/admin/audit` source screens are implemented. Runtime work must still verify live form writes, configure browser-safe Supabase Auth keys, create the first admin profile, verify live settings/media/Stone Library/Projects/Products/Articles/Leads writes, and verify live audit row creation from the shared admin audit writer.
+It is both the schema design contract and the current implementation checkpoint record. The foundation migrations, baseline seeds, admin settings/profile hardening, SECURITY DEFINER grant hardening, and media Storage policies are applied. Cloudflare Pages Function source exists for forms, and the `/admin` auth shell, `/admin/settings`, `/admin/media`, `/admin/stone-library`, `/admin/projects`, `/admin/products`, `/admin/articles`, `/admin/leads`, and `/admin/audit` source screens are implemented. Runtime work must still verify live form writes, configure browser-safe Supabase Auth keys, create the first admin profile, verify live settings/admin-profile/media/Stone Library/Projects/Products/Articles/Leads writes, and verify live audit row creation from the shared admin audit writer.
 
 ## Current Supabase Project
 
@@ -19,7 +19,7 @@ The Supabase connector can access the Urblo project directly. Do not ask the use
 | Status checked | `ACTIVE_HEALTHY` on 2026-05-26 |
 | Foundation migrations | Applied on 2026-05-27: `foundation_schema`, `foundation_hardening`, `anon_read_only` |
 | Baseline seed migration | Applied on 2026-05-27: `baseline_seed` |
-| Admin hardening migration | Applied on 2026-05-28: `admin_settings_role_hardening` |
+| Admin hardening migrations | Applied on 2026-05-28: `admin_settings_role_hardening`, `admin_profile_owner_hardening`, `security_definer_function_grants` |
 | Media Storage migrations | Applied on 2026-05-28: `media_storage_foundation`, `media_storage_listing_hardening` |
 | First content CRUD sources | Implemented on 2026-05-28: `/admin/stone-library` source screen for Stone Library groups, variants, and finish capabilities; `/admin/projects` source screen for project records, facts, material schedules, material maps, and hotspots; `/admin/products` source screen for product families, models, material defaults, and specs; `/admin/articles` source screen for article metadata and structured article blocks |
 | First lead workflow source | Implemented on 2026-05-28: `/admin/leads` source screen for enquiry/sample request status, assignment, internal notes, notification state, and sample item inspection |
@@ -101,13 +101,17 @@ Acceptance:
 - Active admin users can reach the dashboard only after Jay confirms the first admin email and an active `admin_profiles` row exists.
 - No service-role key is shipped to browser code.
 
-### Phase 4a - Site Settings CRUD and RLS Hardening
-Outcome: the first admin CRUD surface follows the contract that global settings are owner/admin controlled.
+### Phase 4a - Site Settings, Admin Profiles, and RLS Hardening
+Outcome: the first admin CRUD surface follows the contract that global settings and admin profile management are owner/admin controlled, with owner-role changes protected.
 
 Acceptance:
 - In progress on 2026-05-28. `/admin/settings` source implements the default `site_settings` read/create/update form with status, contact, social, SEO, and footer JSON fields.
 - Supabase migration `admin_settings_role_hardening` is applied and verified: `site_settings` SELECT remains available to active viewer/editor/admin/owner profiles, while INSERT/UPDATE/DELETE policies now require owner/admin.
-- Live browser save verification still requires browser-safe Supabase key configuration and an active owner/admin profile.
+- `/admin/settings` source also implements a non-destructive admin team manager for existing Supabase Auth users. Owner/admin roles can create/update profile rows once live auth is configured; UI guardrails block self-lockout and preserve at least one active owner.
+- Supabase migration `admin_profile_owner_hardening` is applied and verified: admins can maintain non-owner profiles, while owner-role assignment and owner-profile changes require owner.
+- Supabase migration `security_definer_function_grants` is applied and verified: anonymous direct execution is revoked for admin SECURITY DEFINER helpers, and `rls_auto_enable` is not directly executable by anon or authenticated roles.
+- Supabase security advisor still reports authenticated SECURITY DEFINER warnings for the RLS helper functions because they remain executable by authenticated users for policy evaluation.
+- Live browser save/profile verification still requires browser-safe Supabase key configuration and an active owner/admin profile.
 
 ### Phase 4b - Media Storage and Media Library
 Outcome: the first media workflow has controlled buckets, Storage RLS, and a protected admin metadata screen.
@@ -253,6 +257,7 @@ Fields:
 
 Access:
 - Owners/admins can manage admin profiles.
+- Admins can manage non-owner profiles; owner-role assignment and owner-profile changes are owner-protected by `admin_profile_owner_hardening`.
 - Editors can manage content but not admin users.
 - Viewers can read admin content but not publish or delete.
 
