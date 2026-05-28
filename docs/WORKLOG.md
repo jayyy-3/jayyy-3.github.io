@@ -2,6 +2,28 @@
 
 Last updated: 2026-05-28
 
+## Entry - 2026-05-28 (Generated Test Artifact Ignore)
+
+### Scope
+- Added generated Playwright/test artifact directories to `.gitignore` so local verification output does not leave the goal worktree dirty.
+- Existing `test-results/` files were not deleted or modified.
+- No runtime source, Supabase data, Cloudflare state, credentials, or public content was changed.
+
+### Changed Files
+- `.gitignore`
+- `docs/WORKLOG.md`
+
+### Verification Results
+- `git status --short`: after the ignore update, only the intended `.gitignore` and `docs/WORKLOG.md` edits remained visible before commit.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- This is repository hygiene only. It does not advance live credential-gated form/admin verification.
+
+### Next Handoff
+- Continue with credential-gated form/admin live checks when keys and first-admin details are available, or continue source-only readiness work if credentials remain unavailable.
+
 ## Entry - 2026-05-28 (Forms Current-State Harness Alignment)
 
 ### Scope

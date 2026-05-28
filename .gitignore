@@ -17,6 +17,8 @@ dist-ssr
 *.local
 urblo.fig
 .playwright-cli/
+playwright-report/
+test-results/
 
 # Editor directories and files
 .vscode/*
