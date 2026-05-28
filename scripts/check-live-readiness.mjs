@@ -19,6 +19,9 @@ const EMAIL_NAMES = [
 
 function parseArgs(argv) {
   const options = {
+    adminEmail: '',
+    adminWritesApproved: false,
+    baseUrl: '',
     envFiles: [...DEFAULT_ENV_FILES],
     json: false,
     strict: false,
@@ -34,6 +37,33 @@ function parseArgs(argv) {
 
     if (arg === '--json') {
       options.json = true;
+      continue;
+    }
+
+    if (arg === '--base-url') {
+      options.baseUrl = argv[index + 1] || '';
+      index += 1;
+      continue;
+    }
+
+    if (arg.startsWith('--base-url=')) {
+      options.baseUrl = arg.slice('--base-url='.length);
+      continue;
+    }
+
+    if (arg === '--admin-email') {
+      options.adminEmail = argv[index + 1] || '';
+      index += 1;
+      continue;
+    }
+
+    if (arg.startsWith('--admin-email=')) {
+      options.adminEmail = arg.slice('--admin-email='.length);
+      continue;
+    }
+
+    if (arg === '--admin-writes-approved') {
+      options.adminWritesApproved = true;
       continue;
     }
 
@@ -116,6 +146,10 @@ function describeSource(name, sources) {
   return name ? `${name} (${sources[name] || 'unknown source'})` : '';
 }
 
+function presentSource(name, sources, cliDescription) {
+  return cliDescription || describeSource(name, sources);
+}
+
 function makeCheck({ id, label, command, present = [], missing = [], manual = [], optional = [] }) {
   return {
     id,
@@ -129,11 +163,15 @@ function makeCheck({ id, label, command, present = [], missing = [], manual = []
   };
 }
 
-function buildChecks(env, sources) {
+function buildChecks(env, sources, options) {
   const serviceKey = firstPresent(env, SERVICE_KEY_NAMES);
   const browserKey = firstPresent(env, BROWSER_KEY_NAMES);
-  const firstAdminEmail = firstPresent(env, ADMIN_EMAIL_NAMES);
-  const previewUrl = firstPresent(env, PREVIEW_URL_NAMES);
+  const firstAdminEmailEnv = firstPresent(env, ADMIN_EMAIL_NAMES);
+  const firstAdminEmail = options.adminEmail || firstAdminEmailEnv;
+  const firstAdminEmailSource = options.adminEmail ? '--admin-email argument' : describeSource(firstAdminEmailEnv, sources);
+  const previewUrlEnv = firstPresent(env, PREVIEW_URL_NAMES);
+  const previewUrl = options.baseUrl || previewUrlEnv;
+  const previewUrlSource = options.baseUrl ? '--base-url argument' : describeSource(previewUrlEnv, sources);
   const adminToken = firstPresent(env, ADMIN_SESSION_TOKEN_NAMES);
   const adminPasswordSession = allPresent(env, ADMIN_SESSION_PASSWORD_NAMES);
   const turnstile = firstPresent(env, TURNSTILE_NAMES);
@@ -162,7 +200,7 @@ function buildChecks(env, sources) {
       id: 'forms-live-preview',
       label: 'Deployed Cloudflare form persistence',
       command: 'npm run agent:forms-live -- --base-url <preview-or-production-origin>',
-      present: [describeSource(serviceKey, sources), describeSource(previewUrl, sources)].filter(Boolean),
+      present: [describeSource(serviceKey, sources), presentSource(previewUrlEnv, sources, previewUrlSource)].filter(Boolean),
       missing: [
         serviceKey ? '' : 'SUPABASE_SERVICE_ROLE_KEY or SUPABASE_SERVICE_KEY',
         previewUrl ? '' : 'CLOUDFLARE_PAGES_PREVIEW_URL or PAGES_PREVIEW_URL, or pass --base-url manually',
@@ -175,7 +213,7 @@ function buildChecks(env, sources) {
       present: [
         describeSource(browserKey, sources),
         describeSource(serviceKey, sources),
-        describeSource(firstAdminEmail, sources),
+        presentSource(firstAdminEmailEnv, sources, firstAdminEmailSource),
       ].filter(Boolean),
       missing: [
         browserKey ? '' : 'VITE_SUPABASE_PUBLISHABLE_KEY or VITE_SUPABASE_ANON_KEY',
@@ -191,6 +229,7 @@ function buildChecks(env, sources) {
         describeSource(browserKey, sources),
         describeSource(adminToken, sources),
         adminPasswordSession ? 'URBLO_ADMIN_EMAIL and URBLO_ADMIN_PASSWORD configured' : '',
+        options.adminWritesApproved ? 'Jay approval flag supplied for tagged live QA writes' : '',
       ].filter(Boolean),
       missing: [
         browserKey ? '' : 'VITE_SUPABASE_PUBLISHABLE_KEY or VITE_SUPABASE_ANON_KEY',
@@ -198,13 +237,15 @@ function buildChecks(env, sources) {
           ? ''
           : 'URBLO_ADMIN_ACCESS_TOKEN, or URBLO_ADMIN_EMAIL plus URBLO_ADMIN_PASSWORD',
       ].filter(Boolean),
-      manual: ['Jay approval for tagged live QA writes is required before running --allow-writes'],
+      manual: options.adminWritesApproved
+        ? []
+        : ['Jay approval for tagged live QA writes is required before running --allow-writes'],
     }),
     makeCheck({
       id: 'cloudflare-preview-smoke',
       label: 'Cloudflare deployed-preview route/API smoke',
       command: 'npm run agent:cloudflare-preview-smoke -- --base-url <preview-origin>',
-      present: [describeSource(previewUrl, sources)].filter(Boolean),
+      present: [presentSource(previewUrlEnv, sources, previewUrlSource)].filter(Boolean),
       missing: previewUrl
         ? []
         : ['CLOUDFLARE_PAGES_PREVIEW_URL or PAGES_PREVIEW_URL, or pass --base-url manually'],
@@ -247,7 +288,7 @@ function printTextReport({ checks, scannedFiles, strict }) {
 async function run() {
   const options = parseArgs(process.argv.slice(2));
   const { env, scannedFiles, sources } = loadEnv(options.envFiles);
-  const checks = buildChecks(env, sources);
+  const checks = buildChecks(env, sources, options);
   const blockers = checks.filter((check) => !check.ready);
 
   if (options.json) {

@@ -11,7 +11,7 @@ Repo-side readiness is checked by `npm run agent:cloudflare-readiness`. This com
 
 After a preview deployment exists, preview HTTP smoke is checked by `npm run agent:cloudflare-preview-smoke -- --base-url https://<preview>.pages.dev`. This command verifies direct-refresh route shells, deployed static assets, Cloudflare redirect behavior, and no-write API safe-failure behavior for `/api/enquiries` and `/api/sample-requests`.
 
-Before running live form/admin/preview checks, `npm run agent:live-readiness` can be used to audit local inputs without printing secret values or mutating Supabase/Cloudflare. Use `--strict` when missing or manual-gated live inputs should fail the command.
+Before running live form/admin/preview checks, `npm run agent:live-readiness` can be used to audit local inputs without printing secret values or mutating Supabase/Cloudflare. Use `--base-url <preview-origin>` and `--admin-email <first-admin-email>` for non-secret manual inputs, and use `--strict` when missing or manual-gated live inputs should fail the command.
 
 ## Repo-Side Contract
 
@@ -120,7 +120,7 @@ This runner does not require secrets. It checks:
 - legacy product/article 301 redirects from `_redirects`;
 - `/api/enquiries` and `/api/sample-requests` GET/OPTIONS/invalid POST safe-failure behavior. Invalid POST checks are deliberately no-write and do not replace the credential-gated live form persistence command.
 
-If `CLOUDFLARE_PAGES_PREVIEW_URL` or `PAGES_PREVIEW_URL` is set in a local untracked env file, `npm run agent:live-readiness` will report that the preview smoke input is available; the preview smoke runner still expects `--base-url` explicitly.
+If `CLOUDFLARE_PAGES_PREVIEW_URL` or `PAGES_PREVIEW_URL` is set in a local untracked env file, or if `npm run agent:live-readiness -- --base-url <preview-origin>` is used, the readiness runner reports that the preview smoke input is available; the preview smoke runner still expects `--base-url` explicitly.
 
 ### 4. Validate Function Routing After API Work Exists
 Current `/functions/api` endpoints:

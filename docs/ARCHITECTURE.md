@@ -145,6 +145,7 @@ Last updated: 2026-05-28
   - `npm run agent:live-readiness` => `node scripts/check-live-readiness.mjs`
   - Loads local environment values from `.env.local`, `.env`, `.dev.vars`, and the shell.
   - Reports, without printing secret values, whether the inputs for `agent:forms-live`, deployed form verification, `agent:admin-live-readiness`, `agent:admin-crud-live -- --allow-writes`, and `agent:cloudflare-preview-smoke` are present.
+  - Accepts non-secret readiness overrides: `--base-url <origin>`, `--admin-email <email>`, and `--admin-writes-approved`. Secret keys and admin session credentials must still come from env files or the shell and must not be printed.
   - Default mode is report-only and exits 0 even when inputs are missing; `--strict` exits 1 when live inputs are missing or manually gated.
   - This command does not query Supabase, create users, run live writes, create Cloudflare projects, or touch DNS.
 - Admin CRUD source coverage:

@@ -153,7 +153,7 @@
         "2026-05-28: Form handlers now attempt server-side admin_audit_events writes after successful enquiry/sample request inserts. Mock API checks verify audit calls, audit-failure resilience after lead storage, missing service-role fail-closed behavior before Supabase calls, and configured Turnstile failure.",
         "2026-05-28: `.env.example`, Cloudflare deployment docs, and architecture docs now list canonical form/admin environment variables plus supported compatibility aliases for Supabase service key, Turnstile, Resend sender, and lead notification recipient configuration.",
         "2026-05-28: Added `npm run agent:forms-live` as the credential-gated live verification runner for valid enquiry, invalid enquiry, valid sample request, invalid sample request, sample item, and server-side audit rows. The command intentionally fails when the service-role key is unavailable and retains tagged test rows for auditability unless Jay approves cleanup.",
-        "2026-05-28: Added `npm run agent:live-readiness` as a no-secret input audit for local/deployed form verification, admin readiness, tagged admin live writes, and Cloudflare preview smoke readiness."
+        "2026-05-28: Added `npm run agent:live-readiness` as a no-secret input audit for local/deployed form verification, admin readiness, tagged admin live writes, and Cloudflare preview smoke readiness. It accepts non-secret `--base-url`, `--admin-email`, and `--admin-writes-approved` readiness flags; secret keys and admin session credentials still stay in env files or shell."
       ],
       "acceptance": [
         "Valid enquiry submissions create Supabase enquiry rows through a server-side endpoint.",
@@ -221,7 +221,7 @@
       "notes": [
         "2026-05-28: Added `npm run agent:cloudflare-readiness` as a no-secret repo-side verifier for Cloudflare Pages. It checks the build script, Vite root base, SPA fallback, Function routing scope, headers, API handler files, environment placeholders, and deployment runbook. Account-level Pages project creation, production env vars, preview URL, custom domain, DNS, and rollback remain blocked on Cloudflare account access.",
         "2026-05-28: Added `npm run agent:cloudflare-preview-smoke` as a no-secret deployed-preview verifier. It requires `--base-url`, checks direct-refresh public/admin route shells and deployed assets, verifies Cloudflare-applied legacy redirects, and verifies `/api/enquiries` and `/api/sample-requests` reject GET/invalid POST safely. Local preview URLs skip redirect/Function checks so the script can be validated before a Pages preview exists.",
-        "2026-05-28: Added `npm run agent:live-readiness` reporting for the optional `CLOUDFLARE_PAGES_PREVIEW_URL` / `PAGES_PREVIEW_URL` helper variables before running deployed preview smoke."
+        "2026-05-28: Added `npm run agent:live-readiness` reporting for the optional `CLOUDFLARE_PAGES_PREVIEW_URL` / `PAGES_PREVIEW_URL` helper variables, plus a non-secret `--base-url` override, before running deployed preview smoke."
       ]
     },
     {
@@ -283,7 +283,7 @@
         "2026-05-28: Added source-only content import dry run for static-to-Supabase migration preparation. It does not write production rows or treat provisional content as final.",
         "2026-05-28: Added `npm run agent:admin-crud-coverage` as a source-only admin coverage verifier. It checks /admin route registration, protected shell coverage, launch-critical table references, role-gated controls, publish/archive paths, shared audit writer coverage, Media/Leads export audit gates, and no browser service-role key reference. It does not mutate Supabase and does not replace live credential/browser QA.",
         "2026-05-28: Added `npm run agent:admin-crud-live` as a credential-gated live write verifier. Default mode is plan-only and no-write; `--allow-writes` requires browser-safe Supabase config plus a real owner/admin Supabase Auth session, then creates tagged draft/archived QA rows plus audit events through browser-key RLS without physical deletes. Optional `--include-storage` verifies private Storage upload policy.",
-        "2026-05-28: Added `npm run agent:live-readiness` as a no-secret input audit for first-admin readiness, admin live-write session availability, and Jay approval/manual-gate visibility before running live admin verification.",
+        "2026-05-28: Added `npm run agent:live-readiness` as a no-secret input audit for first-admin readiness, admin live-write session availability, and Jay approval/manual-gate visibility before running live admin verification. It accepts non-secret `--admin-email` and `--admin-writes-approved` readiness flags, but still performs no writes.",
         "2026-05-28: Removed the retired AdminModulePage scaffold component and unused scaffold/locked module-state branches now that all launch-critical admin modules have real source screens. Admin CRUD coverage now fails if the retired scaffold component returns."
       ],
       "acceptance": [

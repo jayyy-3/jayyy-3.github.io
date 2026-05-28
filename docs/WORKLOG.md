@@ -2,6 +2,35 @@
 
 Last updated: 2026-05-28
 
+## Entry - 2026-05-28 (Live Readiness Non-Secret Overrides)
+
+### Scope
+- Refined `npm run agent:live-readiness` so non-secret manual inputs can be represented directly in the audit.
+- Added support for `--base-url <origin>`, `--admin-email <email>`, and `--admin-writes-approved`.
+- Kept secret-bearing inputs out of CLI flags: service-role keys, browser keys, and admin sessions still come only from env files or the shell.
+- No Supabase queries, Supabase mutations, Cloudflare account changes, DNS changes, live writes, or credential storage were performed.
+
+### Changed Files
+- `docs/ARCHITECTURE.md`
+- `docs/CLOUDFLARE_DEPLOYMENT.md`
+- `docs/HANDOFF.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `scripts/check-live-readiness.mjs`
+
+### Verification Results
+- `node --check scripts/check-live-readiness.mjs`: pass.
+- `npm run agent:live-readiness`: pass in report-only mode, preserving the missing-input report when no env files are present.
+- `npm run agent:live-readiness -- --base-url <preview-origin> --admin-email <first-admin-email> --admin-writes-approved`: pass in report-only mode. It marks the non-secret preview URL, admin email, and approval flag as present without printing those values, and still reports missing service-role/browser/admin-session inputs.
+- `npm run agent:live-readiness -- --base-url <preview-origin> --admin-email <first-admin-email> --admin-writes-approved --strict`: expected fail because the service-role key, browser-safe key, and admin session credentials are still missing.
+
+### Risks and Gaps
+- `--admin-writes-approved` is only a readiness accounting flag. It does not run writes, create sessions, or replace Jay's actual approval requirement before `npm run agent:admin-crud-live -- --allow-writes`.
+- This refinement still does not provide service-role credentials, browser-safe Supabase key configuration, first-admin profile setup, or Cloudflare preview deployment.
+
+### Next Handoff
+- Continue with `npm run agent:forms-live`, `npm run agent:admin-live-readiness`, `npm run agent:admin-crud-live -- --allow-writes`, and `npm run agent:cloudflare-preview-smoke` only after their required inputs exist and approvals are satisfied.
+
 ## Entry - 2026-05-28 (Live Verification Readiness Audit Runner)
 
 ### Scope
