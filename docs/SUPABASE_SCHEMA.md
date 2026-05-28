@@ -1,11 +1,11 @@
 # Urblo Supabase Schema Plan
 
-Last updated: 2026-05-28
+Last updated: 2026-05-29
 
 ## Purpose
 This document defines the first production Supabase data model for the Urblo website launch.
 
-It is both the schema design contract and the current implementation checkpoint record. The foundation migrations, baseline seeds, admin settings/profile hardening, SECURITY DEFINER grant hardening, and media Storage policies are applied. Cloudflare Pages Function source exists for forms, and the `/admin` auth shell, `/admin/settings`, `/admin/media`, `/admin/stone-library`, `/admin/projects`, `/admin/products`, `/admin/articles`, `/admin/leads`, and `/admin/audit` source screens are implemented. Leads now includes an owner/admin CSV export path that requires an audit event before download. `npm run agent:admin-crud-coverage` provides source-only coverage for the implemented `/admin` route/module/table/audit/export paths before live credential checks run. Runtime work must still verify live form writes, configure browser-safe Supabase Auth keys, create the first admin profile, verify live settings/admin-profile/media/Stone Library/Projects/Products/Articles/Leads writes and export, and verify live audit row creation from the shared admin audit writer.
+It is both the schema design contract and the current implementation checkpoint record. The foundation migrations, baseline seeds, admin settings/profile/helper hardening, and media Storage policies are applied. Admin role helper RPC execution is revoked from browser roles in the exposed public schema, while RLS and Storage policies call private SECURITY DEFINER helpers from a non-exposed schema; the Supabase security advisor currently reports zero security lints. Cloudflare Pages Function source exists for forms, and the `/admin` auth shell, `/admin/settings`, `/admin/media`, `/admin/stone-library`, `/admin/projects`, `/admin/products`, `/admin/articles`, `/admin/leads`, and `/admin/audit` source screens are implemented. Leads now includes an owner/admin CSV export path that requires an audit event before download. `npm run agent:admin-crud-coverage` provides source-only coverage for the implemented `/admin` route/module/table/audit/export paths before live credential checks run. Runtime work must still verify live form writes, configure browser-safe Supabase Auth keys, create the first admin profile, verify live settings/admin-profile/media/Stone Library/Projects/Products/Articles/Leads writes and export, and verify live audit row creation from the shared admin audit writer.
 
 ## Current Supabase Project
 
@@ -19,7 +19,7 @@ The Supabase connector can access the Urblo project directly. Do not ask the use
 | Status checked | `ACTIVE_HEALTHY` on 2026-05-26 |
 | Foundation migrations | Applied on 2026-05-27: `foundation_schema`, `foundation_hardening`, `anon_read_only` |
 | Baseline seed migration | Applied on 2026-05-27: `baseline_seed` |
-| Admin hardening migrations | Applied on 2026-05-28: `admin_settings_role_hardening`, `admin_profile_owner_hardening`, `security_definer_function_grants` |
+| Admin hardening migrations | Applied on 2026-05-28: `admin_settings_role_hardening`, `admin_profile_owner_hardening`, `security_definer_function_grants`; applied on 2026-05-29: `security_definer_private_helpers` |
 | Media Storage migrations | Applied on 2026-05-28: `media_storage_foundation`, `media_storage_listing_hardening` |
 | First content CRUD sources | Implemented on 2026-05-28: `/admin/stone-library` source screen for Stone Library groups, variants, and finish capabilities; `/admin/projects` source screen for project records, facts, material schedules, material maps, and hotspots; `/admin/products` source screen for product families, models, material defaults, and specs; `/admin/articles` source screen for article metadata and structured article blocks |
 | First lead workflow source | Implemented on 2026-05-28: `/admin/leads` source screen for enquiry/sample request status, assignment, internal notes, notification state, sample item inspection, and audit-gated owner/admin CSV export |
@@ -115,7 +115,7 @@ Acceptance:
 - `/admin/settings` source also implements a non-destructive admin team manager for existing Supabase Auth users. Owner/admin roles can create/update profile rows once live auth is configured; UI guardrails block self-lockout and preserve at least one active owner.
 - Supabase migration `admin_profile_owner_hardening` is applied and verified: admins can maintain non-owner profiles, while owner-role assignment and owner-profile changes require owner.
 - Supabase migration `security_definer_function_grants` is applied and verified: anonymous direct execution is revoked for admin SECURITY DEFINER helpers, and `rls_auto_enable` is not directly executable by anon or authenticated roles.
-- Supabase security advisor still reports authenticated SECURITY DEFINER warnings for the RLS helper functions because they remain executable by authenticated users for policy evaluation.
+- Supabase migration `security_definer_private_helpers` is applied and verified: RLS and Storage policies call `private.has_admin_role(...)`, public helper RPC execution is revoked from browser roles, authenticated policy evaluation still works through the non-exposed private helpers, and the Supabase security advisor reports zero security lints.
 - Live browser save/profile verification still requires browser-safe Supabase key configuration and an active owner/admin profile.
 
 ### Phase 4b - Media Storage and Media Library

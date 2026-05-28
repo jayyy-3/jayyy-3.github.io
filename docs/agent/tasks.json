@@ -422,6 +422,7 @@
         "supabase/migrations/202605280001_admin_settings_role_hardening.sql",
         "supabase/migrations/202605280004_admin_profile_owner_hardening.sql",
         "supabase/migrations/202605280005_security_definer_function_grants.sql",
+        "supabase/migrations/202605290001_security_definer_private_helpers.sql",
         "supabase/migrations/README.md",
         "scripts/check-admin-crud-coverage.mjs",
         "scripts/check-admin-crud-live.mjs"
@@ -433,6 +434,7 @@
         "2026-05-28: Settings saves now call the shared admin audit writer after successful primary save. Live audit row creation remains pending browser-safe Supabase config and active owner/admin profile.",
         "2026-05-28: Added /admin/settings source for non-destructive admin profile management of existing Supabase Auth users, with owner/admin create/update controls, owner-role guardrails, self-lockout prevention, and profile audit attempts.",
         "2026-05-28: Applied and verified admin_profile_owner_hardening and security_definer_function_grants on Supabase project npkidywzwddbnfrnxlmo. Admins can maintain non-owner profiles, owner-role changes require owner, anon helper execution is revoked, and rls_auto_enable is not directly executable by anon/authenticated.",
+        "2026-05-29: Applied and verified security_definer_private_helpers on Supabase project npkidywzwddbnfrnxlmo. RLS and Storage policies now call private.has_admin_role(...), zero policies call public.has_admin_role(...), public helper execution is revoked from authenticated, anon/authenticated public reads still work, and the Supabase security advisor reports zero security lints.",
         "Live settings/profile save verification still requires browser-safe Supabase key configuration and an active owner/admin profile.",
         "2026-05-28: Admin CRUD coverage verifier now checks settings/admin profile table references, owner/self-lockout guardrail copy, mutation paths, and site_settings/admin_profile audit actions.",
         "2026-05-28: Admin CRUD live verifier now includes a tagged site_settings create/update/archive path through owner/admin RLS, but it does not create or mutate first-admin profile rows."
@@ -449,10 +451,10 @@
         "No service-role key is shipped to browser code."
       ],
       "verification": [
-        "Supabase MCP: list_migrations includes admin_settings_role_hardening, admin_profile_owner_hardening, and security_definer_function_grants",
+        "Supabase MCP: list_migrations includes admin_settings_role_hardening, admin_profile_owner_hardening, security_definer_function_grants, and security_definer_private_helpers",
         "Supabase MCP: execute_sql verifies site_settings write policies require owner/admin",
         "Supabase MCP: execute_sql verifies admin profile owner-role policies",
-        "Supabase MCP: execute_sql verifies anon cannot execute admin SECURITY DEFINER helpers",
+        "Supabase MCP: execute_sql verifies public helper RPC execution is revoked from anon/authenticated browser roles and RLS/Storage policies call private helpers",
         "npm run build",
         "npm run lint",
         "npx tsc -b",

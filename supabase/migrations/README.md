@@ -24,6 +24,10 @@ Applied admin hardening migration on 2026-05-28:
 - `admin_profile_owner_hardening`
 - `security_definer_function_grants`
 
+Applied admin helper hardening migration on 2026-05-29:
+
+- `security_definer_private_helpers`
+
 Applied media Storage migrations on 2026-05-28:
 
 - `media_storage_foundation`

@@ -2,6 +2,54 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Supabase Private Helper Hardening)
+
+### Scope
+- Added and applied the `security_definer_private_helpers` Supabase migration.
+- Moved admin-role RLS helper usage to `private.has_admin_role(...)` in a non-exposed schema and revoked exposed `public.current_admin_role()` / `public.has_admin_role(text[])` execution from browser roles.
+- Rewrote public-table and Storage policies that previously called the public helper so they now call the private helper.
+- Ran read-only Supabase advisor and policy/privilege checks to verify the hardening did not break public reads.
+
+### Changed Files
+- `AGENTS.md`
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `supabase/migrations/README.md`
+- `supabase/migrations/202605290001_security_definer_private_helpers.sql`
+
+### Verification Results
+- Supabase migration list: pass. `security_definer_private_helpers` is listed on project `npkidywzwddbnfrnxlmo`.
+- Supabase security advisor: pass. 0 security lints after the helper migration.
+- Supabase policy inspection: pass. 99 policies call `private.has_admin_role(...)`; 0 policies call `public.has_admin_role(...)`.
+- Supabase privilege inspection: pass. `authenticated` cannot execute `public.current_admin_role()` or `public.has_admin_role(text[])`; `anon` cannot execute either public or private admin-role helper; `authenticated` can execute the private helpers used by RLS/Storage policies.
+- Supabase role-read checks: pass. Role `anon` can still read 1 published `site_settings` row and 12 published `finish_definitions`; role `authenticated` without a JWT sees those public rows and 0 `admin_profiles`.
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass, including public/admin route shells and Forms API mock checks.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:public-supabase-readiness`: pass.
+- `npm run agent:live-readiness`: pass in report-only mode. It still reports missing service-role key, persistent browser-safe key env, first-admin email, admin session credentials, Jay approval for tagged live QA writes, and Cloudflare preview URL.
+- `npm run agent:cloudflare-readiness`: pass.
+- `npm run agent:admin-crud-live`: pass in plan-only mode. No Supabase writes, Storage uploads, or deletes were attempted.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- Changed-file secret pattern scan: pass.
+
+### Risks and Gaps
+- This is non-destructive schema hardening. It does not create a first admin, verify active admin login, run CRUD writes, verify live form persistence, upload Storage objects, or touch Cloudflare.
+- Supabase performance advisor still reports expected INFO/WARN items for unused indexes and multiple permissive policies on new/low-traffic tables. Those are not launch blockers yet; do not remove launch-pattern indexes before real traffic/import/live admin usage exists.
+
+### Next Handoff
+- `NOW-FORMS-BACKEND-001`: run `npm run agent:forms-live` after `SUPABASE_SERVICE_ROLE_KEY` is configured.
+- `NOW-ADMIN-AUTH-RLS-001`: run `npm run agent:admin-live-readiness -- --admin-email <first-admin-email>` after browser-safe and service-role keys plus first-admin profile are available.
+- `NOW-ADMIN-CMS-001`: run `npm run agent:admin-crud-live -- --allow-writes` only after Jay approves tagged QA writes and a real owner/admin session exists.
+
 ## Entry - 2026-05-29 (Admin Browser-Key Unauthenticated Gate)
 
 ### Scope

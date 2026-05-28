@@ -1,12 +1,12 @@
 # Urblo Web - Architecture and Contracts
 
-Last updated: 2026-05-28
+Last updated: 2026-05-29
 
 ## System Boundary
 - Current implementation: frontend-only React application shipped as static assets.
 - Current implementation: Cloudflare Pages Function source now exists for `/api/enquiries` and `/api/sample-requests`.
 - Current implementation: the public Contact page submits enquiries and sample requests to those API routes. The API source attempts server-side audit events after successful lead inserts, but live Supabase row creation still requires server-side Cloudflare environment variables.
-- Current Supabase project: `Urblo` (`npkidywzwddbnfrnxlmo`, `ap-southeast-2`) has the foundation schema/RLS migrations, baseline seeds, admin settings/profile hardening, SECURITY DEFINER function grant hardening, and media Storage policies applied. The `/admin` auth shell source is implemented and config-gated, but live admin login still requires browser-safe Supabase key configuration and a confirmed first admin profile. Settings/admin profiles, Media, Stone Library, Projects, Products, Articles, Leads, and Audit are the first source CRUD/workflow/review screens; admin CRUD/workflow save flows now call a shared audit writer after successful primary mutations, and Media/Leads CSV exports are audit-gated, with live audit row creation still pending credentials.
+- Current Supabase project: `Urblo` (`npkidywzwddbnfrnxlmo`, `ap-southeast-2`) has the foundation schema/RLS migrations, baseline seeds, admin settings/profile/helper hardening, and media Storage policies applied. Admin role helper RPC execution is revoked from browser roles in the exposed public schema, while RLS and Storage policies call private SECURITY DEFINER helpers from a non-exposed schema. The `/admin` auth shell source is implemented and config-gated, but live active-admin login still requires persistent browser-safe Supabase key configuration and a confirmed first admin profile. Settings/admin profiles, Media, Stone Library, Projects, Products, Articles, Leads, and Audit are the first source CRUD/workflow/review screens; admin CRUD/workflow save flows now call a shared audit writer after successful primary mutations, and Media/Leads CSV exports are audit-gated, with live audit row creation still pending credentials.
 - Launch target: Cloudflare Pages static frontend, Cloudflare Pages Functions API endpoints, Supabase Postgres/Auth/Storage, and an Urblo-owned admin interface for content operations.
 - Planning source: `docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md`.
 - Supabase schema design source: `docs/SUPABASE_SCHEMA.md`.
@@ -454,7 +454,7 @@ Route state contract:
   - `Space Grotesk` local WOFF2
 - Homepage runtime no longer depends on remote WordPress font CSS/TTF/WOFF assets.
 
-## Last Runtime Quality Gate Status (Measured 2026-05-28)
+## Last Runtime Quality Gate Status (Measured 2026-05-29)
 - `npm run build`: pass
 - `npm run lint`: pass
 - `npx tsc -b`: pass

@@ -1,6 +1,6 @@
 # Urblo Admin IA and Access Contract
 
-Last updated: 2026-05-28
+Last updated: 2026-05-29
 
 ## Purpose
 This document defines the executable contract for Urblo's `/admin` site.
@@ -169,7 +169,7 @@ Current implementation:
 - `npm run agent:admin-crud-coverage` is the source-only admin coverage check. It verifies active route/module registration, protected shell coverage, launch-critical table references, role-gated controls, publish/archive paths, shared audit writer usage, and audit-gated Media/Leads exports before live credential QA.
 - `npm run agent:admin-crud-live` is the credential-gated live admin write check. Default mode is plan-only and performs no writes. With `--allow-writes`, it requires a browser-safe key plus a real owner/admin Supabase Auth session, then creates tagged draft/archived QA records across launch-critical admin tables and audit-gated export actions through normal RLS. It does not physically delete live data.
 - Supabase `admin_profile_owner_hardening` keeps owner-role assignment and owner-profile changes owner-protected, while admins can maintain non-owner profiles.
-- Supabase `security_definer_function_grants` revokes anonymous direct execution of admin SECURITY DEFINER helpers; authenticated helper execution remains for RLS policy evaluation.
+- Supabase `security_definer_function_grants` and `security_definer_private_helpers` revoke exposed public helper RPC execution from browser roles; authenticated RLS/Storage policy evaluation now uses private SECURITY DEFINER helpers from a non-exposed schema.
 
 Do not do before credentials:
 - fake authentication in production routes;

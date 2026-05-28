@@ -1,6 +1,6 @@
 # AGENTS - Urblo AI Harness Entry
 
-Last updated: 2026-05-28
+Last updated: 2026-05-29
 
 ## Project Mission
 Urblo web exists to communicate a design-led, engineering-backed, proof-driven natural stone solution system for streetscapes and civil landscapes.
@@ -79,7 +79,7 @@ Before declaring implementation complete, verify all checks below:
 - Launch target is now Cloudflare Pages + Supabase + Urblo-owned `/admin`; the long-form plan is `docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md`.
 - Supabase foundation migrations are applied and verified for project `Urblo` (`npkidywzwddbnfrnxlmo`): 24 launch tables, RLS, policies, FK indexes, private lead/admin protection, and read-only anonymous public-content grants.
 - Supabase baseline seed migration is applied and verified: 12 distinct published finish definitions and one published default site settings row.
-- Supabase admin settings/profile hardening migrations are applied and verified: `site_settings` writes are owner/admin only, admin profile owner-role changes are owner-protected, and anonymous direct execution of admin SECURITY DEFINER helpers is revoked.
+- Supabase admin settings/profile/helper hardening migrations are applied and verified: `site_settings` writes are owner/admin only, admin profile owner-role changes are owner-protected, public helper RPC execution is revoked from browser roles, RLS/Storage policies call private SECURITY DEFINER helpers, and the Supabase security advisor currently reports no security lints.
 - Supabase media Storage migrations are applied and verified: `urblo-public-media` and `urblo-admin-media` buckets exist, public object listing is disabled, and Storage object writes require active admin/editor roles.
 - Forms backend source is implemented for `/api/enquiries` and `/api/sample-requests`, including server-side audit-event attempts after successful lead inserts, but live Supabase row creation still requires server-side `SUPABASE_SERVICE_ROLE_KEY` verification.
 - `npm run agent:forms-live` is the credential-gated live form verification runner; it proves valid enquiry/sample-request rows plus audit rows and invalid-payload no-write behavior once a service-role key is available, and intentionally fails without credentials.
@@ -105,7 +105,7 @@ Before declaring implementation complete, verify all checks below:
 - Stone Library migration is complete: old `/materials*` route family has been removed and replaced with `/stone-library` plus `/stone-library/:stoneGroupId`.
 - `NEXT-STONELIB-DRIVE-IMAGE-AUDIT-001` and `NEXT-STONELIB-IMG-001` are complete for current website stones only; Drive-only products remain out of scope until the client decides to add them.
 - Contact route is declared at `/contact`; shared header/footer navigation points to declared routes, and Sample Request routes to `/contact?intent=sample-request`. The main Contact/Sample Request submit source now posts to Pages Functions; direct email/phone links remain manual contact channels, and production persistence is still pending service-role environment verification.
-- Last runtime gates were measured on 2026-05-28 and were green (`npm run build`, `npm run lint`, `npx tsc -b`, `npm run agent:smoke`) during the Media manifest export source checkpoint.
+- Last runtime gates were measured on 2026-05-29 and were green (`npm run build`, `npm run lint`, `npx tsc -b`, `npm run agent:smoke`) during the Supabase helper hardening checkpoint.
 - Route-level code splitting is in place and the previous `>500kB` chunk warning is resolved; continue monitoring bundle output as features are added.
 - GitHub Pages hardening is now a legacy fallback; Cloudflare Pages deployment is the active launch path.
 - Routing now uses clean paths through `BrowserRouter` with Cloudflare Pages SPA fallback files in `public/`; unknown public URLs render a branded not-found state instead of the homepage.
