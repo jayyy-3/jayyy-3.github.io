@@ -1,6 +1,6 @@
 # Urblo Cloudflare Pages Deployment Runbook
 
-Last updated: 2026-05-28
+Last updated: 2026-05-29
 
 ## Purpose
 This runbook captures the repo-side Cloudflare Pages deployment contract and the manual account steps required before production cutover.
@@ -11,7 +11,7 @@ Repo-side readiness is checked by `npm run agent:cloudflare-readiness`. This com
 
 After a preview deployment exists, preview HTTP smoke is checked by `npm run agent:cloudflare-preview-smoke -- --base-url https://<preview>.pages.dev`. This command verifies direct-refresh route shells, deployed static assets, Cloudflare redirect behavior, and no-write API safe-failure behavior for `/api/enquiries` and `/api/sample-requests`.
 
-Before running live form/admin/preview checks, `npm run agent:live-readiness` can be used to audit local inputs without printing secret values or mutating Supabase/Cloudflare. Use `--base-url <preview-origin>` and `--admin-email <first-admin-email>` for non-secret manual inputs, and use `--strict` when missing or manual-gated live inputs should fail the command.
+Before running live form/admin/preview checks, `npm run agent:live-readiness` can be used to audit local inputs without printing secret values or mutating Supabase/Cloudflare. Use `--base-url <preview-origin>` and `--admin-email <first-admin-email>` for non-secret manual inputs, use `--form-writes-approved` only after Jay approves tagged live form QA writes, use `--admin-writes-approved` only after Jay approves tagged live admin QA writes, and use `--strict` when missing or manual-gated live inputs should fail the command.
 
 ## Repo-Side Contract
 
@@ -129,9 +129,9 @@ Current `/functions/api` endpoints:
 - Cloudflare analytics should show static traffic and API traffic separately.
 - Valid form tests require `SUPABASE_SERVICE_ROLE_KEY` in the Pages Function environment.
 - Credential-gated live verification can be run with:
-  - `npm run agent:forms-live` for direct handler verification against local service-role credentials.
-  - `npm run agent:forms-live -- --require-browser-boundary` for final private-row proof after both service-role and browser-safe Supabase keys are configured.
-  - `npm run agent:forms-live -- --base-url https://<preview>.pages.dev` for deployed endpoint verification, after the Pages environment has the service-role key.
+  - `npm run agent:forms-live` for direct handler verification against local service-role credentials after Jay approves tagged form QA writes.
+  - `npm run agent:forms-live -- --require-browser-boundary` for final private-row proof after both service-role and browser-safe Supabase keys are configured and Jay approval is in place.
+  - `npm run agent:forms-live -- --base-url https://<preview>.pages.dev` for deployed endpoint verification, after the Pages environment has the service-role key and Jay approves tagged form QA writes against that target.
 - The live verification command creates tagged test enquiry and sample-request rows, verifies their `admin_audit_events`, verifies invalid payloads create no rows, checks response-vs-stored notification status, and keeps the test rows until Jay approves cleanup. With `--require-browser-boundary`, it also proves those private lead rows are not anonymously readable through browser-key REST access.
 - Admin route tests require a browser-safe Supabase key, a Supabase Auth user, and a matching active `admin_profiles` row.
 - Before browser admin QA, run `npm run agent:admin-live-readiness -- --admin-email <first-admin-email>` to verify the browser-safe key, service-role verification key, active admin profile, and baseline seed rows without mutating Supabase.
@@ -169,11 +169,11 @@ Run from the repo root before deploying:
 - `npm run agent:check`
 - `git diff --check`
 
-After form secrets are configured, run:
+After form secrets are configured and Jay approves tagged form QA writes, run:
 - `npm run agent:forms-live`
 - `npm run agent:forms-live -- --require-browser-boundary` after the browser-safe Supabase key is configured
 
-For deployed Pages preview form verification, run:
+For deployed Pages preview form verification after Jay approves tagged writes against that target, run:
 - `npm run agent:forms-live -- --base-url https://<preview>.pages.dev`
 
 For deployed Pages preview route/asset/redirect/API safe-failure smoke, run:

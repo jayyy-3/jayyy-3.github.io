@@ -2,6 +2,50 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Live Readiness Form Write Approval Gate)
+
+### Scope
+- Refined `npm run agent:live-readiness` so tagged live form QA writes are explicitly approval-gated before local/direct, deployed, or private-boundary form persistence checks are run.
+- Added `--form-writes-approved` as the non-secret readiness flag for Jay approval, matching the existing admin live-write approval pattern.
+- Updated Harness docs so future agents do not treat service-role credentials alone as sufficient permission to create tagged live enquiry/sample-request rows.
+
+### Changed Files
+- `AGENTS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/CLOUDFLARE_DEPLOYMENT.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `docs/agent/verification.md`
+- `scripts/check-live-readiness.mjs`
+
+### Verification Results
+- `node --check scripts/check-live-readiness.mjs`: pass.
+- `npm run agent:live-readiness`: pass in report-only mode and reports the live form commands as manually gated until Jay approval is supplied.
+- `npm run agent:live-readiness -- --form-writes-approved`: pass in report-only mode and clears only the form approval gate while preserving missing service-role/browser-safe credential reporting.
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:admin-crud-live`: pass in plan-only/no-write mode.
+- `npm run agent:public-supabase-readiness`: pass.
+- `npm run agent:cloudflare-readiness`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `node -e "JSON.parse(require('fs').readFileSync('docs/agent/tasks.json','utf8')); console.log('tasks json ok')"`: pass.
+
+### Risks and Gaps
+- This is a no-secret, no-write readiness hardening change only. It does not verify live form row creation.
+- Live form persistence remains blocked until a server-side service-role key is configured and Jay approves tagged form QA writes.
+- Final private-row proof still requires both service-role and browser-safe keys plus `npm run agent:forms-live -- --require-browser-boundary`.
+
+### Next Handoff
+- `NOW-FORMS-BACKEND-001`
+- `NOW-FORMS-SUPABASE-001`
+- `NOW-ADMIN-AUTH-RLS-001`
+
 ## Entry - 2026-05-29 (Cloudflare Forms Boundary Runbook)
 
 ### Scope

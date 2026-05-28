@@ -23,6 +23,7 @@ function parseArgs(argv) {
     adminWritesApproved: false,
     baseUrl: '',
     envFiles: [...DEFAULT_ENV_FILES],
+    formWritesApproved: false,
     json: false,
     strict: false,
   };
@@ -64,6 +65,11 @@ function parseArgs(argv) {
 
     if (arg === '--admin-writes-approved') {
       options.adminWritesApproved = true;
+      continue;
+    }
+
+    if (arg === '--form-writes-approved') {
+      options.formWritesApproved = true;
       continue;
     }
 
@@ -185,8 +191,14 @@ function buildChecks(env, sources, options) {
       id: 'forms-live-local',
       label: 'Local/direct live form persistence',
       command: 'npm run agent:forms-live',
-      present: [describeSource(serviceKey, sources)].filter(Boolean),
+      present: [
+        describeSource(serviceKey, sources),
+        options.formWritesApproved ? 'Jay approval flag supplied for tagged live form QA writes' : '',
+      ].filter(Boolean),
       missing: serviceKey ? [] : ['SUPABASE_SERVICE_ROLE_KEY or SUPABASE_SERVICE_KEY'],
+      manual: options.formWritesApproved
+        ? []
+        : ['Jay approval for tagged live form QA writes is required before running forms-live'],
       optional: [
         turnstile
           ? `Turnstile configured via ${describeSource(turnstile, sources)}`
@@ -200,21 +212,35 @@ function buildChecks(env, sources, options) {
       id: 'forms-live-preview',
       label: 'Deployed Cloudflare form persistence',
       command: 'npm run agent:forms-live -- --base-url <preview-or-production-origin>',
-      present: [describeSource(serviceKey, sources), presentSource(previewUrlEnv, sources, previewUrlSource)].filter(Boolean),
+      present: [
+        describeSource(serviceKey, sources),
+        presentSource(previewUrlEnv, sources, previewUrlSource),
+        options.formWritesApproved ? 'Jay approval flag supplied for tagged live form QA writes' : '',
+      ].filter(Boolean),
       missing: [
         serviceKey ? '' : 'SUPABASE_SERVICE_ROLE_KEY or SUPABASE_SERVICE_KEY',
         previewUrl ? '' : 'CLOUDFLARE_PAGES_PREVIEW_URL or PAGES_PREVIEW_URL, or pass --base-url manually',
       ].filter(Boolean),
+      manual: options.formWritesApproved
+        ? []
+        : ['Jay approval for tagged live form QA writes is required before running forms-live'],
     }),
     makeCheck({
       id: 'forms-private-boundary',
       label: 'Live form private-row browser-key boundary',
       command: 'npm run agent:forms-live -- --require-browser-boundary',
-      present: [describeSource(serviceKey, sources), describeSource(browserKey, sources)].filter(Boolean),
+      present: [
+        describeSource(serviceKey, sources),
+        describeSource(browserKey, sources),
+        options.formWritesApproved ? 'Jay approval flag supplied for tagged live form QA writes' : '',
+      ].filter(Boolean),
       missing: [
         serviceKey ? '' : 'SUPABASE_SERVICE_ROLE_KEY or SUPABASE_SERVICE_KEY',
         browserKey ? '' : 'VITE_SUPABASE_PUBLISHABLE_KEY or VITE_SUPABASE_ANON_KEY',
       ].filter(Boolean),
+      manual: options.formWritesApproved
+        ? []
+        : ['Jay approval for tagged live form QA writes is required before running forms-live'],
       optional: [
         'Runs the live form persistence check and additionally verifies created private lead rows are not anonymously readable through the browser key.',
       ],

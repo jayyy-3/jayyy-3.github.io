@@ -156,7 +156,8 @@
         "2026-05-28: Added `npm run agent:forms-live` as the credential-gated live verification runner for valid enquiry, invalid enquiry, valid sample request, invalid sample request, sample item, and server-side audit rows. The command intentionally fails when the service-role key is unavailable and retains tagged test rows for auditability unless Jay approves cleanup.",
         "2026-05-29: `npm run agent:forms-live` now also verifies that each valid response notificationStatus matches the stored lead row notification_status, catching email status patch failures during live verification.",
         "2026-05-29: `npm run agent:forms-live` now checks created private lead rows against anonymous browser-key reads whenever a browser-safe key is configured, and `--require-browser-boundary` makes that privacy check mandatory for final launch proof.",
-        "2026-05-28: Added `npm run agent:live-readiness` as a no-secret input audit for local/deployed form verification, admin readiness, tagged admin live writes, and Cloudflare preview smoke readiness. It accepts non-secret `--base-url`, `--admin-email`, and `--admin-writes-approved` readiness flags; secret keys and admin session credentials still stay in env files or shell."
+        "2026-05-28: Added `npm run agent:live-readiness` as a no-secret input audit for local/deployed form verification, admin readiness, tagged admin live writes, and Cloudflare preview smoke readiness. It accepts non-secret `--base-url`, `--admin-email`, `--form-writes-approved`, and `--admin-writes-approved` readiness flags; secret keys and admin session credentials still stay in env files or shell.",
+        "2026-05-29: `npm run agent:live-readiness` now treats all live form persistence commands as manually gated until Jay's approval for tagged live form QA writes is represented with `--form-writes-approved`. The flag clears only the manual approval gate and never substitutes for service-role or browser-safe credentials."
       ],
       "acceptance": [
         "Valid enquiry submissions create Supabase enquiry rows through a server-side endpoint.",
@@ -173,8 +174,8 @@
         "npm run agent:smoke",
         "node scripts/check-forms-api.mjs",
         "npm run agent:live-readiness",
-        "npm run agent:forms-live (after SUPABASE_SERVICE_ROLE_KEY is configured)",
-        "npm run agent:forms-live -- --require-browser-boundary (after service-role and browser-safe keys are configured)",
+        "npm run agent:forms-live (after SUPABASE_SERVICE_ROLE_KEY is configured and Jay approves tagged live form QA writes)",
+        "npm run agent:forms-live -- --require-browser-boundary (after service-role and browser-safe keys are configured and Jay approves tagged live form QA writes)",
         "Live Forms API test: valid response notificationStatus matches stored notification_status",
         "Live Forms API test: created private enquiry/sample-request/sample-item rows are not anonymously readable through browser-key REST access",
         "Mock API test: successful enquiry attempts admin_audit_events insert",
@@ -230,6 +231,7 @@
         "2026-05-28: Added `npm run agent:cloudflare-readiness` as a no-secret repo-side verifier for Cloudflare Pages. It checks the build script, Vite root base, SPA fallback, Function routing scope, headers, API handler files, environment placeholders, and deployment runbook. Account-level Pages project creation, production env vars, preview URL, custom domain, DNS, and rollback remain blocked on Cloudflare account access.",
         "2026-05-28: Added `npm run agent:cloudflare-preview-smoke` as a no-secret deployed-preview verifier. It requires `--base-url`, checks direct-refresh public/admin route shells and deployed assets, verifies Cloudflare-applied legacy redirects, and verifies `/api/enquiries` and `/api/sample-requests` reject GET/invalid POST safely. Local preview URLs skip redirect/Function checks so the script can be validated before a Pages preview exists.",
         "2026-05-28: Added `npm run agent:live-readiness` reporting for the optional `CLOUDFLARE_PAGES_PREVIEW_URL` / `PAGES_PREVIEW_URL` helper variables, plus a non-secret `--base-url` override, before running deployed preview smoke.",
+        "2026-05-29: Live deployed form verification is also approval-gated in `npm run agent:live-readiness`; pass `--form-writes-approved` only after Jay approves tagged form QA writes against the target environment.",
         "2026-05-29: Cloudflare deployment runbook and `npm run agent:cloudflare-readiness` now include `npm run agent:forms-live -- --require-browser-boundary` as the final private-row form proof after service-role and browser-safe Supabase keys are configured."
       ]
     },
