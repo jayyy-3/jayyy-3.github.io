@@ -257,6 +257,7 @@ function checkRoutes() {
   const auth = readRequired('src/lib/adminAuth.tsx');
   const client = readRequired('src/lib/supabaseClient.ts');
   const audit = readRequired('src/lib/adminAudit.ts');
+  const firstAdminBootstrap = readRequired('scripts/bootstrap-first-admin.mjs');
 
   if (existsSync(join(root, 'src/pages/admin/AdminModulePage.tsx'))) {
     failures.push('src/pages/admin/AdminModulePage.tsx: retired scaffold component should not remain after all launch modules are active');
@@ -322,6 +323,15 @@ function checkRoutes() {
   }
 
   requireIncludes(audit, ".from('admin_audit_events')", 'src/lib/adminAudit.ts');
+  requireIncludes(firstAdminBootstrap, ".from('admin_audit_events')", 'scripts/bootstrap-first-admin.mjs');
+  requireIncludes(firstAdminBootstrap, 'admin_profile.bootstrap', 'scripts/bootstrap-first-admin.mjs');
+  requireIncludes(firstAdminBootstrap, 'actor_user_id: null', 'scripts/bootstrap-first-admin.mjs');
+  requireIncludes(firstAdminBootstrap, "entity_type: 'admin_profiles'", 'scripts/bootstrap-first-admin.mjs');
+  requireIncludes(
+    firstAdminBootstrap,
+    'Bootstrap audit event recorded: admin_profile.bootstrap.',
+    'scripts/bootstrap-first-admin.mjs',
+  );
 }
 
 function checkPage(page) {

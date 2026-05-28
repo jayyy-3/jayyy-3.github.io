@@ -106,6 +106,7 @@ Acceptance:
 - Authenticated users without an active admin profile see unauthorized state once live auth can be exercised.
 - Active admin users can reach the dashboard only after Jay confirms the first admin email and an active `admin_profiles` row exists.
 - `npm run agent:first-admin-bootstrap` is the guarded operational path for this first profile. Default mode is no-write; `--verify-only` checks existing Auth/profile/seed state with a service-role key; write/invite mode requires Jay approval plus `--allow-writes` and a matching `--confirm-email`.
+- Approved first-admin write mode records an `admin_profile.bootstrap` audit event with `actor_user_id = null` and target profile metadata, so the service-role setup action is not invisible in the audit trail.
 - `npm run agent:admin-live-readiness -- --admin-email <first-admin-email>` is the read-only readiness gate before browser QA; it verifies browser-safe key presence, service-role verification access, the named active admin profile, baseline seed rows, and the browser-key anonymous public/private REST boundary without creating or changing users.
 - No service-role key is shipped to browser code.
 
@@ -192,6 +193,7 @@ Acceptance:
 - The screen includes loading, empty, filter, detail, metadata JSON, restricted-role, and error states.
 - Audit event mutation remains intentionally absent from the screen.
 - Admin Settings, Media, Stone Library, Projects, Products, Articles, and Leads save flows call `recordAdminAuditEvent` after successful primary mutations. If the audit insert fails, the UI appends an audit warning to the success notice instead of rolling back the primary save.
+- The one-time first-admin bootstrap script also writes `admin_profile.bootstrap` into `admin_audit_events` during approved `--allow-writes` mode. Because that operation runs through service-role setup rather than a signed-in admin browser session, the audit event uses `actor_user_id = null` and metadata for the target Auth user/profile.
 - Live audit row creation verification still requires browser-safe Supabase key configuration and an active profile. Server-side form audit events remain pending live form persistence verification.
 - `npm run agent:admin-crud-live` is now staged for that live proof. Default mode is no-write. With `--allow-writes`, it signs in or uses an admin access token and writes tagged QA rows across Settings, Media, Stone Library including finish images, Projects, Products, Articles, private lead workflow rows, and export-audit actions through authenticated RLS. It publishes then archives public-facing QA parents where possible, verifies tagged archived public-content QA rows and private lead QA rows are not anonymously visible through browser-key reads, and performs no physical deletes.
 

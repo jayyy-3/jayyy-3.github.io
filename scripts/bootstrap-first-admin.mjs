@@ -355,6 +355,27 @@ async function upsertAdminProfile(supabase, user, config) {
   return data;
 }
 
+async function recordBootstrapAuditEvent(supabase, user, config, options) {
+  const { error } = await supabase.from('admin_audit_events').insert({
+    actor_user_id: null,
+    action: 'admin_profile.bootstrap',
+    entity_type: 'admin_profiles',
+    entity_id: null,
+    metadata: {
+      source: 'scripts/bootstrap-first-admin.mjs',
+      target_user_id: user.id,
+      email: config.adminEmail,
+      role: config.role,
+      invited: options.invite,
+      allow_existing_owner: options.allowExistingOwner,
+    },
+  });
+
+  if (error) {
+    throw new Error(`First admin profile was upserted, but bootstrap audit event failed: ${error.message}`);
+  }
+}
+
 async function verifyOnly(supabase, config) {
   const [user, profiles] = await Promise.all([
     findAuthUserByEmail(supabase, config.adminEmail),
@@ -396,11 +417,13 @@ async function writeBootstrap(supabase, config, options) {
 
   assertOwnerBootstrapAllowed(activeOwners, user.id, options);
   const profile = await upsertAdminProfile(supabase, user, config);
+  await recordBootstrapAuditEvent(supabase, user, config, options);
   await verifySeeds(supabase);
 
   console.log('First admin bootstrap write completed.');
   console.log(`Supabase URL: ${config.supabaseUrl}`);
   console.log(`Admin profile ready: ${profile.email} (${profile.role}, active=${profile.is_active}).`);
+  console.log('Bootstrap audit event recorded: admin_profile.bootstrap.');
   console.log('Baseline seed rows ready: site_settings default and finish_definitions.');
   console.log('Next: run npm run agent:admin-live-readiness -- --admin-email <first-admin-email>.');
 }

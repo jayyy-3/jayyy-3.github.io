@@ -2,6 +2,48 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (First Admin Bootstrap Audit Guard)
+
+### Scope
+- Updated `scripts/bootstrap-first-admin.mjs` so approved `--allow-writes` mode records an `admin_profile.bootstrap` audit event after the first-admin profile upsert.
+- The audit event uses `actor_user_id = null` because the bootstrap is a guarded service-role setup operation, and stores target Auth/profile metadata in `metadata`.
+- The command now fails if the bootstrap audit event cannot be recorded, instead of silently treating the access-control change as fully verified.
+- Strengthened `npm run agent:admin-crud-coverage` so it guards this bootstrap audit source contract.
+
+### Changed Files
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `scripts/bootstrap-first-admin.mjs`
+- `scripts/check-admin-crud-coverage.mjs`
+
+### Verification Results
+- `node --check scripts/bootstrap-first-admin.mjs`: pass.
+- `node --check scripts/check-admin-crud-coverage.mjs`: pass.
+- `npm run agent:first-admin-bootstrap`: pass in plan-only/no-write mode; no Supabase calls, invites, profile writes, or deletes were attempted.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:live-readiness`: pass in report-only mode; live form/admin/Cloudflare inputs remain missing or approval-gated.
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass, including public/admin route shells and Forms API/UI source checks.
+- `npm run agent:admin-crud-live`: pass in plan-only/no-write mode.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- This is source-only first-admin audit hardening. It does not create an Auth user, create or update an admin profile, or verify live audit row creation.
+- Live first-admin bootstrap still requires service-role credentials, Jay-confirmed first admin email, Jay approval, `--allow-writes`, and matching `--confirm-email`.
+
+### Next Handoff
+- `NOW-ADMIN-AUTH-RLS-001`
+- `NOW-ADMIN-CMS-001`
+- `NOW-FORMS-BACKEND-001`
+
 ## Entry - 2026-05-29 (Admin Login Next Target Guard)
 
 ### Scope
