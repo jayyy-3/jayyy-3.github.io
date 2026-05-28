@@ -22,6 +22,7 @@ Last updated: 2026-05-29
 - `npm run agent:admin-crud-coverage`: pass.
 - `npm run agent:admin-crud-live`: pass in plan-only/no-write mode.
 - `npm run agent:check`: pass.
+- `npm run lint`: pass.
 - `git diff --check`: pass.
 - Supabase MCP read-only sanity: 10 migrations are present, 24/24 expected public launch tables have RLS enabled, 12 published finish definitions exist, one published default site settings row exists, and `admin_profiles`, `admin_audit_events`, `enquiries`, `sample_requests`, and `sample_request_items` remain at 0 rows.
 
