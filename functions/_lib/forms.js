@@ -331,6 +331,24 @@ async function updateSupabaseRow(env, tableName, id, values) {
   });
 }
 
+async function callSupabaseRpc(env, functionName, params) {
+  const result = await supabaseRequest(env, `/rest/v1/rpc/${functionName}`, {
+    method: 'POST',
+    body: JSON.stringify(params),
+  });
+
+  const row = Array.isArray(result) ? result[0] : result;
+  if (!row || typeof row !== 'object') {
+    throw new ApiError(
+      502,
+      'database_write_failed',
+      'The request could not be stored. Please contact Urblo directly.',
+    );
+  }
+
+  return row;
+}
+
 async function recordServerAuditEvent(env, action, entityType, entityId, metadata = {}) {
   try {
     await supabaseRequest(env, '/rest/v1/admin_audit_events', {
@@ -424,6 +442,43 @@ function sampleItemNotes(payload) {
     .join('\n');
 }
 
+async function insertSampleRequestWithItem(env, payload, notificationStatus) {
+  const result = await callSupabaseRpc(env, 'submit_sample_request_with_item', {
+    p_request: {
+      name: payload.name,
+      email: payload.email,
+      phone: payload.phone,
+      company: payload.company,
+      shipping_address: payload.shippingAddress,
+      project_name: payload.projectName,
+      message: payload.message,
+      source_route: payload.sourceRoute,
+      turnstile_success: payload.turnstileSuccess,
+      notification_status: notificationStatus,
+    },
+    p_item: {
+      quantity: payload.sampleQuantity,
+      notes: sampleItemNotes(payload),
+    },
+  });
+
+  const sampleRequestId = result.sample_request_id;
+  const sampleRequestItemId = result.sample_request_item_id;
+
+  if (typeof sampleRequestId === 'undefined' || typeof sampleRequestItemId === 'undefined') {
+    throw new ApiError(
+      502,
+      'database_write_failed',
+      'The request could not be stored. Please contact Urblo directly.',
+    );
+  }
+
+  return {
+    id: sampleRequestId,
+    itemId: sampleRequestItemId,
+  };
+}
+
 async function handleWithErrors(callback) {
   try {
     return await callback();
@@ -492,30 +547,20 @@ export async function handleSampleRequest(request, env) {
       ? 'pending'
       : 'not_required';
 
-    const inserted = await insertSupabaseRow(env, 'sample_requests', {
-      name: payload.name,
-      email: payload.email,
-      phone: payload.phone,
-      company: payload.company,
-      shipping_address: payload.shippingAddress,
-      project_name: payload.projectName,
-      message: payload.message,
-      source_route: payload.sourceRoute,
-      turnstile_success: turnstileSuccess,
-      notification_status: notificationStatus,
-    });
-
-    const item = await insertSupabaseRow(env, 'sample_request_items', {
-      sample_request_id: inserted.id,
-      quantity: payload.sampleQuantity,
-      notes: sampleItemNotes(payload),
-    });
+    const inserted = await insertSampleRequestWithItem(
+      env,
+      {
+        ...payload,
+        turnstileSuccess,
+      },
+      notificationStatus,
+    );
 
     await recordServerAuditEvent(env, 'sample_request.create', 'sample_requests', inserted.id, {
       sourceRoute: payload.sourceRoute,
       turnstileSuccess,
       notificationStatus,
-      itemId: item.id,
+      itemId: inserted.itemId,
       quantity: payload.sampleQuantity,
       finishProvided: Boolean(payload.sampleFinish),
       projectNameProvided: Boolean(payload.projectName),
@@ -540,7 +585,7 @@ export async function handleSampleRequest(request, env) {
       {
         ok: true,
         id: inserted.id,
-        itemId: item.id,
+        itemId: inserted.itemId,
         notificationStatus: finalNotificationStatus,
       },
       201,

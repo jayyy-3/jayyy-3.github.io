@@ -2,6 +2,45 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Sample Request Atomic Insert RPC)
+
+### Scope
+- Added and applied Supabase migration `sample_request_atomic_insert` for project `npkidywzwddbnfrnxlmo`.
+- Added service-role-only RPC function `public.submit_sample_request_with_item(jsonb, jsonb)` so the Pages Function creates a `sample_requests` row and first `sample_request_items` row inside one database transaction.
+- Updated `/api/sample-requests` source to call the RPC instead of two separate REST inserts, reducing the risk of a stored sample request without its requested item.
+- Updated Forms API mock checks so direct sample request/table item inserts now fail the source contract.
+
+### Changed Files
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `functions/_lib/forms.js`
+- `scripts/check-forms-api.mjs`
+- `supabase/migrations/202605290003_sample_request_atomic_insert.sql`
+- `supabase/migrations/README.md`
+
+### Verification Results
+- `node --check functions/_lib/forms.js`: pass.
+- `node --check scripts/check-forms-api.mjs`: pass.
+- `node scripts/check-forms-api.mjs`: pass; valid sample requests now use `submit_sample_request_with_item`, and mock checks fail on direct `sample_requests` / `sample_request_items` insert paths.
+- Supabase connector syntax preflight in a rolled-back transaction: pass.
+- Supabase connector `apply_migration`: `sample_request_atomic_insert` applied successfully.
+- Supabase connector `list_migrations`: `sample_request_atomic_insert` present.
+- Supabase connector `execute_sql`: `submit_sample_request_with_item(jsonb, jsonb)` exists, is `security invoker`, uses `search_path=public, pg_temp`, denies execute to `anon` and `authenticated`, and allows execute to `service_role`.
+- Supabase connector `execute_sql`: `admin_profiles`, `admin_audit_events`, `enquiries`, `sample_requests`, and `sample_request_items` remain at 0 rows after the DDL-only migration.
+
+### Risks and Gaps
+- This fixes source and database write atomicity for the sample request/request-item pair, but still does not prove live form persistence because no service-role key or Jay approval for tagged live form QA writes is available locally.
+- Email delivery, Turnstile, deployed Cloudflare Function behavior, and browser-key private-row proof remain pending their documented credentials and approval gates.
+
+### Next Handoff
+- `NOW-FORMS-BACKEND-001`
+- `NOW-FORMS-SUPABASE-001`
+- `NOW-ADMIN-AUTH-RLS-001`
+
 ## Entry - 2026-05-29 (Admin Profile Form Duplicate Validation)
 
 ### Scope

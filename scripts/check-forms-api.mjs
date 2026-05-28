@@ -44,12 +44,22 @@ async function withFetchMock(handler, options = {}) {
       return Response.json([{ id: 101 }], { status: 201 });
     }
 
-    if (url.includes('/rest/v1/sample_requests')) {
-      return Response.json([{ id: 202 }], { status: 201 });
+    if (url.includes('/rest/v1/rpc/submit_sample_request_with_item')) {
+      return Response.json([{ sample_request_id: 202, sample_request_item_id: 303 }], {
+        status: 200,
+      });
+    }
+
+    if (url.includes('/rest/v1/sample_requests?id=eq.202')) {
+      return new Response(null, { status: 204 });
     }
 
     if (url.includes('/rest/v1/sample_request_items')) {
-      return Response.json([{ id: 303 }], { status: 201 });
+      throw new Error('Sample request items should be inserted through submit_sample_request_with_item RPC.');
+    }
+
+    if (url.includes('/rest/v1/sample_requests?select=id')) {
+      throw new Error('Sample requests should be inserted through submit_sample_request_with_item RPC.');
     }
 
     if (url.includes('/rest/v1/admin_audit_events')) {
@@ -195,12 +205,16 @@ await withFetchMock(async (calls) => {
   assert.equal(body.id, 202);
   assert.equal(body.itemId, 303);
   assert.equal(body.notificationStatus, 'not_required');
-  assert.equal(calls.length, 3);
-  assert.match(calls[0].url, /\/rest\/v1\/sample_requests\?select=id$/);
-  assert.match(calls[1].url, /\/rest\/v1\/sample_request_items\?select=id$/);
-  assert.equal(JSON.parse(calls[1].init.body).sample_request_id, 202);
-  assert.match(calls[2].url, /\/rest\/v1\/admin_audit_events$/);
-  const sampleAuditBody = JSON.parse(calls[2].init.body);
+  assert.equal(calls.length, 2);
+  assert.match(calls[0].url, /\/rest\/v1\/rpc\/submit_sample_request_with_item$/);
+  const sampleRpcBody = JSON.parse(calls[0].init.body);
+  assert.equal(sampleRpcBody.p_request.email, 'mia@example.com');
+  assert.equal(sampleRpcBody.p_request.source_route, '/contact?intent=sample-request');
+  assert.equal(sampleRpcBody.p_request.notification_status, 'not_required');
+  assert.equal(sampleRpcBody.p_item.quantity, 2);
+  assert.match(sampleRpcBody.p_item.notes, /Angola Black/);
+  assert.match(calls[1].url, /\/rest\/v1\/admin_audit_events$/);
+  const sampleAuditBody = JSON.parse(calls[1].init.body);
   assert.equal(sampleAuditBody.action, 'sample_request.create');
   assert.equal(sampleAuditBody.entity_type, 'sample_requests');
   assert.equal(sampleAuditBody.entity_id, 202);
@@ -262,16 +276,15 @@ await withFetchMock(async (calls) => {
   assert.equal(response.status, 201);
   assert.equal(body.ok, true);
   assert.equal(body.notificationStatus, 'failed');
-  assert.equal(calls.length, 5);
-  assert.match(calls[0].url, /\/rest\/v1\/sample_requests\?select=id$/);
-  assert.equal(JSON.parse(calls[0].init.body).notification_status, 'pending');
-  assert.match(calls[1].url, /\/rest\/v1\/sample_request_items\?select=id$/);
-  assert.match(calls[2].url, /\/rest\/v1\/admin_audit_events$/);
-  assert.match(calls[3].url, /api\.resend\.com\/emails$/);
-  assert.equal(JSON.parse(calls[3].init.body).to[0], 'samples@example.com');
-  assert.match(calls[4].url, /\/rest\/v1\/sample_requests\?id=eq\.202$/);
-  assert.equal(calls[4].init.method, 'PATCH');
-  assert.equal(JSON.parse(calls[4].init.body).notification_status, 'failed');
+  assert.equal(calls.length, 4);
+  assert.match(calls[0].url, /\/rest\/v1\/rpc\/submit_sample_request_with_item$/);
+  assert.equal(JSON.parse(calls[0].init.body).p_request.notification_status, 'pending');
+  assert.match(calls[1].url, /\/rest\/v1\/admin_audit_events$/);
+  assert.match(calls[2].url, /api\.resend\.com\/emails$/);
+  assert.equal(JSON.parse(calls[2].init.body).to[0], 'samples@example.com');
+  assert.match(calls[3].url, /\/rest\/v1\/sample_requests\?id=eq\.202$/);
+  assert.equal(calls[3].init.method, 'PATCH');
+  assert.equal(JSON.parse(calls[3].init.body).notification_status, 'failed');
 }, { resendStatus: 500 });
 
 await withFetchMock(async (calls) => {

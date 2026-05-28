@@ -20,6 +20,7 @@ The Supabase connector can access the Urblo project directly. Do not ask the use
 | Foundation migrations | Applied on 2026-05-27: `foundation_schema`, `foundation_hardening`, `anon_read_only` |
 | Baseline seed migration | Applied on 2026-05-27: `baseline_seed` |
 | Admin hardening migrations | Applied on 2026-05-28: `admin_settings_role_hardening`, `admin_profile_owner_hardening`, `security_definer_function_grants`; applied on 2026-05-29: `security_definer_private_helpers`, `admin_profile_email_uniqueness` |
+| Form helper migrations | Applied on 2026-05-29: `sample_request_atomic_insert`, adding service-role-only atomic `sample_requests` + `sample_request_items` insert RPC |
 | Media Storage migrations | Applied on 2026-05-28: `media_storage_foundation`, `media_storage_listing_hardening` |
 | First content CRUD sources | Implemented on 2026-05-28: `/admin/stone-library` source screen for Stone Library groups, variants, and finish capabilities; expanded on 2026-05-29 with finish image links to media records. `/admin/projects` source screen for project records, facts, material schedules, material maps, and hotspots; `/admin/products` source screen for product families, models, material defaults, and specs; `/admin/articles` source screen for article metadata and structured article blocks |
 | First lead workflow source | Implemented on 2026-05-28: `/admin/leads` source screen for enquiry/sample request status, assignment, internal notes, notification state, sample item inspection, and audit-gated owner/admin CSV export |
@@ -84,6 +85,7 @@ Acceptance:
 - In progress on 2026-05-27. Pages Function source and Contact UI wiring are implemented for `/api/enquiries` and `/api/sample-requests`.
 - Mock API checks verify valid enquiry payloads target `enquiries`, valid sample request payloads target `sample_requests` plus `sample_request_items`, invalid payloads return validation errors before Supabase calls, and configured Turnstile failures fail closed before Supabase calls.
 - Mock API checks also verify successful enquiry/sample request inserts attempt `admin_audit_events` writes, audit insert failure does not fail the visitor response, and missing server-side Supabase credentials fail closed before Supabase calls.
+- Sample Request source now calls `submit_sample_request_with_item(jsonb, jsonb)`, a service-role-only `security invoker` RPC that creates the `sample_requests` row and first `sample_request_items` row inside one database transaction.
 - Mock API checks now verify configured Resend notification behavior: initial lead rows are inserted with `notification_status = pending`, email calls are attempted with the configured recipient, and the stored lead row is patched to `sent` or `failed` without failing the visitor response.
 - `npm run agent:forms-live -- --allow-writes` is now the write-gated and credential-gated live verification command for this phase. It requires Jay approval plus a service-role key, creates tagged test enquiry/sample-request rows, verifies their source-route audit metadata and sample item row, verifies invalid enquiry/sample-request payloads create no rows or matching audit events, verifies response-vs-stored `notification_status` consistency, and retains test rows for auditability until Jay approves cleanup. When a browser-safe key is configured it also verifies created private form rows are not anonymously readable; final launch proof should run it with `--require-browser-boundary`.
 - Live Supabase row creation through the HTTP endpoints is still pending server-side `SUPABASE_SERVICE_ROLE_KEY` configuration in the Cloudflare/Pages Function environment.
@@ -722,6 +724,15 @@ Fields:
 - `finish_definition_id bigint references finish_definitions(id)`
 - `quantity integer not null default 1 check (quantity > 0)`
 - `notes text`
+
+### `submit_sample_request_with_item(jsonb, jsonb)`
+Purpose: transactional helper used by the Cloudflare Pages Sample Request Function.
+
+Behavior:
+- Inserts one `sample_requests` row and its first `sample_request_items` row in a single database transaction.
+- Returns `sample_request_id` and `sample_request_item_id`.
+- Runs as `security invoker` with `search_path = public, pg_temp`.
+- Execute is revoked from `public`, `anon`, and `authenticated`; only `service_role` can execute it.
 
 ## Public Read Contract
 Public routes should read only published data:
