@@ -93,6 +93,7 @@ function inferMediaType(url) {
 
 function publicFileExists(url) {
     if (!url || /^https?:\/\//i.test(url)) return true;
+    if (url.startsWith('data/Product/')) return fs.existsSync(path.join(root, url));
     if (!url.startsWith('/')) return false;
 
     return fs.existsSync(path.join(root, 'public', url.slice(1)));
@@ -124,6 +125,7 @@ function buildImportPlan(summary) {
         ['stone_groups', summary.stone_groups, 'stone_group_key'],
         ['stone_variants', summary.stone_variants, 'stone_group_key + variant_key'],
         ['stone_finish_capabilities', summary.stone_finish_capabilities, 'stone_group_key + stone_variant_key + finish_key'],
+        ['stone_finish_images', summary.stone_finish_images, 'stone_group_key + stone_variant_key + finish_key + media_source_url + image_role + sort_order'],
         ['products', summary.products, 'slug'],
         ['product_models', summary.product_models, 'product_slug + model_key'],
         ['product_material_defaults', summary.product_material_defaults, 'product_slug + material_category'],
@@ -186,6 +188,7 @@ function formatImportPlanMarkdown(payload) {
         `- Stone groups: ${payload.summary.stone_groups}`,
         `- Stone variants: ${payload.summary.stone_variants}`,
         `- Finish capabilities: ${payload.summary.stone_finish_capabilities}`,
+        `- Stone finish images: ${payload.summary.stone_finish_images}`,
         `- Products: ${payload.summary.products}`,
         `- Product models: ${payload.summary.product_models}`,
         `- Product material defaults: ${payload.summary.product_material_defaults}`,
@@ -243,6 +246,7 @@ function buildPreflightSql(payload) {
         'media_assets',
         'stone_groups',
         'stone_variants',
+        'stone_finish_images',
         'products',
         'product_models',
         'projects',
@@ -510,6 +514,34 @@ function buildDraftImportSql(payload) {
         'on conflict (stone_variant_id, finish_definition_id) do update set',
         '  capability = excluded.capability,',
         '  sources = excluded.sources;',
+        '',
+        '-- Stone finish images: linked to imported media assets and kept draft for admin review.',
+        'with',
+        jsonRecordset(payload.rows.stone_finish_images, 'finish_image_rows', [
+            'stone_group_key text',
+            'stone_variant_key text',
+            'finish_key text',
+            'media_source_url text',
+            'image_role text',
+            'sort_order integer',
+            'status text',
+        ]),
+        'insert into public.stone_finish_images (stone_group_id, stone_variant_id, finish_definition_id, media_asset_id, image_role, sort_order, status)',
+        "select sg.id, sv.id, fd.id, m.id, r.image_role, r.sort_order, 'draft'",
+        'from finish_image_rows r',
+        'join public.stone_groups sg on sg.stone_group_key = r.stone_group_key',
+        'join public.stone_variants sv on sv.stone_group_id = sg.id and sv.variant_key = r.stone_variant_key',
+        'join public.finish_definitions fd on fd.finish_key = r.finish_key',
+        'join public.media_assets m on m.source_url = r.media_source_url',
+        'where not exists (',
+        '  select 1 from public.stone_finish_images existing',
+        '  where existing.stone_group_id = sg.id',
+        '    and existing.stone_variant_id = sv.id',
+        '    and existing.finish_definition_id = fd.id',
+        '    and existing.media_asset_id = m.id',
+        '    and existing.image_role = r.image_role',
+        '    and existing.sort_order = r.sort_order',
+        ');',
         '',
         '-- Products.',
         'with',
@@ -845,6 +877,174 @@ function addMediaCandidate(url, usage, alt) {
     return url;
 }
 
+function propertyNameText(name) {
+    if (ts.isIdentifier(name) || ts.isStringLiteral(name) || ts.isNumericLiteral(name)) {
+        return name.text;
+    }
+
+    return null;
+}
+
+function stringLiteralText(node) {
+    return node && (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) ? node.text : null;
+}
+
+function productImageSourceUrl(relativePath) {
+    return `data/Product/${relativePath}`;
+}
+
+function extractSecondaryProductImage(callExpression) {
+    if (!ts.isCallExpression(callExpression) || callExpression.expression.getText() !== 'secondaryProductImage') {
+        return null;
+    }
+
+    const relativePath = stringLiteralText(callExpression.arguments[0]);
+    const alt = stringLiteralText(callExpression.arguments[1]);
+    const label = stringLiteralText(callExpression.arguments[2]);
+
+    if (!relativePath) {
+        return null;
+    }
+
+    return {
+        imageUrl: productImageSourceUrl(relativePath),
+        alt,
+        label,
+    };
+}
+
+function extractStoneImageAsset(initializer) {
+    if (ts.isCallExpression(initializer) && initializer.expression.getText() === 'productImage') {
+        const relativePath = stringLiteralText(initializer.arguments[0]);
+        const alt = stringLiteralText(initializer.arguments[1]);
+        const secondaryImagesArg = initializer.arguments[3];
+        const secondaryImages = secondaryImagesArg && ts.isArrayLiteralExpression(secondaryImagesArg)
+            ? secondaryImagesArg.elements.map(extractSecondaryProductImage).filter(Boolean)
+            : [];
+
+        if (!relativePath) {
+            return null;
+        }
+
+        return {
+            imageUrl: productImageSourceUrl(relativePath),
+            alt,
+            secondaryImages,
+        };
+    }
+
+    if (ts.isObjectLiteralExpression(initializer)) {
+        const asset = {
+            imageUrl: null,
+            alt: null,
+            secondaryImages: [],
+        };
+
+        for (const property of initializer.properties) {
+            if (!ts.isPropertyAssignment(property)) continue;
+            const key = propertyNameText(property.name);
+
+            if (key === 'imageUrl') {
+                asset.imageUrl = stringLiteralText(property.initializer);
+            }
+            if (key === 'alt') {
+                asset.alt = stringLiteralText(property.initializer);
+            }
+        }
+
+        return asset.imageUrl ? asset : null;
+    }
+
+    return null;
+}
+
+function extractStaticStoneFinishImageRows(stoneVariantToGroup, validFinishKeys, blockers) {
+    const sourcePath = 'src/data/stoneFinishImages.ts';
+    const source = fs.readFileSync(path.join(root, sourcePath), 'utf8');
+    const sourceFile = ts.createSourceFile(sourcePath, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+    const rows = [];
+
+    function visit(node) {
+        if (
+            ts.isVariableDeclaration(node) &&
+            ts.isIdentifier(node.name) &&
+            node.name.text === 'stoneFinishImages' &&
+            node.initializer &&
+            ts.isObjectLiteralExpression(node.initializer)
+        ) {
+            for (const variantProperty of node.initializer.properties) {
+                if (!ts.isPropertyAssignment(variantProperty) || !ts.isObjectLiteralExpression(variantProperty.initializer)) {
+                    continue;
+                }
+
+                const stoneVariantKey = propertyNameText(variantProperty.name);
+                if (!stoneVariantKey) continue;
+
+                const stoneGroupKey = stoneVariantToGroup.get(stoneVariantKey);
+                if (!stoneGroupKey) {
+                    const hasFinishSpecificRows = variantProperty.initializer.properties.some(
+                        (finishProperty) =>
+                            ts.isPropertyAssignment(finishProperty) &&
+                            propertyNameText(finishProperty.name) !== 'default',
+                    );
+                    if (hasFinishSpecificRows) {
+                        blockers.push(`Unknown stone variant image map ${stoneVariantKey} in ${sourcePath}`);
+                    }
+                    continue;
+                }
+
+                for (const finishProperty of variantProperty.initializer.properties) {
+                    if (!ts.isPropertyAssignment(finishProperty)) continue;
+                    const finishKey = propertyNameText(finishProperty.name);
+
+                    if (!finishKey || finishKey === 'default') continue;
+                    if (!validFinishKeys.has(finishKey)) {
+                        blockers.push(`Unknown finish image key ${finishKey} on ${stoneVariantKey} in ${sourcePath}`);
+                        continue;
+                    }
+
+                    const asset = extractStoneImageAsset(finishProperty.initializer);
+                    if (!asset?.imageUrl) {
+                        blockers.push(`Missing finish image asset for ${stoneVariantKey}/${finishKey} in ${sourcePath}`);
+                        continue;
+                    }
+
+                    rows.push({
+                        stone_group_key: stoneGroupKey,
+                        stone_variant_key: stoneVariantKey,
+                        finish_key: finishKey,
+                        media_source_url: asset.imageUrl,
+                        image_role: 'primary',
+                        sort_order: 0,
+                        status: 'draft',
+                        alt: asset.alt,
+                    });
+
+                    asset.secondaryImages.forEach((secondaryImage, secondaryIndex) => {
+                        if (!secondaryImage.imageUrl) return;
+
+                        rows.push({
+                            stone_group_key: stoneGroupKey,
+                            stone_variant_key: stoneVariantKey,
+                            finish_key: finishKey,
+                            media_source_url: secondaryImage.imageUrl,
+                            image_role: 'secondary',
+                            sort_order: secondaryIndex + 1,
+                            status: 'draft',
+                            alt: secondaryImage.alt,
+                        });
+                    });
+                }
+            }
+        }
+
+        ts.forEachChild(node, visit);
+    }
+
+    visit(sourceFile);
+    return rows;
+}
+
 const stoneLibrary = readJson('data/clean/stone_library.json');
 const articles = readJson('public/articles/index.json');
 const { projects } = loadTypeScriptModule('src/data/projectData.ts');
@@ -852,6 +1052,11 @@ const { products } = loadTypeScriptModule('src/data/productData.ts');
 
 const finishKeys = new Set(stoneLibrary.finishes.map((finish) => finishKeyFromParts(finish.finishId, finish.finishVariantId)));
 const stoneGroupKeys = new Set(stoneLibrary.stones.map((stone) => stone.stoneGroupId));
+const stoneVariantToGroup = new Map(
+    stoneLibrary.stones.flatMap((stone) =>
+        (stone.variants ?? []).map((variant) => [variant.stoneVariantId, stone.stoneGroupId]),
+    ),
+);
 
 const stoneGroups = stoneLibrary.stones.map((stone, index) => ({
     stone_group_key: stone.stoneGroupId,
@@ -901,6 +1106,15 @@ for (const stone of stoneLibrary.stones) {
         }
     }
 }
+
+const stoneFinishImages = extractStaticStoneFinishImageRows(stoneVariantToGroup, finishKeys, blockers);
+stoneFinishImages.forEach((image) => {
+    addMediaCandidate(
+        image.media_source_url,
+        `stone finish image ${image.stone_variant_key}/${image.finish_key}/${image.image_role}/${image.sort_order}`,
+        image.alt,
+    );
+});
 
 const productRows = [];
 const productModels = [];
@@ -1113,6 +1327,13 @@ articles.forEach((article, articleIndex) => {
 
 assertUnique(stoneGroups, (row) => row.stone_group_key, 'stone group key', blockers);
 assertUnique(stoneVariants, (row) => `${row.stone_group_key}/${row.variant_key}`, 'stone variant key', blockers);
+assertUnique(
+    stoneFinishImages,
+    (row) =>
+        `${row.stone_group_key}/${row.stone_variant_key}/${row.finish_key}/${row.media_source_url}/${row.image_role}/${row.sort_order}`,
+    'stone finish image key',
+    blockers,
+);
 assertUnique(productRows, (row) => row.slug, 'product slug', blockers);
 assertUnique(projectRows, (row) => row.slug, 'project slug', blockers);
 assertUnique(articleRows, (row) => row.slug, 'article slug', blockers);
@@ -1139,6 +1360,7 @@ const payload = {
         stone_groups: stoneGroups.length,
         stone_variants: stoneVariants.length,
         stone_finish_capabilities: stoneFinishCapabilities.length,
+        stone_finish_images: stoneFinishImages.length,
         products: productRows.length,
         product_models: productModels.length,
         product_material_defaults: productMaterialDefaults.length,
@@ -1159,6 +1381,7 @@ const payload = {
         stone_groups: stoneGroups,
         stone_variants: stoneVariants,
         stone_finish_capabilities: stoneFinishCapabilities,
+        stone_finish_images: stoneFinishImages.map(({ alt, ...row }) => row),
         products: productRows,
         product_models: productModels,
         product_material_defaults: productMaterialDefaults,
@@ -1206,6 +1429,7 @@ if (printJson) {
     console.log(`- stone_groups: ${stoneGroups.length}`);
     console.log(`- stone_variants: ${stoneVariants.length}`);
     console.log(`- stone_finish_capabilities: ${stoneFinishCapabilities.length}`);
+    console.log(`- stone_finish_images: ${stoneFinishImages.length}`);
     console.log(`- products: ${productRows.length}`);
     console.log(`- product_models: ${productModels.length}`);
     console.log(`- product_material_defaults: ${productMaterialDefaults.length}`);

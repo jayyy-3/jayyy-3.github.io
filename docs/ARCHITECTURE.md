@@ -103,7 +103,7 @@ Last updated: 2026-05-29
   - `scripts/check-doc-paths.mjs` rejects machine-specific paths and validates repo-relative path references in docs/task state.
 - Content import dry run:
   - `npm run agent:content-import` => `node scripts/check-content-import-readiness.mjs`
-  - Reads current static Stone Library JSON, Projects data, Products data, Articles manifest, and referenced local media.
+  - Reads current static Stone Library JSON, Stone Library finish-image mappings, Projects data, Products data, Articles manifest, and referenced local media.
   - Produces Supabase-shaped import candidates with natural keys, forces content rows to `draft`, and fails before any database write if local media is missing, slugs duplicate, or project/material references use unknown stone or finish keys.
   - Can write a local ignored review artifact with `npm run agent:content-import -- --out .tmp/content-import-preview.json`; the artifact remains a draft/no-write payload and must not be applied as final published content without approval.
   - `npm run agent:content-import:plan` writes both `.tmp/content-import-preview.json` and `.tmp/content-import-plan.md`, including import safety notes, preflight checks, table apply order, reverse rollback order, and verification expectations.

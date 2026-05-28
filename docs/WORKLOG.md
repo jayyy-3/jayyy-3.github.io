@@ -2,6 +2,53 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Stone Library Finish Image Import Payload)
+
+### Scope
+- Extended the static-to-Supabase content import dry run so Stone Library finish-specific imagery from `src/data/stoneFinishImages.ts` is represented as draft `stone_finish_images` rows.
+- Added a TypeScript AST extractor for the static image map so Vite `import.meta.glob` runtime code is not executed by the Node import verifier.
+- Added local `data/Product` media source validation, finish-image counts in the JSON/Markdown plan, read-only preflight SQL status/count checks, and guarded draft apply SQL inserts.
+- Kept all imported finish image rows and linked media rows draft-only; no Supabase rows, Storage objects, Cloudflare state, credentials, or live admin writes were created or changed.
+
+### Changed Files
+- `AGENTS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `scripts/check-content-import-readiness.mjs`
+
+### Verification Results
+- `node --check scripts/check-content-import-readiness.mjs`: pass.
+- `npm run agent:content-import`: pass with 104 media candidates, 13 stone groups, 15 stone variants, 153 finish capability rows, 53 stone finish image rows, 6 products, 28 product models, 18 product material defaults, 18 product specs, 5 projects, 41 project facts, 14 project media rows, 2 project materials, 1 material map, 2 hotspots, 4 articles, 4 article block placeholders, 0 warnings, and 0 blockers.
+- `npm run agent:content-import:apply-sql`: pass and wrote ignored JSON, Markdown, preflight SQL, and guarded draft apply SQL artifacts.
+- Static SQL artifact guard scan: pass. The generated apply SQL includes the approval guard, inserts `stone_finish_images`, has no `delete from`, `drop table`, or `truncate`, and has no `status = 'published'` import operation.
+- `.tmp/` ignore check: pass. Generated import artifacts are ignored by Git.
+- `npm run agent:public-supabase-readiness`: pass.
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass, including public/admin route shells and Forms API mock checks.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:admin-crud-live`: pass in plan-only mode; no Supabase writes, Storage uploads, or deletes were attempted.
+- `npm run agent:live-readiness`: pass in report-only mode. It still reports missing service-role key, persistent browser-safe key env, first-admin email, admin session credentials, Jay approval for tagged live QA writes, and Cloudflare preview URL.
+- `npm run agent:cloudflare-readiness`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- This checkpoint does not apply the generated import SQL to Supabase, publish content, create credentials, create a first admin, or verify live admin/form writes.
+- The imported finish-image source URLs are local `data/Product` migration source locators; the rows remain draft until media is deliberately uploaded/approved through the CMS or a reviewed import path.
+- Default/reference-only Stone Library imagery remains excluded from finish-specific `stone_finish_images` rows unless a later content decision maps it to a specific finish or media role.
+
+### Next Handoff
+- `NOW-FORMS-BACKEND-001`: run `npm run agent:forms-live` after `SUPABASE_SERVICE_ROLE_KEY` is configured.
+- `NOW-ADMIN-AUTH-RLS-001`: run `npm run agent:admin-live-readiness -- --admin-email <first-admin-email>` after browser-safe and service-role keys plus first-admin profile are available.
+- `NOW-ADMIN-CONTENT-CRUD-001`: keep source-only import/public-read preparation moving while credentials remain unavailable; apply/import remains approval-gated.
+
 ## Entry - 2026-05-29 (Stone Library Finish Image Admin Source)
 
 ### Scope
