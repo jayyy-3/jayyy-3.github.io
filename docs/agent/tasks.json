@@ -234,7 +234,8 @@
         "2026-05-28: Added `npm run agent:live-readiness` reporting for the optional `CLOUDFLARE_PAGES_PREVIEW_URL` / `PAGES_PREVIEW_URL` helper variables, plus a non-secret `--base-url` override, before running deployed preview smoke.",
         "2026-05-29: Live deployed form verification is also approval-gated in `npm run agent:live-readiness`; pass `--form-writes-approved` only after Jay approves tagged form QA writes against the target environment.",
         "2026-05-29: Cloudflare deployment runbook and `npm run agent:cloudflare-readiness` now include `npm run agent:forms-live -- --allow-writes --require-browser-boundary` as the final private-row form proof after service-role and browser-safe Supabase keys are configured.",
-        "2026-05-29: `npm run agent:cloudflare-readiness` now also fails if the runbook drops `--allow-writes` form commands, `--form-writes-approved`, `--admin-writes-approved`, or the Jay approval language around tagged live form/admin QA writes."
+        "2026-05-29: `npm run agent:cloudflare-readiness` now also fails if the runbook drops `--allow-writes` form commands, `--form-writes-approved`, `--admin-writes-approved`, or the Jay approval language around tagged live form/admin QA writes.",
+        "2026-05-29: `npm run agent:cloudflare-readiness` now also fails if the runbook drops the first-admin read-only bootstrap check, the approval-gated first-admin `--allow-writes` command, `--first-admin-writes-approved`, or the Jay approval language around first-admin profile/invite writes."
       ]
     },
     {

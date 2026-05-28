@@ -173,6 +173,8 @@ function checkEnvAndDocs() {
     'npm run agent:cloudflare-preview-smoke -- --base-url https://<preview>.pages.dev',
     'npm run agent:forms-live -- --allow-writes',
     'npm run agent:forms-live -- --allow-writes --require-browser-boundary',
+    'npm run agent:first-admin-bootstrap -- --verify-only --admin-email <first-admin-email>',
+    'npm run agent:first-admin-bootstrap -- --allow-writes --admin-email <first-admin-email> --confirm-email <first-admin-email>',
     'npm run agent:admin-live-readiness -- --admin-email <first-admin-email>',
   ]) {
     requireIncludes(runbook, command, 'docs/CLOUDFLARE_DEPLOYMENT.md');
@@ -181,6 +183,8 @@ function checkEnvAndDocs() {
   for (const approvalGate of [
     '--form-writes-approved',
     'Jay approves tagged form QA writes',
+    '--first-admin-writes-approved',
+    'Jay approves creating/upserting the first profile or sending an invite',
     '--admin-writes-approved',
     'Jay approves tagged live admin QA writes',
   ]) {

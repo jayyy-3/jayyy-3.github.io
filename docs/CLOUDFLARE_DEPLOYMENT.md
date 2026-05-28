@@ -11,7 +11,7 @@ Repo-side readiness is checked by `npm run agent:cloudflare-readiness`. This com
 
 After a preview deployment exists, preview HTTP smoke is checked by `npm run agent:cloudflare-preview-smoke -- --base-url https://<preview>.pages.dev`. This command verifies direct-refresh route shells, deployed static assets, Cloudflare redirect behavior, and no-write API safe-failure behavior for `/api/enquiries` and `/api/sample-requests`.
 
-Before running live form/admin/preview checks, `npm run agent:live-readiness` can be used to audit local inputs without printing secret values or mutating Supabase/Cloudflare. Use `--base-url <preview-origin>` and `--admin-email <first-admin-email>` for non-secret manual inputs, use `--form-writes-approved` only after Jay approves tagged live form QA writes, use `--admin-writes-approved` only after Jay approves tagged live admin QA writes, and use `--strict` when missing or manual-gated live inputs should fail the command.
+Before running live form/admin/preview checks, `npm run agent:live-readiness` can be used to audit local inputs without printing secret values or mutating Supabase/Cloudflare. Use `--base-url <preview-origin>` and `--admin-email <first-admin-email>` for non-secret manual inputs, use `--form-writes-approved` only after Jay approves tagged live form QA writes, use `--first-admin-writes-approved` only after Jay approves creating/upserting the first profile or sending an invite, use `--admin-writes-approved` only after Jay approves tagged live admin QA writes, and use `--strict` when missing or manual-gated live inputs should fail the command.
 
 ## Repo-Side Contract
 
@@ -134,6 +134,8 @@ Current `/functions/api` endpoints:
   - `npm run agent:forms-live -- --allow-writes --base-url https://<preview>.pages.dev` for deployed endpoint verification, after the Pages environment has the service-role key and Jay approves tagged form QA writes against that target.
 - The live verification command creates tagged test enquiry and sample-request rows, verifies their `admin_audit_events`, verifies invalid payloads create no rows, checks response-vs-stored notification status, and keeps the test rows until Jay approves cleanup. With `--require-browser-boundary`, it also proves those private lead rows are not anonymously readable through browser-key REST access.
 - Admin route tests require a browser-safe Supabase key, a Supabase Auth user, and a matching active `admin_profiles` row.
+- Before creating/upserting the first admin profile or sending an invitation, run `npm run agent:first-admin-bootstrap -- --verify-only --admin-email <first-admin-email>` with the service-role key to inspect the existing Auth/profile/seed state.
+- First-admin profile/invite writes require Jay approval, `--allow-writes`, and a matching `--confirm-email`: `npm run agent:first-admin-bootstrap -- --allow-writes --admin-email <first-admin-email> --confirm-email <first-admin-email>`. Add `--invite` only when Jay explicitly approves sending the Supabase Auth invitation.
 - Before browser admin QA, run `npm run agent:admin-live-readiness -- --admin-email <first-admin-email>` to verify the browser-safe key, service-role verification key, active admin profile, and baseline seed rows without mutating Supabase.
 - Before live admin save/export QA, run `npm run agent:admin-crud-live` in plan-only mode, then run `npm run agent:admin-crud-live -- --allow-writes` only after a real owner/admin Supabase Auth session is available and Jay approves tagged QA writes. Use `--include-storage` when intentionally verifying private Storage object upload policy.
 - Settings save tests require an active owner/admin profile because `site_settings` write RLS is owner/admin only. Admin profile save tests require existing Supabase Auth users and must verify owner-role changes are owner-protected.
@@ -180,6 +182,8 @@ For deployed Pages preview route/asset/redirect/API safe-failure smoke, run:
 - `npm run agent:cloudflare-preview-smoke -- --base-url https://<preview>.pages.dev`
 
 After admin browser-safe keys and the first admin profile are configured, run:
+- `npm run agent:first-admin-bootstrap -- --verify-only --admin-email <first-admin-email>`
+- `npm run agent:first-admin-bootstrap -- --allow-writes --admin-email <first-admin-email> --confirm-email <first-admin-email>` only after Jay approves creating/upserting the first profile or sending an invite
 - `npm run agent:admin-live-readiness -- --admin-email <first-admin-email>`
 
 After a real owner/admin browser session is available and tagged QA writes are approved, run:

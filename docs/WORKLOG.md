@@ -2,6 +2,37 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Cloudflare First Admin Approval Gate Guard)
+
+### Scope
+- Updated the Cloudflare deployment runbook so admin browser QA setup includes the guarded first-admin path:
+  - read-only verify: `npm run agent:first-admin-bootstrap -- --verify-only --admin-email <first-admin-email>`;
+  - write/invite path: `npm run agent:first-admin-bootstrap -- --allow-writes --admin-email <first-admin-email> --confirm-email <first-admin-email>` only after Jay approval.
+- Hardened `npm run agent:cloudflare-readiness` so the runbook must retain `--first-admin-writes-approved`, the first-admin write command, and the Jay approval language.
+
+### Changed Files
+- `docs/CLOUDFLARE_DEPLOYMENT.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `scripts/check-cloudflare-pages-readiness.mjs`
+
+### Verification Results
+- `node --check scripts/check-cloudflare-pages-readiness.mjs`: pass.
+- `npm run agent:cloudflare-readiness`: pass.
+- `npm run agent:check`: pass.
+- `npm run lint`: pass.
+- `git diff --check`: pass.
+- `node -e "JSON.parse(require('fs').readFileSync('docs/agent/tasks.json','utf8')); console.log('tasks json ok')"`: pass.
+
+### Risks and Gaps
+- Source-only runbook/readiness hardening. No Cloudflare project, DNS, secrets, Supabase users, profiles, rows, Storage objects, or live writes were created or changed.
+
+### Next Handoff
+- `NOW-CLOUDFLARE-PAGES-DEPLOY-001`
+- `NOW-ADMIN-AUTH-RLS-001`
+
 ## Entry - 2026-05-29 (First Admin Write Readiness Gate)
 
 ### Scope
