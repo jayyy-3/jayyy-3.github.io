@@ -2,6 +2,33 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Supabase Read-Only Launch Sanity)
+
+### Scope
+- Ran a read-only Supabase connector sanity pass against project `npkidywzwddbnfrnxlmo`.
+- Verified the live project still matches the expected pre-credential launch state after the source-only admin/import verifier checkpoints.
+- No migrations, SQL writes, table rows, Storage objects, Auth users, Cloudflare state, credentials, or local runtime source were changed.
+
+### Changed Files
+- `docs/HANDOFF.md`
+- `docs/WORKLOG.md`
+
+### Verification Results
+- Supabase migration list: pass. 10 launch migrations are present, ending with `security_definer_private_helpers`.
+- Supabase table/RLS check: pass. 24 expected public launch tables exist and all 24 have RLS enabled.
+- Supabase policy helper check: pass. 99 checked policy expressions use `private.has_admin_role(...)`; 0 use `public.has_admin_role(...)`.
+- Supabase helper privilege check: pass. `anon` and `authenticated` have no direct routine privileges on exposed public admin helper functions.
+- Supabase seed/private-row check: pass. 12 published `finish_definitions`, 1 published default `site_settings` row, and 0 rows in `admin_profiles`, `admin_audit_events`, `enquiries`, `sample_requests`, and `sample_request_items`.
+- Supabase Storage check: pass. `urblo-public-media` and `urblo-admin-media` buckets exist with expected public/private bucket posture, and four authenticated `storage.objects` policies are present.
+
+### Risks and Gaps
+- This checkpoint is read-only evidence. It does not verify live form persistence, first-admin setup, active-admin login, admin CRUD writes, Storage upload, audit row creation, or Cloudflare preview deployment.
+- The live project intentionally still has zero private workflow rows because service-role form verification and first-admin bootstrap have not run.
+
+### Next Handoff
+- Continue source-only verification hardening while credentials are unavailable.
+- Once credentials are available, run `npm run agent:forms-live`, first-admin verify/bootstrap, admin live readiness, and approval-gated tagged admin writes in the documented order.
+
 ## Entry - 2026-05-29 (Admin Article Structured Authoring Coverage)
 
 ### Scope
