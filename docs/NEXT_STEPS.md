@@ -23,7 +23,7 @@ Docs-only and harness-only work should run:
 Cloudflare/Supabase implementation work should also follow the new verification profiles in `docs/agent/verification.md`.
 
 ## Last Runtime Baseline
-Measured 2026-05-29 during the Stone Library finish-image import checkpoint:
+Measured 2026-05-29 during the Forms API wrapper coverage checkpoint:
 - `npm run build`: pass
 - `npm run lint`: pass
 - `npx tsc -b`: pass
@@ -40,6 +40,7 @@ For any user-facing layout/copy/IA task:
 Source of truth: `docs/agent/tasks.json`.
 
 - `NOW-FORMS-BACKEND-001`: complete live verification for Cloudflare Pages Functions after server-side `SUPABASE_SERVICE_ROLE_KEY` is configured and Jay approves tagged live form QA writes. Source and mock API checks are implemented, including server-side audit-event attempts after successful lead inserts; `.env.example` and Cloudflare docs now list canonical variables plus supported compatibility aliases; `npm run agent:forms-ui` now guards the Contact form visitor-state/source contract; `npm run agent:forms-live -- --allow-writes` is ready as the credential-gated live persistence/audit/no-write verifier, and `npm run agent:forms-live -- --allow-writes --require-browser-boundary` is the final private-row browser-key boundary proof once a browser-safe key is configured.
+- Forms API source checks now also exercise the Cloudflare Pages Function wrappers for method behavior: GET is rejected, OPTIONS returns the preflight response, and invalid Sample Request POSTs are rejected before Supabase calls.
 - `NOW-CLOUDFLARE-PAGES-DEPLOY-001`: repo-side Cloudflare readiness is now checkable with `npm run agent:cloudflare-readiness`; deployed preview route/asset/redirect/API safe-failure smoke is staged with `npm run agent:cloudflare-preview-smoke -- --base-url https://<preview>.pages.dev`; the runbook includes `npm run agent:forms-live -- --allow-writes --require-browser-boundary` for final private-row form proof and the guarded first-admin bootstrap commands before admin browser QA; account-level project creation, production environment variables, preview URL, custom domain, DNS cutover, and rollback remain blocked on Cloudflare access/confirmation.
 - Cloudflare deployed-preview route checklist now treats canonical `/products/prime-block`, article detail, and `/capabilities` as direct-refresh checks; old product/article URLs remain redirect checks only.
 - `NOW-FORMS-SUPABASE-001`: complete live verification for Supabase-backed Contact and Sample Request submissions, notification acceptance, and admin-visible lead workflow.

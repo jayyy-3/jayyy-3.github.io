@@ -1,4 +1,6 @@
 import assert from 'node:assert/strict';
+import { onRequest as onEnquiryRequest } from '../functions/api/enquiries.js';
+import { onRequest as onSampleRequest } from '../functions/api/sample-requests.js';
 import { handleEnquiryRequest, handleSampleRequest } from '../functions/_lib/forms.js';
 
 const env = {
@@ -13,6 +15,14 @@ function jsonRequest(path, body) {
       'content-type': 'application/json',
     },
     body: JSON.stringify(body),
+  });
+}
+
+function methodRequest(path, method, body = undefined) {
+  return new Request(`https://urblo.test${path}`, {
+    method,
+    headers: body ? { 'content-type': 'application/json' } : undefined,
+    body: body ? JSON.stringify(body) : undefined,
   });
 }
 
@@ -73,7 +83,59 @@ async function withFetchMock(handler, options = {}) {
 }
 
 await withFetchMock(async (calls) => {
+  for (const [path, onRequest] of [
+    ['/api/enquiries', onEnquiryRequest],
+    ['/api/sample-requests', onSampleRequest],
+  ]) {
+    const response = await onRequest({
+      request: methodRequest(path, 'GET'),
+      env,
+    });
+    const body = await readJson(response);
+
+    assert.equal(response.status, 405);
+    assert.equal(body.ok, false);
+    assert.equal(body.error.code, 'method_not_allowed');
+  }
+  assert.equal(calls.length, 0);
+});
+
+await withFetchMock(async (calls) => {
+  for (const [path, onRequest] of [
+    ['/api/enquiries', onEnquiryRequest],
+    ['/api/sample-requests', onSampleRequest],
+  ]) {
+    const response = await onRequest({
+      request: methodRequest(path, 'OPTIONS'),
+      env,
+    });
+
+    assert.equal(response.status, 204);
+    assert.equal(response.headers.get('allow'), 'POST, OPTIONS');
+  }
+  assert.equal(calls.length, 0);
+});
+
+await withFetchMock(async (calls) => {
   const response = await handleEnquiryRequest(jsonRequest('/api/enquiries', {}), env);
+  const body = await readJson(response);
+
+  assert.equal(response.status, 400);
+  assert.equal(body.ok, false);
+  assert.equal(body.error.code, 'validation_failed');
+  assert.equal(calls.length, 0);
+});
+
+await withFetchMock(async (calls) => {
+  const response = await onSampleRequest({
+    request: methodRequest('/api/sample-requests', 'POST', {
+      name: 'No',
+      email: 'bad-sample',
+      shippingAddress: 'x',
+      sampleStone: '',
+    }),
+    env,
+  });
   const body = await readJson(response);
 
   assert.equal(response.status, 400);

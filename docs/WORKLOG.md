@@ -2,6 +2,46 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Forms API Wrapper Coverage)
+
+### Scope
+- Strengthened `scripts/check-forms-api.mjs` so the no-secret Forms API verifier covers the Cloudflare Pages Function endpoint wrappers, not only the shared request handlers.
+- Added checks that GET requests return `method_not_allowed`, OPTIONS returns the 204 preflight response without Supabase calls, and invalid Sample Request POSTs fail validation before Supabase calls.
+- Kept the checkpoint source-only: no live endpoint, Supabase row, Turnstile, Resend, Cloudflare, or credential access was used.
+
+### Changed Files
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `scripts/check-forms-api.mjs`
+
+### Verification Results
+- `node scripts/check-forms-api.mjs`: pass.
+- `node --check scripts/check-forms-api.mjs`: pass.
+- `npm run agent:forms-ui`: pass.
+- `npm run agent:live-readiness`: pass in report-only mode; live form/admin/Cloudflare inputs remain missing or approval-gated.
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:smoke`: pass, including public/admin route shells, Forms API wrapper/source checks, and Contact form UI source checks.
+- `npm run agent:check`: pass.
+- `npm run agent:admin-crud-live`: pass in plan-only/no-write mode.
+- `npm run agent:cloudflare-readiness`: pass.
+- `npm run agent:public-supabase-readiness`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- This strengthens source/mock coverage only. Live Contact and Sample Request persistence still requires server-side `SUPABASE_SERVICE_ROLE_KEY`, optional notification/Turnstile secrets, and Jay approval for tagged live form QA writes.
+- Deployed Cloudflare Function behavior still requires a real Pages preview URL before `npm run agent:cloudflare-preview-smoke -- --base-url <preview>` can prove deployed route/API behavior.
+
+### Next Handoff
+- `NOW-FORMS-BACKEND-001`
+- `NOW-FORMS-SUPABASE-001`
+- `NOW-ADMIN-AUTH-RLS-001`
+
 ## Entry - 2026-05-29 (First Admin Bootstrap Audit Guard)
 
 ### Scope

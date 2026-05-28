@@ -106,7 +106,7 @@ Before declaring implementation complete, verify all checks below:
 - Stone Library migration is complete: old `/materials*` route family has been removed and replaced with `/stone-library` plus `/stone-library/:stoneGroupId`.
 - `NEXT-STONELIB-DRIVE-IMAGE-AUDIT-001` and `NEXT-STONELIB-IMG-001` are complete for current website stones only; Drive-only products remain out of scope until the client decides to add them.
 - Contact route is declared at `/contact`; shared header/footer navigation points to declared routes, and Sample Request routes to `/contact?intent=sample-request`. The main Contact/Sample Request submit source now posts to Pages Functions; direct email/phone links remain manual contact channels, and production persistence is still pending service-role environment verification.
-- Last runtime gates were measured on 2026-05-29 and were green (`npm run build`, `npm run lint`, `npx tsc -b`, `npm run agent:smoke`) during the Stone Library finish-image import checkpoint.
+- Last runtime gates were measured on 2026-05-29 and were green (`npm run build`, `npm run lint`, `npx tsc -b`, `npm run agent:smoke`) during the Forms API wrapper coverage checkpoint.
 - Route-level code splitting is in place and the previous `>500kB` chunk warning is resolved; continue monitoring bundle output as features are added.
 - GitHub Pages hardening is now a legacy fallback; Cloudflare Pages deployment is the active launch path.
 - Routing now uses clean paths through `BrowserRouter` with Cloudflare Pages SPA fallback files in `public/`; unknown public URLs render a branded not-found state instead of the homepage.
