@@ -2,6 +2,52 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Admin Storage Anonymous Read Guard)
+
+### Scope
+- Strengthened `scripts/check-admin-crud-live.mjs` so the approval-gated `--include-storage` live run no longer proves only private Storage upload success.
+- The live verifier now checks the tagged tiny `urblo-admin-media` object against anonymous browser-key reads through both private and public Storage object endpoints.
+- Expanded `scripts/check-admin-crud-coverage.mjs` so the Storage anonymous-read guard cannot be silently removed.
+
+### Changed Files
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `scripts/check-admin-crud-coverage.mjs`
+- `scripts/check-admin-crud-live.mjs`
+- `scripts/check-live-readiness.mjs`
+
+### Verification Results
+- `node --check scripts/check-admin-crud-live.mjs`: pass.
+- `node --check scripts/check-admin-crud-coverage.mjs`: pass.
+- `node --check scripts/check-live-readiness.mjs`: pass.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-live -- --include-storage`: pass in plan-only/no-write mode; plan now includes the private Storage anonymous-read denial check.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:live-readiness`: pass in report-only mode; live form/admin/Cloudflare inputs remain missing or approval-gated, and Storage proof messaging now names anonymous-read denial.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:cloudflare-readiness`: pass.
+- `npm run agent:public-supabase-readiness`: pass.
+- `npm run agent:forms-ui`: pass.
+
+### Risks and Gaps
+- This is a verifier hardening checkpoint only. It does not upload Storage objects, create Supabase rows, create Auth users, run live admin writes, or touch Cloudflare state.
+- Final Storage proof still requires browser-safe Supabase config, a real owner/admin session, Jay approval for tagged live admin QA writes, and `npm run agent:admin-crud-live -- --allow-writes --include-storage`.
+
+### Next Handoff
+- `NOW-ADMIN-MEDIA-LEADS-001`
+- `NOW-ADMIN-CMS-001`
+- `NOW-FORMS-BACKEND-001`
+
 ## Entry - 2026-05-29 (Harness Operational Script Guard)
 
 ### Scope

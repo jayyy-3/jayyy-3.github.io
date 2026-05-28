@@ -547,6 +547,7 @@ function checkAdminLiveVerifierBoundaries() {
   const text = readRequired('scripts/check-admin-crud-live.mjs');
   requireIncludes(text, 'assertNotPubliclyVisible', 'scripts/check-admin-crud-live.mjs');
   requireIncludes(text, 'assertNotAnonymousReadable', 'scripts/check-admin-crud-live.mjs');
+  requireIncludes(text, 'assertStorageObjectNotAnonymousReadable', 'scripts/check-admin-crud-live.mjs');
   requireIncludes(text, 'BROWSER_KEY_NAMES', 'scripts/check-admin-crud-live.mjs');
   requireIncludes(text, 'ADMIN_TOKEN_NAMES', 'scripts/check-admin-crud-live.mjs');
   requireIncludes(text, 'auth/v1/token?grant_type=password', 'scripts/check-admin-crud-live.mjs');
@@ -587,6 +588,16 @@ function checkAdminLiveVerifierBoundaries() {
   requireIncludes(
     text,
     'Anonymous browser-key reads returned zero tagged QA content rows and no private lead rows.',
+    'scripts/check-admin-crud-live.mjs',
+  );
+  requireIncludes(
+    text,
+    'When --include-storage is used, verify the uploaded private Storage object is not anonymously readable.',
+    'scripts/check-admin-crud-live.mjs',
+  );
+  requireIncludes(
+    text,
+    'Anonymous reads for the tagged private Storage object were denied.',
     'scripts/check-admin-crud-live.mjs',
   );
   requireIncludes(text, 'EXPECTED_AUDIT_ACTIONS', 'scripts/check-admin-crud-live.mjs');

@@ -26,6 +26,7 @@ const livePlan = [
   'Record admin_audit_events for primary writes and export-gate actions.',
   'Publish then archive public-facing tagged QA rows before the final anonymous visibility check.',
   'Verify tagged archived content and private lead rows are not anonymously visible through browser-key reads.',
+  'When --include-storage is used, verify the uploaded private Storage object is not anonymously readable.',
   'Leave tagged QA rows archived or private for auditability; no physical deletes are attempted.',
 ];
 
@@ -507,6 +508,39 @@ async function assertNotAnonymousReadable(config, table, filters, label) {
       typeof json === 'string' ? json : JSON.stringify(json)
     }`,
   );
+}
+
+async function assertStorageObjectNotAnonymousReadable(config, storageRef) {
+  if (!storageRef) return;
+
+  const objectKey = storageRef.objectPath.split('/').map(encodeURIComponent).join('/');
+  const checks = [
+    {
+      label: 'private object endpoint',
+      url: `${config.supabaseUrl}/storage/v1/object/${storageRef.bucket}/${objectKey}`,
+    },
+    {
+      label: 'public object endpoint',
+      url: `${config.supabaseUrl}/storage/v1/object/public/${storageRef.bucket}/${objectKey}`,
+    },
+  ];
+
+  for (const check of checks) {
+    const response = await fetch(check.url, {
+      headers: browserKeyHeaders(config),
+    });
+
+    if (response.ok) {
+      throw new Error(
+        `Uploaded private Storage object was anonymously readable through the ${check.label}.`,
+      );
+    }
+
+    assert.ok(
+      [400, 401, 403, 404].includes(response.status),
+      `Anonymous Storage read via ${check.label} failed with unexpected HTTP ${response.status}.`,
+    );
+  }
 }
 
 async function insertRow(config, accessToken, table, payload) {
@@ -1072,6 +1106,7 @@ async function run() {
     assertNotAnonymousReadable(config, 'enquiries', { id: enquiry.id }, 'Tagged enquiry row'),
     assertNotAnonymousReadable(config, 'sample_requests', { id: sampleRequest.id }, 'Tagged sample_request row'),
     assertNotAnonymousReadable(config, 'sample_request_items', { id: sampleItem.id }, 'Tagged sample_request_item row'),
+    assertStorageObjectNotAnonymousReadable(config, storageRef),
   ]);
 
   const auditRows = await selectAuditRowsByMarker(config, accessToken, marker);
@@ -1081,6 +1116,7 @@ async function run() {
   console.log(`Created tagged QA rows: ${created.join(', ')}`);
   if (storageRef) {
     console.log(`Uploaded tagged private Storage object: ${storageRef.bucket}/${storageRef.objectPath}`);
+    console.log('Anonymous reads for the tagged private Storage object were denied.');
   }
   console.log(`Audit rows recorded: ${auditRows.length}`);
   console.log('Tagged QA content rows were published, archived, then checked for anonymous invisibility.');

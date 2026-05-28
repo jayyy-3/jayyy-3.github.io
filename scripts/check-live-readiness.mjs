@@ -344,7 +344,7 @@ function buildChecks(env, sources, options) {
         ? []
         : ['Jay approval for tagged live QA writes is required before running --allow-writes --include-storage'],
       optional: [
-        'Runs the admin CRUD live verifier and additionally uploads a tiny private urblo-admin-media object to verify Storage insert policy.',
+        'Runs the admin CRUD live verifier, uploads a tiny private urblo-admin-media object, and verifies anonymous reads are denied.',
       ],
     }),
     makeCheck({
