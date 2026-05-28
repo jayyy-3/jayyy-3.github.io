@@ -384,24 +384,33 @@
     },
     {
       "id": "NOW-ADMIN-CONTENT-CRUD-001",
-      "status": "blocked",
+      "status": "now",
       "priority": 5.3,
       "summary": "Implement admin CRUD modules for Projects, Stone Library, Products, and Articles.",
       "files": [
         "docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md",
         "docs/SUPABASE_SCHEMA.md",
         "docs/ARCHITECTURE.md",
+        "docs/ADMIN_IA_ACCESS.md",
+        "docs/DESIGN.md",
         "docs/HANDOFF.md",
+        "docs/NEXT_STEPS.md",
         "docs/WORKLOG.md",
         "docs/agent/tasks.json",
+        "scripts/agent-smoke.sh",
+        "src/pages/admin/AdminApp.tsx",
+        "src/pages/admin/AdminStoneLibraryPage.tsx",
+        "src/pages/admin/adminContent.ts",
         "src/data/projectData.ts",
         "src/data/productData.ts",
         "src/service/StoneLibraryService.ts",
         "src/pages/ArticlePage.tsx"
       ],
       "notes": [
-        "Blocked until live admin auth/profile verification is complete and the CRUD flow can rely on protected Supabase content access. Article editing must use structured blocks, not raw newsletter HTML.",
-        "Use docs/ADMIN_IA_ACCESS.md for module sequencing and field ownership when implementing Projects, Stone Library, Products, and Articles CRUD."
+        "Live save verification remains blocked until browser-safe Supabase key configuration and active admin/editor profiles exist. Source-only CRUD can continue behind the existing config/auth gate.",
+        "Use docs/ADMIN_IA_ACCESS.md for module sequencing and field ownership when implementing Projects, Stone Library, Products, and Articles CRUD.",
+        "2026-05-28: Added `/admin/stone-library` source CRUD behind the auth/config gate. It loads Stone Library groups, variants, finish definitions, and finish capabilities from Supabase; supports group and variant create/update/publish/archive flows; supports per-finish capability editing; includes loading, empty, validation, save, publish/archive, read-only, and error states.",
+        "2026-05-28: Public Stone Library runtime remains static/file-backed. Live Stone Library save verification and static-to-Supabase content import remain pending browser-safe Supabase config plus an active admin/editor profile."
       ],
       "acceptance": [
         "Admin users can draft, publish, edit, archive, and delete Projects, Stone Library records, Products, and Articles.",
@@ -414,7 +423,8 @@
         "npm run lint",
         "npx tsc -b",
         "npm run agent:smoke",
-        "npm run agent:check"
+        "npm run agent:check",
+        "Playwright: /admin/stone-library shows configuration-required state when no browser key is configured"
       ]
     },
     {

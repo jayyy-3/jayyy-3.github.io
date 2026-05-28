@@ -65,8 +65,8 @@ export const adminModules: AdminModuleDefinition[] = [
         label: 'Stone Library',
         path: '/admin/stone-library',
         summary: 'Stone groups, variants, finish capabilities, and source imagery readiness.',
-        dependency: 'Media library and Stone Library migration',
-        state: 'scaffold',
+        dependency: 'Stone Library tables + admin_profiles RLS',
+        state: 'active',
         Icon: Archive,
     },
     {

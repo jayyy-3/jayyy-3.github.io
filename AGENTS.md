@@ -86,6 +86,7 @@ Before declaring implementation complete, verify all checks below:
 - `/admin` auth shell source is implemented and config-gated: routes exist outside public site chrome, use Supabase Auth/profile checks when browser-safe keys are configured, and show a configuration-required state without rendering dashboard content when keys are absent.
 - `/admin/settings` source is the first CRUD screen and can read/create/update the default `site_settings` row for owner/admin roles after live auth is configured.
 - `/admin/media` source is implemented as the first media library screen: active admin/editor roles can upload Storage-backed draft records and edit media metadata, while publish/archive validation keeps private draft assets from being marked public.
+- `/admin/stone-library` source is implemented as the first content CRUD screen: active admin/editor roles can maintain stone groups, variants, and finish capability rows after live auth is configured.
 - `NOW-ADMIN-CMS-001` is an umbrella objective, not a single executable implementation task; admin IA/access is defined in `docs/ADMIN_IA_ACCESS.md`, and implementation still uses the smaller auth/CRUD/media/leads tasks in `docs/agent/tasks.json`.
 - Stone Library migration is complete: old `/materials*` route family has been removed and replaced with `/stone-library` plus `/stone-library/:stoneGroupId`.
 - `NEXT-STONELIB-DRIVE-IMAGE-AUDIT-001` and `NEXT-STONELIB-IMG-001` are complete for current website stones only; Drive-only products remain out of scope until the client decides to add them.

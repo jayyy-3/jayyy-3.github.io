@@ -84,6 +84,7 @@ Before custom domain cutover, test the generated `*.pages.dev` URL:
 - `/admin/login`
 - `/admin/media`
 - `/admin/settings`
+- `/admin/stone-library`
 
 Each route should:
 - return HTTP 200 on direct refresh;
@@ -100,6 +101,7 @@ Current `/functions/api` endpoints:
 - Admin route tests require a browser-safe Supabase key, a Supabase Auth user, and a matching active `admin_profiles` row.
 - Settings save tests require an active owner/admin profile because `site_settings` write RLS is owner/admin only.
 - Media upload/save tests require an active owner/admin/editor profile because Storage object writes and `media_assets` mutations are admin/editor only.
+- Stone Library save tests require an active owner/admin/editor profile because `stone_groups`, `stone_variants`, and `stone_finish_capabilities` mutations are admin/editor only.
 
 ### 5. Custom Domain Cutover
 Before switching production DNS:

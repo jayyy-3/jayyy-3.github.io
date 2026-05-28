@@ -2,6 +2,50 @@
 
 Last updated: 2026-05-28
 
+## Entry - 2026-05-28 (Admin Stone Library CRUD Source)
+
+### Scope
+- Replaced the `/admin/stone-library` scaffold with a protected source CRUD screen behind the existing Supabase Auth/profile gate.
+- The screen reads Stone Library groups, variants, finish definitions, and finish capability rows from Supabase.
+- Active editor/admin/owner roles can create/update stone groups, create/update variants, publish/archive group and variant records, and save per-finish capability rows once browser-safe Supabase config and an active profile exist.
+- Added loading, empty, validation, save, publish/archive, read-only, and error states.
+- Kept public Stone Library runtime static/file-backed; static-to-Supabase content import and public read migration remain separate follow-ups.
+
+### Changed Files
+- `scripts/agent-smoke.sh`
+- `src/pages/admin/AdminApp.tsx`
+- `src/pages/admin/AdminStoneLibraryPage.tsx`
+- `src/pages/admin/adminContent.ts`
+- `AGENTS.md`
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/DESIGN.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- Supabase policy inspection: pass. `stone_groups`, `stone_variants`, `stone_finish_capabilities`, and `finish_definitions` keep active admin-role SELECT/INSERT/UPDATE policies, owner/admin DELETE policies, and published-only public SELECT policies.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run build`: pass. Browserslist staleness notice remains; the admin chunk is about 301 kB before gzip.
+- `npm run agent:smoke`: pass, including `/admin/stone-library` route shell and Forms API checks.
+- Playwright browser QA: pass for `/admin/stone-library` with no browser-safe Supabase key configured. The route shows the configuration-required state rather than Stone Library CRUD content, and console output had 0 errors/warnings. Firefox was installed for local Playwright because local Chrome was unavailable.
+
+### Risks and Gaps
+- Live Stone Library save verification is not complete because browser-safe Supabase key configuration and an active editor/admin profile are still required.
+- Supabase Stone Library tables currently have finish definitions seeded, but group/variant/capability content import has not been run; the admin UI can create records once live auth is available.
+- Public Stone Library routes still read `data/clean/stone_library.json`; public runtime migration from static data to Supabase remains pending.
+- Physical delete controls are intentionally not exposed in this checkpoint; archive is the safe operational path until destructive-delete policy is confirmed.
+
+### Next Handoff
+- `NOW-FORMS-BACKEND-001`
+- `NOW-ADMIN-AUTH-RLS-001`
+- `NOW-ADMIN-CONTENT-CRUD-001` next source-only checkpoint: Projects with material maps and hotspots.
+- `NOW-ADMIN-MEDIA-LEADS-001`
+
 ## Entry - 2026-05-28 (Admin Media Storage and Library Source)
 
 ### Scope

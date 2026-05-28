@@ -94,6 +94,7 @@ Current execution split:
 - `NOW-FORMS-BACKEND-001`: in progress; Pages Function source and public Contact UI wiring are implemented, with live Supabase insert verification pending server-side secrets.
 - `NOW-ADMIN-SETTINGS-CRUD-001`: source implemented; `/admin/settings` can manage the default settings row after live owner/admin access is configured.
 - `NOW-ADMIN-MEDIA-LEADS-001`: media source implemented; Supabase Storage buckets/policies and `/admin/media` are in place, with live upload/save verification pending browser-safe Supabase key configuration and an active admin/editor profile.
+- `NOW-ADMIN-CONTENT-CRUD-001`: Stone Library source implemented; `/admin/stone-library` can manage stone groups, variants, and finish capability rows after live admin/editor access is configured. Projects, Products, Articles, and Leads remain pending.
 
 Core tables:
 - `site_settings`

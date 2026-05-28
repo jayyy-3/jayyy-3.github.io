@@ -5,7 +5,7 @@ Last updated: 2026-05-28
 ## Purpose
 This document defines the first production Supabase data model for the Urblo website launch.
 
-It is both the schema design contract and the current implementation checkpoint record. The foundation migrations, baseline seeds, admin settings hardening, and media Storage policies are applied. Cloudflare Pages Function source exists for forms, and the `/admin` auth shell, `/admin/settings`, and `/admin/media` source screens are implemented. Runtime work must still verify live form writes, configure browser-safe Supabase Auth keys, create the first admin profile, verify live settings/media writes, and build broader content CRUD.
+It is both the schema design contract and the current implementation checkpoint record. The foundation migrations, baseline seeds, admin settings hardening, and media Storage policies are applied. Cloudflare Pages Function source exists for forms, and the `/admin` auth shell, `/admin/settings`, `/admin/media`, and `/admin/stone-library` source screens are implemented. Runtime work must still verify live form writes, configure browser-safe Supabase Auth keys, create the first admin profile, verify live settings/media/Stone Library writes, and build broader Projects, Products, Articles, lead, and audit CRUD.
 
 ## Current Supabase Project
 
@@ -21,6 +21,7 @@ The Supabase connector can access the Urblo project directly. Do not ask the use
 | Baseline seed migration | Applied on 2026-05-27: `baseline_seed` |
 | Admin hardening migration | Applied on 2026-05-28: `admin_settings_role_hardening` |
 | Media Storage migrations | Applied on 2026-05-28: `media_storage_foundation`, `media_storage_listing_hardening` |
+| First content CRUD source | Implemented on 2026-05-28: `/admin/stone-library` source screen for Stone Library groups, variants, and finish capabilities |
 
 Secrets still must not be committed or pasted into repo docs. Service-role keys, database passwords, Turnstile secrets, and email provider secrets belong only in server-side environment variable stores.
 
@@ -115,13 +116,23 @@ Acceptance:
 - `/admin/media` source implements upload-backed draft media records, external media records, metadata editing, role-aware read-only behavior, and publish/archive validation.
 - Live browser upload/save verification still requires browser-safe Supabase key configuration and an active admin/editor profile.
 
+### Phase 4c - Stone Library CRUD Source
+Outcome: the first content workflow has a protected source editing surface before public runtime migration.
+
+Acceptance:
+- In progress on 2026-05-28. `/admin/stone-library` source implements Stone Library group, variant, and finish capability editing behind the existing Supabase Auth/profile gate.
+- The screen reads `stone_groups`, `stone_variants`, `finish_definitions`, and `stone_finish_capabilities`; editor/admin/owner roles can save group and variant records, publish/archive them, and update per-finish capability rows once live browser-safe Supabase config exists.
+- The screen includes loading, empty, validation, save, publish/archive, read-only, and error states.
+- Public Stone Library routes remain static/file-backed until static data is imported into Supabase and the public read path is deliberately migrated.
+- Live browser save verification still requires browser-safe Supabase key configuration and an active admin/editor profile.
+
 ### Phase 5 - Content Migration and CRUD
 Outcome: content can move out of static files in a controlled order.
 
 Order:
 1. Site settings is started under Phase 4a.
 2. Media records and Storage policy.
-3. Stone Library data.
+3. Stone Library data. Source CRUD is implemented under `/admin/stone-library`; live save verification and static-to-Supabase content import are pending browser-safe Supabase config and active admin/editor profile access.
 4. Projects and project material maps.
 5. Products.
 6. Articles as structured blocks.
