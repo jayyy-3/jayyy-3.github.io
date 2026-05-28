@@ -2,6 +2,43 @@
 
 Last updated: 2026-05-28
 
+## Entry - 2026-05-28 (Content Import Preflight SQL Artifact)
+
+### Scope
+- Added `--preflight-sql-out` support to `scripts/check-content-import-readiness.mjs`.
+- Added `npm run agent:content-import:preflight-sql` to write `.tmp/content-import-preview.json`, `.tmp/content-import-plan.md`, and `.tmp/content-import-preflight.sql`.
+- The generated SQL artifact is read-only and covers planned-vs-current row counts, seed/import target counts, status distribution, RLS state, and policy inspection.
+- Verified current Supabase target state without writing rows: seed tables have 12 finish definitions and one site settings row, content import target tables are empty, and all checked seed/import target tables have RLS enabled.
+
+### Changed Files
+- `AGENTS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `package.json`
+- `scripts/agent-init.sh`
+- `scripts/check-content-import-readiness.mjs`
+
+### Verification Results
+- `npm run agent:content-import:preflight-sql`: pass. Wrote local ignored JSON, Markdown plan, and read-only SQL artifacts with 0 warnings and 0 blockers.
+- Supabase connector target-count/RLS preflight: pass. `finish_definitions` has 12 rows, `site_settings` has 1 row, all checked content import target tables have 0 rows, and all checked seed/import target tables have RLS enabled.
+- `npm run lint`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `node -e "JSON.parse(require('fs').readFileSync('docs/agent/tasks.json','utf8')); JSON.parse(require('fs').readFileSync('package.json','utf8')); console.log('json ok')"`: pass.
+
+### Risks and Gaps
+- This is still a preflight artifact only. It must not be run as an import/apply step, and it does not write Supabase rows.
+- Actual import remains blocked on Jay's content-scope approval, credential handling, backup/export posture, and live admin verification.
+
+### Next Handoff
+- `NOW-FORMS-BACKEND-001` live Supabase row/audit verification.
+- `NOW-ADMIN-AUTH-RLS-001` live auth/profile verification.
+- `NOW-ADMIN-CONTENT-CRUD-001` approved content import/apply checkpoint after credentials are available.
+
 ## Entry - 2026-05-28 (Admin Dashboard Launch Checks Refresh)
 
 ### Scope

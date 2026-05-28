@@ -103,6 +103,7 @@ Last updated: 2026-05-28
   - Produces Supabase-shaped import candidates with natural keys and fails before any database write if local media is missing, slugs duplicate, or project/material references use unknown stone or finish keys.
   - Can write a local ignored review artifact with `npm run agent:content-import -- --out .tmp/content-import-preview.json`; the artifact remains a draft/no-write payload and must not be applied as final published content without approval.
   - `npm run agent:content-import:plan` writes both `.tmp/content-import-preview.json` and `.tmp/content-import-plan.md`, including import safety notes, preflight checks, table apply order, reverse rollback order, and verification expectations.
+  - `npm run agent:content-import:preflight-sql` also writes `.tmp/content-import-preflight.sql`, a read-only Supabase target preflight SQL artifact for row-count, status, RLS, and policy inspection before any approved import/apply step.
 - Agent startup:
   - `npm run agent:init` => `bash scripts/agent-init.sh`
   - Prints repo path, git status, recent commits, runtime versions, read order, and common commands.
@@ -327,6 +328,7 @@ Route state contract:
   - It intentionally marks import candidates as `draft` and uses natural keys/source URLs so provisional static content is not treated as final published client-approved content.
   - The optional `--out` flag writes a local ignored JSON artifact for review without writing Supabase rows.
   - The optional `--plan-out` flag writes a local ignored Markdown apply/rollback plan for review without writing Supabase rows.
+  - The optional `--preflight-sql-out` flag writes a local ignored read-only SQL artifact for reviewing current target table counts, status distribution, RLS state, and policies before any import is approved.
 - Admin IA/access:
   - `/admin` route, login, unauthorized, loading, module, settings, and audit states are defined in `docs/ADMIN_IA_ACCESS.md`.
   - Current `/admin` source implements real Supabase Auth wiring, session/profile loading, login, unauthorized, dashboard, and protected module scaffolds.

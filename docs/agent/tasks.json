@@ -455,7 +455,8 @@
         "2026-05-28: Stone Library, Projects, Products, and Articles save flows now call the shared admin audit writer after successful primary saves. Live audit row creation remains pending browser-safe Supabase config and active admin/editor profile.",
         "2026-05-28: Added `npm run agent:content-import` as a no-write dry run that maps current static Stone Library, Products, Projects, Articles, and media candidates into Supabase-shaped draft payloads. Latest run prepared 51 media candidates, 13 stone groups, 15 stone variants, 153 finish capability rows, 6 products, 28 product models, 5 projects, 4 articles, and zero warnings/blockers.",
         "2026-05-28: Added `--out` support for the content import dry run and ignored `.tmp/` so agents can write a local review artifact without committing generated payloads or writing Supabase rows.",
-        "2026-05-28: Added `--plan-out` and `npm run agent:content-import:plan` to write a local ignored Markdown apply/rollback plan alongside the dry-run JSON artifact. Latest plan includes 51 media candidates, 13 stone groups, 15 stone variants, 153 finish capability rows, 6 products, 28 product models, 18 material defaults, 18 specs, 5 projects, 41 project facts, 14 project media rows, 2 project materials, 1 material map, 2 hotspots, 4 articles, 4 article block placeholders, and zero warnings/blockers."
+        "2026-05-28: Added `--plan-out` and `npm run agent:content-import:plan` to write a local ignored Markdown apply/rollback plan alongside the dry-run JSON artifact. Latest plan includes 51 media candidates, 13 stone groups, 15 stone variants, 153 finish capability rows, 6 products, 28 product models, 18 material defaults, 18 specs, 5 projects, 41 project facts, 14 project media rows, 2 project materials, 1 material map, 2 hotspots, 4 articles, 4 article block placeholders, and zero warnings/blockers.",
+        "2026-05-28: Added `--preflight-sql-out` and `npm run agent:content-import:preflight-sql` to write a local ignored read-only Supabase target preflight SQL artifact. Supabase connector target-count/RLS preflight confirms import target tables are currently empty, seed tables contain 12 finish definitions and one site settings row, and all checked target/seed tables have RLS enabled."
       ],
       "acceptance": [
         "Admin users can draft, publish, edit, archive, and delete Projects, Stone Library records, Products, and Articles.",
@@ -474,6 +475,8 @@
         "npm run agent:content-import",
         "npm run agent:content-import -- --out .tmp/content-import-preview.json",
         "npm run agent:content-import:plan",
+        "npm run agent:content-import:preflight-sql",
+        "Supabase MCP: execute_sql verifies seed/import target table counts and RLS state before any import apply",
         "Playwright: /admin/stone-library shows configuration-required state when no browser key is configured",
         "Playwright: /admin/projects shows configuration-required state when no browser key is configured",
         "Playwright: /admin/products shows configuration-required state when no browser key is configured",
