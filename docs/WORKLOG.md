@@ -2,6 +2,39 @@
 
 Last updated: 2026-05-28
 
+## Entry - 2026-05-28 (Goal Resume Readiness Audit)
+
+### Scope
+- Resumed the active `/admin` CMS goal from the current worktree instead of relying on previous session memory.
+- Re-read the Harness in the required order and ran no-write source/external readiness checks for the implemented admin, Cloudflare, public Supabase, and live credential gates.
+- Confirmed the current blocker remains credentials/account state, not source coverage: live form persistence needs a server-side service-role key; live admin readiness needs a browser-safe Supabase key, service-role verification key, and first-admin email/profile.
+- No runtime source, Supabase schema, Supabase data, Cloudflare account state, or live content was changed.
+
+### Changed Files
+- `docs/HANDOFF.md`
+- `docs/WORKLOG.md`
+
+### Verification Results
+- `npm run agent:init`: pass. Branch reported clean and tracking `origin/main`.
+- `npm run agent:admin-crud-coverage`: pass. Covered Dashboard, Settings/admin profiles, Media, Stone Library, Projects, Products, Articles, Leads, and Audit source/table/audit/export coverage.
+- `npm run agent:admin-crud-live`: pass in plan-only mode. No writes, Storage uploads, or deletes were attempted.
+- `npm run agent:cloudflare-readiness`: pass. Repo-side Pages build contract, SPA fallback, Function routing scope, headers, API handlers, env placeholders, and deployment runbook remain valid.
+- `npm run agent:public-supabase-readiness`: pass. Import candidates remain draft-only, public RLS source remains published-only, anonymous grants remain read-only, public runtime remains static/file-backed, and Functions stay scoped to `/api/*`.
+- Supabase connector migration sanity: pass. Nine launch migrations are listed on project `npkidywzwddbnfrnxlmo`.
+- Supabase connector RLS sanity: pass. The checked core public tables all report RLS enabled.
+- Supabase connector row-count sanity: pass. `admin_profiles`, `admin_audit_events`, `enquiries`, `sample_requests`, and `sample_request_items` remain 0; `finish_definitions` remains 12; `site_settings` remains 1.
+- `npm run agent:forms-live`: expected credential-gated fail. It stops on missing `SUPABASE_SERVICE_ROLE_KEY` before live form verification.
+- `npm run agent:admin-live-readiness`: expected credential-gated fail. It stops on missing browser-safe Supabase key, service-role key, and first-admin email.
+
+### Risks and Gaps
+- The goal is not complete. Live form persistence, live admin auth/profile readiness, live admin CRUD/audit writes, live media upload/export, live lead workflow/export, Cloudflare preview smoke, and deployed form verification still require external credentials/account state and Jay approvals.
+- No tagged QA writes were run, and no first-admin/profile changes were made.
+
+### Next Handoff
+- `NOW-FORMS-BACKEND-001` live Supabase row/audit verification with `npm run agent:forms-live` after `SUPABASE_SERVICE_ROLE_KEY` is configured.
+- `NOW-ADMIN-AUTH-RLS-001` live admin readiness with `npm run agent:admin-live-readiness -- --admin-email <first-admin-email>` after browser-safe and service-role keys plus first-admin profile are available.
+- `NOW-ADMIN-CMS-001` live tagged CRUD/audit verification with `npm run agent:admin-crud-live -- --allow-writes` only after Jay approves tagged QA writes and a real owner/admin session exists.
+
 ## Entry - 2026-05-28 (Admin Scaffold Cleanup)
 
 ### Scope
