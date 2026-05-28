@@ -297,7 +297,8 @@ function AdminDashboardContent() {
                         <ul className="mt-4 space-y-3 text-sm leading-6 text-black/62">
                             <li>Configure server-side `SUPABASE_SERVICE_ROLE_KEY` for live form writes.</li>
                             <li>Confirm the first admin email before creating an owner/admin profile.</li>
-                            <li>Add Storage buckets and media policies before upload CRUD.</li>
+                            <li>Verify live admin save, upload, and export audit rows after browser-safe Supabase config.</li>
+                            <li>Approve the static content import scope before applying draft rows to Supabase.</li>
                         </ul>
                     </section>
                 </aside>

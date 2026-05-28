@@ -2,6 +2,37 @@
 
 Last updated: 2026-05-28
 
+## Entry - 2026-05-28 (Admin Dashboard Launch Checks Refresh)
+
+### Scope
+- Updated the protected admin dashboard's open launch checklist so it no longer lists completed Storage bucket/media policy work as an open blocker.
+- The dashboard now points active admins to the current blockers: server-side form service-role verification, first admin profile, live admin save/upload/export audit verification, and approved content import scope.
+- Kept the change source-only; no Supabase rows or production configuration were changed.
+
+### Changed Files
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `src/pages/admin/AdminDashboardPage.tsx`
+
+### Verification Results
+- `npm run build`: pass. Browserslist staleness notice remains; the admin chunk is about 432 kB before gzip.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass, including `/admin` route shell coverage and Forms API mock checks.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- Active-admin dashboard rendering is still not live-verified because browser-safe Supabase configuration and a first active admin profile are still required.
+- The checklist is operational copy only; it does not resolve the underlying credential and live verification blockers.
+
+### Next Handoff
+- `NOW-FORMS-BACKEND-001` live Supabase row/audit verification.
+- `NOW-ADMIN-AUTH-RLS-001` live auth/profile verification.
+- `NOW-ADMIN-CONTENT-CRUD-001` approved content import/apply checkpoint after credentials are available.
+
 ## Entry - 2026-05-28 (Media Manifest Export Source)
 
 ### Scope
