@@ -15,8 +15,7 @@ export default function AdminLoginPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const nextPath = useMemo(() => {
-        const next = searchParams.get('next');
-        return next && next.startsWith('/admin') && next !== location.pathname ? next : '/admin';
+        return resolveAdminNextPath(searchParams.get('next'), location.pathname);
     }, [location.pathname, searchParams]);
 
     if (auth.status === 'loading') {
@@ -125,4 +124,19 @@ export default function AdminLoginPage() {
             </section>
         </main>
     );
+}
+
+function resolveAdminNextPath(next: string | null, currentPath: string) {
+    if (!next) {
+        return '/admin';
+    }
+
+    const isAdminPath =
+        next === '/admin' || next.startsWith('/admin/') || next.startsWith('/admin?');
+    const isBlockedAdminPath =
+        next === currentPath ||
+        next.startsWith('/admin/login') ||
+        next.startsWith('/admin/unauthorized');
+
+    return isAdminPath && !isBlockedAdminPath ? next : '/admin';
 }

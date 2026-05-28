@@ -253,6 +253,7 @@ function checkRoutes() {
   const adminApp = readRequired('src/pages/admin/AdminApp.tsx');
   const content = readRequired('src/pages/admin/adminContent.ts');
   const requireAdmin = readRequired('src/pages/admin/RequireAdmin.tsx');
+  const login = readRequired('src/pages/admin/AdminLoginPage.tsx');
   const auth = readRequired('src/lib/adminAuth.tsx');
   const client = readRequired('src/lib/supabaseClient.ts');
   const audit = readRequired('src/lib/adminAudit.ts');
@@ -292,8 +293,27 @@ function checkRoutes() {
   for (const state of ['loading', 'config-missing', 'error', 'unauthenticated', 'unauthorized']) {
     requireIncludes(requireAdmin, `auth.status === '${state}'`, 'src/pages/admin/RequireAdmin.tsx');
   }
+  requireIncludes(
+    requireAdmin,
+    "to={`/admin/login?next=${encodeURIComponent(next)}`}",
+    'src/pages/admin/RequireAdmin.tsx',
+  );
+  requireIncludes(login, 'resolveAdminNextPath', 'src/pages/admin/AdminLoginPage.tsx');
+  requireIncludes(login, "next === '/admin'", 'src/pages/admin/AdminLoginPage.tsx');
+  requireIncludes(login, "next.startsWith('/admin/')", 'src/pages/admin/AdminLoginPage.tsx');
+  requireIncludes(login, "next.startsWith('/admin?')", 'src/pages/admin/AdminLoginPage.tsx');
+  requireIncludes(login, "next.startsWith('/admin/login')", 'src/pages/admin/AdminLoginPage.tsx');
+  requireIncludes(login, "next.startsWith('/admin/unauthorized')", 'src/pages/admin/AdminLoginPage.tsx');
+  requireNotIncludes(
+    login,
+    "next.startsWith('/admin') &&",
+    'src/pages/admin/AdminLoginPage.tsx next-route guard',
+  );
 
   requireIncludes(auth, ".from('admin_profiles')", 'src/lib/adminAuth.tsx');
+  requireIncludes(auth, 'supabase.auth.getUser()', 'src/lib/adminAuth.tsx');
+  requireIncludes(auth, ".eq('user_id', verifiedUser.id)", 'src/lib/adminAuth.tsx');
+  requireIncludes(auth, ".eq('is_active', true)", 'src/lib/adminAuth.tsx');
   requireIncludes(client, 'VITE_SUPABASE_PUBLISHABLE_KEY', 'src/lib/supabaseClient.ts');
   requireIncludes(client, 'VITE_SUPABASE_ANON_KEY', 'src/lib/supabaseClient.ts');
 

@@ -2,6 +2,45 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Admin Login Next Target Guard)
+
+### Scope
+- Tightened `/admin/login` post-auth redirect handling so it accepts only true admin-console `next` targets: `/admin`, `/admin?*`, or `/admin/*`.
+- Blocked login and unauthorized self-loop targets from being used as authenticated redirects.
+- Strengthened `npm run agent:admin-crud-coverage` so it guards the login next-target source contract and verifies session bootstrap still calls `supabase.auth.getUser()` before querying an active `admin_profiles` row.
+
+### Changed Files
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `scripts/check-admin-crud-coverage.mjs`
+- `src/pages/admin/AdminLoginPage.tsx`
+
+### Verification Results
+- `node --check scripts/check-admin-crud-coverage.mjs`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `node -e "JSON.parse(require('fs').readFileSync('docs/agent/tasks.json','utf8')); console.log('tasks json ok')"`: pass.
+- `npm run agent:live-readiness`: pass in report-only mode; live form/admin/Cloudflare inputs remain missing or approval-gated.
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass, including public/admin route shells and Forms API/UI source checks.
+- `npm run agent:admin-crud-live`: pass in plan-only/no-write mode.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- This is source-only admin auth hardening. It does not prove active admin login, unprofiled-user unauthorized behavior, first-admin bootstrap, live CRUD writes, Storage uploads, audit row creation, or Cloudflare preview deployment.
+- Live admin verification still requires browser-safe Supabase config, service-role verification access, first admin email/profile, a real owner/admin session, and Jay approval for tagged live admin QA writes.
+
+### Next Handoff
+- `NOW-ADMIN-AUTH-RLS-001`
+- `NOW-ADMIN-CMS-001`
+- `NOW-FORMS-BACKEND-001`
+
 ## Entry - 2026-05-29 (Contact Form UI Source Contract)
 
 ### Scope
