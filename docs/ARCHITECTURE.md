@@ -76,7 +76,7 @@ Last updated: 2026-05-29
   - Form Functions require `SUPABASE_SERVICE_ROLE_KEY` server-side; `SUPABASE_SERVICE_KEY` remains a compatibility alias only. `SUPABASE_URL` may be configured, but defaults to the Urblo project URL if omitted.
   - Form Functions attempt `admin_audit_events` writes with `actor_user_id = null` after successful enquiry/sample request inserts. Audit write failure does not fail the visitor response.
   - Form notification source uses Resend only when server-side notification inputs exist. Mock checks verify configured notification paths start with `notification_status = pending`, call Resend, then patch the lead row to `sent` or `failed` without failing the already-stored visitor response.
-  - Live form persistence verification is staged through `npm run agent:forms-live`. The command requires a server-side Supabase service-role key, verifies valid enquiry/sample request rows plus audit rows, verifies invalid enquiry/sample request payloads create no rows, and retains tagged test rows for auditability until Jay approves cleanup.
+  - Live form persistence verification is staged through `npm run agent:forms-live`. The command requires a server-side Supabase service-role key, verifies valid enquiry/sample request rows plus audit rows, verifies invalid enquiry/sample request payloads create no rows, verifies response-vs-stored notification status, and retains tagged test rows for auditability until Jay approves cleanup. When a browser-safe key is configured, the verifier checks that created private lead rows are not anonymously readable; `--require-browser-boundary` makes that browser-key boundary mandatory for final launch proof.
   - Optional server-side form secrets: `TURNSTILE_SECRET_KEY` or `CF_TURNSTILE_SECRET_KEY`, `RESEND_API_KEY`, `LEAD_NOTIFICATION_FROM` or `RESEND_FROM_EMAIL`, `LEAD_NOTIFICATION_TO`, `ENQUIRY_NOTIFICATION_TO`, and `SAMPLE_REQUEST_NOTIFICATION_TO`.
 - Vite base config: `vite.config.ts`
   - `base: '/'` for root-domain Cloudflare Pages clean URL routing.
@@ -130,6 +130,7 @@ Last updated: 2026-05-29
   - Default mode invokes the Pages Function handlers directly and suppresses Turnstile/email side effects unless `--turnstile-token` or `--allow-email` is supplied.
   - Optional HTTP mode uses `--base-url <origin>` to test a local or deployed Pages endpoint while still querying Supabase to verify durable rows.
   - Valid live submissions must return a final `notificationStatus` that matches the stored lead row's `notification_status`, so email patch failures do not hide behind a successful insert.
+  - Optional `--require-browser-boundary` requires `VITE_SUPABASE_PUBLISHABLE_KEY` or `VITE_SUPABASE_ANON_KEY` and verifies the created enquiry, sample request, and sample item rows are not anonymously readable through browser-key REST access.
   - The command is credential-gated and intentionally fails when service-role credentials are absent.
 - Cloudflare Pages readiness:
   - `npm run agent:cloudflare-readiness` => `node scripts/check-cloudflare-pages-readiness.mjs`
@@ -156,7 +157,7 @@ Last updated: 2026-05-29
 - Live input readiness:
   - `npm run agent:live-readiness` => `node scripts/check-live-readiness.mjs`
   - Loads local environment values from `.env.local`, `.env`, `.dev.vars`, and the shell.
-  - Reports, without printing secret values, whether the inputs for `agent:forms-live`, deployed form verification, `agent:admin-live-readiness`, `agent:admin-crud-live -- --allow-writes`, and `agent:cloudflare-preview-smoke` are present.
+  - Reports, without printing secret values, whether the inputs for `agent:forms-live`, deployed form verification, `agent:forms-live -- --require-browser-boundary`, `agent:admin-live-readiness`, `agent:admin-crud-live -- --allow-writes`, and `agent:cloudflare-preview-smoke` are present.
   - Accepts non-secret readiness overrides: `--base-url <origin>`, `--admin-email <email>`, and `--admin-writes-approved`. Secret keys and admin session credentials must still come from env files or the shell and must not be printed.
   - Default mode is report-only and exits 0 even when inputs are missing; `--strict` exits 1 when live inputs are missing or manually gated.
   - This command does not query Supabase, create users, run live writes, create Cloudflare projects, or touch DNS.

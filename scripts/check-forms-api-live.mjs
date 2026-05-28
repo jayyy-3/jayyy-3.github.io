@@ -6,6 +6,7 @@ import { handleEnquiryRequest, handleSampleRequest } from '../functions/_lib/for
 const DEFAULT_SUPABASE_URL = 'https://npkidywzwddbnfrnxlmo.supabase.co';
 const DEFAULT_ENV_FILES = ['.env.local', '.env', '.dev.vars'];
 const SERVICE_KEY_NAMES = ['SUPABASE_SERVICE_ROLE_KEY', 'SUPABASE_SERVICE_KEY'];
+const BROWSER_KEY_NAMES = ['VITE_SUPABASE_PUBLISHABLE_KEY', 'VITE_SUPABASE_ANON_KEY'];
 const EMAIL_ENV_NAMES = [
   'RESEND_API_KEY',
   'LEAD_NOTIFICATION_FROM',
@@ -21,6 +22,7 @@ function parseArgs(argv) {
     baseUrl: null,
     envFiles: [...DEFAULT_ENV_FILES],
     allowEmail: false,
+    requireBrowserBoundary: false,
     turnstileToken: '',
   };
 
@@ -28,6 +30,11 @@ function parseArgs(argv) {
     const arg = argv[index];
     if (arg === '--allow-email') {
       options.allowEmail = true;
+      continue;
+    }
+
+    if (arg === '--require-browser-boundary') {
+      options.requireBrowserBoundary = true;
       continue;
     }
 
@@ -110,7 +117,12 @@ function loadEnv(envFiles) {
   };
 }
 
-function requireConfig(env) {
+function firstEnv(env, names) {
+  const key = names.find((name) => env[name]);
+  return key ? { key, value: env[key] } : { key: '', value: '' };
+}
+
+function requireConfig(env, options) {
   const serviceKeyName = SERVICE_KEY_NAMES.find((key) => env[key]);
   if (!serviceKeyName) {
     throw new Error(
@@ -118,8 +130,17 @@ function requireConfig(env) {
     );
   }
 
+  const browserKey = firstEnv(env, BROWSER_KEY_NAMES);
+  if (options.requireBrowserBoundary && !browserKey.value) {
+    throw new Error(
+      'Missing VITE_SUPABASE_PUBLISHABLE_KEY or VITE_SUPABASE_ANON_KEY. Set a browser-safe key before running --require-browser-boundary.',
+    );
+  }
+
   const supabaseUrl = (env.SUPABASE_URL || DEFAULT_SUPABASE_URL).replace(/\/$/, '');
   return {
+    browserKey: browserKey.value,
+    browserKeyName: browserKey.key,
     serviceKey: env[serviceKeyName],
     serviceKeyName,
     supabaseUrl,
@@ -193,6 +214,19 @@ function restHeaders(config) {
   };
 }
 
+function browserKeyHeaders(config, extra = {}) {
+  const headers = {
+    apikey: config.browserKey,
+    ...extra,
+  };
+
+  if (config.browserKey && !config.browserKey.startsWith('sb_publishable_')) {
+    headers.authorization = `Bearer ${config.browserKey}`;
+  }
+
+  return headers;
+}
+
 async function supabaseRest(config, path, init = {}) {
   const response = await fetch(`${config.supabaseUrl}${path}`, {
     ...init,
@@ -223,6 +257,49 @@ async function selectRows(config, table, filters, select = '*') {
 async function countRows(config, table, filters) {
   const rows = await selectRows(config, table, filters, 'id');
   return rows.length;
+}
+
+function buildQuery(select, filters = {}) {
+  const query = new URLSearchParams({ select });
+  for (const [key, value] of Object.entries(filters)) {
+    query.set(key, `eq.${value}`);
+  }
+  return query.toString();
+}
+
+async function assertNotAnonymousReadable(config, table, filters, label) {
+  if (!config.browserKey) return false;
+
+  const response = await fetch(
+    `${config.supabaseUrl}/rest/v1/${table}?${buildQuery('id', filters)}`,
+    {
+      headers: browserKeyHeaders(config),
+    },
+  );
+
+  const text = await response.text();
+  let json = null;
+  if (text) {
+    try {
+      json = JSON.parse(text);
+    } catch {
+      json = text;
+    }
+  }
+
+  if (response.ok) {
+    assert.ok(Array.isArray(json), `${label} anonymous read returned a non-array response.`);
+    assert.equal(json.length, 0, `${label} unexpectedly returned rows through anonymous browser-key access.`);
+    return true;
+  }
+
+  assert.ok(
+    [401, 403, 404].includes(response.status),
+    `${label} anonymous read failed with unexpected HTTP ${response.status}: ${
+      typeof json === 'string' ? json : JSON.stringify(json)
+    }`,
+  );
+  return true;
 }
 
 async function verifyAudit(config, action, entityType, entityId) {
@@ -262,7 +339,7 @@ function withTurnstile(body, options) {
 async function run() {
   const options = parseArgs(process.argv.slice(2));
   const env = loadEnv(options.envFiles);
-  const config = requireConfig(env);
+  const config = requireConfig(env, options);
   const runtimeEnv = options.baseUrl ? env : safeRuntimeEnv(env, options);
   const marker = `urblo-live-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`;
 
@@ -270,6 +347,7 @@ async function run() {
   console.log(`Mode: ${options.baseUrl ? `HTTP ${options.baseUrl}` : 'direct handler'}`);
   console.log(`Supabase URL: ${config.supabaseUrl}`);
   console.log(`Service key source: ${config.serviceKeyName}`);
+  console.log(`Browser-key private boundary: ${config.browserKey ? config.browserKeyName : 'not configured'}`);
   if (!options.baseUrl && !options.allowEmail) {
     console.log('Handler mode email delivery disabled for this verification run.');
   }
@@ -325,6 +403,12 @@ async function run() {
   assert.equal(enquiryRows[0].source_route, `/contact?live_check=${marker}`);
   verifyNotificationStatus(enquiryRows[0], enquiryBody, 'enquiry');
   await verifyAudit(config, 'enquiry.create', 'enquiries', enquiryBody.id);
+  const checkedEnquiryBoundary = await assertNotAnonymousReadable(
+    config,
+    'enquiries',
+    { id: enquiryBody.id },
+    'Live enquiry row',
+  );
   console.log(`Valid enquiry created row and audit event: enquiries #${enquiryBody.id}.`);
 
   assert.equal(await countRows(config, 'sample_requests', { email: invalidSampleEmail }), 0);
@@ -387,9 +471,29 @@ async function run() {
   assert.equal(itemRows[0].quantity, 2);
   assert.match(itemRows[0].notes, /Angola Black/);
   await verifyAudit(config, 'sample_request.create', 'sample_requests', sampleBody.id);
+  const checkedSampleRequestBoundary = await assertNotAnonymousReadable(
+    config,
+    'sample_requests',
+    { id: sampleBody.id },
+    'Live sample request row',
+  );
+  const checkedSampleItemBoundary = await assertNotAnonymousReadable(
+    config,
+    'sample_request_items',
+    { id: itemRows[0].id },
+    'Live sample request item row',
+  );
   console.log(
     `Valid sample request created row, item, and audit event: sample_requests #${sampleBody.id}, item #${itemRows[0].id}.`,
   );
+
+  if (checkedEnquiryBoundary && checkedSampleRequestBoundary && checkedSampleItemBoundary) {
+    console.log('Anonymous browser-key reads returned no live private form rows.');
+  } else {
+    console.log(
+      'Browser-key private lead boundary skipped; set VITE_SUPABASE_PUBLISHABLE_KEY or VITE_SUPABASE_ANON_KEY and rerun with --require-browser-boundary before final launch proof.',
+    );
+  }
 
   console.log('Live Forms API verification passed.');
   console.log(`Marker: ${marker}`);

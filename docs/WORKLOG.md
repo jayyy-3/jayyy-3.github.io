@@ -2,6 +2,50 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Live Forms Private Lead Boundary)
+
+### Scope
+- Strengthened `scripts/check-forms-api-live.mjs` so live form verification checks created private enquiry, sample request, and sample item rows against anonymous browser-key reads whenever a browser-safe Supabase key is available.
+- Added `--require-browser-boundary` so final launch proof can require `VITE_SUPABASE_PUBLISHABLE_KEY` or `VITE_SUPABASE_ANON_KEY` in addition to the service-role key.
+- Updated `scripts/check-live-readiness.mjs` to report readiness for `npm run agent:forms-live -- --require-browser-boundary`.
+- No Supabase rows, Auth users, Storage objects, credentials, Cloudflare state, or live writes were created or changed.
+
+### Changed Files
+- `AGENTS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `scripts/check-forms-api-live.mjs`
+- `scripts/check-live-readiness.mjs`
+
+### Verification Results
+- `node --check scripts/check-forms-api-live.mjs`: pass.
+- `node --check scripts/check-live-readiness.mjs`: pass.
+- `npm run agent:live-readiness`: pass in report-only mode and now reports the missing inputs for `npm run agent:forms-live -- --require-browser-boundary`.
+- `npm run agent:forms-live`: expected credential-gated fail before Supabase calls because no local service-role key is configured.
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:admin-crud-live`: pass in plan-only no-write mode.
+- `npm run agent:public-supabase-readiness`: pass.
+- `npm run agent:cloudflare-readiness`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `node -e "JSON.parse(require('fs').readFileSync('docs/agent/tasks.json','utf8')); console.log('tasks json ok')"`: pass.
+- Supabase MCP read-only private row count check: pass. `admin_profiles`, `admin_audit_events`, `enquiries`, `sample_requests`, and `sample_request_items` remain at 0 rows.
+
+### Risks and Gaps
+- The private form-row browser-key boundary runs only after service-role and browser-safe keys are configured.
+- Live form persistence, first-admin setup, active-admin browser QA, Storage upload, and Cloudflare preview smoke remain blocked by credential/account inputs.
+
+### Next Handoff
+- `NOW-FORMS-BACKEND-001`: run `npm run agent:forms-live`, then `npm run agent:forms-live -- --require-browser-boundary`, after service-role and browser-safe keys are configured.
+
 ## Entry - 2026-05-29 (Admin CRUD Live Private Lead RLS Guard)
 
 ### Scope

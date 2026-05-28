@@ -207,6 +207,19 @@ function buildChecks(env, sources, options) {
       ].filter(Boolean),
     }),
     makeCheck({
+      id: 'forms-private-boundary',
+      label: 'Live form private-row browser-key boundary',
+      command: 'npm run agent:forms-live -- --require-browser-boundary',
+      present: [describeSource(serviceKey, sources), describeSource(browserKey, sources)].filter(Boolean),
+      missing: [
+        serviceKey ? '' : 'SUPABASE_SERVICE_ROLE_KEY or SUPABASE_SERVICE_KEY',
+        browserKey ? '' : 'VITE_SUPABASE_PUBLISHABLE_KEY or VITE_SUPABASE_ANON_KEY',
+      ].filter(Boolean),
+      optional: [
+        'Runs the live form persistence check and additionally verifies created private lead rows are not anonymously readable through the browser key.',
+      ],
+    }),
+    makeCheck({
       id: 'admin-live-readiness',
       label: 'Read-only first-admin readiness',
       command: 'npm run agent:admin-live-readiness -- --admin-email <first-admin-email>',
