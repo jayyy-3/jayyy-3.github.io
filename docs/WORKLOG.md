@@ -2,6 +2,48 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Admin CRUD Live Public RLS Invisibility)
+
+### Scope
+- Strengthened `scripts/check-admin-crud-live.mjs` so the approval-gated live write verifier will also prove tagged public-content QA rows are not anonymously visible after they are left draft/archived.
+- The live run now uses browser-key anonymous readback for tagged `site_settings`, `media_assets`, `stone_groups`, `products`, `projects`, and `articles` rows after authenticated RLS writes.
+- Updated Harness docs so future live admin QA treats public invisibility as part of the tagged write proof, not a separate assumption.
+- No Supabase rows, Auth users, Storage objects, credentials, Cloudflare state, or live writes were created or changed.
+
+### Changed Files
+- `AGENTS.md`
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `scripts/check-admin-crud-live.mjs`
+
+### Verification Results
+- `node --check scripts/check-admin-crud-live.mjs`: pass.
+- `npm run agent:admin-crud-live`: pass in plan-only no-write mode and includes the public-RLS invisibility check in the printed live plan.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:public-supabase-readiness`: pass.
+- `npm run agent:live-readiness`: pass in report-only mode; live form/admin/Cloudflare inputs remain missing or approval-gated.
+- `npm run agent:cloudflare-readiness`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `node -e "JSON.parse(require('fs').readFileSync('docs/agent/tasks.json','utf8')); console.log('tasks json ok')"`: pass.
+
+### Risks and Gaps
+- The new anonymous readback runs only in `--allow-writes` mode after browser-safe Supabase config, a real owner/admin session, and Jay approval for tagged QA writes exist.
+- Live form persistence, first-admin setup, active-admin browser QA, Storage upload, and Cloudflare preview smoke remain blocked by credential/account inputs.
+
+### Next Handoff
+- `NOW-ADMIN-AUTH-RLS-001`: run first-admin verify/bootstrap and active admin readiness after keys and first admin email are available.
+- `NOW-ADMIN-CMS-001`: run `npm run agent:admin-crud-live -- --allow-writes` only after Jay approves tagged live QA writes and a real owner/admin session exists.
+
 ## Entry - 2026-05-29 (Admin Readiness Browser-Key Boundary)
 
 ### Scope

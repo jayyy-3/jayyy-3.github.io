@@ -24,6 +24,7 @@ const livePlan = [
   'Create tagged Article metadata and structured block records.',
   'Create tagged private enquiry/sample-request QA rows, then update workflow fields.',
   'Record admin_audit_events for primary writes and export-gate actions.',
+  'Verify tagged draft/archived content is not anonymously visible through public RLS.',
   'Leave tagged QA rows archived or private for auditability; no physical deletes are attempted.',
 ];
 
@@ -227,6 +228,19 @@ function authHeaders(config, accessToken, extra = {}) {
   };
 }
 
+function browserKeyHeaders(config, extra = {}) {
+  const headers = {
+    apikey: config.browserKey,
+    ...extra,
+  };
+
+  if (!config.browserKey.startsWith('sb_publishable_')) {
+    headers.authorization = `Bearer ${config.browserKey}`;
+  }
+
+  return headers;
+}
+
 async function fetchJson(url, init, context) {
   const response = await fetch(url, init);
   const text = await response.text();
@@ -324,14 +338,53 @@ async function postgrest(config, accessToken, table, query = '', init = {}) {
   return json;
 }
 
+async function publicPostgrest(config, table, query = '', init = {}) {
+  const suffix = query ? `?${query}` : '';
+  const response = await fetch(`${config.supabaseUrl}/rest/v1/${table}${suffix}`, {
+    ...init,
+    headers: {
+      ...browserKeyHeaders(config, {
+        'content-type': 'application/json',
+      }),
+      ...init.headers,
+    },
+  });
+
+  const text = await response.text();
+  let json = null;
+  if (text) {
+    try {
+      json = JSON.parse(text);
+    } catch {
+      json = text;
+    }
+  }
+
+  if (!response.ok) {
+    const detail = typeof json === 'string' ? json : JSON.stringify(json);
+    throw new Error(`Public PostgREST ${init.method || 'GET'} ${table} failed with HTTP ${response.status}: ${detail.slice(0, 320)}`);
+  }
+
+  return json;
+}
+
 async function selectRows(config, accessToken, table, filters = {}, select = '*', extras = {}) {
   return postgrest(config, accessToken, table, buildQuery(select, filters, extras));
+}
+
+async function selectPublicRows(config, table, filters = {}, select = 'id', extras = {}) {
+  return publicPostgrest(config, table, buildQuery(select, filters, extras));
 }
 
 async function selectAuditRowsByMarker(config, accessToken, marker) {
   const query = new URLSearchParams({ select: 'id,action,metadata' });
   query.set('metadata', `cs.${JSON.stringify({ marker })}`);
   return postgrest(config, accessToken, 'admin_audit_events', query.toString());
+}
+
+async function assertNotPubliclyVisible(config, table, filters, label) {
+  const rows = await selectPublicRows(config, table, filters);
+  assert.equal(rows.length, 0, `${label} unexpectedly visible through anonymous public RLS.`);
 }
 
 async function insertRow(config, accessToken, table, payload) {
@@ -823,6 +876,15 @@ async function run() {
     checked_ids: { enquiries: [enquiry.id], sample_requests: [sampleRequest.id] },
   });
 
+  await Promise.all([
+    assertNotPubliclyVisible(config, 'site_settings', { settings_key: marker }, 'Tagged site_settings row'),
+    assertNotPubliclyVisible(config, 'media_assets', { id: media.id }, 'Tagged media_assets row'),
+    assertNotPubliclyVisible(config, 'stone_groups', { stone_group_key: slug }, 'Tagged stone_groups row'),
+    assertNotPubliclyVisible(config, 'products', { slug }, 'Tagged products row'),
+    assertNotPubliclyVisible(config, 'projects', { slug }, 'Tagged projects row'),
+    assertNotPubliclyVisible(config, 'articles', { slug }, 'Tagged articles row'),
+  ]);
+
   const auditRows = await selectAuditRowsByMarker(config, accessToken, marker);
   assert.ok(auditRows.length >= 26, `Expected at least 26 tagged audit rows, found ${auditRows.length}.`);
 
@@ -832,6 +894,7 @@ async function run() {
     console.log(`Uploaded tagged private Storage object: ${storageRef.bucket}/${storageRef.objectPath}`);
   }
   console.log(`Audit rows recorded: ${auditRows.length}`);
+  console.log('Anonymous public RLS returned zero tagged QA content rows.');
   console.log('Tagged rows are retained for auditability; cleanup is intentionally not destructive.');
 }
 
