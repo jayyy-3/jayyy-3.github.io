@@ -175,7 +175,7 @@ Last updated: 2026-05-29
   - `npm run agent:admin-crud-coverage` => `node scripts/check-admin-crud-coverage.mjs`
   - Verifies `/admin` route registration, active module registration, `RequireAdmin` state coverage, browser-safe Supabase client wiring, launch-critical table references, role-gated mutation controls, publish/archive paths, structured Article block authoring guardrails, shared audit writer usage, Media/Leads export audit gates, and the non-destructive archive/removal contract.
   - Also guards the admin auth shell source contract: protected routes must preserve encoded admin-only `next` targets, login must reject non-admin or login/unauthorized loop targets, and session bootstrap must validate Supabase sessions with `getUser()` before looking up an active `admin_profiles` row.
-  - Also scans browser source for actual service-role Supabase env/client usage patterns and guards the config-missing admin gate plus admin-route WelcomePopup suppression.
+  - Also scans browser source for actual service-role Supabase env/client usage patterns, guards the config-missing admin gate plus admin-route WelcomePopup suppression, and verifies the live admin CRUD verifier remains browser-key/RLS based rather than service-role based.
   - This is a source-only verifier. It never mutates Supabase and does not replace live browser QA with a configured admin profile.
 - Admin CRUD live verification:
   - `npm run agent:admin-crud-live` => `node scripts/check-admin-crud-live.mjs`

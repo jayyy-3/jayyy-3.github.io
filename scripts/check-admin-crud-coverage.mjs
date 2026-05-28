@@ -514,6 +514,12 @@ function checkAdminLiveVerifierBoundaries() {
   const text = readRequired('scripts/check-admin-crud-live.mjs');
   requireIncludes(text, 'assertNotPubliclyVisible', 'scripts/check-admin-crud-live.mjs');
   requireIncludes(text, 'assertNotAnonymousReadable', 'scripts/check-admin-crud-live.mjs');
+  requireIncludes(text, 'BROWSER_KEY_NAMES', 'scripts/check-admin-crud-live.mjs');
+  requireIncludes(text, 'ADMIN_TOKEN_NAMES', 'scripts/check-admin-crud-live.mjs');
+  requireIncludes(text, 'auth/v1/token?grant_type=password', 'scripts/check-admin-crud-live.mjs');
+  requireNotIncludes(text, 'SUPABASE_SERVICE_ROLE_KEY', 'scripts/check-admin-crud-live.mjs RLS verifier');
+  requireNotIncludes(text, 'SUPABASE_SERVICE_KEY', 'scripts/check-admin-crud-live.mjs RLS verifier');
+  requireNotIncludes(text, 'SERVICE_KEY_NAMES', 'scripts/check-admin-crud-live.mjs RLS verifier');
   requireIncludes(
     text,
     'Publish then archive public-facing tagged QA rows before the final anonymous visibility check.',

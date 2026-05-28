@@ -7,6 +7,7 @@ Last updated: 2026-05-29
 ### Scope
 - Strengthened `scripts/check-admin-crud-coverage.mjs` so the source-only admin verifier scans all `src` browser source files for actual Supabase service-role env/client usage patterns instead of checking only `src/lib/supabaseClient.ts`.
 - Added machine checks for the admin config-missing state copy, login/unauthorized config handling, and admin-route WelcomePopup suppression.
+- Added machine checks that the future `scripts/check-admin-crud-live.mjs` path remains browser-key/RLS based and does not introduce service-role key access.
 - Kept the checkpoint source-only. No Supabase rows, Storage objects, Auth users, Cloudflare state, credentials, or live writes were created or changed.
 
 ### Changed Files
