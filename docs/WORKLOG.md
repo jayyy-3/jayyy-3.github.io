@@ -2,6 +2,36 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Admin No-Config Route Gate QA)
+
+### Scope
+- Verified the built admin shell still renders the configuration-required gate when no browser-safe Supabase key is configured.
+- Checked representative admin routes covering dashboard, protected module, and login entry points.
+- Kept the check no-secret and no-write; it did not configure Supabase env, create users, query Supabase, or touch live data.
+
+### Changed Files
+- `docs/HANDOFF.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npx vite preview --host 127.0.0.1 --port 4191 --strictPort`: pass; served the current built site locally.
+- `npx playwright screenshot --wait-for-selector "text=Configuration required" --wait-for-timeout=500 --viewport-size=1280,800 http://127.0.0.1:4191/admin /tmp/urblo-admin-config-required-dashboard.png`: pass.
+- `npx playwright screenshot --wait-for-selector "text=Configuration required" --wait-for-timeout=500 --viewport-size=1280,800 http://127.0.0.1:4191/admin/media /tmp/urblo-admin-config-required-media.png`: pass.
+- `npx playwright screenshot --wait-for-selector "text=Configuration required" --wait-for-timeout=500 --viewport-size=1280,800 http://127.0.0.1:4191/admin/login /tmp/urblo-admin-config-required-login.png`: pass.
+- `node -e "JSON.parse(require('fs').readFileSync('docs/agent/tasks.json','utf8')); console.log('tasks json ok')"`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- This proves only the config-missing gate for the built local site. It does not prove active admin login, unprofiled-user unauthorized behavior, first-admin bootstrap, live CRUD writes, Storage uploads, or Cloudflare preview deployment.
+- Playwright Test was not added as a dependency; the verification used the existing `npx playwright screenshot` CLI.
+
+### Next Handoff
+- `NOW-ADMIN-AUTH-RLS-001`
+- `NOW-ADMIN-CMS-001`
+- `NOW-CLOUDFLARE-PAGES-DEPLOY-001`
+
 ## Entry - 2026-05-29 (Cloudflare Preview Route Checklist Alignment)
 
 ### Scope
