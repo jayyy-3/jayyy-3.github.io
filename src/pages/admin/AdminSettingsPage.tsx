@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { CheckCircle2, Save } from 'lucide-react';
+import { recordAdminAuditEvent, withAuditNotice } from '../../lib/adminAudit';
 import { supabase } from '../../lib/supabaseClient';
 import { useAdminAuth } from '../../lib/adminAuthHooks';
 import AdminShell from './AdminShell';
@@ -62,7 +63,7 @@ export default function AdminSettingsPage() {
 }
 
 function AdminSettingsContent() {
-    const { profile } = useAdminAuth();
+    const { profile, user } = useAdminAuth();
     const canEdit = profile?.role === 'owner' || profile?.role === 'admin';
     const [row, setRow] = useState<SiteSettingsRow | null>(null);
     const [form, setForm] = useState<SettingsFormState>(emptyForm);
@@ -120,7 +121,7 @@ function AdminSettingsContent() {
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
-        if (!supabase || !canEdit) {
+        if (!supabase || !canEdit || !user) {
             return;
         }
 
@@ -181,7 +182,17 @@ function AdminSettingsContent() {
 
         setRow(response.data);
         setForm(rowToForm(response.data));
-        setNotice('Site settings saved.');
+        const auditError = await recordAdminAuditEvent(supabase, {
+            actorUserId: user.id,
+            action: row ? 'site_settings.update' : 'site_settings.create',
+            entityType: 'site_settings',
+            entityId: response.data.id,
+            metadata: {
+                settingsKey: response.data.settings_key,
+                status: response.data.status,
+            },
+        });
+        setNotice(withAuditNotice('Site settings saved.', auditError));
     }
 
     return (

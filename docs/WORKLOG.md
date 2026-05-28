@@ -2,6 +2,49 @@
 
 Last updated: 2026-05-28
 
+## Entry - 2026-05-28 (Admin Audit Writer Source)
+
+### Scope
+- Added `src/lib/adminAudit.ts` as the shared browser-side audit writer for admin save flows.
+- Wired Settings, Media, Stone Library, Projects, Products, Articles, and Leads save workflows to call the audit writer after successful primary mutations.
+- Audit insert failures are appended to the success notice and do not roll back the already-saved primary record.
+- Kept live audit-row verification pending until browser-safe Supabase config and an active admin/editor or owner/admin profile exist.
+
+### Changed Files
+- `src/lib/adminAudit.ts`
+- `src/pages/admin/AdminSettingsPage.tsx`
+- `src/pages/admin/AdminMediaPage.tsx`
+- `src/pages/admin/AdminStoneLibraryPage.tsx`
+- `src/pages/admin/AdminProjectsPage.tsx`
+- `src/pages/admin/AdminProductsPage.tsx`
+- `src/pages/admin/AdminArticlesPage.tsx`
+- `src/pages/admin/AdminLeadsPage.tsx`
+- `AGENTS.md`
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run build`: pass. Browserslist staleness notice remains; the admin chunk is about 416 kB before gzip.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass, including all current `/admin/*` route shells and Forms API mock checks.
+
+### Risks and Gaps
+- Live audit row creation is not verified because browser-safe Supabase key configuration and an active admin profile are still required.
+- Server-side form audit events are not implemented yet; form persistence itself still requires `SUPABASE_SERVICE_ROLE_KEY` verification first.
+- Audit insert failure currently notifies the admin but does not retry automatically.
+
+### Next Handoff
+- `NOW-FORMS-BACKEND-001`
+- `NOW-ADMIN-AUTH-RLS-001`
+- `NOW-ADMIN-CONTENT-CRUD-001` content import/public-read preparation if credentials remain unavailable.
+
 ## Entry - 2026-05-28 (Admin Audit Visibility Source)
 
 ### Scope

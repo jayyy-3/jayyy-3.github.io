@@ -10,6 +10,7 @@ import {
     Save,
     ShieldAlert,
 } from 'lucide-react';
+import { recordAdminAuditEvent, withAuditNotice } from '../../lib/adminAudit';
 import { supabase } from '../../lib/supabaseClient';
 import { useAdminAuth } from '../../lib/adminAuthHooks';
 import AdminShell from './AdminShell';
@@ -407,7 +408,24 @@ function AdminArticlesContent() {
             return;
         }
 
-        setNotice(nextStatus === 'published' ? 'Article published.' : 'Article saved.');
+        const auditError = await recordAdminAuditEvent(supabase, {
+            actorUserId: user.id,
+            action: selectedArticleId
+                ? nextStatus === 'published'
+                    ? 'article.publish'
+                    : nextStatus === 'archived'
+                      ? 'article.archive'
+                      : 'article.update'
+                : 'article.create',
+            entityType: 'articles',
+            entityId: response.data.id,
+            metadata: {
+                slug: response.data.slug,
+                status: response.data.status,
+                tags: response.data.tags,
+            },
+        });
+        setNotice(withAuditNotice(nextStatus === 'published' ? 'Article published.' : 'Article saved.', auditError));
         await loadArticles(response.data.id);
     }
 
@@ -468,7 +486,24 @@ function AdminArticlesContent() {
             return;
         }
 
-        setNotice(nextStatus === 'published' ? 'Block published.' : 'Block saved.');
+        const auditError = await recordAdminAuditEvent(supabase, {
+            actorUserId: user.id,
+            action: selectedBlockId
+                ? nextStatus === 'published'
+                    ? 'article_block.publish'
+                    : nextStatus === 'archived'
+                      ? 'article_block.archive'
+                      : 'article_block.update'
+                : 'article_block.create',
+            entityType: 'article_blocks',
+            entityId: response.data.id,
+            metadata: {
+                articleId: response.data.article_id,
+                blockType: response.data.block_type,
+                status: response.data.status,
+            },
+        });
+        setNotice(withAuditNotice(nextStatus === 'published' ? 'Block published.' : 'Block saved.', auditError));
         await loadArticleBlocks(supabase, selectedArticle.id, response.data.id);
     }
 

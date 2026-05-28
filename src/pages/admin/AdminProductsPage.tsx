@@ -10,6 +10,7 @@ import {
     Save,
     ShieldAlert,
 } from 'lucide-react';
+import { recordAdminAuditEvent, withAuditNotice } from '../../lib/adminAudit';
 import { supabase } from '../../lib/supabaseClient';
 import { useAdminAuth } from '../../lib/adminAuthHooks';
 import AdminShell from './AdminShell';
@@ -431,7 +432,23 @@ function AdminProductsContent() {
             return;
         }
 
-        setNotice(nextStatus === 'published' ? 'Product published.' : 'Product saved.');
+        const auditError = await recordAdminAuditEvent(supabase, {
+            actorUserId: user.id,
+            action: selectedProductId
+                ? nextStatus === 'published'
+                    ? 'product.publish'
+                    : nextStatus === 'archived'
+                      ? 'product.archive'
+                      : 'product.update'
+                : 'product.create',
+            entityType: 'products',
+            entityId: response.data.id,
+            metadata: {
+                slug: response.data.slug,
+                status: response.data.status,
+            },
+        });
+        setNotice(withAuditNotice(nextStatus === 'published' ? 'Product published.' : 'Product saved.', auditError));
         await loadProducts(response.data.id);
     }
 
@@ -486,7 +503,24 @@ function AdminProductsContent() {
             return;
         }
 
-        setNotice(nextStatus === 'published' ? 'Model published.' : 'Model saved.');
+        const auditError = await recordAdminAuditEvent(supabase, {
+            actorUserId: user.id,
+            action: selectedModelId
+                ? nextStatus === 'published'
+                    ? 'product_model.publish'
+                    : nextStatus === 'archived'
+                      ? 'product_model.archive'
+                      : 'product_model.update'
+                : 'product_model.create',
+            entityType: 'product_models',
+            entityId: response.data.id,
+            metadata: {
+                productId: response.data.product_id,
+                modelKey: response.data.model_key,
+                status: response.data.status,
+            },
+        });
+        setNotice(withAuditNotice(nextStatus === 'published' ? 'Model published.' : 'Model saved.', auditError));
         await loadProductBundle(supabase, selectedProduct.id, response.data.id);
     }
 
@@ -532,7 +566,18 @@ function AdminProductsContent() {
             return;
         }
 
-        setNotice('Material default saved.');
+        const auditError = await recordAdminAuditEvent(supabase, {
+            actorUserId: user.id,
+            action: selectedMaterialDefaultId ? 'product_material_default.update' : 'product_material_default.create',
+            entityType: 'product_material_defaults',
+            entityId: response.data.id,
+            metadata: {
+                productId: response.data.product_id,
+                materialCategory: response.data.material_category,
+                stoneGroupId: response.data.stone_group_id,
+            },
+        });
+        setNotice(withAuditNotice('Material default saved.', auditError));
         await loadProductBundle(supabase, selectedProduct.id, selectedModelId);
     }
 
@@ -577,7 +622,17 @@ function AdminProductsContent() {
             return;
         }
 
-        setNotice('Specification saved.');
+        const auditError = await recordAdminAuditEvent(supabase, {
+            actorUserId: user.id,
+            action: selectedSpecId ? 'product_spec.update' : 'product_spec.create',
+            entityType: 'product_specs',
+            entityId: response.data.id,
+            metadata: {
+                productId: response.data.product_id,
+                label: response.data.spec_label,
+            },
+        });
+        setNotice(withAuditNotice('Specification saved.', auditError));
         await loadProductBundle(supabase, selectedProduct.id, selectedModelId);
     }
 

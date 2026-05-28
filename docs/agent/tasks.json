@@ -238,11 +238,13 @@
         "src/data/productData.ts",
         "src/service/StoneLibraryService.ts",
         "src/pages/ArticlePage.tsx",
+        "src/lib/adminAudit.ts",
         "src/pages/admin/AdminAuditPage.tsx"
       ],
       "notes": [
         "2026-05-22: This is an umbrella launch objective, not a directly executable single-pass implementation task. Execute through the smaller admin IA, auth/RLS, content CRUD, media, lead-management, and audit-visibility tasks below.",
-        "2026-05-28: Added `/admin/audit` source visibility for owner/admin audit event review. Shared mutation helpers still need to write audit rows from CRUD/form workflows."
+        "2026-05-28: Added `/admin/audit` source visibility for owner/admin audit event review.",
+        "2026-05-28: Added shared admin audit writer source and wired Settings, Media, Stone Library, Projects, Products, Articles, and Leads save flows to insert audit rows after successful primary mutations. Live audit row creation remains pending browser-safe Supabase config and active admin profiles."
       ],
       "acceptance": [
         "Authenticated admin users can create, read, update, delete, draft, and publish Projects, Stone Library records, Products, Articles, and media records without code edits.",
@@ -354,6 +356,7 @@
         "docs/WORKLOG.md",
         "docs/agent/tasks.json",
         "scripts/agent-smoke.sh",
+        "src/lib/adminAudit.ts",
         "src/pages/admin/AdminSettingsPage.tsx",
         "src/pages/admin/AdminApp.tsx",
         "src/pages/admin/adminContent.ts",
@@ -364,6 +367,7 @@
         "Run after the admin auth shell source exists, but before broader content CRUD, because site settings are first in the goal's CRUD order.",
         "2026-05-28: Added /admin/settings source for default site_settings read/create/update with status, contact, social, SEO, and footer JSON fields.",
         "2026-05-28: Applied and verified admin_settings_role_hardening on Supabase project npkidywzwddbnfrnxlmo. site_settings SELECT remains active viewer/editor/admin/owner, while INSERT/UPDATE/DELETE require owner/admin.",
+        "2026-05-28: Settings saves now call the shared admin audit writer after successful primary save. Live audit row creation remains pending browser-safe Supabase config and active owner/admin profile.",
         "Live save verification still requires browser-safe Supabase key configuration and an active owner/admin profile."
       ],
       "acceptance": [
@@ -400,6 +404,7 @@
         "docs/WORKLOG.md",
         "docs/agent/tasks.json",
         "scripts/agent-smoke.sh",
+        "src/lib/adminAudit.ts",
         "src/pages/admin/AdminApp.tsx",
         "src/pages/admin/AdminProjectsPage.tsx",
         "src/pages/admin/AdminProductsPage.tsx",
@@ -421,7 +426,8 @@
         "2026-05-28: Added `/admin/products` source CRUD behind the auth/config gate. It loads product families, models, material defaults, specs, Stone Library references, and media options from Supabase; supports create/update plus publish/archive flows for products and models; includes loading, empty, validation, save, material-default, publish/archive, read-only, and error states.",
         "2026-05-28: Public Product runtime remains static/file-backed. Live Products save verification and static-to-Supabase content import remain pending browser-safe Supabase config plus an active admin/editor profile. Physical delete controls remain intentionally hidden until destructive-delete policy is confirmed.",
         "2026-05-28: Added `/admin/articles` source CRUD behind the auth/config gate. It loads article metadata, structured article blocks, media records, project references, and Stone Library references from Supabase; supports create/update plus publish/archive flows for articles and blocks; includes loading, empty, validation, save, legacy-source provenance, structured-block JSON, read-only, and error states.",
-        "2026-05-28: Public Article runtime remains static/file-backed and continues rendering sanitized legacy HTML. Live Articles save verification and static-to-Supabase content import remain pending browser-safe Supabase config plus an active admin/editor profile. Physical delete controls remain intentionally hidden until destructive-delete policy is confirmed."
+        "2026-05-28: Public Article runtime remains static/file-backed and continues rendering sanitized legacy HTML. Live Articles save verification and static-to-Supabase content import remain pending browser-safe Supabase config plus an active admin/editor profile. Physical delete controls remain intentionally hidden until destructive-delete policy is confirmed.",
+        "2026-05-28: Stone Library, Projects, Products, and Articles save flows now call the shared admin audit writer after successful primary saves. Live audit row creation remains pending browser-safe Supabase config and active admin/editor profile."
       ],
       "acceptance": [
         "Admin users can draft, publish, edit, archive, and delete Projects, Stone Library records, Products, and Articles.",
@@ -460,6 +466,7 @@
         "docs/agent/tasks.json",
         "public/media/launch",
         "scripts/agent-smoke.sh",
+        "src/lib/adminAudit.ts",
         "src/pages/ContactPage.tsx",
         "src/pages/admin/AdminApp.tsx",
         "src/pages/admin/AdminLeadsPage.tsx",
@@ -475,7 +482,8 @@
         "2026-05-28: Added `/admin/media` source for upload-backed draft records, external records, metadata editing, read-only viewer behavior, and publish/archive validation.",
         "Live media upload/save verification remains pending browser-safe Supabase key configuration and an active admin/editor profile.",
         "2026-05-28: Added `/admin/leads` source for enquiry and sample request queues, sample items, status, assignment, internal notes, notification state, read-only role behavior, and privacy guardrails.",
-        "Live lead workflow save verification remains pending browser-safe Supabase key configuration and an active owner/admin profile. Live lead row creation still requires server-side form persistence, Turnstile verification, and transactional email secrets."
+        "Live lead workflow save verification remains pending browser-safe Supabase key configuration and an active owner/admin profile. Live lead row creation still requires server-side form persistence, Turnstile verification, and transactional email secrets.",
+        "2026-05-28: Media and Leads save flows now call the shared admin audit writer after successful primary saves. Live audit row creation remains pending browser-safe Supabase config and active profiles."
       ],
       "acceptance": [
         "Admin users can manage uploaded media records with source, alt text, usage, and publish status.",

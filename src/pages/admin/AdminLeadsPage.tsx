@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { CheckCircle2, Inbox, Mail, PackageCheck, Save, ShieldAlert } from 'lucide-react';
+import { recordAdminAuditEvent, withAuditNotice } from '../../lib/adminAudit';
 import { supabase } from '../../lib/supabaseClient';
 import { useAdminAuth } from '../../lib/adminAuthHooks';
 import AdminShell from './AdminShell';
@@ -131,7 +132,7 @@ export default function AdminLeadsPage() {
 }
 
 function AdminLeadsContent() {
-    const { profile } = useAdminAuth();
+    const { profile, user } = useAdminAuth();
     const canManageLeads = profile?.role === 'owner' || profile?.role === 'admin';
     const [enquiries, setEnquiries] = useState<EnquiryRow[]>([]);
     const [sampleRequests, setSampleRequests] = useState<SampleRequestRow[]>([]);
@@ -305,7 +306,7 @@ function AdminLeadsContent() {
     async function saveLead(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
-        if (!supabase || !canManageLeads || !selectedKind || !selectedId) return;
+        if (!supabase || !canManageLeads || !user || !selectedKind || !selectedId) return;
 
         const allowedStatuses =
             selectedKind === 'enquiry'
@@ -338,7 +339,18 @@ function AdminLeadsContent() {
             return;
         }
 
-        setNotice('Lead workflow updated.');
+        const auditError = await recordAdminAuditEvent(supabase, {
+            actorUserId: user.id,
+            action: selectedKind === 'enquiry' ? 'enquiry.workflow_update' : 'sample_request.workflow_update',
+            entityType: selectedKind === 'enquiry' ? 'enquiries' : 'sample_requests',
+            entityId: selectedId,
+            metadata: {
+                status: form.status,
+                assignedTo: form.assignedTo || null,
+                hasInternalNotes: Boolean(form.internalNotes.trim()),
+            },
+        });
+        setNotice(withAuditNotice('Lead workflow updated.', auditError));
         await loadLeads({ kind: selectedKind, id: selectedId });
     }
 

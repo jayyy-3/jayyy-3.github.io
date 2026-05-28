@@ -10,6 +10,7 @@ import {
     Save,
     ShieldCheck,
 } from 'lucide-react';
+import { recordAdminAuditEvent, withAuditNotice } from '../../lib/adminAudit';
 import { supabase } from '../../lib/supabaseClient';
 import { useAdminAuth } from '../../lib/adminAuthHooks';
 import AdminShell from './AdminShell';
@@ -258,7 +259,24 @@ function AdminMediaContent() {
         setAssets((current) => [data, ...current.filter((asset) => asset.id !== data.id)]);
         setSelectedId(data.id);
         setForm(rowToForm(data));
-        setNotice('Media uploaded as a draft. Add alt text and usage notes before publishing.');
+        const auditError = await recordAdminAuditEvent(supabase, {
+            actorUserId: user.id,
+            action: 'media_asset.upload',
+            entityType: 'media_assets',
+            entityId: data.id,
+            metadata: {
+                bucket: data.bucket,
+                objectPath: data.object_path,
+                mediaType: data.media_type,
+                sizeBytes: data.size_bytes,
+            },
+        });
+        setNotice(
+            withAuditNotice(
+                'Media uploaded as a draft. Add alt text and usage notes before publishing.',
+                auditError,
+            ),
+        );
     }
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -336,7 +354,29 @@ function AdminMediaContent() {
         ]);
         setSelectedId(response.data.id);
         setForm(rowToForm(response.data));
-        setNotice(nextStatus === 'published' ? 'Media published.' : 'Media metadata saved.');
+        const auditError = await recordAdminAuditEvent(supabase, {
+            actorUserId: user.id,
+            action: selectedId
+                ? nextStatus === 'published'
+                    ? 'media_asset.publish'
+                    : nextStatus === 'archived'
+                      ? 'media_asset.archive'
+                      : 'media_asset.update'
+                : 'media_asset.create',
+            entityType: 'media_assets',
+            entityId: response.data.id,
+            metadata: {
+                status: response.data.status,
+                sourceKind: response.data.source_kind,
+                mediaType: response.data.media_type,
+            },
+        });
+        setNotice(
+            withAuditNotice(
+                nextStatus === 'published' ? 'Media published.' : 'Media metadata saved.',
+                auditError,
+            ),
+        );
     }
 
     const previewUrl = getMediaUrl(selectedAsset);

@@ -10,6 +10,7 @@ import {
     Save,
     ShieldAlert,
 } from 'lucide-react';
+import { recordAdminAuditEvent, withAuditNotice } from '../../lib/adminAudit';
 import { supabase } from '../../lib/supabaseClient';
 import { useAdminAuth } from '../../lib/adminAuthHooks';
 import AdminShell from './AdminShell';
@@ -608,7 +609,24 @@ function AdminProjectsContent() {
             return;
         }
 
-        setNotice(nextStatus === 'published' ? 'Project published.' : 'Project saved.');
+        const auditError = await recordAdminAuditEvent(supabase, {
+            actorUserId: user.id,
+            action: selectedProjectId
+                ? nextStatus === 'published'
+                    ? 'project.publish'
+                    : nextStatus === 'archived'
+                      ? 'project.archive'
+                      : 'project.update'
+                : 'project.create',
+            entityType: 'projects',
+            entityId: response.data.id,
+            metadata: {
+                slug: response.data.slug,
+                status: response.data.status,
+                claimReviewStatus: response.data.claim_review_status,
+            },
+        });
+        setNotice(withAuditNotice(nextStatus === 'published' ? 'Project published.' : 'Project saved.', auditError));
         await loadProjects(response.data.id);
     }
 
@@ -660,7 +678,18 @@ function AdminProjectsContent() {
             return;
         }
 
-        setNotice('Project fact saved.');
+        const auditError = await recordAdminAuditEvent(supabase, {
+            actorUserId: user.id,
+            action: selectedFactId ? 'project_fact.update' : 'project_fact.create',
+            entityType: 'project_facts',
+            entityId: response.data.id,
+            metadata: {
+                projectId: response.data.project_id,
+                label: response.data.fact_label,
+                claimStatus: response.data.claim_status,
+            },
+        });
+        setNotice(withAuditNotice('Project fact saved.', auditError));
         await loadProjectBundle(supabase, selectedProject.id, selectedMapId, selectedHotspotId);
     }
 
@@ -713,7 +742,19 @@ function AdminProjectsContent() {
             return;
         }
 
-        setNotice('Project material saved.');
+        const auditError = await recordAdminAuditEvent(supabase, {
+            actorUserId: user.id,
+            action: selectedMaterialId ? 'project_material.update' : 'project_material.create',
+            entityType: 'project_materials',
+            entityId: response.data.id,
+            metadata: {
+                projectId: response.data.project_id,
+                stoneGroupId: response.data.stone_group_id,
+                finishDefinitionId: response.data.finish_definition_id,
+                claimStatus: response.data.claim_status,
+            },
+        });
+        setNotice(withAuditNotice('Project material saved.', auditError));
         await loadProjectBundle(supabase, selectedProject.id, selectedMapId, selectedHotspotId);
     }
 
@@ -763,7 +804,25 @@ function AdminProjectsContent() {
             return;
         }
 
-        setNotice(nextStatus === 'published' ? 'Material map published.' : 'Material map saved.');
+        const auditError = await recordAdminAuditEvent(supabase, {
+            actorUserId: user.id,
+            action: selectedMapId
+                ? nextStatus === 'published'
+                    ? 'project_material_map.publish'
+                    : nextStatus === 'archived'
+                      ? 'project_material_map.archive'
+                      : 'project_material_map.update'
+                : 'project_material_map.create',
+            entityType: 'project_material_maps',
+            entityId: response.data.id,
+            metadata: {
+                projectId: response.data.project_id,
+                status: response.data.status,
+            },
+        });
+        setNotice(
+            withAuditNotice(nextStatus === 'published' ? 'Material map published.' : 'Material map saved.', auditError),
+        );
         await loadProjectBundle(supabase, selectedProject.id, response.data.id, selectedHotspotId);
     }
 
@@ -823,7 +882,25 @@ function AdminProjectsContent() {
             return;
         }
 
-        setNotice(nextStatus === 'published' ? 'Hotspot published.' : 'Hotspot saved.');
+        const auditError = await recordAdminAuditEvent(supabase, {
+            actorUserId: user.id,
+            action: selectedHotspotId
+                ? nextStatus === 'published'
+                    ? 'project_hotspot.publish'
+                    : nextStatus === 'archived'
+                      ? 'project_hotspot.archive'
+                      : 'project_hotspot.update'
+                : 'project_hotspot.create',
+            entityType: 'project_hotspots',
+            entityId: response.data.id,
+            metadata: {
+                projectMaterialMapId: response.data.project_material_map_id,
+                projectMaterialId: response.data.project_material_id,
+                key: response.data.hotspot_key,
+                status: response.data.status,
+            },
+        });
+        setNotice(withAuditNotice(nextStatus === 'published' ? 'Hotspot published.' : 'Hotspot saved.', auditError));
         await loadHotspots(supabase, selectedMap.id, response.data.id);
     }
 

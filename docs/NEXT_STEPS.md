@@ -23,7 +23,7 @@ Docs-only and harness-only work should run:
 Cloudflare/Supabase implementation work should also follow the new verification profiles in `docs/agent/verification.md`.
 
 ## Last Runtime Baseline
-Measured 2026-05-28 during the admin Audit checkpoint:
+Measured 2026-05-28 during the admin audit-writer checkpoint:
 - `npm run build`: pass
 - `npm run lint`: pass
 - `npx tsc -b`: pass
@@ -45,7 +45,7 @@ Source of truth: `docs/agent/tasks.json`.
 - `NOW-ADMIN-SETTINGS-CRUD-001`: complete live `/admin/settings` save verification after owner/admin profile access is available. Source form and owner/admin RLS hardening are implemented.
 - `NOW-ADMIN-MEDIA-LEADS-001`: continue after the Leads checkpoint. Supabase Storage buckets/policies, `/admin/media`, and `/admin/leads` source are implemented; live upload/save and lead workflow verification still require browser-safe Supabase key configuration and active admin profiles. Live lead creation still requires server-side form persistence verification.
 - `NOW-ADMIN-CONTENT-CRUD-001`: continue after the Articles checkpoint. `/admin/stone-library`, `/admin/projects`, `/admin/products`, and `/admin/articles` source CRUD are implemented; live save verification and static-to-Supabase content import still require browser-safe Supabase key configuration and an active admin/editor profile.
-- `NOW-ADMIN-CMS-001`: umbrella objective for customer-maintained Projects, Stone Library, Products, Articles, media, and leads; execute through the smaller admin child tasks.
+- `NOW-ADMIN-CMS-001`: umbrella objective for customer-maintained Projects, Stone Library, Products, Articles, media, leads, and audit visibility; execute through the smaller admin child tasks. Shared browser-side audit writers now exist for admin CRUD/workflow saves, but live audit row verification still requires browser-safe Supabase config and active admin profiles.
 - `NOW-ASSET-MIGRATION-001`: migrate priority media away from old WordPress URLs and define controlled storage for launch.
 - `NOW-ARTICLE-STRUCTURE-CLAIMS-001`: move article details from raw newsletter HTML to mobile-safe, claim-reviewed structured article templates.
 
@@ -109,7 +109,8 @@ Source of truth: `docs/agent/tasks.json`.
 - `NOW-ADMIN-CONTENT-CRUD-001` Products source checkpoint: `/admin/products` now supports product families, models, material defaults, and specs behind the admin gate, with loading, empty, validation, save, publish/archive, read-only, and error states. Public Product runtime remains static/file-backed until content import and public read migration are completed.
 - `NOW-ADMIN-CONTENT-CRUD-001` Articles source checkpoint: `/admin/articles` now supports article metadata and structured article block rows behind the admin gate, with loading, empty, validation, save, publish/archive, legacy-source provenance, reference linking, read-only, and error states. Public Article runtime remains static/file-backed and sanitized legacy HTML until content import and public read migration are completed.
 - `NOW-ADMIN-MEDIA-LEADS-001` Leads source checkpoint: `/admin/leads` now supports enquiry and sample request queues behind the admin gate, with contact detail, sample item inspection, status, assignment, internal notes, notification state, read-only, and error states. Live lead row creation, notification emails, exports, and save verification remain pending credentials and policy confirmation.
-- Audit visibility source checkpoint: `/admin/audit` now supports owner/admin audit event inspection behind the admin gate, with event filters, actor/entity detail, metadata JSON, restricted-role, empty, and error states. Shared audit event writers remain pending.
+- Audit visibility source checkpoint: `/admin/audit` now supports owner/admin audit event inspection behind the admin gate, with event filters, actor/entity detail, metadata JSON, restricted-role, empty, and error states.
+- Admin audit-writer source checkpoint: Settings, Media, Stone Library, Projects, Products, Articles, and Leads save flows now call `src/lib/adminAudit.ts` after successful primary mutations. Audit insert failures are surfaced in the success notice without rolling back the saved content. Live audit row verification remains pending credentials.
 
 Older completion details live in `docs/WORKLOG.md`.
 

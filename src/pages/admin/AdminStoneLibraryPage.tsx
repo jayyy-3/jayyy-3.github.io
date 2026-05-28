@@ -10,6 +10,7 @@ import {
     Save,
     ShieldAlert,
 } from 'lucide-react';
+import { recordAdminAuditEvent, withAuditNotice } from '../../lib/adminAudit';
 import { supabase } from '../../lib/supabaseClient';
 import { useAdminAuth } from '../../lib/adminAuthHooks';
 import AdminShell from './AdminShell';
@@ -479,7 +480,25 @@ function AdminStoneLibraryContent() {
             return;
         }
 
-        setNotice(nextStatus === 'published' ? 'Stone group published.' : 'Stone group saved.');
+        const auditError = await recordAdminAuditEvent(supabase, {
+            actorUserId: user.id,
+            action: selectedGroupId
+                ? nextStatus === 'published'
+                    ? 'stone_group.publish'
+                    : nextStatus === 'archived'
+                      ? 'stone_group.archive'
+                      : 'stone_group.update'
+                : 'stone_group.create',
+            entityType: 'stone_groups',
+            entityId: response.data.id,
+            metadata: {
+                key: response.data.stone_group_key,
+                status: response.data.status,
+            },
+        });
+        setNotice(
+            withAuditNotice(nextStatus === 'published' ? 'Stone group published.' : 'Stone group saved.', auditError),
+        );
         await loadLibrary(response.data.id);
     }
 
@@ -537,7 +556,24 @@ function AdminStoneLibraryContent() {
             return;
         }
 
-        setNotice(nextStatus === 'published' ? 'Variant published.' : 'Variant saved.');
+        const auditError = await recordAdminAuditEvent(supabase, {
+            actorUserId: user.id,
+            action: selectedVariantId
+                ? nextStatus === 'published'
+                    ? 'stone_variant.publish'
+                    : nextStatus === 'archived'
+                      ? 'stone_variant.archive'
+                      : 'stone_variant.update'
+                : 'stone_variant.create',
+            entityType: 'stone_variants',
+            entityId: response.data.id,
+            metadata: {
+                stoneGroupId: response.data.stone_group_id,
+                key: response.data.variant_key,
+                status: response.data.status,
+            },
+        });
+        setNotice(withAuditNotice(nextStatus === 'published' ? 'Variant published.' : 'Variant saved.', auditError));
         await loadVariantBundle(supabase, selectedGroup.id, response.data.id, finishDefinitions);
     }
 
@@ -586,7 +622,18 @@ function AdminStoneLibraryContent() {
             ...current,
             [finish.id]: rowToCapabilityForm(response.data),
         }));
-        setNotice(`${finish.display_name} capability saved.`);
+        const auditError = await recordAdminAuditEvent(supabase, {
+            actorUserId: user.id,
+            action: form.id ? 'stone_finish_capability.update' : 'stone_finish_capability.create',
+            entityType: 'stone_finish_capabilities',
+            entityId: response.data.id,
+            metadata: {
+                stoneVariantId: response.data.stone_variant_id,
+                finishDefinitionId: response.data.finish_definition_id,
+                capability: response.data.capability,
+            },
+        });
+        setNotice(withAuditNotice(`${finish.display_name} capability saved.`, auditError));
     }
 
     return (
