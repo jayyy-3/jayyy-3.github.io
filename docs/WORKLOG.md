@@ -2,6 +2,41 @@
 
 Last updated: 2026-05-28
 
+## Entry - 2026-05-28 (Post-Alignment Baseline Verification)
+
+### Scope
+- Re-ran source/no-write, runtime, and credential-gated readiness checks after the Harness alignment and generated-artifact ignore commits.
+- Verified the current blocker remains missing live credentials/account state, not source coverage.
+- Queried Supabase through the connector in read-only mode to confirm migration/RLS/row-count posture after this checkpoint.
+- No runtime source, Supabase schema/data, Cloudflare account state, credentials, or live content was changed.
+
+### Changed Files
+- `docs/HANDOFF.md`
+- `docs/WORKLOG.md`
+
+### Verification Results
+- `git status --short`: clean before recording this entry.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:admin-crud-live`: pass in plan-only mode; no writes, Storage uploads, or deletes were attempted.
+- `npm run agent:cloudflare-readiness`: pass.
+- `npm run agent:public-supabase-readiness`: pass.
+- Supabase connector read-only sanity: pass. Nine launch migrations are present, latest migration is `security_definer_function_grants`, 12 checked core tables have RLS enabled, private workflow rows remain 0, `finish_definitions` remains 12, and `site_settings` remains 1.
+- `npm run agent:forms-live`: expected credential-gated fail on missing `SUPABASE_SERVICE_ROLE_KEY`.
+- `npm run agent:admin-live-readiness`: expected credential-gated fail on missing browser-safe Supabase key, service-role key, and first-admin email.
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass, including public/admin route shells, critical CTAs, redirects, and Forms API mock checks.
+
+### Risks and Gaps
+- The active goal is not complete. Live form persistence, live admin auth/profile readiness, tagged admin CRUD/audit writes, live media upload/export, live lead workflow/export, Cloudflare preview smoke, deployed form verification, and production DNS/cutover remain unverified.
+- Advancing those live checks requires server-side Supabase credentials, browser-safe Supabase configuration, first-admin details, Cloudflare preview/account state, and Jay approval for tagged admin QA writes where applicable.
+
+### Next Handoff
+- Configure `SUPABASE_SERVICE_ROLE_KEY`, then run `npm run agent:forms-live` locally and against Cloudflare preview when available.
+- Configure browser-safe Supabase key and confirm first admin email/profile, then run `npm run agent:admin-live-readiness -- --admin-email <first-admin-email>`.
+- Run `npm run agent:admin-crud-live -- --allow-writes` only after Jay approves tagged QA writes and a real owner/admin session exists.
+
 ## Entry - 2026-05-28 (Generated Test Artifact Ignore)
 
 ### Scope
