@@ -171,8 +171,8 @@ function checkEnvAndDocs() {
     'npm run agent:smoke',
     'npm run agent:check',
     'npm run agent:cloudflare-preview-smoke -- --base-url https://<preview>.pages.dev',
-    'npm run agent:forms-live',
-    'npm run agent:forms-live -- --require-browser-boundary',
+    'npm run agent:forms-live -- --allow-writes',
+    'npm run agent:forms-live -- --allow-writes --require-browser-boundary',
     'npm run agent:admin-live-readiness -- --admin-email <first-admin-email>',
   ]) {
     requireIncludes(runbook, command, 'docs/CLOUDFLARE_DEPLOYMENT.md');

@@ -2,6 +2,52 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Forms Live Write-Mode Guard)
+
+### Scope
+- Hardened `scripts/check-forms-api-live.mjs` so live form verification refuses to create tagged Supabase rows unless `--allow-writes` is supplied.
+- Updated `scripts/check-live-readiness.mjs` and `scripts/check-cloudflare-pages-readiness.mjs` so readiness and deployment docs point to the executable write-gated command forms.
+- Updated Harness docs to make the live form proof require three separate conditions: Jay approval, `--allow-writes`, and the required Supabase credentials.
+
+### Changed Files
+- `AGENTS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/CLOUDFLARE_DEPLOYMENT.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `docs/agent/verification.md`
+- `scripts/check-cloudflare-pages-readiness.mjs`
+- `scripts/check-forms-api-live.mjs`
+- `scripts/check-live-readiness.mjs`
+
+### Verification Results
+- `node --check scripts/check-forms-api-live.mjs`: pass.
+- `node --check scripts/check-live-readiness.mjs`: pass.
+- `node --check scripts/check-cloudflare-pages-readiness.mjs`: pass.
+- `npm run agent:forms-live`: expected fail before Supabase calls because `--allow-writes` is absent.
+- `npm run agent:live-readiness`: pass in report-only mode and now lists `--allow-writes` form commands plus the manual approval gate.
+- `npm run agent:live-readiness -- --form-writes-approved`: pass in report-only mode and clears only the form approval gate while preserving missing credential reporting.
+- `npm run agent:cloudflare-readiness`: pass.
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `node -e "JSON.parse(require('fs').readFileSync('docs/agent/tasks.json','utf8')); console.log('tasks json ok')"`: pass.
+
+### Risks and Gaps
+- This is source-only write-safety hardening. It does not verify live form persistence and creates no Supabase rows.
+- Future live form verification must run with `npm run agent:forms-live -- --allow-writes` only after Jay approves tagged live form QA writes.
+
+### Next Handoff
+- `NOW-FORMS-BACKEND-001`
+- `NOW-CLOUDFLARE-PAGES-DEPLOY-001`
+- `NOW-ADMIN-AUTH-RLS-001`
+
 ## Entry - 2026-05-29 (Cloudflare Runbook Approval Gate Guard)
 
 ### Scope

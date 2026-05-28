@@ -22,6 +22,7 @@ function parseArgs(argv) {
     baseUrl: null,
     envFiles: [...DEFAULT_ENV_FILES],
     allowEmail: false,
+    allowWrites: false,
     requireBrowserBoundary: false,
     turnstileToken: '',
   };
@@ -30,6 +31,11 @@ function parseArgs(argv) {
     const arg = argv[index];
     if (arg === '--allow-email') {
       options.allowEmail = true;
+      continue;
+    }
+
+    if (arg === '--allow-writes') {
+      options.allowWrites = true;
       continue;
     }
 
@@ -338,6 +344,12 @@ function withTurnstile(body, options) {
 
 async function run() {
   const options = parseArgs(process.argv.slice(2));
+  if (!options.allowWrites) {
+    throw new Error(
+      'Live form verification creates tagged Supabase rows. Re-run with --allow-writes only after Jay approves tagged live form QA writes.',
+    );
+  }
+
   const env = loadEnv(options.envFiles);
   const config = requireConfig(env, options);
   const runtimeEnv = options.baseUrl ? env : safeRuntimeEnv(env, options);

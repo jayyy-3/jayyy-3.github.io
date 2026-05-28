@@ -190,7 +190,7 @@ function buildChecks(env, sources, options) {
     makeCheck({
       id: 'forms-live-local',
       label: 'Local/direct live form persistence',
-      command: 'npm run agent:forms-live',
+      command: 'npm run agent:forms-live -- --allow-writes',
       present: [
         describeSource(serviceKey, sources),
         options.formWritesApproved ? 'Jay approval flag supplied for tagged live form QA writes' : '',
@@ -198,7 +198,7 @@ function buildChecks(env, sources, options) {
       missing: serviceKey ? [] : ['SUPABASE_SERVICE_ROLE_KEY or SUPABASE_SERVICE_KEY'],
       manual: options.formWritesApproved
         ? []
-        : ['Jay approval for tagged live form QA writes is required before running forms-live'],
+        : ['Jay approval for tagged live form QA writes is required before running forms-live --allow-writes'],
       optional: [
         turnstile
           ? `Turnstile configured via ${describeSource(turnstile, sources)}`
@@ -211,7 +211,7 @@ function buildChecks(env, sources, options) {
     makeCheck({
       id: 'forms-live-preview',
       label: 'Deployed Cloudflare form persistence',
-      command: 'npm run agent:forms-live -- --base-url <preview-or-production-origin>',
+      command: 'npm run agent:forms-live -- --allow-writes --base-url <preview-or-production-origin>',
       present: [
         describeSource(serviceKey, sources),
         presentSource(previewUrlEnv, sources, previewUrlSource),
@@ -223,12 +223,12 @@ function buildChecks(env, sources, options) {
       ].filter(Boolean),
       manual: options.formWritesApproved
         ? []
-        : ['Jay approval for tagged live form QA writes is required before running forms-live'],
+        : ['Jay approval for tagged live form QA writes is required before running forms-live --allow-writes'],
     }),
     makeCheck({
       id: 'forms-private-boundary',
       label: 'Live form private-row browser-key boundary',
-      command: 'npm run agent:forms-live -- --require-browser-boundary',
+      command: 'npm run agent:forms-live -- --allow-writes --require-browser-boundary',
       present: [
         describeSource(serviceKey, sources),
         describeSource(browserKey, sources),
@@ -240,7 +240,7 @@ function buildChecks(env, sources, options) {
       ].filter(Boolean),
       manual: options.formWritesApproved
         ? []
-        : ['Jay approval for tagged live form QA writes is required before running forms-live'],
+        : ['Jay approval for tagged live form QA writes is required before running forms-live --allow-writes'],
       optional: [
         'Runs the live form persistence check and additionally verifies created private lead rows are not anonymously readable through the browser key.',
       ],
