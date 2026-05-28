@@ -2,6 +2,44 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Admin Article Structured Authoring Coverage)
+
+### Scope
+- Extended `scripts/check-admin-crud-coverage.mjs` so the admin source-only gate now explicitly verifies structured article authoring guardrails.
+- The verifier checks that `/admin/articles` exposes every approved `article_blocks.block_type` from the schema as a block type option.
+- The verifier fails if raw HTML/newsletter authoring helpers such as `dangerouslySetInnerHTML`, `rawHtml`, or newsletter HTML fields appear in `AdminArticlesPage`.
+- The verifier also guards the existing JSON and published-block validation copy so published blocks continue requiring structured content rather than empty payloads.
+- No runtime article rendering, Supabase rows, Storage objects, Cloudflare state, credentials, or approved article copy were changed.
+
+### Changed Files
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `scripts/check-admin-crud-coverage.mjs`
+
+### Verification Results
+- `node --check scripts/check-admin-crud-coverage.mjs`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass, including public/admin route shells and Forms API mock checks.
+- `npm run agent:live-readiness`: pass in report-only mode; live form/admin/Cloudflare inputs remain missing or approval-gated.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- This is source-only verifier hardening. It does not prove live article save/publish flows, live audit rows, or active admin access.
+- `/admin/articles` still uses a JSON editor for block content. That is acceptable for the current operational source screen, but final customer handoff may still need friendlier block-specific forms.
+- Live admin article CRUD remains blocked until browser-safe Supabase config, a first admin profile, a real admin session, and Jay approval for tagged live writes exist.
+
+### Next Handoff
+- Continue source-only admin/import verifier hardening while credentials are unavailable.
+- Run live article CRUD through `npm run agent:admin-crud-live -- --allow-writes` only after the approved credential/session path exists.
+
 ## Entry - 2026-05-29 (Public Supabase Article Block Readiness Guard)
 
 ### Scope

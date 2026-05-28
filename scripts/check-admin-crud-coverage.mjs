@@ -356,8 +356,46 @@ function checkPage(page) {
   notes.push(`- ${page.label}: ${page.tables.join(', ')}`);
 }
 
+function checkArticleStructuredAuthoring() {
+  const schema = readRequired('docs/SUPABASE_SCHEMA.md');
+  const text = readRequired('src/pages/admin/AdminArticlesPage.tsx');
+  const approvedBlockTypes = [
+    'rich_text',
+    'image',
+    'gallery',
+    'quote',
+    'faq',
+    'cta',
+    'project_spotlight',
+    'stone_reference',
+    'comparison_table',
+    'proof_metric',
+    'video_embed',
+    'callout',
+  ];
+
+  for (const blockType of approvedBlockTypes) {
+    requireIncludes(schema, blockType, 'docs/SUPABASE_SCHEMA.md article block contract');
+    requireRegex(
+      text,
+      new RegExp(`\\['${blockType}',\\s*'[^']+'\\]`),
+      'src/pages/admin/AdminArticlesPage.tsx',
+      `block type option ${blockType}`,
+    );
+  }
+
+  for (const forbidden of ['dangerouslySetInnerHTML', 'rawHtml', 'raw_html', 'newsletterHtml', 'newsletter_html']) {
+    requireNotIncludes(text, forbidden, 'src/pages/admin/AdminArticlesPage.tsx structured article authoring');
+  }
+
+  requireIncludes(text, 'Published blocks require structured content.', 'src/pages/admin/AdminArticlesPage.tsx');
+  requireIncludes(text, 'Block content JSON is not valid JSON.', 'src/pages/admin/AdminArticlesPage.tsx');
+  requireIncludes(text, 'do not paste newsletter HTML as normal authoring', 'src/pages/admin/AdminArticlesPage.tsx');
+}
+
 checkRoutes();
 pageChecks.forEach(checkPage);
+checkArticleStructuredAuthoring();
 
 if (failures.length) {
   console.error('Admin CRUD coverage checks failed:');
