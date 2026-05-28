@@ -331,6 +331,26 @@ async function updateSupabaseRow(env, tableName, id, values) {
   });
 }
 
+async function recordServerAuditEvent(env, action, entityType, entityId, metadata = {}) {
+  try {
+    await supabaseRequest(env, '/rest/v1/admin_audit_events', {
+      method: 'POST',
+      headers: {
+        prefer: 'return=minimal',
+      },
+      body: JSON.stringify({
+        actor_user_id: null,
+        action,
+        entity_type: entityType,
+        entity_id: entityId,
+        metadata,
+      }),
+    });
+  } catch {
+    // The lead is already stored. Do not fail the visitor response because audit logging failed.
+  }
+}
+
 function leadSummary(type, id, payload) {
   const rows = [
     `${type} #${id}`,
@@ -430,6 +450,14 @@ export async function handleEnquiryRequest(request, env) {
       notification_status: notificationStatus,
     });
 
+    await recordServerAuditEvent(env, 'enquiry.create', 'enquiries', inserted.id, {
+      sourceRoute: payload.sourceRoute,
+      turnstileSuccess,
+      notificationStatus,
+      companyProvided: Boolean(payload.company),
+      phoneProvided: Boolean(payload.phone),
+    });
+
     const finalNotificationStatus = await sendLeadNotification(
       env,
       'enquiry',
@@ -481,6 +509,16 @@ export async function handleSampleRequest(request, env) {
       sample_request_id: inserted.id,
       quantity: payload.sampleQuantity,
       notes: sampleItemNotes(payload),
+    });
+
+    await recordServerAuditEvent(env, 'sample_request.create', 'sample_requests', inserted.id, {
+      sourceRoute: payload.sourceRoute,
+      turnstileSuccess,
+      notificationStatus,
+      itemId: item.id,
+      quantity: payload.sampleQuantity,
+      finishProvided: Boolean(payload.sampleFinish),
+      projectNameProvided: Boolean(payload.projectName),
     });
 
     const finalNotificationStatus = await sendLeadNotification(

@@ -2,6 +2,43 @@
 
 Last updated: 2026-05-28
 
+## Entry - 2026-05-28 (Server-Side Form Audit Source)
+
+### Scope
+- Updated the Cloudflare Pages Function form helpers so successful enquiry and sample-request inserts attempt server-side `admin_audit_events` writes with `actor_user_id = null`.
+- Added audit metadata for source route, Turnstile result, initial notification status, and sample-request item context.
+- Kept visitor responses resilient: audit logging failure is swallowed after the primary lead row has been stored.
+- Expanded Forms API mocks to cover audit writes, audit-failure resilience, missing service-role fail-closed behavior before Supabase calls, and existing Turnstile fail-closed behavior.
+
+### Changed Files
+- `functions/_lib/forms.js`
+- `scripts/check-forms-api.mjs`
+- `AGENTS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `node scripts/check-forms-api.mjs`: pass.
+- `npm run build`: pass. Browserslist staleness notice remains; the admin chunk is about 416 kB before gzip.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass, including all current `/admin/*` route shells and Forms API mock checks.
+
+### Risks and Gaps
+- Live form row creation and live form audit-row creation are still unverified until `SUPABASE_SERVICE_ROLE_KEY` exists in the local/Cloudflare Pages Function environment.
+- Transactional email delivery remains staged but unverified until Resend/email secrets are configured.
+- The source intentionally does not fail visitor submissions because audit logging failed after the primary lead row was stored.
+
+### Next Handoff
+- `NOW-FORMS-BACKEND-001` live Supabase row/audit verification.
+- `NOW-ADMIN-AUTH-RLS-001` live auth/profile verification.
+- `NOW-ADMIN-CONTENT-CRUD-001` source-only public-read preparation if credentials remain unavailable.
+
 ## Entry - 2026-05-28 (Content Import Dry Run)
 
 ### Scope

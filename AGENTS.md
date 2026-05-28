@@ -81,7 +81,7 @@ Before declaring implementation complete, verify all checks below:
 - Supabase baseline seed migration is applied and verified: 12 distinct published finish definitions and one published default site settings row.
 - Supabase admin settings hardening migration is applied and verified: `site_settings` writes are owner/admin only while read access remains available to active admin roles.
 - Supabase media Storage migrations are applied and verified: `urblo-public-media` and `urblo-admin-media` buckets exist, public object listing is disabled, and Storage object writes require active admin/editor roles.
-- Forms backend source is implemented for `/api/enquiries` and `/api/sample-requests`, but live Supabase row creation still requires server-side `SUPABASE_SERVICE_ROLE_KEY` verification.
+- Forms backend source is implemented for `/api/enquiries` and `/api/sample-requests`, including server-side audit-event attempts after successful lead inserts, but live Supabase row creation still requires server-side `SUPABASE_SERVICE_ROLE_KEY` verification.
 - Current content runtime remains static/file-backed until content CRUD is implemented and public routes are migrated from static data.
 - `/admin` auth shell source is implemented and config-gated: routes exist outside public site chrome, use Supabase Auth/profile checks when browser-safe keys are configured, and show a configuration-required state without rendering dashboard content when keys are absent.
 - `/admin/settings` source is the first CRUD screen and can read/create/update the default `site_settings` row for owner/admin roles after live auth is configured.
@@ -97,7 +97,7 @@ Before declaring implementation complete, verify all checks below:
 - Stone Library migration is complete: old `/materials*` route family has been removed and replaced with `/stone-library` plus `/stone-library/:stoneGroupId`.
 - `NEXT-STONELIB-DRIVE-IMAGE-AUDIT-001` and `NEXT-STONELIB-IMG-001` are complete for current website stones only; Drive-only products remain out of scope until the client decides to add them.
 - Contact route is declared at `/contact`; shared header/footer navigation points to declared routes, with Sample Request remaining a `mailto:` fallback until `NOW-FORMS-SUPABASE-001` is implemented.
-- Last runtime gates were measured on 2026-05-28 and were green (`npm run build`, `npm run lint`, `npx tsc -b`, `npm run agent:smoke`) during the content import dry-run checkpoint.
+- Last runtime gates were measured on 2026-05-28 and were green (`npm run build`, `npm run lint`, `npx tsc -b`, `npm run agent:smoke`) during the server-side form audit checkpoint.
 - Route-level code splitting is in place and the previous `>500kB` chunk warning is resolved; continue monitoring bundle output as features are added.
 - GitHub Pages hardening is now a legacy fallback; Cloudflare Pages deployment is the active launch path.
 - Routing now uses clean paths through `BrowserRouter` with Cloudflare Pages SPA fallback files in `public/`; unknown public URLs render a branded not-found state instead of the homepage.

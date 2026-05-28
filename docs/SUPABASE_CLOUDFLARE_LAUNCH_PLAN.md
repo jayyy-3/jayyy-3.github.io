@@ -25,7 +25,7 @@ After launch:
 - The current app is still a Vite/React static site.
 - The current deployment workflow still targets GitHub Pages.
 - Contact and Sample Request form source now posts to Cloudflare Pages Function routes; live Supabase persistence still requires server-side environment variables and preview verification.
-- Public Projects, Stone Library, Products, and Articles are still file-backed content. Admin source CRUD/workflow/review now exists for Stone Library, Projects, Products, Articles, Leads, and Audit, and admin CRUD/workflow save flows now call a shared audit writer. Live save verification, public read migration, live form-row creation, live audit row creation, server-side form audit events, and content import work still require browser-safe Supabase config, active admin profiles, server-side form secrets, and follow-up verification.
+- Public Projects, Stone Library, Products, and Articles are still file-backed content. Admin source CRUD/workflow/review now exists for Stone Library, Projects, Products, Articles, Leads, and Audit, and admin CRUD/workflow save flows now call a shared audit writer. Form API source also attempts server-side audit events after successful lead inserts. Live save verification, public read migration, live form-row creation, live audit row creation, and content import work still require browser-safe Supabase config, active admin profiles, server-side form secrets, and follow-up verification.
 - Source-only static-to-Supabase import preparation now exists through `npm run agent:content-import`. It dry-runs current static Stone Library, Products, Projects, Articles, and media candidates into draft payloads without writing Supabase rows.
 - The Supabase project `Urblo` (`npkidywzwddbnfrnxlmo`, `ap-southeast-2`) is active and connector-accessible. Foundation schema/RLS migrations and baseline seeds are applied; runtime integrations are not applied yet.
 - P0/P1 visible runtime media now uses controlled local launch assets; raw article HTML remains migration source material and should still be converted into structured Supabase article blocks.
@@ -182,6 +182,7 @@ Required work:
 - Add server-side validation. Source implemented.
 - Add Cloudflare Turnstile verification. Source implemented and fails closed when a secret is configured.
 - Insert submissions into Supabase. Source implemented; live verification pending `SUPABASE_SERVICE_ROLE_KEY`.
+- Record server-side audit events for successful lead inserts. Source implemented; live verification pending `SUPABASE_SERVICE_ROLE_KEY`.
 - Send transactional email notification. Resend integration is staged behind server-side environment variables.
 - Show clear success/error states to the visitor. Source implemented.
 - Add admin status workflow: new, contacted, quoted, won, closed, spam.
@@ -191,6 +192,7 @@ Validation:
 - Valid public submissions create Supabase records.
 - Invalid submissions fail without creating records.
 - Bot-protection failures fail closed.
+- Audit logging failure does not fail a visitor submission after the lead row is stored.
 - Notification email arrives with enough context to act.
 - Admin can update status and add internal notes.
 

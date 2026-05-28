@@ -5,7 +5,7 @@ Last updated: 2026-05-28
 ## System Boundary
 - Current implementation: frontend-only React application shipped as static assets.
 - Current implementation: Cloudflare Pages Function source now exists for `/api/enquiries` and `/api/sample-requests`.
-- Current implementation: the public Contact page submits enquiries and sample requests to those API routes, but live Supabase row creation still requires server-side Cloudflare environment variables.
+- Current implementation: the public Contact page submits enquiries and sample requests to those API routes. The API source attempts server-side audit events after successful lead inserts, but live Supabase row creation still requires server-side Cloudflare environment variables.
 - Current Supabase project: `Urblo` (`npkidywzwddbnfrnxlmo`, `ap-southeast-2`) has the foundation schema/RLS migrations, baseline seeds, admin settings hardening, and media Storage policies applied. The `/admin` auth shell source is implemented and config-gated, but live admin login still requires browser-safe Supabase key configuration and a confirmed first admin profile. Settings, Media, Stone Library, Projects, Products, Articles, Leads, and Audit are the first source CRUD/workflow/review screens; admin CRUD/workflow save flows now call a shared audit writer after successful primary mutations, with live audit row creation still pending credentials.
 - Launch target: Cloudflare Pages static frontend, Cloudflare Pages Functions API endpoints, Supabase Postgres/Auth/Storage, and an Urblo-owned admin interface for content operations.
 - Planning source: `docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md`.
@@ -70,6 +70,7 @@ Last updated: 2026-05-28
   - Current Audit admin source: `/admin/audit` reads `admin_audit_events` for active owner/admin roles once browser-safe Supabase config and an active profile exist.
   - Current audit-write source: `src/lib/adminAudit.ts` inserts `admin_audit_events` after successful admin Settings, Media, Stone Library, Projects, Products, Articles, and Leads mutations. Audit insert failures are appended to the success notice and do not roll back the already-saved primary change.
   - Form Functions require `SUPABASE_SERVICE_ROLE_KEY` server-side. `SUPABASE_URL` may be configured, but defaults to the Urblo project URL if omitted.
+  - Form Functions attempt `admin_audit_events` writes with `actor_user_id = null` after successful enquiry/sample request inserts. Audit write failure does not fail the visitor response.
   - Optional server-side form secrets: `TURNSTILE_SECRET_KEY` or `CF_TURNSTILE_SECRET_KEY`, `RESEND_API_KEY`, `LEAD_NOTIFICATION_FROM`, `ENQUIRY_NOTIFICATION_TO`, and `SAMPLE_REQUEST_NOTIFICATION_TO`.
 - Vite base config: `vite.config.ts`
   - `base: '/'` for root-domain Cloudflare Pages clean URL routing.
@@ -318,6 +319,7 @@ Route state contract:
   - Enquiries and sample requests store submitted fields, source route, Turnstile result, notification status, admin status, owner, and internal notes.
 - Admin audit:
   - Admin mutations should be attributable through audit fields or audit-event records.
+  - Public form submissions should create server-side audit events after successful lead inserts when server-side Supabase credentials are configured.
 - Content import readiness:
   - `scripts/check-content-import-readiness.mjs` is the source-only dry run for static-to-Supabase import preparation.
   - It intentionally marks import candidates as `draft` and uses natural keys/source URLs so provisional static content is not treated as final published client-approved content.

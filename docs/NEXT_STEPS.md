@@ -23,7 +23,7 @@ Docs-only and harness-only work should run:
 Cloudflare/Supabase implementation work should also follow the new verification profiles in `docs/agent/verification.md`.
 
 ## Last Runtime Baseline
-Measured 2026-05-28 during the content import dry-run checkpoint:
+Measured 2026-05-28 during the server-side form audit checkpoint:
 - `npm run build`: pass
 - `npm run lint`: pass
 - `npx tsc -b`: pass
@@ -39,7 +39,7 @@ For any user-facing layout/copy/IA task:
 ## Now
 Source of truth: `docs/agent/tasks.json`.
 
-- `NOW-FORMS-BACKEND-001`: complete live verification for Cloudflare Pages Functions after server-side `SUPABASE_SERVICE_ROLE_KEY` is configured. Source and mock API checks are implemented.
+- `NOW-FORMS-BACKEND-001`: complete live verification for Cloudflare Pages Functions after server-side `SUPABASE_SERVICE_ROLE_KEY` is configured. Source and mock API checks are implemented, including server-side audit-event attempts after successful lead inserts.
 - `NOW-FORMS-SUPABASE-001`: replace mailto-only Contact and Sample Request flows with Supabase-backed submissions.
 - `NOW-ADMIN-AUTH-RLS-001`: complete live admin auth verification after browser-safe Supabase key configuration and first admin email/profile are available. Source shell and config-gated routes are implemented.
 - `NOW-ADMIN-SETTINGS-CRUD-001`: complete live `/admin/settings` save verification after owner/admin profile access is available. Source form and owner/admin RLS hardening are implemented.
@@ -75,7 +75,7 @@ Source of truth: `docs/agent/tasks.json`.
 - `NOW-SUPABASE-SCHEMA-001`: Supabase schema plan is documented for Projects, Stone Library, Products, Articles, media, admin access, and lead capture.
 - `NOW-SUPABASE-FOUNDATION-001`: Supabase foundation migrations are applied and verified for the Urblo project: 24 launch tables, RLS, policies, FK indexes, private lead/admin protection, and read-only anonymous public-content grants.
 - `NOW-SUPABASE-SEED-BASELINE-001`: Supabase baseline seed is applied and verified: 12 distinct finish definitions and one published default Urblo site settings row, with idempotent upsert behavior.
-- `NOW-FORMS-BACKEND-001` partial source implementation: `/api/enquiries` and `/api/sample-requests` Pages Function source exists, Contact page posts to those endpoints, sample CTAs route to `/contact?intent=sample-request`, and mock API checks cover valid/invalid/Turnstile-failure behavior. Live Supabase row verification still requires server-side environment variables before this task can be marked done.
+- `NOW-FORMS-BACKEND-001` partial source implementation: `/api/enquiries` and `/api/sample-requests` Pages Function source exists, Contact page posts to those endpoints, sample CTAs route to `/contact?intent=sample-request`, and mock API checks cover valid/invalid/Turnstile-failure behavior, server-side audit attempts, audit-failure resilience, and missing-service-role fail-closed behavior. Live Supabase row verification still requires server-side environment variables before this task can be marked done.
 - `NEXT-ROUTER-SEO-001`: clean Cloudflare Pages routing is implemented with `BrowserRouter`, root Vite base, and SPA fallback.
 - Asset migration stopgap: direct old WordPress media references have been removed from runtime data and replaced with controlled local assets under `public/media/launch`; article covers and known article detail images now use a local runtime cleanup layer, while CMS media records and structured article blocks remain open under the article/admin tracks.
 - Homepage video launch optimization: the controlled desktop MP4 is now about 3MB, H.264 1280x720, no-audio, fast-start media; mobile still uses poster-only behavior until a mobile-specific variant is approved.
