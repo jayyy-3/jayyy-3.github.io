@@ -178,6 +178,15 @@ function checkEnvAndDocs() {
     requireIncludes(runbook, command, 'docs/CLOUDFLARE_DEPLOYMENT.md');
   }
 
+  for (const approvalGate of [
+    '--form-writes-approved',
+    'Jay approves tagged form QA writes',
+    '--admin-writes-approved',
+    'Jay approves tagged live admin QA writes',
+  ]) {
+    requireIncludes(runbook, approvalGate, 'docs/CLOUDFLARE_DEPLOYMENT.md');
+  }
+
   for (const route of previewRoutes) {
     requireIncludes(runbook, route, 'docs/CLOUDFLARE_DEPLOYMENT.md');
   }

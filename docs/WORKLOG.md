@@ -2,6 +2,35 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Cloudflare Runbook Approval Gate Guard)
+
+### Scope
+- Hardened `npm run agent:cloudflare-readiness` so the Cloudflare runbook must keep the manual approval gates for tagged live form and admin QA writes.
+- The verifier now fails if `docs/CLOUDFLARE_DEPLOYMENT.md` drops `--form-writes-approved`, `--admin-writes-approved`, or the Jay approval language around those live-write checks.
+
+### Changed Files
+- `docs/HANDOFF.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `scripts/check-cloudflare-pages-readiness.mjs`
+
+### Verification Results
+- `node --check scripts/check-cloudflare-pages-readiness.mjs`: pass.
+- `npm run agent:cloudflare-readiness`: pass.
+- `npm run lint`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `node -e "JSON.parse(require('fs').readFileSync('docs/agent/tasks.json','utf8')); console.log('tasks json ok')"`: pass.
+
+### Risks and Gaps
+- Source-only readiness hardening. It does not create a Cloudflare preview, configure secrets, or run live Supabase writes.
+- Live form/admin verification still waits for keys, first-admin/profile inputs, preview URL, and Jay approval.
+
+### Next Handoff
+- `NOW-CLOUDFLARE-PAGES-DEPLOY-001`
+- `NOW-FORMS-BACKEND-001`
+- `NOW-ADMIN-AUTH-RLS-001`
+
 ## Entry - 2026-05-29 (Live Readiness Form Write Approval Gate)
 
 ### Scope

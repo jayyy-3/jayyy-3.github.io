@@ -232,7 +232,8 @@
         "2026-05-28: Added `npm run agent:cloudflare-preview-smoke` as a no-secret deployed-preview verifier. It requires `--base-url`, checks direct-refresh public/admin route shells and deployed assets, verifies Cloudflare-applied legacy redirects, and verifies `/api/enquiries` and `/api/sample-requests` reject GET/invalid POST safely. Local preview URLs skip redirect/Function checks so the script can be validated before a Pages preview exists.",
         "2026-05-28: Added `npm run agent:live-readiness` reporting for the optional `CLOUDFLARE_PAGES_PREVIEW_URL` / `PAGES_PREVIEW_URL` helper variables, plus a non-secret `--base-url` override, before running deployed preview smoke.",
         "2026-05-29: Live deployed form verification is also approval-gated in `npm run agent:live-readiness`; pass `--form-writes-approved` only after Jay approves tagged form QA writes against the target environment.",
-        "2026-05-29: Cloudflare deployment runbook and `npm run agent:cloudflare-readiness` now include `npm run agent:forms-live -- --require-browser-boundary` as the final private-row form proof after service-role and browser-safe Supabase keys are configured."
+        "2026-05-29: Cloudflare deployment runbook and `npm run agent:cloudflare-readiness` now include `npm run agent:forms-live -- --require-browser-boundary` as the final private-row form proof after service-role and browser-safe Supabase keys are configured.",
+        "2026-05-29: `npm run agent:cloudflare-readiness` now also fails if the runbook drops `--form-writes-approved`, `--admin-writes-approved`, or the Jay approval language around tagged live form/admin QA writes."
       ]
     },
     {
