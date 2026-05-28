@@ -104,7 +104,7 @@ Last updated: 2026-05-29
 - Verification matrix: `docs/agent/verification.md`
 - Harness checks:
   - `npm run agent:check` => `node scripts/check-harness.mjs`
-  - `scripts/check-harness.mjs` verifies required harness files, required package scripts, Contact form UI source-check smoke integration, and delegates doc path/task checks.
+  - `scripts/check-harness.mjs` verifies required harness files, active operational `agent:*` package scripts, Contact form UI source-check smoke integration, and delegates doc path/task checks. The guarded script map includes the form, admin, Cloudflare, first-admin, live-readiness, content-import, and public Supabase readiness runners so launch verification commands cannot be silently removed from `package.json`.
   - `scripts/check-doc-paths.mjs` rejects machine-specific paths and validates repo-relative path references in docs/task state.
 - Content import dry run:
   - `npm run agent:content-import` => `node scripts/check-content-import-readiness.mjs`

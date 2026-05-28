@@ -22,8 +22,19 @@ const requiredFiles = [
 ]
 const requiredPackageScripts = {
   'agent:check': 'node scripts/check-harness.mjs',
+  'agent:admin-crud-coverage': 'node scripts/check-admin-crud-coverage.mjs',
+  'agent:admin-crud-live': 'node scripts/check-admin-crud-live.mjs',
+  'agent:admin-live-readiness': 'node scripts/check-admin-live-readiness.mjs',
+  'agent:cloudflare-preview-smoke': 'node scripts/check-cloudflare-preview-smoke.mjs',
+  'agent:cloudflare-readiness': 'node scripts/check-cloudflare-pages-readiness.mjs',
+  'agent:content-import': 'node scripts/check-content-import-readiness.mjs',
+  'agent:content-import:apply-sql': 'node scripts/check-content-import-readiness.mjs --out .tmp/content-import-preview.json --plan-out .tmp/content-import-plan.md --preflight-sql-out .tmp/content-import-preflight.sql --apply-sql-out .tmp/content-import-apply.sql',
+  'agent:first-admin-bootstrap': 'node scripts/bootstrap-first-admin.mjs',
+  'agent:forms-live': 'node scripts/check-forms-api-live.mjs',
   'agent:forms-ui': 'node scripts/check-contact-form-ui-source.mjs',
   'agent:init': 'bash scripts/agent-init.sh',
+  'agent:live-readiness': 'node scripts/check-live-readiness.mjs',
+  'agent:public-supabase-readiness': 'node scripts/check-public-supabase-readiness.mjs',
   'agent:smoke': 'bash scripts/agent-smoke.sh',
 }
 

@@ -2,6 +2,52 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Harness Operational Script Guard)
+
+### Scope
+- Hardened `npm run agent:check` so `scripts/check-harness.mjs` verifies the active operational `agent:*` package script map, not only the core harness and Contact UI source check.
+- The guarded script map now covers form live/UI checks, admin coverage/live/readiness checks, first-admin bootstrap, live input readiness, Cloudflare readiness/preview smoke, content import, and public Supabase readiness commands.
+- Refreshed current no-write Supabase evidence while live credentials remain absent.
+
+### Changed Files
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `scripts/check-harness.mjs`
+
+### Verification Results
+- Supabase connector `list_migrations`: pass. 12 migrations are applied through `sample_request_atomic_insert`.
+- Supabase connector `execute_sql`: pass. 24/24 expected public launch tables exist with RLS enabled, 12 published finish definitions exist, one published default site settings row exists, and private workflow/admin tables remain at 0 rows.
+- Supabase connector `execute_sql`: pass. `submit_sample_request_with_item(jsonb, jsonb)` is `security invoker` and executable by `service_role` only.
+- Supabase security advisor: pass. 0 security lints.
+- Supabase performance advisor: reviewed. Remaining INFO/WARN items are expected early-stage unused-index and multiple-permissive-policy notices on new/low-traffic launch tables; do not remove launch-pattern indexes before real import/live admin usage evidence exists.
+- `node --check scripts/check-harness.mjs`: pass.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run agent:smoke`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:admin-crud-live`: pass in plan-only/no-write mode.
+- `npm run agent:forms-ui`: pass.
+- `npm run agent:live-readiness`: pass in report-only mode; all live form/admin/Cloudflare inputs remain missing or approval-gated in the current local environment.
+- `npm run agent:cloudflare-readiness`: pass.
+- `npm run agent:public-supabase-readiness`: pass.
+- `npm run agent:content-import:apply-sql`: pass; wrote ignored `.tmp/` review/preflight/apply artifacts only.
+
+### Risks and Gaps
+- This is source/docs verification hardening plus read-only external-state evidence. It does not create Supabase rows, Auth users, Storage objects, Cloudflare state, credentials, or live writes.
+- Live completion still requires service-role and browser-safe Supabase keys, Jay-confirmed first-admin email/profile/session, Cloudflare preview URL, and Jay approval for tagged form/admin QA writes.
+
+### Next Handoff
+- `NOW-FORMS-BACKEND-001`
+- `NOW-ADMIN-AUTH-RLS-001`
+- `NOW-ADMIN-CMS-001`
+
 ## Entry - 2026-05-29 (Sample Request Atomic Insert RPC)
 
 ### Scope
