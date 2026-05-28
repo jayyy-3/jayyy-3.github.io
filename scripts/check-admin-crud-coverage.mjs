@@ -414,10 +414,52 @@ function checkAdminLiveVerifierBoundaries() {
   );
 }
 
+function checkAdminRemovalContract() {
+  const tasks = readRequired('docs/agent/tasks.json');
+  const adminIa = readRequired('docs/ADMIN_IA_ACCESS.md');
+  const schema = readRequired('docs/SUPABASE_SCHEMA.md');
+  const liveVerifier = readRequired('scripts/check-admin-crud-live.mjs');
+
+  requireNotIncludes(
+    tasks,
+    'create, read, update, delete, draft',
+    'docs/agent/tasks.json admin CMS acceptance',
+  );
+  requireNotIncludes(
+    tasks,
+    'archive, and delete Projects',
+    'docs/agent/tasks.json admin content acceptance',
+  );
+
+  requireIncludes(
+    tasks,
+    'Physical delete controls remain out of the launch-critical CMS path',
+    'docs/agent/tasks.json admin CMS acceptance',
+  );
+  requireIncludes(
+    tasks,
+    'Physical deletes for content records remain hidden and approval-gated',
+    'docs/agent/tasks.json admin content acceptance',
+  );
+  requireIncludes(adminIa, 'Current launch removal model', 'docs/ADMIN_IA_ACCESS.md');
+  requireIncludes(
+    adminIa,
+    'Live admin verification should prove archive behavior, public invisibility, and auditability',
+    'docs/ADMIN_IA_ACCESS.md',
+  );
+  requireIncludes(
+    schema,
+    'Launch admin removal uses non-destructive archive flows',
+    'docs/SUPABASE_SCHEMA.md',
+  );
+  requireIncludes(liveVerifier, 'no physical deletes are attempted.', 'scripts/check-admin-crud-live.mjs');
+}
+
 checkRoutes();
 pageChecks.forEach(checkPage);
 checkArticleStructuredAuthoring();
 checkAdminLiveVerifierBoundaries();
+checkAdminRemovalContract();
 
 if (failures.length) {
   console.error('Admin CRUD coverage checks failed:');

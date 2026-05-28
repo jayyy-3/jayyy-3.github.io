@@ -304,6 +304,7 @@
         "2026-05-28: Added `npm run agent:live-readiness` as a no-secret input audit for first-admin readiness, admin live-write session availability, and Jay approval/manual-gate visibility before running live admin verification. It accepts non-secret `--admin-email`, `--first-admin-writes-approved`, and `--admin-writes-approved` readiness flags, but still performs no writes.",
         "2026-05-29: `npm run agent:live-readiness` now reports the first-admin profile/invite live write path separately from read-only first-admin verification. `--first-admin-writes-approved` only clears the manual approval gate and does not replace `--allow-writes`, `--confirm-email`, or the service-role credential requirement on `npm run agent:first-admin-bootstrap`.",
         "2026-05-29: `npm run agent:live-readiness` now reports `npm run agent:admin-crud-live -- --allow-writes --include-storage` as the final media Storage upload policy proof, separate from the general admin CRUD/audit live write check.",
+        "2026-05-29: `npm run agent:admin-crud-coverage` now also fails if admin CMS acceptance drifts back toward physical-delete language instead of the launch archive/removal contract.",
         "2026-05-28: Removed the retired AdminModulePage scaffold component and unused scaffold/locked module-state branches now that all launch-critical admin modules have real source screens. Admin CRUD coverage now fails if the retired scaffold component returns."
       ],
       "acceptance": [
@@ -553,6 +554,7 @@
         "2026-05-29: Public Supabase readiness now guards the article structured import shape: it fails if article blocks regress to placeholders, lose image-to-media links, import newsletter footer/contact/social artifacts, or lose claim-review metadata.",
         "2026-05-29: Admin CRUD coverage verifier now checks Stone Library finish-image table/action coverage in addition to group, variant, capability, Projects, Products, and Articles source screens.",
         "2026-05-29: Admin CRUD coverage verifier now also checks Article structured-authoring guardrails: approved schema block types must remain available, published blocks must require structured content, and raw HTML/newsletter authoring helpers must not appear in `/admin/articles`.",
+        "2026-05-29: Admin CRUD coverage verifier now also checks the archive/removal contract so launch-critical content acceptance stays non-destructive until a physical-delete policy is approved.",
         "2026-05-29: Admin CRUD live verifier plan now includes tagged `stone_finish_images` create/archive coverage through authenticated RLS for the later credential-gated live run. It archives public-facing QA parent rows, verifies those tagged public-content rows and private lead rows are not anonymously visible through browser-key reads, and performs no physical deletes."
       ],
       "acceptance": [

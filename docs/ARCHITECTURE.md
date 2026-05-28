@@ -165,7 +165,7 @@ Last updated: 2026-05-29
   - This command does not query Supabase, create users, run live writes, create Cloudflare projects, or touch DNS.
 - Admin CRUD source coverage:
   - `npm run agent:admin-crud-coverage` => `node scripts/check-admin-crud-coverage.mjs`
-  - Verifies `/admin` route registration, active module registration, `RequireAdmin` state coverage, browser-safe Supabase client wiring, launch-critical table references, role-gated mutation controls, publish/archive paths, structured Article block authoring guardrails, shared audit writer usage, and Media/Leads export audit gates.
+  - Verifies `/admin` route registration, active module registration, `RequireAdmin` state coverage, browser-safe Supabase client wiring, launch-critical table references, role-gated mutation controls, publish/archive paths, structured Article block authoring guardrails, shared audit writer usage, Media/Leads export audit gates, and the non-destructive archive/removal contract.
   - This is a source-only verifier. It never mutates Supabase and does not replace live browser QA with a configured admin profile.
 - Admin CRUD live verification:
   - `npm run agent:admin-crud-live` => `node scripts/check-admin-crud-live.mjs`

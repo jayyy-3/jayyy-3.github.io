@@ -2,6 +2,37 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Admin Archive Contract Verifier Guard)
+
+### Scope
+- Hardened `npm run agent:admin-crud-coverage` so it now checks the admin archive/removal contract in `docs/agent/tasks.json`, `docs/ADMIN_IA_ACCESS.md`, `docs/SUPABASE_SCHEMA.md`, and `scripts/check-admin-crud-live.mjs`.
+- The verifier now fails if the launch-critical admin CMS acceptance drifts back toward physical-delete wording instead of create/update/publish/archive plus approval-gated destructive policy.
+- Updated Harness docs that describe admin CRUD coverage.
+
+### Changed Files
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `scripts/check-admin-crud-coverage.mjs`
+
+### Verification Results
+- `node --check scripts/check-admin-crud-coverage.mjs`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:admin-crud-live`: pass in plan-only/no-write mode.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- Source/docs-only guard. No Supabase rows, Storage objects, Auth users, Cloudflare state, credentials, or live writes were created or changed.
+- Live form/admin verification remains blocked by missing service-role key, browser-safe key, first admin email/profile/session, Cloudflare preview URL, and Jay approval for tagged writes.
+
+### Next Handoff
+- `NOW-ADMIN-CMS-001`
+- `NOW-ADMIN-CONTENT-CRUD-001`
+- `NOW-ADMIN-MEDIA-LEADS-001`
+
 ## Entry - 2026-05-29 (Admin Archive/Delete Contract Alignment)
 
 ### Scope
