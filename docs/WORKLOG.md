@@ -2,6 +2,49 @@
 
 Last updated: 2026-05-28
 
+## Entry - 2026-05-28 (Admin Live Readiness Runner)
+
+### Scope
+- Added `scripts/check-admin-live-readiness.mjs` as a non-mutating readiness runner before live `/admin` browser QA.
+- Added `npm run agent:admin-live-readiness`.
+- The runner loads `.env.local`, `.env`, `.dev.vars`, and shell values; requires a browser-safe Supabase key, a service-role verification key, and a first-admin email.
+- It verifies one active `admin_profiles` row for the named email, checks the required role, and confirms baseline `site_settings` and `finish_definitions` seed rows.
+- It does not create Supabase Auth users, create/update admin profile rows, mutate content, or delete rows.
+
+### Changed Files
+- `AGENTS.md`
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/CLOUDFLARE_DEPLOYMENT.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `package.json`
+- `scripts/agent-init.sh`
+- `scripts/check-admin-live-readiness.mjs`
+
+### Verification Results
+- `node --check scripts/check-admin-live-readiness.mjs`: pass.
+- `npm run agent:admin-live-readiness`: expected credential-gated fail. No local browser-safe key, service-role key, or first-admin email is configured, and the command stops before any Supabase calls.
+- `node -e "JSON.parse(require('fs').readFileSync('docs/agent/tasks.json','utf8')); JSON.parse(require('fs').readFileSync('package.json','utf8')); console.log('json ok')"`: pass.
+- `node --check scripts/check-forms-api-live.mjs`: pass.
+- `npm run build`: pass. Browserslist staleness notice remains; admin chunk is about 432 kB before gzip.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass, including `/admin/*` route shells and Forms API mock checks.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- Live admin auth/profile verification is still unverified until Jay confirms the first admin email and browser-safe/service-role keys are configured.
+- First admin bootstrap still must happen outside this runner. Creating or changing admin profiles requires Jay confirmation because it changes access control.
+
+### Next Handoff
+- `NOW-ADMIN-AUTH-RLS-001` live admin profile readiness with `npm run agent:admin-live-readiness -- --admin-email <first-admin-email>` after credentials are configured.
+- `NOW-FORMS-BACKEND-001` live form persistence/audit verification with `npm run agent:forms-live`.
+
 ## Entry - 2026-05-28 (Live Forms Verification Runner)
 
 ### Scope

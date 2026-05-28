@@ -69,6 +69,7 @@ Last updated: 2026-05-28
   - Current Leads admin source: `/admin/leads` reads `enquiries`, `sample_requests`, and `sample_request_items`; active owner/admin roles can update lead status, assignment, internal notes, and export the currently loaded lead queue to CSV once browser-safe Supabase config and an active profile exist. CSV export must write an `admin_audit_events` row before downloading.
   - Current Audit admin source: `/admin/audit` reads `admin_audit_events` for active owner/admin roles once browser-safe Supabase config and an active profile exist.
   - Current audit-write source: `src/lib/adminAudit.ts` inserts `admin_audit_events` after successful admin Settings, admin profile, Media, Stone Library, Projects, Products, Articles, and Leads mutations. Audit insert failures are appended to the success notice and do not roll back the already-saved primary change.
+  - Admin credential/profile readiness verification is staged through `npm run agent:admin-live-readiness -- --admin-email <first-admin-email>`. The command is read-only, requires a browser-safe Supabase key plus a service-role key, verifies the named active admin profile role, and checks the baseline `site_settings` and `finish_definitions` seed rows before browser login/save QA begins.
   - Form Functions require `SUPABASE_SERVICE_ROLE_KEY` server-side; `SUPABASE_SERVICE_KEY` remains a compatibility alias only. `SUPABASE_URL` may be configured, but defaults to the Urblo project URL if omitted.
   - Form Functions attempt `admin_audit_events` writes with `actor_user_id = null` after successful enquiry/sample request inserts. Audit write failure does not fail the visitor response.
   - Live form persistence verification is staged through `npm run agent:forms-live`. The command requires a server-side Supabase service-role key, verifies valid enquiry/sample request rows plus audit rows, verifies invalid enquiry/sample request payloads create no rows, and retains tagged test rows for auditability until Jay approves cleanup.
@@ -119,6 +120,12 @@ Last updated: 2026-05-28
   - Default mode invokes the Pages Function handlers directly and suppresses Turnstile/email side effects unless `--turnstile-token` or `--allow-email` is supplied.
   - Optional HTTP mode uses `--base-url <origin>` to test a local or deployed Pages endpoint while still querying Supabase to verify durable rows.
   - The command is credential-gated and intentionally fails when service-role credentials are absent.
+- Admin live readiness:
+  - `npm run agent:admin-live-readiness -- --admin-email <first-admin-email>` => `node scripts/check-admin-live-readiness.mjs`
+  - Loads local environment values from `.env.local`, `.env`, `.dev.vars`, and the shell.
+  - Requires `VITE_SUPABASE_PUBLISHABLE_KEY` or `VITE_SUPABASE_ANON_KEY`, plus `SUPABASE_SERVICE_ROLE_KEY` or `SUPABASE_SERVICE_KEY`.
+  - Reads `admin_profiles`, `site_settings`, and `finish_definitions` only; it does not create users, create profiles, mutate content, or delete rows.
+  - Defaults to requiring an active `owner` profile. Use `--required-role owner,admin` only when intentionally verifying a non-owner admin profile.
 
 ## Route Interface Contract (`src/App.tsx`)
 

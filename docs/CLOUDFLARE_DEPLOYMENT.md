@@ -112,6 +112,7 @@ Current `/functions/api` endpoints:
   - `npm run agent:forms-live -- --base-url https://<preview>.pages.dev` for deployed endpoint verification, after the Pages environment has the service-role key.
 - The live verification command creates tagged test enquiry and sample-request rows, verifies their `admin_audit_events`, verifies invalid payloads create no rows, and keeps the test rows until Jay approves cleanup.
 - Admin route tests require a browser-safe Supabase key, a Supabase Auth user, and a matching active `admin_profiles` row.
+- Before browser admin QA, run `npm run agent:admin-live-readiness -- --admin-email <first-admin-email>` to verify the browser-safe key, service-role verification key, active admin profile, and baseline seed rows without mutating Supabase.
 - Settings save tests require an active owner/admin profile because `site_settings` write RLS is owner/admin only. Admin profile save tests require existing Supabase Auth users and must verify owner-role changes are owner-protected.
 - Media upload/save tests require an active owner/admin/editor profile because Storage object writes and `media_assets` mutations are admin/editor only.
 - Leads workflow save tests require an active owner/admin profile because lead status, assignment, and internal notes are private operational fields.
@@ -149,6 +150,9 @@ After form secrets are configured, run:
 
 For deployed Pages preview form verification, run:
 - `npm run agent:forms-live -- --base-url https://<preview>.pages.dev`
+
+After admin browser-safe keys and the first admin profile are configured, run:
+- `npm run agent:admin-live-readiness -- --admin-email <first-admin-email>`
 
 ## Current Blocker
 Repo-side Cloudflare Pages preparation can be committed now.

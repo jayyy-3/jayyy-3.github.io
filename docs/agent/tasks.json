@@ -325,6 +325,8 @@
         ".gitignore",
         "package.json",
         "package-lock.json",
+        "scripts/check-admin-live-readiness.mjs",
+        "scripts/agent-init.sh",
         "scripts/agent-smoke.sh",
         "src/App.tsx",
         "src/lib/supabaseClient.ts",
@@ -339,7 +341,8 @@
         "Use docs/ADMIN_IA_ACCESS.md for the protected admin shell route map, access states, and role behavior once Supabase credentials are available.",
         "2026-05-28: Added /admin, /admin/login, /admin/unauthorized, and protected module scaffolds outside public site chrome. The shell uses @supabase/supabase-js with VITE_SUPABASE_ANON_KEY or VITE_SUPABASE_PUBLISHABLE_KEY, validates sessions with getUser(), and checks active admin_profiles before dashboard render.",
         "2026-05-28: Browser QA without browser-safe Supabase key confirmed /admin and /admin/login show a configuration-required state, suppress the public WelcomePopup, and do not render dashboard content. Live unauthenticated/profiled/admin-path verification still requires browser-safe key configuration and Jay's first admin email/profile.",
-        "2026-05-28: Dashboard open launch checks now reflect current blockers: service-role form verification, first admin profile, live admin save/upload/export audit verification, and approved content import scope."
+        "2026-05-28: Dashboard open launch checks now reflect current blockers: service-role form verification, first admin profile, live admin save/upload/export audit verification, and approved content import scope.",
+        "2026-05-28: Added `npm run agent:admin-live-readiness` as the read-only credential/profile readiness runner. It requires a browser-safe Supabase key, service-role verification key, and first-admin email; verifies the active admin profile plus baseline seed rows; and performs no database mutations."
       ],
       "acceptance": [
         "Admin shell route is protected by Supabase Auth.",
@@ -354,6 +357,7 @@
         "npx tsc -b",
         "npm run agent:smoke",
         "npm run agent:check",
+        "npm run agent:admin-live-readiness -- --admin-email <first-admin-email> (after browser/service keys and first admin profile are configured)",
         "Playwright: /admin and /admin/login show configuration-required state when no browser key is configured"
       ]
     },

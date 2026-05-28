@@ -155,6 +155,7 @@ Current implementation:
 - `/admin`, `/admin/login`, `/admin/unauthorized`, and protected module routes exist outside the public site chrome.
 - The admin shell uses Supabase Auth and `admin_profiles` lookup when browser-safe Supabase configuration is present.
 - Without `VITE_SUPABASE_ANON_KEY` or `VITE_SUPABASE_PUBLISHABLE_KEY`, admin routes render a configuration-required state and do not show dashboard content.
+- `npm run agent:admin-live-readiness -- --admin-email <first-admin-email>` is the read-only readiness check before live browser QA. It verifies browser-safe key presence, service-role verification access, the named active admin profile, and baseline seed rows without creating or changing users.
 - `/admin/settings` is the first CRUD source screen behind the auth gate, with owner/admin save controls for the default `site_settings` row.
 - `/admin/settings` also includes a non-destructive admin team manager for existing Supabase Auth users, with owner/admin profile create/update controls, owner-role guardrails, self-lockout prevention, and no delete controls.
 - `/admin/media` is the first media CRUD source screen behind the auth gate, with admin/editor upload and metadata controls, audit-gated media manifest export, viewer read-only behavior, and publish/archive guardrails.

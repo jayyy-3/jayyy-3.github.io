@@ -36,6 +36,7 @@ echo "11. docs/WORKLOG.md when historical evidence is needed"
 echo
 
 echo "Useful commands:"
+echo "- npm run agent:admin-live-readiness"
 echo "- npm run agent:check"
 echo "- npm run agent:content-import"
 echo "- npm run agent:content-import -- --out .tmp/content-import-preview.json"

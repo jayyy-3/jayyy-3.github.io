@@ -100,6 +100,7 @@ Acceptance:
 - Unauthenticated users cannot view admin content once browser Supabase key configuration is present.
 - Authenticated users without an active admin profile see unauthorized state once live auth can be exercised.
 - Active admin users can reach the dashboard only after Jay confirms the first admin email and an active `admin_profiles` row exists.
+- `npm run agent:admin-live-readiness -- --admin-email <first-admin-email>` is the read-only readiness gate before browser QA; it verifies browser-safe key presence, service-role verification access, the named active admin profile, and baseline seed rows without creating or changing users.
 - No service-role key is shipped to browser code.
 
 ### Phase 4a - Site Settings, Admin Profiles, and RLS Hardening
