@@ -2,6 +2,52 @@
 
 Last updated: 2026-05-28
 
+## Entry - 2026-05-28 (Admin Leads Workflow Source)
+
+### Scope
+- Replaced the `/admin/leads` scaffold with a protected source workflow screen behind the existing Supabase Auth/profile gate.
+- The screen reads enquiries, sample requests, sample request items, active admin profiles, Stone Library labels, and finish labels from Supabase.
+- Active owner/admin roles can update lead status, assignment, and internal notes once browser-safe Supabase config and an active profile exist.
+- Added loading, empty, contact detail, sample item, notification state, Turnstile state, status, assignment, internal notes, read-only, and error states.
+- Kept lead row creation server-side only through the existing Pages Function form endpoints; manual lead creation, export, and physical delete controls remain intentionally hidden.
+
+### Changed Files
+- `scripts/agent-smoke.sh`
+- `src/pages/admin/AdminApp.tsx`
+- `src/pages/admin/AdminLeadsPage.tsx`
+- `src/pages/admin/adminContent.ts`
+- `AGENTS.md`
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/CLOUDFLARE_DEPLOYMENT.md`
+- `docs/DESIGN.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run build`: pass.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass, including `/admin/leads` route shell coverage.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- Playwright CLI with Firefox: pass for `/admin/leads` with no browser-safe Supabase key configured. The route shows the configuration-required state rather than Leads workflow content.
+
+### Risks and Gaps
+- Live Leads save verification is not complete because browser-safe Supabase key configuration and an active owner/admin profile are still required.
+- Live lead row creation is still not verified because server-side `SUPABASE_SERVICE_ROLE_KEY` is not configured for the Pages Function environment.
+- Transactional email, Turnstile production secret verification, lead export, and audit review remain pending.
+
+### Next Handoff
+- `NOW-FORMS-BACKEND-001`
+- `NOW-ADMIN-AUTH-RLS-001`
+- `NOW-ADMIN-MEDIA-LEADS-001` live verification and export/notification follow-ups.
+- Next source-only checkpoint without credentials: useful audit visibility.
+
 ## Entry - 2026-05-28 (Admin Articles CRUD Source)
 
 ### Scope

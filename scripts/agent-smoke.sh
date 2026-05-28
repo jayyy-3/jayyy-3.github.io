@@ -40,6 +40,7 @@ const routes = [
   '/admin',
   '/admin/login',
   '/admin/unauthorized',
+  '/admin/leads',
   '/admin/media',
   '/admin/settings',
   '/admin/stone-library',

@@ -48,7 +48,7 @@ export const adminModules: AdminModuleDefinition[] = [
         path: '/admin/leads',
         summary: 'Contact enquiries and sample requests with owner, status, notes, and export controls.',
         dependency: 'Forms live-write verification',
-        state: 'scaffold',
+        state: 'active',
         Icon: Mailbox,
     },
     {

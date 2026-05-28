@@ -82,6 +82,7 @@ Before custom domain cutover, test the generated `*.pages.dev` URL:
 - `/contact`
 - `/admin`
 - `/admin/login`
+- `/admin/leads`
 - `/admin/media`
 - `/admin/settings`
 - `/admin/stone-library`
@@ -104,6 +105,7 @@ Current `/functions/api` endpoints:
 - Admin route tests require a browser-safe Supabase key, a Supabase Auth user, and a matching active `admin_profiles` row.
 - Settings save tests require an active owner/admin profile because `site_settings` write RLS is owner/admin only.
 - Media upload/save tests require an active owner/admin/editor profile because Storage object writes and `media_assets` mutations are admin/editor only.
+- Leads workflow save tests require an active owner/admin profile because lead status, assignment, and internal notes are private operational fields.
 - Stone Library save tests require an active owner/admin/editor profile because `stone_groups`, `stone_variants`, and `stone_finish_capabilities` mutations are admin/editor only.
 - Projects save tests require an active owner/admin/editor profile because `projects`, `project_facts`, `project_materials`, `project_material_maps`, and `project_hotspots` mutations are admin/editor only.
 - Products save tests require an active owner/admin/editor profile because `products`, `product_models`, `product_material_defaults`, and `product_specs` mutations are admin/editor only.

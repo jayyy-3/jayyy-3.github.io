@@ -5,7 +5,7 @@ Last updated: 2026-05-28
 ## Purpose
 This document defines the first production Supabase data model for the Urblo website launch.
 
-It is both the schema design contract and the current implementation checkpoint record. The foundation migrations, baseline seeds, admin settings hardening, and media Storage policies are applied. Cloudflare Pages Function source exists for forms, and the `/admin` auth shell, `/admin/settings`, `/admin/media`, `/admin/stone-library`, `/admin/projects`, `/admin/products`, and `/admin/articles` source screens are implemented. Runtime work must still verify live form writes, configure browser-safe Supabase Auth keys, create the first admin profile, verify live settings/media/Stone Library/Projects/Products/Articles writes, and build broader lead and audit CRUD.
+It is both the schema design contract and the current implementation checkpoint record. The foundation migrations, baseline seeds, admin settings hardening, and media Storage policies are applied. Cloudflare Pages Function source exists for forms, and the `/admin` auth shell, `/admin/settings`, `/admin/media`, `/admin/stone-library`, `/admin/projects`, `/admin/products`, `/admin/articles`, and `/admin/leads` source screens are implemented. Runtime work must still verify live form writes, configure browser-safe Supabase Auth keys, create the first admin profile, verify live settings/media/Stone Library/Projects/Products/Articles/Leads writes, and build broader audit review.
 
 ## Current Supabase Project
 
@@ -22,6 +22,7 @@ The Supabase connector can access the Urblo project directly. Do not ask the use
 | Admin hardening migration | Applied on 2026-05-28: `admin_settings_role_hardening` |
 | Media Storage migrations | Applied on 2026-05-28: `media_storage_foundation`, `media_storage_listing_hardening` |
 | First content CRUD sources | Implemented on 2026-05-28: `/admin/stone-library` source screen for Stone Library groups, variants, and finish capabilities; `/admin/projects` source screen for project records, facts, material schedules, material maps, and hotspots; `/admin/products` source screen for product families, models, material defaults, and specs; `/admin/articles` source screen for article metadata and structured article blocks |
+| First lead workflow source | Implemented on 2026-05-28: `/admin/leads` source screen for enquiry/sample request status, assignment, internal notes, notification state, and sample item inspection |
 
 Secrets still must not be committed or pasted into repo docs. Service-role keys, database passwords, Turnstile secrets, and email provider secrets belong only in server-side environment variable stores.
 
@@ -155,6 +156,16 @@ Acceptance:
 - The screen includes loading, empty, validation, save, publish/archive, read-only, legacy-source provenance, structured-block JSON, and error states.
 - Public Article routes remain static/file-backed and continue rendering sanitized legacy HTML until static article data is imported into Supabase and the public read path is deliberately migrated.
 - Live browser save verification still requires browser-safe Supabase key configuration and an active admin/editor profile.
+
+### Phase 4g - Leads Workflow Source
+Outcome: the private enquiry and sample request queues have a protected operational screen before live form persistence is verified.
+
+Acceptance:
+- In progress on 2026-05-28. `/admin/leads` source implements enquiry/sample request queue inspection behind the existing Supabase Auth/profile gate.
+- The screen reads `enquiries`, `sample_requests`, `sample_request_items`, active `admin_profiles`, `stone_groups`, and `finish_definitions`; owner/admin roles can update lead status, assignment, and internal notes once live browser-safe Supabase config exists.
+- The screen includes loading, empty, detail, status, assignment, internal notes, notification state, sample item, read-only, and error states.
+- Lead rows are still expected to be created only through server-side form endpoints; manual lead creation, exports, and physical deletes remain intentionally hidden until privacy/export policy is confirmed.
+- Live browser save verification still requires browser-safe Supabase key configuration and an active owner/admin profile, and live usefulness requires server-side form persistence verification.
 
 ### Phase 5 - Content Migration and CRUD
 Outcome: content can move out of static files in a controlled order.

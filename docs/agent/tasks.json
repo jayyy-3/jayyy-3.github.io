@@ -460,6 +460,7 @@
         "scripts/agent-smoke.sh",
         "src/pages/ContactPage.tsx",
         "src/pages/admin/AdminApp.tsx",
+        "src/pages/admin/AdminLeadsPage.tsx",
         "src/pages/admin/AdminMediaPage.tsx",
         "src/pages/admin/adminContent.ts",
         "supabase/migrations/202605280002_media_storage_foundation.sql",
@@ -471,7 +472,8 @@
         "2026-05-28: Removed broad public `storage.objects` SELECT policy after Supabase advisor flagged public bucket listing risk.",
         "2026-05-28: Added `/admin/media` source for upload-backed draft records, external records, metadata editing, read-only viewer behavior, and publish/archive validation.",
         "Live media upload/save verification remains pending browser-safe Supabase key configuration and an active admin/editor profile.",
-        "Lead inbox remains pending live form persistence, Turnstile verification, and transactional email secrets."
+        "2026-05-28: Added `/admin/leads` source for enquiry and sample request queues, sample items, status, assignment, internal notes, notification state, read-only role behavior, and privacy guardrails.",
+        "Live lead workflow save verification remains pending browser-safe Supabase key configuration and an active owner/admin profile. Live lead row creation still requires server-side form persistence, Turnstile verification, and transactional email secrets."
       ],
       "acceptance": [
         "Admin users can manage uploaded media records with source, alt text, usage, and publish status.",
@@ -487,7 +489,8 @@
         "npm run agent:check",
         "Supabase MCP: list_migrations includes media_storage_foundation and media_storage_listing_hardening",
         "Supabase MCP: execute_sql verifies Urblo Storage buckets and policies",
-        "Playwright: /admin/media shows configuration-required state when no browser key is configured"
+        "Playwright: /admin/media shows configuration-required state when no browser key is configured",
+        "Playwright: /admin/leads shows configuration-required state when no browser key is configured"
       ]
     },
     {
