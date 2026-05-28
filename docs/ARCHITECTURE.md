@@ -102,6 +102,7 @@ Last updated: 2026-05-28
   - Reads current static Stone Library JSON, Projects data, Products data, Articles manifest, and referenced local media.
   - Produces Supabase-shaped import candidates with natural keys and fails before any database write if local media is missing, slugs duplicate, or project/material references use unknown stone or finish keys.
   - Can write a local ignored review artifact with `npm run agent:content-import -- --out .tmp/content-import-preview.json`; the artifact remains a draft/no-write payload and must not be applied as final published content without approval.
+  - `npm run agent:content-import:plan` writes both `.tmp/content-import-preview.json` and `.tmp/content-import-plan.md`, including import safety notes, preflight checks, table apply order, reverse rollback order, and verification expectations.
 - Agent startup:
   - `npm run agent:init` => `bash scripts/agent-init.sh`
   - Prints repo path, git status, recent commits, runtime versions, read order, and common commands.
@@ -325,6 +326,7 @@ Route state contract:
   - `scripts/check-content-import-readiness.mjs` is the source-only dry run for static-to-Supabase import preparation.
   - It intentionally marks import candidates as `draft` and uses natural keys/source URLs so provisional static content is not treated as final published client-approved content.
   - The optional `--out` flag writes a local ignored JSON artifact for review without writing Supabase rows.
+  - The optional `--plan-out` flag writes a local ignored Markdown apply/rollback plan for review without writing Supabase rows.
 - Admin IA/access:
   - `/admin` route, login, unauthorized, loading, module, settings, and audit states are defined in `docs/ADMIN_IA_ACCESS.md`.
   - Current `/admin` source implements real Supabase Auth wiring, session/profile loading, login, unauthorized, dashboard, and protected module scaffolds.

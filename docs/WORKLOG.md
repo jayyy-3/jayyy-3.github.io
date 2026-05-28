@@ -2,6 +2,45 @@
 
 Last updated: 2026-05-28
 
+## Entry - 2026-05-28 (Content Import Plan Artifact)
+
+### Scope
+- Added `--plan-out` support to `scripts/check-content-import-readiness.mjs`.
+- Added `npm run agent:content-import:plan` to write both `.tmp/content-import-preview.json` and `.tmp/content-import-plan.md`.
+- The Markdown plan records no-write safety notes, preflight checks, table apply order, reverse rollback order, and verification expectations.
+- Kept the flow non-destructive: generated files stay in ignored `.tmp/` and no Supabase rows are written.
+
+### Changed Files
+- `AGENTS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `package.json`
+- `scripts/agent-init.sh`
+- `scripts/check-content-import-readiness.mjs`
+
+### Verification Results
+- `npm run agent:content-import:plan`: pass. Latest run prepared 51 media candidates, 13 stone groups, 15 stone variants, 153 finish capability rows, 6 products, 28 product models, 18 material defaults, 18 specs, 5 projects, 41 project facts, 14 project media rows, 2 project materials, 1 material map, 2 hotspots, 4 articles, and 4 article block placeholders with 0 warnings and 0 blockers.
+- `npm run agent:content-import`: pass with the same zero-warning, zero-blocker content summary.
+- `.tmp/content-import-preview.json`: pass. The local ignored artifact includes `importPlan` keys for safety, preflight checks, apply order, rollback order, and verification.
+- `.tmp/content-import-plan.md`: pass. The local ignored Markdown plan renders the apply/rollback table and preflight checklist.
+- `npm run lint`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `node -e "JSON.parse(require('fs').readFileSync('docs/agent/tasks.json','utf8')); JSON.parse(require('fs').readFileSync('package.json','utf8')); console.log('json ok')"`: pass.
+
+### Risks and Gaps
+- This is still a planning artifact only. It must not be treated as an approved production import or client-approved published content.
+- Actual apply/import still requires Jay approval, a backup/export posture, service-role credential handling, rollback review, and live Supabase verification.
+
+### Next Handoff
+- `NOW-FORMS-BACKEND-001` live Supabase row/audit verification.
+- `NOW-ADMIN-AUTH-RLS-001` live auth/profile verification.
+- `NOW-ADMIN-CONTENT-CRUD-001` explicit import/apply approval and implementation after credentials are available.
+
 ## Entry - 2026-05-28 (Leads CSV Export Source)
 
 ### Scope

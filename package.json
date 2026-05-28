@@ -7,6 +7,7 @@
     "agent:check": "node scripts/check-harness.mjs",
     "agent:content-import": "node scripts/check-content-import-readiness.mjs",
     "agent:content-import:json": "node scripts/check-content-import-readiness.mjs --json",
+    "agent:content-import:plan": "node scripts/check-content-import-readiness.mjs --out .tmp/content-import-preview.json --plan-out .tmp/content-import-plan.md",
     "agent:init": "bash scripts/agent-init.sh",
     "agent:smoke": "bash scripts/agent-smoke.sh",
     "dev": "vite",
