@@ -120,6 +120,10 @@ Last updated: 2026-05-28
   - Default mode invokes the Pages Function handlers directly and suppresses Turnstile/email side effects unless `--turnstile-token` or `--allow-email` is supplied.
   - Optional HTTP mode uses `--base-url <origin>` to test a local or deployed Pages endpoint while still querying Supabase to verify durable rows.
   - The command is credential-gated and intentionally fails when service-role credentials are absent.
+- Cloudflare Pages readiness:
+  - `npm run agent:cloudflare-readiness` => `node scripts/check-cloudflare-pages-readiness.mjs`
+  - Verifies the repo-side Pages contract: `npm run build`, Vite root base, SPA fallback, `/api/*` Function routing scope, launch headers, API handler files, environment placeholders, and deployment runbook coverage.
+  - This command does not create a Cloudflare Pages project, set environment variables, validate a preview URL, change custom domains, or touch DNS.
 - Admin live readiness:
   - `npm run agent:admin-live-readiness -- --admin-email <first-admin-email>` => `node scripts/check-admin-live-readiness.mjs`
   - Loads local environment values from `.env.local`, `.env`, `.dev.vars`, and the shell.

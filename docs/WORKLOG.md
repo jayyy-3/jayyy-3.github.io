@@ -2,6 +2,45 @@
 
 Last updated: 2026-05-28
 
+## Entry - 2026-05-28 (Cloudflare Pages Readiness Runner)
+
+### Scope
+- Added `scripts/check-cloudflare-pages-readiness.mjs` as a no-secret repo-side Cloudflare Pages verifier.
+- Added `npm run agent:cloudflare-readiness` and listed it in `npm run agent:init`.
+- The runner checks the Cloudflare Pages build command, Vite root base, SPA fallback, `/api/*` Function routing scope, launch headers, Pages Function handler files, environment placeholders, and `docs/CLOUDFLARE_DEPLOYMENT.md`.
+- It does not create a Cloudflare Pages project, set environment variables, validate a preview URL, change a custom domain, or touch DNS.
+
+### Changed Files
+- `AGENTS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/CLOUDFLARE_DEPLOYMENT.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `docs/agent/verification.md`
+- `package.json`
+- `scripts/agent-init.sh`
+- `scripts/check-cloudflare-pages-readiness.mjs`
+
+### Verification Results
+- `node --check scripts/check-cloudflare-pages-readiness.mjs`: pass.
+- `npm run agent:cloudflare-readiness`: pass. Verified build contract, SPA fallback, Function routing scope, headers, API handlers, env placeholders, and deployment runbook.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run build`: pass. Browserslist staleness notice remains; admin chunk is about 432 kB before gzip.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass, including `/admin/*` route shells and Forms API mock checks.
+
+### Risks and Gaps
+- Cloudflare Pages project creation, preview deployment validation, production environment variables, custom domain, DNS cutover, and rollback still require account-level access and confirmation.
+- Form persistence still depends on server-side `SUPABASE_SERVICE_ROLE_KEY` configuration before deployed Pages endpoint verification can pass.
+
+### Next Handoff
+- `NOW-CLOUDFLARE-PAGES-DEPLOY-001` account-level Pages setup after Jay confirms the Cloudflare account/project path.
+- `NOW-FORMS-BACKEND-001` live form persistence/audit verification with `npm run agent:forms-live` after credentials are configured.
+
 ## Entry - 2026-05-28 (Admin CRUD Coverage Runner)
 
 ### Scope

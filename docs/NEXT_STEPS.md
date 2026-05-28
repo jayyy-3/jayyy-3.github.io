@@ -23,7 +23,7 @@ Docs-only and harness-only work should run:
 Cloudflare/Supabase implementation work should also follow the new verification profiles in `docs/agent/verification.md`.
 
 ## Last Runtime Baseline
-Measured 2026-05-28 during the Admin CRUD coverage runner checkpoint:
+Measured 2026-05-28 during the Cloudflare Pages readiness runner checkpoint:
 - `npm run build`: pass
 - `npm run lint`: pass
 - `npx tsc -b`: pass
@@ -40,6 +40,7 @@ For any user-facing layout/copy/IA task:
 Source of truth: `docs/agent/tasks.json`.
 
 - `NOW-FORMS-BACKEND-001`: complete live verification for Cloudflare Pages Functions after server-side `SUPABASE_SERVICE_ROLE_KEY` is configured. Source and mock API checks are implemented, including server-side audit-event attempts after successful lead inserts; `.env.example` and Cloudflare docs now list canonical variables plus supported compatibility aliases; `npm run agent:forms-live` is ready as the credential-gated live persistence/audit/no-write verifier.
+- `NOW-CLOUDFLARE-PAGES-DEPLOY-001`: repo-side Cloudflare readiness is now checkable with `npm run agent:cloudflare-readiness`; account-level project creation, production environment variables, preview URL validation, custom domain, DNS cutover, and rollback remain blocked on Cloudflare access/confirmation.
 - `NOW-FORMS-SUPABASE-001`: replace mailto-only Contact and Sample Request flows with Supabase-backed submissions.
 - `NOW-ADMIN-AUTH-RLS-001`: complete live admin auth verification after browser-safe Supabase key configuration and first admin email/profile are available. Source shell and config-gated routes are implemented; `npm run agent:admin-live-readiness -- --admin-email <first-admin-email>` is ready as the non-mutating profile/config readiness gate before browser QA.
 - `NOW-ADMIN-SETTINGS-CRUD-001`: complete live `/admin/settings` and admin profile save verification after owner/admin profile access is available. Source form, admin team manager, owner/admin RLS hardening, owner-role protection, and SECURITY DEFINER grant hardening are implemented.
@@ -117,6 +118,7 @@ Source of truth: `docs/agent/tasks.json`.
 - Admin audit-writer source checkpoint: Settings, Media, Stone Library, Projects, Products, Articles, and Leads save flows now call `src/lib/adminAudit.ts` after successful primary mutations. Audit insert failures are surfaced in the success notice without rolling back the saved content. Live audit row verification remains pending credentials.
 - Admin profile management and hardening checkpoint: `/admin/settings` now includes non-destructive admin profile create/update controls for existing Supabase Auth users, owner/self-lockout guardrails, and profile audit-event attempts. Supabase `admin_profile_owner_hardening` and `security_definer_function_grants` are applied and verified; live team-management verification remains pending first-admin access and browser-safe Supabase config.
 - Admin CRUD coverage checkpoint: `npm run agent:admin-crud-coverage` is available as a source-only verifier for admin routes, active modules, table coverage, role gates, publish/archive controls, audit actions, and audit-gated exports before live credential/browser QA.
+- Cloudflare readiness checkpoint: `npm run agent:cloudflare-readiness` verifies the repo-side Pages build contract, clean-route fallback, `/api/*` Function routing scope, launch headers, API handler files, env placeholders, and deployment runbook without touching Cloudflare account state.
 - Content import dry-run checkpoint: `npm run agent:content-import` maps current static content and local media into Supabase-shaped draft import candidates. The latest run produced zero warnings/blockers and confirmed the import can be staged without writing production rows.
 - Content import artifact checkpoint: the dry run now supports `--out` for a local ignored JSON review artifact, `--plan-out` for a local ignored Markdown apply/rollback plan, `--preflight-sql-out` for a local ignored read-only target preflight SQL artifact, and `.tmp/` is ignored so review payloads are not accidentally committed.
 

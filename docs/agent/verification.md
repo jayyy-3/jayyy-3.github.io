@@ -88,6 +88,7 @@ Evidence to record:
 Use when changing the Cloudflare Pages launch contract, Pages Functions routing, environment variables, redirects, headers, preview deployments, DNS cutover docs, or rollback docs.
 
 Run:
+- `npm run agent:cloudflare-readiness`
 - `npm run build`
 - `npm run lint`
 - `npx tsc -b`

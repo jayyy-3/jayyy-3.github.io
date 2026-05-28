@@ -1,0 +1,197 @@
+#!/usr/bin/env node
+import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { cwd, exit } from 'node:process';
+
+const root = cwd();
+const failures = [];
+
+const requiredEnvNames = [
+  'VITE_SUPABASE_URL',
+  'VITE_SUPABASE_ANON_KEY',
+  'VITE_SUPABASE_PUBLISHABLE_KEY',
+  'SUPABASE_URL',
+  'SUPABASE_SERVICE_ROLE_KEY',
+  'TURNSTILE_SECRET_KEY',
+  'RESEND_API_KEY',
+  'LEAD_NOTIFICATION_FROM',
+  'ENQUIRY_NOTIFICATION_TO',
+  'SAMPLE_REQUEST_NOTIFICATION_TO',
+];
+
+const previewRoutes = [
+  '/',
+  '/projects',
+  '/projects/moon-gate-woolley-street',
+  '/products',
+  '/stone-library',
+  '/stone-library/alpine-white',
+  '/articles',
+  '/contact',
+  '/admin',
+  '/admin/login',
+  '/admin/leads',
+  '/admin/media',
+  '/admin/settings',
+  '/admin/stone-library',
+  '/admin/projects',
+  '/admin/products',
+  '/admin/articles',
+  '/admin/audit',
+];
+
+function readRequired(path) {
+  const fullPath = join(root, path);
+  if (!existsSync(fullPath)) {
+    failures.push(`Missing file: ${path}`);
+    return '';
+  }
+  return readFileSync(fullPath, 'utf8');
+}
+
+function requireIncludes(text, needle, context) {
+  if (!text.includes(needle)) {
+    failures.push(`${context}: missing ${needle}`);
+  }
+}
+
+function requireRegex(text, pattern, context, label) {
+  if (!pattern.test(text)) {
+    failures.push(`${context}: missing ${label}`);
+  }
+}
+
+function nonCommentLines(text) {
+  return text
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line && !line.startsWith('#'));
+}
+
+function checkBuildContract() {
+  const pkg = JSON.parse(readRequired('package.json'));
+  const vite = readRequired('vite.config.ts');
+
+  if (pkg.scripts?.build !== 'tsc -b && vite build') {
+    failures.push('package.json: build script must remain "tsc -b && vite build" for Cloudflare Pages');
+  }
+
+  requireRegex(vite, /base:\s*['"]\/['"]/, 'vite.config.ts', 'root base "/"');
+}
+
+function checkRouting() {
+  const redirects = readRequired('public/_redirects');
+  const redirectLines = nonCommentLines(redirects);
+  const fallbackLine = redirectLines.at(-1);
+
+  if (fallbackLine !== '/* /index.html 200') {
+    failures.push('public/_redirects: final rule must be SPA fallback "/* /index.html 200"');
+  }
+
+  for (const redirect of [
+    '/products/primeBlock /products/prime-block 301',
+    '/articles/Modular-Mastery-How-PrimeBlock-Core-Transformed-Aitken-College /articles/modular-mastery-how-primeblock-core-transformed-aitken-college 301',
+  ]) {
+    requireIncludes(redirects, redirect, 'public/_redirects');
+  }
+
+  const routes = JSON.parse(readRequired('public/_routes.json'));
+  if (routes.version !== 1) {
+    failures.push('public/_routes.json: version must be 1');
+  }
+  if (!Array.isArray(routes.include) || routes.include.length !== 1 || routes.include[0] !== '/api/*') {
+    failures.push('public/_routes.json: include must be exactly ["/api/*"] so static routes avoid Functions');
+  }
+  if (!Array.isArray(routes.exclude) || routes.exclude.length !== 0) {
+    failures.push('public/_routes.json: exclude must remain an empty array');
+  }
+}
+
+function checkHeaders() {
+  const headers = readRequired('public/_headers');
+
+  for (const header of [
+    'X-Content-Type-Options: nosniff',
+    'Referrer-Policy: strict-origin-when-cross-origin',
+    'Permissions-Policy: camera=(), microphone=(), geolocation=()',
+    '/assets/*',
+    'Cache-Control: public, max-age=31536000, immutable',
+    '/fonts/*',
+    '/media/*',
+    'Cache-Control: public, max-age=86400',
+  ]) {
+    requireIncludes(headers, header, 'public/_headers');
+  }
+}
+
+function checkFunctions() {
+  const enquiries = readRequired('functions/api/enquiries.js');
+  const samples = readRequired('functions/api/sample-requests.js');
+  const forms = readRequired('functions/_lib/forms.js');
+
+  for (const [label, text, handler] of [
+    ['functions/api/enquiries.js', enquiries, 'handleEnquiryRequest'],
+    ['functions/api/sample-requests.js', samples, 'handleSampleRequest'],
+  ]) {
+    requireIncludes(text, 'export async function onRequest(context)', label);
+    requireIncludes(text, "context.request.method === 'OPTIONS'", label);
+    requireIncludes(text, "context.request.method !== 'POST'", label);
+    requireIncludes(text, handler, label);
+    requireIncludes(text, 'context.env', label);
+  }
+
+  for (const serverEnv of [
+    'SUPABASE_SERVICE_ROLE_KEY',
+    'SUPABASE_SERVICE_KEY',
+    'TURNSTILE_SECRET_KEY',
+    'CF_TURNSTILE_SECRET_KEY',
+    'RESEND_API_KEY',
+  ]) {
+    requireIncludes(forms, serverEnv, 'functions/_lib/forms.js');
+  }
+
+  if (/VITE_SUPABASE_(?:ANON|PUBLISHABLE)_KEY/.test(forms)) {
+    failures.push('functions/_lib/forms.js: server Functions must not use browser Supabase keys');
+  }
+}
+
+function checkEnvAndDocs() {
+  const envExample = readRequired('.env.example');
+  const runbook = readRequired('docs/CLOUDFLARE_DEPLOYMENT.md');
+
+  for (const name of requiredEnvNames) {
+    requireRegex(envExample, new RegExp(`^${name}=`, 'm'), '.env.example', `${name} placeholder`);
+    requireIncludes(runbook, name, 'docs/CLOUDFLARE_DEPLOYMENT.md');
+  }
+
+  for (const command of [
+    'npm run build',
+    'npm run lint',
+    'npx tsc -b',
+    'npm run agent:smoke',
+    'npm run agent:check',
+    'npm run agent:forms-live',
+    'npm run agent:admin-live-readiness -- --admin-email <first-admin-email>',
+  ]) {
+    requireIncludes(runbook, command, 'docs/CLOUDFLARE_DEPLOYMENT.md');
+  }
+
+  for (const route of previewRoutes) {
+    requireIncludes(runbook, route, 'docs/CLOUDFLARE_DEPLOYMENT.md');
+  }
+}
+
+checkBuildContract();
+checkRouting();
+checkHeaders();
+checkFunctions();
+checkEnvAndDocs();
+
+if (failures.length) {
+  console.error('Cloudflare Pages readiness checks failed:');
+  failures.forEach((failure) => console.error(`- ${failure}`));
+  exit(1);
+}
+
+console.log('Cloudflare Pages readiness checks passed.');
+console.log('Verified build contract, SPA fallback, Function routing scope, headers, API handlers, env placeholders, and deployment runbook.');

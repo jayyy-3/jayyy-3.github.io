@@ -7,6 +7,8 @@ This runbook captures the repo-side Cloudflare Pages deployment contract and the
 
 It does not prove that the Cloudflare Pages project already exists. Account-level setup must still be completed in the Cloudflare dashboard.
 
+Repo-side readiness is checked by `npm run agent:cloudflare-readiness`. This command verifies the build contract, SPA fallback, Pages Functions routing scope, headers, API handler files, environment placeholders, and this runbook without touching Cloudflare account state.
+
 ## Repo-Side Contract
 
 ### Build Settings
@@ -138,6 +140,7 @@ Rollback options:
 
 ## Verification Commands
 Run from the repo root before deploying:
+- `npm run agent:cloudflare-readiness`
 - `npm run build`
 - `npm run lint`
 - `npx tsc -b`

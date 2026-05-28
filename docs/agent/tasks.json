@@ -193,7 +193,9 @@
         "scripts/agent-smoke.sh",
         "package.json",
         "vite.config.ts",
-        "src/App.tsx"
+        "src/App.tsx",
+        "scripts/check-cloudflare-pages-readiness.mjs",
+        "scripts/agent-init.sh"
       ],
       "acceptance": [
         "Repo-side Cloudflare Pages build command, output directory, SPA fallback, function routing, and launch headers are documented and verified locally.",
@@ -205,7 +207,11 @@
         "npm run build",
         "npm run lint",
         "npx tsc -b",
-        "npm run agent:smoke"
+        "npm run agent:smoke",
+        "npm run agent:cloudflare-readiness"
+      ],
+      "notes": [
+        "2026-05-28: Added `npm run agent:cloudflare-readiness` as a no-secret repo-side verifier for Cloudflare Pages. It checks the build script, Vite root base, SPA fallback, Function routing scope, headers, API handler files, environment placeholders, and deployment runbook. Account-level Pages project creation, production env vars, preview URL, custom domain, DNS, and rollback remain blocked on Cloudflare account access."
       ]
     },
     {
