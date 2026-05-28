@@ -2,6 +2,34 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Live Forms Notification Status Gate)
+
+### Scope
+- Tightened `scripts/check-forms-api-live.mjs` so future live form verification checks notification status consistency.
+- Valid enquiry and sample-request live checks now assert that the response `notificationStatus` is final (`not_required`, `sent`, or `failed`) and matches the stored Supabase row's `notification_status`.
+- This catches a failure where the lead row is created but the notification status patch silently fails.
+
+### Changed Files
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `scripts/check-forms-api-live.mjs`
+
+### Verification Results
+- `node --check scripts/check-forms-api-live.mjs`: pass.
+- `npm run agent:forms-live`: expected credential-gated fail before Supabase calls because no local service-role key is configured.
+
+### Risks and Gaps
+- Live form persistence, live audit rows, and real notification delivery remain unverified until service-role and email environment variables are configured.
+- The new assertion will run only when `npm run agent:forms-live` can make live submissions.
+
+### Next Handoff
+- `NOW-FORMS-BACKEND-001`: configure the service-role key and run `npm run agent:forms-live`.
+- `NOW-FORMS-SUPABASE-001`: add `--allow-email` or deployed email envs only when real notification delivery is intentionally being verified.
+
 ## Entry - 2026-05-29 (Forms Notification Mock Coverage)
 
 ### Scope

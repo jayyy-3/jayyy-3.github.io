@@ -128,6 +128,7 @@ Last updated: 2026-05-29
   - Requires `SUPABASE_SERVICE_ROLE_KEY` or the compatibility alias `SUPABASE_SERVICE_KEY`.
   - Default mode invokes the Pages Function handlers directly and suppresses Turnstile/email side effects unless `--turnstile-token` or `--allow-email` is supplied.
   - Optional HTTP mode uses `--base-url <origin>` to test a local or deployed Pages endpoint while still querying Supabase to verify durable rows.
+  - Valid live submissions must return a final `notificationStatus` that matches the stored lead row's `notification_status`, so email patch failures do not hide behind a successful insert.
   - The command is credential-gated and intentionally fails when service-role credentials are absent.
 - Cloudflare Pages readiness:
   - `npm run agent:cloudflare-readiness` => `node scripts/check-cloudflare-pages-readiness.mjs`

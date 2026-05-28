@@ -239,6 +239,18 @@ async function verifyAudit(config, action, entityType, entityId) {
   assert.equal(rows.length, 1, `Expected one audit event for ${action} ${entityType} #${entityId}`);
 }
 
+function verifyNotificationStatus(row, responseBody, label) {
+  assert.ok(
+    ['not_required', 'sent', 'failed'].includes(responseBody.notificationStatus),
+    `Unexpected ${label} notificationStatus: ${responseBody.notificationStatus}`,
+  );
+  assert.equal(
+    row.notification_status,
+    responseBody.notificationStatus,
+    `Expected stored ${label} notification_status to match the response.`,
+  );
+}
+
 function withTurnstile(body, options) {
   if (!options.turnstileToken) return body;
   return {
@@ -311,6 +323,7 @@ async function run() {
   assert.equal(enquiryRows.length, 1, 'Expected one live enquiry row.');
   assert.equal(enquiryRows[0].email, enquiryEmail);
   assert.equal(enquiryRows[0].source_route, `/contact?live_check=${marker}`);
+  verifyNotificationStatus(enquiryRows[0], enquiryBody, 'enquiry');
   await verifyAudit(config, 'enquiry.create', 'enquiries', enquiryBody.id);
   console.log(`Valid enquiry created row and audit event: enquiries #${enquiryBody.id}.`);
 
@@ -362,6 +375,7 @@ async function run() {
   assert.equal(sampleRows.length, 1, 'Expected one live sample request row.');
   assert.equal(sampleRows[0].email, sampleEmail);
   assert.equal(sampleRows[0].source_route, `/contact?intent=sample-request&live_check=${marker}`);
+  verifyNotificationStatus(sampleRows[0], sampleBody, 'sample request');
 
   const itemRows = await selectRows(
     config,

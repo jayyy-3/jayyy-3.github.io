@@ -154,6 +154,7 @@
         "2026-05-29: Mock API checks now cover configured Resend notification success/failure paths without real email secrets, including pending initial row status, Resend call shape, and final notification_status patches to sent or failed.",
         "2026-05-28: `.env.example`, Cloudflare deployment docs, and architecture docs now list canonical form/admin environment variables plus supported compatibility aliases for Supabase service key, Turnstile, Resend sender, and lead notification recipient configuration.",
         "2026-05-28: Added `npm run agent:forms-live` as the credential-gated live verification runner for valid enquiry, invalid enquiry, valid sample request, invalid sample request, sample item, and server-side audit rows. The command intentionally fails when the service-role key is unavailable and retains tagged test rows for auditability unless Jay approves cleanup.",
+        "2026-05-29: `npm run agent:forms-live` now also verifies that each valid response notificationStatus matches the stored lead row notification_status, catching email status patch failures during live verification.",
         "2026-05-28: Added `npm run agent:live-readiness` as a no-secret input audit for local/deployed form verification, admin readiness, tagged admin live writes, and Cloudflare preview smoke readiness. It accepts non-secret `--base-url`, `--admin-email`, and `--admin-writes-approved` readiness flags; secret keys and admin session credentials still stay in env files or shell."
       ],
       "acceptance": [
@@ -172,6 +173,7 @@
         "node scripts/check-forms-api.mjs",
         "npm run agent:live-readiness",
         "npm run agent:forms-live (after SUPABASE_SERVICE_ROLE_KEY is configured)",
+        "Live Forms API test: valid response notificationStatus matches stored notification_status",
         "Mock API test: successful enquiry attempts admin_audit_events insert",
         "Mock API test: successful sample request attempts admin_audit_events insert",
         "Mock API test: audit insert failure still returns success after lead storage",
