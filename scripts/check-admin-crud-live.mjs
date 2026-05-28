@@ -29,6 +29,58 @@ const livePlan = [
   'Leave tagged QA rows archived or private for auditability; no physical deletes are attempted.',
 ];
 
+const EXPECTED_AUDIT_ACTIONS = [
+  { action: 'site_settings.create', entityType: 'site_settings', count: 1 },
+  { action: 'site_settings.update', entityType: 'site_settings', count: 2 },
+  { action: 'media_asset.create', entityType: 'media_assets', count: 1 },
+  { action: 'media_asset.publish', entityType: 'media_assets', count: 1 },
+  { action: 'media_asset.archive', entityType: 'media_assets', count: 1 },
+  { action: 'stone_group.create', entityType: 'stone_groups', count: 1 },
+  { action: 'stone_group.publish', entityType: 'stone_groups', count: 1 },
+  { action: 'stone_group.archive', entityType: 'stone_groups', count: 1 },
+  { action: 'stone_variant.create', entityType: 'stone_variants', count: 1 },
+  { action: 'stone_variant.publish', entityType: 'stone_variants', count: 1 },
+  { action: 'stone_variant.archive', entityType: 'stone_variants', count: 1 },
+  { action: 'stone_finish_capability.create', entityType: 'stone_finish_capabilities', count: 1 },
+  { action: 'stone_finish_image.create', entityType: 'stone_finish_images', count: 1 },
+  { action: 'stone_finish_image.publish', entityType: 'stone_finish_images', count: 1 },
+  { action: 'stone_finish_image.archive', entityType: 'stone_finish_images', count: 1 },
+  { action: 'product.create', entityType: 'products', count: 1 },
+  { action: 'product.publish', entityType: 'products', count: 1 },
+  { action: 'product.archive', entityType: 'products', count: 1 },
+  { action: 'product_model.create', entityType: 'product_models', count: 1 },
+  { action: 'product_model.publish', entityType: 'product_models', count: 1 },
+  { action: 'product_model.archive', entityType: 'product_models', count: 1 },
+  { action: 'product_material_default.create', entityType: 'product_material_defaults', count: 1 },
+  { action: 'product_spec.create', entityType: 'product_specs', count: 1 },
+  { action: 'project.create', entityType: 'projects', count: 1 },
+  { action: 'project.publish', entityType: 'projects', count: 1 },
+  { action: 'project.archive', entityType: 'projects', count: 1 },
+  { action: 'project_fact.create', entityType: 'project_facts', count: 1 },
+  { action: 'project_material.create', entityType: 'project_materials', count: 1 },
+  { action: 'project_material_map.create', entityType: 'project_material_maps', count: 1 },
+  { action: 'project_material_map.publish', entityType: 'project_material_maps', count: 1 },
+  { action: 'project_material_map.archive', entityType: 'project_material_maps', count: 1 },
+  { action: 'project_hotspot.create', entityType: 'project_hotspots', count: 1 },
+  { action: 'project_hotspot.publish', entityType: 'project_hotspots', count: 1 },
+  { action: 'project_hotspot.archive', entityType: 'project_hotspots', count: 1 },
+  { action: 'article.create', entityType: 'articles', count: 1 },
+  { action: 'article.publish', entityType: 'articles', count: 1 },
+  { action: 'article.archive', entityType: 'articles', count: 1 },
+  { action: 'article_block.create', entityType: 'article_blocks', count: 1 },
+  { action: 'article_block.publish', entityType: 'article_blocks', count: 1 },
+  { action: 'article_block.archive', entityType: 'article_blocks', count: 1 },
+  { action: 'enquiry.workflow_update', entityType: 'enquiries', count: 1 },
+  { action: 'sample_request.workflow_update', entityType: 'sample_requests', count: 1 },
+  { action: 'media_assets.export_manifest', entityType: 'media_assets', count: 1 },
+  { action: 'leads.export_csv', entityType: 'leads', count: 1 },
+];
+
+const EXPECTED_AUDIT_ROW_COUNT = EXPECTED_AUDIT_ACTIONS.reduce(
+  (total, expected) => total + expected.count,
+  0,
+);
+
 function parseArgs(argv) {
   const options = {
     accessToken: '',
@@ -378,9 +430,48 @@ async function selectPublicRows(config, table, filters = {}, select = 'id', extr
 }
 
 async function selectAuditRowsByMarker(config, accessToken, marker) {
-  const query = new URLSearchParams({ select: 'id,action,metadata' });
+  const query = new URLSearchParams({ select: 'id,action,entity_type,entity_id,metadata' });
   query.set('metadata', `cs.${JSON.stringify({ marker })}`);
   return postgrest(config, accessToken, 'admin_audit_events', query.toString());
+}
+
+function assertAuditActionCoverage(auditRows, marker) {
+  assert.equal(
+    auditRows.length,
+    EXPECTED_AUDIT_ROW_COUNT,
+    `Expected exactly ${EXPECTED_AUDIT_ROW_COUNT} tagged audit rows, found ${auditRows.length}.`,
+  );
+
+  const expectedByAction = new Map(EXPECTED_AUDIT_ACTIONS.map((expected) => [expected.action, expected]));
+  const actualByAction = new Map();
+
+  for (const row of auditRows) {
+    const expected = expectedByAction.get(row.action);
+    assert.ok(expected, `Unexpected tagged audit action recorded: ${row.action}`);
+    assert.equal(row.entity_type, expected.entityType, `Unexpected entity_type for audit action ${row.action}.`);
+    assert.equal(row.metadata?.marker, marker, `Audit action ${row.action} is missing the verification marker.`);
+    assert.equal(
+      row.metadata?.source,
+      'scripts/check-admin-crud-live.mjs',
+      `Audit action ${row.action} is missing the live verifier source marker.`,
+    );
+
+    if (row.action === 'media_assets.export_manifest' || row.action === 'leads.export_csv') {
+      assert.equal(row.entity_id, null, `${row.action} export audit should not point to a single entity_id.`);
+    } else {
+      assert.ok(row.entity_id !== null && row.entity_id !== undefined, `${row.action} audit is missing entity_id.`);
+    }
+
+    actualByAction.set(row.action, (actualByAction.get(row.action) || 0) + 1);
+  }
+
+  for (const expected of EXPECTED_AUDIT_ACTIONS) {
+    assert.equal(
+      actualByAction.get(expected.action) || 0,
+      expected.count,
+      `Expected ${expected.count} tagged audit row(s) for ${expected.action}.`,
+    );
+  }
 }
 
 async function assertNotPubliclyVisible(config, table, filters, label) {
@@ -984,7 +1075,7 @@ async function run() {
   ]);
 
   const auditRows = await selectAuditRowsByMarker(config, accessToken, marker);
-  assert.ok(auditRows.length >= 40, `Expected at least 40 tagged audit rows, found ${auditRows.length}.`);
+  assertAuditActionCoverage(auditRows, marker);
 
   console.log('Admin CRUD live verification passed.');
   console.log(`Created tagged QA rows: ${created.join(', ')}`);

@@ -2,6 +2,49 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Admin Live Audit Action Coverage)
+
+### Scope
+- Strengthened `scripts/check-admin-crud-live.mjs` so approved live admin CRUD QA writes must produce the exact expected `admin_audit_events` action counts, entity types, entity ids, marker metadata, and verifier source metadata.
+- Replaced the previous loose `at least 40 audit rows` check with explicit coverage for Settings, Media, Stone Library, Products, Projects, Articles, Leads, exports, and publish/archive transitions.
+- Strengthened `scripts/check-admin-crud-coverage.mjs` so source-only coverage fails if the admin live verifier drops the exact audit action coverage contract.
+- Kept the checkpoint source-only. No Supabase rows, Storage objects, Auth users, Cloudflare state, credentials, or live writes were created or changed.
+
+### Changed Files
+- `AGENTS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `scripts/check-admin-crud-coverage.mjs`
+- `scripts/check-admin-crud-live.mjs`
+
+### Verification Results
+- `node --check scripts/check-admin-crud-live.mjs`: pass.
+- `node --check scripts/check-admin-crud-coverage.mjs`: pass.
+- `npm run agent:admin-crud-live`: pass in plan-only/no-write mode.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:live-readiness`: pass in report-only mode; live form/admin/Cloudflare inputs remain missing or approval-gated.
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass, including public/admin route shells, Forms API checks, and Contact form UI source checks.
+- `npm run agent:check`: pass.
+- `npm run agent:public-supabase-readiness`: pass.
+- `npm run agent:cloudflare-readiness`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- This improves the eventual live admin proof but remains source-only until browser-safe Supabase keys, an owner/admin session, Jay approval for tagged admin QA writes, and optional Storage upload approval are available.
+- It does not prove active admin login, form persistence, live CRUD writes, Storage upload, Cloudflare preview deployment, or production DNS.
+
+### Next Handoff
+- `NOW-ADMIN-AUTH-RLS-001`
+- `NOW-ADMIN-CMS-001`
+- `NOW-FORMS-BACKEND-001`
+
 ## Entry - 2026-05-29 (Admin Browser Secret and Config Gate Coverage)
 
 ### Scope

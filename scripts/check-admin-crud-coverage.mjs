@@ -556,6 +556,13 @@ function checkAdminLiveVerifierBoundaries() {
     'Anonymous browser-key reads returned zero tagged QA content rows and no private lead rows.',
     'scripts/check-admin-crud-live.mjs',
   );
+  requireIncludes(text, 'EXPECTED_AUDIT_ACTIONS', 'scripts/check-admin-crud-live.mjs');
+  requireIncludes(text, 'assertAuditActionCoverage', 'scripts/check-admin-crud-live.mjs');
+  requireIncludes(
+    text,
+    'Expected exactly ${EXPECTED_AUDIT_ROW_COUNT} tagged audit rows',
+    'scripts/check-admin-crud-live.mjs',
+  );
 }
 
 function checkAdminRemovalContract() {

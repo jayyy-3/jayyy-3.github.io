@@ -307,6 +307,7 @@
         "2026-05-28: Added `npm run agent:admin-crud-coverage` as a source-only admin coverage verifier. It checks /admin route registration, protected shell coverage, launch-critical table references, role-gated controls, publish/archive paths, shared audit writer coverage, Media/Leads export audit gates, and no browser service-role key reference. It does not mutate Supabase and does not replace live credential/browser QA.",
         "2026-05-29: `npm run agent:admin-crud-coverage` now scans all `src` browser source files for actual Supabase service-role env/client usage patterns, guards the config-missing admin gate plus admin-route WelcomePopup suppression, and verifies the live admin CRUD verifier stays browser-key/RLS based rather than service-role based.",
         "2026-05-28: Added `npm run agent:admin-crud-live` as a credential-gated live write verifier. Default mode is plan-only and no-write; `--allow-writes` requires browser-safe Supabase config plus a real owner/admin Supabase Auth session, then creates tagged QA rows plus audit events through browser-key RLS, publishes then archives public-facing QA rows, and avoids physical deletes. Optional `--include-storage` verifies private Storage upload policy.",
+        "2026-05-29: `npm run agent:admin-crud-live` now verifies the exact expected tagged `admin_audit_events` action counts, entity types, entity ids, marker metadata, and source metadata instead of accepting only a loose audit-row minimum; `npm run agent:admin-crud-coverage` fails if that live verifier audit coverage contract is removed.",
         "2026-05-29: `npm run agent:admin-crud-live` now includes publish-then-archive transitions for public-facing tagged QA rows before the final anonymous browser-key invisibility check, and `npm run agent:admin-crud-coverage` fails if those publish actions are removed.",
         "2026-05-29: `npm run agent:admin-crud-live` now also uses anonymous browser-key readback after tagged writes to verify QA `site_settings`, `media_assets`, `stone_groups`, `products`, `projects`, and `articles` rows are not visible through public RLS after they remain draft/archived.",
         "2026-05-29: `npm run agent:admin-crud-live` now also verifies tagged private `enquiries`, `sample_requests`, and `sample_request_items` QA rows are not anonymously visible through browser-key reads, and `npm run agent:admin-crud-coverage` fails if that guard is removed.",
@@ -321,6 +322,7 @@
         "Authenticated admin users can create, read, update, draft, publish, and archive Projects, Stone Library records, Products, Articles, and media records without code edits.",
         "Physical delete controls remain out of the launch-critical CMS path unless Jay approves a destructive-delete/retention policy; current live verification must use non-destructive archive flows.",
         "Article editing uses approved structured block types instead of arbitrary newsletter HTML.",
+        "`npm run agent:admin-crud-live` must verify exact expected tagged audit actions and entity types for live QA writes and exports, not only a loose audit-row count.",
         "Unpublished content remains hidden from the public site, and unauthenticated users cannot access admin routes."
       ],
       "verification": [
@@ -331,7 +333,7 @@
         "npm run agent:admin-crud-coverage",
         "npm run agent:live-readiness",
         "npm run agent:admin-crud-live (plan-only)",
-        "npm run agent:admin-crud-live -- --allow-writes (after browser-safe keys, real owner/admin session, and Jay approval for tagged QA writes; verifies tagged public-content rows and private lead rows are not anonymously visible)",
+        "npm run agent:admin-crud-live -- --allow-writes (after browser-safe keys, real owner/admin session, and Jay approval for tagged QA writes; verifies exact tagged audit action coverage plus tagged public-content rows and private lead rows are not anonymously visible)",
         "npm run agent:admin-crud-live -- --allow-writes --include-storage (after the same live-write gate, for final private Storage upload policy proof)"
       ]
     },
