@@ -52,7 +52,7 @@ Run:
 - `npm run agent:check`
 - `npm run agent:content-import` when changing static-to-Supabase import mapping or source content used by that dry run.
 - `npm run agent:content-import:apply-sql` when changing static-to-Supabase import SQL artifact generation.
-- `npm run agent:public-supabase-readiness` when changing public-content import status rules, public read cutover assumptions, static/public route boundaries, or Supabase published-only policy checks.
+- `npm run agent:public-supabase-readiness` when changing public-content import status rules, structured article-block import assumptions, public read cutover assumptions, static/public route boundaries, or Supabase published-only policy checks.
 - `npm run agent:smoke` when route output changes.
 
 Evidence to record:

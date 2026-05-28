@@ -28,7 +28,7 @@ The Supabase connector can access the Urblo project directly. Do not ask the use
 | Admin source coverage runner | Implemented on 2026-05-28: `npm run agent:admin-crud-coverage` verifies route/module/table/action/audit/export coverage without mutating Supabase |
 | Admin live CRUD runner | Implemented on 2026-05-28: `npm run agent:admin-crud-live` defaults to a no-write plan; `--allow-writes` requires a real owner/admin Supabase Auth session and creates tagged draft/archived QA rows plus audit events through browser-key RLS |
 | First-admin bootstrap runner | Implemented on 2026-05-29: `npm run agent:first-admin-bootstrap` defaults to no-write plan mode, supports service-role read-only verification, and requires approval plus `--allow-writes`/`--confirm-email` before creating an invite/profile |
-| Public cutover readiness runner | Implemented on 2026-05-28: `npm run agent:public-supabase-readiness` verifies draft-only content import payloads, published-only public RLS policy source, read-only anonymous grants, static public runtime boundaries, and `/api/*` Function routing scope without mutating Supabase |
+| Public cutover readiness runner | Implemented on 2026-05-28 and expanded on 2026-05-29: `npm run agent:public-supabase-readiness` verifies draft-only content import payloads, structured article-block extraction without placeholder/newsletter artifact regressions, published-only public RLS policy source, read-only anonymous grants, static public runtime boundaries, and `/api/*` Function routing scope without mutating Supabase |
 
 Secrets still must not be committed or pasted into repo docs. Service-role keys, database passwords, Turnstile secrets, and email provider secrets belong only in server-side environment variable stores.
 
@@ -209,7 +209,7 @@ Current preparation:
 - The dry run can also write a local ignored read-only target preflight SQL artifact with `npm run agent:content-import:preflight-sql`. This records row-count, planned-vs-current-count, status distribution, RLS, and policy queries for review before any approved import/apply step.
 - The dry run can also write a local ignored guarded draft import SQL artifact with `npm run agent:content-import:apply-sql`. The generated SQL aborts unless `urblo.import_approved=true` is explicitly set inside the transaction, imports draft rows only, and contains no destructive delete/truncate/drop operation.
 - Current Supabase target preflight on 2026-05-28 confirmed the content import target tables are empty, seed tables contain 12 finish definitions and one site settings row, and all checked seed/import target tables have RLS enabled.
-- `npm run agent:public-supabase-readiness` now verifies the no-write public cutover posture: content import rows with status are all `draft`, the import has zero warnings/blockers, public RLS policy source is published-only, anonymous grants are read-only, public runtime code remains static/file-backed, and Cloudflare routes only invoke Pages Functions under `/api/*`.
+- `npm run agent:public-supabase-readiness` now verifies the no-write public cutover posture: content import rows with status are all `draft`, the import has zero warnings/blockers, article block imports remain structured and free of placeholder/newsletter artifact regressions, public RLS policy source is published-only, anonymous grants are read-only, public runtime code remains static/file-backed, and Cloudflare routes only invoke Pages Functions under `/api/*`.
 
 Order:
 1. Site settings is started under Phase 4a.

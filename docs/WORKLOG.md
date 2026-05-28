@@ -2,6 +2,46 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Public Supabase Article Block Readiness Guard)
+
+### Scope
+- Extended `scripts/check-public-supabase-readiness.mjs` so the public cutover gate now verifies the article structured import shape, not only draft/public-boundary status.
+- The verifier now fails if `article_blocks` regress to one placeholder per article, if legacy placeholder migration status returns, if image blocks are missing or not linked to `media_assets`, if shared newsletter/social images leak in, or if newsletter footer/contact artifacts appear in block text.
+- The verifier also checks rich-text claim-review metadata: rich text blocks need `claimReviewStatus`, and any block with `reviewFlags` must stay `needs_review`.
+- No Supabase rows, Storage objects, Cloudflare state, credentials, public runtime code, or approved article copy were changed.
+
+### Changed Files
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `docs/agent/verification.md`
+- `scripts/check-public-supabase-readiness.mjs`
+
+### Verification Results
+- `node --check scripts/check-public-supabase-readiness.mjs`: pass.
+- `npm run agent:content-import`: pass with 115 media candidates, 4 articles, 95 article blocks, 0 warnings, and 0 blockers.
+- `npm run agent:content-import:apply-sql`: pass; generated ignored JSON, Markdown, preflight SQL, and guarded draft apply SQL artifacts.
+- `npm run agent:public-supabase-readiness`: pass; it now reports 95 structured draft article blocks plus the existing draft-only/public-boundary checks.
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass, including public/admin route shells and Forms API mock checks.
+- `npm run agent:live-readiness`: pass in report-only mode; live form/admin/Cloudflare inputs remain missing or approval-gated.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- This is a source-only regression guard. It does not apply import SQL, publish article blocks, create credentials, verify live admin saves, or migrate public article runtime to Supabase.
+- Article source copy remains draft-only and claim-review gated. Do not treat extracted newsletter copy as approved public content without Jay/content review.
+- Live completion still requires service-role form verification, first-admin/profile setup, browser-safe Supabase config, a real admin session, tagged admin write approval, and Cloudflare preview deployment.
+
+### Next Handoff
+- Continue source-only import/public-read preparation while credentials are unavailable.
+- If credentials become available, run the existing live path in order: `npm run agent:forms-live`, first-admin readiness/bootstrap verification, admin live readiness, plan-only admin CRUD live verifier, then approval-gated tagged live writes.
+
 ## Entry - 2026-05-29 (Article Structured Import Draft Blocks)
 
 ### Scope

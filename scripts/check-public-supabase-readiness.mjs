@@ -160,6 +160,67 @@ function checkContentImportPayload(payload) {
   );
 }
 
+function blockText(block) {
+  const content = block.content ?? {};
+  return [content.body, content.title, content.label, content.alt].filter(Boolean).join(' ');
+}
+
+function checkArticleBlockPayload(payload) {
+  const articleRows = Array.isArray(payload.rows.articles) ? payload.rows.articles : [];
+  const articleBlocks = Array.isArray(payload.rows.article_blocks) ? payload.rows.article_blocks : [];
+  const mediaSourceUrls = new Set((payload.rows.media_assets ?? []).map((row) => row.source_url).filter(Boolean));
+
+  if (articleBlocks.length <= articleRows.length) {
+    failures.push('article_blocks: expected structured draft blocks, not one placeholder block per article');
+  }
+
+  if (articleBlocks.some((block) => block.content?.migrationStatus === 'legacy_newsletter_requires_structured_review')) {
+    failures.push('article_blocks: legacy placeholder migration status remains in import payload');
+  }
+
+  const imageBlocks = articleBlocks.filter((block) => block.block_type === 'image');
+  if (imageBlocks.length === 0) {
+    failures.push('article_blocks: expected at least one image block extracted from legacy article HTML');
+  }
+
+  for (const [index, block] of imageBlocks.entries()) {
+    if (!block.media_source_url) {
+      failures.push(`article_blocks image[${index}]: missing media_source_url`);
+      continue;
+    }
+    if (!mediaSourceUrls.has(block.media_source_url)) {
+      failures.push(`article_blocks image[${index}]: media_source_url is not present in media_assets candidates`);
+    }
+    if (block.media_source_url.includes('/media/launch/articles/shared/')) {
+      failures.push(`article_blocks image[${index}]: newsletter shared/social image should not be imported`);
+    }
+  }
+
+  const forbiddenNewsletterText = [
+    /^ready to (transform|experiment)/i,
+    /^call:\s*1300/i,
+    /^urblo,\s*5 hamilton/i,
+    /^5 hamilton street/i,
+    /explore solutions: urblo\.com\.au/i,
+    /unsubscribe|campaign preferences/i,
+  ];
+
+  for (const [index, block] of articleBlocks.entries()) {
+    const text = blockText(block);
+    if (forbiddenNewsletterText.some((pattern) => pattern.test(text))) {
+      failures.push(`article_blocks[${index}]: newsletter footer/contact artifact leaked into structured import`);
+    }
+
+    if (block.block_type === 'rich_text' && !block.content?.claimReviewStatus) {
+      failures.push(`article_blocks[${index}]: rich_text block missing claimReviewStatus`);
+    }
+
+    if ((block.content?.reviewFlags ?? []).length > 0 && block.content?.claimReviewStatus !== 'needs_review') {
+      failures.push(`article_blocks[${index}]: reviewFlags must set claimReviewStatus to needs_review`);
+    }
+  }
+}
+
 function checkSupabasePolicySource() {
   const foundation = readRequired('supabase/migrations/202605270001_foundation_schema.sql');
   const hardening = readRequired('supabase/migrations/202605270002_foundation_hardening.sql');
@@ -270,6 +331,7 @@ function checkDocsContracts() {
 const payload = getContentImportPayload();
 
 checkContentImportPayload(payload);
+checkArticleBlockPayload(payload);
 checkSupabasePolicySource();
 checkPublicRuntimeBoundary();
 checkCloudflareStaticBoundary();
@@ -285,6 +347,7 @@ console.log('Public Supabase readiness checks passed.');
 console.log(
   [
     `Verified ${payload.summary.stone_groups} stone groups, ${payload.summary.products} products, ${payload.summary.projects} projects, and ${payload.summary.articles} articles remain draft in the import dry run.`,
+    `Verified ${payload.summary.article_blocks} draft article blocks use structured extraction instead of placeholder HTML imports.`,
     'Verified published-only public RLS policy source, read-only anon grants, static public runtime boundary, Cloudflare SPA/API routing scope, and cutover docs.',
   ].join('\n'),
 );
