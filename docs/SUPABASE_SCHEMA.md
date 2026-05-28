@@ -27,6 +27,7 @@ The Supabase connector can access the Urblo project directly. Do not ask the use
 | First admin audit writer source | Implemented on 2026-05-28: `src/lib/adminAudit.ts` inserts audit rows after successful admin CRUD/workflow saves; live row creation remains pending browser-safe Supabase config and active admin profiles |
 | Admin source coverage runner | Implemented on 2026-05-28: `npm run agent:admin-crud-coverage` verifies route/module/table/action/audit/export coverage without mutating Supabase |
 | Admin live CRUD runner | Implemented on 2026-05-28: `npm run agent:admin-crud-live` defaults to a no-write plan; `--allow-writes` requires a real owner/admin Supabase Auth session and creates tagged draft/archived QA rows plus audit events through browser-key RLS |
+| Public cutover readiness runner | Implemented on 2026-05-28: `npm run agent:public-supabase-readiness` verifies draft-only content import payloads, published-only public RLS policy source, read-only anonymous grants, static public runtime boundaries, and `/api/*` Function routing scope without mutating Supabase |
 
 Secrets still must not be committed or pasted into repo docs. Service-role keys, database passwords, Turnstile secrets, and email provider secrets belong only in server-side environment variable stores.
 
@@ -202,6 +203,7 @@ Current preparation:
 - The dry run can also write a local ignored Markdown apply/rollback plan with `npm run agent:content-import:plan`. This records the table order, reverse rollback order, preflight checks, and verification expectations without writing Supabase rows.
 - The dry run can also write a local ignored read-only target preflight SQL artifact with `npm run agent:content-import:preflight-sql`. This records row-count, planned-vs-current-count, status distribution, RLS, and policy queries for review before any approved import/apply step.
 - Current Supabase target preflight on 2026-05-28 confirmed the content import target tables are empty, seed tables contain 12 finish definitions and one site settings row, and all checked seed/import target tables have RLS enabled.
+- `npm run agent:public-supabase-readiness` now verifies the no-write public cutover posture: content import rows with status are all `draft`, the import has zero warnings/blockers, public RLS policy source is published-only, anonymous grants are read-only, public runtime code remains static/file-backed, and Cloudflare routes only invoke Pages Functions under `/api/*`.
 
 Order:
 1. Site settings is started under Phase 4a.
@@ -214,6 +216,7 @@ Order:
 Acceptance:
 - Public routes continue exposing only published content.
 - Static-file fallback remains available until each content type is fully migrated.
+- Static-to-Supabase import candidates stay `draft` until Jay approves publication or a deliberate content apply/publish step.
 - Customer-editable fields match `docs/ADMIN_IA_ACCESS.md`.
 - Raw newsletter HTML is not the normal admin article authoring model.
 

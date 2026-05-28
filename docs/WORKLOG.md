@@ -2,6 +2,51 @@
 
 Last updated: 2026-05-28
 
+## Entry - 2026-05-28 (Public Supabase Readiness Runner)
+
+### Scope
+- Tightened `scripts/check-content-import-readiness.mjs` so status-bearing static-to-Supabase import candidates stay `draft`, including Stone Library rows that previously inherited current public active/TBC source status.
+- Added `scripts/check-public-supabase-readiness.mjs` and `npm run agent:public-supabase-readiness` as a no-write source verifier for public Supabase cutover preparation.
+- The new runner verifies zero content import warnings/blockers, draft-only import statuses, local media availability, published-only public RLS policy source, read-only anonymous grants, static public runtime boundaries, Cloudflare SPA fallback, and `/api/*` Function routing scope.
+
+### Changed Files
+- `AGENTS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `docs/agent/verification.md`
+- `package.json`
+- `scripts/agent-init.sh`
+- `scripts/check-content-import-readiness.mjs`
+- `scripts/check-public-supabase-readiness.mjs`
+
+### Verification Results
+- Supabase changelog check: pass. The recent Data API exposure breaking change remains relevant and is covered by explicit grants/RLS checks; no live schema or Data API exposure change was made.
+- Supabase RLS documentation check: pass. The runner follows the documented exposed-schema posture by checking RLS/policy/grant source for public content tables before any browser-readable cutover.
+- `node --check scripts/check-public-supabase-readiness.mjs`: pass.
+- `npm run agent:content-import`: pass. Prepared 51 media candidates, 13 stone groups, 15 stone variants, 153 finish capability rows, 6 products, 28 product models, 5 projects, 4 articles, 0 warnings, and 0 blockers.
+- `npm run agent:public-supabase-readiness`: pass. Verified 13 stone groups, 6 products, 5 projects, and 4 articles remain draft in the import dry run, plus published-only public RLS policy source, read-only anonymous grants, static public runtime boundary, Cloudflare SPA fallback, and `/api/*` Function routing scope.
+- `npm run agent:content-import:preflight-sql`: pass. Wrote local ignored JSON, Markdown, and SQL review artifacts.
+- `npm run agent:cloudflare-readiness`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- Supabase connector read-only sanity: pass. Nine launch migrations are present, 24 public tables have RLS enabled, private workflow rows remain 0, finish definitions remain 12, and site settings remains 1.
+- `npm run build`: pass. Browserslist staleness notice remains; admin chunk is about 432 kB before gzip.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass, including `/admin/*` route shells and Forms API mock checks.
+
+### Risks and Gaps
+- This is still no-write source verification. It does not apply imported rows, prove live browser-key reads, verify admin save flows, or replace `npm run agent:forms-live` / `npm run agent:admin-crud-live -- --allow-writes`.
+- Public Projects, Stone Library, Products, and Articles remain file-backed until Jay approves content import scope and public read migration.
+
+### Next Handoff
+- `NOW-FORMS-BACKEND-001` live Supabase row/audit verification with `npm run agent:forms-live` after credentials are configured.
+- `NOW-ADMIN-AUTH-RLS-001` live admin profile readiness and browser QA after first-admin email/profile and browser-safe keys are available.
+- `NOW-ADMIN-CONTENT-CRUD-001` approved content import/apply and public read migration only after live admin access and content scope are confirmed.
+
 ## Entry - 2026-05-28 (Admin CRUD Live Verifier)
 
 ### Scope

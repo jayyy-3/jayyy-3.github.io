@@ -65,10 +65,7 @@ function finishKeyFromParts(finishId, finishVariantId) {
     return finishVariantId ? `${finishId}__${finishVariantId}` : finishId;
 }
 
-function mapPublicStatus(status) {
-    if (status === 'active') return 'published';
-    if (status === 'tbc') return 'tbc';
-    if (status === 'published' || status === 'draft' || status === 'archived') return status;
+function mapImportStatus() {
     return 'draft';
 }
 
@@ -380,7 +377,7 @@ const stoneGroups = stoneLibrary.stones.map((stone, index) => ({
     stone_group_key: stone.stoneGroupId,
     display_name: stone.displayName,
     source_name: stone.sourceName,
-    status: mapPublicStatus(stone.status),
+    status: mapImportStatus(stone.status),
     stone_type_source: stone.type?.source ?? null,
     stone_type_display: stone.type?.display ?? null,
     origin_region: stone.origin?.regionDisplay ?? null,
@@ -404,7 +401,7 @@ for (const stone of stoneLibrary.stones) {
             display_name: variant.displayVariant ?? null,
             source_variant: variant.sourceVariant ?? null,
             variant_type: variant.variantType ?? 'none',
-            status: mapPublicStatus(variant.status),
+            status: mapImportStatus(variant.status),
             sort_order: variant.sortOrder ?? 0,
         });
 

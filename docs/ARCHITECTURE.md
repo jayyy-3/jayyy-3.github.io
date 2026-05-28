@@ -103,10 +103,14 @@ Last updated: 2026-05-28
 - Content import dry run:
   - `npm run agent:content-import` => `node scripts/check-content-import-readiness.mjs`
   - Reads current static Stone Library JSON, Projects data, Products data, Articles manifest, and referenced local media.
-  - Produces Supabase-shaped import candidates with natural keys and fails before any database write if local media is missing, slugs duplicate, or project/material references use unknown stone or finish keys.
+  - Produces Supabase-shaped import candidates with natural keys, forces content rows to `draft`, and fails before any database write if local media is missing, slugs duplicate, or project/material references use unknown stone or finish keys.
   - Can write a local ignored review artifact with `npm run agent:content-import -- --out .tmp/content-import-preview.json`; the artifact remains a draft/no-write payload and must not be applied as final published content without approval.
   - `npm run agent:content-import:plan` writes both `.tmp/content-import-preview.json` and `.tmp/content-import-plan.md`, including import safety notes, preflight checks, table apply order, reverse rollback order, and verification expectations.
   - `npm run agent:content-import:preflight-sql` also writes `.tmp/content-import-preflight.sql`, a read-only Supabase target preflight SQL artifact for row-count, status, RLS, and policy inspection before any approved import/apply step.
+- Public Supabase readiness:
+  - `npm run agent:public-supabase-readiness` => `node scripts/check-public-supabase-readiness.mjs`
+  - Verifies the content import dry run has no warnings/blockers, all import rows with status remain `draft`, public RLS policy source is published-only, anonymous grants are read-only, public runtime code is still static/file-backed, and Cloudflare routes only invoke Functions under `/api/*`.
+  - This is a source/no-write verifier. It does not apply imported content, query Supabase, create a preview deployment, or replace live credential checks.
 - Agent startup:
   - `npm run agent:init` => `bash scripts/agent-init.sh`
   - Prints repo path, git status, recent commits, runtime versions, read order, and common commands.
