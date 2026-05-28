@@ -64,6 +64,11 @@ Lead modules use operational status instead of public visibility:
 - enquiries: `new`, `contacted`, `quoted`, `won`, `closed`, `spam`;
 - sample requests: `new`, `confirmed`, `packed`, `sent`, `closed`, `spam`.
 
+Current launch removal model:
+- Content and media records use archive/publish state changes as the customer-facing removal path.
+- Physical deletes are destructive operations and remain outside the launch-critical CMS path until Jay approves a retention and destructive-delete policy.
+- Live admin verification should prove archive behavior, public invisibility, and auditability; it should not physically delete production rows.
+
 ## Module Rollout Sequence
 
 | Phase | Module | Why This Order | Dependencies |

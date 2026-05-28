@@ -406,6 +406,7 @@ Route state contract:
   - `/admin/leads` is the first lead workflow screen and uses enquiries, sample requests, sample request items, active admin profile options, Stone Library labels, and finish labels. Owner/admin CSV export is limited to the currently loaded queue and blocked if its audit event cannot be recorded.
   - `/admin/audit` is the first audit visibility screen and uses admin audit events plus active admin profile labels.
   - Admin profile management is non-destructive in source: it creates/updates profile rows for existing Supabase Auth users, preserves owner-role guardrails in UI, and is backed by the `admin_profile_owner_hardening` migration.
+  - Launch content removal is non-destructive in source: admin content and media workflows use archive/publish state changes, while physical deletes remain outside the launch-critical CMS path until Jay approves a retention/destructive-delete policy.
   - The admin CMS must not ship fake production auth; live verification still requires browser-safe Supabase key configuration and a confirmed first admin profile.
 - Access control:
   - Public reads expose only published content.

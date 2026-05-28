@@ -307,7 +307,8 @@
         "2026-05-28: Removed the retired AdminModulePage scaffold component and unused scaffold/locked module-state branches now that all launch-critical admin modules have real source screens. Admin CRUD coverage now fails if the retired scaffold component returns."
       ],
       "acceptance": [
-        "Authenticated admin users can create, read, update, delete, draft, and publish Projects, Stone Library records, Products, Articles, and media records without code edits.",
+        "Authenticated admin users can create, read, update, draft, publish, and archive Projects, Stone Library records, Products, Articles, and media records without code edits.",
+        "Physical delete controls remain out of the launch-critical CMS path unless Jay approves a destructive-delete/retention policy; current live verification must use non-destructive archive flows.",
         "Article editing uses approved structured block types instead of arbitrary newsletter HTML.",
         "Unpublished content remains hidden from the public site, and unauthenticated users cannot access admin routes."
       ],
@@ -555,7 +556,8 @@
         "2026-05-29: Admin CRUD live verifier plan now includes tagged `stone_finish_images` create/archive coverage through authenticated RLS for the later credential-gated live run. It archives public-facing QA parent rows, verifies those tagged public-content rows and private lead rows are not anonymously visible through browser-key reads, and performs no physical deletes."
       ],
       "acceptance": [
-        "Admin users can draft, publish, edit, archive, and delete Projects, Stone Library records including finish image links, Products, and Articles.",
+        "Admin users can draft, publish, edit, and archive Projects, Stone Library records including finish image links, Products, and Articles through the non-destructive launch lifecycle.",
+        "Physical deletes for content records remain hidden and approval-gated until a destructive-delete/retention policy is confirmed.",
         "Public routes expose only published content and preserve current route contracts.",
         "Article CRUD uses approved structured blocks and strips newsletter artifacts from the authoring model.",
         "Static file-backed data sources have a documented migration or fallback path.",

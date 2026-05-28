@@ -223,6 +223,7 @@ Acceptance:
 - Public routes continue exposing only published content.
 - Static-file fallback remains available until each content type is fully migrated.
 - Static-to-Supabase import candidates stay `draft` until Jay approves publication or a deliberate content apply/publish step.
+- Launch admin removal uses non-destructive archive flows; physical deletes remain approval-gated until a retention/destructive-delete policy exists.
 - Customer-editable fields match `docs/ADMIN_IA_ACCESS.md`.
 - Raw newsletter HTML is not the normal admin article authoring model.
 

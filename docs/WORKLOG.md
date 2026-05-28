@@ -2,6 +2,37 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Admin Archive/Delete Contract Alignment)
+
+### Scope
+- Aligned admin CMS task acceptance with the implemented launch removal model: create/update/publish/archive is in scope; physical delete controls remain approval-gated until Jay approves a retention/destructive-delete policy.
+- Added the same non-destructive archive contract to the admin IA, Supabase schema, architecture, roadmap, and handoff docs so future live admin QA does not interpret CRUD as permission to delete production rows.
+
+### Changed Files
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `node -e "JSON.parse(require('fs').readFileSync('docs/agent/tasks.json','utf8')); console.log('tasks json ok')"`: pass.
+- `npm run agent:check`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:admin-crud-live`: pass in plan-only/no-write mode.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- Docs-only contract alignment. No Supabase rows, Storage objects, Auth users, Cloudflare state, credentials, or live writes were created or changed.
+- Live form/admin verification remains blocked by missing service-role key, browser-safe key, first admin email/profile/session, Cloudflare preview URL, and Jay approval for tagged writes.
+
+### Next Handoff
+- `NOW-ADMIN-CMS-001`
+- `NOW-ADMIN-CONTENT-CRUD-001`
+- `NOW-ADMIN-MEDIA-LEADS-001`
+
 ## Entry - 2026-05-29 (Admin Storage Live Readiness Gate)
 
 ### Scope
