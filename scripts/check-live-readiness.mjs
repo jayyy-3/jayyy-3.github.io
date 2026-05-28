@@ -23,6 +23,7 @@ function parseArgs(argv) {
     adminWritesApproved: false,
     baseUrl: '',
     envFiles: [...DEFAULT_ENV_FILES],
+    firstAdminWritesApproved: false,
     formWritesApproved: false,
     json: false,
     strict: false,
@@ -70,6 +71,11 @@ function parseArgs(argv) {
 
     if (arg === '--form-writes-approved') {
       options.formWritesApproved = true;
+      continue;
+    }
+
+    if (arg === '--first-admin-writes-approved') {
+      options.firstAdminWritesApproved = true;
       continue;
     }
 
@@ -274,6 +280,28 @@ function buildChecks(env, sources, options) {
       ].filter(Boolean),
       optional: [
         'Live bootstrap writes require Jay approval plus --allow-writes and a matching --confirm-email.',
+      ],
+    }),
+    makeCheck({
+      id: 'first-admin-bootstrap-write',
+      label: 'First-admin profile/invite live write',
+      command:
+        'npm run agent:first-admin-bootstrap -- --allow-writes --admin-email <first-admin-email> --confirm-email <first-admin-email>',
+      present: [
+        describeSource(serviceKey, sources),
+        presentSource(firstAdminEmailEnv, sources, firstAdminEmailSource),
+        options.firstAdminWritesApproved ? 'Jay approval flag supplied for first-admin profile/invite writes' : '',
+      ].filter(Boolean),
+      missing: [
+        serviceKey ? '' : 'SUPABASE_SERVICE_ROLE_KEY or SUPABASE_SERVICE_KEY',
+        firstAdminEmail ? '' : 'URBLO_FIRST_ADMIN_EMAIL or --admin-email',
+      ].filter(Boolean),
+      manual: options.firstAdminWritesApproved
+        ? []
+        : ['Jay approval for first-admin profile/invite writes is required before running first-admin-bootstrap --allow-writes'],
+      optional: [
+        'Add --invite only when Jay explicitly approves sending a Supabase Auth invitation.',
+        'Existing active owners block a new first-admin bootstrap unless --allow-existing-owner is intentional.',
       ],
     }),
     makeCheck({

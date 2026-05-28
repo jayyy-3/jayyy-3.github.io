@@ -157,9 +157,10 @@ Last updated: 2026-05-29
 - Live input readiness:
   - `npm run agent:live-readiness` => `node scripts/check-live-readiness.mjs`
   - Loads local environment values from `.env.local`, `.env`, `.dev.vars`, and the shell.
-  - Reports, without printing secret values, whether the inputs for `agent:forms-live -- --allow-writes`, deployed form verification, `agent:forms-live -- --allow-writes --require-browser-boundary`, `agent:admin-live-readiness`, `agent:admin-crud-live -- --allow-writes`, and `agent:cloudflare-preview-smoke` are present.
-  - Accepts non-secret readiness overrides: `--base-url <origin>`, `--admin-email <email>`, `--form-writes-approved`, and `--admin-writes-approved`. Secret keys and admin session credentials must still come from env files or the shell and must not be printed.
+  - Reports, without printing secret values, whether the inputs for `agent:forms-live -- --allow-writes`, deployed form verification, `agent:forms-live -- --allow-writes --require-browser-boundary`, `agent:admin-live-readiness`, `agent:first-admin-bootstrap -- --allow-writes`, `agent:admin-crud-live -- --allow-writes`, and `agent:cloudflare-preview-smoke` are present.
+  - Accepts non-secret readiness overrides: `--base-url <origin>`, `--admin-email <email>`, `--form-writes-approved`, `--first-admin-writes-approved`, and `--admin-writes-approved`. Secret keys and admin session credentials must still come from env files or the shell and must not be printed.
   - `--form-writes-approved` only represents Jay's approval to run tagged live form QA writes; it does not provide service-role credentials, browser-safe credentials, or a preview URL.
+  - `--first-admin-writes-approved` only represents Jay's approval to run the first-admin profile/invite write path; it does not provide a service-role key or replace the `--allow-writes` and `--confirm-email` guards on `agent:first-admin-bootstrap`.
   - Default mode is report-only and exits 0 even when inputs are missing; `--strict` exits 1 when live inputs are missing or manually gated.
   - This command does not query Supabase, create users, run live writes, create Cloudflare projects, or touch DNS.
 - Admin CRUD source coverage:

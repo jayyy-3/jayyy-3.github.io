@@ -2,6 +2,49 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (First Admin Write Readiness Gate)
+
+### Scope
+- Added a no-secret `npm run agent:live-readiness` check for the approval-gated first-admin profile/invite write path.
+- The readiness report now separates read-only first-admin verification from `npm run agent:first-admin-bootstrap -- --allow-writes --admin-email <first-admin-email> --confirm-email <first-admin-email>`.
+- Added `--first-admin-writes-approved` as a readiness-only manual gate flag; it does not replace service-role credentials, `--allow-writes`, or `--confirm-email`.
+
+### Changed Files
+- `AGENTS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `docs/agent/verification.md`
+- `scripts/check-live-readiness.mjs`
+
+### Verification Results
+- `node --check scripts/check-live-readiness.mjs`: pass.
+- `npm run agent:live-readiness`: pass in report-only mode and now lists the first-admin profile/invite live write gate.
+- `npm run agent:live-readiness -- --first-admin-writes-approved`: pass in report-only mode and clears only the first-admin manual gate while preserving missing credential/email reporting.
+- `npm run agent:live-readiness -- --json --first-admin-writes-approved`: pass and exposes the new `first-admin-bootstrap-write` check in JSON output.
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:admin-crud-live`: pass in plan-only/no-write mode.
+- `npm run agent:public-supabase-readiness`: pass.
+- `npm run agent:cloudflare-readiness`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- Supabase MCP read-only sanity: 10 migrations present, 24/24 expected launch tables have RLS enabled, 12 published finish definitions, one published default site settings row, and 0 rows in `admin_profiles`, `admin_audit_events`, `enquiries`, `sample_requests`, and `sample_request_items`.
+
+### Risks and Gaps
+- Source-only readiness hardening. No Supabase users, profiles, rows, Storage objects, Cloudflare state, credentials, or live writes were created or changed.
+- The first-admin live write path still requires Jay approval, a service-role key, `--allow-writes`, and matching `--confirm-email`.
+
+### Next Handoff
+- `NOW-ADMIN-AUTH-RLS-001`
+- `NOW-FORMS-BACKEND-001`
+- `NOW-CLOUDFLARE-PAGES-DEPLOY-001`
+
 ## Entry - 2026-05-29 (Agent Init Forms Live Command)
 
 ### Scope
