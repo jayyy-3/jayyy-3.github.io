@@ -2,6 +2,52 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Live Readiness Manual Input Validation)
+
+### Scope
+- Tightened `npm run agent:live-readiness` so non-secret manual `--base-url` and `--admin-email` inputs must be real values before readiness reports them as present.
+- Copied placeholders such as `<preview-origin>` and `<first-admin-email>`, malformed emails, and preview URLs with path/query/hash now remain missing in text and JSON readiness output.
+- Updated Harness docs and task state so future live verification handoffs do not confuse example placeholders with usable Cloudflare preview URLs or first-admin email inputs.
+- No Supabase rows, Auth users, Storage objects, Cloudflare state, credentials, or live writes were created or changed.
+
+### Changed Files
+- `docs/ARCHITECTURE.md`
+- `docs/CLOUDFLARE_DEPLOYMENT.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `docs/agent/verification.md`
+- `scripts/check-live-readiness.mjs`
+
+### Verification Results
+- Supabase changelog scan: pass. The relevant current hosted-platform note remains the April 28, 2026 Data/GraphQL API exposure change; this checkpoint is local readiness tooling/docs only.
+- Supabase connector read-only sanity: pass. Project `Urblo` is active healthy on Postgres 17.6.1, with 12 launch migrations, 24/24 expected launch tables with RLS, 114 public-schema policies, 12 finish rows, one default site settings row, zero admin/form/content parent rows, and zero security advisor lints.
+- `node --check scripts/check-live-readiness.mjs`: pass.
+- Placeholder readiness check: pass. `npm run agent:live-readiness -- --base-url '<preview-origin>' --admin-email '<first-admin-email>' --form-writes-approved --first-admin-writes-approved --admin-writes-approved --content-import-approved --content-merge-approved --content-public-cutover-approved --turnstile-token-provided` reports valid preview URL and valid first-admin email as missing.
+- Valid override JSON check: pass. `npm run agent:live-readiness -- --json --base-url https://example.pages.dev --admin-email first@example.com --form-writes-approved --first-admin-writes-approved --admin-writes-approved --content-import-approved --content-merge-approved --content-public-cutover-approved --turnstile-token-provided` reports those non-secret values as present while preserving missing secret/session inputs.
+- `npm run agent:live-readiness`: pass in report-only mode; live form/admin/Cloudflare inputs remain missing or approval-gated.
+- `npm run agent:admin-config-gate`: pass for 11 no-config admin routes in Firefox.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:cloudflare-readiness`: pass.
+- `npm run agent:public-supabase-readiness`: pass.
+- `npm run agent:forms-ui`: pass.
+- `node scripts/check-forms-api.mjs`: pass.
+- Plan-only `npm run agent:admin-auth-browser`: pass.
+- Plan-only `npm run agent:admin-crud-live`: pass.
+- Plan-only `npm run agent:first-admin-bootstrap`: pass.
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+
+### Risks and Gaps
+- This prevents false readiness from placeholder/manual input mistakes, but it does not provide the missing service-role key, browser-safe key, first-admin email/profile, admin credentials, Cloudflare preview URL, Turnstile/email secrets, or Jay approvals.
+- The admin CMS remains source-ready but not live-operational until the credential-gated form/admin/preview checks run.
+
+### Next Handoff
+- Continue `NOW-FORMS-BACKEND-001`, `NOW-ADMIN-AUTH-RLS-001`, and `NOW-CLOUDFLARE-PAGES-DEPLOY-001` after the required credentials, first-admin details, preview URL, and approvals exist.
+
 ## Entry - 2026-05-29 (Production Dependency Audit)
 
 ### Scope

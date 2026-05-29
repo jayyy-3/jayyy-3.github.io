@@ -176,6 +176,30 @@ function firstPresent(env, names) {
   return names.find((name) => Boolean(env[name])) || '';
 }
 
+function isPlaceholderValue(value) {
+  return /<[^>]+>/.test(value) || /\[[^\]]+\]/.test(value);
+}
+
+function isValidEmail(value) {
+  return Boolean(value && !isPlaceholderValue(value) && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value));
+}
+
+function isValidBaseUrl(value) {
+  if (!value || isPlaceholderValue(value)) return false;
+
+  try {
+    const url = new URL(value);
+    return (
+      (url.protocol === 'https:' || url.protocol === 'http:') &&
+      (url.pathname === '' || url.pathname === '/') &&
+      !url.search &&
+      !url.hash
+    );
+  } catch {
+    return false;
+  }
+}
+
 function allPresent(env, names) {
   return names.every((name) => Boolean(env[name]));
 }
@@ -206,9 +230,11 @@ function buildChecks(env, sources, options) {
   const browserKey = firstPresent(env, BROWSER_KEY_NAMES);
   const firstAdminEmailEnv = firstPresent(env, ADMIN_EMAIL_NAMES);
   const firstAdminEmail = options.adminEmail || firstAdminEmailEnv;
+  const firstAdminEmailValid = isValidEmail(firstAdminEmail);
   const firstAdminEmailSource = options.adminEmail ? '--admin-email argument' : describeSource(firstAdminEmailEnv, sources);
   const previewUrlEnv = firstPresent(env, PREVIEW_URL_NAMES);
   const previewUrl = options.baseUrl || previewUrlEnv;
+  const previewUrlValid = isValidBaseUrl(previewUrl);
   const previewUrlSource = options.baseUrl ? '--base-url argument' : describeSource(previewUrlEnv, sources);
   const adminToken = firstPresent(env, ADMIN_SESSION_TOKEN_NAMES);
   const adminPasswordSession = allPresent(env, ADMIN_SESSION_PASSWORD_NAMES);
@@ -247,12 +273,16 @@ function buildChecks(env, sources, options) {
       command: 'npm run agent:forms-live -- --allow-writes --base-url <preview-or-production-origin>',
       present: [
         describeSource(serviceKey, sources),
-        presentSource(previewUrlEnv, sources, previewUrlSource),
+        previewUrlValid ? presentSource(previewUrlEnv, sources, previewUrlSource) : '',
         options.formWritesApproved ? 'Jay approval flag supplied for tagged live form QA writes' : '',
       ].filter(Boolean),
       missing: [
         serviceKey ? '' : 'SUPABASE_SERVICE_ROLE_KEY or SUPABASE_SERVICE_KEY',
-        previewUrl ? '' : 'CLOUDFLARE_PAGES_PREVIEW_URL or PAGES_PREVIEW_URL, or pass --base-url manually',
+        previewUrlValid
+          ? ''
+          : previewUrl
+            ? 'valid preview base URL with http(s) origin only'
+            : 'CLOUDFLARE_PAGES_PREVIEW_URL or PAGES_PREVIEW_URL, or pass --base-url manually',
       ].filter(Boolean),
       manual: options.formWritesApproved
         ? []
@@ -344,12 +374,16 @@ function buildChecks(env, sources, options) {
       present: [
         describeSource(browserKey, sources),
         describeSource(serviceKey, sources),
-        presentSource(firstAdminEmailEnv, sources, firstAdminEmailSource),
+        firstAdminEmailValid ? presentSource(firstAdminEmailEnv, sources, firstAdminEmailSource) : '',
       ].filter(Boolean),
       missing: [
         browserKey ? '' : 'VITE_SUPABASE_PUBLISHABLE_KEY or VITE_SUPABASE_ANON_KEY',
         serviceKey ? '' : 'SUPABASE_SERVICE_ROLE_KEY or SUPABASE_SERVICE_KEY',
-        firstAdminEmail ? '' : 'URBLO_FIRST_ADMIN_EMAIL or --admin-email',
+        firstAdminEmailValid
+          ? ''
+          : firstAdminEmail
+            ? 'valid first admin email, not a placeholder'
+            : 'URBLO_FIRST_ADMIN_EMAIL or --admin-email',
       ].filter(Boolean),
     }),
     makeCheck({
@@ -358,11 +392,15 @@ function buildChecks(env, sources, options) {
       command: 'npm run agent:first-admin-bootstrap -- --verify-only --admin-email <first-admin-email>',
       present: [
         describeSource(serviceKey, sources),
-        presentSource(firstAdminEmailEnv, sources, firstAdminEmailSource),
+        firstAdminEmailValid ? presentSource(firstAdminEmailEnv, sources, firstAdminEmailSource) : '',
       ].filter(Boolean),
       missing: [
         serviceKey ? '' : 'SUPABASE_SERVICE_ROLE_KEY or SUPABASE_SERVICE_KEY',
-        firstAdminEmail ? '' : 'URBLO_FIRST_ADMIN_EMAIL or --admin-email',
+        firstAdminEmailValid
+          ? ''
+          : firstAdminEmail
+            ? 'valid first admin email, not a placeholder'
+            : 'URBLO_FIRST_ADMIN_EMAIL or --admin-email',
       ].filter(Boolean),
       optional: [
         'Live bootstrap writes require Jay approval plus --allow-writes and a matching --confirm-email.',
@@ -375,12 +413,16 @@ function buildChecks(env, sources, options) {
         'npm run agent:first-admin-bootstrap -- --allow-writes --admin-email <first-admin-email> --confirm-email <first-admin-email>',
       present: [
         describeSource(serviceKey, sources),
-        presentSource(firstAdminEmailEnv, sources, firstAdminEmailSource),
+        firstAdminEmailValid ? presentSource(firstAdminEmailEnv, sources, firstAdminEmailSource) : '',
         options.firstAdminWritesApproved ? 'Jay approval flag supplied for first-admin profile/invite writes' : '',
       ].filter(Boolean),
       missing: [
         serviceKey ? '' : 'SUPABASE_SERVICE_ROLE_KEY or SUPABASE_SERVICE_KEY',
-        firstAdminEmail ? '' : 'URBLO_FIRST_ADMIN_EMAIL or --admin-email',
+        firstAdminEmailValid
+          ? ''
+          : firstAdminEmail
+            ? 'valid first admin email, not a placeholder'
+            : 'URBLO_FIRST_ADMIN_EMAIL or --admin-email',
       ].filter(Boolean),
       manual: options.firstAdminWritesApproved
         ? []
@@ -518,10 +560,14 @@ function buildChecks(env, sources, options) {
       id: 'cloudflare-preview-smoke',
       label: 'Cloudflare deployed-preview route/API smoke',
       command: 'npm run agent:cloudflare-preview-smoke -- --base-url <preview-origin>',
-      present: [presentSource(previewUrlEnv, sources, previewUrlSource)].filter(Boolean),
-      missing: previewUrl
+      present: [previewUrlValid ? presentSource(previewUrlEnv, sources, previewUrlSource) : ''].filter(Boolean),
+      missing: previewUrlValid
         ? []
-        : ['CLOUDFLARE_PAGES_PREVIEW_URL or PAGES_PREVIEW_URL, or pass --base-url manually'],
+        : [
+            previewUrl
+              ? 'valid preview base URL with http(s) origin only'
+              : 'CLOUDFLARE_PAGES_PREVIEW_URL or PAGES_PREVIEW_URL, or pass --base-url manually',
+          ],
     }),
   ];
 }
