@@ -16,6 +16,7 @@ const EMAIL_ENV_NAMES = [
   'SAMPLE_REQUEST_NOTIFICATION_TO',
 ];
 const TURNSTILE_ENV_NAMES = ['TURNSTILE_SECRET_KEY', 'CF_TURNSTILE_SECRET_KEY'];
+const TURNSTILE_SITE_KEY_NAMES = ['VITE_TURNSTILE_SITE_KEY'];
 
 function parseArgs(argv) {
   const options = {
@@ -152,6 +153,10 @@ function hasNotificationConfig(env, type) {
 
 function hasTurnstileConfig(env) {
   return Boolean(env.TURNSTILE_SECRET_KEY || env.CF_TURNSTILE_SECRET_KEY);
+}
+
+function hasTurnstileSiteKey(env) {
+  return TURNSTILE_SITE_KEY_NAMES.some((key) => Boolean(env[key]));
 }
 
 function requireConfig(env, options) {
@@ -438,6 +443,12 @@ async function run() {
   if (options.requireTurnstile) {
     if (!options.turnstileToken) {
       throw new Error('Missing --turnstile-token. A valid Turnstile token is required when using --require-turnstile.');
+    }
+
+    if (!hasTurnstileSiteKey(env)) {
+      throw new Error(
+        'Missing VITE_TURNSTILE_SITE_KEY. Configure the public Contact form Turnstile site key before using --require-turnstile.',
+      );
     }
 
     if (!options.baseUrl && !hasTurnstileConfig(env)) {

@@ -141,7 +141,7 @@ Last updated: 2026-05-29
   - Requires `--allow-writes`, Jay approval for tagged live form QA writes, and `SUPABASE_SERVICE_ROLE_KEY` or the compatibility alias `SUPABASE_SERVICE_KEY`.
   - Default mode invokes the Pages Function handlers directly and suppresses Turnstile/email side effects unless `--turnstile-token` or `--allow-email` is supplied.
   - Final notification proof can be forced with `--allow-email --require-email`; this asserts both valid live submissions store `notification_status = 'sent'` instead of quietly accepting `not_required` or `failed`.
-  - Final Turnstile proof can be forced with `--require-turnstile --turnstile-token <token>`; this asserts both valid live submissions store `turnstile_success = true`.
+  - Final Turnstile proof can be forced with `--require-turnstile --turnstile-token <token>`; this now requires `VITE_TURNSTILE_SITE_KEY` before the live check starts and asserts both valid live submissions store `turnstile_success = true`.
   - Optional HTTP mode uses `--base-url <origin>` to test a local or deployed Pages endpoint while still querying Supabase to verify durable rows.
   - Valid live submissions must return a final `notificationStatus` that matches the stored lead row's `notification_status`, so email patch failures do not hide behind a successful insert.
   - Valid live submissions must have audit rows with matching source-route metadata, and invalid live submissions must create neither rows nor matching audit events.

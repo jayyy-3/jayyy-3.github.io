@@ -171,7 +171,7 @@
         "2026-05-29: `npm run agent:check` now also guards the `agent:forms-ui` package script and its `npm run agent:smoke` integration so the Contact form UI source contract cannot be silently removed from the harness.",
         "2026-05-29: Forms API mock checks now also exercise the Cloudflare Pages Function route wrappers for GET/OPTIONS method handling and invalid sample-request POST no-write behavior, so endpoint wrapper regressions are caught before deployed preview smoke.",
         "2026-05-29: Applied `sample_request_atomic_insert` on Supabase project npkidywzwddbnfrnxlmo. `/api/sample-requests` now calls service-role-only `submit_sample_request_with_item(jsonb, jsonb)` so the sample request row and first item row are created inside one database transaction. The function is security-invoker, not executable by anon/authenticated, executable by service_role, and source/mock checks fail if separate direct table inserts return or if the migration source loses the RPC grant/revoke contract.",
-        "2026-05-29: `scripts/check-forms-api-live.mjs` now supports final proof flags for notification and Turnstile behavior. `--allow-email --require-email` asserts valid live enquiry/sample-request rows store notification_status = sent, and `--require-turnstile --turnstile-token <token>` asserts valid live rows store turnstile_success = true. `npm run agent:live-readiness` reports those inputs separately, with `--turnstile-token-provided` as a no-secret readiness flag.",
+        "2026-05-29: `scripts/check-forms-api-live.mjs` now supports final proof flags for notification and Turnstile behavior. `--allow-email --require-email` asserts valid live enquiry/sample-request rows store notification_status = sent, and `--require-turnstile --turnstile-token <token>` now refuses to start without `VITE_TURNSTILE_SITE_KEY` before asserting valid live rows store turnstile_success = true. `npm run agent:live-readiness` reports those inputs separately, with `--turnstile-token-provided` as a no-secret readiness flag.",
         "2026-05-29: Contact form source now renders the Cloudflare Turnstile widget only when the public `VITE_TURNSTILE_SITE_KEY` is configured, blocks submit until a widget token exists in that mode, and sends `turnstileToken` to the existing Pages Function verifier. Source/Cloudflare readiness checks now guard the public site-key env contract."
       ],
       "acceptance": [
@@ -193,11 +193,11 @@
         "npm run agent:forms-live -- --allow-writes (after SUPABASE_SERVICE_ROLE_KEY is configured and Jay approves tagged live form QA writes)",
         "npm run agent:forms-live -- --allow-writes --require-browser-boundary (after service-role and browser-safe keys are configured and Jay approves tagged live form QA writes)",
         "npm run agent:forms-live -- --allow-writes --allow-email --require-email (after Resend sender/recipient variables are configured and Jay approves real tagged form QA emails)",
-        "npm run agent:forms-live -- --allow-writes --require-turnstile --turnstile-token <token> (after Turnstile secret and a valid target-environment token are available)",
+        "npm run agent:forms-live -- --allow-writes --require-turnstile --turnstile-token <token> (after VITE_TURNSTILE_SITE_KEY, Turnstile secret, and a valid target-environment token are available)",
         "Live Forms API test: valid form audit rows include source-route metadata, and invalid form payloads create no matching audit events",
         "Live Forms API test: valid response notificationStatus matches stored notification_status",
         "Live Forms API test with --require-email: valid stored notification_status values are sent, not not_required or failed",
-        "Live Forms API test with --require-turnstile: valid stored turnstile_success values are true",
+        "Live Forms API test with --require-turnstile: VITE_TURNSTILE_SITE_KEY is configured and valid stored turnstile_success values are true",
         "Live Forms API test: created private enquiry/sample-request/sample-item rows are not anonymously readable through browser-key REST access",
         "Mock API test: successful enquiry attempts admin_audit_events insert",
         "Mock API test: successful sample request attempts admin_audit_events insert",
@@ -281,7 +281,7 @@
         "2026-05-25: Contact now blocks empty local email drafts unless the visitor provides project notes plus either email or phone. This is a runtime guardrail, not a substitute for Supabase-backed lead persistence.",
         "2026-05-26: Execute through NOW-SUPABASE-FOUNDATION-001, NOW-SUPABASE-SEED-BASELINE-001, and NOW-FORMS-BACKEND-001 so database safety is verified before public submit behavior changes.",
         "2026-05-27: Main Contact and Sample Request submit source no longer depends on mailto. Live persistence and notification acceptance remain pending server-side environment variable verification.",
-        "2026-05-29: Final notification and Turnstile acceptance are now guarded by explicit live verifier flags: `--allow-email --require-email` for sent notification_status, and `--require-turnstile --turnstile-token <token>` for turnstile_success = true.",
+        "2026-05-29: Final notification and Turnstile acceptance are now guarded by explicit live verifier flags: `--allow-email --require-email` for sent notification_status, and `--require-turnstile --turnstile-token <token>` for a configured public Turnstile site key plus turnstile_success = true.",
         "2026-05-29: The public Contact form has an optional Cloudflare Turnstile widget behind `VITE_TURNSTILE_SITE_KEY`; production Turnstile still requires the server-side secret and final live proof token."
       ],
       "acceptance": [
@@ -295,7 +295,7 @@
         "npx tsc -b",
         "npm run agent:smoke",
         "npm run agent:forms-live -- --allow-writes --allow-email --require-email (after Resend variables and Jay approval are available)",
-        "npm run agent:forms-live -- --allow-writes --require-turnstile --turnstile-token <token> (after Turnstile secret/token and Jay approval are available)"
+        "npm run agent:forms-live -- --allow-writes --require-turnstile --turnstile-token <token> (after VITE_TURNSTILE_SITE_KEY, Turnstile secret/token, and Jay approval are available)"
       ]
     },
     {

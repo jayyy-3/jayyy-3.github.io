@@ -2,6 +2,45 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Final Turnstile Public Site-Key Guard)
+
+### Scope
+- Hardened `scripts/check-forms-api-live.mjs` so final `--require-turnstile` proof refuses to start unless `VITE_TURNSTILE_SITE_KEY` is configured.
+- Kept the existing server-side Turnstile secret and token checks, so the live verifier now proves the public Contact widget path and server verification path are both intentionally configured before tagged live form rows can be created.
+- Updated Harness docs and task acceptance so final Turnstile proof cannot be mistaken for a server-only token check.
+
+### Changed Files
+- `AGENTS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/CLOUDFLARE_DEPLOYMENT.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `docs/agent/verification.md`
+- `scripts/check-forms-api-live.mjs`
+
+### Verification Results
+- `node --check scripts/check-forms-api-live.mjs`: pass.
+- `SUPABASE_SERVICE_ROLE_KEY=dummy TURNSTILE_SECRET_KEY=dummy node scripts/check-forms-api-live.mjs --allow-writes --require-turnstile --turnstile-token dummy`: expected fail-closed before Supabase reads/writes with missing `VITE_TURNSTILE_SITE_KEY`.
+- `SUPABASE_SERVICE_ROLE_KEY=dummy VITE_TURNSTILE_SITE_KEY=dummy node scripts/check-forms-api-live.mjs --allow-writes --require-turnstile --turnstile-token dummy`: expected fail-closed at the next preflight with missing server-side Turnstile secret.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:live-readiness -- --json --form-writes-approved --turnstile-token-provided`: pass in report-only mode; final Turnstile proof still reports missing service key, Turnstile secret, and `VITE_TURNSTILE_SITE_KEY` in the current local environment.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+
+### Risks and Gaps
+- This is source-only verifier hardening. It does not create Supabase rows, configure Turnstile, verify a real token, send email, create Auth users, upload Storage objects, or touch Cloudflare state.
+- Live form persistence and final Turnstile proof still require `SUPABASE_SERVICE_ROLE_KEY`, `VITE_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` or `CF_TURNSTILE_SECRET_KEY`, a valid target-environment token, and Jay approval for tagged form QA writes.
+
+### Next Handoff
+- `NOW-FORMS-BACKEND-001`: configure service-role key and run `npm run agent:forms-live` after Jay approval.
+- `NOW-FORMS-SUPABASE-001`: run final email/Turnstile proof after Resend and Turnstile inputs exist.
+- `NOW-ADMIN-AUTH-RLS-001`: continue first-admin readiness once first admin email and keys are available.
+
 ## Entry - 2026-05-29 (Content Cutover Readiness Gates)
 
 ### Scope
