@@ -147,6 +147,7 @@ Evidence to record:
 - Email notification proof or reason it was mocked.
 - Whether final live email proof required stored `notification_status = sent`.
 - Whether final live Turnstile proof required stored `turnstile_success = true`.
+- Whether the public Turnstile widget path was configured with `VITE_TURNSTILE_SITE_KEY` or intentionally omitted for local/source-only verification.
 - Secret/env assumptions.
 
 ### Admin CMS

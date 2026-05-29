@@ -64,6 +64,16 @@ requireIncludes(
 );
 requireIncludes('direct email fallback channel', 'href="mailto:info@urblo.com.au?subject=Contact%20Us"');
 requireIncludes('direct phone fallback channel', 'href="tel:1300187256"');
+requireIncludes('public Turnstile site key env', 'import.meta.env.VITE_TURNSTILE_SITE_KEY');
+requireIncludes(
+  'explicit Turnstile client script',
+  'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit',
+);
+requireIncludes('Turnstile field component', 'function TurnstileField');
+requireIncludes(
+  'Turnstile visitor verification copy',
+  'Complete the verification check before sending the request.',
+);
 
 requireRegex('inline success status region', /role="status"[\s\S]*?\{successMessage\}/);
 requireRegex('inline error alert region', /id="contact-form-error"[\s\S]*?role="alert"[\s\S]*?\{formError\}/);
@@ -76,6 +86,15 @@ requireRegex(
 requireRegex('sample request fields render only in sample mode', /isSampleRequest \? \([\s\S]*contact-sample-stone/);
 requireRegex('sample request shipping field', /id="contact-shipping-address"[\s\S]*required=\{isSampleRequest\}/);
 requireRegex('source route included in payload', /const sourceRoute = `\$\{window\.location\.pathname\}\$\{window\.location\.search\}`/);
+requireRegex('Turnstile token included in submit payload', /turnstileToken:\s*turnstileToken\s*\|\|\s*undefined/);
+requireRegex(
+  'submit blocks when configured Turnstile has no token',
+  /isTurnstileEnabled\s*&&\s*!turnstileToken[\s\S]*?setFormError\(message\)/,
+);
+requireRegex(
+  'Turnstile widget resets after submit',
+  /setTurnstileResetSignal\(\(current\) => current \+ 1\)/,
+);
 
 if (failures.length) {
   console.error('Contact form UI source contract checks failed:');

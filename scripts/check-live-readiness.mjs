@@ -8,6 +8,7 @@ const ADMIN_SESSION_TOKEN_NAMES = ['URBLO_ADMIN_ACCESS_TOKEN'];
 const ADMIN_SESSION_PASSWORD_NAMES = ['URBLO_ADMIN_EMAIL', 'URBLO_ADMIN_PASSWORD'];
 const PREVIEW_URL_NAMES = ['CLOUDFLARE_PAGES_PREVIEW_URL', 'PAGES_PREVIEW_URL'];
 const TURNSTILE_NAMES = ['TURNSTILE_SECRET_KEY', 'CF_TURNSTILE_SECRET_KEY'];
+const TURNSTILE_SITE_KEY_NAMES = ['VITE_TURNSTILE_SITE_KEY'];
 const EMAIL_NAMES = [
   'RESEND_API_KEY',
   'LEAD_NOTIFICATION_FROM',
@@ -193,6 +194,7 @@ function buildChecks(env, sources, options) {
   const adminToken = firstPresent(env, ADMIN_SESSION_TOKEN_NAMES);
   const adminPasswordSession = allPresent(env, ADMIN_SESSION_PASSWORD_NAMES);
   const turnstile = firstPresent(env, TURNSTILE_NAMES);
+  const turnstileSiteKey = firstPresent(env, TURNSTILE_SITE_KEY_NAMES);
   const emailSenderReady = Boolean(env.RESEND_API_KEY) && Boolean(env.LEAD_NOTIFICATION_FROM || env.RESEND_FROM_EMAIL);
   const enquiryEmailReady = emailSenderReady && Boolean(env.ENQUIRY_NOTIFICATION_TO || env.LEAD_NOTIFICATION_TO);
   const sampleEmailReady = emailSenderReady && Boolean(env.SAMPLE_REQUEST_NOTIFICATION_TO || env.LEAD_NOTIFICATION_TO);
@@ -295,11 +297,13 @@ function buildChecks(env, sources, options) {
       present: [
         describeSource(serviceKey, sources),
         describeSource(turnstile, sources),
+        describeSource(turnstileSiteKey, sources),
         options.formWritesApproved ? 'Jay approval flag supplied for tagged live form QA writes' : '',
       ].filter(Boolean),
       missing: [
         serviceKey ? '' : 'SUPABASE_SERVICE_ROLE_KEY or SUPABASE_SERVICE_KEY',
         turnstile ? '' : 'TURNSTILE_SECRET_KEY or CF_TURNSTILE_SECRET_KEY',
+        turnstileSiteKey ? '' : 'VITE_TURNSTILE_SITE_KEY',
       ].filter(Boolean),
       manual: [
         options.formWritesApproved
@@ -310,7 +314,7 @@ function buildChecks(env, sources, options) {
           : 'A valid target-environment Turnstile token must be supplied with --turnstile-token',
       ].filter(Boolean),
       optional: [
-        'Asserts stored enquiry/sample request turnstile_success values are true for the tagged live rows.',
+        'Asserts stored enquiry/sample request turnstile_success values are true for the tagged live rows and keeps the public Contact widget configured.',
       ],
     }),
     makeCheck({

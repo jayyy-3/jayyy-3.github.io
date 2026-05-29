@@ -2,6 +2,56 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Contact Turnstile Widget Source Contract)
+
+### Scope
+- Added the optional Cloudflare Turnstile widget path to the public Contact form.
+- The widget renders only when `VITE_TURNSTILE_SITE_KEY` is configured, blocks submission until a token exists in that mode, sends `turnstileToken` to the existing Pages Function payload, and resets after success or failure.
+- Added `VITE_TURNSTILE_SITE_KEY` to the Vite/env contract, `.env.example`, Cloudflare readiness guard, live-readiness reporting, Contact source verifier, and Harness docs.
+
+### Changed Files
+- `.env.example`
+- `AGENTS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/CLOUDFLARE_DEPLOYMENT.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `docs/agent/verification.md`
+- `scripts/check-cloudflare-pages-readiness.mjs`
+- `scripts/check-contact-form-ui-source.mjs`
+- `scripts/check-live-readiness.mjs`
+- `src/pages/ContactPage.tsx`
+- `src/vite-env.d.ts`
+
+### Verification Results
+- `node --check scripts/check-contact-form-ui-source.mjs`: pass.
+- `node --check scripts/check-cloudflare-pages-readiness.mjs`: pass.
+- `node --check scripts/check-live-readiness.mjs`: pass.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:forms-ui`: pass.
+- `npm run agent:cloudflare-readiness`: pass.
+- `npm run agent:live-readiness`: pass in report-only mode; final Turnstile proof now reports missing `VITE_TURNSTILE_SITE_KEY` alongside the server secret/key and approval/token gates.
+- `npm run agent:live-readiness -- --json --form-writes-approved --turnstile-token-provided`: pass in report-only mode; flags clear only the manual approval/token gates and do not replace missing credentials.
+- `node scripts/check-forms-api.mjs`: pass.
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass, including Forms API checks and the Contact form UI source contract.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- This is a source-only widget/config checkpoint. It does not create Supabase rows, verify a real Turnstile token, configure the Cloudflare Turnstile site, configure server-side Turnstile secrets, send email, create Auth users, upload Storage objects, or touch Cloudflare state.
+- Final Turnstile launch proof still requires `VITE_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` or `CF_TURNSTILE_SECRET_KEY`, a valid target-environment token, service-role credentials, and Jay approval for tagged live form QA writes.
+
+### Next Handoff
+- `NOW-FORMS-BACKEND-001`
+- `NOW-FORMS-SUPABASE-001`
+- `NOW-ADMIN-AUTH-RLS-001`
+
 ## Entry - 2026-05-29 (Live Form Email and Turnstile Proof Guards)
 
 ### Scope

@@ -58,6 +58,7 @@ Initial production variables needed for forms and later admin work:
 - `VITE_SUPABASE_URL`
 - `VITE_SUPABASE_ANON_KEY`
 - `VITE_SUPABASE_PUBLISHABLE_KEY` (preferred when Supabase provides a publishable key; otherwise use the anon key)
+- `VITE_TURNSTILE_SITE_KEY`
 - `SUPABASE_URL`
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `SUPABASE_SERVICE_KEY` (optional compatibility alias; prefer `SUPABASE_SERVICE_ROLE_KEY`)
@@ -77,6 +78,7 @@ Optional local-only helper variables for verification commands:
 Rules:
 - Public `VITE_` values may be exposed to browser code.
 - The admin shell requires either `VITE_SUPABASE_ANON_KEY` or `VITE_SUPABASE_PUBLISHABLE_KEY` before login can run.
+- The public Contact form renders the Turnstile widget only when `VITE_TURNSTILE_SITE_KEY` is configured; the server still requires `TURNSTILE_SECRET_KEY` or `CF_TURNSTILE_SECRET_KEY` to verify tokens.
 - `SUPABASE_URL` is server-side for Pages Functions and may match `VITE_SUPABASE_URL`.
 - Secret values must exist only in Cloudflare Pages project settings.
 - Service-role and email API keys must never be committed or shipped to browser code.
@@ -136,7 +138,7 @@ Current `/functions/api` endpoints:
   - `npm run agent:forms-live -- --allow-writes` for direct handler verification against local service-role credentials after Jay approves tagged form QA writes.
   - `npm run agent:forms-live -- --allow-writes --require-browser-boundary` for final private-row proof after both service-role and browser-safe Supabase keys are configured and Jay approval is in place.
   - `npm run agent:forms-live -- --allow-writes --allow-email --require-email` for final email proof after Resend sender/recipient variables are configured and Jay approves tagged form QA writes. This asserts both valid live submissions store `notification_status = 'sent'`.
-  - `npm run agent:forms-live -- --allow-writes --require-turnstile --turnstile-token <token>` for final Turnstile proof after the Turnstile secret is configured and a valid token is available for the target environment. This asserts both valid live submissions store `turnstile_success = true`.
+  - `npm run agent:forms-live -- --allow-writes --require-turnstile --turnstile-token <token>` for final Turnstile proof after the public Turnstile site key, server-side Turnstile secret, and a valid token are available for the target environment. This asserts both valid live submissions store `turnstile_success = true`.
   - `npm run agent:forms-live -- --allow-writes --base-url https://<preview>.pages.dev` for deployed endpoint verification, after the Pages environment has the service-role key and Jay approves tagged form QA writes against that target.
 - The live verification command creates tagged test enquiry and sample-request rows, verifies their `admin_audit_events`, verifies invalid payloads create no rows, checks response-vs-stored notification status, and keeps the test rows until Jay approves cleanup. With `--require-browser-boundary`, it also proves those private lead rows are not anonymously readable through browser-key REST access.
 - Admin route tests require a browser-safe Supabase key, a Supabase Auth user, and a matching active `admin_profiles` row.
@@ -181,7 +183,7 @@ After form secrets are configured and Jay approves tagged form QA writes, run:
 - `npm run agent:forms-live -- --allow-writes`
 - `npm run agent:forms-live -- --allow-writes --require-browser-boundary` after the browser-safe Supabase key is configured
 - `npm run agent:forms-live -- --allow-writes --allow-email --require-email` after Resend sender/recipient variables are configured and the team is ready to send real verification emails
-- `npm run agent:forms-live -- --allow-writes --require-turnstile --turnstile-token <token>` after Turnstile is configured and a valid target-environment token is available
+- `npm run agent:forms-live -- --allow-writes --require-turnstile --turnstile-token <token>` after the Turnstile site key/secret are configured and a valid target-environment token is available
 
 For deployed Pages preview form verification after Jay approves tagged writes against that target, run:
 - `npm run agent:forms-live -- --allow-writes --base-url https://<preview>.pages.dev`
