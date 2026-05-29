@@ -42,11 +42,10 @@ const forbiddenUnauthorizedText = [
   'Audit',
 ];
 
-const unauthorizedRouteProbes = [
-  { path: '/admin', slug: 'unauthorized-admin' },
-  { path: '/admin/leads', slug: 'unauthorized-leads' },
-  { path: '/admin/settings', slug: 'unauthorized-settings' },
-];
+const unauthorizedRouteProbes = routeChecks.map((route) => {
+  const shortSlug = route.slug.replace(/^admin-?/, '') || 'admin';
+  return { path: route.path, slug: `unauthorized-${shortSlug}` };
+});
 
 let args;
 try {

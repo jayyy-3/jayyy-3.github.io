@@ -467,7 +467,24 @@ function checkRoutes() {
   requireIncludes(adminAuthBrowser, 'URBLO_UNPROFILED_PASSWORD', 'scripts/check-admin-auth-browser.mjs');
   requireIncludes(adminAuthBrowser, 'waitForUnauthorizedRoute', 'scripts/check-admin-auth-browser.mjs');
   requireIncludes(adminAuthBrowser, 'unauthorizedRouteProbes', 'scripts/check-admin-auth-browser.mjs');
-  requireIncludes(adminAuthBrowser, '/admin/settings', 'scripts/check-admin-auth-browser.mjs');
+  requireIncludes(
+    adminAuthBrowser,
+    'const unauthorizedRouteProbes = routeChecks.map',
+    'scripts/check-admin-auth-browser.mjs',
+  );
+  for (const path of [
+    '/admin',
+    '/admin/leads',
+    '/admin/media',
+    '/admin/settings',
+    '/admin/stone-library',
+    '/admin/projects',
+    '/admin/products',
+    '/admin/articles',
+    '/admin/audit',
+  ]) {
+    requireIncludes(adminAuthBrowser, `path: '${path}'`, 'scripts/check-admin-auth-browser.mjs');
+  }
   requireIncludes(adminAuthBrowser, 'assertNoPrivateAdminText', 'scripts/check-admin-auth-browser.mjs');
   requireIncludes(adminAuthBrowser, "getByRole('button', { name: /sign out/i })", 'scripts/check-admin-auth-browser.mjs');
   requireIncludes(adminAuthBrowser, 'waitForSignedOutRoute', 'scripts/check-admin-auth-browser.mjs');

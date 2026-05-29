@@ -2,6 +2,56 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Full Unprofiled Admin Route-Probe Coverage)
+
+### Scope
+- Expanded `npm run agent:admin-auth-browser -- --allow-login --expect-unauthorized --strict` so unauthorized-profile live mode derives its probes from the complete authenticated admin route list.
+- The future no-write live QA now requires `/admin`, `/admin/leads`, `/admin/media`, `/admin/settings`, `/admin/stone-library`, `/admin/projects`, `/admin/products`, `/admin/articles`, and `/admin/audit` to stay on `/admin/unauthorized` without private module headings after an unprofiled Auth user signs in.
+- Hardened `npm run agent:admin-crud-coverage` so the unauthorized-profile probes cannot quietly fall back to a small route subset.
+- No Supabase rows, Auth users, Storage objects, Cloudflare state, credentials, or live writes were created or changed.
+
+### Changed Files
+- `AGENTS.md`
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/CLOUDFLARE_DEPLOYMENT.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `docs/agent/verification.md`
+- `scripts/check-admin-auth-browser.mjs`
+- `scripts/check-admin-crud-coverage.mjs`
+- `scripts/check-live-readiness.mjs`
+
+### Verification Results
+- Supabase changelog scan: pass. Relevant current notes for this source-only auth verifier checkpoint remain the April 28, 2026 Data/GraphQL API exposure change and May 2026 platform/auth notes; no database implementation change was needed.
+- `npm run agent:live-readiness`: pass in report-only mode with live credentials, preview URL, first-admin inputs, and approvals still missing/manual-gated.
+- `npm run agent:supabase-foundation-readiness`: pass.
+- `node --check scripts/check-admin-auth-browser.mjs`: pass.
+- `node --check scripts/check-admin-crud-coverage.mjs`: pass.
+- `node --check scripts/check-live-readiness.mjs`: pass.
+- `npm run agent:admin-auth-browser -- --expect-unauthorized`: pass in plan-only/no-login mode.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:admin-crud-live`: pass in plan-only/no-write mode.
+- `npm run agent:admin-config-gate`: pass for 11 no-config admin routes in Firefox.
+- `npm run agent:cloudflare-readiness`: pass.
+- `npm run agent:public-supabase-readiness`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+
+### Risks and Gaps
+- Live unprofiled browser QA still requires browser-safe Supabase config and a valid Auth user with no active `admin_profiles` row.
+- This checkpoint is source/tooling only. It does not prove active-admin login, first-admin bootstrap, live form persistence, admin CRUD writes, Storage upload policy, email/Turnstile behavior, or Cloudflare preview deployment.
+
+### Next Handoff
+- When browser-safe Supabase config and an unprofiled Auth test account are available, run `npm run agent:admin-auth-browser -- --allow-login --expect-unauthorized --strict` to verify every launch-critical admin route stays unauthorized for that account.
+
 ## Entry - 2026-05-29 (Admin Runner Credential Input Boundary)
 
 ### Scope

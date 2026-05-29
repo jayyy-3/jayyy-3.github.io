@@ -219,7 +219,7 @@ After admin browser-safe keys and the first admin profile are configured, run:
 - `npm run agent:first-admin-bootstrap -- --allow-writes --admin-email <first-admin-email> --confirm-email <first-admin-email>` only after Jay approves creating/upserting the first profile or sending an invite
 - `npm run agent:admin-live-readiness -- --admin-email <first-admin-email>`
 - `npm run agent:admin-auth-browser -- --allow-login --strict`
-- `npm run agent:admin-auth-browser -- --allow-login --expect-unauthorized --strict` after a valid unprofiled Auth test user is available; this also probes direct protected admin routes and keeps them unauthorized without private module content
+- `npm run agent:admin-auth-browser -- --allow-login --expect-unauthorized --strict` after a valid unprofiled Auth test user is available; this also probes all launch-critical admin routes and keeps them unauthorized without private module content
 
 After a real owner/admin browser session is available and tagged QA writes are approved, run:
 - `npm run agent:admin-crud-live -- --allow-writes`
