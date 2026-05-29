@@ -238,6 +238,16 @@ async function countRows(config, table, filters = {}) {
   return rows.length;
 }
 
+async function readProfilesByEmail(supabase, email) {
+  const { data, error } = await supabase
+    .from('admin_profiles')
+    .select('user_id,email,display_name,role,is_active')
+    .limit(1000);
+
+  if (error) throw error;
+  return (data || []).filter((profile) => normalizeEmail(profile.email || '') === email);
+}
+
 function assertBrowserKeyRows(result, label) {
   if (!result.ok) {
     const detail =
@@ -317,12 +327,7 @@ async function run() {
   const authUser = await findAuthUserByEmail(serviceClient, config.adminEmail);
   assert.ok(authUser, `Expected a Supabase Auth user for ${config.adminEmail}.`);
 
-  const profiles = await selectRows(
-    config,
-    'admin_profiles',
-    { email: config.adminEmail },
-    'user_id,email,display_name,role,is_active',
-  );
+  const profiles = await readProfilesByEmail(serviceClient, config.adminEmail);
   assert.equal(profiles.length, 1, `Expected one admin_profiles row for ${config.adminEmail}.`);
 
   const profile = profiles[0];

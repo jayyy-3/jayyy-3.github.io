@@ -2,6 +2,50 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (First-Admin Email Case Readiness)
+
+### Scope
+- Updated the first-admin bootstrap verifier and admin live-readiness verifier so `admin_profiles.email` matching is normalized before comparison.
+- This aligns the scripts with the live `admin_profiles_email_ci_unique_idx` database contract, which enforces unique `lower(btrim(email))` values.
+- The change prevents a mixed-case manually created admin profile email from being misreported as missing during read-only first-admin readiness.
+
+### Changed Files
+- `scripts/bootstrap-first-admin.mjs`
+- `scripts/check-admin-live-readiness.mjs`
+- `AGENTS.md`
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- Supabase connector read-only sanity: 24/24 expected launch tables present, 0 expected launch tables missing RLS, 12 published finish definitions, 1 published default `site_settings` row, 0 active admin profiles, and current selected content/lead target tables still empty.
+- `node --check scripts/bootstrap-first-admin.mjs`: pass.
+- `node --check scripts/check-admin-live-readiness.mjs`: pass.
+- `npm run agent:first-admin-bootstrap`: pass in no-write plan mode.
+- `npm run agent:admin-auth-browser`: pass in plan-only mode.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:admin-crud-live`: pass in plan-only/no-write mode.
+- `npm run agent:live-readiness`: pass in report-only mode; live inputs remain missing/manual-gated.
+- `npm run build`: pass. Existing Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- This is source-only/no-write. It did not create a Supabase Auth user, create or change an admin profile, create form/admin/content rows, upload Storage objects, configure credentials, touch Cloudflare, or run live writes.
+- Live first-admin/admin verification still requires service-role and browser-safe keys, the first admin email, a real admin session/password or token, and Jay approval for any write path.
+
+### Next Handoff
+- `NOW-ADMIN-AUTH-RLS-001`
+- `NOW-FORMS-BACKEND-001`
+- `NOW-ADMIN-CMS-001`
+
 ## Entry - 2026-05-29 (Local Live Verification Secret Handling)
 
 ### Scope

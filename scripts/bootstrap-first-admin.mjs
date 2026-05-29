@@ -288,10 +288,10 @@ async function readProfileByEmail(supabase, email) {
   const { data, error } = await supabase
     .from('admin_profiles')
     .select('user_id,email,display_name,role,is_active,created_at,updated_at')
-    .eq('email', email);
+    .limit(1000);
 
   if (error) throw error;
-  return data || [];
+  return (data || []).filter((profile) => normalizeEmail(profile.email || '') === email);
 }
 
 async function readActiveOwners(supabase) {

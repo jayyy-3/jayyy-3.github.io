@@ -470,6 +470,7 @@
         "2026-05-29: First-admin read-only `--verify-only` now also fails if the existing active admin profile has the wrong role for the planned bootstrap role, and `npm run agent:admin-crud-coverage` guards that source contract.",
         "2026-05-29: First-admin and admin-live read-only readiness now fail if the active admin profile is not linked to the matching Supabase Auth user id for the supplied email, and source coverage guards that contract.",
         "2026-05-29: Applied and verified admin_profile_email_uniqueness on Supabase project npkidywzwddbnfrnxlmo. `admin_profiles_email_ci_unique_idx` keeps normalized profile emails case-insensitively unique, and first-admin write mode now refuses a target email already linked to a different Auth user before upsert.",
+        "2026-05-29: First-admin bootstrap and admin-live readiness scripts now normalize `admin_profiles.email` before matching the supplied first-admin email, aligning source readiness checks with the case-insensitive database uniqueness contract.",
         "2026-05-28: `npm run agent:admin-crud-coverage` now verifies /admin route registration, RequireAdmin state handling, active module registration, and browser-key-only Supabase client wiring before live auth QA.",
         "2026-05-29: `npm run agent:admin-crud-coverage` now also guards the config-missing state copy, login/unauthorized config handling, admin-route WelcomePopup suppression, whole-browser-source service-role env/client boundary, and browser-key/RLS-only admin live verifier boundary.",
         "2026-05-28: `npm run agent:admin-crud-live` now stages the live write proof after auth readiness. Plan-only mode performs no writes; live mode requires a real owner/admin session and Jay approval for tagged QA rows.",
@@ -485,7 +486,7 @@
         "Admin session behavior is documented and covered by browser or Playwright checks.",
         "Without browser-safe Supabase configuration, admin routes render a configuration-required state and no dashboard content.",
         "First-admin read-only verification fails unless the target Auth user has exactly one active admin profile linked to that Auth user with the planned bootstrap role.",
-        "Admin profile email lookups are unambiguous through a case-insensitive normalized unique index, and first-admin write mode refuses email/Auth-user mismatches before upsert."
+        "Admin profile email lookups are unambiguous through a case-insensitive normalized unique index; first-admin and admin-readiness source checks normalize email matching, and first-admin write mode refuses email/Auth-user mismatches before upsert."
       ],
       "verification": [
         "npm run build",
