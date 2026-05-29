@@ -176,6 +176,8 @@ function checkEnvAndDocs() {
     'npm run agent:cloudflare-preview-smoke -- --base-url https://<preview>.pages.dev',
     'npm run agent:forms-live -- --allow-writes',
     'npm run agent:forms-live -- --allow-writes --require-browser-boundary',
+    'npm run agent:forms-live -- --allow-writes --allow-email --require-email',
+    'npm run agent:forms-live -- --allow-writes --require-turnstile --turnstile-token <token>',
     'npm run agent:first-admin-bootstrap -- --verify-only --admin-email <first-admin-email>',
     'npm run agent:first-admin-bootstrap -- --allow-writes --admin-email <first-admin-email> --confirm-email <first-admin-email>',
     'npm run agent:admin-live-readiness -- --admin-email <first-admin-email>',
@@ -191,6 +193,7 @@ function checkEnvAndDocs() {
     'Jay approves creating/upserting the first profile or sending an invite',
     '--admin-writes-approved',
     'Jay approves tagged live admin QA writes',
+    '--turnstile-token-provided',
   ]) {
     requireIncludes(runbook, approvalGate, 'docs/CLOUDFLARE_DEPLOYMENT.md');
   }

@@ -123,6 +123,7 @@
       "priority": 4.1,
       "summary": "Implement Cloudflare Pages Functions for Contact and Sample Request Supabase writes.",
       "files": [
+        "AGENTS.md",
         "docs/SUPABASE_SCHEMA.md",
         "docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md",
         "docs/CLOUDFLARE_DEPLOYMENT.md",
@@ -130,6 +131,7 @@
         "docs/HANDOFF.md",
         "docs/WORKLOG.md",
         "docs/agent/tasks.json",
+        "docs/agent/verification.md",
         ".env.example",
         "src/pages/ContactPage.tsx",
         "src/data/siteChrome.ts",
@@ -166,7 +168,8 @@
         "2026-05-29: Added `npm run agent:forms-ui` as a no-secret Contact form UI source contract check. It keeps the main submit flow on `/api/enquiries` and `/api/sample-requests`, verifies inline validation/success/error states, sample-request mode fields, submitting state, direct contact fallbacks, and guards against submit-flow mailto/window-navigation regressions.",
         "2026-05-29: `npm run agent:check` now also guards the `agent:forms-ui` package script and its `npm run agent:smoke` integration so the Contact form UI source contract cannot be silently removed from the harness.",
         "2026-05-29: Forms API mock checks now also exercise the Cloudflare Pages Function route wrappers for GET/OPTIONS method handling and invalid sample-request POST no-write behavior, so endpoint wrapper regressions are caught before deployed preview smoke.",
-        "2026-05-29: Applied `sample_request_atomic_insert` on Supabase project npkidywzwddbnfrnxlmo. `/api/sample-requests` now calls service-role-only `submit_sample_request_with_item(jsonb, jsonb)` so the sample request row and first item row are created inside one database transaction. The function is security-invoker, not executable by anon/authenticated, executable by service_role, and source/mock checks fail if separate direct table inserts return or if the migration source loses the RPC grant/revoke contract."
+        "2026-05-29: Applied `sample_request_atomic_insert` on Supabase project npkidywzwddbnfrnxlmo. `/api/sample-requests` now calls service-role-only `submit_sample_request_with_item(jsonb, jsonb)` so the sample request row and first item row are created inside one database transaction. The function is security-invoker, not executable by anon/authenticated, executable by service_role, and source/mock checks fail if separate direct table inserts return or if the migration source loses the RPC grant/revoke contract.",
+        "2026-05-29: `scripts/check-forms-api-live.mjs` now supports final proof flags for notification and Turnstile behavior. `--allow-email --require-email` asserts valid live enquiry/sample-request rows store notification_status = sent, and `--require-turnstile --turnstile-token <token>` asserts valid live rows store turnstile_success = true. `npm run agent:live-readiness` reports those inputs separately, with `--turnstile-token-provided` as a no-secret readiness flag."
       ],
       "acceptance": [
         "Valid enquiry submissions create Supabase enquiry rows through a server-side endpoint.",
@@ -186,8 +189,12 @@
         "npm run agent:live-readiness",
         "npm run agent:forms-live -- --allow-writes (after SUPABASE_SERVICE_ROLE_KEY is configured and Jay approves tagged live form QA writes)",
         "npm run agent:forms-live -- --allow-writes --require-browser-boundary (after service-role and browser-safe keys are configured and Jay approves tagged live form QA writes)",
+        "npm run agent:forms-live -- --allow-writes --allow-email --require-email (after Resend sender/recipient variables are configured and Jay approves real tagged form QA emails)",
+        "npm run agent:forms-live -- --allow-writes --require-turnstile --turnstile-token <token> (after Turnstile secret and a valid target-environment token are available)",
         "Live Forms API test: valid form audit rows include source-route metadata, and invalid form payloads create no matching audit events",
         "Live Forms API test: valid response notificationStatus matches stored notification_status",
+        "Live Forms API test with --require-email: valid stored notification_status values are sent, not not_required or failed",
+        "Live Forms API test with --require-turnstile: valid stored turnstile_success values are true",
         "Live Forms API test: created private enquiry/sample-request/sample-item rows are not anonymously readable through browser-key REST access",
         "Mock API test: successful enquiry attempts admin_audit_events insert",
         "Mock API test: successful sample request attempts admin_audit_events insert",
@@ -248,6 +255,7 @@
         "2026-05-28: Added `npm run agent:live-readiness` reporting for the optional `CLOUDFLARE_PAGES_PREVIEW_URL` / `PAGES_PREVIEW_URL` helper variables, plus a non-secret `--base-url` override, before running deployed preview smoke.",
         "2026-05-29: Live deployed form verification is also approval-gated in `npm run agent:live-readiness`; pass `--form-writes-approved` only after Jay approves tagged form QA writes against the target environment.",
         "2026-05-29: Cloudflare deployment runbook and `npm run agent:cloudflare-readiness` now include `npm run agent:forms-live -- --allow-writes --require-browser-boundary` as the final private-row form proof after service-role and browser-safe Supabase keys are configured.",
+        "2026-05-29: Cloudflare deployment runbook and `npm run agent:cloudflare-readiness` now include final live email and Turnstile proof commands: `npm run agent:forms-live -- --allow-writes --allow-email --require-email` and `npm run agent:forms-live -- --allow-writes --require-turnstile --turnstile-token <token>`.",
         "2026-05-29: `npm run agent:cloudflare-readiness` now also fails if the runbook drops `--allow-writes` form commands, `--form-writes-approved`, `--admin-writes-approved`, or the Jay approval language around tagged live form/admin QA writes.",
         "2026-05-29: `npm run agent:cloudflare-readiness` now also fails if the runbook drops the first-admin read-only bootstrap check, the approval-gated first-admin `--allow-writes` command, `--first-admin-writes-approved`, or the Jay approval language around first-admin profile/invite writes.",
         "2026-05-29: `npm run agent:cloudflare-readiness` now guards the deployed-preview manual route list against stale legacy direct-refresh URLs by requiring canonical `/products/prime-block`, article detail, and `/capabilities` route checks while keeping old product/article URLs as redirect checks."
@@ -269,7 +277,8 @@
         "2026-05-22 full-site QA confirmed Contact page copy is clear about opening an email draft, but Sample Request and other mailto CTAs still need consistent fallback wording until Supabase submissions are live.",
         "2026-05-25: Contact now blocks empty local email drafts unless the visitor provides project notes plus either email or phone. This is a runtime guardrail, not a substitute for Supabase-backed lead persistence.",
         "2026-05-26: Execute through NOW-SUPABASE-FOUNDATION-001, NOW-SUPABASE-SEED-BASELINE-001, and NOW-FORMS-BACKEND-001 so database safety is verified before public submit behavior changes.",
-        "2026-05-27: Main Contact and Sample Request submit source no longer depends on mailto. Live persistence and notification acceptance remain pending server-side environment variable verification."
+        "2026-05-27: Main Contact and Sample Request submit source no longer depends on mailto. Live persistence and notification acceptance remain pending server-side environment variable verification.",
+        "2026-05-29: Final notification and Turnstile acceptance are now guarded by explicit live verifier flags: `--allow-email --require-email` for sent notification_status, and `--require-turnstile --turnstile-token <token>` for turnstile_success = true."
       ],
       "acceptance": [
         "Public form submissions are validated server-side, protected by Turnstile, stored in Supabase, and notify Urblo by email.",
@@ -280,7 +289,9 @@
         "npm run build",
         "npm run lint",
         "npx tsc -b",
-        "npm run agent:smoke"
+        "npm run agent:smoke",
+        "npm run agent:forms-live -- --allow-writes --allow-email --require-email (after Resend variables and Jay approval are available)",
+        "npm run agent:forms-live -- --allow-writes --require-turnstile --turnstile-token <token> (after Turnstile secret/token and Jay approval are available)"
       ]
     },
     {

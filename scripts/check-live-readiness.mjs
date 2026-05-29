@@ -27,6 +27,7 @@ function parseArgs(argv) {
     formWritesApproved: false,
     json: false,
     strict: false,
+    turnstileTokenProvided: false,
   };
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -76,6 +77,11 @@ function parseArgs(argv) {
 
     if (arg === '--first-admin-writes-approved') {
       options.firstAdminWritesApproved = true;
+      continue;
+    }
+
+    if (arg === '--turnstile-token-provided') {
+      options.turnstileTokenProvided = true;
       continue;
     }
 
@@ -187,10 +193,9 @@ function buildChecks(env, sources, options) {
   const adminToken = firstPresent(env, ADMIN_SESSION_TOKEN_NAMES);
   const adminPasswordSession = allPresent(env, ADMIN_SESSION_PASSWORD_NAMES);
   const turnstile = firstPresent(env, TURNSTILE_NAMES);
-  const emailReady = Boolean(env.RESEND_API_KEY) && Boolean(env.LEAD_NOTIFICATION_FROM || env.RESEND_FROM_EMAIL);
-  const anyEmailRecipient = Boolean(
-    env.LEAD_NOTIFICATION_TO || env.ENQUIRY_NOTIFICATION_TO || env.SAMPLE_REQUEST_NOTIFICATION_TO,
-  );
+  const emailSenderReady = Boolean(env.RESEND_API_KEY) && Boolean(env.LEAD_NOTIFICATION_FROM || env.RESEND_FROM_EMAIL);
+  const enquiryEmailReady = emailSenderReady && Boolean(env.ENQUIRY_NOTIFICATION_TO || env.LEAD_NOTIFICATION_TO);
+  const sampleEmailReady = emailSenderReady && Boolean(env.SAMPLE_REQUEST_NOTIFICATION_TO || env.LEAD_NOTIFICATION_TO);
 
   return [
     makeCheck({
@@ -209,7 +214,7 @@ function buildChecks(env, sources, options) {
         turnstile
           ? `Turnstile configured via ${describeSource(turnstile, sources)}`
           : 'Turnstile not configured; handler-mode verifier suppresses Turnstile unless --turnstile-token is supplied',
-        emailReady && anyEmailRecipient
+        enquiryEmailReady && sampleEmailReady
           ? 'Email notification inputs appear configured'
           : 'Email notification inputs incomplete; handler-mode verifier suppresses email unless --allow-email is supplied',
       ],
@@ -249,6 +254,63 @@ function buildChecks(env, sources, options) {
         : ['Jay approval for tagged live form QA writes is required before running forms-live --allow-writes'],
       optional: [
         'Runs the live form persistence check and additionally verifies created private lead rows are not anonymously readable through the browser key.',
+      ],
+    }),
+    makeCheck({
+      id: 'forms-email-proof',
+      label: 'Live form email notification proof',
+      command: 'npm run agent:forms-live -- --allow-writes --allow-email --require-email',
+      present: [
+        describeSource(serviceKey, sources),
+        env.RESEND_API_KEY ? `RESEND_API_KEY (${sources.RESEND_API_KEY || 'unknown source'})` : '',
+        env.LEAD_NOTIFICATION_FROM || env.RESEND_FROM_EMAIL
+          ? `${env.LEAD_NOTIFICATION_FROM ? 'LEAD_NOTIFICATION_FROM' : 'RESEND_FROM_EMAIL'} (${
+              sources[env.LEAD_NOTIFICATION_FROM ? 'LEAD_NOTIFICATION_FROM' : 'RESEND_FROM_EMAIL'] || 'unknown source'
+            })`
+          : '',
+        enquiryEmailReady ? 'enquiry notification recipient configured' : '',
+        sampleEmailReady ? 'sample request notification recipient configured' : '',
+        options.formWritesApproved ? 'Jay approval flag supplied for tagged live form QA writes' : '',
+      ].filter(Boolean),
+      missing: [
+        serviceKey ? '' : 'SUPABASE_SERVICE_ROLE_KEY or SUPABASE_SERVICE_KEY',
+        env.RESEND_API_KEY ? '' : 'RESEND_API_KEY',
+        env.LEAD_NOTIFICATION_FROM || env.RESEND_FROM_EMAIL
+          ? ''
+          : 'LEAD_NOTIFICATION_FROM or RESEND_FROM_EMAIL',
+        enquiryEmailReady ? '' : 'ENQUIRY_NOTIFICATION_TO or LEAD_NOTIFICATION_TO',
+        sampleEmailReady ? '' : 'SAMPLE_REQUEST_NOTIFICATION_TO or LEAD_NOTIFICATION_TO',
+      ].filter(Boolean),
+      manual: options.formWritesApproved
+        ? []
+        : ['Jay approval for tagged live form QA writes is required before running forms-live --allow-writes'],
+      optional: [
+        'Requires real email side effects and asserts stored enquiry/sample request notification_status values are sent.',
+      ],
+    }),
+    makeCheck({
+      id: 'forms-turnstile-proof',
+      label: 'Live form Turnstile proof',
+      command: 'npm run agent:forms-live -- --allow-writes --require-turnstile --turnstile-token <token>',
+      present: [
+        describeSource(serviceKey, sources),
+        describeSource(turnstile, sources),
+        options.formWritesApproved ? 'Jay approval flag supplied for tagged live form QA writes' : '',
+      ].filter(Boolean),
+      missing: [
+        serviceKey ? '' : 'SUPABASE_SERVICE_ROLE_KEY or SUPABASE_SERVICE_KEY',
+        turnstile ? '' : 'TURNSTILE_SECRET_KEY or CF_TURNSTILE_SECRET_KEY',
+      ].filter(Boolean),
+      manual: [
+        options.formWritesApproved
+          ? ''
+          : 'Jay approval for tagged live form QA writes is required before running forms-live --allow-writes',
+        options.turnstileTokenProvided
+          ? ''
+          : 'A valid target-environment Turnstile token must be supplied with --turnstile-token',
+      ].filter(Boolean),
+      optional: [
+        'Asserts stored enquiry/sample request turnstile_success values are true for the tagged live rows.',
       ],
     }),
     makeCheck({

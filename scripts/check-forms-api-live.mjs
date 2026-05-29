@@ -23,6 +23,8 @@ function parseArgs(argv) {
     envFiles: [...DEFAULT_ENV_FILES],
     allowEmail: false,
     allowWrites: false,
+    requireEmail: false,
+    requireTurnstile: false,
     requireBrowserBoundary: false,
     turnstileToken: '',
   };
@@ -36,6 +38,16 @@ function parseArgs(argv) {
 
     if (arg === '--allow-writes') {
       options.allowWrites = true;
+      continue;
+    }
+
+    if (arg === '--require-email') {
+      options.requireEmail = true;
+      continue;
+    }
+
+    if (arg === '--require-turnstile') {
+      options.requireTurnstile = true;
       continue;
     }
 
@@ -126,6 +138,20 @@ function loadEnv(envFiles) {
 function firstEnv(env, names) {
   const key = names.find((name) => env[name]);
   return key ? { key, value: env[key] } : { key: '', value: '' };
+}
+
+function hasNotificationConfig(env, type) {
+  const to =
+    type === 'sample request'
+      ? env.SAMPLE_REQUEST_NOTIFICATION_TO || env.LEAD_NOTIFICATION_TO
+      : env.ENQUIRY_NOTIFICATION_TO || env.LEAD_NOTIFICATION_TO;
+  const from = env.LEAD_NOTIFICATION_FROM || env.RESEND_FROM_EMAIL;
+
+  return Boolean(env.RESEND_API_KEY && to && from);
+}
+
+function hasTurnstileConfig(env) {
+  return Boolean(env.TURNSTILE_SECRET_KEY || env.CF_TURNSTILE_SECRET_KEY);
 }
 
 function requireConfig(env, options) {
@@ -348,6 +374,33 @@ function verifyNotificationStatus(row, responseBody, label) {
   );
 }
 
+function verifyRequiredNotificationStatus(row, responseBody, label, options) {
+  verifyNotificationStatus(row, responseBody, label);
+
+  if (!options.requireEmail) return;
+
+  assert.equal(
+    responseBody.notificationStatus,
+    'sent',
+    `Expected ${label} notificationStatus to be sent when --require-email is used.`,
+  );
+  assert.equal(
+    row.notification_status,
+    'sent',
+    `Expected stored ${label} notification_status to be sent when --require-email is used.`,
+  );
+}
+
+function verifyRequiredTurnstileStatus(row, label, options) {
+  if (!options.requireTurnstile) return;
+
+  assert.equal(
+    row.turnstile_success,
+    true,
+    `Expected stored ${label} turnstile_success to be true when --require-turnstile is used.`,
+  );
+}
+
 function withTurnstile(body, options) {
   if (!options.turnstileToken) return body;
   return {
@@ -366,6 +419,34 @@ async function run() {
 
   const env = loadEnv(options.envFiles);
   const config = requireConfig(env, options);
+
+  if (options.requireEmail && !options.baseUrl) {
+    if (!options.allowEmail) {
+      throw new Error('Direct handler --require-email also requires --allow-email so live email delivery is explicit.');
+    }
+
+    const missingEmailTypes = ['enquiry', 'sample request'].filter((type) => !hasNotificationConfig(env, type));
+    if (missingEmailTypes.length > 0) {
+      throw new Error(
+        `Missing email notification configuration for ${missingEmailTypes.join(
+          ' and ',
+        )}. Set RESEND_API_KEY, LEAD_NOTIFICATION_FROM or RESEND_FROM_EMAIL, and the relevant recipient variable before using --require-email.`,
+      );
+    }
+  }
+
+  if (options.requireTurnstile) {
+    if (!options.turnstileToken) {
+      throw new Error('Missing --turnstile-token. A valid Turnstile token is required when using --require-turnstile.');
+    }
+
+    if (!options.baseUrl && !hasTurnstileConfig(env)) {
+      throw new Error(
+        'Missing TURNSTILE_SECRET_KEY or CF_TURNSTILE_SECRET_KEY. Set a server-side Turnstile secret before using --require-turnstile in direct handler mode.',
+      );
+    }
+  }
+
   const runtimeEnv = options.baseUrl ? env : safeRuntimeEnv(env, options);
   const marker = `urblo-live-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`;
 
@@ -433,7 +514,8 @@ async function run() {
   assert.equal(enquiryRows.length, 1, 'Expected one live enquiry row.');
   assert.equal(enquiryRows[0].email, enquiryEmail);
   assert.equal(enquiryRows[0].source_route, enquiryRoute);
-  verifyNotificationStatus(enquiryRows[0], enquiryBody, 'enquiry');
+  verifyRequiredNotificationStatus(enquiryRows[0], enquiryBody, 'enquiry', options);
+  verifyRequiredTurnstileStatus(enquiryRows[0], 'enquiry', options);
   await verifyAudit(config, 'enquiry.create', 'enquiries', enquiryBody.id, { sourceRoute: enquiryRoute });
   const checkedEnquiryBoundary = await assertNotAnonymousReadable(
     config,
@@ -493,7 +575,8 @@ async function run() {
   assert.equal(sampleRows.length, 1, 'Expected one live sample request row.');
   assert.equal(sampleRows[0].email, sampleEmail);
   assert.equal(sampleRows[0].source_route, sampleRoute);
-  verifyNotificationStatus(sampleRows[0], sampleBody, 'sample request');
+  verifyRequiredNotificationStatus(sampleRows[0], sampleBody, 'sample request', options);
+  verifyRequiredTurnstileStatus(sampleRows[0], 'sample request', options);
 
   const itemRows = await selectRows(
     config,

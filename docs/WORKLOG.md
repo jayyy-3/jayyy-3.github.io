@@ -2,6 +2,65 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Live Form Email and Turnstile Proof Guards)
+
+### Scope
+- Strengthened `scripts/check-forms-api-live.mjs` with explicit final proof flags for real notification and Turnstile behavior.
+- Added `--allow-email --require-email` so final live form proof must store `notification_status = 'sent'` for valid enquiry and sample request rows instead of accepting skipped or failed notification states.
+- Added `--require-turnstile --turnstile-token <token>` so final live form proof must store `turnstile_success = true` for valid enquiry and sample request rows.
+- Expanded `npm run agent:live-readiness` so email and Turnstile proof inputs are reported separately, and updated the Cloudflare runbook/readiness guard to keep the final proof commands visible.
+
+### Changed Files
+- `AGENTS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/CLOUDFLARE_DEPLOYMENT.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `docs/agent/verification.md`
+- `scripts/agent-init.sh`
+- `scripts/check-cloudflare-pages-readiness.mjs`
+- `scripts/check-forms-api-live.mjs`
+- `scripts/check-live-readiness.mjs`
+
+### Verification Results
+- `node --check scripts/check-forms-api-live.mjs`: pass.
+- `node --check scripts/check-live-readiness.mjs`: pass.
+- `node --check scripts/check-cloudflare-pages-readiness.mjs`: pass.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:live-readiness`: pass in report-only mode; final email and Turnstile proof inputs remain missing/manual-gated in the current local environment.
+- `npm run agent:live-readiness -- --json --form-writes-approved --turnstile-token-provided`: pass in report-only mode; approval/token readiness flags clear only the relevant manual gates and do not replace missing credentials.
+- Expected fail-closed guard: `SUPABASE_SERVICE_ROLE_KEY=dummy node scripts/check-forms-api-live.mjs --allow-writes --require-email` stops before writes because direct handler email proof also requires `--allow-email`.
+- Expected fail-closed guard: `SUPABASE_SERVICE_ROLE_KEY=dummy node scripts/check-forms-api-live.mjs --allow-writes --allow-email --require-email` stops before writes because Resend sender/recipient configuration is missing.
+- Expected fail-closed guard: `SUPABASE_SERVICE_ROLE_KEY=dummy node scripts/check-forms-api-live.mjs --allow-writes --require-turnstile` stops before writes because a token is missing.
+- `npm run agent:cloudflare-readiness`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:forms-ui`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:admin-crud-live`: pass in plan-only/no-write mode.
+- `npm run agent:content-import:apply-sql`: pass; wrote ignored `.tmp/` review/preflight/apply artifacts only.
+- `npm run agent:public-supabase-readiness`: pass.
+- `npm run agent:init`: pass and now lists the final email/Turnstile proof commands.
+- Supabase connector `list_migrations`: pass. 12 migrations are applied through `sample_request_atomic_insert`.
+- Supabase connector read-only sanity: pass. 24/24 expected launch tables have RLS enabled; published seeds remain 12 finish definitions and one default site settings row; private workflow/admin tables still have 0 rows.
+- Supabase security advisor: pass. 0 security lints.
+
+### Risks and Gaps
+- This is source-only verifier hardening. It does not create Supabase rows, send emails, verify a real Turnstile token, upload Storage objects, create Auth users, or touch Cloudflare state.
+- Final form completion still requires service-role credentials, browser-safe key for private-row proof, Resend variables, Turnstile secret/token, Cloudflare preview URL for deployed proof, and Jay approval for tagged live form QA writes.
+
+### Next Handoff
+- `NOW-FORMS-BACKEND-001`
+- `NOW-FORMS-SUPABASE-001`
+- `NOW-ADMIN-AUTH-RLS-001`
+
 ## Entry - 2026-05-29 (Admin Storage Readback and Anonymous Read Guard)
 
 ### Scope

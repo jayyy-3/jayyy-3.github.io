@@ -136,6 +136,8 @@ Run:
 - `npm run agent:smoke`
 - `npm run agent:forms-ui` when changing Contact form UI state, submit routing, or sample-request mode.
 - API-level positive and negative submission tests when endpoints exist.
+- `npm run agent:forms-live -- --allow-writes --allow-email --require-email` when verifying real notification delivery after Resend variables and Jay approval are available.
+- `npm run agent:forms-live -- --allow-writes --require-turnstile --turnstile-token <token>` when verifying real Turnstile handling after the Turnstile secret/token and Jay approval are available.
 
 Evidence to record:
 - Endpoint paths changed.
@@ -143,6 +145,8 @@ Evidence to record:
 - Invalid/spam submission result.
 - Supabase record creation proof.
 - Email notification proof or reason it was mocked.
+- Whether final live email proof required stored `notification_status = sent`.
+- Whether final live Turnstile proof required stored `turnstile_success = true`.
 - Secret/env assumptions.
 
 ### Admin CMS
