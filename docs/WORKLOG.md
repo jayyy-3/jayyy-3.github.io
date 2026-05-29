@@ -2,6 +2,38 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Live Readiness Docs Guard)
+
+### Scope
+- Refreshed live-readiness documentation in `docs/ARCHITECTURE.md`, `docs/CLOUDFLARE_DEPLOYMENT.md`, and `docs/agent/verification.md` so the documented non-secret flags match the current runner.
+- Added a Harness assertion so `npm run agent:check` fails if those docs stop mentioning the current approval/readiness flags, including guarded content import/cutover approvals and the Turnstile token readiness flag.
+- No Supabase rows, Auth users, Storage objects, Cloudflare state, credentials, or live writes were created or changed.
+
+### Changed Files
+- `docs/ARCHITECTURE.md`
+- `docs/CLOUDFLARE_DEPLOYMENT.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `docs/agent/verification.md`
+- `scripts/check-harness.mjs`
+
+### Verification Results
+- `node --check scripts/check-harness.mjs`: pass.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:live-readiness`: pass in report-only mode and still reports missing external credentials/approvals.
+- `npm run agent:check`: pass, including the new live-readiness docs flag guard.
+- `npm run agent:cloudflare-readiness`: pass.
+- `npm run lint`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- This closes a documentation/tooling drift only. Live form persistence, first-admin setup, active-admin browser QA, admin CRUD live writes, Storage upload proof, email/Turnstile proof, and Cloudflare preview smoke still require the external inputs reported by `npm run agent:live-readiness`.
+
+### Next Handoff
+- Continue source-only hardening where useful, but do not claim CMS completion until live form/admin gates run with credentials and approvals.
+
 ## Entry - 2026-05-29 (Cloudflare Env Placeholder Contract)
 
 ### Scope

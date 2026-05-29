@@ -76,6 +76,36 @@ try {
   failures.push(`Unable to read scripts/agent-smoke.sh: ${error.message}`)
 }
 
+const liveReadinessDocFlags = [
+  '--base-url',
+  '--admin-email',
+  '--form-writes-approved',
+  '--first-admin-writes-approved',
+  '--admin-writes-approved',
+  '--content-import-approved',
+  '--content-merge-approved',
+  '--content-public-cutover-approved',
+  '--turnstile-token-provided',
+]
+const liveReadinessDocFiles = [
+  'docs/ARCHITECTURE.md',
+  'docs/CLOUDFLARE_DEPLOYMENT.md',
+  'docs/agent/verification.md',
+]
+
+for (const file of liveReadinessDocFiles) {
+  try {
+    const text = readFileSync(join(root, file), 'utf8')
+    for (const flag of liveReadinessDocFlags) {
+      if (!text.includes(flag)) {
+        failures.push(`${file} must document agent:live-readiness flag ${flag}.`)
+      }
+    }
+  } catch (error) {
+    failures.push(`Unable to read ${file}: ${error.message}`)
+  }
+}
+
 if (!failures.length) {
   const result = spawnSync('node', ['scripts/check-doc-paths.mjs'], {
     cwd: root,
