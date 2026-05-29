@@ -206,8 +206,12 @@ function checkDraftImportSqlArtifact(applySql, payload) {
     '-- Urblo guarded draft content import',
     '-- It imports rows as draft/private review data only; it does not publish content or delete data.',
     "-- set local urblo.import_approved = 'true';",
+    "-- set local urblo.import_merge_approved = 'true';",
     "current_setting('urblo.import_approved', true)",
+    "current_setting('urblo.import_merge_approved', true)",
     "raise exception 'Urblo draft import is not approved.",
+    'Urblo draft import found % existing target natural-key matches.',
+    '-- Existing target natural-key conflict guard.',
     'begin;',
     'commit;',
   ]) {
@@ -216,6 +220,17 @@ function checkDraftImportSqlArtifact(applySql, payload) {
 
   if (/^\s*set\s+local\s+urblo\.import_approved\s*=\s*'true';/im.test(applySql)) {
     failures.push('guarded draft content import SQL: approval gate must remain commented by default');
+  }
+  if (/^\s*set\s+local\s+urblo\.import_merge_approved\s*=\s*'true';/im.test(applySql)) {
+    failures.push('guarded draft content import SQL: merge approval gate must remain commented by default');
+  }
+
+  for (const table of ['media_assets', 'stone_groups', 'products', 'projects', 'articles']) {
+    requireIncludes(
+      applySql,
+      `'${table}' as table_name, count(*)::bigint as matching_rows`,
+      'guarded draft content import SQL natural-key conflict guard',
+    );
   }
 
   const destructiveStatements = [
@@ -508,7 +523,7 @@ console.log(
   [
     `Verified ${payload.summary.stone_groups} stone groups, ${payload.summary.products} products, ${payload.summary.projects} projects, and ${payload.summary.articles} articles remain draft in the import dry run.`,
     `Verified ${payload.summary.article_blocks} draft article blocks use structured extraction instead of placeholder HTML imports.`,
-    'Verified guarded draft import SQL keeps the approval gate manual, avoids destructive/publish statements, and forces imported content status to draft.',
+    'Verified guarded draft import SQL keeps the approval and merge gates manual, avoids destructive/publish statements, and forces imported content status to draft.',
     'Verified guarded draft rollback SQL keeps its destructive gate manual, follows reverse dependency order, and targets draft/import rows only.',
     'Verified published-only public RLS policy source, read-only anon grants, static public runtime boundary, Cloudflare SPA/API routing scope, and cutover docs.',
   ].join('\n'),

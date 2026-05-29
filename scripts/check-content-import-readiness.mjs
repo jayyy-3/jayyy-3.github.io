@@ -238,6 +238,94 @@ function formatValues(rows) {
     return rows.map((row) => `    (${row.map(sqlString).join(', ')})`).join(',\n');
 }
 
+function formatSqlCteList(ctes, indent = '') {
+    return ctes.flatMap((cte, index) => {
+        const lines = cte.split('\n');
+        const suffix = index === ctes.length - 1 ? '' : ',';
+        return lines.map((line, lineIndex) => {
+            const cteLine = `${indent}${line}`;
+            return lineIndex === lines.length - 1 ? `${cteLine}${suffix}` : cteLine;
+        });
+    });
+}
+
+function buildNaturalKeyConflictCtes(payload) {
+    return [
+        jsonRecordset(payload.rows.media_assets, 'media_conflict_rows', ['source_url text']),
+        jsonRecordset(payload.rows.stone_groups, 'stone_group_conflict_rows', ['stone_group_key text']),
+        jsonRecordset(payload.rows.products, 'product_conflict_rows', ['slug text']),
+        jsonRecordset(payload.rows.projects, 'project_conflict_rows', ['slug text']),
+        jsonRecordset(payload.rows.articles, 'article_conflict_rows', ['slug text']),
+    ];
+}
+
+function buildNaturalKeyConflictSelectLines() {
+    return [
+        "  select 'media_assets' as table_name, count(*)::bigint as matching_rows",
+        '  from public.media_assets target',
+        '  join media_conflict_rows r on target.source_url = r.source_url',
+        "  where r.source_url is not null and r.source_url <> ''",
+        '  union all',
+        "  select 'stone_groups' as table_name, count(*)::bigint as matching_rows",
+        '  from public.stone_groups target',
+        '  join stone_group_conflict_rows r on target.stone_group_key = r.stone_group_key',
+        '  union all',
+        "  select 'products' as table_name, count(*)::bigint as matching_rows",
+        '  from public.products target',
+        '  join product_conflict_rows r on target.slug = r.slug',
+        '  union all',
+        "  select 'projects' as table_name, count(*)::bigint as matching_rows",
+        '  from public.projects target',
+        '  join project_conflict_rows r on target.slug = r.slug',
+        '  union all',
+        "  select 'articles' as table_name, count(*)::bigint as matching_rows",
+        '  from public.articles target',
+        '  join article_conflict_rows r on target.slug = r.slug',
+    ];
+}
+
+function buildNaturalKeyConflictReportSql(payload) {
+    return [
+        'with',
+        ...formatSqlCteList(buildNaturalKeyConflictCtes(payload)),
+        ', conflicts as (',
+        ...buildNaturalKeyConflictSelectLines(),
+        ')',
+        'select table_name, matching_rows',
+        'from conflicts',
+        'where matching_rows > 0',
+        'order by table_name;',
+    ].join('\n');
+}
+
+function buildNaturalKeyConflictGuardSql(payload) {
+    return [
+        '-- Existing target natural-key conflict guard.',
+        '-- This makes first-run imports safe by default. Existing matching rows require a separate reviewed merge/upsert approval.',
+        "-- Required merge approval gate. Uncomment only after preflight shows matching target rows and Jay approves the merge behavior.",
+        "-- set local urblo.import_merge_approved = 'true';",
+        '',
+        'do $$',
+        'declare',
+        '  matching_rows bigint;',
+        'begin',
+        '  with',
+        ...formatSqlCteList(buildNaturalKeyConflictCtes(payload), '  '),
+        '  , conflicts as (',
+        ...buildNaturalKeyConflictSelectLines().map((line) => `  ${line}`),
+        '  )',
+        '  select coalesce(sum(conflicts.matching_rows), 0)::bigint',
+        '  into matching_rows',
+        '  from conflicts;',
+        '',
+        "  if matching_rows > 0 and current_setting('urblo.import_merge_approved', true) is distinct from 'true' then",
+        "    raise exception 'Urblo draft import found % existing target natural-key matches. Review preflight and set urblo.import_merge_approved=true only after Jay approves merge/upsert behavior.', matching_rows;",
+        '  end if;',
+        'end $$;',
+        '',
+    ].join('\n');
+}
+
 function buildPreflightSql(payload) {
     const importTables = payload.importPlan.applyOrder.map((item) => item.table);
     const countTables = ['finish_definitions', 'site_settings', ...importTables];
@@ -310,6 +398,9 @@ function buildPreflightSql(payload) {
         'select table_name, current_rows',
         'from current_counts',
         'order by table_name;',
+        '',
+        '-- Existing target rows matching parent natural keys that would turn the apply step into a merge/upsert.',
+        buildNaturalKeyConflictReportSql(payload),
         '',
         '-- Status distribution for public-status tables.',
         'select table_name, status, rows',
@@ -385,6 +476,7 @@ function buildDraftImportSql(payload) {
         '  end if;',
         'end $$;',
         '',
+        buildNaturalKeyConflictGuardSql(payload),
         '-- Media assets: keyed by source_url. Existing rows are updated in place; missing rows are inserted as draft/external review records.',
         'with',
         jsonRecordset(mediaRows, 'media_rows', [

@@ -2,6 +2,53 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Content Import Merge Approval Guard)
+
+### Scope
+- Added a parent natural-key conflict report to the generated content import preflight SQL.
+- Added a separate `urblo.import_merge_approved=true` guard to the generated draft import SQL so existing parent keys in `media_assets`, `stone_groups`, `products`, `projects`, or `articles` require explicit merge/upsert approval in addition to the base import approval.
+- Expanded public Supabase readiness checks so the merge gate, manual-comment posture, and guarded parent-table conflict checks cannot be silently removed.
+
+### Changed Files
+- `AGENTS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `scripts/check-content-import-readiness.mjs`
+- `scripts/check-public-supabase-readiness.mjs`
+
+### Verification Results
+- Supabase connector `list_migrations`: pass. 12 migrations are applied through `sample_request_atomic_insert`.
+- Supabase connector `execute_sql`: pass. 24/24 expected launch tables exist with RLS enabled, 12 published finish definitions exist, one published default `site_settings` row exists, and private workflow/admin tables remain at 0 rows.
+- Supabase security advisor: pass. 0 security lints.
+- `node --check scripts/check-content-import-readiness.mjs`: pass.
+- `node --check scripts/check-public-supabase-readiness.mjs`: pass.
+- `npm run agent:content-import:apply-sql`: pass; wrote ignored `.tmp/` preview, plan, preflight, apply, and rollback artifacts only.
+- `npm run agent:public-supabase-readiness`: pass; verified the manual import approval gate, manual merge approval gate, draft-only status posture, and existing rollback/readiness contracts.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run agent:smoke`: pass, including public/admin route shells, Forms API checks, and Contact form UI source checks.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:admin-crud-live`: pass in plan-only/no-write mode.
+- `npm run agent:cloudflare-readiness`: pass.
+- `npm run agent:forms-ui`: pass.
+- `npm run agent:live-readiness`: pass in report-only mode; live form/admin/Cloudflare inputs remain missing or approval-gated in the current local environment.
+
+### Risks and Gaps
+- This is source-only/no-write. It did not apply content rows, merge existing data, roll back data, create Supabase rows, create Auth users, upload Storage objects, touch Cloudflare, configure credentials, or run live form/admin writes.
+- Real content import, merge/upsert behavior, rollback execution, public read cutover, and publication still require Jay approval, reviewed target preflight output, credentials, and a deliberate live operation window.
+
+### Next Handoff
+- `NOW-ADMIN-CONTENT-CRUD-001`
+- `NOW-FORMS-BACKEND-001`
+- `NOW-ADMIN-AUTH-RLS-001`
+
 ## Entry - 2026-05-29 (Content Import Rollback SQL Guard)
 
 ### Scope
