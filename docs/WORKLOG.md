@@ -2,6 +2,32 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Read-Only Supabase Sanity Refresh)
+
+### Scope
+- Ran fresh read-only Supabase connector checks against project `npkidywzwddbnfrnxlmo`.
+- Confirmed the live database still matches the documented foundation/seed/admin-hardening state before continuing source-only admin work.
+- Recorded that the live project still has no first admin profile and no imported/static-to-Supabase content rows, so live admin/form completion remains credential- and approval-gated.
+
+### Changed Files
+- `docs/HANDOFF.md`
+- `docs/WORKLOG.md`
+
+### Verification Results
+- Supabase migration list: pass. All 12 launch migrations are listed through `sample_request_atomic_insert`.
+- Supabase security advisor: pass. Zero security lints returned.
+- Supabase SQL sanity: pass. 24 expected public launch tables are present, 24/24 have RLS enabled, and no expected tables are missing.
+- Supabase seed sanity: pass. `finish_definitions` has 12 rows and 12 distinct finish keys; published default `site_settings` count is 1.
+- Supabase live-state sanity: pass. Active admin profiles, form lead rows, media assets, Stone Library groups, Projects, Products, and Articles all remain at 0 rows.
+- No writes, Auth changes, Storage writes, form submissions, or Cloudflare actions were performed.
+
+### Risks and Gaps
+- Live form persistence still requires service-role environment configuration and Jay approval for tagged form QA writes.
+- Live admin readiness still requires browser-safe Supabase config, first admin email/profile setup, and an unprofiled Auth test account for unauthorized browser QA.
+
+### Next Handoff
+- Continue source-only readiness work until local/Cloudflare credentials and approvals are available, then run the live form/admin gates documented in `docs/HANDOFF.md`.
+
 ## Entry - 2026-05-29 (Unprofiled Admin Route-Probe Gate)
 
 ### Scope
