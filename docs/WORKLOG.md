@@ -2,6 +2,30 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Content Import and Public Cutover Readiness Recheck)
+
+### Scope
+- Re-ran the source-only static-to-Supabase content import artifact generation and public cutover readiness checks.
+- Wrote ignored review artifacts under `.tmp/` only; no Supabase SQL was applied and no production rows were created.
+
+### Verification Results
+- `npm run agent:content-import:apply-sql`: pass.
+- Generated dry-run candidates: 115 media assets, 13 stone groups, 15 stone variants, 153 finish capabilities, 53 finish image rows, 6 products, 28 product models, 18 product material defaults, 18 product specs, 5 projects, 41 project facts, 14 project media rows, 2 project material rows, 1 project material map, 2 hotspots, 4 articles, and 95 article blocks.
+- Import warnings: 0.
+- Import blockers: 0.
+- `npm run agent:public-supabase-readiness`: pass.
+- Public readiness verified 13 stone groups, 6 products, 5 projects, and 4 articles remain `draft` in the import dry run.
+- Public readiness verified 95 draft article blocks use structured extraction instead of placeholder HTML imports.
+- Public readiness verified the generated preflight SQL includes Data API role/sequence grant inspection, guarded draft import SQL keeps manual import/merge gates and avoids destructive/publish statements, guarded rollback SQL remains manually destructive-gated and reverse ordered, public RLS policy source remains published-only, anonymous grants remain read-only, public runtime remains static/file-backed, and Cloudflare Functions remain scoped to `/api/*`.
+
+### Risks and Gaps
+- These checks do not apply content, publish rows, switch public runtime reads, or verify live admin CRUD.
+- Applying `.tmp/content-import-apply.sql`, approving merge/upsert behavior, and cutting over public reads still require Jay approval and live credential/admin verification.
+
+### Next Handoff
+- Keep content import artifacts as review-only until import approval is explicit.
+- Continue form/admin live verification only after the missing service-role, browser-safe key, first-admin, admin-session, and approval inputs are available.
+
 ## Entry - 2026-05-29 (Supabase Read-Only State Re-Audit)
 
 ### Scope
