@@ -2,6 +2,35 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Cloudflare Env Placeholder Contract)
+
+### Scope
+- Expanded `npm run agent:cloudflare-readiness` so it guards the full live-readiness environment placeholder contract across `.env.example` and `docs/CLOUDFLARE_DEPLOYMENT.md`.
+- The gate now includes canonical Supabase/Form vars, compatibility aliases, Cloudflare preview URL helpers, first-admin bootstrap email, active-admin login credentials, admin access token, and unprofiled QA credentials.
+- No Supabase rows, Auth users, Storage objects, Cloudflare state, credentials, or live writes were created or changed.
+
+### Changed Files
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `scripts/check-cloudflare-pages-readiness.mjs`
+
+### Verification Results
+- `node --check scripts/check-cloudflare-pages-readiness.mjs`: pass.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:cloudflare-readiness`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run lint`: pass.
+
+### Risks and Gaps
+- This is repo-side contract hardening only. It does not create the Cloudflare Pages project, set environment variables, produce a preview URL, or verify deployed Pages behavior.
+- Runtime build/typecheck/smoke were already green in the immediately preceding admin credential-boundary checkpoint and were not rerun for this docs/tooling-only Cloudflare verifier expansion.
+
+### Next Handoff
+- Continue to use `npm run agent:live-readiness` before live form/admin/preview work, and run `npm run agent:cloudflare-preview-smoke -- --base-url <preview-origin>` only after a real Pages preview URL exists.
+
 ## Entry - 2026-05-29 (Admin Live Login Credential Boundary)
 
 ### Scope
