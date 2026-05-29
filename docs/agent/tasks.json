@@ -319,7 +319,8 @@
         "scripts/check-admin-crud-coverage.mjs",
         "scripts/check-admin-crud-live.mjs",
         "scripts/check-live-readiness.mjs",
-        "scripts/agent-init.sh"
+        "scripts/agent-init.sh",
+        "src/pages/admin/AdminDashboardPage.tsx"
       ],
       "notes": [
         "2026-05-22: This is an umbrella launch objective, not a directly executable single-pass implementation task. Execute through the smaller admin IA, auth/RLS, content CRUD, media, lead-management, and audit-visibility tasks below.",
@@ -340,7 +341,8 @@
         "2026-05-29: `npm run agent:live-readiness` now reports `npm run agent:admin-crud-live -- --allow-writes --include-storage` as the final media Storage upload policy proof, separate from the general admin CRUD/audit live write check.",
         "2026-05-29: `npm run agent:check` now guards the active operational `agent:*` package script map for form, admin, Cloudflare, first-admin, live-readiness, content-import, and public Supabase readiness runners so launch verification commands cannot be silently removed from `package.json`.",
         "2026-05-29: `npm run agent:admin-crud-coverage` now also fails if admin CMS acceptance drifts back toward physical-delete language instead of the launch archive/removal contract.",
-        "2026-05-28: Removed the retired AdminModulePage scaffold component and unused scaffold/locked module-state branches now that all launch-critical admin modules have real source screens. Admin CRUD coverage now fails if the retired scaffold component returns."
+        "2026-05-28: Removed the retired AdminModulePage scaffold component and unused scaffold/locked module-state branches now that all launch-critical admin modules have real source screens. Admin CRUD coverage now fails if the retired scaffold component returns.",
+        "2026-05-29: `/admin` dashboard now includes a real content health queue for published media missing metadata, project claim review, published products/articles missing key media, TBC Stone Library records, and stale new leads. `npm run agent:admin-crud-coverage` guards those dashboard health checks source-side until live admin credentials allow browser/data QA."
       ],
       "acceptance": [
         "Authenticated admin users can create, read, update, draft, publish, and archive Projects, Stone Library records, Products, Articles, and media records without code edits.",
@@ -425,7 +427,8 @@
         "src/pages/admin",
         "supabase/migrations/202605280001_admin_settings_role_hardening.sql",
         "supabase/migrations/202605290002_admin_profile_email_uniqueness.sql",
-        "scripts/check-admin-crud-coverage.mjs"
+        "scripts/check-admin-crud-coverage.mjs",
+        "src/pages/admin/AdminDashboardPage.tsx"
       ],
       "notes": [
         "2026-05-26: Supabase project access is now available through the connector. The remaining live-auth blockers are first admin email/profile creation and browser-safe Supabase key configuration.",
@@ -445,7 +448,8 @@
         "2026-05-29: Applied and verified admin_profile_email_uniqueness on Supabase project npkidywzwddbnfrnxlmo. `admin_profiles_email_ci_unique_idx` keeps normalized profile emails case-insensitively unique, and first-admin write mode now refuses a target email already linked to a different Auth user before upsert.",
         "2026-05-28: `npm run agent:admin-crud-coverage` now verifies /admin route registration, RequireAdmin state handling, active module registration, and browser-key-only Supabase client wiring before live auth QA.",
         "2026-05-29: `npm run agent:admin-crud-coverage` now also guards the config-missing state copy, login/unauthorized config handling, admin-route WelcomePopup suppression, whole-browser-source service-role env/client boundary, and browser-key/RLS-only admin live verifier boundary.",
-        "2026-05-28: `npm run agent:admin-crud-live` now stages the live write proof after auth readiness. Plan-only mode performs no writes; live mode requires a real owner/admin session and Jay approval for tagged QA rows."
+        "2026-05-28: `npm run agent:admin-crud-live` now stages the live write proof after auth readiness. Plan-only mode performs no writes; live mode requires a real owner/admin session and Jay approval for tagged QA rows.",
+        "2026-05-29: `/admin` dashboard now includes a real content health queue for published media missing metadata, project claim review, published products/articles missing key media, TBC Stone Library records, and stale new leads. `npm run agent:admin-crud-coverage` guards those dashboard health checks source-side until live admin credentials allow browser/data QA."
       ],
       "acceptance": [
         "Admin shell route is protected by Supabase Auth.",
@@ -501,9 +505,9 @@
         "supabase/migrations/202605290001_security_definer_private_helpers.sql",
         "supabase/migrations/202605290002_admin_profile_email_uniqueness.sql",
         "supabase/migrations/README.md",
-    "scripts/check-admin-crud-coverage.mjs",
-    "scripts/check-admin-crud-live.mjs",
-    "scripts/check-live-readiness.mjs"
+        "scripts/check-admin-crud-coverage.mjs",
+        "scripts/check-admin-crud-live.mjs",
+        "scripts/check-live-readiness.mjs"
       ],
       "notes": [
         "Run after the admin auth shell source exists, but before broader content CRUD, because site settings are first in the goal's CRUD order.",
@@ -582,7 +586,8 @@
         "src/service/StoneLibraryService.ts",
         "src/pages/ArticlePage.tsx",
         "scripts/check-admin-crud-coverage.mjs",
-        "scripts/check-admin-crud-live.mjs"
+        "scripts/check-admin-crud-live.mjs",
+        "src/pages/admin/AdminDashboardPage.tsx"
       ],
       "notes": [
         "Live save verification remains blocked until browser-safe Supabase key configuration and active admin/editor profiles exist. Source-only CRUD can continue behind the existing config/auth gate.",
@@ -613,7 +618,8 @@
         "2026-05-29: Admin CRUD coverage verifier now checks Stone Library finish-image table/action coverage in addition to group, variant, capability, Projects, Products, and Articles source screens.",
         "2026-05-29: Admin CRUD coverage verifier now also checks Article structured-authoring guardrails: approved schema block types must remain available, published blocks must require structured content, and raw HTML/newsletter authoring helpers must not appear in `/admin/articles`.",
         "2026-05-29: Admin CRUD coverage verifier now also checks the archive/removal contract so launch-critical content acceptance stays non-destructive until a physical-delete policy is approved.",
-        "2026-05-29: Admin CRUD live verifier plan now includes tagged `stone_finish_images` create/publish/archive coverage through authenticated RLS for the later credential-gated live run. It publishes then archives public-facing QA parent rows, verifies those tagged archived public-content rows and private lead rows are not anonymously visible through browser-key reads, and performs no physical deletes."
+        "2026-05-29: Admin CRUD live verifier plan now includes tagged `stone_finish_images` create/publish/archive coverage through authenticated RLS for the later credential-gated live run. It publishes then archives public-facing QA parent rows, verifies those tagged archived public-content rows and private lead rows are not anonymously visible through browser-key reads, and performs no physical deletes.",
+        "2026-05-29: `/admin` dashboard now includes a real content health queue for published media missing metadata, project claim review, published products/articles missing key media, TBC Stone Library records, and stale new leads. `npm run agent:admin-crud-coverage` guards those dashboard health checks source-side until live admin credentials allow browser/data QA."
       ],
       "acceptance": [
         "Admin users can draft, publish, edit, and archive Projects, Stone Library records including finish image links, Products, and Articles through the non-destructive launch lifecycle.",

@@ -22,10 +22,19 @@ interface RecentLead {
     kind: 'Enquiry' | 'Sample';
 }
 
+interface DashboardHealthItem {
+    label: string;
+    value: number;
+    action: string;
+    path: string;
+    severity: 'ready' | 'warning';
+}
+
 interface DashboardState {
     isLoading: boolean;
     error: string | null;
     metrics: DashboardMetric[];
+    healthItems: DashboardHealthItem[];
     recentLeads: RecentLead[];
 }
 
@@ -35,6 +44,26 @@ const contentTables = [
     { table: 'products', label: 'Products' },
     { table: 'articles', label: 'Articles' },
 ] as const;
+
+async function resolveCount(
+    query: PromiseLike<{ count: number | null; error: { message?: string } | null }>,
+) {
+    const { count, error } = await query;
+    if (error) {
+        throw error;
+    }
+    return count ?? 0;
+}
+
+function healthItem(label: string, value: number, action: string, path: string): DashboardHealthItem {
+    return {
+        label,
+        value,
+        action,
+        path,
+        severity: value > 0 ? 'warning' : 'ready',
+    };
+}
 
 export default function AdminDashboardPage() {
     return (
@@ -50,6 +79,7 @@ function AdminDashboardContent() {
         isLoading: true,
         error: null,
         metrics: [],
+        healthItems: [],
         recentLeads: [],
     });
 
@@ -101,10 +131,88 @@ function AdminDashboardContent() {
             .order('created_at', { ascending: false })
             .limit(4);
 
+        const staleLeadCutoff = new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toISOString();
+
+        const healthRequests = [
+            resolveCount(
+                client
+                    .from('media_assets')
+                    .select('id', { count: 'exact', head: true })
+                    .eq('status', 'published')
+                    .or('alt.is.null,usage_notes.is.null'),
+            ).then((count) =>
+                healthItem(
+                    'Published media missing alt or usage notes',
+                    count,
+                    'Review media metadata',
+                    '/admin/media',
+                ),
+            ),
+            resolveCount(
+                client
+                    .from('projects')
+                    .select('id', { count: 'exact', head: true })
+                    .eq('status', 'published')
+                    .eq('claim_review_status', 'needs_review'),
+            ).then((count) =>
+                healthItem('Project claims needing review', count, 'Review project claims', '/admin/projects'),
+            ),
+            resolveCount(
+                client
+                    .from('project_facts')
+                    .select('id', { count: 'exact', head: true })
+                    .eq('claim_status', 'needs_review'),
+            ).then((count) =>
+                healthItem('Project fact rows needing review', count, 'Review proof facts', '/admin/projects'),
+            ),
+            resolveCount(
+                client
+                    .from('products')
+                    .select('id', { count: 'exact', head: true })
+                    .eq('status', 'published')
+                    .is('hero_media_id', null),
+            ).then((count) =>
+                healthItem('Published products missing hero media', count, 'Add product media', '/admin/products'),
+            ),
+            resolveCount(
+                client
+                    .from('articles')
+                    .select('id', { count: 'exact', head: true })
+                    .eq('status', 'published')
+                    .is('cover_media_id', null),
+            ).then((count) =>
+                healthItem('Published articles missing cover media', count, 'Review article covers', '/admin/articles'),
+            ),
+            resolveCount(
+                client.from('stone_groups').select('id', { count: 'exact', head: true }).eq('status', 'tbc'),
+            ).then((count) =>
+                healthItem('Stone groups still marked TBC', count, 'Review Stone Library state', '/admin/stone-library'),
+            ),
+            Promise.all([
+                resolveCount(
+                    client
+                        .from('enquiries')
+                        .select('id', { count: 'exact', head: true })
+                        .eq('status', 'new')
+                        .lt('created_at', staleLeadCutoff),
+                ),
+                resolveCount(
+                    client
+                        .from('sample_requests')
+                        .select('id', { count: 'exact', head: true })
+                        .eq('status', 'new')
+                        .lt('created_at', staleLeadCutoff),
+                ),
+            ]).then(([enquiryCount, sampleCount]) =>
+                healthItem('Stale new leads older than 48 hours', enquiryCount + sampleCount, 'Open lead inbox', '/admin/leads'),
+            ),
+        ];
+
         try {
-            const [contentMetrics, newEnquiries, newSamples, recentEnquiries, recentSamples] =
+            const [contentMetrics, healthItems, newEnquiries, newSamples, recentEnquiries, recentSamples] =
                 await Promise.all([
                     Promise.all(metricRequests),
+                    Promise.all(healthRequests),
                     newEnquiriesRequest,
                     newSamplesRequest,
                     recentEnquiriesRequest,
@@ -149,6 +257,7 @@ function AdminDashboardContent() {
                 isLoading: false,
                 error: null,
                 metrics: [...leadMetrics, ...contentMetrics],
+                healthItems,
                 recentLeads,
             });
         } catch (error) {
@@ -156,6 +265,7 @@ function AdminDashboardContent() {
                 isLoading: false,
                 error: error instanceof Error ? error.message : 'Dashboard query failed.',
                 metrics: [],
+                healthItems: [],
                 recentLeads: [],
             });
         }
@@ -209,6 +319,57 @@ function AdminDashboardContent() {
                             {dashboard.error}
                         </div>
                     ) : null}
+
+                    <section className="border border-black/10 bg-white">
+                        <div className="border-b border-black/10 p-4">
+                            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-black/45">
+                                Content health queue
+                            </p>
+                            <h2 className="mt-2 text-2xl font-semibold text-black">
+                                Items to clear before public cutover
+                            </h2>
+                        </div>
+                        <div className="divide-y divide-black/10">
+                            {dashboard.isLoading ? (
+                                Array.from({ length: 5 }).map((_, index) => (
+                                    <div key={index} className="min-h-[76px] animate-pulse bg-[#f8f9f5] p-4" />
+                                ))
+                            ) : dashboard.healthItems.length ? (
+                                dashboard.healthItems.map((item) => (
+                                    <Link
+                                        key={item.label}
+                                        to={item.path}
+                                        className="grid gap-3 p-4 transition hover:bg-[#f8f9f5] md:grid-cols-[88px_1fr_150px]"
+                                    >
+                                        <span
+                                            className={[
+                                                'inline-flex h-10 w-20 items-center justify-center rounded border text-xl font-light',
+                                                item.severity === 'warning'
+                                                    ? 'border-black bg-black text-white'
+                                                    : 'border-[var(--urblo-lime)] bg-[rgba(0,255,25,0.12)] text-black',
+                                            ].join(' ')}
+                                        >
+                                            {item.value}
+                                        </span>
+                                        <span>
+                                            <span className="block text-sm font-semibold text-black">{item.label}</span>
+                                            <span className="mt-1 block text-xs font-semibold uppercase tracking-[0.14em] text-black/40">
+                                                {item.severity === 'warning' ? 'Needs review' : 'Clear'}
+                                            </span>
+                                        </span>
+                                        <span className="inline-flex h-9 items-center justify-center rounded border border-black/10 px-3 text-[11px] font-bold uppercase tracking-[0.12em] text-black/55">
+                                            {item.action}
+                                        </span>
+                                    </Link>
+                                ))
+                            ) : (
+                                <div className="p-4 text-sm leading-6 text-black/58">
+                                    No health checks are visible yet. The queue will populate after live Supabase
+                                    content and lead rows exist.
+                                </div>
+                            )}
+                        </div>
+                    </section>
 
                     <section className="border border-black/10 bg-white">
                         <div className="border-b border-black/10 p-4">

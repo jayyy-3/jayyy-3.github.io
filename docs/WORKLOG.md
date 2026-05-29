@@ -2,6 +2,48 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Admin Dashboard Health Queue)
+
+### Scope
+- Expanded `/admin` dashboard from simple published-row metrics into an operational content health queue.
+- Added source-side Supabase count checks for published media missing alt/usage notes, published project and project-fact claim review, published products/articles missing key media, Stone Library TBC rows, and stale new leads older than 48 hours.
+- Hardened `npm run agent:admin-crud-coverage` so those dashboard health checks and table references cannot be silently removed.
+
+### Changed Files
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `scripts/check-admin-crud-coverage.mjs`
+- `src/pages/admin/AdminDashboardPage.tsx`
+
+### Verification Results
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run agent:smoke`: pass, including public/admin route shells, Forms API checks, and Contact form UI source checks.
+- `npm run agent:forms-ui`: pass.
+- `npm run agent:admin-crud-coverage`: pass; Dashboard coverage now includes `media_assets`, `stone_groups`, `projects`, `project_facts`, `products`, `articles`, `enquiries`, and `sample_requests`.
+- `npm run agent:admin-crud-live`: pass in plan-only/no-write mode.
+- `npm run agent:live-readiness`: pass in report-only mode; live form/admin/Cloudflare inputs remain missing or approval-gated in the current local environment.
+- `npm run agent:cloudflare-readiness`: pass.
+- `npm run agent:public-supabase-readiness`: pass.
+- `npm run agent:check`: pass.
+- `jq empty docs/agent/tasks.json`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- This is source-only/no-write. It did not create Supabase rows, create Auth users, run live admin writes, upload Storage objects, send email, verify Turnstile, create Cloudflare state, or configure credentials.
+- The dashboard health queue still needs live browser/data QA after browser-safe Supabase config, first-admin profile access, and a real owner/admin session exist.
+
+### Next Handoff
+- `NOW-ADMIN-AUTH-RLS-001`
+- `NOW-ADMIN-CMS-001`
+- `NOW-FORMS-BACKEND-001`
+
 ## Entry - 2026-05-29 (Content Import Merge Approval Guard)
 
 ### Scope
