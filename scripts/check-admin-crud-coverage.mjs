@@ -83,6 +83,7 @@ const pageChecks = [
   {
     label: 'Media library',
     file: 'src/pages/admin/AdminMediaPage.tsx',
+    lifecycle: true,
     tables: ['media_assets'],
     actions: [
       'media_asset.upload',
@@ -104,6 +105,7 @@ const pageChecks = [
   {
     label: 'Stone Library',
     file: 'src/pages/admin/AdminStoneLibraryPage.tsx',
+    lifecycle: true,
     tables: [
       'stone_groups',
       'stone_variants',
@@ -138,6 +140,7 @@ const pageChecks = [
   {
     label: 'Projects',
     file: 'src/pages/admin/AdminProjectsPage.tsx',
+    lifecycle: true,
     tables: [
       'projects',
       'project_facts',
@@ -171,6 +174,7 @@ const pageChecks = [
   {
     label: 'Products',
     file: 'src/pages/admin/AdminProductsPage.tsx',
+    lifecycle: true,
     tables: [
       'products',
       'product_models',
@@ -198,6 +202,7 @@ const pageChecks = [
   {
     label: 'Articles',
     file: 'src/pages/admin/AdminArticlesPage.tsx',
+    lifecycle: true,
     tables: ['articles', 'article_blocks', 'media_assets', 'projects', 'stone_groups'],
     actions: [
       'article.create',
@@ -496,8 +501,17 @@ function checkPage(page) {
     requireIncludes(text, 'withAuditNotice', page.file);
     requireRegex(text, /\.insert\(|\.update\(/, page.file, 'insert/update mutation path');
     requireRegex(text, /disabled=\{![a-zA-Z]+/, page.file, 'role-gated disabled controls');
+    requireRegex(text, /validationFailure|validate[A-Z][A-Za-z]+Form|setError\([^)]*(?:required|not valid)/i, page.file, 'validation feedback path');
+    requireRegex(text, /Save [A-Za-z ]+|save[A-Z][A-Za-z]+\(/, page.file, 'save action path');
   } else if (text.includes('recordAdminAuditEvent')) {
     failures.push(`${page.file}: read-only page unexpectedly imports recordAdminAuditEvent`);
+  }
+
+  if (page.lifecycle) {
+    requireRegex(text, /save[A-Z][A-Za-z]+\('published'\)/, page.file, 'publish lifecycle save path');
+    requireRegex(text, /save[A-Z][A-Za-z]+\('archived'\)/, page.file, 'archive lifecycle save path');
+    requireRegex(text, /status === 'published'|value="published"|\['published'/, page.file, 'published state control');
+    requireRegex(text, /status === 'archived'|value="archived"|\['archived'/, page.file, 'archived state control');
   }
 
   for (const action of page.actions ?? []) {

@@ -172,6 +172,7 @@ Run:
 Evidence to record:
 - Admin routes touched.
 - CRUD flows manually or automatically checked.
+- Validation/save/publish/archive/error/read-only state coverage when source-only verification is used.
 - Draft/published visibility behavior.
 - Auth/RLS assumptions.
 - Any content type still requiring code edits.
