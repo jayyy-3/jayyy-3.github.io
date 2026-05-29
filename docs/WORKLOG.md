@@ -2,6 +2,23 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Local Live Verification Secret Handling)
+
+### Scope
+- Added a local secret-file section to `docs/CLOUDFLARE_DEPLOYMENT.md`.
+- Documented that live verification secrets should go in ignored local env files such as `.env.local` or `.dev.vars`, not chat or committed docs.
+- Grouped the variables required for form persistence, browser-key privacy checks, admin readiness, admin browser QA, admin CRUD live writes, email proof, and Turnstile proof.
+
+### Verification Results
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- This is documentation only. It does not configure Cloudflare, create a Supabase Auth user, create an admin profile, run live form writes, send email, verify Turnstile, or run authenticated admin CRUD.
+
+### Next Handoff
+- When credentials are available, place them in `.env.local` or `.dev.vars`, run `npm run agent:live-readiness`, then run the specific approval-gated live verifier for the next target.
+
 ## Entry - 2026-05-29 (Content Import and Public Cutover Readiness Recheck)
 
 ### Scope

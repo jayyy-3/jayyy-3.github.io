@@ -85,6 +85,24 @@ Rules:
 - `SUPABASE_SERVICE_KEY`, `CF_TURNSTILE_SECRET_KEY`, and `RESEND_FROM_EMAIL` are compatibility aliases only; prefer the canonical names above for new Cloudflare configuration.
 - If Resend variables are not configured, form rows are stored with `notification_status = 'not_required'`.
 
+### 2a. Local Secret File for Live Verification
+For local verification, put secrets in an untracked file such as `.env.local` or `.dev.vars`. Both are ignored by git. Do not paste service-role keys, admin passwords, email API keys, or Turnstile secrets into chat or committed docs.
+
+Recommended local flow:
+1. Copy `.env.example` to `.env.local`.
+2. Fill only the variables needed for the next verification step.
+3. Run `npm run agent:live-readiness` to confirm which inputs are present or still missing. The runner prints variable names and sources only, never secret values.
+4. Run the specific gated verifier only after the required approval flag or command guard is satisfied.
+
+Useful local env groups:
+- Form persistence: `SUPABASE_SERVICE_ROLE_KEY`.
+- Private-row browser boundary: `SUPABASE_SERVICE_ROLE_KEY` plus `VITE_SUPABASE_PUBLISHABLE_KEY` or `VITE_SUPABASE_ANON_KEY`.
+- Admin read-only readiness: browser-safe Supabase key, service-role key, and first admin email.
+- Admin browser QA: browser-safe Supabase key plus `URBLO_ADMIN_EMAIL` and `URBLO_ADMIN_PASSWORD`.
+- Admin CRUD live writes: browser-safe Supabase key plus either `URBLO_ADMIN_ACCESS_TOKEN` or `URBLO_ADMIN_EMAIL` and `URBLO_ADMIN_PASSWORD`.
+- Email proof: `RESEND_API_KEY`, sender, and recipient variables.
+- Turnstile proof: `VITE_TURNSTILE_SITE_KEY`, server-side Turnstile secret, and a valid target-environment token passed to the verifier.
+
 ### 3. Validate Preview Deployment
 Before custom domain cutover, test the generated `*.pages.dev` URL:
 - `/`
