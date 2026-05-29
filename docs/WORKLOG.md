@@ -2,6 +2,41 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Production Dependency Audit)
+
+### Scope
+- Upgraded production-facing dependencies to remove the critical/high production audit path: `react-router-dom` to `^7.16.0`, `swiper` to `^12.2.0`, and `postcss` to `^8.5.15`.
+- Ran `npm audit fix` to refresh safe transitive dependency versions in `package-lock.json`; `npm audit --omit=dev --audit-level=critical` now reports zero vulnerabilities.
+- Added `tailwindcss/nesting` before Tailwind in `postcss.config.js` so Swiper 12 nested CSS builds cleanly instead of relying on PostCSS warning-tolerant output.
+
+### Changed Files
+- `AGENTS.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `package.json`
+- `package-lock.json`
+- `postcss.config.js`
+
+### Verification Results
+- `npm run build`: pass. The previous Swiper nested-CSS warnings are resolved; Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:admin-config-gate`: pass for 11 no-config admin routes in Firefox.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:check`: pass.
+- `npm audit --omit=dev --audit-level=critical`: pass with zero vulnerabilities reported.
+- Playwright Chromium homepage carousel render check: pass. The product carousel renders 5 slides, 5 pagination bullets, 2 navigation buttons, and a visible active slide.
+
+### Risks and Gaps
+- This reduces production dependency audit risk but does not complete live Supabase form/admin verification.
+- Build still reports the existing Browserslist data staleness notice.
+
+### Next Handoff
+- Continue live form/admin verification after the required credentials, first-admin details, Cloudflare preview URL, and Jay approvals are available.
+
 ## Entry - 2026-05-29 (Live Readiness Docs Guard)
 
 ### Scope

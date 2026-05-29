@@ -239,9 +239,11 @@
         "docs/WORKLOG.md",
         "docs/agent/tasks.json",
         "docs/agent/verification.md",
+        "package-lock.json",
         "public/_redirects",
         "public/_routes.json",
         "public/_headers",
+        "postcss.config.js",
         "scripts/agent-smoke.sh",
         "package.json",
         "vite.config.ts",
@@ -279,6 +281,7 @@
         "2026-05-29: `npm run agent:cloudflare-readiness` now also fails if the runbook drops the first-admin read-only bootstrap check, the approval-gated first-admin `--allow-writes` command, `--first-admin-writes-approved`, or the Jay approval language around first-admin profile/invite writes.",
         "2026-05-29: `npm run agent:cloudflare-readiness` now guards the full live-readiness environment placeholder contract in `.env.example` and `docs/CLOUDFLARE_DEPLOYMENT.md`, including compatibility aliases, preview URL helpers, first-admin bootstrap email, active-admin credentials, token login, and unprofiled QA credentials.",
         "2026-05-29: `npm run agent:check` now guards live-readiness flag documentation in `docs/ARCHITECTURE.md`, `docs/CLOUDFLARE_DEPLOYMENT.md`, and `docs/agent/verification.md`, including content import/merge/cutover approval flags and the Turnstile token readiness flag.",
+        "2026-05-29: Production dependencies were updated to clear the critical production audit path: `react-router-dom` `^7.16.0`, `swiper` `^12.2.0`, and `postcss` `^8.5.15`. `postcss.config.js` now runs `tailwindcss/nesting` before Tailwind so Swiper 12 nested CSS builds without nesting warnings.",
         "2026-05-29: `npm run agent:cloudflare-readiness` now guards the deployed-preview manual route list against stale legacy direct-refresh URLs by requiring canonical `/products/prime-block`, article detail, and `/capabilities` route checks while keeping old product/article URLs as redirect checks.",
         "2026-05-29: `npm run agent:cloudflare-preview-smoke` now recursively follows deployed JS/CSS route chunks, verifies deployed admin config-required and `admin_profiles` bundle markers, rejects browser service-role env access patterns, and checks malformed JSON API safe failures. Local preview mode validates the route/asset/bundle portion before a real Pages preview URL exists."
       ]
