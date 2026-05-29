@@ -479,9 +479,29 @@ function checkRoutes() {
     'already linked to a different Supabase Auth user',
     'scripts/bootstrap-first-admin.mjs',
   );
+  requireIncludes(
+    firstAdminBootstrap,
+    "normalizeEmail(profile.email || '') === email",
+    'scripts/bootstrap-first-admin.mjs',
+  );
+  requireNotIncludes(
+    firstAdminBootstrap,
+    ".eq('email', email)",
+    'scripts/bootstrap-first-admin.mjs case-insensitive email matching',
+  );
   requireIncludes(adminLiveReadiness, 'findAuthUserByEmail', 'scripts/check-admin-live-readiness.mjs');
   requireIncludes(adminLiveReadiness, 'profile.user_id', 'scripts/check-admin-live-readiness.mjs');
   requireIncludes(adminLiveReadiness, 'authUser.id', 'scripts/check-admin-live-readiness.mjs');
+  requireIncludes(
+    adminLiveReadiness,
+    "normalizeEmail(profile.email || '') === email",
+    'scripts/check-admin-live-readiness.mjs',
+  );
+  requireNotIncludes(
+    adminLiveReadiness,
+    "{ email: config.adminEmail }",
+    'scripts/check-admin-live-readiness.mjs case-insensitive email matching',
+  );
   requireIncludes(
     firstAdminBootstrap,
     'Bootstrap audit event recorded: admin_profile.bootstrap.',

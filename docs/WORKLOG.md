@@ -2,6 +2,37 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (First-Admin Email Matching Coverage Guard)
+
+### Scope
+- Hardened `npm run agent:admin-crud-coverage` so the first-admin/bootstrap readiness email matching contract cannot silently regress.
+- The source gate now fails if first-admin/bootstrap or admin-live readiness goes back to an exact case-sensitive `email` query instead of normalized profile-email matching.
+
+### Changed Files
+- `scripts/check-admin-crud-coverage.mjs`
+- `docs/HANDOFF.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `node --check scripts/check-admin-crud-coverage.mjs`: pass.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run lint`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run build`: pass. Existing Browserslist staleness notice remains.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+
+### Risks and Gaps
+- This is source-only/no-write. It does not create Supabase users/profiles/rows, upload Storage objects, configure credentials, touch Cloudflare, or run live writes.
+
+### Next Handoff
+- `NOW-ADMIN-AUTH-RLS-001`
+- `NOW-FORMS-BACKEND-001`
+- `NOW-ADMIN-CMS-001`
+
 ## Entry - 2026-05-29 (First-Admin Email Case Readiness)
 
 ### Scope
