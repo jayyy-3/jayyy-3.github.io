@@ -1,14 +1,13 @@
 #!/usr/bin/env node
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { mkdir, rm } from 'node:fs/promises';
 import { spawn } from 'node:child_process';
-import { cwd, env, exit } from 'node:process';
+import { cwd, env as processEnv, exit } from 'node:process';
 import { join } from 'node:path';
 import { firefox } from 'playwright';
 
+const DEFAULT_ENV_FILES = ['.env.local', '.env', '.dev.vars'];
 const root = cwd();
-const host = env.ADMIN_AUTH_BROWSER_HOST ?? '127.0.0.1';
-const port = env.ADMIN_AUTH_BROWSER_PORT ?? '4193';
 const defaultScreenshotsDir = '.tmp/admin-auth-browser/screenshots';
 
 const routeChecks = [
@@ -31,6 +30,10 @@ const forbiddenAuthenticatedText = [
 ];
 
 const args = parseArgs(process.argv.slice(2));
+const loadedEnvironment = loadEnv(args.envFiles);
+const runtimeEnv = loadedEnvironment.env;
+const host = runtimeEnv.ADMIN_AUTH_BROWSER_HOST ?? '127.0.0.1';
+const port = runtimeEnv.ADMIN_AUTH_BROWSER_PORT ?? '4193';
 let serverProcess = null;
 
 main().catch((error) => {
@@ -39,10 +42,10 @@ main().catch((error) => {
 });
 
 async function main() {
-  const readiness = getReadiness();
+  const readiness = getReadiness(runtimeEnv, loadedEnvironment.sources);
 
   if (!args.allowLogin || readiness.missing.length > 0) {
-    printPlan(readiness);
+    printPlan(readiness, loadedEnvironment.scannedFiles);
     if (args.strict) {
       throw new Error('Admin auth browser check is not runnable in strict mode.');
     }
@@ -83,6 +86,7 @@ async function main() {
 function parseArgs(rawArgs) {
   const parsed = {
     allowLogin: false,
+    envFiles: [...DEFAULT_ENV_FILES],
     strict: false,
   };
 
@@ -106,46 +110,117 @@ function parseArgs(rawArgs) {
       index += 1;
       continue;
     }
+    if (arg === '--env-file') {
+      parsed.envFiles.push(rawArgs[index + 1] || '');
+      index += 1;
+      continue;
+    }
+    if (arg.startsWith('--env-file=')) {
+      parsed.envFiles.push(arg.slice('--env-file='.length));
+      continue;
+    }
     throw new Error(`Unknown argument: ${arg}`);
+  }
+
+  parsed.envFiles = [...new Set(parsed.envFiles.filter(Boolean))];
+  return parsed;
+}
+
+function parseEnvFile(path) {
+  if (!existsSync(path)) return {};
+
+  const parsed = {};
+  const text = readFileSync(path, 'utf8');
+  for (const line of text.split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+
+    const match = /^([A-Za-z_][A-Za-z0-9_]*)=(.*)$/.exec(trimmed);
+    if (!match) continue;
+
+    let value = match[2].trim();
+    if (
+      (value.startsWith('"') && value.endsWith('"')) ||
+      (value.startsWith("'") && value.endsWith("'"))
+    ) {
+      value = value.slice(1, -1);
+    }
+
+    if (value) parsed[match[1]] = value;
   }
 
   return parsed;
 }
 
-function getReadiness() {
-  const browserKeyName = env.VITE_SUPABASE_PUBLISHABLE_KEY
+function loadEnv(envFiles) {
+  const loadedEnv = {};
+  const sources = {};
+  const scannedFiles = [];
+
+  for (const file of envFiles) {
+    if (!existsSync(file)) continue;
+    scannedFiles.push(file);
+    for (const [key, value] of Object.entries(parseEnvFile(file))) {
+      loadedEnv[key] = value;
+      sources[key] = file;
+    }
+  }
+
+  for (const [key, value] of Object.entries(processEnv)) {
+    if (typeof value !== 'string' || !value) continue;
+    loadedEnv[key] = value;
+    sources[key] = 'shell';
+  }
+
+  return { env: loadedEnv, scannedFiles, sources };
+}
+
+function describeSource(name, sources) {
+  return name ? `${name} (${sources[name] || 'unknown source'})` : '';
+}
+
+function getReadiness(currentEnv, sources) {
+  const browserKeyName = currentEnv.VITE_SUPABASE_PUBLISHABLE_KEY
     ? 'VITE_SUPABASE_PUBLISHABLE_KEY'
-    : env.VITE_SUPABASE_ANON_KEY
+    : currentEnv.VITE_SUPABASE_ANON_KEY
       ? 'VITE_SUPABASE_ANON_KEY'
       : '';
 
   const missing = [
-    env.VITE_SUPABASE_URL ? '' : 'VITE_SUPABASE_URL',
     browserKeyName ? '' : 'VITE_SUPABASE_PUBLISHABLE_KEY or VITE_SUPABASE_ANON_KEY',
-    env.URBLO_ADMIN_EMAIL ? '' : 'URBLO_ADMIN_EMAIL',
-    env.URBLO_ADMIN_PASSWORD ? '' : 'URBLO_ADMIN_PASSWORD',
+    currentEnv.URBLO_ADMIN_EMAIL ? '' : 'URBLO_ADMIN_EMAIL',
+    currentEnv.URBLO_ADMIN_PASSWORD ? '' : 'URBLO_ADMIN_PASSWORD',
   ].filter(Boolean);
 
   return {
     browserKeyName,
-    email: env.URBLO_ADMIN_EMAIL ?? '',
+    email: currentEnv.URBLO_ADMIN_EMAIL ?? '',
     missing,
-    password: env.URBLO_ADMIN_PASSWORD ?? '',
+    password: currentEnv.URBLO_ADMIN_PASSWORD ?? '',
+    present: [
+      describeSource(currentEnv.VITE_SUPABASE_URL ? 'VITE_SUPABASE_URL' : '', sources),
+      describeSource(browserKeyName, sources),
+      describeSource(currentEnv.URBLO_ADMIN_EMAIL ? 'URBLO_ADMIN_EMAIL' : '', sources),
+      describeSource(currentEnv.URBLO_ADMIN_PASSWORD ? 'URBLO_ADMIN_PASSWORD' : '', sources),
+    ].filter(Boolean),
   };
 }
 
-function printPlan(readiness) {
+function printPlan(readiness, scannedFiles) {
   console.log('Admin auth browser check is plan-only.');
   console.log('No Supabase login was attempted and no live content/admin rows were changed.');
+  console.log(`Environment files scanned: ${scannedFiles.length > 0 ? scannedFiles.join(', ') : 'none found'}`);
+  console.log('Secrets are never printed; only variable names and sources are reported.');
   console.log('');
   console.log('To run the no-write browser login check:');
   console.log('  npm run agent:admin-auth-browser -- --allow-login --strict');
   console.log('');
   console.log('Required shell or local env values:');
-  console.log('- VITE_SUPABASE_URL');
   console.log('- VITE_SUPABASE_PUBLISHABLE_KEY or VITE_SUPABASE_ANON_KEY');
   console.log('- URBLO_ADMIN_EMAIL');
   console.log('- URBLO_ADMIN_PASSWORD');
+  console.log('');
+  console.log('Optional: VITE_SUPABASE_URL can override the default Urblo Supabase project URL.');
   console.log('');
   if (!args.allowLogin) {
     console.log('manual: --allow-login is required before the script signs in to Supabase Auth.');
@@ -153,8 +228,8 @@ function printPlan(readiness) {
   if (readiness.missing.length > 0) {
     console.log(`missing: ${readiness.missing.join('; ')}`);
   }
-  if (readiness.browserKeyName) {
-    console.log(`present: ${readiness.browserKeyName}`);
+  if (readiness.present.length > 0) {
+    console.log(`present: ${readiness.present.join(', ')}`);
   }
 }
 
@@ -165,7 +240,7 @@ function startPreview() {
     ['vite', 'preview', '--host', host, '--port', port, '--strictPort'],
     {
       cwd: root,
-      env,
+      env: runtimeEnv,
       stdio: ['ignore', 'pipe', 'pipe'],
     },
   );

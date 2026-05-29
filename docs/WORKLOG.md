@@ -2,6 +2,38 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Admin Auth Browser Env Loading)
+
+### Scope
+- Updated `npm run agent:admin-auth-browser` so it can read untracked local env files (`.env.local`, `.env`, `.dev.vars`) as well as shell values.
+- Added `--env-file <path>` support for an additional local secret source when needed.
+- The runner still prints only variable names and sources, never secret values.
+- Relaxed the hard `VITE_SUPABASE_URL` requirement because `src/lib/supabaseClient.ts` already defaults to the Urblo Supabase project URL; the live browser auth check only requires a browser-safe key and admin email/password credentials.
+
+### Changed Files
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `scripts/check-admin-auth-browser.mjs`
+
+### Verification Results
+- `node --check scripts/check-admin-auth-browser.mjs`: pass.
+- `npm run agent:admin-auth-browser`: pass in plan-only mode; it scanned no env files in this workspace and attempted no Supabase login.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run lint`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- Live login mode remains unrun until browser-safe Supabase config and real active admin email/password credentials exist.
+- This checkpoint improves credential input handling only; it does not prove active-admin access, admin writes, form persistence, Storage policy, Cloudflare preview behavior, or public content cutover.
+
+### Next Handoff
+- Put browser-safe key and admin QA credentials in an untracked env file or shell, then run `npm run agent:admin-auth-browser -- --allow-login --strict` after first-admin/profile readiness is verified.
+
 ## Entry - 2026-05-29 (Admin Auth Browser QA Runner)
 
 ### Scope

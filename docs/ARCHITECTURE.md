@@ -194,8 +194,9 @@ Last updated: 2026-05-29
   - Use `--base-url <origin>` to run the same no-config route gate against another built preview origin.
 - Admin auth browser coverage:
   - `npm run agent:admin-auth-browser` => `node scripts/check-admin-auth-browser.mjs`
-  - Default mode is plan-only and prints required inputs. It does not sign in unless `--allow-login` is supplied.
-  - Live mode starts built Vite preview by default, signs in through `/admin/login` with `URBLO_ADMIN_EMAIL` and `URBLO_ADMIN_PASSWORD`, verifies authenticated admin route shells in Firefox, captures ignored screenshots under `.tmp/admin-auth-browser/screenshots`, and creates no content rows, Storage objects, or audit events.
+  - Loads local environment values from `.env.local`, `.env`, `.dev.vars`, and the shell without printing secret values.
+  - Default mode is plan-only and prints required variable names/sources. It does not sign in unless `--allow-login` is supplied.
+  - Live mode starts built Vite preview by default, signs in through `/admin/login` with `URBLO_ADMIN_EMAIL` and `URBLO_ADMIN_PASSWORD`, verifies authenticated admin route shells in Firefox, captures ignored screenshots under `.tmp/admin-auth-browser/screenshots`, and creates no content rows, Storage objects, or audit events. `VITE_SUPABASE_URL` is optional because the browser client defaults to the Urblo project URL.
   - Use `--base-url <origin>` to run the same authenticated browser check against another preview origin after browser-safe Supabase config exists there.
 - Admin CRUD live verification:
   - `npm run agent:admin-crud-live` => `node scripts/check-admin-crud-live.mjs`
