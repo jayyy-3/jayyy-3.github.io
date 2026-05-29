@@ -373,6 +373,7 @@ function checkRoutes() {
   const auth = readRequired('src/lib/adminAuth.tsx');
   const client = readRequired('src/lib/supabaseClient.ts');
   const audit = readRequired('src/lib/adminAudit.ts');
+  const adminAuthBrowser = readRequired('scripts/check-admin-auth-browser.mjs');
   const firstAdminBootstrap = readRequired('scripts/bootstrap-first-admin.mjs');
   const adminLiveReadiness = readRequired('scripts/check-admin-live-readiness.mjs');
   const adminProfileEmailMigration = readRequired(
@@ -461,6 +462,10 @@ function checkRoutes() {
   requireIncludes(unauthorized, "auth.status === 'config-missing'", 'src/pages/admin/AdminUnauthorizedPage.tsx');
 
   requireIncludes(audit, ".from('admin_audit_events')", 'src/lib/adminAudit.ts');
+  requireIncludes(adminAuthBrowser, '--expect-unauthorized', 'scripts/check-admin-auth-browser.mjs');
+  requireIncludes(adminAuthBrowser, 'URBLO_UNPROFILED_EMAIL', 'scripts/check-admin-auth-browser.mjs');
+  requireIncludes(adminAuthBrowser, 'URBLO_UNPROFILED_PASSWORD', 'scripts/check-admin-auth-browser.mjs');
+  requireIncludes(adminAuthBrowser, 'waitForUnauthorizedRoute', 'scripts/check-admin-auth-browser.mjs');
   requireIncludes(firstAdminBootstrap, ".from('admin_audit_events')", 'scripts/bootstrap-first-admin.mjs');
   requireIncludes(firstAdminBootstrap, 'admin_profile.bootstrap', 'scripts/bootstrap-first-admin.mjs');
   requireIncludes(firstAdminBootstrap, 'actor_user_id: null', 'scripts/bootstrap-first-admin.mjs');

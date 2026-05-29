@@ -2,6 +2,51 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Unprofiled Admin Browser QA Gate)
+
+### Scope
+- Added a no-write unauthorized-profile mode to `npm run agent:admin-auth-browser`.
+- `--allow-login --expect-unauthorized --strict` now uses `URBLO_UNPROFILED_EMAIL` and `URBLO_UNPROFILED_PASSWORD` to prove a valid Supabase Auth user without an active `admin_profiles` row lands on `/admin/unauthorized`.
+- The check rejects private admin module headings in that unauthorized state and creates no content rows, Storage objects, audit events, Auth users, or admin profiles.
+- Added the new gate to `npm run agent:live-readiness`, `.env.example`, docs, and `npm run agent:admin-crud-coverage` source guards.
+
+### Changed Files
+- `.env.example`
+- `AGENTS.md`
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/CLOUDFLARE_DEPLOYMENT.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `docs/agent/verification.md`
+- `scripts/check-admin-auth-browser.mjs`
+- `scripts/check-admin-crud-coverage.mjs`
+- `scripts/check-live-readiness.mjs`
+
+### Verification Results
+- `node --check scripts/check-admin-auth-browser.mjs`: pass.
+- `node --check scripts/check-live-readiness.mjs`: pass.
+- `node --check scripts/check-admin-crud-coverage.mjs`: pass.
+- `npm run agent:admin-auth-browser -- --expect-unauthorized`: pass in plan-only mode.
+- `npm run agent:live-readiness`: pass in report-only mode and now reports the unprofiled unauthorized browser QA gate.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run lint`: pass.
+- `npm run build`: pass. Existing Browserslist staleness notice remains.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:admin-config-gate`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- Live unauthorized-profile browser QA was not run because this workspace has no browser-safe Supabase key or unprofiled Auth test credentials.
+- This checkpoint is source/tooling only. It does not create the first admin, create an unprofiled Auth user, run live admin writes, upload Storage objects, verify form persistence, or touch Cloudflare.
+
+### Next Handoff
+- When browser-safe Supabase config and an unprofiled Auth test account are available, run `npm run agent:admin-auth-browser -- --allow-login --expect-unauthorized --strict` before claiming the unauthorized-profile access state is live verified.
+
 ## Entry - 2026-05-29 (First-Admin Email Matching Coverage Guard)
 
 ### Scope

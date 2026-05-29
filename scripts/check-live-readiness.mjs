@@ -6,6 +6,7 @@ const BROWSER_KEY_NAMES = ['VITE_SUPABASE_PUBLISHABLE_KEY', 'VITE_SUPABASE_ANON_
 const ADMIN_EMAIL_NAMES = ['URBLO_FIRST_ADMIN_EMAIL'];
 const ADMIN_SESSION_TOKEN_NAMES = ['URBLO_ADMIN_ACCESS_TOKEN'];
 const ADMIN_SESSION_PASSWORD_NAMES = ['URBLO_ADMIN_EMAIL', 'URBLO_ADMIN_PASSWORD'];
+const UNPROFILED_SESSION_PASSWORD_NAMES = ['URBLO_UNPROFILED_EMAIL', 'URBLO_UNPROFILED_PASSWORD'];
 const PREVIEW_URL_NAMES = ['CLOUDFLARE_PAGES_PREVIEW_URL', 'PAGES_PREVIEW_URL'];
 const TURNSTILE_NAMES = ['TURNSTILE_SECRET_KEY', 'CF_TURNSTILE_SECRET_KEY'];
 const TURNSTILE_SITE_KEY_NAMES = ['VITE_TURNSTILE_SITE_KEY'];
@@ -211,6 +212,7 @@ function buildChecks(env, sources, options) {
   const previewUrlSource = options.baseUrl ? '--base-url argument' : describeSource(previewUrlEnv, sources);
   const adminToken = firstPresent(env, ADMIN_SESSION_TOKEN_NAMES);
   const adminPasswordSession = allPresent(env, ADMIN_SESSION_PASSWORD_NAMES);
+  const unprofiledPasswordSession = allPresent(env, UNPROFILED_SESSION_PASSWORD_NAMES);
   const turnstile = firstPresent(env, TURNSTILE_NAMES);
   const turnstileSiteKey = firstPresent(env, TURNSTILE_SITE_KEY_NAMES);
   const emailSenderReady = Boolean(env.RESEND_API_KEY) && Boolean(env.LEAD_NOTIFICATION_FROM || env.RESEND_FROM_EMAIL);
@@ -402,6 +404,23 @@ function buildChecks(env, sources, options) {
       ].filter(Boolean),
       optional: [
         'Signs in through the browser UI and verifies authenticated admin route shells without creating content rows, Storage objects, or audit events.',
+        'The runner still requires explicit --allow-login so credentials are not used accidentally.',
+      ],
+    }),
+    makeCheck({
+      id: 'admin-auth-browser-unprofiled',
+      label: 'No-write unprofiled admin browser QA',
+      command: 'npm run agent:admin-auth-browser -- --allow-login --expect-unauthorized --strict',
+      present: [
+        describeSource(browserKey, sources),
+        unprofiledPasswordSession ? 'URBLO_UNPROFILED_EMAIL and URBLO_UNPROFILED_PASSWORD configured' : '',
+      ].filter(Boolean),
+      missing: [
+        browserKey ? '' : 'VITE_SUPABASE_PUBLISHABLE_KEY or VITE_SUPABASE_ANON_KEY',
+        unprofiledPasswordSession ? '' : 'URBLO_UNPROFILED_EMAIL plus URBLO_UNPROFILED_PASSWORD',
+      ].filter(Boolean),
+      optional: [
+        'Signs in through the browser UI with a valid Auth user that has no active admin_profiles row and verifies /admin/unauthorized without rendering private admin content.',
         'The runner still requires explicit --allow-login so credentials are not used accidentally.',
       ],
     }),

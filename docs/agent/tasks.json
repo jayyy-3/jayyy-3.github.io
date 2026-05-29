@@ -357,7 +357,8 @@
         "2026-05-29: `npm run agent:admin-crud-live` now stages dashboard-health predicate readback against tagged QA rows before archive cleanup, and `npm run agent:admin-crud-coverage` fails if those live-verifier hooks are removed.",
         "2026-05-29: Added `npm run agent:admin-config-gate` as the repeatable built-site Firefox gate for no-config admin routes. It checks all launch-critical admin routes render the configuration-required state, rejects private admin/module text, captures ignored screenshots under `.tmp/admin-config-gate/screenshots`, and requires no Supabase credentials or live writes.",
         "2026-05-29: Added `npm run agent:admin-auth-browser` as the gated no-write browser login verifier. Default mode is plan-only; `--allow-login --strict` requires browser-safe Supabase config plus `URBLO_ADMIN_EMAIL`/`URBLO_ADMIN_PASSWORD`, signs in through the UI, and checks authenticated admin route shells without creating content rows, Storage objects, or audit events.",
-        "2026-05-29: `npm run agent:admin-auth-browser` now loads `.env.local`, `.env`, `.dev.vars`, and shell values without printing secret values, supports extra `--env-file`, and treats `VITE_SUPABASE_URL` as optional because the browser client defaults to the Urblo project URL."
+        "2026-05-29: `npm run agent:admin-auth-browser` now loads `.env.local`, `.env`, `.dev.vars`, and shell values without printing secret values, supports extra `--env-file`, and treats `VITE_SUPABASE_URL` as optional because the browser client defaults to the Urblo project URL.",
+        "2026-05-29: `npm run agent:admin-auth-browser -- --allow-login --expect-unauthorized --strict` is staged as the no-write unauthorized-profile browser QA path. It requires `URBLO_UNPROFILED_EMAIL`/`URBLO_UNPROFILED_PASSWORD` for a valid Auth user without an active `admin_profiles` row, must land on `/admin/unauthorized`, and must not render private admin module headings."
       ],
       "acceptance": [
         "Authenticated admin users can create, read, update, draft, publish, and archive Projects, Stone Library records, Products, Articles, and media records without code edits.",
@@ -378,6 +379,7 @@
         "npm run agent:admin-config-gate",
         "npm run agent:admin-auth-browser",
         "npm run agent:admin-auth-browser -- --allow-login --strict (after browser-safe keys and a real active admin email/password are available; no content writes)",
+        "npm run agent:admin-auth-browser -- --allow-login --expect-unauthorized --strict (after browser-safe keys and a valid unprofiled Auth user email/password are available; no content writes)",
         "npm run agent:live-readiness",
         "npm run agent:live-readiness -- --content-import-approved --content-merge-approved --content-public-cutover-approved (report-only; use only after Jay approves those gates)",
         "npm run agent:admin-crud-live (plan-only)",
@@ -478,7 +480,8 @@
         "2026-05-29: `/admin` dashboard now includes a real content health queue for published media missing metadata, project claim review, published products/articles missing key media, TBC Stone Library records, and stale new leads. `npm run agent:admin-crud-coverage` guards those dashboard health checks source-side, and `npm run agent:admin-crud-live` stages tagged predicate readback for live admin QA.",
         "2026-05-29: Added `npm run agent:admin-config-gate` to make no-config admin route QA repeatable. The runner starts built Vite preview by default, checks every launch-critical admin route in Firefox for the configuration-required state, rejects private admin/module text, and requires no Supabase credentials.",
         "2026-05-29: Added `npm run agent:admin-auth-browser` as the next live-auth browser QA gate. It is plan-only unless `--allow-login` is supplied; live mode signs in with `URBLO_ADMIN_EMAIL`/`URBLO_ADMIN_PASSWORD`, checks authenticated `/admin` route shells, and creates no content rows, Storage objects, or audit events.",
-        "2026-05-29: `npm run agent:admin-auth-browser` now uses the same local env-file loading pattern as the other live runners, supports extra `--env-file`, prints only variable names/sources, and no longer requires `VITE_SUPABASE_URL` because the runtime has a default project URL."
+        "2026-05-29: `npm run agent:admin-auth-browser` now uses the same local env-file loading pattern as the other live runners, supports extra `--env-file`, prints only variable names/sources, and no longer requires `VITE_SUPABASE_URL` because the runtime has a default project URL.",
+        "2026-05-29: `npm run agent:admin-auth-browser -- --allow-login --expect-unauthorized --strict` now covers the valid-auth/no-active-profile path with `URBLO_UNPROFILED_EMAIL` and `URBLO_UNPROFILED_PASSWORD`, requiring `/admin/unauthorized` and no private module content. `npm run agent:live-readiness` reports this gate separately, and admin CRUD coverage guards the verifier source."
       ],
       "acceptance": [
         "Admin shell route is protected by Supabase Auth.",
@@ -505,6 +508,7 @@
         "npm run agent:admin-config-gate",
         "npm run agent:admin-auth-browser",
         "npm run agent:admin-auth-browser -- --allow-login --strict (after browser-safe keys and a real active admin email/password are available; no content writes)",
+        "npm run agent:admin-auth-browser -- --allow-login --expect-unauthorized --strict (after browser-safe keys and a valid unprofiled Auth user email/password are available; no content writes)",
         "npm run agent:admin-crud-live (plan-only)",
         "npm run agent:admin-crud-live -- --allow-writes (after browser-safe keys, real owner/admin session, and Jay approval for tagged QA writes; verifies dashboard-health predicate readback plus tagged public-content rows and private lead rows are not anonymously visible)"
       ]

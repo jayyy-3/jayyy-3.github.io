@@ -99,6 +99,7 @@ Useful local env groups:
 - Private-row browser boundary: `SUPABASE_SERVICE_ROLE_KEY` plus `VITE_SUPABASE_PUBLISHABLE_KEY` or `VITE_SUPABASE_ANON_KEY`.
 - Admin read-only readiness: browser-safe Supabase key, service-role key, and first admin email.
 - Admin browser QA: browser-safe Supabase key plus `URBLO_ADMIN_EMAIL` and `URBLO_ADMIN_PASSWORD`.
+- Unprofiled admin browser QA: browser-safe Supabase key plus `URBLO_UNPROFILED_EMAIL` and `URBLO_UNPROFILED_PASSWORD` for a valid Auth user with no active `admin_profiles` row.
 - Admin CRUD live writes: browser-safe Supabase key plus either `URBLO_ADMIN_ACCESS_TOKEN` or `URBLO_ADMIN_EMAIL` and `URBLO_ADMIN_PASSWORD`.
 - Email proof: `RESEND_API_KEY`, sender, and recipient variables.
 - Turnstile proof: `VITE_TURNSTILE_SITE_KEY`, server-side Turnstile secret, and a valid target-environment token passed to the verifier.
@@ -214,6 +215,8 @@ After admin browser-safe keys and the first admin profile are configured, run:
 - `npm run agent:first-admin-bootstrap -- --verify-only --admin-email <first-admin-email>`
 - `npm run agent:first-admin-bootstrap -- --allow-writes --admin-email <first-admin-email> --confirm-email <first-admin-email>` only after Jay approves creating/upserting the first profile or sending an invite
 - `npm run agent:admin-live-readiness -- --admin-email <first-admin-email>`
+- `npm run agent:admin-auth-browser -- --allow-login --strict`
+- `npm run agent:admin-auth-browser -- --allow-login --expect-unauthorized --strict` after a valid unprofiled Auth test user is available
 
 After a real owner/admin browser session is available and tagged QA writes are approved, run:
 - `npm run agent:admin-crud-live -- --allow-writes`

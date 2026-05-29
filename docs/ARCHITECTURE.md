@@ -173,7 +173,7 @@ Last updated: 2026-05-29
 - Live input readiness:
   - `npm run agent:live-readiness` => `node scripts/check-live-readiness.mjs`
   - Loads local environment values from `.env.local`, `.env`, `.dev.vars`, and the shell.
-  - Reports, without printing secret values, whether the inputs for `agent:forms-live -- --allow-writes`, deployed form verification, `agent:forms-live -- --allow-writes --require-browser-boundary`, `agent:admin-live-readiness`, `agent:first-admin-bootstrap -- --allow-writes`, `agent:admin-crud-live -- --allow-writes`, `agent:admin-crud-live -- --allow-writes --include-storage`, and `agent:cloudflare-preview-smoke` are present.
+  - Reports, without printing secret values, whether the inputs for `agent:forms-live -- --allow-writes`, deployed form verification, `agent:forms-live -- --allow-writes --require-browser-boundary`, `agent:admin-live-readiness`, `agent:first-admin-bootstrap -- --allow-writes`, active-admin browser QA, unprofiled unauthorized browser QA, `agent:admin-crud-live -- --allow-writes`, `agent:admin-crud-live -- --allow-writes --include-storage`, and `agent:cloudflare-preview-smoke` are present.
   - Accepts non-secret readiness overrides: `--base-url <origin>`, `--admin-email <email>`, `--form-writes-approved`, `--first-admin-writes-approved`, and `--admin-writes-approved`. Secret keys and admin session credentials must still come from env files or the shell and must not be printed.
   - `--form-writes-approved` only represents Jay's approval to run tagged live form QA writes; it does not provide service-role credentials, browser-safe credentials, or a preview URL.
   - `--first-admin-writes-approved` only represents Jay's approval to run the first-admin profile/invite write path; it does not provide a service-role key or replace the `--allow-writes` and `--confirm-email` guards on `agent:first-admin-bootstrap`.
@@ -197,6 +197,7 @@ Last updated: 2026-05-29
   - Loads local environment values from `.env.local`, `.env`, `.dev.vars`, and the shell without printing secret values.
   - Default mode is plan-only and prints required variable names/sources. It does not sign in unless `--allow-login` is supplied.
   - Live mode starts built Vite preview by default, signs in through `/admin/login` with `URBLO_ADMIN_EMAIL` and `URBLO_ADMIN_PASSWORD`, verifies authenticated admin route shells in Firefox, captures ignored screenshots under `.tmp/admin-auth-browser/screenshots`, and creates no content rows, Storage objects, or audit events. `VITE_SUPABASE_URL` is optional because the browser client defaults to the Urblo project URL.
+  - Unauthorized-profile mode uses `--allow-login --expect-unauthorized --strict` with `URBLO_UNPROFILED_EMAIL` and `URBLO_UNPROFILED_PASSWORD` for a valid Auth user that has no active `admin_profiles` row; it must land on `/admin/unauthorized` without rendering private admin module content and still creates no rows or Storage objects.
   - Use `--base-url <origin>` to run the same authenticated browser check against another preview origin after browser-safe Supabase config exists there.
 - Admin CRUD live verification:
   - `npm run agent:admin-crud-live` => `node scripts/check-admin-crud-live.mjs`

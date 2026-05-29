@@ -29,6 +29,18 @@ const forbiddenAuthenticatedText = [
   'Admin login',
 ];
 
+const forbiddenUnauthorizedText = [
+  'Dashboard',
+  'Leads',
+  'Media Library',
+  'Site Settings',
+  'Stone Library',
+  'Projects',
+  'Products',
+  'Articles',
+  'Audit',
+];
+
 const args = parseArgs(process.argv.slice(2));
 const loadedEnvironment = loadEnv(args.envFiles);
 const runtimeEnv = loadedEnvironment.env;
@@ -71,6 +83,7 @@ async function main() {
 
     await runBrowserCheck({
       baseUrl,
+      expectUnauthorized: args.expectUnauthorized,
       screenshotsDir: join(root, screenshotsDir),
       email: readiness.email,
       password: readiness.password,
@@ -79,7 +92,11 @@ async function main() {
     await stopPreview();
   }
 
-  console.log(`Admin auth browser check passed for ${routeChecks.length} authenticated routes.`);
+  console.log(
+    args.expectUnauthorized
+      ? 'Admin auth browser unauthorized-profile check passed.'
+      : `Admin auth browser check passed for ${routeChecks.length} authenticated routes.`,
+  );
   console.log(`Screenshots written to ${screenshotsDir}.`);
 }
 
@@ -98,6 +115,10 @@ function parseArgs(rawArgs) {
     }
     if (arg === '--strict') {
       parsed.strict = true;
+      continue;
+    }
+    if (arg === '--expect-unauthorized') {
+      parsed.expectUnauthorized = true;
       continue;
     }
     if (arg === '--base-url') {
@@ -185,23 +206,27 @@ function getReadiness(currentEnv, sources) {
     : currentEnv.VITE_SUPABASE_ANON_KEY
       ? 'VITE_SUPABASE_ANON_KEY'
       : '';
+  const emailName = args.expectUnauthorized ? 'URBLO_UNPROFILED_EMAIL' : 'URBLO_ADMIN_EMAIL';
+  const passwordName = args.expectUnauthorized ? 'URBLO_UNPROFILED_PASSWORD' : 'URBLO_ADMIN_PASSWORD';
 
   const missing = [
     browserKeyName ? '' : 'VITE_SUPABASE_PUBLISHABLE_KEY or VITE_SUPABASE_ANON_KEY',
-    currentEnv.URBLO_ADMIN_EMAIL ? '' : 'URBLO_ADMIN_EMAIL',
-    currentEnv.URBLO_ADMIN_PASSWORD ? '' : 'URBLO_ADMIN_PASSWORD',
+    currentEnv[emailName] ? '' : emailName,
+    currentEnv[passwordName] ? '' : passwordName,
   ].filter(Boolean);
 
   return {
     browserKeyName,
-    email: currentEnv.URBLO_ADMIN_EMAIL ?? '',
+    email: currentEnv[emailName] ?? '',
+    emailName,
     missing,
-    password: currentEnv.URBLO_ADMIN_PASSWORD ?? '',
+    password: currentEnv[passwordName] ?? '',
+    passwordName,
     present: [
       describeSource(currentEnv.VITE_SUPABASE_URL ? 'VITE_SUPABASE_URL' : '', sources),
       describeSource(browserKeyName, sources),
-      describeSource(currentEnv.URBLO_ADMIN_EMAIL ? 'URBLO_ADMIN_EMAIL' : '', sources),
-      describeSource(currentEnv.URBLO_ADMIN_PASSWORD ? 'URBLO_ADMIN_PASSWORD' : '', sources),
+      describeSource(currentEnv[emailName] ? emailName : '', sources),
+      describeSource(currentEnv[passwordName] ? passwordName : '', sources),
     ].filter(Boolean),
   };
 }
@@ -212,15 +237,26 @@ function printPlan(readiness, scannedFiles) {
   console.log(`Environment files scanned: ${scannedFiles.length > 0 ? scannedFiles.join(', ') : 'none found'}`);
   console.log('Secrets are never printed; only variable names and sources are reported.');
   console.log('');
-  console.log('To run the no-write browser login check:');
-  console.log('  npm run agent:admin-auth-browser -- --allow-login --strict');
+  console.log(
+    args.expectUnauthorized
+      ? 'To run the no-write unauthorized-profile browser check:'
+      : 'To run the no-write browser login check:',
+  );
+  console.log(
+    args.expectUnauthorized
+      ? '  npm run agent:admin-auth-browser -- --allow-login --expect-unauthorized --strict'
+      : '  npm run agent:admin-auth-browser -- --allow-login --strict',
+  );
   console.log('');
   console.log('Required shell or local env values:');
   console.log('- VITE_SUPABASE_PUBLISHABLE_KEY or VITE_SUPABASE_ANON_KEY');
-  console.log('- URBLO_ADMIN_EMAIL');
-  console.log('- URBLO_ADMIN_PASSWORD');
+  console.log(`- ${readiness.emailName}`);
+  console.log(`- ${readiness.passwordName}`);
   console.log('');
   console.log('Optional: VITE_SUPABASE_URL can override the default Urblo Supabase project URL.');
+  if (args.expectUnauthorized) {
+    console.log('The supplied account must have a valid Supabase Auth session but no active admin_profiles row.');
+  }
   console.log('');
   if (!args.allowLogin) {
     console.log('manual: --allow-login is required before the script signs in to Supabase Auth.');
@@ -273,7 +309,7 @@ async function waitForServer(baseUrl) {
   throw new Error(`Preview did not respond at ${baseUrl}.`);
 }
 
-async function runBrowserCheck({ baseUrl, screenshotsDir, email, password }) {
+async function runBrowserCheck({ baseUrl, expectUnauthorized, screenshotsDir, email, password }) {
   const browser = await firefox.launch();
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
   const page = await context.newPage();
@@ -300,6 +336,18 @@ async function runBrowserCheck({ baseUrl, screenshotsDir, email, password }) {
     await page.getByLabel('Password').fill(password);
     await page.getByRole('button', { name: /sign in/i }).click();
 
+    if (expectUnauthorized) {
+      await waitForUnauthorizedRoute(page);
+      for (const text of forbiddenUnauthorizedText) {
+        await assertNoText(page, text);
+      }
+      await page.screenshot({ path: `${screenshotsDir}/unauthorized-profile.png`, fullPage: true });
+      if (consoleErrors.length > 0) {
+        throw new Error(`Console/page errors detected: ${consoleErrors.join(' | ')}`);
+      }
+      return;
+    }
+
     await waitForAuthenticatedRoute(page, 'Media Library');
 
     for (const route of routeChecks) {
@@ -316,6 +364,33 @@ async function runBrowserCheck({ baseUrl, screenshotsDir, email, password }) {
     }
   } finally {
     await browser.close();
+  }
+}
+
+async function waitForUnauthorizedRoute(page) {
+  try {
+    await waitForText(page, 'This account is not an active Urblo admin', 'unauthorized admin route', 30000);
+  } catch (error) {
+    const visibleFailure = await firstVisibleText(page, [
+      'Invalid login credentials',
+      'Configuration required',
+      'Admin auth is not connected yet',
+      'Admin access could not be verified',
+      'Media Library',
+      'Dashboard',
+    ]);
+    throw new Error(
+      visibleFailure
+        ? `Unprofiled admin login did not reach the unauthorized shell: ${visibleFailure}`
+        : error instanceof Error
+          ? error.message
+          : 'Unprofiled admin login did not reach the unauthorized shell.',
+    );
+  }
+
+  const parsed = new URL(page.url());
+  if (parsed.pathname !== '/admin/unauthorized') {
+    throw new Error(`Expected unprofiled account to land on /admin/unauthorized, got ${parsed.pathname}.`);
   }
 }
 
