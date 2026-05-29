@@ -6,6 +6,7 @@
   "scripts": {
     "agent:check": "node scripts/check-harness.mjs",
     "agent:admin-crud-coverage": "node scripts/check-admin-crud-coverage.mjs",
+    "agent:admin-config-gate": "node scripts/check-admin-config-gate.mjs",
     "agent:admin-crud-live": "node scripts/check-admin-crud-live.mjs",
     "agent:admin-live-readiness": "node scripts/check-admin-live-readiness.mjs",
     "agent:first-admin-bootstrap": "node scripts/bootstrap-first-admin.mjs",
@@ -52,6 +53,7 @@
     "framer-motion": "^12.18.1",
     "globals": "^16.0.0",
     "lucide-react": "^0.525.0",
+    "playwright": "^1.60.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.1",
     "typescript": "~5.8.3",

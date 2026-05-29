@@ -16,6 +16,7 @@ const requiredFiles = [
   'docs/agent/verification.md',
   'scripts/agent-init.sh',
   'scripts/agent-smoke.sh',
+  'scripts/check-admin-config-gate.mjs',
   'scripts/check-contact-form-ui-source.mjs',
   'scripts/check-doc-paths.mjs',
   'scripts/check-harness.mjs',
@@ -23,6 +24,7 @@ const requiredFiles = [
 const requiredPackageScripts = {
   'agent:check': 'node scripts/check-harness.mjs',
   'agent:admin-crud-coverage': 'node scripts/check-admin-crud-coverage.mjs',
+  'agent:admin-config-gate': 'node scripts/check-admin-config-gate.mjs',
   'agent:admin-crud-live': 'node scripts/check-admin-crud-live.mjs',
   'agent:admin-live-readiness': 'node scripts/check-admin-live-readiness.mjs',
   'agent:cloudflare-preview-smoke': 'node scripts/check-cloudflare-preview-smoke.mjs',

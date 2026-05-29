@@ -2,6 +2,47 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Repeatable Admin Config-Gate Browser Check)
+
+### Scope
+- Added `npm run agent:admin-config-gate` as a repeatable no-secret Firefox browser gate for the built `/admin` shell.
+- The new runner starts Vite preview when no `--base-url` is supplied, generates a temporary Playwright spec under `.tmp/`, checks all launch-critical admin routes for `Configuration required`, rejects private admin/module text, captures screenshots, and shuts the preview down.
+- Added `playwright` as a dev dependency so the gate does not depend on a global or temporary `npx` cache.
+
+### Changed Files
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `docs/agent/verification.md`
+- `package.json`
+- `package-lock.json`
+- `scripts/agent-init.sh`
+- `scripts/check-admin-config-gate.mjs`
+- `scripts/check-harness.mjs`
+
+### Verification Results
+- `node --check scripts/check-admin-config-gate.mjs`: pass.
+- `npm run build`: pass. Existing Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:admin-config-gate`: pass; 11 Firefox route checks passed and screenshots were written to `.tmp/admin-config-gate/screenshots`.
+- `npm run agent:smoke`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:live-readiness`: pass in report-only mode; live form/admin/Cloudflare inputs remain missing or approval-gated.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- This remains no-config browser QA. It does not prove active-admin login, unprofiled-user unauthorized behavior, browser-key RLS writes, audit row creation, Storage upload policy, form persistence, Cloudflare preview behavior, or public content cutover.
+- Extra observation: `npm audit --omit=dev --audit-level=critical` still reports existing production dependency advisories, including a critical Swiper advisory that requires a breaking upgrade path. That is not resolved in this admin-gate checkpoint.
+
+### Next Handoff
+- Run `npm run agent:admin-config-gate` after admin route/auth-shell changes, before claiming no-config admin route protection remains intact.
+- Live admin verification still requires browser-safe Supabase config, a real owner/admin session, first-admin profile readiness, and Jay approval for tagged QA writes.
+
 ## Entry - 2026-05-29 (Admin No-Config Route Gate Full Coverage)
 
 ### Scope

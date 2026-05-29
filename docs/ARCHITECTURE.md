@@ -187,6 +187,11 @@ Last updated: 2026-05-29
   - Also guards the admin auth shell source contract: protected routes must preserve encoded admin-only `next` targets, login must reject non-admin or login/unauthorized loop targets, and session bootstrap must validate Supabase sessions with `getUser()` before looking up an active `admin_profiles` row.
   - Also scans browser source for actual service-role Supabase env/client usage patterns, guards the config-missing admin gate plus admin-route WelcomePopup suppression, and verifies the live admin CRUD verifier remains browser-key/RLS based rather than service-role based.
   - This is a source-only verifier. It never mutates Supabase and does not replace live browser QA with a configured admin profile.
+- Admin config-gate browser coverage:
+  - `npm run agent:admin-config-gate` => `node scripts/check-admin-config-gate.mjs`
+  - Starts built Vite preview when no `--base-url` is supplied, then runs a generated Playwright Firefox spec against `/admin`, `/admin/login`, `/admin/unauthorized`, `/admin/leads`, `/admin/media`, `/admin/settings`, `/admin/stone-library`, `/admin/projects`, `/admin/products`, `/admin/articles`, and `/admin/audit`.
+  - Verifies each route renders `Configuration required`, rejects private admin/module text, captures ignored screenshots under `.tmp/admin-config-gate/screenshots`, and does not require Supabase credentials or live writes.
+  - Use `--base-url <origin>` to run the same no-config route gate against another built preview origin.
 - Admin CRUD live verification:
   - `npm run agent:admin-crud-live` => `node scripts/check-admin-crud-live.mjs`
   - Default mode prints the live verification plan and performs no writes.

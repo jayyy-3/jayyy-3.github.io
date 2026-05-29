@@ -323,6 +323,7 @@
         "src/lib/adminAudit.ts",
         "src/pages/admin/AdminAuditPage.tsx",
         "scripts/check-admin-crud-coverage.mjs",
+        "scripts/check-admin-config-gate.mjs",
         "scripts/check-admin-crud-live.mjs",
         "scripts/check-live-readiness.mjs",
         "scripts/agent-init.sh",
@@ -352,7 +353,8 @@
         "2026-05-29: `npm run agent:admin-crud-coverage` now scans admin source and the live admin verifier for Supabase `.delete()` mutations, HTTP `DELETE` requests, destructive RPC names, and visible `Delete`/`Remove` controls so launch removal stays archive-first until a retention/destructive-delete policy is approved.",
         "2026-05-28: Removed the retired AdminModulePage scaffold component and unused scaffold/locked module-state branches now that all launch-critical admin modules have real source screens. Admin CRUD coverage now fails if the retired scaffold component returns.",
         "2026-05-29: `/admin` dashboard now includes a real content health queue for published media missing metadata, project claim review, published products/articles missing key media, TBC Stone Library records, and stale new leads. `npm run agent:admin-crud-coverage` guards those dashboard health checks source-side until live admin credentials allow browser/data QA.",
-        "2026-05-29: `npm run agent:admin-crud-live` now stages dashboard-health predicate readback against tagged QA rows before archive cleanup, and `npm run agent:admin-crud-coverage` fails if those live-verifier hooks are removed."
+        "2026-05-29: `npm run agent:admin-crud-live` now stages dashboard-health predicate readback against tagged QA rows before archive cleanup, and `npm run agent:admin-crud-coverage` fails if those live-verifier hooks are removed.",
+        "2026-05-29: Added `npm run agent:admin-config-gate` as the repeatable built-site Firefox gate for no-config admin routes. It checks all launch-critical admin routes render the configuration-required state, rejects private admin/module text, captures ignored screenshots under `.tmp/admin-config-gate/screenshots`, and requires no Supabase credentials or live writes."
       ],
       "acceptance": [
         "Authenticated admin users can create, read, update, draft, publish, and archive Projects, Stone Library records, Products, Articles, and media records without code edits.",
@@ -370,6 +372,7 @@
         "npx tsc -b",
         "npm run agent:smoke",
         "npm run agent:admin-crud-coverage",
+        "npm run agent:admin-config-gate",
         "npm run agent:live-readiness",
         "npm run agent:live-readiness -- --content-import-approved --content-merge-approved --content-public-cutover-approved (report-only; use only after Jay approves those gates)",
         "npm run agent:admin-crud-live (plan-only)",
@@ -431,6 +434,7 @@
         "scripts/bootstrap-first-admin.mjs",
         "scripts/check-admin-live-readiness.mjs",
         "scripts/check-admin-crud-live.mjs",
+        "scripts/check-admin-config-gate.mjs",
         "scripts/agent-init.sh",
         "scripts/agent-smoke.sh",
         "src/App.tsx",
@@ -463,7 +467,8 @@
         "2026-05-28: `npm run agent:admin-crud-coverage` now verifies /admin route registration, RequireAdmin state handling, active module registration, and browser-key-only Supabase client wiring before live auth QA.",
         "2026-05-29: `npm run agent:admin-crud-coverage` now also guards the config-missing state copy, login/unauthorized config handling, admin-route WelcomePopup suppression, whole-browser-source service-role env/client boundary, and browser-key/RLS-only admin live verifier boundary.",
         "2026-05-28: `npm run agent:admin-crud-live` now stages the live write proof after auth readiness. Plan-only mode performs no writes; live mode requires a real owner/admin session and Jay approval for tagged QA rows.",
-        "2026-05-29: `/admin` dashboard now includes a real content health queue for published media missing metadata, project claim review, published products/articles missing key media, TBC Stone Library records, and stale new leads. `npm run agent:admin-crud-coverage` guards those dashboard health checks source-side, and `npm run agent:admin-crud-live` stages tagged predicate readback for live admin QA."
+        "2026-05-29: `/admin` dashboard now includes a real content health queue for published media missing metadata, project claim review, published products/articles missing key media, TBC Stone Library records, and stale new leads. `npm run agent:admin-crud-coverage` guards those dashboard health checks source-side, and `npm run agent:admin-crud-live` stages tagged predicate readback for live admin QA.",
+        "2026-05-29: Added `npm run agent:admin-config-gate` to make no-config admin route QA repeatable. The runner starts built Vite preview by default, checks every launch-critical admin route in Firefox for the configuration-required state, rejects private admin/module text, and requires no Supabase credentials."
       ],
       "acceptance": [
         "Admin shell route is protected by Supabase Auth.",
@@ -487,6 +492,7 @@
         "npm run agent:admin-live-readiness -- --admin-email <first-admin-email> (after browser/service keys and first admin profile are configured; verifies active profile, baseline seeds, and browser-key public/private boundary)",
         "Playwright: /admin, /admin/login, /admin/unauthorized, /admin/leads, /admin/media, /admin/settings, /admin/stone-library, /admin/projects, /admin/products, /admin/articles, and /admin/audit show configuration-required state when no browser key is configured",
         "npm run agent:admin-crud-coverage",
+        "npm run agent:admin-config-gate",
         "npm run agent:admin-crud-live (plan-only)",
         "npm run agent:admin-crud-live -- --allow-writes (after browser-safe keys, real owner/admin session, and Jay approval for tagged QA writes; verifies dashboard-health predicate readback plus tagged public-content rows and private lead rows are not anonymously visible)"
       ]
