@@ -51,6 +51,7 @@ const pageChecks = [
       'Content health queue',
       'Published media missing alt or usage notes',
       'Project claims needing review',
+      'Project fact rows needing review',
       'Published products missing hero media',
       'Published articles missing cover media',
       'Stone groups still marked TBC',
@@ -628,6 +629,18 @@ function checkAdminLiveVerifierBoundaries() {
   );
   requireIncludes(text, 'EXPECTED_AUDIT_ACTIONS', 'scripts/check-admin-crud-live.mjs');
   requireIncludes(text, 'assertAuditActionCoverage', 'scripts/check-admin-crud-live.mjs');
+  requireIncludes(text, 'assertPrePublishDashboardHealth', 'scripts/check-admin-crud-live.mjs');
+  requireIncludes(text, 'assertPublishedDashboardHealth', 'scripts/check-admin-crud-live.mjs');
+  requireIncludes(
+    text,
+    'Read back dashboard health predicates against tagged QA rows before archiving them.',
+    'scripts/check-admin-crud-live.mjs',
+  );
+  requireIncludes(
+    text,
+    'Dashboard health predicates matched tagged QA rows before archive cleanup.',
+    'scripts/check-admin-crud-live.mjs',
+  );
   requireIncludes(
     text,
     'Expected exactly ${EXPECTED_AUDIT_ROW_COUNT} tagged audit rows',

@@ -24,6 +24,7 @@ const livePlan = [
   'Create tagged Article metadata and structured block records.',
   'Create tagged private enquiry/sample-request QA rows, then update workflow fields.',
   'Record admin_audit_events for primary writes and export-gate actions.',
+  'Read back dashboard health predicates against tagged QA rows before archiving them.',
   'Publish then archive public-facing tagged QA rows before the final anonymous visibility check.',
   'Verify tagged archived content and private lead rows are not anonymously visible through browser-key reads.',
   'When --include-storage is used, verify the signed-in admin can read back the private Storage object and anonymous reads are denied.',
@@ -510,6 +511,89 @@ async function assertNotAnonymousReadable(config, table, filters, label) {
   );
 }
 
+async function assertDashboardHealthMatch(config, accessToken, table, filters, extras, label) {
+  const rows = await selectRows(config, accessToken, table, filters, 'id', extras);
+  assert.equal(
+    rows.length,
+    1,
+    `${label} dashboard health predicate did not match exactly one tagged QA row.`,
+  );
+}
+
+async function assertPrePublishDashboardHealth(config, accessToken, ids, staleLeadCutoff) {
+  await Promise.all([
+    assertDashboardHealthMatch(
+      config,
+      accessToken,
+      'stone_groups',
+      { id: ids.stoneGroupId, status: 'tbc' },
+      {},
+      'Stone Library TBC health check',
+    ),
+    assertDashboardHealthMatch(
+      config,
+      accessToken,
+      'enquiries',
+      { id: ids.enquiryId, status: 'new' },
+      { created_at: `lt.${staleLeadCutoff}` },
+      'stale enquiry health check',
+    ),
+    assertDashboardHealthMatch(
+      config,
+      accessToken,
+      'sample_requests',
+      { id: ids.sampleRequestId, status: 'new' },
+      { created_at: `lt.${staleLeadCutoff}` },
+      'stale sample request health check',
+    ),
+  ]);
+}
+
+async function assertPublishedDashboardHealth(config, accessToken, ids) {
+  await Promise.all([
+    assertDashboardHealthMatch(
+      config,
+      accessToken,
+      'media_assets',
+      { id: ids.mediaId, status: 'published' },
+      { or: '(alt.is.null,usage_notes.is.null)' },
+      'published media metadata health check',
+    ),
+    assertDashboardHealthMatch(
+      config,
+      accessToken,
+      'projects',
+      { id: ids.projectId, status: 'published', claim_review_status: 'needs_review' },
+      {},
+      'published project claim-review health check',
+    ),
+    assertDashboardHealthMatch(
+      config,
+      accessToken,
+      'project_facts',
+      { id: ids.projectFactId, claim_status: 'needs_review' },
+      {},
+      'project fact claim-review health check',
+    ),
+    assertDashboardHealthMatch(
+      config,
+      accessToken,
+      'products',
+      { id: ids.productId, status: 'published' },
+      { hero_media_id: 'is.null' },
+      'published product missing hero-media health check',
+    ),
+    assertDashboardHealthMatch(
+      config,
+      accessToken,
+      'articles',
+      { id: ids.articleId, status: 'published' },
+      { cover_media_id: 'is.null' },
+      'published article missing cover-media health check',
+    ),
+  ]);
+}
+
 async function assertStorageObjectNotAnonymousReadable(config, storageRef) {
   if (!storageRef) return;
 
@@ -698,6 +782,8 @@ async function run() {
   const marker = `admin-live-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`;
   const slug = markerSlug(marker);
   const metadata = { marker, source: 'scripts/check-admin-crud-live.mjs' };
+  const staleLeadCreatedAt = new Date(Date.now() - 1000 * 60 * 60 * 72).toISOString();
+  const staleLeadCutoff = new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString();
   const created = [];
 
   console.log('Admin CRUD live verification starting.');
@@ -745,7 +831,7 @@ async function run() {
     size_bytes: storageRef ? PNG_1X1.length : null,
     alt: `Admin live QA ${marker}`,
     caption: 'Tagged admin live verification asset.',
-    usage_notes: marker,
+    usage_notes: null,
     created_by: authUser.id,
     updated_by: authUser.id,
   });
@@ -766,7 +852,7 @@ async function run() {
   const stoneGroup = await insertRow(config, accessToken, 'stone_groups', {
     stone_group_key: slug,
     display_name: `Admin Live Stone ${marker}`,
-    status: 'draft',
+    status: 'tbc',
     stone_type_display: 'Granite',
     summary: 'Tagged admin live verification row.',
     notes: marker,
@@ -1013,6 +1099,8 @@ async function run() {
     source_route: '/admin-live-check',
     turnstile_success: null,
     notification_status: 'not_required',
+    created_at: staleLeadCreatedAt,
+    updated_at: staleLeadCreatedAt,
   });
   created.push(`enquiries#${enquiry.id}`);
 
@@ -1028,6 +1116,8 @@ async function run() {
     source_route: '/admin-live-check',
     turnstile_success: null,
     notification_status: 'not_required',
+    created_at: staleLeadCreatedAt,
+    updated_at: staleLeadCreatedAt,
   });
   created.push(`sample_requests#${sampleRequest.id}`);
 
@@ -1039,6 +1129,17 @@ async function run() {
     notes: marker,
   });
   created.push(`sample_request_items#${sampleItem.id}`);
+
+  await assertPrePublishDashboardHealth(
+    config,
+    accessToken,
+    {
+      stoneGroupId: stoneGroup.id,
+      enquiryId: enquiry.id,
+      sampleRequestId: sampleRequest.id,
+    },
+    staleLeadCutoff,
+  );
 
   await updateById(config, accessToken, 'enquiries', enquiry.id, {
     status: 'contacted',
@@ -1076,6 +1177,14 @@ async function run() {
   ]) {
     await transitionStatus(config, accessToken, authUser.id, table, id, 'published', action, entityType, metadata);
   }
+
+  await assertPublishedDashboardHealth(config, accessToken, {
+    mediaId: media.id,
+    projectId: project.id,
+    projectFactId: projectFact.id,
+    productId: product.id,
+    articleId: article.id,
+  });
 
   for (const [table, id, action, entityType] of [
     ['project_hotspots', hotspot.id, 'project_hotspot.archive', 'project_hotspots'],
@@ -1141,6 +1250,7 @@ async function run() {
     console.log('Anonymous reads for the tagged private Storage object were denied.');
   }
   console.log(`Audit rows recorded: ${auditRows.length}`);
+  console.log('Dashboard health predicates matched tagged QA rows before archive cleanup.');
   console.log('Tagged QA content rows were published, archived, then checked for anonymous invisibility.');
   console.log('Anonymous browser-key reads returned zero tagged QA content rows and no private lead rows.');
   console.log('Tagged rows are retained for auditability; cleanup is intentionally not destructive.');

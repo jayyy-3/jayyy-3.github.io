@@ -342,13 +342,15 @@
         "2026-05-29: `npm run agent:check` now guards the active operational `agent:*` package script map for form, admin, Cloudflare, first-admin, live-readiness, content-import, and public Supabase readiness runners so launch verification commands cannot be silently removed from `package.json`.",
         "2026-05-29: `npm run agent:admin-crud-coverage` now also fails if admin CMS acceptance drifts back toward physical-delete language instead of the launch archive/removal contract.",
         "2026-05-28: Removed the retired AdminModulePage scaffold component and unused scaffold/locked module-state branches now that all launch-critical admin modules have real source screens. Admin CRUD coverage now fails if the retired scaffold component returns.",
-        "2026-05-29: `/admin` dashboard now includes a real content health queue for published media missing metadata, project claim review, published products/articles missing key media, TBC Stone Library records, and stale new leads. `npm run agent:admin-crud-coverage` guards those dashboard health checks source-side until live admin credentials allow browser/data QA."
+        "2026-05-29: `/admin` dashboard now includes a real content health queue for published media missing metadata, project claim review, published products/articles missing key media, TBC Stone Library records, and stale new leads. `npm run agent:admin-crud-coverage` guards those dashboard health checks source-side until live admin credentials allow browser/data QA.",
+        "2026-05-29: `npm run agent:admin-crud-live` now stages dashboard-health predicate readback against tagged QA rows before archive cleanup, and `npm run agent:admin-crud-coverage` fails if those live-verifier hooks are removed."
       ],
       "acceptance": [
         "Authenticated admin users can create, read, update, draft, publish, and archive Projects, Stone Library records, Products, Articles, and media records without code edits.",
         "Physical delete controls remain out of the launch-critical CMS path unless Jay approves a destructive-delete/retention policy; current live verification must use non-destructive archive flows.",
         "Article editing uses approved structured block types instead of arbitrary newsletter HTML.",
         "`npm run agent:admin-crud-live` must verify exact expected tagged audit actions and entity types for live QA writes and exports, not only a loose audit-row count.",
+        "`npm run agent:admin-crud-live` must verify dashboard-health predicates against tagged live QA rows before archiving them.",
         "Unpublished content remains hidden from the public site, and unauthenticated users cannot access admin routes."
       ],
       "verification": [
@@ -359,7 +361,7 @@
         "npm run agent:admin-crud-coverage",
         "npm run agent:live-readiness",
         "npm run agent:admin-crud-live (plan-only)",
-        "npm run agent:admin-crud-live -- --allow-writes (after browser-safe keys, real owner/admin session, and Jay approval for tagged QA writes; verifies exact tagged audit action coverage plus tagged public-content rows and private lead rows are not anonymously visible)",
+        "npm run agent:admin-crud-live -- --allow-writes (after browser-safe keys, real owner/admin session, and Jay approval for tagged QA writes; verifies exact tagged audit action coverage, dashboard-health predicate readback, plus tagged public-content rows and private lead rows are not anonymously visible)",
         "npm run agent:admin-crud-live -- --allow-writes --include-storage (after the same live-write gate, for final private Storage upload, signed-in admin readback, and anonymous-read denial proof)"
       ]
     },
@@ -449,7 +451,7 @@
         "2026-05-28: `npm run agent:admin-crud-coverage` now verifies /admin route registration, RequireAdmin state handling, active module registration, and browser-key-only Supabase client wiring before live auth QA.",
         "2026-05-29: `npm run agent:admin-crud-coverage` now also guards the config-missing state copy, login/unauthorized config handling, admin-route WelcomePopup suppression, whole-browser-source service-role env/client boundary, and browser-key/RLS-only admin live verifier boundary.",
         "2026-05-28: `npm run agent:admin-crud-live` now stages the live write proof after auth readiness. Plan-only mode performs no writes; live mode requires a real owner/admin session and Jay approval for tagged QA rows.",
-        "2026-05-29: `/admin` dashboard now includes a real content health queue for published media missing metadata, project claim review, published products/articles missing key media, TBC Stone Library records, and stale new leads. `npm run agent:admin-crud-coverage` guards those dashboard health checks source-side until live admin credentials allow browser/data QA."
+        "2026-05-29: `/admin` dashboard now includes a real content health queue for published media missing metadata, project claim review, published products/articles missing key media, TBC Stone Library records, and stale new leads. `npm run agent:admin-crud-coverage` guards those dashboard health checks source-side, and `npm run agent:admin-crud-live` stages tagged predicate readback for live admin QA."
       ],
       "acceptance": [
         "Admin shell route is protected by Supabase Auth.",
@@ -474,7 +476,7 @@
         "Playwright: /admin and /admin/login show configuration-required state when no browser key is configured",
         "npm run agent:admin-crud-coverage",
         "npm run agent:admin-crud-live (plan-only)",
-        "npm run agent:admin-crud-live -- --allow-writes (after browser-safe keys, real owner/admin session, and Jay approval for tagged QA writes; verifies tagged public-content rows and private lead rows are not anonymously visible)"
+        "npm run agent:admin-crud-live -- --allow-writes (after browser-safe keys, real owner/admin session, and Jay approval for tagged QA writes; verifies dashboard-health predicate readback plus tagged public-content rows and private lead rows are not anonymously visible)"
       ]
     },
     {
@@ -550,7 +552,7 @@
         "Playwright: /admin/settings shows configuration-required state when no browser key is configured",
         "npm run agent:admin-crud-coverage",
         "npm run agent:admin-crud-live (plan-only)",
-        "npm run agent:admin-crud-live -- --allow-writes (after browser-safe keys, real owner/admin session, and Jay approval for tagged QA writes; verifies tagged public-content rows and private lead rows are not anonymously visible)"
+        "npm run agent:admin-crud-live -- --allow-writes (after browser-safe keys, real owner/admin session, and Jay approval for tagged QA writes; verifies dashboard-health predicate readback plus tagged public-content rows and private lead rows are not anonymously visible)"
       ]
     },
     {
@@ -619,7 +621,7 @@
         "2026-05-29: Admin CRUD coverage verifier now also checks Article structured-authoring guardrails: approved schema block types must remain available, published blocks must require structured content, and raw HTML/newsletter authoring helpers must not appear in `/admin/articles`.",
         "2026-05-29: Admin CRUD coverage verifier now also checks the archive/removal contract so launch-critical content acceptance stays non-destructive until a physical-delete policy is approved.",
         "2026-05-29: Admin CRUD live verifier plan now includes tagged `stone_finish_images` create/publish/archive coverage through authenticated RLS for the later credential-gated live run. It publishes then archives public-facing QA parent rows, verifies those tagged archived public-content rows and private lead rows are not anonymously visible through browser-key reads, and performs no physical deletes.",
-        "2026-05-29: `/admin` dashboard now includes a real content health queue for published media missing metadata, project claim review, published products/articles missing key media, TBC Stone Library records, and stale new leads. `npm run agent:admin-crud-coverage` guards those dashboard health checks source-side until live admin credentials allow browser/data QA."
+        "2026-05-29: `/admin` dashboard now includes a real content health queue for published media missing metadata, project claim review, published products/articles missing key media, TBC Stone Library records, and stale new leads. `npm run agent:admin-crud-coverage` guards those dashboard health checks source-side, and `npm run agent:admin-crud-live` stages tagged predicate readback for live admin QA."
       ],
       "acceptance": [
         "Admin users can draft, publish, edit, and archive Projects, Stone Library records including finish image links, Products, and Articles through the non-destructive launch lifecycle.",
@@ -656,7 +658,7 @@
         "Playwright: /admin/articles shows configuration-required state when no browser key is configured",
         "npm run agent:admin-crud-coverage",
         "npm run agent:admin-crud-live (plan-only)",
-        "npm run agent:admin-crud-live -- --allow-writes (after browser-safe keys, real owner/admin session, and Jay approval for tagged QA writes; verifies tagged public-content rows and private lead rows are not anonymously visible)"
+        "npm run agent:admin-crud-live -- --allow-writes (after browser-safe keys, real owner/admin session, and Jay approval for tagged QA writes; verifies dashboard-health predicate readback plus tagged public-content rows and private lead rows are not anonymously visible)"
       ]
     },
     {
@@ -725,7 +727,7 @@
         "Playwright: /admin/leads shows configuration-required state when no browser key is configured",
         "npm run agent:admin-crud-coverage",
         "npm run agent:admin-crud-live (plan-only)",
-        "npm run agent:admin-crud-live -- --allow-writes (after browser-safe keys, real owner/admin session, and Jay approval for tagged QA writes; verifies tagged public-content rows and private lead rows are not anonymously visible)",
+        "npm run agent:admin-crud-live -- --allow-writes (after browser-safe keys, real owner/admin session, and Jay approval for tagged QA writes; verifies dashboard-health predicate readback plus tagged public-content rows and private lead rows are not anonymously visible)",
         "npm run agent:admin-crud-live -- --allow-writes --include-storage (for final private Storage upload, signed-in admin readback, and anonymous-read denial proof after the same credentials/session/approval gate)"
       ]
     },
