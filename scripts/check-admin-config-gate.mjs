@@ -4,6 +4,7 @@ import { mkdir, rm, writeFile } from 'node:fs/promises';
 import { spawn } from 'node:child_process';
 import { cwd, env, exit } from 'node:process';
 import { join } from 'node:path';
+import { normalizeBaseUrlOrigin } from './_lib/live-input-validation.mjs';
 
 const root = cwd();
 const host = env.ADMIN_CONFIG_GATE_HOST ?? '127.0.0.1';
@@ -43,7 +44,13 @@ const forbiddenPrivateText = [
   'Site settings saved',
 ];
 
-const args = parseArgs(process.argv.slice(2));
+let args;
+try {
+  args = parseArgs(process.argv.slice(2));
+} catch (error) {
+  console.error(error instanceof Error ? error.message : error);
+  exit(1);
+}
 let serverProcess = null;
 
 main().catch((error) => {
@@ -111,7 +118,7 @@ function parseArgs(rawArgs) {
   for (let index = 0; index < rawArgs.length; index += 1) {
     const arg = rawArgs[index];
     if (arg === '--base-url') {
-      parsed.baseUrl = stripTrailingSlash(rawArgs[index + 1]);
+      parsed.baseUrl = normalizeBaseUrlOrigin(rawArgs[index + 1] || '', '--base-url');
       index += 1;
       continue;
     }
@@ -239,13 +246,6 @@ export default {
   ],
 };
 `;
-}
-
-function stripTrailingSlash(value) {
-  if (!value) {
-    throw new Error('--base-url requires a value');
-  }
-  return value.replace(/\/$/, '');
 }
 
 function sleep(ms) {

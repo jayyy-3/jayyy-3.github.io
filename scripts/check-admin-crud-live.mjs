@@ -2,6 +2,7 @@
 import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
+import { isValidEmail } from './_lib/live-input-validation.mjs';
 
 const DEFAULT_SUPABASE_URL = 'https://npkidywzwddbnfrnxlmo.supabase.co';
 const DEFAULT_ENV_FILES = ['.env.local', '.env', '.dev.vars'];
@@ -253,8 +254,8 @@ function assertWriteConfig(config) {
   if (!config.browserKey) {
     missing.push('VITE_SUPABASE_PUBLISHABLE_KEY or VITE_SUPABASE_ANON_KEY');
   }
-  if (!config.accessToken && (!config.adminEmail || !config.adminPassword)) {
-    missing.push('URBLO_ADMIN_ACCESS_TOKEN or URBLO_ADMIN_EMAIL + URBLO_ADMIN_PASSWORD');
+  if (!config.accessToken && (!isValidEmail(config.adminEmail) || !config.adminPassword)) {
+    missing.push('URBLO_ADMIN_ACCESS_TOKEN or valid URBLO_ADMIN_EMAIL + URBLO_ADMIN_PASSWORD');
   }
 
   if (missing.length > 0) {

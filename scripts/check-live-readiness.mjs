@@ -180,10 +180,6 @@ function firstPresent(env, names) {
   return names.find((name) => Boolean(env[name])) || '';
 }
 
-function allPresent(env, names) {
-  return names.every((name) => Boolean(env[name]));
-}
-
 function describeSource(name, sources) {
   return name ? `${name} (${sources[name] || 'unknown source'})` : '';
 }
@@ -217,8 +213,10 @@ function buildChecks(env, sources, options) {
   const previewUrlValid = isValidBaseUrlOrigin(previewUrl);
   const previewUrlSource = options.baseUrl ? '--base-url argument' : describeSource(previewUrlEnv, sources);
   const adminToken = firstPresent(env, ADMIN_SESSION_TOKEN_NAMES);
-  const adminPasswordSession = allPresent(env, ADMIN_SESSION_PASSWORD_NAMES);
-  const unprofiledPasswordSession = allPresent(env, UNPROFILED_SESSION_PASSWORD_NAMES);
+  const adminPasswordSession =
+    isValidEmail(env.URBLO_ADMIN_EMAIL || '') && Boolean(env.URBLO_ADMIN_PASSWORD);
+  const unprofiledPasswordSession =
+    isValidEmail(env.URBLO_UNPROFILED_EMAIL || '') && Boolean(env.URBLO_UNPROFILED_PASSWORD);
   const turnstile = firstPresent(env, TURNSTILE_NAMES);
   const turnstileSiteKey = firstPresent(env, TURNSTILE_SITE_KEY_NAMES);
   const emailSenderReady = Boolean(env.RESEND_API_KEY) && Boolean(env.LEAD_NOTIFICATION_FROM || env.RESEND_FROM_EMAIL);
@@ -422,7 +420,7 @@ function buildChecks(env, sources, options) {
       ].filter(Boolean),
       missing: [
         browserKey ? '' : 'VITE_SUPABASE_PUBLISHABLE_KEY or VITE_SUPABASE_ANON_KEY',
-        adminPasswordSession ? '' : 'URBLO_ADMIN_EMAIL plus URBLO_ADMIN_PASSWORD',
+        adminPasswordSession ? '' : 'valid URBLO_ADMIN_EMAIL plus URBLO_ADMIN_PASSWORD',
       ].filter(Boolean),
       optional: [
         'Signs in through the browser UI and verifies authenticated admin route shells without creating content rows, Storage objects, or audit events.',
@@ -439,7 +437,7 @@ function buildChecks(env, sources, options) {
       ].filter(Boolean),
       missing: [
         browserKey ? '' : 'VITE_SUPABASE_PUBLISHABLE_KEY or VITE_SUPABASE_ANON_KEY',
-        unprofiledPasswordSession ? '' : 'URBLO_UNPROFILED_EMAIL plus URBLO_UNPROFILED_PASSWORD',
+        unprofiledPasswordSession ? '' : 'valid URBLO_UNPROFILED_EMAIL plus URBLO_UNPROFILED_PASSWORD',
       ].filter(Boolean),
       optional: [
         'Signs in through the browser UI with a valid Auth user that has no active admin_profiles row, verifies /admin/unauthorized, and probes protected admin routes without rendering private admin content.',
@@ -460,7 +458,7 @@ function buildChecks(env, sources, options) {
         browserKey ? '' : 'VITE_SUPABASE_PUBLISHABLE_KEY or VITE_SUPABASE_ANON_KEY',
         adminToken || adminPasswordSession
           ? ''
-          : 'URBLO_ADMIN_ACCESS_TOKEN, or URBLO_ADMIN_EMAIL plus URBLO_ADMIN_PASSWORD',
+          : 'URBLO_ADMIN_ACCESS_TOKEN, or valid URBLO_ADMIN_EMAIL plus URBLO_ADMIN_PASSWORD',
       ].filter(Boolean),
       manual: options.adminWritesApproved
         ? []
@@ -480,7 +478,7 @@ function buildChecks(env, sources, options) {
         browserKey ? '' : 'VITE_SUPABASE_PUBLISHABLE_KEY or VITE_SUPABASE_ANON_KEY',
         adminToken || adminPasswordSession
           ? ''
-          : 'URBLO_ADMIN_ACCESS_TOKEN, or URBLO_ADMIN_EMAIL plus URBLO_ADMIN_PASSWORD',
+          : 'URBLO_ADMIN_ACCESS_TOKEN, or valid URBLO_ADMIN_EMAIL plus URBLO_ADMIN_PASSWORD',
       ].filter(Boolean),
       manual: options.adminWritesApproved
         ? []

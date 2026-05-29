@@ -2,6 +2,58 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Admin Runner Credential Input Boundary)
+
+### Scope
+- Extended the shared live input validation helper to the admin config browser gate so `--base-url` placeholders or non-origin URLs fail before browser navigation.
+- Tightened active-admin and unprofiled admin browser QA readiness so copied email placeholders do not proceed to Supabase Auth login attempts.
+- Tightened `admin-crud-live --allow-writes` so live RLS write verification requires either an explicit access token or a real email-shaped admin email/password pair before any live auth/write work can start.
+- Updated Harness docs and task state to record the stricter admin runner input boundary.
+- No Supabase rows, Auth users, Storage objects, Cloudflare state, credentials, or live writes were created or changed.
+
+### Changed Files
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `docs/agent/verification.md`
+- `scripts/check-admin-auth-browser.mjs`
+- `scripts/check-admin-config-gate.mjs`
+- `scripts/check-admin-crud-live.mjs`
+- `scripts/check-live-readiness.mjs`
+
+### Verification Results
+- Supabase changelog scan: pass. The relevant hosted-platform note remains the April 28, 2026 Data/GraphQL API exposure change; this checkpoint is local verifier/docs hardening only.
+- `node --check` for edited admin/live-readiness scripts: pass.
+- `npm run agent:admin-config-gate -- --base-url '<preview-origin>'`: expected fail before browser navigation with the placeholder base URL error.
+- Placeholder active-admin browser QA check with dummy browser key/password: expected fail in strict plan mode with `valid URBLO_ADMIN_EMAIL` missing; no login attempted.
+- Placeholder admin CRUD live write check with dummy browser key/password: expected fail before Supabase auth/write work with `valid URBLO_ADMIN_EMAIL + URBLO_ADMIN_PASSWORD` missing.
+- Placeholder admin login readiness audit: `npm run agent:live-readiness` reports active-admin, unprofiled, and admin CRUD live write gates as missing valid email-shaped inputs when placeholder emails are supplied.
+- `npm run agent:live-readiness`: pass in report-only mode with live inputs still missing/manual-gated.
+- `npm run agent:admin-auth-browser`: pass in plan-only/no-login mode.
+- `npm run agent:admin-crud-live`: pass in plan-only/no-write mode.
+- `npm run agent:first-admin-bootstrap`: pass in plan-only/no-write mode.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:public-supabase-readiness`: pass.
+- `npm run agent:cloudflare-readiness`: pass.
+- `npm run agent:forms-ui`: pass.
+- `node scripts/check-forms-api.mjs`: pass.
+- `npm run agent:supabase-foundation-readiness`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:admin-config-gate`: pass for 11 no-config admin routes in Firefox.
+
+### Risks and Gaps
+- This is another source-only verifier guard. It still does not provide service-role keys, browser-safe keys, admin credentials, first-admin profile, Cloudflare preview URL, or Jay approvals needed for live completion.
+
+### Next Handoff
+- Continue source-only hardening only where it reduces launch risk; otherwise live form/admin proof remains blocked on the external inputs listed by `npm run agent:live-readiness`.
+
 ## Entry - 2026-05-29 (Live Verifier Input Boundary)
 
 ### Scope

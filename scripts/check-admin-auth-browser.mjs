@@ -5,7 +5,7 @@ import { spawn } from 'node:child_process';
 import { cwd, env as processEnv, exit } from 'node:process';
 import { join } from 'node:path';
 import { firefox } from 'playwright';
-import { normalizeBaseUrlOrigin } from './_lib/live-input-validation.mjs';
+import { isValidEmail, normalizeBaseUrlOrigin } from './_lib/live-input-validation.mjs';
 
 const DEFAULT_ENV_FILES = ['.env.local', '.env', '.dev.vars'];
 const root = cwd();
@@ -221,16 +221,17 @@ function getReadiness(currentEnv, sources) {
       : '';
   const emailName = args.expectUnauthorized ? 'URBLO_UNPROFILED_EMAIL' : 'URBLO_ADMIN_EMAIL';
   const passwordName = args.expectUnauthorized ? 'URBLO_UNPROFILED_PASSWORD' : 'URBLO_ADMIN_PASSWORD';
+  const email = currentEnv[emailName] ?? '';
 
   const missing = [
     browserKeyName ? '' : 'VITE_SUPABASE_PUBLISHABLE_KEY or VITE_SUPABASE_ANON_KEY',
-    currentEnv[emailName] ? '' : emailName,
+    isValidEmail(email) ? '' : `valid ${emailName}`,
     currentEnv[passwordName] ? '' : passwordName,
   ].filter(Boolean);
 
   return {
     browserKeyName,
-    email: currentEnv[emailName] ?? '',
+    email,
     emailName,
     missing,
     password: currentEnv[passwordName] ?? '',
