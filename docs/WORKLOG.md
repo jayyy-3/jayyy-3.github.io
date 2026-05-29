@@ -40,6 +40,7 @@ Last updated: 2026-05-29
 - `npm run lint`: pass.
 - `npx tsc -b`: pass.
 - `npm run agent:smoke`: pass, including Forms API checks and the Contact form UI source contract.
+- Playwright CLI Firefox snapshot on `http://127.0.0.1:4174/contact`: pass. With no `VITE_TURNSTILE_SITE_KEY` configured, the Contact page rendered the normal form, direct email/phone fallback channels, and no Turnstile widget.
 - `npm run agent:check`: pass.
 - `git diff --check`: pass.
 
