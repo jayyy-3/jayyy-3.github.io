@@ -12,7 +12,7 @@ Run:
 - `npm run agent:init`
 - `npm run agent:live-readiness` when continuing form/admin/Cloudflare live verification work.
 
-This command is informational and does not replace verification gates. For live form checks, use `--form-writes-approved` in readiness only after Jay has approved tagged live form QA writes; actual `npm run agent:forms-live` execution must also include `--allow-writes`. For the first-admin profile/invite write path, use `--first-admin-writes-approved` only after Jay has approved creating/upserting the first profile or sending an invite. For live admin CRUD writes, use `--admin-writes-approved` only after Jay has approved tagged live admin QA writes.
+This command is informational and does not replace verification gates. For live form checks, use `--form-writes-approved` in readiness only after Jay has approved tagged live form QA writes; actual `npm run agent:forms-live` execution must also include `--allow-writes`. For the first-admin profile/invite write path, use `--first-admin-writes-approved` only after Jay has approved creating/upserting the first profile or sending an invite. For live admin CRUD writes, use `--admin-writes-approved` only after Jay has approved tagged live admin QA writes. For static-to-Supabase content import and public read cutover, use `--content-import-approved`, `--content-merge-approved`, and `--content-public-cutover-approved` only after Jay has approved the guarded draft import apply, any required merge/upsert behavior, and the public read-path switch.
 
 ## Verification Profiles
 

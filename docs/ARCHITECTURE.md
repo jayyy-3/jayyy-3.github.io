@@ -122,6 +122,7 @@ Last updated: 2026-05-29
   - `npm run agent:public-supabase-readiness` => `node scripts/check-public-supabase-readiness.mjs`
   - Verifies the content import dry run has no warnings/blockers, all import rows with status remain `draft`, article block imports stay structured rather than placeholder/newsletter-artifact payloads, the generated guarded draft apply SQL keeps the import and merge approval gates manual, avoids destructive/publish statements, forces imported status to `draft`, the generated guarded rollback SQL keeps its destructive approval gate manual and follows reverse dependency order, public RLS policy source is published-only, anonymous grants are read-only, public runtime code is still static/file-backed, and Cloudflare routes only invoke Functions under `/api/*`.
   - This is a source/no-write verifier. It does not apply imported content, query Supabase, create a preview deployment, or replace live credential checks.
+  - `npm run agent:live-readiness` reports the guarded content import apply, merge/upsert, and public read cutover approval gates with `--content-import-approved`, `--content-merge-approved`, and `--content-public-cutover-approved`. These flags only document manual readiness and never apply SQL, publish content, or switch runtime reads.
 - Agent startup:
   - `npm run agent:init` => `bash scripts/agent-init.sh`
   - Prints repo path, git status, recent commits, runtime versions, read order, and common commands.

@@ -23,6 +23,9 @@ function parseArgs(argv) {
     adminEmail: '',
     adminWritesApproved: false,
     baseUrl: '',
+    contentImportApproved: false,
+    contentMergeApproved: false,
+    contentPublicCutoverApproved: false,
     envFiles: [...DEFAULT_ENV_FILES],
     firstAdminWritesApproved: false,
     formWritesApproved: false,
@@ -68,6 +71,21 @@ function parseArgs(argv) {
 
     if (arg === '--admin-writes-approved') {
       options.adminWritesApproved = true;
+      continue;
+    }
+
+    if (arg === '--content-import-approved') {
+      options.contentImportApproved = true;
+      continue;
+    }
+
+    if (arg === '--content-merge-approved') {
+      options.contentMergeApproved = true;
+      continue;
+    }
+
+    if (arg === '--content-public-cutover-approved') {
+      options.contentPublicCutoverApproved = true;
       continue;
     }
 
@@ -411,6 +429,53 @@ function buildChecks(env, sources, options) {
         : ['Jay approval for tagged live QA writes is required before running --allow-writes --include-storage'],
       optional: [
         'Runs the admin CRUD live verifier, uploads a tiny private urblo-admin-media object, verifies signed-in admin readback, and verifies anonymous reads are denied.',
+      ],
+    }),
+    makeCheck({
+      id: 'content-import-artifacts',
+      label: 'Static-to-Supabase draft import artifacts',
+      command: 'npm run agent:content-import:apply-sql',
+      present: ['source-only guarded import, preflight, plan, and rollback artifact command is available'],
+      optional: [
+        'This command writes ignored .tmp review artifacts only; it does not apply SQL or mutate Supabase.',
+        'Review .tmp/content-import-preflight.sql before any live import approval.',
+      ],
+    }),
+    makeCheck({
+      id: 'content-import-live-apply',
+      label: 'Approved draft content import live apply',
+      command:
+        'Review .tmp/content-import-preflight.sql, then apply .tmp/content-import-apply.sql only after setting the guarded approval variables inside the transaction',
+      present: [
+        options.contentImportApproved ? 'Jay approval flag supplied for guarded draft content import apply' : '',
+        options.contentMergeApproved ? 'Jay approval flag supplied for merge/upsert when existing parent natural-key matches are present' : '',
+      ].filter(Boolean),
+      manual: [
+        options.contentImportApproved
+          ? ''
+          : 'Jay approval is required before applying guarded draft content import SQL to Supabase',
+        options.contentMergeApproved
+          ? ''
+          : 'Jay approval for import merge/upsert is required if preflight reports existing parent natural-key matches',
+      ].filter(Boolean),
+      optional: [
+        'The guarded apply SQL must keep imported content in draft and must not publish, delete, truncate, or disable RLS.',
+        'Use Supabase connector or an approved server-side SQL session; never paste or commit service-role secrets.',
+      ],
+    }),
+    makeCheck({
+      id: 'public-supabase-cutover',
+      label: 'Public content read cutover approval',
+      command:
+        'After approved draft import and live admin verification, migrate public read paths deliberately and run npm run agent:public-supabase-readiness plus runtime gates',
+      present: [
+        options.contentPublicCutoverApproved ? 'Jay approval flag supplied for public read cutover work' : '',
+      ].filter(Boolean),
+      manual: options.contentPublicCutoverApproved
+        ? []
+        : ['Jay approval is required before switching public Projects, Stone Library, Products, or Articles away from static/file-backed reads'],
+      optional: [
+        'Public routes must continue exposing published content only, and static fallback must remain explicit until each content type is fully migrated.',
       ],
     }),
     makeCheck({

@@ -339,6 +339,7 @@
         "2026-05-28: Added `npm run agent:live-readiness` as a no-secret input audit for first-admin readiness, admin live-write session availability, and Jay approval/manual-gate visibility before running live admin verification. It accepts non-secret `--admin-email`, `--first-admin-writes-approved`, and `--admin-writes-approved` readiness flags, but still performs no writes.",
         "2026-05-29: `npm run agent:live-readiness` now reports the first-admin profile/invite live write path separately from read-only first-admin verification. `--first-admin-writes-approved` only clears the manual approval gate and does not replace `--allow-writes`, `--confirm-email`, or the service-role credential requirement on `npm run agent:first-admin-bootstrap`.",
         "2026-05-29: `npm run agent:live-readiness` now reports `npm run agent:admin-crud-live -- --allow-writes --include-storage` as the final media Storage upload policy proof, separate from the general admin CRUD/audit live write check.",
+        "2026-05-29: `npm run agent:live-readiness` now reports guarded content import apply, merge/upsert, and public read cutover approval gates with `--content-import-approved`, `--content-merge-approved`, and `--content-public-cutover-approved` so generated import SQL is not confused with approved live work.",
         "2026-05-29: `npm run agent:check` now guards the active operational `agent:*` package script map for form, admin, Cloudflare, first-admin, live-readiness, content-import, and public Supabase readiness runners so launch verification commands cannot be silently removed from `package.json`.",
         "2026-05-29: `npm run agent:admin-crud-coverage` now also fails if admin CMS acceptance drifts back toward physical-delete language instead of the launch archive/removal contract.",
         "2026-05-28: Removed the retired AdminModulePage scaffold component and unused scaffold/locked module-state branches now that all launch-critical admin modules have real source screens. Admin CRUD coverage now fails if the retired scaffold component returns.",
@@ -360,6 +361,7 @@
         "npm run agent:smoke",
         "npm run agent:admin-crud-coverage",
         "npm run agent:live-readiness",
+        "npm run agent:live-readiness -- --content-import-approved --content-merge-approved --content-public-cutover-approved (report-only; use only after Jay approves those gates)",
         "npm run agent:admin-crud-live (plan-only)",
         "npm run agent:admin-crud-live -- --allow-writes (after browser-safe keys, real owner/admin session, and Jay approval for tagged QA writes; verifies exact tagged audit action coverage, dashboard-health predicate readback, plus tagged public-content rows and private lead rows are not anonymously visible)",
         "npm run agent:admin-crud-live -- --allow-writes --include-storage (after the same live-write gate, for final private Storage upload, signed-in admin readback, and anonymous-read denial proof)"
@@ -617,6 +619,7 @@
         "2026-05-29: Public Supabase readiness now guards the article structured import shape: it fails if article blocks regress to placeholders, lose image-to-media links, import newsletter footer/contact/social artifacts, or lose claim-review metadata.",
         "2026-05-29: Public Supabase readiness now also generates the guarded draft apply SQL in a temporary ignored `.tmp/` folder and fails if the import or merge approval gate is uncommented by default, runtime approval is not required, destructive statements appear, publish-status changes appear, imported status can drift from `draft`, parent natural-key conflict checks disappear, or the SQL summary stops matching dry-run plan counts.",
         "2026-05-29: Public Supabase readiness now also generates the guarded draft rollback SQL in a temporary ignored `.tmp/` folder and fails if the rollback approval gate is uncommented by default, reverse dependency order drifts, forbidden destructive statements appear, publish-state statements appear, or the SQL summary stops matching dry-run plan counts.",
+        "2026-05-29: `npm run agent:live-readiness` now exposes the content import apply, merge/upsert, and public read cutover approval gates as no-secret readiness flags. These flags are report-only and do not apply SQL, publish content, or switch runtime reads.",
         "2026-05-29: Admin CRUD coverage verifier now checks Stone Library finish-image table/action coverage in addition to group, variant, capability, Projects, Products, and Articles source screens.",
         "2026-05-29: Admin CRUD coverage verifier now also checks Article structured-authoring guardrails: approved schema block types must remain available, published blocks must require structured content, and raw HTML/newsletter authoring helpers must not appear in `/admin/articles`.",
         "2026-05-29: Admin CRUD coverage verifier now also checks the archive/removal contract so launch-critical content acceptance stays non-destructive until a physical-delete policy is approved.",
@@ -637,6 +640,7 @@
         "`npm run agent:public-supabase-readiness` fails if structured article import regresses to placeholder/newsletter-artifact payloads or loses claim-review metadata.",
         "`npm run agent:public-supabase-readiness` fails if the guarded draft apply SQL loses its manual import or merge approval gate, introduces destructive/publish statements, drops parent natural-key conflict checks, or stops forcing imported content status to draft.",
         "`npm run agent:public-supabase-readiness` fails if the guarded draft rollback SQL loses its manual destructive gate, reverse dependency order, draft/import targeting, or dry-run summary alignment.",
+        "`npm run agent:live-readiness` reports content import apply, merge/upsert, and public read cutover approval gates without mutating Supabase.",
         "`npm run agent:admin-crud-coverage` fails if `/admin/articles` loses approved structured block options, structured-content validation, or reintroduces raw HTML/newsletter authoring helpers."
       ],
       "verification": [
@@ -651,6 +655,7 @@
         "npm run agent:content-import:preflight-sql",
         "npm run agent:content-import:apply-sql",
         "npm run agent:public-supabase-readiness",
+        "npm run agent:live-readiness",
         "Supabase MCP: execute_sql verifies seed/import target table counts and RLS state before any import apply",
         "Playwright: /admin/stone-library shows configuration-required state when no browser key is configured",
         "Playwright: /admin/projects shows configuration-required state when no browser key is configured",

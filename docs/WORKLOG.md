@@ -2,6 +2,43 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Content Cutover Readiness Gates)
+
+### Scope
+- Expanded `npm run agent:live-readiness` so content import and public read cutover approval gates are visible next to form/admin/Cloudflare live blockers.
+- Added no-secret readiness flags for guarded draft content import apply, merge/upsert approval, and public read cutover approval: `--content-import-approved`, `--content-merge-approved`, and `--content-public-cutover-approved`.
+- Updated Harness docs so generated `.tmp` import SQL remains clearly no-write review material until Jay approves the live operation.
+
+### Changed Files
+- `AGENTS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `docs/agent/verification.md`
+- `scripts/check-live-readiness.mjs`
+
+### Verification Results
+- `node --check scripts/check-live-readiness.mjs`: pass.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:live-readiness`: pass in report-only mode; content import artifacts show ready, while live apply and public cutover remain manual-gated without approval flags.
+- `npm run agent:live-readiness -- --json --content-import-approved --content-merge-approved --content-public-cutover-approved`: pass in report-only mode; content import/cutover gates show ready when explicit approval flags are supplied.
+- `npm run agent:public-supabase-readiness`: pass.
+- `npm run agent:check`: pass.
+- `npm run lint`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- This is source-only/no-write. It did not apply content import SQL, merge target rows, publish content, switch public runtime reads, create Supabase rows, create Auth users, upload Storage objects, or touch Cloudflare.
+- Real content import apply, any merge/upsert, and public read cutover still require Jay approval, reviewed preflight output, live credentials/session readiness, and a deliberate runtime migration.
+
+### Next Handoff
+- `NOW-ADMIN-CONTENT-CRUD-001`
+- `NOW-ADMIN-CMS-001`
+- `NOW-FORMS-BACKEND-001`
+
 ## Entry - 2026-05-29 (Admin Live Dashboard Health Predicate Guard)
 
 ### Scope
