@@ -1,4 +1,8 @@
 import fs from 'node:fs';
+import {
+  isValidBaseUrlOrigin,
+  isValidEmail,
+} from './_lib/live-input-validation.mjs';
 
 const DEFAULT_ENV_FILES = ['.env.local', '.env', '.dev.vars'];
 const SERVICE_KEY_NAMES = ['SUPABASE_SERVICE_ROLE_KEY', 'SUPABASE_SERVICE_KEY'];
@@ -176,30 +180,6 @@ function firstPresent(env, names) {
   return names.find((name) => Boolean(env[name])) || '';
 }
 
-function isPlaceholderValue(value) {
-  return /<[^>]+>/.test(value) || /\[[^\]]+\]/.test(value);
-}
-
-function isValidEmail(value) {
-  return Boolean(value && !isPlaceholderValue(value) && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value));
-}
-
-function isValidBaseUrl(value) {
-  if (!value || isPlaceholderValue(value)) return false;
-
-  try {
-    const url = new URL(value);
-    return (
-      (url.protocol === 'https:' || url.protocol === 'http:') &&
-      (url.pathname === '' || url.pathname === '/') &&
-      !url.search &&
-      !url.hash
-    );
-  } catch {
-    return false;
-  }
-}
-
 function allPresent(env, names) {
   return names.every((name) => Boolean(env[name]));
 }
@@ -234,7 +214,7 @@ function buildChecks(env, sources, options) {
   const firstAdminEmailSource = options.adminEmail ? '--admin-email argument' : describeSource(firstAdminEmailEnv, sources);
   const previewUrlEnv = firstPresent(env, PREVIEW_URL_NAMES);
   const previewUrl = options.baseUrl || previewUrlEnv;
-  const previewUrlValid = isValidBaseUrl(previewUrl);
+  const previewUrlValid = isValidBaseUrlOrigin(previewUrl);
   const previewUrlSource = options.baseUrl ? '--base-url argument' : describeSource(previewUrlEnv, sources);
   const adminToken = firstPresent(env, ADMIN_SESSION_TOKEN_NAMES);
   const adminPasswordSession = allPresent(env, ADMIN_SESSION_PASSWORD_NAMES);

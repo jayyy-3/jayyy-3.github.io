@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { createClient } from '@supabase/supabase-js';
+import { isValidEmail } from './_lib/live-input-validation.mjs';
 
 const DEFAULT_SUPABASE_URL = 'https://npkidywzwddbnfrnxlmo.supabase.co';
 const DEFAULT_ENV_FILES = ['.env.local', '.env', '.dev.vars'];
@@ -119,7 +120,7 @@ function requireConfig(env, options) {
   const missing = [];
   if (!browserKeyName) missing.push('VITE_SUPABASE_PUBLISHABLE_KEY or VITE_SUPABASE_ANON_KEY');
   if (!serviceKeyName) missing.push('SUPABASE_SERVICE_ROLE_KEY or SUPABASE_SERVICE_KEY');
-  if (!adminEmail) missing.push('URBLO_FIRST_ADMIN_EMAIL or --admin-email');
+  if (!isValidEmail(adminEmail)) missing.push('valid URBLO_FIRST_ADMIN_EMAIL or --admin-email');
 
   if (missing.length > 0) {
     throw new Error(`Missing admin live readiness inputs: ${missing.join(', ')}.`);

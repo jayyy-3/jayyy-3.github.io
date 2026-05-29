@@ -2,6 +2,64 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Live Verifier Input Boundary)
+
+### Scope
+- Added a shared live input validation helper for placeholder detection, first-admin email shape checks, and origin-only base URL normalization.
+- Aligned the actual live verifier scripts with the existing readiness-report boundary: `forms-live`, `cloudflare-preview-smoke`, and `admin-auth-browser` now reject copied placeholders or URLs with path/query/hash in `--base-url` before any network or live-write work starts.
+- Tightened `admin-live-readiness` so copied first-admin email placeholders are reported as invalid before read-only Supabase checks.
+- Updated Harness docs and task state so future handoffs distinguish readiness reporting from executable verifier input validation.
+- No Supabase rows, Auth users, Storage objects, Cloudflare state, credentials, or live writes were created or changed.
+
+### Changed Files
+- `docs/ARCHITECTURE.md`
+- `docs/CLOUDFLARE_DEPLOYMENT.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `docs/agent/verification.md`
+- `scripts/_lib/live-input-validation.mjs`
+- `scripts/check-admin-auth-browser.mjs`
+- `scripts/check-admin-live-readiness.mjs`
+- `scripts/check-cloudflare-preview-smoke.mjs`
+- `scripts/check-forms-api-live.mjs`
+- `scripts/check-live-readiness.mjs`
+
+### Verification Results
+- Supabase changelog scan: pass. The relevant hosted-platform note remains the April 28, 2026 Data/GraphQL API exposure change; this checkpoint is local verifier/docs hardening only.
+- `node --check` for the shared helper and all edited verifier scripts: pass.
+- `node -e "JSON.parse(...docs/agent/tasks.json...)"`: pass.
+- Negative placeholder check: `npm run agent:forms-live -- --allow-writes --base-url '<preview-origin>'` fails before Supabase work with the placeholder base URL error.
+- Negative placeholder check: `npm run agent:cloudflare-preview-smoke -- --base-url '<preview-origin>'` fails before route/API requests with the placeholder base URL error.
+- Negative placeholder check: `npm run agent:admin-auth-browser -- --base-url '<preview-origin>'` fails before browser navigation with the placeholder base URL error.
+- Negative placeholder check: `npm run agent:admin-live-readiness -- --admin-email '<first-admin-email>'` reports `valid URBLO_FIRST_ADMIN_EMAIL or --admin-email` missing, alongside missing keys.
+- Pathful URL checks for `forms-live` and `cloudflare-preview-smoke`: pass; both fail before live/network work because the base URL is not an origin-only value.
+- `npm run agent:live-readiness`: pass in report-only mode with live inputs still missing/manual-gated.
+- `npm run agent:admin-auth-browser`: pass in plan-only/no-login mode.
+- `npm run agent:cloudflare-readiness`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run lint`: pass.
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:public-supabase-readiness`: pass.
+- `node scripts/check-forms-api.mjs`: pass.
+- `npm run agent:forms-ui`: pass.
+- `npm run agent:admin-config-gate`: pass for 11 no-config admin routes in Firefox.
+- Plan-only `npm run agent:admin-crud-live`: pass.
+- Plan-only `npm run agent:first-admin-bootstrap`: pass.
+- `npm run agent:supabase-foundation-readiness`: pass.
+
+### Risks and Gaps
+- Live form persistence, first-admin readiness, active-admin browser QA, unprofiled unauthorized browser QA, admin CRUD live writes, Storage upload proof, email/Turnstile proof, and Cloudflare preview smoke remain blocked by the same missing credentials, preview URL, first-admin details, and Jay approvals.
+- This checkpoint reduces false-start live verifier risk only; it does not make the CMS operational.
+
+### Next Handoff
+- Continue `NOW-FORMS-BACKEND-001`, `NOW-ADMIN-AUTH-RLS-001`, and `NOW-CLOUDFLARE-PAGES-DEPLOY-001` after credentials, first-admin details, preview URL, and write approvals are available.
+
 ## Entry - 2026-05-29 (Live Readiness Manual Input Validation)
 
 ### Scope

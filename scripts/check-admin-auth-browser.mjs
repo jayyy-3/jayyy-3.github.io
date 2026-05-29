@@ -5,6 +5,7 @@ import { spawn } from 'node:child_process';
 import { cwd, env as processEnv, exit } from 'node:process';
 import { join } from 'node:path';
 import { firefox } from 'playwright';
+import { normalizeBaseUrlOrigin } from './_lib/live-input-validation.mjs';
 
 const DEFAULT_ENV_FILES = ['.env.local', '.env', '.dev.vars'];
 const root = cwd();
@@ -47,7 +48,13 @@ const unauthorizedRouteProbes = [
   { path: '/admin/settings', slug: 'unauthorized-settings' },
 ];
 
-const args = parseArgs(process.argv.slice(2));
+let args;
+try {
+  args = parseArgs(process.argv.slice(2));
+} catch (error) {
+  console.error(error instanceof Error ? error.message : error);
+  exit(1);
+}
 const loadedEnvironment = loadEnv(args.envFiles);
 const runtimeEnv = loadedEnvironment.env;
 const host = runtimeEnv.ADMIN_AUTH_BROWSER_HOST ?? '127.0.0.1';
@@ -128,7 +135,7 @@ function parseArgs(rawArgs) {
       continue;
     }
     if (arg === '--base-url') {
-      parsed.baseUrl = stripTrailingSlash(rawArgs[index + 1]);
+      parsed.baseUrl = normalizeBaseUrlOrigin(rawArgs[index + 1] || '', '--base-url');
       index += 1;
       continue;
     }
@@ -495,13 +502,6 @@ async function firstVisibleText(page, candidates) {
     }
   }
   return '';
-}
-
-function stripTrailingSlash(value) {
-  if (!value) {
-    throw new Error('--base-url requires a value');
-  }
-  return value.replace(/\/$/, '');
 }
 
 function sleep(ms) {

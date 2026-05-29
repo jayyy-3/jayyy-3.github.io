@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import { handleEnquiryRequest, handleSampleRequest } from '../functions/_lib/forms.js';
+import { normalizeBaseUrlOrigin } from './_lib/live-input-validation.mjs';
 
 const DEFAULT_SUPABASE_URL = 'https://npkidywzwddbnfrnxlmo.supabase.co';
 const DEFAULT_ENV_FILES = ['.env.local', '.env', '.dev.vars'];
@@ -94,7 +95,7 @@ function parseArgs(argv) {
   }
 
   if (options.baseUrl) {
-    options.baseUrl = options.baseUrl.replace(/\/$/, '');
+    options.baseUrl = normalizeBaseUrlOrigin(options.baseUrl, '--base-url');
   }
 
   options.envFiles = [...new Set(options.envFiles.filter(Boolean))];

@@ -140,6 +140,8 @@ Legacy URLs such as `/products/primeBlock` and `/articles/Modular-Mastery-How-Pr
 Run the deployed preview smoke runner:
 - `npm run agent:cloudflare-preview-smoke -- --base-url https://<preview>.pages.dev`
 
+The `--base-url` value must be a real `http`/`https` origin with no path, query, or hash. Copied placeholders are rejected before any route, asset, redirect, or Function request runs.
+
 This runner does not require secrets. It checks:
 - direct refresh for public routes, unknown-route fallback, and `/admin/*` route shells;
 - deployed `/assets/*` JavaScript/CSS availability, including recursively discovered route chunks referenced by deployed bundles;
@@ -160,12 +162,12 @@ Current `/functions/api` endpoints:
   - `npm run agent:forms-live -- --allow-writes --require-browser-boundary` for final private-row proof after both service-role and browser-safe Supabase keys are configured and Jay approval is in place.
   - `npm run agent:forms-live -- --allow-writes --allow-email --require-email` for final email proof after Resend sender/recipient variables are configured and Jay approves tagged form QA writes. This asserts both valid live submissions store `notification_status = 'sent'`.
   - `npm run agent:forms-live -- --allow-writes --require-turnstile --turnstile-token <token>` for final Turnstile proof after the public Turnstile site key, server-side Turnstile secret, and a valid token are available for the target environment. The verifier refuses to start without `VITE_TURNSTILE_SITE_KEY`, then asserts both valid live submissions store `turnstile_success = true`.
-  - `npm run agent:forms-live -- --allow-writes --base-url https://<preview>.pages.dev` for deployed endpoint verification, after the Pages environment has the service-role key and Jay approves tagged form QA writes against that target.
+  - `npm run agent:forms-live -- --allow-writes --base-url https://<preview>.pages.dev` for deployed endpoint verification, after the Pages environment has the service-role key and Jay approves tagged form QA writes against that target. The base URL must be an origin only; placeholders or URLs with path/query/hash fail before any live writes.
 - The live verification command creates tagged test enquiry and sample-request rows, verifies their `admin_audit_events`, verifies invalid payloads create no rows, checks response-vs-stored notification status, and keeps the test rows until Jay approves cleanup. With `--require-browser-boundary`, it also proves those private lead rows are not anonymously readable through browser-key REST access.
 - Admin route tests require a browser-safe Supabase key, a Supabase Auth user, and a matching active `admin_profiles` row.
 - Before creating/upserting the first admin profile or sending an invitation, run `npm run agent:first-admin-bootstrap -- --verify-only --admin-email <first-admin-email>` with the service-role key to inspect the existing Auth/profile/seed state.
 - First-admin profile/invite writes require Jay approval, `--allow-writes`, and a matching `--confirm-email`: `npm run agent:first-admin-bootstrap -- --allow-writes --admin-email <first-admin-email> --confirm-email <first-admin-email>`. Add `--invite` only when Jay explicitly approves sending the Supabase Auth invitation.
-- Before browser admin QA, run `npm run agent:admin-live-readiness -- --admin-email <first-admin-email>` to verify the browser-safe key, service-role verification key, active admin profile, and baseline seed rows without mutating Supabase.
+- Before browser admin QA, run `npm run agent:admin-live-readiness -- --admin-email <first-admin-email>` with a real email address to verify the browser-safe key, service-role verification key, active admin profile, and baseline seed rows without mutating Supabase.
 - Before live admin save/export QA, run `npm run agent:admin-crud-live` in plan-only mode, then run `npm run agent:admin-crud-live -- --allow-writes` only after a real owner/admin Supabase Auth session is available and Jay approves tagged QA writes. Use `--include-storage` when intentionally verifying private Storage object upload policy.
 - Settings save tests require an active owner/admin profile because `site_settings` write RLS is owner/admin only. Admin profile save tests require existing Supabase Auth users and must verify owner-role changes are owner-protected.
 - Media upload/save tests require an active owner/admin/editor profile because Storage object writes and `media_assets` mutations are admin/editor only.

@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { exit } from 'node:process';
+import { normalizeBaseUrlOrigin } from './_lib/live-input-validation.mjs';
 
 const publicRoutes = [
   '/',
@@ -94,7 +95,7 @@ function parseArgs(argv) {
     throw new Error('Missing --base-url. Example: npm run agent:cloudflare-preview-smoke -- --base-url https://<preview>.pages.dev');
   }
 
-  options.baseUrl = options.baseUrl.replace(/\/$/, '');
+  options.baseUrl = normalizeBaseUrlOrigin(options.baseUrl, '--base-url');
 
   if (!Number.isInteger(options.timeoutMs) || options.timeoutMs < 1000) {
     throw new Error('--timeout-ms must be an integer >= 1000');

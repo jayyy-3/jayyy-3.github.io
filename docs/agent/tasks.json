@@ -154,6 +154,7 @@
         "supabase/migrations/202605290003_sample_request_atomic_insert.sql",
         "scripts/check-contact-form-ui-source.mjs",
         "scripts/check-forms-api-live.mjs",
+        "scripts/_lib/live-input-validation.mjs",
         "scripts/check-live-readiness.mjs",
         "scripts/check-forms-api.mjs",
         "scripts/agent-init.sh",
@@ -183,7 +184,8 @@
         "2026-05-29: Forms API mock checks now also exercise the Cloudflare Pages Function route wrappers for GET/OPTIONS method handling, CORS preflight headers, malformed JSON `400 invalid_json` responses, and invalid sample-request POST no-write behavior, so endpoint wrapper regressions are caught before deployed preview smoke.",
         "2026-05-29: Applied `sample_request_atomic_insert` on Supabase project npkidywzwddbnfrnxlmo. `/api/sample-requests` now calls service-role-only `submit_sample_request_with_item(jsonb, jsonb)` so the sample request row and first item row are created inside one database transaction. The function is security-invoker, not executable by anon/authenticated, executable by service_role, and source/mock checks fail if separate direct table inserts return or if the migration source loses the RPC grant/revoke contract.",
         "2026-05-29: `scripts/check-forms-api-live.mjs` now supports final proof flags for notification and Turnstile behavior. `--allow-email --require-email` asserts valid live enquiry/sample-request rows store notification_status = sent, and `--require-turnstile --turnstile-token <token>` now refuses to start without `VITE_TURNSTILE_SITE_KEY` before asserting valid live rows store turnstile_success = true. `npm run agent:live-readiness` reports those inputs separately, with `--turnstile-token-provided` as a no-secret readiness flag.",
-        "2026-05-29: Contact form source now renders the Cloudflare Turnstile widget only when the public `VITE_TURNSTILE_SITE_KEY` is configured, blocks submit until a widget token exists in that mode, and sends `turnstileToken` to the existing Pages Function verifier. Source/Cloudflare readiness checks now guard the public site-key env contract."
+        "2026-05-29: Contact form source now renders the Cloudflare Turnstile widget only when the public `VITE_TURNSTILE_SITE_KEY` is configured, blocks submit until a widget token exists in that mode, and sends `turnstileToken` to the existing Pages Function verifier. Source/Cloudflare readiness checks now guard the public site-key env contract.",
+        "2026-05-29: `scripts/check-forms-api-live.mjs` HTTP mode now rejects copied placeholders and non-origin `--base-url` values before service-role Supabase reads/writes can start, using the shared live input validation helper."
       ],
       "acceptance": [
         "Valid enquiry submissions create Supabase enquiry rows through a server-side endpoint.",
@@ -251,6 +253,7 @@
         "src/App.tsx",
         "scripts/check-cloudflare-pages-readiness.mjs",
         "scripts/check-cloudflare-preview-smoke.mjs",
+        "scripts/_lib/live-input-validation.mjs",
         "scripts/check-live-readiness.mjs",
         "scripts/check-harness.mjs",
         "scripts/agent-init.sh"
@@ -285,7 +288,8 @@
         "2026-05-29: `npm run agent:check` now guards live-readiness flag documentation in `docs/ARCHITECTURE.md`, `docs/CLOUDFLARE_DEPLOYMENT.md`, and `docs/agent/verification.md`, including content import/merge/cutover approval flags and the Turnstile token readiness flag.",
         "2026-05-29: Production dependencies were updated to clear the critical production audit path: `react-router-dom` `^7.16.0`, `swiper` `^12.2.0`, and `postcss` `^8.5.15`. `postcss.config.js` now runs `tailwindcss/nesting` before Tailwind so Swiper 12 nested CSS builds without nesting warnings.",
         "2026-05-29: `npm run agent:cloudflare-readiness` now guards the deployed-preview manual route list against stale legacy direct-refresh URLs by requiring canonical `/products/prime-block`, article detail, and `/capabilities` route checks while keeping old product/article URLs as redirect checks.",
-        "2026-05-29: `npm run agent:cloudflare-preview-smoke` now recursively follows deployed JS/CSS route chunks, verifies deployed admin config-required and `admin_profiles` bundle markers, rejects browser service-role env access patterns, and checks malformed JSON API safe failures. Local preview mode validates the route/asset/bundle portion before a real Pages preview URL exists."
+        "2026-05-29: `npm run agent:cloudflare-preview-smoke` now recursively follows deployed JS/CSS route chunks, verifies deployed admin config-required and `admin_profiles` bundle markers, rejects browser service-role env access patterns, and checks malformed JSON API safe failures. Local preview mode validates the route/asset/bundle portion before a real Pages preview URL exists.",
+        "2026-05-29: `npm run agent:cloudflare-preview-smoke` now rejects copied placeholders and URLs with path/query/hash in `--base-url` before any deployed route, asset, redirect, or Function request runs."
       ]
     },
     {
@@ -467,6 +471,7 @@
         "scripts/check-admin-crud-live.mjs",
         "scripts/check-admin-config-gate.mjs",
         "scripts/check-admin-auth-browser.mjs",
+        "scripts/_lib/live-input-validation.mjs",
         "scripts/agent-init.sh",
         "scripts/agent-smoke.sh",
         "src/App.tsx",
@@ -506,7 +511,8 @@
         "2026-05-29: Added `npm run agent:admin-auth-browser` as the next live-auth browser QA gate. It is plan-only unless `--allow-login` is supplied; live mode signs in with `URBLO_ADMIN_EMAIL`/`URBLO_ADMIN_PASSWORD`, checks authenticated `/admin` route shells, and creates no content rows, Storage objects, or audit events.",
         "2026-05-29: `npm run agent:admin-auth-browser` now uses the same local env-file loading pattern as the other live runners, supports extra `--env-file`, prints only variable names/sources, and no longer requires `VITE_SUPABASE_URL` because the runtime has a default project URL.",
         "2026-05-29: `npm run agent:admin-auth-browser -- --allow-login --expect-unauthorized --strict` now covers the valid-auth/no-active-profile path with `URBLO_UNPROFILED_EMAIL` and `URBLO_UNPROFILED_PASSWORD`, requiring `/admin/unauthorized`, direct protected route probes that stay unauthorized, and no private module content. `npm run agent:live-readiness` reports this gate separately, and admin CRUD coverage guards the verifier source.",
-        "2026-05-29: Active-admin `npm run agent:admin-auth-browser -- --allow-login --strict` now also verifies the Sign out control returns the last protected admin route to `/admin/login?next=...` without content writes."
+        "2026-05-29: Active-admin `npm run agent:admin-auth-browser -- --allow-login --strict` now also verifies the Sign out control returns the last protected admin route to `/admin/login?next=...` without content writes.",
+        "2026-05-29: `npm run agent:admin-auth-browser -- --base-url <origin>` now rejects copied placeholders and non-origin URLs before browser navigation, and `npm run agent:admin-live-readiness -- --admin-email <email>` now requires a real first-admin email shape before read-only Supabase checks."
       ],
       "acceptance": [
         "Admin shell route is protected by Supabase Auth.",

@@ -15,6 +15,8 @@ Run:
 
 This command is informational and does not replace verification gates. Use `--base-url <origin>` and `--admin-email <email>` only for non-secret manual inputs; the runner treats copied placeholders or malformed values as missing, and the base URL must be an `http`/`https` origin with no path/query/hash. For live form checks, use `--form-writes-approved` in readiness only after Jay has approved tagged live form QA writes; actual `npm run agent:forms-live` execution must also include `--allow-writes`. For the first-admin profile/invite write path, use `--first-admin-writes-approved` only after Jay has approved creating/upserting the first profile or sending an invite. For live admin CRUD writes, use `--admin-writes-approved` only after Jay has approved tagged live admin QA writes. For static-to-Supabase content import and public read cutover, use `--content-import-approved`, `--content-merge-approved`, and `--content-public-cutover-approved` only after Jay has approved the guarded draft import apply, any required merge/upsert behavior, and the public read-path switch. For final Turnstile proof, use `--turnstile-token-provided` only when a valid target-environment token will be supplied to `npm run agent:forms-live -- --allow-writes --require-turnstile --turnstile-token <token>`.
 
+The actual live runners use the same manual-input boundary: `agent:forms-live`, `agent:cloudflare-preview-smoke`, and `agent:admin-auth-browser` reject placeholder or non-origin `--base-url` values before network or live-write work starts, and `agent:admin-live-readiness` requires a real first-admin email shape.
+
 ## Verification Profiles
 
 ### Docs-Only
