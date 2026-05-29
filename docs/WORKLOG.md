@@ -2,6 +2,51 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Admin Live Login Credential Boundary)
+
+### Scope
+- Tightened `npm run agent:admin-crud-live` so live password login only reads `URBLO_ADMIN_EMAIL`/`URBLO_ADMIN_PASSWORD`, or an explicit `URBLO_ADMIN_ACCESS_TOKEN`.
+- Kept `URBLO_FIRST_ADMIN_EMAIL` reserved for first-admin bootstrap/readiness checks so setup identity and live admin session credentials are not conflated.
+- Added source coverage so the admin live verifier fails if `URBLO_FIRST_ADMIN_EMAIL` returns as a live-login fallback.
+- No Supabase rows, Auth users, Storage objects, Cloudflare state, credentials, or live writes were created or changed.
+
+### Changed Files
+- `.env.example`
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/CLOUDFLARE_DEPLOYMENT.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `scripts/check-admin-crud-coverage.mjs`
+- `scripts/check-admin-crud-live.mjs`
+
+### Verification Results
+- Supabase changelog scan: pass. Relevant current note remains the April 28, 2026 Data/GraphQL API exposure change; this checkpoint is local verifier/docs hardening.
+- Supabase connector read-only sanity: pass. The live project reports all 24 expected launch tables, no missing RLS among those tables, 114 public-schema policies, 12 applied launch migrations in the expected set, 12 published finish definitions, one published default `site_settings` row, and zero private/admin/form/import target rows.
+- `node --check scripts/check-admin-crud-live.mjs`: pass.
+- `node --check scripts/check-admin-crud-coverage.mjs`: pass.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:admin-crud-live`: pass in plan-only/no-write mode.
+- `npm run agent:live-readiness`: pass in report-only mode and still reports missing external credentials/approvals.
+- `npm run agent:cloudflare-readiness`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+
+### Risks and Gaps
+- Live admin write proof is still pending browser-safe Supabase config, a real owner/admin session, and Jay approval for tagged QA writes.
+- Live form persistence, first-admin setup, email/Turnstile proof, and Cloudflare preview smoke remain blocked by the external inputs listed by `npm run agent:live-readiness`.
+
+### Next Handoff
+- Continue source-only hardening only where it meaningfully reduces launch risk. Do not claim the admin CMS is operational until the live form/admin gates run with credentials and approvals.
+
 ## Entry - 2026-05-29 (Supabase Foundation Source Readiness Gate)
 
 ### Scope

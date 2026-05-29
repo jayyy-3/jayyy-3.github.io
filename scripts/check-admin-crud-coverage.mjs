@@ -684,6 +684,16 @@ function checkAdminLiveVerifierBoundaries() {
   requireIncludes(text, 'assertStorageObjectNotAnonymousReadable', 'scripts/check-admin-crud-live.mjs');
   requireIncludes(text, 'BROWSER_KEY_NAMES', 'scripts/check-admin-crud-live.mjs');
   requireIncludes(text, 'ADMIN_TOKEN_NAMES', 'scripts/check-admin-crud-live.mjs');
+  requireIncludes(
+    text,
+    "const ADMIN_EMAIL_NAMES = ['URBLO_ADMIN_EMAIL'];",
+    'scripts/check-admin-crud-live.mjs',
+  );
+  requireNotIncludes(
+    text,
+    'URBLO_FIRST_ADMIN_EMAIL',
+    'scripts/check-admin-crud-live.mjs live admin login credentials',
+  );
   requireIncludes(text, 'auth/v1/token?grant_type=password', 'scripts/check-admin-crud-live.mjs');
   requireNotIncludes(text, 'SUPABASE_SERVICE_ROLE_KEY', 'scripts/check-admin-crud-live.mjs RLS verifier');
   requireNotIncludes(text, 'SUPABASE_SERVICE_KEY', 'scripts/check-admin-crud-live.mjs RLS verifier');
