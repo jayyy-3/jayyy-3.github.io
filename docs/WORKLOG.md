@@ -2,6 +2,37 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Supabase Read-Only State Re-Audit)
+
+### Scope
+- Re-checked the live Supabase project state through read-only connector SQL for project `npkidywzwddbnfrnxlmo`.
+- Verified the applied migration list still includes the current launch migrations through `sample_request_atomic_insert`.
+- Verified launch table, RLS, seed, Storage bucket, grant, helper, RPC, and empty-content/import-target assumptions before continuing source-only work.
+
+### Verification Results
+- Expected launch tables present: 24 of 24.
+- Expected launch tables missing RLS: none.
+- Published finish definitions: 12.
+- Published default `site_settings` row: 1.
+- Current launch content and lead row counts for `media_assets`, `stone_groups`, `stone_variants`, `products`, `projects`, `articles`, `enquiries`, `sample_requests`, and `sample_request_items`: all 0.
+- Storage buckets: `urblo-public-media` is public with 25 MB limit; `urblo-admin-media` is private with 50 MB limit.
+- Public policy count: 114.
+- Anonymous write grants on public launch tables: 0.
+- Anonymous grants on private admin/lead tables: 0.
+- `admin_profiles` rows: 0; active admin profiles: 0.
+- `admin_profiles_email_ci_unique_idx`: present.
+- `submit_sample_request_with_item(jsonb, jsonb)`: executable by `service_role`, not executable by `anon` or `authenticated`.
+- `public.has_admin_role(text[])`: not executable by `anon` or `authenticated`.
+
+### Risks and Gaps
+- No active admin profile exists yet, so active-admin browser login, `/admin` CRUD writes, and audit-row write verification remain blocked until Jay confirms the first admin path and credentials are configured.
+- The content import target is still empty and public runtime remains static/file-backed; do not apply generated import SQL or cut over public reads without approval.
+- Live form persistence remains unverified because service-role environment configuration and tagged live form QA approval are still missing.
+
+### Next Handoff
+- Continue source-only readiness where it improves final verification coverage.
+- For live progress, configure server/browser Supabase keys and confirm the first admin email, then run the existing read-only and approval-gated live verifiers in the order listed in `docs/HANDOFF.md`.
+
 ## Entry - 2026-05-29 (Admin Auth Browser Env Loading)
 
 ### Scope
