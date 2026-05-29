@@ -11,6 +11,7 @@ Use when resuming work or handing off between agents.
 Run:
 - `npm run agent:init`
 - `npm run agent:live-readiness` when continuing form/admin/Cloudflare live verification work.
+- `npm run agent:supabase-foundation-readiness` when continuing Supabase foundation, seed, Storage, helper, or form-RPC contract work without live credentials.
 
 This command is informational and does not replace verification gates. For live form checks, use `--form-writes-approved` in readiness only after Jay has approved tagged live form QA writes; actual `npm run agent:forms-live` execution must also include `--allow-writes`. For the first-admin profile/invite write path, use `--first-admin-writes-approved` only after Jay has approved creating/upserting the first profile or sending an invite. For live admin CRUD writes, use `--admin-writes-approved` only after Jay has approved tagged live admin QA writes. For static-to-Supabase content import and public read cutover, use `--content-import-approved`, `--content-merge-approved`, and `--content-public-cutover-approved` only after Jay has approved the guarded draft import apply, any required merge/upsert behavior, and the public read-path switch.
 
@@ -118,6 +119,7 @@ Run:
 - `npm run lint`
 - `npx tsc -b`
 - `npm run agent:check`
+- `npm run agent:supabase-foundation-readiness` when changing foundation migrations, baseline seeds, Storage policy source, helper grants, or service-role form RPC source.
 - Tool-specific migration dry run or local Supabase verification when available.
 - `npm run agent:content-import:apply-sql` when changing guarded static-to-Supabase import or rollback SQL artifacts.
 - `npm run agent:public-supabase-readiness` when public content import/cutover safety is in scope.

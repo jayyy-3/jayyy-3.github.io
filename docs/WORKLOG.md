@@ -2,6 +2,46 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Supabase Foundation Source Readiness Gate)
+
+### Scope
+- Added `npm run agent:supabase-foundation-readiness` as a no-secret source verifier for the applied Supabase foundation contract.
+- The new gate checks the expected 12 migration files, 24 launch tables including `project_media`, RLS enablement, public-select policies, private-table anonymous revokes, anonymous read-only public grants, baseline seed upserts, the service-role-only Sample Request atomic RPC, Storage bucket/listing hardening, private SECURITY DEFINER helper posture, and normalized admin profile email uniqueness.
+- Wired the command into `npm run agent:check` and `npm run agent:init` so future agents cannot silently drop the foundation verifier while live credentials remain unavailable.
+- No Supabase rows, Auth users, Storage objects, Cloudflare state, credentials, or live writes were created or changed.
+
+### Changed Files
+- `AGENTS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `docs/agent/verification.md`
+- `package.json`
+- `scripts/agent-init.sh`
+- `scripts/check-harness.mjs`
+- `scripts/check-supabase-foundation-readiness.mjs`
+
+### Verification Results
+- Supabase changelog scan: pass. Current relevant breaking-change note remains the April 28, 2026 Data/GraphQL API exposure change; this checkpoint changes only local source verification.
+- `node --check scripts/check-supabase-foundation-readiness.mjs`: pass.
+- `npm run agent:supabase-foundation-readiness`: pass.
+- `node --check scripts/check-harness.mjs`: pass.
+- `npm run agent:check`: pass, including the delegated Supabase foundation source-readiness gate.
+- `npm run lint`: pass.
+- `git diff --check`: pass.
+- `npm run agent:init`: pass and lists `npm run agent:supabase-foundation-readiness`.
+- Supabase connector read-only sanity: pass. The live project reports 12/12 expected migrations, 24/24 expected launch tables, no missing RLS among those tables, 12 published finish definitions with 12 distinct keys, one published default `site_settings` row, zero private admin/form rows, and zero imported content rows for media, Stone Library groups, Products, Projects, and Articles.
+
+### Risks and Gaps
+- This is source-only. It does not replace read-only Supabase connector sanity, live form persistence, first-admin readiness, authenticated admin browser QA, admin CRUD live writes, Storage upload proof, or Cloudflare preview smoke.
+- Live blockers remain unchanged: service-role key, browser-safe Supabase key, first admin email/profile, admin/unprofiled test credentials, Cloudflare preview URL, and Jay approval for tagged live QA writes.
+
+### Next Handoff
+- Continue source-only hardening where useful, but treat live form/admin completion as pending until the missing credentials, first-admin details, preview URL, and write approvals are available.
+
 ## Entry - 2026-05-29 (Read-Only Supabase Sanity Refresh)
 
 ### Scope

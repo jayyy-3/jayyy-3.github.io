@@ -21,6 +21,7 @@ const requiredFiles = [
   'scripts/check-contact-form-ui-source.mjs',
   'scripts/check-doc-paths.mjs',
   'scripts/check-harness.mjs',
+  'scripts/check-supabase-foundation-readiness.mjs',
 ]
 const requiredPackageScripts = {
   'agent:check': 'node scripts/check-harness.mjs',
@@ -39,6 +40,7 @@ const requiredPackageScripts = {
   'agent:init': 'bash scripts/agent-init.sh',
   'agent:live-readiness': 'node scripts/check-live-readiness.mjs',
   'agent:public-supabase-readiness': 'node scripts/check-public-supabase-readiness.mjs',
+  'agent:supabase-foundation-readiness': 'node scripts/check-supabase-foundation-readiness.mjs',
   'agent:smoke': 'bash scripts/agent-smoke.sh',
 }
 
@@ -76,6 +78,20 @@ try {
 
 if (!failures.length) {
   const result = spawnSync('node', ['scripts/check-doc-paths.mjs'], {
+    cwd: root,
+    encoding: 'utf8',
+    stdio: 'pipe',
+  })
+  if (result.status !== 0) {
+    failures.push(result.stdout.trim())
+    failures.push(result.stderr.trim())
+  } else {
+    process.stdout.write(result.stdout)
+  }
+}
+
+if (!failures.length) {
+  const result = spawnSync('node', ['scripts/check-supabase-foundation-readiness.mjs'], {
     cwd: root,
     encoding: 'utf8',
     stdio: 'pipe',

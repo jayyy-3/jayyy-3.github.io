@@ -61,12 +61,17 @@
         "docs/HANDOFF.md",
         "docs/WORKLOG.md",
         "docs/agent/tasks.json",
+        "package.json",
+        "scripts/agent-init.sh",
+        "scripts/check-harness.mjs",
+        "scripts/check-supabase-foundation-readiness.mjs",
         "supabase/migrations"
       ],
       "notes": [
         "2026-05-26: Supabase connector can access the Urblo project directly: project ref npkidywzwddbnfrnxlmo, region ap-southeast-2, status ACTIVE_HEALTHY.",
         "2026-05-27: Applied foundation_schema, foundation_hardening, and anon_read_only migrations to project npkidywzwddbnfrnxlmo.",
         "2026-05-27: Verification confirmed 24 expected public tables exist, 24/24 have RLS enabled, anonymous users have no private lead/admin table privileges, anonymous public-content access is read-only, and no public-schema foreign keys are missing indexes.",
+        "2026-05-29: Added `npm run agent:supabase-foundation-readiness` as a no-secret source gate for expected migration files, 24 launch tables, RLS source, anonymous read-only posture, baseline seeds, service-role-only Sample Request atomic RPC, Storage bucket/listing hardening, private SECURITY DEFINER helper posture, and admin profile email uniqueness. `npm run agent:check` now runs the source gate and guards the package script so the foundation verifier cannot be silently removed.",
         "Do not request manual dashboard table creation while connector migrations are available.",
         "Do not commit or paste service-role keys, database passwords, Turnstile secrets, or email provider secrets."
       ],
@@ -79,6 +84,7 @@
         "Migration evidence and Supabase verification results are recorded in docs/WORKLOG.md."
       ],
       "verification": [
+        "npm run agent:supabase-foundation-readiness",
         "Supabase MCP: list_migrations includes the foundation migration on project npkidywzwddbnfrnxlmo",
         "Supabase MCP: list_tables verbose=true confirms foundation tables and foreign keys",
         "Supabase MCP: execute_sql verifies relrowsecurity and pg_policies for public, admin, and lead tables",
@@ -97,12 +103,15 @@
         "docs/HANDOFF.md",
         "docs/WORKLOG.md",
         "docs/agent/tasks.json",
+        "package.json",
+        "scripts/check-supabase-foundation-readiness.mjs",
         "supabase/migrations"
       ],
       "notes": [
         "Run after NOW-SUPABASE-FOUNDATION-001 so seed statements can use stable table constraints.",
         "Initial seed scope should stay small: finish definitions, one published site settings row, and only media placeholders needed by near-term migration work.",
-        "2026-05-27: Applied baseline_seed migration to project npkidywzwddbnfrnxlmo. Verification confirmed 12 distinct finish definitions and one published default site_settings row. Rerunning the seed upsert did not duplicate rows."
+        "2026-05-27: Applied baseline_seed migration to project npkidywzwddbnfrnxlmo. Verification confirmed 12 distinct finish definitions and one published default site_settings row. Rerunning the seed upsert did not duplicate rows.",
+        "2026-05-29: `npm run agent:supabase-foundation-readiness` now source-checks the 12 finish seed rows, default published site settings row, and upsert/idempotency clauses alongside the broader Supabase foundation migration contract."
       ],
       "acceptance": [
         "finish_definitions contains the approved first finish dictionary.",
@@ -111,6 +120,7 @@
         "Seed verification queries and row counts are recorded in docs/WORKLOG.md."
       ],
       "verification": [
+        "npm run agent:supabase-foundation-readiness",
         "Supabase MCP: execute_sql confirms finish_definitions and site_settings row counts",
         "Supabase MCP: list_migrations includes the baseline seed migration on project npkidywzwddbnfrnxlmo",
         "npm run agent:check",
@@ -327,6 +337,7 @@
         "scripts/check-admin-auth-browser.mjs",
         "scripts/check-admin-crud-live.mjs",
         "scripts/check-live-readiness.mjs",
+        "scripts/check-supabase-foundation-readiness.mjs",
         "scripts/agent-init.sh",
         "src/pages/admin/AdminDashboardPage.tsx"
       ],
@@ -348,7 +359,8 @@
         "2026-05-29: `npm run agent:live-readiness` now reports the first-admin profile/invite live write path separately from read-only first-admin verification. `--first-admin-writes-approved` only clears the manual approval gate and does not replace `--allow-writes`, `--confirm-email`, or the service-role credential requirement on `npm run agent:first-admin-bootstrap`.",
         "2026-05-29: `npm run agent:live-readiness` now reports `npm run agent:admin-crud-live -- --allow-writes --include-storage` as the final media Storage upload policy proof, separate from the general admin CRUD/audit live write check.",
         "2026-05-29: `npm run agent:live-readiness` now reports guarded content import apply, merge/upsert, and public read cutover approval gates with `--content-import-approved`, `--content-merge-approved`, and `--content-public-cutover-approved` so generated import SQL is not confused with approved live work.",
-        "2026-05-29: `npm run agent:check` now guards the active operational `agent:*` package script map for form, admin, Cloudflare, first-admin, live-readiness, content-import, and public Supabase readiness runners so launch verification commands cannot be silently removed from `package.json`.",
+        "2026-05-29: `npm run agent:check` now guards the active operational `agent:*` package script map for form, admin, Cloudflare, first-admin, live-readiness, content-import, Supabase foundation readiness, and public Supabase readiness runners, and it runs the Supabase foundation source-readiness gate so launch verification commands and the foundation migration contract cannot be silently removed from `package.json`.",
+        "2026-05-29: `npm run agent:supabase-foundation-readiness` is available as a no-secret source gate for the underlying Supabase migration/seed/Storage/helper/RPC contract that the admin CMS depends on while live admin credentials remain pending.",
         "2026-05-29: `npm run agent:admin-crud-coverage` now also fails if admin CMS acceptance drifts back toward physical-delete language instead of the launch archive/removal contract.",
         "2026-05-29: `npm run agent:admin-crud-coverage` now fails if mutating admin screens lose validation feedback paths or save paths, and fails if content/media lifecycle screens lose publish/archive save paths or published/archived state controls.",
         "2026-05-29: `npm run agent:admin-crud-coverage` now scans admin source and the live admin verifier for Supabase `.delete()` mutations, HTTP `DELETE` requests, destructive RPC names, and visible `Delete`/`Remove` controls so launch removal stays archive-first until a retention/destructive-delete policy is approved.",
@@ -376,6 +388,7 @@
         "npm run lint",
         "npx tsc -b",
         "npm run agent:smoke",
+        "npm run agent:supabase-foundation-readiness",
         "npm run agent:admin-crud-coverage",
         "npm run agent:admin-config-gate",
         "npm run agent:admin-auth-browser",

@@ -57,6 +57,7 @@ echo "- npm run agent:forms-live -- --allow-writes --require-turnstile --turnsti
 echo "- npm run agent:forms-ui"
 echo "- npm run agent:live-readiness"
 echo "- npm run agent:public-supabase-readiness"
+echo "- npm run agent:supabase-foundation-readiness"
 echo "- npm run agent:smoke"
 echo "- npm run build"
 echo "- npm run lint"

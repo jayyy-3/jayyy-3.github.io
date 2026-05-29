@@ -107,8 +107,12 @@ Last updated: 2026-05-29
 - Verification matrix: `docs/agent/verification.md`
 - Harness checks:
   - `npm run agent:check` => `node scripts/check-harness.mjs`
-  - `scripts/check-harness.mjs` verifies required harness files, active operational `agent:*` package scripts, Contact form UI source-check smoke integration, and delegates doc path/task checks. The guarded script map includes the form, admin, Cloudflare, first-admin, live-readiness, content-import, and public Supabase readiness runners so launch verification commands cannot be silently removed from `package.json`.
+  - `scripts/check-harness.mjs` verifies required harness files, active operational `agent:*` package scripts, Contact form UI source-check smoke integration, and delegates doc path/task checks plus the Supabase foundation source-readiness gate. The guarded script map includes the form, admin, Cloudflare, first-admin, live-readiness, content-import, Supabase foundation readiness, and public Supabase readiness runners so launch verification commands cannot be silently removed from `package.json`.
   - `scripts/check-doc-paths.mjs` rejects machine-specific paths and validates repo-relative path references in docs/task state.
+- Supabase foundation source readiness:
+  - `npm run agent:supabase-foundation-readiness` => `node scripts/check-supabase-foundation-readiness.mjs`
+  - Verifies the source contract for the 12 expected launch migrations, 24 launch tables including `project_media`, RLS enablement, public-select policies, anonymous read-only grants, private-table anonymous revokes, 12 baseline finish rows, the default published site settings row, service-role-only Sample Request atomic RPC, Storage bucket/listing hardening, private SECURITY DEFINER helper posture, and normalized admin profile email uniqueness.
+  - This is a source/no-secret verifier. It does not query Supabase, apply migrations, create rows, validate live Auth, or replace connector/live browser verification.
 - Content import dry run:
   - `npm run agent:content-import` => `node scripts/check-content-import-readiness.mjs`
   - Reads current static Stone Library JSON, Stone Library finish-image mappings, Projects data, Products data, Articles manifest, and referenced local media.

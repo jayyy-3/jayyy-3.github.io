@@ -30,6 +30,7 @@ The Supabase connector can access the Urblo project directly. Do not ask the use
 | Admin live CRUD runner | Implemented on 2026-05-28 and expanded on 2026-05-29: `npm run agent:admin-crud-live` defaults to a no-write plan; `--allow-writes` requires a real owner/admin Supabase Auth session, creates tagged QA rows plus exact expected audit actions through browser-key RLS, verifies tagged dashboard-health predicates before archive cleanup, publishes and archives public-facing QA rows, and verifies tagged archived public-content QA rows plus private lead QA rows are not anonymously visible; `--include-storage` is the final tiny private Storage upload, signed-in admin readback, and anonymous-read denial proof |
 | First-admin bootstrap runner | Implemented on 2026-05-29: `npm run agent:first-admin-bootstrap` defaults to no-write plan mode, supports service-role read-only verification for Auth user, Auth-linked active profile, planned role, and seeds, normalizes profile email matching to the case-insensitive database contract, and requires approval plus `--allow-writes`/`--confirm-email` before creating an invite/profile |
 | Public cutover readiness runner | Implemented on 2026-05-28 and expanded on 2026-05-29: `npm run agent:public-supabase-readiness` verifies draft-only content import payloads, structured article-block extraction without placeholder/newsletter artifact regressions, guarded draft apply SQL approval/merge/draft/no-destructive/no-publish posture, guarded rollback SQL manual approval/reverse-dependency/draft-target posture, published-only public RLS policy source, read-only anonymous grants, Data API role/sequence grant preflight inspection for `anon`, `authenticated`, and `service_role`, static public runtime boundaries, and `/api/*` Function routing scope without mutating Supabase |
+| Foundation source readiness runner | Implemented on 2026-05-29: `npm run agent:supabase-foundation-readiness` verifies the source contract for the expected migration files, 24 launch tables, RLS source, anonymous read-only posture, baseline seed idempotency, service-role-only Sample Request atomic RPC, Storage bucket/listing hardening, private SECURITY DEFINER helper posture, and admin profile email uniqueness without credentials or live writes |
 
 Secrets still must not be committed or pasted into repo docs. Service-role keys, database passwords, Turnstile secrets, and email provider secrets belong only in server-side environment variable stores.
 
@@ -56,6 +57,7 @@ Acceptance:
 - Private form tables have operational partial indexes for new lead queues.
 - All public-schema foreign-key columns are indexed.
 - The migrations are represented in repo review material under `supabase/migrations`.
+- `npm run agent:supabase-foundation-readiness` passes as a no-secret source gate for the local migration contract; it does not replace live connector verification.
 
 ### Phase 2 - Baseline Seeds
 Outcome: the database has enough safe baseline data for forms/admin work without moving all public content yet.
@@ -69,6 +71,7 @@ Acceptance:
 - Complete on 2026-05-27. `finish_definitions` contains 12 distinct published finish keys from the current Stone Library dictionary.
 - `site_settings` contains one published `default` row with Urblo contact, social, footer, and SEO baseline values.
 - Seed script is idempotent: rerunning the seed upsert did not duplicate rows.
+- `npm run agent:supabase-foundation-readiness` source-checks the 12 expected finish seed rows and the published default `site_settings` upsert contract.
 
 ### Phase 3 - Forms Backend
 Outcome: Contact and Sample Request become durable business workflows.
