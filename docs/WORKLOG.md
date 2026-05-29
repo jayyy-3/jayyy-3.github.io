@@ -2,6 +2,36 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Content Import Connector Preflight)
+
+### Scope
+- Generated the latest ignored content import preflight bundle with `npm run agent:content-import:preflight-sql`.
+- Ran a read-only Supabase connector preflight against project `npkidywzwddbnfrnxlmo` to compare planned static-to-Supabase import rows with the current target table state.
+- Verified the current production target remains clean for a future approved draft import: no current rows in import target tables, no current rows in parent conflict-gate tables, RLS enabled across checked seed/import tables, and public-select policy coverage present.
+
+### Changed Files
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run agent:content-import:preflight-sql`: pass; generated ignored `.tmp/content-import-preview.json`, `.tmp/content-import-plan.md`, and `.tmp/content-import-preflight.sql` with 115 media candidates, 13 stone groups, 15 variants, 153 finish capability rows, 53 finish image rows, 6 products, 28 models, 5 projects, 4 articles, 95 article blocks, 0 warnings, and 0 blockers.
+- Supabase connector read-only SQL: pass. Live target has 12 `finish_definitions`, 1 `site_settings` row, and 0 current rows in every content import target table.
+- Supabase connector parent conflict-gate check: pass. `media_assets`, `stone_groups`, `products`, `projects`, and `articles` all have 0 current rows, so the generated merge/upsert conflict gate has no current natural-key conflicts.
+- Supabase connector RLS/policy check: pass. No missing RLS across checked seed/import tables, and each checked public content table has one public-select policy.
+- Supabase security advisor: pass. 0 security lints.
+
+### Risks and Gaps
+- This is a read-only/source-only preflight. It did not apply import SQL, merge rows, publish content, switch public runtime reads, create Supabase rows, create Auth users, upload Storage objects, or touch Cloudflare state.
+- Actual import remains blocked on Jay approval for the draft import, merge/upsert behavior if preflight ever reports parent conflicts, live admin/auth readiness, and a deliberate public read cutover.
+
+### Next Handoff
+- `NOW-ADMIN-CONTENT-CRUD-001`: keep content import and public read cutover guarded until approval.
+- `NOW-ADMIN-CMS-001`: resume live admin verification only after browser-safe Supabase config, first admin, admin session, and write approval exist.
+- `NOW-FORMS-BACKEND-001`: live form persistence remains the next credential-gated proof once service-role key and write approval exist.
+
 ## Entry - 2026-05-29 (Final Turnstile Public Site-Key Guard)
 
 ### Scope
