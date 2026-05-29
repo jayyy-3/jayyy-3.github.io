@@ -2,6 +2,40 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Admin Browser Sign-Out Gate)
+
+### Scope
+- Extended active-admin `npm run agent:admin-auth-browser -- --allow-login --strict` so the no-write browser QA flow checks session exit, not only session entry.
+- After authenticated route-shell checks, the runner clicks Sign out and requires the protected route to return to `/admin/login?next=...` without rendering private admin audit content.
+- Added source coverage so the sign-out check cannot be silently removed from the admin browser verifier.
+
+### Changed Files
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `scripts/check-admin-auth-browser.mjs`
+- `scripts/check-admin-crud-coverage.mjs`
+
+### Verification Results
+- `node --check scripts/check-admin-auth-browser.mjs`: pass.
+- `node --check scripts/check-admin-crud-coverage.mjs`: pass.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-auth-browser`: pass in plan-only mode.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run lint`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- Live sign-out browser QA still requires browser-safe Supabase config and a real active admin email/password.
+- This checkpoint does not create rows, upload Storage objects, change Auth users/profiles, verify form persistence, or touch Cloudflare.
+
+### Next Handoff
+- When active-admin browser credentials exist, run `npm run agent:admin-auth-browser -- --allow-login --strict` to verify login, route shells, and sign-out behavior in one no-write flow.
+
 ## Entry - 2026-05-29 (Unprofiled Admin Browser QA Gate)
 
 ### Scope

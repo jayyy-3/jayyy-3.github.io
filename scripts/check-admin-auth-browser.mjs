@@ -359,6 +359,11 @@ async function runBrowserCheck({ baseUrl, expectUnauthorized, screenshotsDir, em
       await page.screenshot({ path: `${screenshotsDir}/${route.slug}.png`, fullPage: true });
     }
 
+    await page.getByRole('button', { name: /sign out/i }).click();
+    await waitForSignedOutRoute(page, '/admin/audit');
+    await assertNoText(page, 'Audit events');
+    await page.screenshot({ path: `${screenshotsDir}/signed-out.png`, fullPage: true });
+
     if (consoleErrors.length > 0) {
       throw new Error(`Console/page errors detected: ${consoleErrors.join(' | ')}`);
     }
@@ -423,6 +428,29 @@ async function waitForAuthenticatedRoute(page, expectedText) {
           : 'Admin login did not reach the authenticated shell.',
     );
   }
+}
+
+async function waitForSignedOutRoute(page, expectedNext) {
+  try {
+    await waitForText(page, 'Admin login', 'signed-out admin login screen', 30000);
+  } catch (error) {
+    const visibleFailure = await firstVisibleText(page, [
+      'Configuration required',
+      'This account is not an active Urblo admin',
+      'Admin access could not be verified',
+      'Audit',
+      'Dashboard',
+    ]);
+    throw new Error(
+      visibleFailure
+        ? `Admin sign-out did not return to the login shell: ${visibleFailure}`
+        : error instanceof Error
+          ? error.message
+          : 'Admin sign-out did not return to the login shell.',
+    );
+  }
+
+  assertAdminLoginUrl(page.url(), expectedNext);
 }
 
 async function waitForText(page, text, label, timeout = 15000) {
