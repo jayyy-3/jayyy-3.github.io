@@ -2,6 +2,36 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Admin No-Config Route Gate Full Coverage)
+
+### Scope
+- Expanded the built-site admin no-config QA evidence from the earlier `/admin`, `/admin/media`, and `/admin/login` spot check to every launch-critical admin route.
+- Verified the config-missing gate on `/admin`, `/admin/login`, `/admin/unauthorized`, `/admin/leads`, `/admin/media`, `/admin/settings`, `/admin/stone-library`, `/admin/projects`, `/admin/products`, `/admin/articles`, and `/admin/audit`.
+- This checkpoint proves the built admin shell stays fail-closed without browser-safe Supabase configuration; it does not change runtime source, Supabase data, Auth users, Storage, Cloudflare state, or credentials.
+
+### Changed Files
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run build`: pass. Existing Browserslist staleness notice remains.
+- Local preview: `npx vite preview --host 127.0.0.1 --port 4191 --strictPort`.
+- Playwright Firefox screenshot checks: pass for `/admin`, `/admin/login`, `/admin/unauthorized`, `/admin/leads`, `/admin/media`, `/admin/settings`, `/admin/stone-library`, `/admin/projects`, `/admin/products`, `/admin/articles`, and `/admin/audit`, each waiting for rendered `Configuration required`.
+- Screenshot evidence: `/tmp/urblo-admin-config-required-admin.png`, `/tmp/urblo-admin-config-required-admin-login.png`, `/tmp/urblo-admin-config-required-admin-unauthorized.png`, `/tmp/urblo-admin-config-required-admin-leads.png`, `/tmp/urblo-admin-config-required-admin-media.png`, `/tmp/urblo-admin-config-required-admin-settings.png`, `/tmp/urblo-admin-config-required-admin-stone-library.png`, `/tmp/urblo-admin-config-required-admin-projects.png`, `/tmp/urblo-admin-config-required-admin-products.png`, `/tmp/urblo-admin-config-required-admin-articles.png`, and `/tmp/urblo-admin-config-required-admin-audit.png`.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- This is built-site no-config browser QA only. It does not prove active-admin login, unprofiled-user unauthorized behavior, browser-key RLS writes, audit row creation, Storage upload policy, form persistence, Cloudflare preview behavior, or public content cutover.
+- Live admin verification still requires browser-safe Supabase config, a real owner/admin session, first-admin profile readiness, and Jay approval for tagged QA writes.
+
+### Next Handoff
+- `NOW-ADMIN-AUTH-RLS-001`: continue only after browser-safe Supabase config and first-admin/profile inputs exist; then run the read-only readiness and authenticated browser QA paths.
+- `NOW-ADMIN-CMS-001`: keep source-only guardrails moving where useful, but do not claim operational admin completion until live admin writes are verified.
+
 ## Entry - 2026-05-29 (Admin Destructive-Removal Source Guard)
 
 ### Scope
