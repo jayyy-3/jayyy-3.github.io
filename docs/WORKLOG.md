@@ -2,6 +2,48 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Admin Auth Browser QA Runner)
+
+### Scope
+- Added `npm run agent:admin-auth-browser` as a gated browser login verifier for the configured `/admin` auth shell.
+- Default mode is plan-only: it prints required inputs and performs no Supabase login.
+- Live mode requires `--allow-login --strict`, browser-safe Supabase config, and `URBLO_ADMIN_EMAIL`/`URBLO_ADMIN_PASSWORD`; it signs in through `/admin/login`, checks authenticated admin route shells, rejects config/unauthorized/login states after authentication, captures screenshots, and creates no content rows, Storage objects, or audit events.
+- Added the runner to live-readiness reporting so the no-write browser auth QA gate is visible separately from tagged admin CRUD/live-write verification.
+
+### Changed Files
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `docs/agent/verification.md`
+- `package.json`
+- `scripts/agent-init.sh`
+- `scripts/check-admin-auth-browser.mjs`
+- `scripts/check-harness.mjs`
+- `scripts/check-live-readiness.mjs`
+
+### Verification Results
+- `node --check scripts/check-admin-auth-browser.mjs`: pass.
+- `npm run agent:admin-auth-browser`: pass in plan-only mode; no Supabase login attempted.
+- `npm run build`: pass. Existing Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:admin-config-gate`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:live-readiness`: pass in report-only mode and now reports the new no-write admin auth browser QA command.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- Live login mode was not run because this workspace still lacks persistent browser-safe Supabase config and real active admin email/password credentials.
+- The runner proves authenticated route shells only. It does not prove save/upload/export writes, audit row creation, private Storage policy, form persistence, Cloudflare preview behavior, or public content cutover.
+
+### Next Handoff
+- After first-admin/profile setup and browser-safe config exist, run `npm run agent:admin-auth-browser -- --allow-login --strict` before tagged admin CRUD live writes.
+
 ## Entry - 2026-05-29 (Repeatable Admin Config-Gate Browser Check)
 
 ### Scope

@@ -7,6 +7,7 @@
     "agent:check": "node scripts/check-harness.mjs",
     "agent:admin-crud-coverage": "node scripts/check-admin-crud-coverage.mjs",
     "agent:admin-config-gate": "node scripts/check-admin-config-gate.mjs",
+    "agent:admin-auth-browser": "node scripts/check-admin-auth-browser.mjs",
     "agent:admin-crud-live": "node scripts/check-admin-crud-live.mjs",
     "agent:admin-live-readiness": "node scripts/check-admin-live-readiness.mjs",
     "agent:first-admin-bootstrap": "node scripts/bootstrap-first-admin.mjs",

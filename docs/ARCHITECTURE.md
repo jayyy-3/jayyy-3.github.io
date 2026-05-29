@@ -192,6 +192,11 @@ Last updated: 2026-05-29
   - Starts built Vite preview when no `--base-url` is supplied, then runs a generated Playwright Firefox spec against `/admin`, `/admin/login`, `/admin/unauthorized`, `/admin/leads`, `/admin/media`, `/admin/settings`, `/admin/stone-library`, `/admin/projects`, `/admin/products`, `/admin/articles`, and `/admin/audit`.
   - Verifies each route renders `Configuration required`, rejects private admin/module text, captures ignored screenshots under `.tmp/admin-config-gate/screenshots`, and does not require Supabase credentials or live writes.
   - Use `--base-url <origin>` to run the same no-config route gate against another built preview origin.
+- Admin auth browser coverage:
+  - `npm run agent:admin-auth-browser` => `node scripts/check-admin-auth-browser.mjs`
+  - Default mode is plan-only and prints required inputs. It does not sign in unless `--allow-login` is supplied.
+  - Live mode starts built Vite preview by default, signs in through `/admin/login` with `URBLO_ADMIN_EMAIL` and `URBLO_ADMIN_PASSWORD`, verifies authenticated admin route shells in Firefox, captures ignored screenshots under `.tmp/admin-auth-browser/screenshots`, and creates no content rows, Storage objects, or audit events.
+  - Use `--base-url <origin>` to run the same authenticated browser check against another preview origin after browser-safe Supabase config exists there.
 - Admin CRUD live verification:
   - `npm run agent:admin-crud-live` => `node scripts/check-admin-crud-live.mjs`
   - Default mode prints the live verification plan and performs no writes.

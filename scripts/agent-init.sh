@@ -38,6 +38,7 @@ echo
 echo "Useful commands:"
 echo "- npm run agent:admin-crud-coverage"
 echo "- npm run agent:admin-config-gate"
+echo "- npm run agent:admin-auth-browser -- --allow-login --strict"
 echo "- npm run agent:admin-crud-live"
 echo "- npm run agent:admin-live-readiness"
 echo "- npm run agent:first-admin-bootstrap"

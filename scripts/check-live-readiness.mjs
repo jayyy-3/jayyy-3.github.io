@@ -389,6 +389,23 @@ function buildChecks(env, sources, options) {
       ],
     }),
     makeCheck({
+      id: 'admin-auth-browser',
+      label: 'No-write admin auth browser QA',
+      command: 'npm run agent:admin-auth-browser -- --allow-login --strict',
+      present: [
+        describeSource(browserKey, sources),
+        adminPasswordSession ? 'URBLO_ADMIN_EMAIL and URBLO_ADMIN_PASSWORD configured' : '',
+      ].filter(Boolean),
+      missing: [
+        browserKey ? '' : 'VITE_SUPABASE_PUBLISHABLE_KEY or VITE_SUPABASE_ANON_KEY',
+        adminPasswordSession ? '' : 'URBLO_ADMIN_EMAIL plus URBLO_ADMIN_PASSWORD',
+      ].filter(Boolean),
+      optional: [
+        'Signs in through the browser UI and verifies authenticated admin route shells without creating content rows, Storage objects, or audit events.',
+        'The runner still requires explicit --allow-login so credentials are not used accidentally.',
+      ],
+    }),
+    makeCheck({
       id: 'admin-crud-live',
       label: 'Tagged admin CRUD/audit live writes',
       command: 'npm run agent:admin-crud-live -- --allow-writes',
