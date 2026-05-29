@@ -2,6 +2,44 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Admin Destructive-Removal Source Guard)
+
+### Scope
+- Hardened `npm run agent:admin-crud-coverage` again so the launch-critical admin source cannot quietly introduce destructive removal behavior.
+- The checker now scans `src/pages/admin` and `scripts/check-admin-crud-live.mjs` for Supabase `.delete()` mutations, HTTP `DELETE` requests, destructive RPC names, and visible `Delete`/`Remove` controls.
+- This reinforces the existing archive-first removal model while first-admin credentials and live admin QA writes remain unavailable.
+
+### Changed Files
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `docs/agent/verification.md`
+- `scripts/check-admin-crud-coverage.mjs`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `node --check scripts/check-admin-crud-coverage.mjs`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:admin-crud-live`: pass in plan-only/no-write mode.
+- `npm run build`: pass. Existing Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:live-readiness`: pass in report-only mode; live form/admin/Cloudflare inputs remain missing or approval-gated in the current local environment.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- This is source-only coverage. It does not prove live admin login, browser-key RLS writes, audit row creation, Storage upload policy, form persistence, Cloudflare preview behavior, or public content cutover.
+- Live admin CRUD still requires browser-safe Supabase config, a real owner/admin session, and Jay approval for tagged QA writes.
+
+### Next Handoff
+- `NOW-ADMIN-CMS-001`: continue source-only guardrails where possible; run `npm run agent:admin-crud-live -- --allow-writes` only after credentials/session/approval exist.
+- `NOW-FORMS-BACKEND-001`: live form persistence still needs the service-role key and Jay approval for tagged form QA writes.
+
 ## Entry - 2026-05-29 (Admin CRUD State-Coverage Guard)
 
 ### Scope

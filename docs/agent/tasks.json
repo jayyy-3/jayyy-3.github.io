@@ -349,6 +349,7 @@
         "2026-05-29: `npm run agent:check` now guards the active operational `agent:*` package script map for form, admin, Cloudflare, first-admin, live-readiness, content-import, and public Supabase readiness runners so launch verification commands cannot be silently removed from `package.json`.",
         "2026-05-29: `npm run agent:admin-crud-coverage` now also fails if admin CMS acceptance drifts back toward physical-delete language instead of the launch archive/removal contract.",
         "2026-05-29: `npm run agent:admin-crud-coverage` now fails if mutating admin screens lose validation feedback paths or save paths, and fails if content/media lifecycle screens lose publish/archive save paths or published/archived state controls.",
+        "2026-05-29: `npm run agent:admin-crud-coverage` now scans admin source and the live admin verifier for Supabase `.delete()` mutations, HTTP `DELETE` requests, destructive RPC names, and visible `Delete`/`Remove` controls so launch removal stays archive-first until a retention/destructive-delete policy is approved.",
         "2026-05-28: Removed the retired AdminModulePage scaffold component and unused scaffold/locked module-state branches now that all launch-critical admin modules have real source screens. Admin CRUD coverage now fails if the retired scaffold component returns.",
         "2026-05-29: `/admin` dashboard now includes a real content health queue for published media missing metadata, project claim review, published products/articles missing key media, TBC Stone Library records, and stale new leads. `npm run agent:admin-crud-coverage` guards those dashboard health checks source-side until live admin credentials allow browser/data QA.",
         "2026-05-29: `npm run agent:admin-crud-live` now stages dashboard-health predicate readback against tagged QA rows before archive cleanup, and `npm run agent:admin-crud-coverage` fails if those live-verifier hooks are removed."
@@ -360,6 +361,7 @@
         "`npm run agent:admin-crud-live` must verify exact expected tagged audit actions and entity types for live QA writes and exports, not only a loose audit-row count.",
         "`npm run agent:admin-crud-live` must verify dashboard-health predicates against tagged live QA rows before archiving them.",
         "`npm run agent:admin-crud-coverage` must verify validation/save paths and publish/archive lifecycle paths stay present on launch-critical admin screens.",
+        "`npm run agent:admin-crud-coverage` must fail if launch-critical admin source or the live verifier introduces physical delete mutations, HTTP DELETE requests, destructive RPC names, or visible Delete/Remove controls.",
         "Unpublished content remains hidden from the public site, and unauthenticated users cannot access admin routes."
       ],
       "verification": [
@@ -634,6 +636,7 @@
         "2026-05-29: Admin CRUD coverage verifier now also checks Article structured-authoring guardrails: approved schema block types must remain available, published blocks must require structured content, and raw HTML/newsletter authoring helpers must not appear in `/admin/articles`.",
         "2026-05-29: Admin CRUD coverage verifier now also checks the archive/removal contract so launch-critical content acceptance stays non-destructive until a physical-delete policy is approved.",
         "2026-05-29: Admin CRUD coverage verifier now also checks validation feedback paths, save paths, and content/media publish/archive lifecycle paths so source screens cannot silently lose launch-critical UI states.",
+        "2026-05-29: Admin CRUD coverage verifier now scans admin source and the live verifier for Supabase `.delete()` mutations, HTTP `DELETE` requests, destructive RPC names, and visible `Delete`/`Remove` controls.",
         "2026-05-29: Admin CRUD live verifier plan now includes tagged `stone_finish_images` create/publish/archive coverage through authenticated RLS for the later credential-gated live run. It publishes then archives public-facing QA parent rows, verifies those tagged archived public-content rows and private lead rows are not anonymously visible through browser-key reads, and performs no physical deletes.",
         "2026-05-29: `/admin` dashboard now includes a real content health queue for published media missing metadata, project claim review, published products/articles missing key media, TBC Stone Library records, and stale new leads. `npm run agent:admin-crud-coverage` guards those dashboard health checks source-side, and `npm run agent:admin-crud-live` stages tagged predicate readback for live admin QA."
       ],
@@ -654,7 +657,8 @@
         "`npm run agent:public-supabase-readiness` fails if generated preflight SQL loses Data API role/sequence grant inspection for anon, authenticated, and service_role.",
         "`npm run agent:live-readiness` reports content import apply, merge/upsert, and public read cutover approval gates without mutating Supabase.",
         "`npm run agent:admin-crud-coverage` fails if `/admin/articles` loses approved structured block options, structured-content validation, or reintroduces raw HTML/newsletter authoring helpers.",
-        "`npm run agent:admin-crud-coverage` fails if launch-critical admin screens lose validation/save paths or content/media publish/archive lifecycle paths."
+        "`npm run agent:admin-crud-coverage` fails if launch-critical admin screens lose validation/save paths or content/media publish/archive lifecycle paths.",
+        "`npm run agent:admin-crud-coverage` fails if launch-critical admin source or the live verifier introduces physical delete mutations, HTTP DELETE requests, destructive RPC names, or visible Delete/Remove controls."
       ],
       "verification": [
         "npm run build",

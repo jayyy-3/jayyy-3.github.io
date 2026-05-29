@@ -269,6 +269,45 @@ const forbiddenBrowserSecretPatterns = [
   },
 ];
 
+const forbiddenAdminDestructivePatterns = [
+  {
+    pattern: /\.delete\s*\(/,
+    label: 'Supabase/PostgREST delete mutation',
+  },
+  {
+    pattern: /\bmethod\s*:\s*['"`]DELETE['"`]/,
+    label: 'HTTP DELETE request',
+  },
+  {
+    pattern: /\.rpc\(\s*['"`][^'"`]*(?:delete|remove|purge|destroy|truncate)[^'"`]*['"`]/i,
+    label: 'destructive RPC call',
+  },
+  {
+    pattern: />\s*Delete(?:\s|<)/,
+    label: 'visible Delete control',
+  },
+  {
+    pattern: />\s*Remove(?:\s|<)/,
+    label: 'visible Remove control',
+  },
+  {
+    pattern: /\baria-label\s*=\s*['"`]Delete\b/,
+    label: 'Delete aria-label',
+  },
+  {
+    pattern: /\baria-label\s*=\s*['"`]Remove\b/,
+    label: 'Remove aria-label',
+  },
+  {
+    pattern: /\btitle\s*=\s*['"`]Delete\b/,
+    label: 'Delete title',
+  },
+  {
+    pattern: /\btitle\s*=\s*['"`]Remove\b/,
+    label: 'Remove title',
+  },
+];
+
 function readRequired(path) {
   const fullPath = join(root, path);
   if (!existsSync(fullPath)) {
@@ -475,6 +514,35 @@ function checkBrowserSecretBoundaries() {
     for (const forbidden of forbiddenBrowserSecretPatterns) {
       if (forbidden.pattern.test(text)) {
         failures.push(`${repoPath}: unexpected ${forbidden.label}`);
+      }
+    }
+  }
+}
+
+function checkAdminDestructiveBoundaries() {
+  const adminSourceRoot = join(root, 'src/pages/admin');
+  const liveVerifierPath = join(root, 'scripts/check-admin-crud-live.mjs');
+  const filesToScan = [];
+
+  if (existsSync(adminSourceRoot) && statSync(adminSourceRoot).isDirectory()) {
+    filesToScan.push(...collectSourceFiles(adminSourceRoot));
+  } else {
+    failures.push('src/pages/admin: admin source directory is missing');
+  }
+
+  if (existsSync(liveVerifierPath)) {
+    filesToScan.push(liveVerifierPath);
+  } else {
+    failures.push('scripts/check-admin-crud-live.mjs: admin live verifier is missing');
+  }
+
+  for (const fullPath of filesToScan) {
+    const text = readFileSync(fullPath, 'utf8');
+    const repoPath = toRepoPath(fullPath);
+
+    for (const forbidden of forbiddenAdminDestructivePatterns) {
+      if (forbidden.pattern.test(text)) {
+        failures.push(`${repoPath}: unexpected ${forbidden.label}; launch admin removal must use archive flows`);
       }
     }
   }
@@ -705,6 +773,7 @@ function checkAdminRemovalContract() {
 
 checkRoutes();
 checkBrowserSecretBoundaries();
+checkAdminDestructiveBoundaries();
 pageChecks.forEach(checkPage);
 checkArticleStructuredAuthoring();
 checkAdminLiveVerifierBoundaries();
