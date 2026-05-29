@@ -2,6 +2,47 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Unprofiled Admin Route-Probe Gate)
+
+### Scope
+- Extended `npm run agent:admin-auth-browser -- --allow-login --expect-unauthorized --strict` beyond the first unauthorized landing.
+- After an unprofiled Auth user reaches `/admin/unauthorized`, the runner now probes `/admin`, `/admin/leads`, and `/admin/settings` while still signed in and requires each route to stay on the unauthorized shell without private module headings.
+- Added source coverage so those unauthorized direct-route probes cannot be silently removed from the admin browser verifier.
+
+### Changed Files
+- `AGENTS.md`
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `docs/agent/verification.md`
+- `scripts/check-admin-auth-browser.mjs`
+- `scripts/check-admin-crud-coverage.mjs`
+- `scripts/check-live-readiness.mjs`
+
+### Verification Results
+- `node --check scripts/check-admin-auth-browser.mjs`: pass.
+- `node --check scripts/check-admin-crud-coverage.mjs`: pass.
+- `node --check scripts/check-live-readiness.mjs`: pass.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-auth-browser -- --expect-unauthorized`: pass in plan-only mode.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:live-readiness`: pass in report-only mode and now describes the protected-route probes in the unprofiled admin browser QA note.
+- `npm run lint`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- Runtime gates were intentionally skipped because this checkpoint changed verifier/docs only, not `src/**` runtime behavior.
+
+### Risks and Gaps
+- Live unprofiled browser QA still requires browser-safe Supabase config and a valid Auth user with no active `admin_profiles` row.
+- This checkpoint is source/tooling only. It does not create users, profiles, content rows, Storage objects, audit rows, form submissions, or Cloudflare state.
+
+### Next Handoff
+- When browser-safe Supabase config and an unprofiled Auth test account are available, run `npm run agent:admin-auth-browser -- --allow-login --expect-unauthorized --strict` to verify the unauthorized landing and direct-route probes in one no-write browser flow.
+
 ## Entry - 2026-05-29 (Admin Browser Sign-Out Gate)
 
 ### Scope

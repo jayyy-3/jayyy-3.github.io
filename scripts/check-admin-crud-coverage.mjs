@@ -466,6 +466,9 @@ function checkRoutes() {
   requireIncludes(adminAuthBrowser, 'URBLO_UNPROFILED_EMAIL', 'scripts/check-admin-auth-browser.mjs');
   requireIncludes(adminAuthBrowser, 'URBLO_UNPROFILED_PASSWORD', 'scripts/check-admin-auth-browser.mjs');
   requireIncludes(adminAuthBrowser, 'waitForUnauthorizedRoute', 'scripts/check-admin-auth-browser.mjs');
+  requireIncludes(adminAuthBrowser, 'unauthorizedRouteProbes', 'scripts/check-admin-auth-browser.mjs');
+  requireIncludes(adminAuthBrowser, '/admin/settings', 'scripts/check-admin-auth-browser.mjs');
+  requireIncludes(adminAuthBrowser, 'assertNoPrivateAdminText', 'scripts/check-admin-auth-browser.mjs');
   requireIncludes(adminAuthBrowser, "getByRole('button', { name: /sign out/i })", 'scripts/check-admin-auth-browser.mjs');
   requireIncludes(adminAuthBrowser, 'waitForSignedOutRoute', 'scripts/check-admin-auth-browser.mjs');
   requireIncludes(firstAdminBootstrap, ".from('admin_audit_events')", 'scripts/bootstrap-first-admin.mjs');

@@ -420,7 +420,7 @@ function buildChecks(env, sources, options) {
         unprofiledPasswordSession ? '' : 'URBLO_UNPROFILED_EMAIL plus URBLO_UNPROFILED_PASSWORD',
       ].filter(Boolean),
       optional: [
-        'Signs in through the browser UI with a valid Auth user that has no active admin_profiles row and verifies /admin/unauthorized without rendering private admin content.',
+        'Signs in through the browser UI with a valid Auth user that has no active admin_profiles row, verifies /admin/unauthorized, and probes protected admin routes without rendering private admin content.',
         'The runner still requires explicit --allow-login so credentials are not used accidentally.',
       ],
     }),

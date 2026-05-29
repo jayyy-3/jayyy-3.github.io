@@ -41,6 +41,12 @@ const forbiddenUnauthorizedText = [
   'Audit',
 ];
 
+const unauthorizedRouteProbes = [
+  { path: '/admin', slug: 'unauthorized-admin' },
+  { path: '/admin/leads', slug: 'unauthorized-leads' },
+  { path: '/admin/settings', slug: 'unauthorized-settings' },
+];
+
 const args = parseArgs(process.argv.slice(2));
 const loadedEnvironment = loadEnv(args.envFiles);
 const runtimeEnv = loadedEnvironment.env;
@@ -338,10 +344,14 @@ async function runBrowserCheck({ baseUrl, expectUnauthorized, screenshotsDir, em
 
     if (expectUnauthorized) {
       await waitForUnauthorizedRoute(page);
-      for (const text of forbiddenUnauthorizedText) {
-        await assertNoText(page, text);
-      }
+      await assertNoPrivateAdminText(page);
       await page.screenshot({ path: `${screenshotsDir}/unauthorized-profile.png`, fullPage: true });
+      for (const route of unauthorizedRouteProbes) {
+        await page.goto(new URL(route.path, baseUrl).toString(), { waitUntil: 'domcontentloaded' });
+        await waitForUnauthorizedRoute(page);
+        await assertNoPrivateAdminText(page);
+        await page.screenshot({ path: `${screenshotsDir}/${route.slug}.png`, fullPage: true });
+      }
       if (consoleErrors.length > 0) {
         throw new Error(`Console/page errors detected: ${consoleErrors.join(' | ')}`);
       }
@@ -469,6 +479,12 @@ async function assertNoText(page, text) {
   const count = await page.getByText(text, { exact: false }).count();
   if (count > 0) {
     throw new Error(`Unexpected text is visible in the admin browser check: ${text}`);
+  }
+}
+
+async function assertNoPrivateAdminText(page) {
+  for (const text of forbiddenUnauthorizedText) {
+    await assertNoText(page, text);
   }
 }
 
