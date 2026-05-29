@@ -289,7 +289,8 @@
         "2026-05-29: Production dependencies were updated to clear the critical production audit path: `react-router-dom` `^7.16.0`, `swiper` `^12.2.0`, and `postcss` `^8.5.15`. `postcss.config.js` now runs `tailwindcss/nesting` before Tailwind so Swiper 12 nested CSS builds without nesting warnings.",
         "2026-05-29: `npm run agent:cloudflare-readiness` now guards the deployed-preview manual route list against stale legacy direct-refresh URLs by requiring canonical `/products/prime-block`, article detail, and `/capabilities` route checks while keeping old product/article URLs as redirect checks.",
         "2026-05-29: `npm run agent:cloudflare-preview-smoke` now recursively follows deployed JS/CSS route chunks, verifies deployed admin config-required and `admin_profiles` bundle markers, rejects browser service-role env access patterns, and checks malformed JSON API safe failures. Local preview mode validates the route/asset/bundle portion before a real Pages preview URL exists.",
-        "2026-05-29: `npm run agent:cloudflare-preview-smoke` now rejects copied placeholders and URLs with path/query/hash in `--base-url` before any deployed route, asset, redirect, or Function request runs."
+        "2026-05-29: `npm run agent:cloudflare-preview-smoke` now rejects copied placeholders and URLs with path/query/hash in `--base-url` before any deployed route, asset, redirect, or Function request runs.",
+        "2026-05-29: Read-only Cloudflare API probe found Jay's account (`a9cbf84bf6677e2af8c76b353afe0d9d`) reachable with 0 Pages projects, while Hunter's account (`077afae2c6f4e77badadf21e49e58eb7`) returns an API authentication error with the current token. No Pages project, deployment, domain, DNS record, environment variable, or secret was created or changed."
       ]
     },
     {

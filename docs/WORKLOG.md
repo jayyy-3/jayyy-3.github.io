@@ -2,6 +2,36 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Cloudflare Pages Account Read-Only Probe)
+
+### Scope
+- Used the Cloudflare API connector in read-only mode to inspect Pages project availability in the two accessible Cloudflare accounts.
+- Checked Jay's account and Hunter's account without creating projects, deployments, domains, DNS records, environment variables, or secrets.
+- Confirmed the Cloudflare launch blocker is account/project setup rather than a repo-side Pages readiness issue.
+
+### Changed Files
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- Cloudflare API spec lookup: pass. Confirmed the read-only Pages endpoint is `GET /accounts/{account_id}/pages/projects`.
+- Jay Cloudflare account (`a9cbf84bf6677e2af8c76b353afe0d9d`) Pages project list: pass. The account is reachable and currently returns 0 Pages projects.
+- Hunter Cloudflare account (`077afae2c6f4e77badadf21e49e58eb7`) Pages project list: blocked by Cloudflare API authentication error with the current token.
+- `npm run agent:live-readiness`: pass in report-only mode; live Supabase keys, first-admin inputs, admin credentials, preview URL, and tagged-write approvals remain missing/manual-gated.
+- `git status --short`: clean before this documentation checkpoint.
+
+### Risks and Gaps
+- No Cloudflare Pages project, preview deployment, production environment variable, custom domain, DNS record, or rollback state was created or changed.
+- Jay's account appears usable for future Pages setup but has no existing Pages project to smoke-test.
+- Hunter's account cannot be used with the current Cloudflare token until access is fixed.
+- Creating a Pages project still requires Jay to choose the target account and approve the account-level action.
+
+### Next Handoff
+- Ask Jay whether to create the Cloudflare Pages project in Jay's account or resolve Hunter account access first.
+- After a preview deployment exists, run `npm run agent:cloudflare-preview-smoke -- --base-url https://<preview>.pages.dev`.
+
 ## Entry - 2026-05-29 (Full Unprofiled Admin Route-Probe Coverage)
 
 ### Scope
