@@ -45,6 +45,16 @@ function methodRequest(path, method, body = undefined) {
   });
 }
 
+function malformedJsonRequest(path) {
+  return new Request(`https://urblo.test${path}`, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+    },
+    body: '{',
+  });
+}
+
 async function readJson(response) {
   return response.json();
 }
@@ -141,6 +151,8 @@ await withFetchMock(async (calls) => {
 
     assert.equal(response.status, 204);
     assert.equal(response.headers.get('allow'), 'POST, OPTIONS');
+    assert.match(response.headers.get('access-control-allow-methods') ?? '', /POST/);
+    assert.match(response.headers.get('access-control-allow-headers') ?? '', /content-type/);
   }
   assert.equal(calls.length, 0);
 });
@@ -170,6 +182,24 @@ await withFetchMock(async (calls) => {
   assert.equal(response.status, 400);
   assert.equal(body.ok, false);
   assert.equal(body.error.code, 'validation_failed');
+  assert.equal(calls.length, 0);
+});
+
+await withFetchMock(async (calls) => {
+  for (const [path, onRequest] of [
+    ['/api/enquiries', onEnquiryRequest],
+    ['/api/sample-requests', onSampleRequest],
+  ]) {
+    const response = await onRequest({
+      request: malformedJsonRequest(path),
+      env,
+    });
+    const body = await readJson(response);
+
+    assert.equal(response.status, 400);
+    assert.equal(body.ok, false);
+    assert.equal(body.error.code, 'invalid_json');
+  }
   assert.equal(calls.length, 0);
 });
 

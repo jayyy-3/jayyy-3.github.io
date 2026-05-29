@@ -106,6 +106,8 @@ Evidence to record:
 - Preview URL and production URL if available.
 - Whether static routes avoid Function invocation.
 - Direct-refresh checks for declared public routes.
+- Deployed route chunk discovery, admin bundle config/profile-gate contract, and browser service-role secret boundary checks.
+- API safe-failure results for unsafe methods, OPTIONS/CORS preflight, malformed JSON, and invalid payloads.
 - DNS cutover and rollback assumptions.
 
 ### Supabase Schema or Data Migration
@@ -145,6 +147,7 @@ Evidence to record:
 - Endpoint paths changed.
 - Valid submission result.
 - Invalid/spam submission result.
+- Malformed JSON result and confirmation that it creates no Supabase calls.
 - Supabase record creation proof.
 - Email notification proof or reason it was mocked.
 - Whether final live email proof required stored `notification_status = sent`.

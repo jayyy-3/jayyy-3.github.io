@@ -147,14 +147,25 @@ function assertHtmlShell(path, response, html) {
 function collectAssetPaths(html) {
   const paths = new Set();
   for (const match of html.matchAll(/(?:src|href)="([^"]*\/assets\/[^"]+)"/g)) {
-    const path = match[1];
-    if (path.startsWith('http')) {
-      paths.add(new URL(path).pathname);
-    } else {
-      paths.add(path);
-    }
+    paths.add(normalizeAssetPath(match[1]));
   }
-  return [...paths].slice(0, 8);
+  return [...paths].filter(Boolean);
+}
+
+function collectReferencedAssetPaths(text) {
+  const paths = new Set();
+  for (const match of text.matchAll(/["'`](\/?assets\/[^"'`]+?\.(?:js|css))["'`]/g)) {
+    paths.add(normalizeAssetPath(match[1]));
+  }
+  return [...paths].filter(Boolean);
+}
+
+function normalizeAssetPath(rawPath) {
+  if (!rawPath) return '';
+  if (rawPath.startsWith('http')) {
+    return new URL(rawPath).pathname;
+  }
+  return rawPath.startsWith('/') ? rawPath : `/${rawPath}`;
 }
 
 async function checkHtmlRoutes(options) {
@@ -172,14 +183,63 @@ async function checkHtmlRoutes(options) {
 }
 
 async function checkAssets(html, options) {
-  const assetPaths = collectAssetPaths(html);
-  assert(assetPaths.length > 0, 'No /assets/ references found in root HTML');
+  const queue = collectAssetPaths(html);
+  const seen = new Set();
+  const jsAssetTexts = new Map();
+  assert(queue.length > 0, 'No /assets/ references found in root HTML');
 
-  for (const path of assetPaths) {
+  while (queue.length > 0) {
+    const path = queue.shift();
+    if (!path || seen.has(path)) continue;
+    seen.add(path);
+
     const response = await timedFetch(`${options.baseUrl}${path}`, options);
     assert(response.status === 200, `${path} returned ${response.status}, expected 200`);
+    if (path.endsWith('.js') || path.endsWith('.css')) {
+      const text = await response.text();
+      if (path.endsWith('.js')) {
+        jsAssetTexts.set(path, text);
+      }
+      for (const discoveredPath of collectReferencedAssetPaths(text)) {
+        if (!seen.has(discoveredPath) && queue.length + seen.size < 80) {
+          queue.push(discoveredPath);
+        }
+      }
+    }
     console.log(`asset ok: ${path}`);
   }
+
+  checkDeployedBundleContracts(jsAssetTexts);
+}
+
+function checkDeployedBundleContracts(jsAssetTexts) {
+  assert(jsAssetTexts.size > 0, 'No deployed JS asset text was available for bundle contract checks');
+
+  const combinedJs = [...jsAssetTexts.values()].join('\n');
+  assert(
+    combinedJs.includes('Configuration required'),
+    'Deployed JS bundle is missing the /admin configuration-required state copy',
+  );
+  assert(
+    combinedJs.includes('admin_profiles'),
+    'Deployed JS bundle is missing the admin profile gate contract marker',
+  );
+
+  const forbiddenBrowserSecretPatterns = [
+    /VITE_SUPABASE_SERVICE(?:_ROLE)?_KEY/,
+    /import\.meta\.env\.(?:VITE_)?SUPABASE_SERVICE(?:_ROLE)?_KEY/,
+    /process\.env\.(?:VITE_)?SUPABASE_SERVICE(?:_ROLE)?_KEY/,
+    /(?:import\.meta\.env|process\.env)\[['"`](?:VITE_)?SUPABASE_SERVICE(?:_ROLE)?_KEY['"`]\]/,
+  ];
+
+  for (const pattern of forbiddenBrowserSecretPatterns) {
+    assert(
+      !pattern.test(combinedJs),
+      `Deployed browser JS includes forbidden service-role exposure pattern: ${pattern}`,
+    );
+  }
+
+  console.log('bundle contract ok: admin config gate and browser secret boundary');
 }
 
 async function checkRedirects(options) {
@@ -235,6 +295,31 @@ async function checkFunctionPath(path, options) {
     },
   });
   assert(optionsResponse.status === 204, `${path} OPTIONS returned ${optionsResponse.status}, expected 204`);
+  assert(
+    (optionsResponse.headers.get('access-control-allow-methods') || '').includes('POST'),
+    `${path} OPTIONS is missing POST in access-control-allow-methods`,
+  );
+  assert(
+    (optionsResponse.headers.get('access-control-allow-headers') || '').includes('content-type'),
+    `${path} OPTIONS is missing content-type in access-control-allow-headers`,
+  );
+
+  const malformedPost = await timedFetch(`${options.baseUrl}${path}`, {
+    ...options,
+    fetch: {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+      },
+      body: '{',
+    },
+  });
+  const malformedJson = await expectJson(malformedPost, `${path} malformed POST`);
+  assert(malformedPost.status === 400, `${path} malformed POST returned ${malformedPost.status}, expected 400`);
+  assert(
+    malformedJson?.error?.code === 'invalid_json',
+    `${path} malformed POST returned unexpected error code`,
+  );
 
   const invalidPost = await timedFetch(`${options.baseUrl}${path}`, {
     ...options,

@@ -2,6 +2,50 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Cloudflare Preview Bundle/API Safe-Failure Guard)
+
+### Scope
+- Hardened the deployed-preview smoke runner so it recursively discovers deployed JS/CSS route chunks instead of checking only the initial HTML asset references.
+- Added deployed admin bundle contract checks for the configuration-required state and `admin_profiles` profile gate, plus browser bundle checks against service-role env access patterns.
+- Added no-write malformed JSON API safe-failure checks for `/api/enquiries` and `/api/sample-requests`.
+- Expanded the Forms API mock wrapper checks so OPTIONS must expose CORS method/header values and malformed JSON returns `400 invalid_json` before any Supabase calls.
+
+### Changed Files
+- `docs/ARCHITECTURE.md`
+- `docs/CLOUDFLARE_DEPLOYMENT.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `docs/agent/verification.md`
+- `scripts/check-cloudflare-preview-smoke.mjs`
+- `scripts/check-forms-api.mjs`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `node --check scripts/check-cloudflare-preview-smoke.mjs`: pass.
+- `node --check scripts/check-forms-api.mjs`: pass.
+- `node scripts/check-forms-api.mjs`: pass.
+- `npm run agent:cloudflare-readiness`: pass.
+- `npm run agent:check`: pass.
+- `npm run build`: pass. Existing Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:cloudflare-preview-smoke -- --base-url http://127.0.0.1:4184`: pass; local preview mode verified route shells, recursively discovered assets/route chunks, and the admin bundle contract while skipping Cloudflare-only redirect/Function checks.
+- `npm run agent:smoke`: pass.
+- `npm run agent:live-readiness`: pass in report-only mode; live form/admin/Cloudflare inputs remain missing or approval-gated in the current local environment.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- This is source-only/local-preview hardening. It did not create a Cloudflare Pages project, run against a real `*.pages.dev` URL, create Supabase rows, create Auth users, upload Storage objects, configure credentials, send email, verify Turnstile, or run tagged live QA writes.
+- Final deployed preview smoke still requires a Cloudflare Pages preview URL.
+- Live form persistence still requires server-side service-role credentials and Jay approval for tagged form QA writes.
+
+### Next Handoff
+- `NOW-CLOUDFLARE-PAGES-DEPLOY-001`: run `npm run agent:cloudflare-preview-smoke -- --base-url https://<preview>.pages.dev` once a Pages preview URL exists.
+- `NOW-FORMS-BACKEND-001`: run `npm run agent:forms-live -- --allow-writes` only after service-role credentials exist and Jay approves tagged live form QA writes.
+- `NOW-ADMIN-AUTH-RLS-001`: continue first-admin readiness once browser-safe Supabase config, service-role verification key, and the first admin email are available.
+
 ## Entry - 2026-05-29 (Content Import Data API Grant Preflight)
 
 ### Scope
