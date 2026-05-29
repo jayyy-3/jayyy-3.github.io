@@ -123,6 +123,7 @@ Run:
 Evidence to record:
 - Tables/relations changed.
 - RLS status and public/admin access assumptions.
+- Data API role grants for tables and generated sequences when PostgREST or `supabase-js` access is in scope.
 - Migration source files and row counts where available.
 - Rollback or restore path.
 - Any customer-facing data not yet migrated.

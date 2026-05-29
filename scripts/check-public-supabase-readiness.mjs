@@ -128,6 +128,7 @@ function getContentImportSqlArtifacts() {
 
     const tmpDir = mkdtempSync(join(tmpRoot, 'public-supabase-readiness-'));
     const relativeTmpDir = relative(root, tmpDir);
+    const preflightSqlPath = join(relativeTmpDir, 'content-import-preflight.sql');
     const applySqlPath = join(relativeTmpDir, 'content-import-apply.sql');
     const rollbackSqlPath = join(relativeTmpDir, 'content-import-rollback.sql');
 
@@ -141,7 +142,7 @@ function getContentImportSqlArtifacts() {
         '--plan-out',
         join(relativeTmpDir, 'content-import-plan.md'),
                 '--preflight-sql-out',
-                join(relativeTmpDir, 'content-import-preflight.sql'),
+                preflightSqlPath,
                 '--apply-sql-out',
                 applySqlPath,
                 '--rollback-sql-out',
@@ -155,6 +156,7 @@ function getContentImportSqlArtifacts() {
         );
 
         return {
+            preflightSql: readFileSync(join(root, preflightSqlPath), 'utf8'),
             applySql: readFileSync(join(root, applySqlPath), 'utf8'),
             rollbackSql: readFileSync(join(root, rollbackSqlPath), 'utf8'),
         };
@@ -199,6 +201,24 @@ function checkContentImportPayload(payload) {
     'Run public route smoke tests before switching any public read path from static files to Supabase',
     'content import plan verification',
   );
+}
+
+function checkPreflightSqlArtifact(preflightSql) {
+  for (const fragment of [
+    '-- Data API role grants for seed and import target tables.',
+    'Supabase Data API access requires table grants in addition to RLS policies.',
+    "has_table_privilege('anon'",
+    "has_table_privilege('authenticated'",
+    "has_table_privilege('service_role'",
+    'anon_insert',
+    'authenticated_insert',
+    'service_role_insert',
+    '-- Data API sequence grants for generated identity rows.',
+    "has_sequence_privilege('authenticated'",
+    "has_sequence_privilege('service_role'",
+  ]) {
+    requireIncludes(preflightSql, fragment, 'content import preflight SQL');
+  }
 }
 
 function checkDraftImportSqlArtifact(applySql, payload) {
@@ -501,9 +521,10 @@ function checkDocsContracts() {
 }
 
 const payload = getContentImportPayload();
-const { applySql, rollbackSql } = getContentImportSqlArtifacts();
+const { preflightSql, applySql, rollbackSql } = getContentImportSqlArtifacts();
 
 checkContentImportPayload(payload);
+checkPreflightSqlArtifact(preflightSql);
 checkDraftImportSqlArtifact(applySql, payload);
 checkDraftRollbackSqlArtifact(rollbackSql, payload);
 checkArticleBlockPayload(payload);
@@ -523,6 +544,7 @@ console.log(
   [
     `Verified ${payload.summary.stone_groups} stone groups, ${payload.summary.products} products, ${payload.summary.projects} projects, and ${payload.summary.articles} articles remain draft in the import dry run.`,
     `Verified ${payload.summary.article_blocks} draft article blocks use structured extraction instead of placeholder HTML imports.`,
+    'Verified content import preflight SQL includes Data API role/sequence grant inspection for anon, authenticated, and service_role.',
     'Verified guarded draft import SQL keeps the approval and merge gates manual, avoids destructive/publish statements, and forces imported content status to draft.',
     'Verified guarded draft rollback SQL keeps its destructive gate manual, follows reverse dependency order, and targets draft/import rows only.',
     'Verified published-only public RLS policy source, read-only anon grants, static public runtime boundary, Cloudflare SPA/API routing scope, and cutover docs.',

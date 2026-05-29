@@ -2,6 +2,41 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Content Import Data API Grant Preflight)
+
+### Scope
+- Expanded the generated content import preflight SQL so future static-to-Supabase import reviews inspect Data API table grants in addition to RLS and policies.
+- Added role matrix checks for `anon`, `authenticated`, and `service_role` table privileges, plus generated-identity sequence usage checks for `authenticated` and `service_role`.
+- Hardened `npm run agent:public-supabase-readiness` so the Data API grant matrix cannot be silently removed from the preflight artifact.
+- Ran read-only Supabase connector verification against project `npkidywzwddbnfrnxlmo` after reviewing the Supabase 2026-04-28 Data API explicit-grants changelog.
+
+### Changed Files
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `docs/agent/verification.md`
+- `scripts/check-content-import-readiness.mjs`
+- `scripts/check-public-supabase-readiness.mjs`
+
+### Verification Results
+- `node --check scripts/check-content-import-readiness.mjs`: pass.
+- `node --check scripts/check-public-supabase-readiness.mjs`: pass.
+- `npm run agent:content-import:preflight-sql`: pass; regenerated ignored `.tmp/content-import-preflight.sql` with Data API role and sequence grant inspection.
+- `npm run agent:public-supabase-readiness`: pass; now verifies the preflight SQL includes grant inspection for `anon`, `authenticated`, and `service_role`.
+- Supabase connector read-only grant summary: pass. Current live project has 19/19 public content tables with anon `select`, 5/5 private/admin/lead tables with anon `select` denied, 24/24 tables with anon writes denied, 24/24 tables with authenticated CRUD grants, 24/24 tables with service-role CRUD grants, and 23/23 generated sequences with authenticated/service-role usage grants.
+
+### Risks and Gaps
+- This is source/read-only hardening. It did not apply import SQL, create rows, create Auth users, upload Storage objects, configure credentials, or touch Cloudflare state.
+- Live form persistence, first-admin readiness, tagged admin CRUD writes, Storage upload proof, email proof, Turnstile proof, content import apply, and public read cutover remain blocked on the existing credential and approval gates.
+
+### Next Handoff
+- `NOW-FORMS-BACKEND-001`: live form persistence remains the next credential-gated proof once service-role key and tagged write approval exist.
+- `NOW-ADMIN-AUTH-RLS-001`: first-admin readiness still needs browser/service keys and Jay's first-admin email.
+- `NOW-ADMIN-CONTENT-CRUD-001`: content import remains draft/no-write until Jay approves import and cutover.
+
 ## Entry - 2026-05-29 (Content Import Connector Preflight)
 
 ### Scope
