@@ -2,6 +2,42 @@
 
 Last updated: 2026-05-29
 
+## Entry - 2026-05-29 (Content Import Rollback SQL Guard)
+
+### Scope
+- Added `--rollback-sql-out` support to the static-to-Supabase content import dry run.
+- Updated `npm run agent:content-import:apply-sql` so the ignored `.tmp/` review bundle now includes both guarded draft apply SQL and guarded draft rollback SQL.
+- The rollback artifact is destructive by nature but fail-closed by default: it aborts unless `urblo.rollback_approved=true` is explicitly set in the transaction, rolls back in reverse dependency order, and targets matching draft/import rows only.
+- Expanded public Supabase readiness checks so the rollback artifact cannot lose its manual gate, reverse order, draft targeting, or dry-run row-count summary.
+
+### Changed Files
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `package.json`
+- `scripts/check-content-import-readiness.mjs`
+- `scripts/check-harness.mjs`
+- `scripts/check-public-supabase-readiness.mjs`
+
+### Verification Results
+- `node --check scripts/check-content-import-readiness.mjs`: pass.
+- `node --check scripts/check-public-supabase-readiness.mjs`: pass.
+- `node --check scripts/check-harness.mjs`: pass.
+- `npm run agent:content-import:apply-sql`: pass; wrote ignored `.tmp/` preview, plan, preflight, apply, and rollback artifacts only.
+- `npm run agent:public-supabase-readiness`: pass; verified the new guarded rollback SQL plus existing draft-only import/readiness contracts.
+
+### Risks and Gaps
+- This is source-only/no-write. It did not apply or roll back data, create Supabase rows, delete rows, create Auth users, upload Storage objects, touch Cloudflare, or use credentials.
+- Real content import and rollback execution still require Jay approval, a reviewed target preflight, service-role credential review, and a deliberate live operation window.
+
+### Next Handoff
+- `NOW-ADMIN-CONTENT-CRUD-001`
+- `NOW-FORMS-BACKEND-001`
+- `NOW-ADMIN-AUTH-RLS-001`
+
 ## Entry - 2026-05-29 (Contact Turnstile Widget Source Contract)
 
 ### Scope

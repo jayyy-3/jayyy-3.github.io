@@ -28,7 +28,7 @@ const requiredPackageScripts = {
   'agent:cloudflare-preview-smoke': 'node scripts/check-cloudflare-preview-smoke.mjs',
   'agent:cloudflare-readiness': 'node scripts/check-cloudflare-pages-readiness.mjs',
   'agent:content-import': 'node scripts/check-content-import-readiness.mjs',
-  'agent:content-import:apply-sql': 'node scripts/check-content-import-readiness.mjs --out .tmp/content-import-preview.json --plan-out .tmp/content-import-plan.md --preflight-sql-out .tmp/content-import-preflight.sql --apply-sql-out .tmp/content-import-apply.sql',
+  'agent:content-import:apply-sql': 'node scripts/check-content-import-readiness.mjs --out .tmp/content-import-preview.json --plan-out .tmp/content-import-plan.md --preflight-sql-out .tmp/content-import-preflight.sql --apply-sql-out .tmp/content-import-apply.sql --rollback-sql-out .tmp/content-import-rollback.sql',
   'agent:first-admin-bootstrap': 'node scripts/bootstrap-first-admin.mjs',
   'agent:forms-live': 'node scripts/check-forms-api-live.mjs',
   'agent:forms-ui': 'node scripts/check-contact-form-ui-source.mjs',

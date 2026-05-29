@@ -122,39 +122,45 @@ function getContentImportPayload() {
   return JSON.parse(stdout);
 }
 
-function getContentImportApplySql() {
-  const tmpRoot = join(root, '.tmp');
-  mkdirSync(tmpRoot, { recursive: true });
+function getContentImportSqlArtifacts() {
+    const tmpRoot = join(root, '.tmp');
+    mkdirSync(tmpRoot, { recursive: true });
 
-  const tmpDir = mkdtempSync(join(tmpRoot, 'public-supabase-readiness-'));
-  const relativeTmpDir = relative(root, tmpDir);
-  const applySqlPath = join(relativeTmpDir, 'content-import-apply.sql');
+    const tmpDir = mkdtempSync(join(tmpRoot, 'public-supabase-readiness-'));
+    const relativeTmpDir = relative(root, tmpDir);
+    const applySqlPath = join(relativeTmpDir, 'content-import-apply.sql');
+    const rollbackSqlPath = join(relativeTmpDir, 'content-import-rollback.sql');
 
-  try {
-    execFileSync(
-      process.execPath,
-      [
+    try {
+        execFileSync(
+            process.execPath,
+            [
         'scripts/check-content-import-readiness.mjs',
         '--out',
         join(relativeTmpDir, 'content-import-preview.json'),
         '--plan-out',
         join(relativeTmpDir, 'content-import-plan.md'),
-        '--preflight-sql-out',
-        join(relativeTmpDir, 'content-import-preflight.sql'),
-        '--apply-sql-out',
-        applySqlPath,
-      ],
-      {
-        cwd: root,
-        encoding: 'utf8',
-        maxBuffer: 64 * 1024 * 1024,
-      },
-    );
+                '--preflight-sql-out',
+                join(relativeTmpDir, 'content-import-preflight.sql'),
+                '--apply-sql-out',
+                applySqlPath,
+                '--rollback-sql-out',
+                rollbackSqlPath,
+            ],
+            {
+                cwd: root,
+                encoding: 'utf8',
+                maxBuffer: 64 * 1024 * 1024,
+            },
+        );
 
-    return readFileSync(join(root, applySqlPath), 'utf8');
-  } finally {
-    rmSync(tmpDir, { force: true, recursive: true });
-  }
+        return {
+            applySql: readFileSync(join(root, applySqlPath), 'utf8'),
+            rollbackSql: readFileSync(join(root, rollbackSqlPath), 'utf8'),
+        };
+    } finally {
+        rmSync(tmpDir, { force: true, recursive: true });
+    }
 }
 
 function checkContentImportPayload(payload) {
@@ -251,6 +257,62 @@ function checkDraftImportSqlArtifact(applySql, payload) {
       applySql,
       `('${item.table}', ${item.count}::bigint)`,
       'guarded draft content import SQL summary',
+    );
+  }
+}
+
+function checkDraftRollbackSqlArtifact(rollbackSql, payload) {
+  for (const fragment of [
+    '-- Urblo guarded draft content import rollback',
+    '-- This script is intentionally destructive and guarded.',
+    '-- It removes matching draft/import rows in reverse dependency order; it does not touch published content.',
+    "-- set local urblo.rollback_approved = 'true';",
+    "current_setting('urblo.rollback_approved', true)",
+    "raise exception 'Urblo draft import rollback is not approved.",
+    'begin;',
+    'commit;',
+    'delete from public.article_blocks',
+    'delete from public.media_assets',
+    "target.status = 'draft'",
+  ]) {
+    requireIncludes(rollbackSql, fragment, 'guarded draft content import rollback SQL');
+  }
+
+  if (/^\s*set\s+local\s+urblo\.rollback_approved\s*=\s*'true';/im.test(rollbackSql)) {
+    failures.push('guarded draft content import rollback SQL: approval gate must remain commented by default');
+  }
+
+  const forbiddenStatements = [
+    /^\s*truncate\b/im,
+    /^\s*drop\s+(table|schema|policy|function|view)\b/im,
+    /^\s*alter\s+table\b.*\bdisable\s+row\s+level\s+security\b/im,
+    /\bstatus\s*=\s*'published'\b/i,
+    /\bpublished_at\s*=/i,
+  ];
+  for (const pattern of forbiddenStatements) {
+    if (pattern.test(rollbackSql)) {
+      failures.push(`guarded draft content import rollback SQL: forbidden statement matched ${pattern}`);
+    }
+  }
+
+  let previousIndex = -1;
+  for (const item of payload.importPlan.rollbackOrder) {
+    const marker = `-- Rollback ${item.table}.`;
+    const index = rollbackSql.indexOf(marker);
+    if (index === -1) {
+      failures.push(`guarded draft content import rollback SQL: missing rollback section for ${item.table}`);
+      continue;
+    }
+    if (index < previousIndex) {
+      failures.push(`guarded draft content import rollback SQL: ${item.table} is out of rollback order`);
+    }
+    previousIndex = index;
+
+    const count = payload.importPlan.applyOrder.find((entry) => entry.table === item.table)?.count ?? 0;
+    requireIncludes(
+      rollbackSql,
+      `('${item.table}', ${count}::bigint)`,
+      'guarded draft content import rollback SQL summary',
     );
   }
 }
@@ -424,10 +486,11 @@ function checkDocsContracts() {
 }
 
 const payload = getContentImportPayload();
-const applySql = getContentImportApplySql();
+const { applySql, rollbackSql } = getContentImportSqlArtifacts();
 
 checkContentImportPayload(payload);
 checkDraftImportSqlArtifact(applySql, payload);
+checkDraftRollbackSqlArtifact(rollbackSql, payload);
 checkArticleBlockPayload(payload);
 checkSupabasePolicySource();
 checkPublicRuntimeBoundary();
@@ -446,6 +509,7 @@ console.log(
     `Verified ${payload.summary.stone_groups} stone groups, ${payload.summary.products} products, ${payload.summary.projects} projects, and ${payload.summary.articles} articles remain draft in the import dry run.`,
     `Verified ${payload.summary.article_blocks} draft article blocks use structured extraction instead of placeholder HTML imports.`,
     'Verified guarded draft import SQL keeps the approval gate manual, avoids destructive/publish statements, and forces imported content status to draft.',
+    'Verified guarded draft rollback SQL keeps its destructive gate manual, follows reverse dependency order, and targets draft/import rows only.',
     'Verified published-only public RLS policy source, read-only anon grants, static public runtime boundary, Cloudflare SPA/API routing scope, and cutover docs.',
   ].join('\n'),
 );

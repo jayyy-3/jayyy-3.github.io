@@ -13,7 +13,7 @@
     "agent:content-import:json": "node scripts/check-content-import-readiness.mjs --json",
     "agent:content-import:plan": "node scripts/check-content-import-readiness.mjs --out .tmp/content-import-preview.json --plan-out .tmp/content-import-plan.md",
     "agent:content-import:preflight-sql": "node scripts/check-content-import-readiness.mjs --out .tmp/content-import-preview.json --plan-out .tmp/content-import-plan.md --preflight-sql-out .tmp/content-import-preflight.sql",
-    "agent:content-import:apply-sql": "node scripts/check-content-import-readiness.mjs --out .tmp/content-import-preview.json --plan-out .tmp/content-import-plan.md --preflight-sql-out .tmp/content-import-preflight.sql --apply-sql-out .tmp/content-import-apply.sql",
+    "agent:content-import:apply-sql": "node scripts/check-content-import-readiness.mjs --out .tmp/content-import-preview.json --plan-out .tmp/content-import-plan.md --preflight-sql-out .tmp/content-import-preflight.sql --apply-sql-out .tmp/content-import-apply.sql --rollback-sql-out .tmp/content-import-rollback.sql",
     "agent:public-supabase-readiness": "node scripts/check-public-supabase-readiness.mjs",
     "agent:cloudflare-readiness": "node scripts/check-cloudflare-pages-readiness.mjs",
     "agent:cloudflare-preview-smoke": "node scripts/check-cloudflare-preview-smoke.mjs",
