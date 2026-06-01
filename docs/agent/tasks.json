@@ -1366,12 +1366,12 @@
       ],
       "notes": [
         "2026-05-25: Replaced the old homepage hero headline/support copy with three sequential title lines.",
-        "2026-06-01: The green punctuation is restricted to the final `DELIVER.` terminal dot, matching the Urblo signal-color rule without turning the hero into a green decoration.",
+        "2026-06-01: The only terminal punctuation in the homepage hero is the final `DELIVER.` dot in Urblo lime; `DESIGN` and `SOURCE` render without dots.",
         "2026-05-25: Added a shared edge container for the global header and homepage hero so the first viewport no longer inherits the standard 1440px page-container inset.",
         "2026-05-26: Updated the reference interpretation to all-caps DESIGN/SOURCE/DELIVER, with the second line offset, smaller type, lower bottom anchoring, and letter-by-letter left-to-right reveal motion."
       ],
       "acceptance": [
-        "Homepage hero text renders as three all-caps lines: DESIGN., SOURCE., DELIVER., with only the final DELIVER terminal dot in Urblo lime.",
+        "Homepage hero text renders as three all-caps lines: DESIGN, SOURCE, DELIVER., with no dots after DESIGN or SOURCE and only the final DELIVER terminal dot in Urblo lime.",
         "The old Stone Solutions for Street headline and trusted-partner support copy are removed from the first viewport.",
         "Logo, nav, and hero copy use the same edge-aligned gutter rather than the standard centered page container, with SOURCE deliberately offset from the first line.",
         "Hero animation reveals letters sequentially from left to right, completing the first line before the second and the second before the third, while remaining restrained and reduced-motion aware.",

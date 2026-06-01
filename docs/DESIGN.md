@@ -143,7 +143,7 @@ Hero behavior:
 - Desktop video is acceptable when it does not slow first meaningfully visible content; mobile should use a poster or optimized mobile-specific media until a smaller video variant is approved.
 - The homepage hero and global header may use the edge-aligned container instead of the standard page container when the first viewport needs a full-bleed editorial composition.
 - Homepage hero title motion should be restrained, sequential, and reduced-motion aware. Letter-by-letter left-to-right reveals are acceptable when they clarify hierarchy rather than delaying access to content.
-- The approved first-viewport verb stack is all-caps, with a deliberate second-line offset, only the final `DELIVER.` terminal dot in Urblo lime, and enough bottom proximity to feel anchored without clipping on mobile.
+- The approved first-viewport verb stack is all-caps, with a deliberate second-line offset, no terminal punctuation on `DESIGN` or `SOURCE`, only the final `DELIVER.` terminal dot in Urblo lime, and enough bottom proximity to feel anchored without clipping on mobile.
 
 ### Stone Library
 Stone Library is an inspection and specification aid, not a product marketing grid.

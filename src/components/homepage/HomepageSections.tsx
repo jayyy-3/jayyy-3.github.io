@@ -259,15 +259,14 @@ function HeroStatementLine({
   reduceMotion: boolean;
 }) {
   const lineOffset = index === 1 ? 'pl-[0.42em] sm:pl-[0.54em] lg:pl-[0.66em]' : '';
-  const characters = Array.from(`${word}.`);
+  const characters = Array.from(word === 'DELIVER' ? `${word}.` : word);
   const lineDelay = reduceMotion ? 0.08 + index * 0.34 : 0.22 + index * 0.82;
   const characterDelay = reduceMotion ? 0.035 : 0.06;
 
   return (
     <span className={`block whitespace-nowrap py-[0.035em] ${lineOffset}`}>
       {characters.map((character, characterIndex) => {
-        const isDot = character === '.';
-        const isFinalDot = isDot && word === 'DELIVER';
+        const isFinalDot = character === '.';
 
         return (
           <motion.span
@@ -312,7 +311,7 @@ function HeroSection() {
       <div className="urblo-edge-container relative flex min-h-[100svh] items-end pb-[22px] pt-32 md:pb-[30px] lg:pb-[38px]">
         <h1
           className="text-[52px] font-light leading-[0.98] text-white sm:text-[66px] md:text-[88px] lg:text-[112px] xl:text-[132px] 2xl:text-[148px]"
-          aria-label="DESIGN. SOURCE. DELIVER."
+          aria-label="DESIGN SOURCE DELIVER."
         >
           {heroStatements.map((statement, index) => (
             <HeroStatementLine

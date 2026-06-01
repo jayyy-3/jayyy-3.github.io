@@ -2,6 +2,37 @@
 
 Last updated: 2026-06-01
 
+## Entry - 2026-06-01 (Homepage Hero Single Terminal Symbol)
+
+### Scope
+- Removed the terminal dots from the first two homepage hero lines.
+- Kept only the final `DELIVER.` symbol, with the dot in Urblo lime.
+- Updated current Harness notes so the hero contract is `DESIGN`, `SOURCE`, `DELIVER.` rather than three punctuated lines.
+
+### Changed Files
+- `docs/DESIGN.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `src/components/homepage/HomepageSections.tsx`
+
+### Verification Results
+- `npm run build`: pass. Existing Browserslist/caniuse-lite staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:check`: pass.
+- `jq empty docs/agent/tasks.json`: pass.
+- `git diff --check`: pass.
+- Browser QA through the in-app Browser against local Vite preview on `http://127.0.0.1:4174`: pass for DOM/style checks.
+- Browser QA desktop `1440x900`: hero lines are `DESIGN`, `SOURCE`, `DELIVER.`; dot count is 1; the only dot belongs to `DELIVER.` and computes to `rgb(0, 255, 25)`; no framework overlay, console warnings/errors, or horizontal overflow.
+- Browser QA mobile `390x844`: hero lines are `DESIGN`, `SOURCE`, `DELIVER.`; dot count is 1; the only dot belongs to `DELIVER.` and computes to `rgb(0, 255, 25)`; no framework overlay, console warnings/errors, or horizontal overflow.
+- Browser screenshot capability timed out twice on `Page.captureScreenshot`; Playwright fallback captured `/tmp/urblo-home-hero-single-dot-mobile.png` after waiting for `aria-label="DESIGN SOURCE DELIVER."`, confirming the mobile visual state without the welcome popup.
+
+### Risks and Gaps
+- None identified beyond normal deployed-preview QA after Cloudflare Pages preview exists.
+
 ## Entry - 2026-06-01 (Homepage Capabilities CTA Inner Ring)
 
 ### Scope
