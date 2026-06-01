@@ -141,7 +141,7 @@ Last updated: 2026-06-01
   - This is a source-only verifier. It does not replace live Supabase form persistence, Turnstile, email, browser-responsive QA, or Cloudflare endpoint verification.
 - Capability Statement UI source verification:
   - `npm run agent:capabilities-ui` => `node scripts/check-capabilities-page-source.mjs`
-  - Verifies `/capabilities` keeps the Founder-sourced Capability Statement structure, shared CTA data, static PDF/media assets, email-gated `/api/enquiries` download lead capture, Turnstile widget/token reuse, and no-mailto/window-navigation submit contract.
+  - Verifies `/capabilities` keeps the Founder-sourced Capability Statement structure, the five concrete capability modules, selected-project proof ledger, shared CTA data, static PDF/media assets, email-gated `/api/enquiries` download lead capture, Turnstile widget/token reuse, and no-mailto/window-navigation submit contract.
   - This is a source-only verifier. It does not replace live Supabase lead persistence, final Turnstile proof, or browser-responsive QA.
 - Live form verification:
   - `npm run agent:forms-live -- --allow-writes` => `node scripts/check-forms-api-live.mjs --allow-writes`
@@ -231,7 +231,7 @@ Routing uses clean paths through `BrowserRouter`. Cloudflare Pages direct refres
 | `/projects` | `Projects` | Project listing page. |
 | `/projects/:slug` | `ProjectDetails` | Project detail page. Uses page-owned project hero via `DefaultLayout showBanner={false}`. |
 | `/our-story` | `OurStory` | About page. |
-| `/capabilities` | `CapabilitiesPage` | Web-native 2026 Capability Statement page sourced from the Founder PDF, including capabilities, lifecycle support, national reach, selected proof, and an email-gated PDF download form. |
+| `/capabilities` | `CapabilitiesPage` | Web-native 2026 Capability Statement page sourced from the Founder PDF, including a service-style capability hub, lifecycle support, national reach, selected proof ledger, and an email-gated PDF download form. |
 | `/contact` | `ContactPage` | Contact surface with direct contact channels plus API-backed enquiry/sample-request submit flows. Sample mode is available at `/contact?intent=sample-request`; direct email and phone remain manual fallback channels. |
 | `/articles` | `ArticlesPage` | Article list page. |
 | `/articles/:slug` | `ArticlePage` | Article detail page. Uses page-owned article hero via `DefaultLayout showBanner={false}`. |
@@ -293,7 +293,7 @@ Route state contract:
 - The desktop MP4 was re-encoded from about 16MB to about 3MB for launch. Cloudflare Stream/R2 remains optional if the client later wants adaptive delivery, analytics, or non-repo video management.
 - Route banners are local launch media referenced from `src/App.tsx` through the `ROUTE_BANNERS` map. `/capabilities` now owns a full-bleed page hero sourced from the 2026 Capability Statement PDF instead of using a shared route banner.
 - Capability Statement PDF download path: `public/downloads/urblo-capability-statement-2026.pdf`.
-- Capability Statement web imagery path: `public/media/launch/capabilities`.
+- Capability Statement web imagery path: `public/media/launch/capabilities`; these assets must be visually audited for orientation and crop quality before use.
 - Our Story Natalie source portrait path: `public/media/launch/our-story/natalie-ma-2026.jpg`.
 - Contact image path: `public/media/launch/contact/project-contact.jpg`, referenced by `src/pages/ContactPage.tsx` and reused in homepage data where the same old WordPress image was previously used.
 - Homepage section imagery and partner logos now use controlled files under `public/media/launch/homepage`.

@@ -194,7 +194,11 @@ Avoid:
 
 Current source state:
 - `/capabilities` is now a web-native version of the Founder-supplied `Urblo Capability Statement_2026.pdf`, not the earlier provisional placeholder.
-- The page should keep the PDF's stronger positioning and proof structure: philosophy, capability/product range, lifecycle support, national reach, Urblo advantage, selected project proof, and a guarded PDF download.
+- The page should read first as a service-capability hub, following the clearer information architecture pattern of the supplied `samthepavingman.com.au/capabilities/` reference without copying its visual style.
+- The first capability section should expose the five PDF capability lines as concrete operating scopes: bespoke street furniture and public art, premium paving and architectural cladding, advanced stone machining, multi-material assemblies, and design and technical service.
+- Supporting sections should keep the PDF's stronger proof structure: approach, lifecycle support, national reach, Urblo advantage, selected project proof, and a guarded PDF download.
+- Selected proof should include project facts as a ledger, not only decorative project cards.
+- PDF-derived imagery must be visually audited before use; incorrectly rotated or low-information crops should be corrected or replaced before shipping.
 - The email-gated download CTA should feel like a project lead capture, not a newsletter widget; it must stay clear about the form endpoint and live credential dependency in Harness docs.
 
 Project Material Map pattern:

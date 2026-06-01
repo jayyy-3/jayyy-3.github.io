@@ -32,6 +32,7 @@ if (!submitSource) {
 }
 
 requireIncludes('Founder statement headline', 'Urblo Capability Statement 2026');
+requireIncludes('reference-style capability map heading', 'A capability map for complex stone work.');
 requireIncludes('PDF download section anchor', 'id="capability-statement"');
 requireIncludes('download success CTA', 'Download PDF');
 requireIncludes('PDF download CTA data', 'capabilityStatementDownload', ctaSource);
@@ -46,6 +47,19 @@ requireIncludes('capabilities source check smoke integration', 'node scripts/che
 requireIncludes('public Turnstile widget reuse', 'TurnstileField');
 requireIncludes('public Turnstile site key reuse', 'turnstileSiteKey');
 requireIncludes('download lead project type', 'Capability statement download');
+requireIncludes('bespoke street furniture capability', 'Bespoke street furniture and public art');
+requireIncludes('premium paving capability', 'Premium paving and architectural cladding');
+requireIncludes('advanced stone machining capability', 'Advanced stone machining');
+requireIncludes('multi-material assemblies capability', 'Multi-material assemblies');
+requireIncludes('design technical service capability', 'Design and technical service');
+requireIncludes('lifecycle support section', 'From the first sketch to the tenth-year visit.');
+requireIncludes('national reach section', 'Melbourne-based. Working Australia-wide.');
+requireIncludes('selected project proof section', 'Selected project proof');
+requireIncludes('project proof ledger', 'projectLedger');
+requireIncludes('West Side Place project proof', 'West Side Place');
+requireIncludes('Moon Gate project proof', 'Moon Gate | Woolley Street');
+requireIncludes('Greenline project proof', 'Greenline');
+requireIncludes('Bundha Sport Centre project proof', 'Bundha Sport Centre');
 
 if (!submitSource.includes('/api/enquiries')) {
   failures.push('Capabilities download form must submit to /api/enquiries.');

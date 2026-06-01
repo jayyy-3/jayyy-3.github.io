@@ -2,6 +2,42 @@
 
 Last updated: 2026-06-01
 
+## Entry - 2026-06-01 (Capability Statement Service Hub Redesign)
+
+### Scope
+- Reworked `/capabilities` from an editorial PDF-like page into a service-style capability hub informed by the supplied Sam the Paving Man capabilities reference.
+- Rebuilt the page around the Founder PDF's five capability scopes, approach, lifecycle support, national reach, Urblo advantage, selected-project proof ledger, and email-gated PDF download.
+- Rotated the previously sideways site-review image upright before reuse.
+- Expanded the Capability Statement source verifier and Harness docs so the concrete capability modules and project ledger remain guarded.
+
+### Changed Files
+- `docs/ARCHITECTURE.md`
+- `docs/DESIGN.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `public/media/launch/capabilities/site-install-review.jpg`
+- `scripts/check-capabilities-page-source.mjs`
+- `src/pages/CapabilitiesPage.tsx`
+
+### Verification Results
+- `npm run agent:capabilities-ui`: pass.
+- `npx tsc -b`: pass.
+- `npm run build`: pass. Existing Browserslist/caniuse-lite staleness notice remains.
+- `npm run lint`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:check`: pass.
+- `jq empty docs/agent/tasks.json`: pass.
+- `git diff --check`: pass.
+- Browser plugin QA fallback: the in-app Browser route was unavailable, so Playwright CLI with Chromium was used against local Vite dev server `http://127.0.0.1:4174/capabilities`.
+- Browser QA desktop `1440x1000`: hero, capability hub, sticky module navigation, corrected site-review image usage, selected proof, and download section rendered with 0 console errors/warnings.
+- Browser QA mobile `390x844`: hero, capability module list, first service detail, and corrected responsive stacking rendered without visible overlap; document horizontal overflow was `0`.
+
+### Risks and Gaps
+- Live email capture for the Capability Statement PDF download still depends on the same server-side `/api/enquiries` credential verification as Contact.
+- Final deployed visual QA remains pending until a Cloudflare Pages preview URL exists.
+
 ## Entry - 2026-06-01 (Homepage Hero Single Terminal Symbol)
 
 ### Scope
