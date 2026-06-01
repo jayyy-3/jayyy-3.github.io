@@ -418,6 +418,54 @@ html {
     pointer-events: none;
 }
 
+@media (min-width: 1024px) and (max-height: 820px) {
+    .homepage-project-active-actions {
+        display: flex;
+        align-items: flex-end;
+        gap: 18px;
+    }
+
+    .homepage-project-active-facts {
+        flex: 1 1 auto;
+        min-width: 0;
+        padding-block: 12px;
+    }
+
+    .homepage-project-active-summary {
+        display: none !important;
+        height: 0 !important;
+        margin: 0 !important;
+    }
+
+    .homepage-project-active-link {
+        flex: 0 0 auto;
+        margin-top: 0;
+    }
+}
+
+@media (max-width: 767px) and (max-height: 720px) {
+    .homepage-project-active-region {
+        grid-template-rows: minmax(154px, 0.64fr) minmax(72px, 0.36fr);
+        gap: 12px;
+    }
+
+    .homepage-project-active-summary {
+        display: none !important;
+        height: 0 !important;
+        margin: 0 !important;
+    }
+
+    .homepage-project-active-link {
+        min-height: 38px;
+        margin-top: 10px;
+        padding: 8px 14px;
+    }
+
+    .homepage-project-thumb-media {
+        height: 58px;
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
     .homepage-collaboration-track-left,
     .homepage-collaboration-track-right {

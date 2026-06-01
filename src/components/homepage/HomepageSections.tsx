@@ -986,76 +986,99 @@ function LatestProjectsSection() {
   return (
     <section
       data-section="latest-projects"
-      className="bg-[#f6f6f2] px-6 py-20 text-black md:px-10 lg:px-[92px] lg:py-28"
+      className="h-[100svh] overflow-hidden bg-[#f6f6f2] px-5 py-5 text-black sm:px-6 md:px-10 md:py-6 lg:px-[92px] lg:py-8"
     >
-      <div className="mx-auto max-w-[1440px]">
-        <Reveal>
-          <div className="grid gap-12 lg:grid-cols-[minmax(0,0.84fr)_minmax(520px,1.16fr)] lg:items-end">
-            <div className="max-w-[620px]">
+      <div className="mx-auto flex h-full max-w-[1440px] flex-col gap-4 md:gap-5">
+        <Reveal className="shrink-0">
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,0.82fr)_minmax(420px,1.18fr)] lg:items-end">
+            <div className="max-w-[680px]">
               <div className="h-[5px] w-16 bg-[var(--urblo-lime)]" />
-              <h2 className="mt-7 font-sans text-[42px] font-light leading-[1.05] tracking-normal text-black md:text-[64px] lg:text-[78px]">
+              <h2 className="mt-4 font-sans text-[34px] font-light leading-[1.05] tracking-normal text-black md:text-[52px] lg:mt-5 lg:text-[58px] xl:text-[68px]">
                 {homepageData.latestProjects.title}
               </h2>
-              <p className="mt-7 max-w-[38rem] text-[18px] font-light leading-8 text-[var(--urblo-text)] md:text-[22px] md:leading-9">
-                {homepageData.latestProjects.intro}
-              </p>
+            </div>
+            <p className="max-w-[42rem] text-[16px] font-light leading-7 text-[var(--urblo-text)] md:text-[18px] md:leading-8 lg:justify-self-end lg:pb-1">
+              {homepageData.latestProjects.intro}
+            </p>
+          </div>
+        </Reveal>
 
-              <AnimatePresence mode="wait" initial={false}>
-                <motion.div
-                  key={activeProject.slug}
-                  initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 14 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -10 }}
-                  transition={{ duration: reduceMotion ? 0.18 : 0.34, ease: 'easeOut' }}
-                  className="mt-12 border-t border-black/18 pt-8"
-                >
-                  <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-black/48">
-                    {String(activeProjectIndex + 1).padStart(2, '0')} /{' '}
-                    {String(projects.length).padStart(2, '0')}
-                  </p>
-                  <h3 className="mt-5 max-w-[34rem] text-[28px] font-semibold leading-[1.12] text-black md:text-[38px]">
-                    {activeProject.title}
-                  </h3>
-                  <p className="mt-5 max-w-[34rem] text-[16px] leading-8 text-[var(--urblo-text)]">
-                    {activeProject.summary}
-                  </p>
-                  <dl className="mt-8 grid gap-x-7 gap-y-5 border-y border-black/12 py-6 text-[13px] uppercase tracking-[0.12em] text-black/52 sm:grid-cols-3">
-                    <div>
-                      <dt>Location</dt>
-                      <dd className="mt-2 text-[14px] font-semibold normal-case tracking-normal text-black">
-                        {activeProject.location}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt>Scope</dt>
-                      <dd className="mt-2 text-[14px] font-semibold normal-case tracking-normal text-black">
-                        {activeProject.category}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt>Year</dt>
-                      <dd className="mt-2 text-[14px] font-semibold tracking-normal text-black">
-                        {activeProject.year}
-                      </dd>
-                    </div>
-                  </dl>
-                  <Link
-                    to={`/projects/${activeProject.slug}`}
-                    className="group mt-8 inline-flex min-h-[48px] items-center gap-4 rounded-full border border-black/[0.18] px-5 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-black transition duration-200 hover:border-[var(--urblo-lime)] hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--urblo-lime)]"
+        <Reveal className="min-h-0 flex-1">
+          <div
+            data-project-active-region="homepage-latest-projects"
+            className="homepage-project-active-region grid h-full min-h-0 gap-4 md:gap-5 lg:grid-cols-[minmax(0,0.82fr)_minmax(420px,1.18fr)]"
+          >
+            <div
+              data-project-active-copy="homepage-latest-projects"
+              className="min-h-0 border-t border-black/18 pt-4 md:pt-5"
+            >
+              <div className="relative h-full min-h-0 overflow-hidden">
+                <AnimatePresence initial={false}>
+                  <motion.div
+                    key={activeProject.slug}
+                    initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -8 }}
+                    transition={{ duration: reduceMotion ? 0.18 : 0.3, ease: 'easeOut' }}
+                    className="absolute inset-0 grid grid-rows-[auto_minmax(0,1fr)_auto] gap-2 md:gap-3"
                   >
-                    <span>View project</span>
-                    <span
-                      className="inline-flex items-center justify-center text-black transition duration-200 group-hover:translate-x-1"
-                      aria-hidden="true"
-                    >
-                      <ArrowIcon />
-                    </span>
-                  </Link>
-                </motion.div>
-              </AnimatePresence>
+                    <div>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-black/48 md:text-[12px]">
+                        {String(activeProjectIndex + 1).padStart(2, '0')} /{' '}
+                        {String(projects.length).padStart(2, '0')}
+                      </p>
+                      <h3 className="mt-3 line-clamp-2 max-w-[34rem] text-[23px] font-semibold leading-[1.12] text-black md:mt-4 md:text-[31px] xl:text-[36px]">
+                        {activeProject.title}
+                      </h3>
+                    </div>
+
+                    <p className="homepage-project-active-summary line-clamp-2 min-h-0 max-w-[34rem] overflow-hidden text-[14px] leading-6 text-[var(--urblo-text)] md:line-clamp-3 md:text-[15px] md:leading-7 xl:line-clamp-4">
+                      {activeProject.summary}
+                    </p>
+
+                    <div className="homepage-project-active-actions shrink-0">
+                      <dl className="homepage-project-active-facts hidden grid-cols-2 gap-x-4 gap-y-3 border-y border-black/12 py-4 text-[11px] uppercase tracking-[0.12em] text-black/52 sm:grid sm:grid-cols-3 md:text-[12px]">
+                        <div>
+                          <dt>Location</dt>
+                          <dd className="mt-1.5 line-clamp-1 text-[13px] font-semibold normal-case tracking-normal text-black md:text-[14px]">
+                            {activeProject.location}
+                          </dd>
+                        </div>
+                        <div className="hidden sm:block">
+                          <dt>Scope</dt>
+                          <dd className="mt-1.5 line-clamp-1 text-[13px] font-semibold normal-case tracking-normal text-black md:text-[14px]">
+                            {activeProject.category}
+                          </dd>
+                        </div>
+                        <div>
+                          <dt>Year</dt>
+                          <dd className="mt-1.5 text-[13px] font-semibold tracking-normal text-black md:text-[14px]">
+                            {activeProject.year}
+                          </dd>
+                        </div>
+                      </dl>
+                      <Link
+                        to={`/projects/${activeProject.slug}`}
+                        className="homepage-project-active-link group mt-4 inline-flex min-h-[42px] items-center gap-3 rounded-full border border-black/[0.18] px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-black transition duration-200 hover:border-[var(--urblo-lime)] hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--urblo-lime)] md:mt-5 md:min-h-[46px] md:px-5 md:text-[12px]"
+                      >
+                        <span>View project</span>
+                        <span
+                          className="inline-flex items-center justify-center text-black transition duration-200 group-hover:translate-x-1"
+                          aria-hidden="true"
+                        >
+                          <ArrowIcon />
+                        </span>
+                      </Link>
+                    </div>
+                  </motion.div>
+                </AnimatePresence>
+              </div>
             </div>
 
-            <div className="relative min-h-[420px] overflow-hidden bg-black md:min-h-[560px] lg:min-h-[680px]">
+            <div
+              data-project-active-image="homepage-latest-projects"
+              className="relative min-h-0 overflow-hidden bg-black"
+            >
               <AnimatePresence mode="wait" initial={false}>
                 <motion.img
                   key={activeProject.image}
@@ -1073,12 +1096,12 @@ function LatestProjectsSection() {
           </div>
         </Reveal>
 
-        <Reveal delay={0.08}>
-          <div className="mt-12 border-t border-black/18 pt-7 lg:mt-16">
+        <Reveal delay={0.08} className="shrink-0">
+          <div className="border-t border-black/18 pt-4">
             <div
               ref={railRef}
               data-project-rail="homepage-latest-projects"
-              className={`flex snap-x snap-mandatory gap-6 overflow-x-auto pb-4 pr-1 select-none [scrollbar-color:rgba(0,0,0,0.3)_transparent] [scrollbar-width:thin] ${
+              className={`flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3 pr-1 select-none [scrollbar-color:rgba(0,0,0,0.3)_transparent] [scrollbar-width:thin] md:gap-5 lg:gap-6 ${
                 isDragging ? 'cursor-grabbing' : 'cursor-grab'
               }`}
               onPointerDown={(event) => {
@@ -1124,7 +1147,7 @@ function LatestProjectsSection() {
                     data-project-thumb={project.slug}
                     aria-pressed={isActive}
                     aria-label={`Show ${project.title}`}
-                    className="group w-[82%] flex-none snap-start text-left outline-none sm:w-[46%] lg:w-[calc(25%_-_18px)]"
+                    className="group w-[78%] flex-none snap-start text-left outline-none sm:w-[calc(50%_-_8px)] md:w-[calc(33.333%_-_14px)] lg:w-[calc(25%_-_18px)]"
                     onMouseEnter={() => {
                       if (!dragStateRef.current.isDown) selectProject(index);
                     }}
@@ -1134,7 +1157,7 @@ function LatestProjectsSection() {
                       selectProject(index);
                     }}
                   >
-                    <span className="relative block aspect-[1.36] overflow-hidden bg-black/10">
+                    <span className="homepage-project-thumb-media relative block h-[72px] overflow-hidden bg-black/10 sm:h-[86px] md:h-[98px] lg:h-[110px] xl:h-[124px]">
                       <img
                         src={project.image}
                         alt=""
@@ -1152,19 +1175,19 @@ function LatestProjectsSection() {
                         }`}
                       />
                     </span>
-                    <span className="mt-5 grid grid-cols-[3.2rem_minmax(0,1fr)] gap-4">
+                    <span className="mt-3 grid grid-cols-[2.35rem_minmax(0,1fr)] gap-3 md:grid-cols-[2.7rem_minmax(0,1fr)] md:gap-4">
                       <span
-                        className={`pt-1 text-[12px] font-semibold uppercase tracking-[0.16em] transition duration-200 ${
+                        className={`pt-0.5 text-[11px] font-semibold uppercase tracking-[0.16em] transition duration-200 md:text-[12px] ${
                           isActive ? 'text-black' : 'text-black/42'
                         }`}
                       >
                         {String(index + 1).padStart(2, '0')}
                       </span>
                       <span>
-                        <span className="block text-[18px] font-semibold leading-[1.16] text-black md:text-[20px]">
+                        <span className="block truncate text-[15px] font-semibold leading-[1.16] text-black md:text-[17px] lg:text-[18px]">
                           {project.title}
                         </span>
-                        <span className="mt-2 block text-[14px] leading-6 text-[var(--urblo-text)]">
+                        <span className="mt-1 block truncate text-[12px] leading-5 text-[var(--urblo-text)] md:text-[13px]">
                           {project.location} / {project.year}
                         </span>
                       </span>

@@ -1,6 +1,44 @@
 # WORKLOG - Urblo Execution Log
 
-Last updated: 2026-06-01
+Last updated: 2026-06-02
+
+## Entry - 2026-06-02 (Homepage Latest Projects Full-Screen Stability)
+
+### Scope
+- Reworked the homepage Latest Projects section so the whole section is exactly one viewport high (`100svh`) instead of being content-height driven.
+- Fixed hover/tap layout shift by giving the active copy, active image, and thumbnail rail stable measured regions.
+- Added short-screen desktop behavior that hides the active summary and places facts beside the CTA so 720-768px high screens do not clip controls.
+- Added short mobile behavior that simplifies active copy/facts and shrinks rail media so the one-screen section remains readable at 375x667.
+- Added lightweight `data-*` markers for repeatable rendered QA of the active region, active copy, active image, and rail.
+
+### Changed Files
+- `docs/DESIGN.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `src/components/homepage/HomepageSections.tsx`
+- `src/index.css`
+
+### Verification Results
+- `npm run build`: pass. Existing Browserslist/caniuse-lite staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass, including homepage project assets and public route/CTA contracts.
+- `npm run agent:check`: pass.
+- `jq empty docs/agent/tasks.json`: pass.
+- `git diff --check`: pass.
+- Playwright Chromium fallback against `http://127.0.0.1:4174/`: pass at `1440x900`, `1366x768`, `1280x720`, `390x844`, and `375x667`. Each viewport reported section height equal to viewport height, section scroll height equal to viewport height, 0 height delta for section/active copy/active image/rail after hover or tap selection, `0` horizontal overflow, no framework overlay, no console errors/warnings, visible section heading, visible CTA, and image above rail.
+- In-app Browser plugin QA was attempted first but unavailable because `agent.browsers.list()` returned an empty backend list; Playwright was used as the fallback validation path.
+
+### Risks and Gaps
+- Deployed-preview visual QA remains pending until a Cloudflare Pages preview URL exists.
+- The homepage project browser remains static data until the approved public content migration switches Projects to Supabase-backed reads.
+
+### Next Handoff
+- `NEXT-UI-PARITY-001`
+- `NOW-CLOUDFLARE-PAGES-DEPLOY-001`
+- `NOW-FORMS-BACKEND-001`
 
 ## Entry - 2026-06-01 (Homepage Latest Projects Redesign)
 
