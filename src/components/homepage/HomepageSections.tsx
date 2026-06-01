@@ -929,7 +929,7 @@ function MetricsSection() {
           >
             <span>Our {siteCtas.capabilities.label}</span>
             <span
-              className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-black/[0.15] text-black transition duration-200 group-hover:translate-x-1 group-hover:border-[var(--urblo-lime)] group-hover:text-black"
+              className="inline-flex items-center justify-center text-black transition duration-200 group-hover:translate-x-1"
               aria-hidden="true"
             >
               <ArrowIcon />

@@ -2,6 +2,33 @@
 
 Last updated: 2026-06-01
 
+## Entry - 2026-06-01 (Homepage Capabilities CTA Inner Ring)
+
+### Scope
+- Removed the nested circular icon ring from the homepage proof-section `Our Capabilities` CTA.
+- Kept the outer pill button, text, and arrow motion, but removed the small inner circle that made the CTA read as a concentric-circle control.
+- Updated the design Harness note for this CTA treatment.
+
+### Changed Files
+- `docs/DESIGN.md`
+- `docs/WORKLOG.md`
+- `src/components/homepage/HomepageSections.tsx`
+
+### Verification Results
+- `npm run build`: pass. Existing Browserslist/caniuse-lite staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:check`: pass.
+- `jq empty docs/agent/tasks.json`: pass.
+- `git diff --check`: pass.
+- Browser QA through the in-app Browser against local Vite preview on `http://127.0.0.1:4174`: pass.
+- Browser QA desktop `1440x900`: `Our Capabilities` CTA still routes to `/capabilities`; inner icon wrapper border width is `0px`, border radius is `0px`, and no framework overlay, console warnings/errors, or horizontal overflow were observed.
+- Browser QA mobile `390x844`: inner icon wrapper border width is `0px`, border radius is `0px`, and no framework overlay, console warnings/errors, or horizontal overflow were observed.
+
+### Risks and Gaps
+- None identified beyond normal deployed-preview QA after Cloudflare Pages preview exists.
+
 ## Entry - 2026-06-01 (Homepage Hero Final Dot)
 
 ### Scope
