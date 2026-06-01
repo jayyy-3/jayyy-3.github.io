@@ -136,6 +136,7 @@ Current launch rhythm:
 - The proof metrics section sits immediately after the full-viewport hero.
 - Its approved copy is `Stone has always shaped cities.` followed by `We shape how stone is designed, specified, and delivered.`
 - The proof section may include a lightweight `Our Capabilities` CTA under the intro copy. It should feel like a quiet design-system control, not a heavy sales button, and should not use a nested circular icon ring inside the pill.
+- The partner banner uses `Design-led stone solutions for streetscapes & civil landscapes.` over the West Side Place aerial project image at `public/media/launch/homepage/partner-banner-west-side-place.jpg`.
 - The old sustainability/tabbed feature section should stay out of the rendered homepage unless it is rebuilt with clearer evidence, lighter UI, and approved claim scope.
 
 Hero behavior:

@@ -73,6 +73,7 @@ const requiredAssets = [
   '/media/launch/capabilities/curved-stone-preassembly.jpg',
   '/media/launch/capabilities/moon-gate-framed-view.jpg',
   '/media/launch/our-story/natalie-ma-2026.jpg',
+  '/media/launch/homepage/partner-banner-west-side-place.jpg',
 ]
 
 const redirectContracts = [

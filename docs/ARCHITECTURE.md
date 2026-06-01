@@ -295,7 +295,8 @@ Route state contract:
 - Capability Statement PDF download path: `public/downloads/urblo-capability-statement-2026.pdf`.
 - Capability Statement web imagery path: `public/media/launch/capabilities`; these assets must be visually audited for orientation and crop quality before use.
 - Our Story Natalie source portrait path: `public/media/launch/our-story/natalie-ma-2026.jpg`.
-- Contact image path: `public/media/launch/contact/project-contact.jpg`, referenced by `src/pages/ContactPage.tsx` and reused in homepage data where the same old WordPress image was previously used.
+- Contact image path: `public/media/launch/contact/project-contact.jpg`, referenced by `src/pages/ContactPage.tsx`.
+- Homepage partner banner image path: `public/media/launch/homepage/partner-banner-west-side-place.jpg`, referenced by `src/data/homepage.ts`.
 - Homepage section imagery and partner logos now use controlled files under `public/media/launch/homepage`.
 - Our Story portraits now use controlled files under `public/media/launch/our-story`; the carbon banner uses the controlled route banner because the old WordPress carbon banner returned 404.
 - Legacy project listing/detail media now uses controlled files under `public/media/launch/projects`.

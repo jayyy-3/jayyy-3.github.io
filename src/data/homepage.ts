@@ -211,7 +211,7 @@ export const homepageData = {
     },
   },
   partnerBanner: {
-    image: '/media/launch/contact/project-contact.jpg',
+    image: '/media/launch/homepage/partner-banner-west-side-place.jpg',
     text: 'Design-led stone solutions for streetscapes & civil landscapes.',
   },
   productShowcase: {

@@ -2,6 +2,38 @@
 
 Last updated: 2026-06-01
 
+## Entry - 2026-06-01 (Homepage Partner Banner Background)
+
+### Scope
+- Replaced the homepage `Design-led stone solutions for streetscapes & civil landscapes.` partner-banner background with the supplied West Side Place aerial image.
+- Added the controlled optimized asset at `public/media/launch/homepage/partner-banner-west-side-place.jpg`.
+- Updated homepage data and smoke coverage so the runtime asset path is guarded.
+- Updated Harness notes for the homepage partner-banner image contract.
+
+### Changed Files
+- `docs/ARCHITECTURE.md`
+- `docs/DESIGN.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `public/media/launch/homepage/partner-banner-west-side-place.jpg`
+- `scripts/agent-smoke.sh`
+- `src/data/homepage.ts`
+
+### Verification Results
+- `npm run build`: pass. Existing Browserslist/caniuse-lite staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass, including `asset ok: /media/launch/homepage/partner-banner-west-side-place.jpg`.
+- `npm run agent:check`: pass.
+- `jq empty docs/agent/tasks.json`: pass.
+- `git diff --check`: pass.
+- Playwright CLI fallback against `http://127.0.0.1:4174/`: desktop `1440x900` and mobile `390x844` both confirmed the partner banner `img` source is `/media/launch/homepage/partner-banner-west-side-place.jpg`, rendered the approved banner copy, had 0 horizontal overflow, and reported 0 console errors.
+
+### Risks and Gaps
+- None identified beyond normal deployed-preview QA after Cloudflare Pages preview exists.
+
 ## Entry - 2026-06-01 (Capability Statement Service Hub Redesign)
 
 ### Scope
