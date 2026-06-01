@@ -23,7 +23,7 @@ Docs-only and harness-only work should run:
 Cloudflare/Supabase implementation work should also follow the new verification profiles in `docs/agent/verification.md`.
 
 ## Last Runtime Baseline
-Measured 2026-05-29 during the production dependency audit checkpoint:
+Measured 2026-06-01 during the homepage Latest Projects redesign checkpoint:
 - `npm run build`: pass
 - `npm run lint`: pass
 - `npx tsc -b`: pass
@@ -128,6 +128,7 @@ Source of truth: `docs/agent/tasks.json`.
 - `NEXT-UI-PARITY-001` partial launch polish: homepage hero now fills the first viewport, route transitions reset to top, no-banner error/loading states clear the header, article detail no longer double-renders a route banner, article mobile overflow has a CSS stopgap, Contact blocks empty email drafts, product renders are labeled as geometry previews with separate material previews, Stone Library images disclose finish-specific/reference status, and `react-helmet` was removed to clear React 19 strict-mode console noise.
 - `NEXT-UI-PARITY-001` homepage proof update: the old rendered sustainability/tabbed feature module was removed from the homepage flow by request; proof metrics now sit directly after the hero with approved stone/city copy and updated project, CO2, landscape architect, and delivered-stone metrics.
 - `NEXT-UI-PARITY-001` homepage partner banner image update: the `Design-led stone solutions for streetscapes & civil landscapes.` banner now uses the West Side Place aerial project image at `public/media/launch/homepage/partner-banner-west-side-place.jpg`.
+- `NEXT-UI-PARITY-001` homepage Latest Projects update: the section now uses `The work speaks.` with a selected-project detail/image panel and a draggable five-project rail that shows four projects on desktop; thumbnail hover/focus/tap changes the active project, while the upper `View project` CTA handles route navigation.
 - `NEXT-UI-PARITY-001` Capability Statement page: the homepage proof section still includes a lightweight `Our Capabilities` CTA, and `/capabilities` now renders a Founder-sourced web version of the 2026 Capability Statement as a reference-style capability hub with five service scopes, lifecycle/reach support, selected-project proof ledger, corrected site-review imagery, and an email-gated PDF download.
 - `NOW-ADMIN-AUTH-RLS-001` partial source implementation: `/admin`, `/admin/login`, `/admin/unauthorized`, protected admin module routes, Supabase Auth session/profile checks, config-required state, dashboard query shell, and current launch-check copy are implemented. Live active-admin verification remains pending first admin email/profile and browser-safe Supabase key configuration.
 - `NOW-ADMIN-AUTH-RLS-001` no-config route gate checkpoint: built-site Playwright Firefox checks now cover `/admin`, `/admin/login`, `/admin/unauthorized`, `/admin/leads`, `/admin/media`, `/admin/settings`, `/admin/stone-library`, `/admin/projects`, `/admin/products`, `/admin/articles`, and `/admin/audit`, each rendering `Configuration required` without browser-safe Supabase env.

@@ -74,6 +74,11 @@ const requiredAssets = [
   '/media/launch/capabilities/moon-gate-framed-view.jpg',
   '/media/launch/our-story/natalie-ma-2026.jpg',
   '/media/launch/homepage/partner-banner-west-side-place.jpg',
+  '/media/launch/homepage/project-artisan-park.jpg',
+  '/media/launch/homepage/project-moon-gate.jpg',
+  '/media/launch/homepage/project-west-side-place.jpg',
+  '/media/launch/homepage/project-xavier-college.jpg',
+  '/media/launch/contact/project-contact.jpg',
 ]
 
 const redirectContracts = [

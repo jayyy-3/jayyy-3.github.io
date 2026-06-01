@@ -13,8 +13,12 @@ export interface HomepageMetric {
 export interface HomepageProject {
   slug: string;
   title: string;
-  excerpt: string;
+  location: string;
+  category: string;
+  year: string;
+  summary: string;
   image: string;
+  imageAlt: string;
 }
 
 export interface HomepageProductCategory {
@@ -258,40 +262,64 @@ export const homepageData = {
     { value: '3500+', label: 'linear metres stone blocks delivered' },
   ] satisfies HomepageMetric[],
   latestProjects: {
-    title: 'Latest Projects',
+    title: 'The work speaks.',
     intro:
-      'Urblo is a stone supplier specialized in streetscapes & civil landscape while respecting the people and environment.',
-    featured: {
-      slug: 'artisan-park-yarrabend',
-      title: 'Artisan Park',
-      excerpt:
-        'Deakin University student accommodation was organised back in July 2016 with a focus on practical, durable, and design-led streetscape outcomes.',
-      image: '/media/launch/homepage/project-artisan-park.jpg',
-    } satisfies HomepageProject,
-    gallery: [
-      {
-        slug: 'australian-catholic-university',
-        title: 'Australian Catholic University',
-        excerpt: 'Precision-built bluestone seating with calm civic character.',
-        image: '/media/launch/contact/project-contact.jpg',
-      },
-      {
-        slug: 'moon-gate-woolley-street',
-        title: 'Moon Gate',
-        excerpt: 'Polished stone sculptural forms for a landmark arrival.',
-        image: '/media/launch/homepage/project-moon-gate.jpg',
-      },
+      'From bespoke civic landscapes to high-volume streetscape programmes — every project is a collaboration between design vision and stone craft.',
+    projects: [
       {
         slug: 'west-side-place',
         title: 'West Side Place',
-        excerpt: 'Large-scale stone deployment across a dense urban precinct.',
+        location: 'Melbourne VIC',
+        category: 'High-rise plaza and public realm',
+        year: '2023',
+        summary:
+          'Over 500 linear metres of stone elements coordinated across a dense urban precinct, balancing scale, detailing, and installation predictability.',
         image: '/media/launch/homepage/project-west-side-place.jpg',
+        imageAlt: 'West Side Place public realm with stone seating and planting edges',
+      },
+      {
+        slug: 'moon-gate-woolley-street',
+        title: 'Moon Gate | Woolley Street',
+        location: 'Dickson ACT',
+        category: 'Urban sculpture and public realm',
+        year: '2023',
+        summary:
+          'Five custom-fabricated stone elements form a sculptural threshold and seating sequence for a civic dining precinct.',
+        image: '/media/launch/homepage/project-moon-gate.jpg',
+        imageAlt: 'Moon Gate stone sculpture and seating in a streetscape setting',
+      },
+      {
+        slug: 'artisan-park-yarrabend',
+        title: 'Artisan Park | YarraBend',
+        location: 'Alphington VIC',
+        category: 'Urban community park',
+        year: '2024',
+        summary:
+          'Architectural block seating and landscape plinths built for a community park where stone detail, scale, and carbon-offset scope all matter.',
+        image: '/media/launch/homepage/project-artisan-park.jpg',
+        imageAlt: 'Artisan Park stone blocks integrated with planting and public seating',
       },
       {
         slug: 'xavier-college',
         title: 'Xavier College',
-        excerpt: 'Warm sandstone detailing for an educational landscape.',
+        location: 'Kew VIC',
+        category: 'Education and heritage landscape',
+        year: '2023',
+        summary:
+          'Warm sandstone masonry details for an education setting, supporting landscape integration with a quieter heritage register.',
         image: '/media/launch/homepage/project-xavier-college.jpg',
+        imageAlt: 'Sandstone landscape detailing at Xavier College',
+      },
+      {
+        slug: 'australian-catholic-university',
+        title: 'Australian Catholic University',
+        location: 'Fitzroy VIC',
+        category: 'Institutional landscape',
+        year: '2023',
+        summary:
+          'Precision-built bluestone seating with a calm civic character, developed for a high-use institutional landscape.',
+        image: '/media/launch/contact/project-contact.jpg',
+        imageAlt: 'Bluestone seating and paving at Australian Catholic University',
       },
     ] satisfies HomepageProject[],
   },

@@ -2,6 +2,41 @@
 
 Last updated: 2026-06-01
 
+## Entry - 2026-06-01 (Homepage Latest Projects Redesign)
+
+### Scope
+- Replaced the old black Latest Projects card grid with an image-led selected-project browser based on the supplied sketch and Escofet-style reference rhythm.
+- Updated `homepageData.latestProjects` to five project records with location, scope, year, summary, image, and alt text.
+- Added a desktop rail that shows four project thumbnails at a time, supports horizontal drag, and lets hover/focus/tap update the upper project detail panel.
+- Kept route navigation on the upper `View project` CTA so thumbnail interaction remains selection-only.
+- Added smoke coverage for the five controlled project image assets.
+
+### Changed Files
+- `docs/ARCHITECTURE.md`
+- `docs/DESIGN.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `scripts/agent-smoke.sh`
+- `src/components/homepage/HomepageSections.tsx`
+- `src/data/homepage.ts`
+
+### Verification Results
+- `npm run build`: pass. Existing Browserslist/caniuse-lite staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass, including the five Latest Projects asset paths.
+- `npm run agent:check`: pass.
+- `jq empty docs/agent/tasks.json`: pass.
+- `git diff --check`: pass.
+- Playwright Chromium against `http://127.0.0.1:4174/`: desktop `1440x900` confirmed `The work speaks.`, the upper `View project` CTA, four fully visible project thumbnails, draggable rail movement from `scrollLeft 0` to `319`, hover selection for Moon Gate, 0 document horizontal overflow, and 0 console errors.
+- Playwright Chromium mobile `390x844`: tap selection for Australian Catholic University updated the active thumbnail state, document horizontal overflow was `0`, and console errors were `0`.
+
+### Risks and Gaps
+- Final deployed visual QA remains pending until a Cloudflare Pages preview URL exists.
+- Project summaries are still static homepage copy and should be reconciled with CMS-sourced public project records during the approved content migration.
+
 ## Entry - 2026-06-01 (Homepage Partner Banner Background)
 
 ### Scope

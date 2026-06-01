@@ -297,6 +297,7 @@ Route state contract:
 - Our Story Natalie source portrait path: `public/media/launch/our-story/natalie-ma-2026.jpg`.
 - Contact image path: `public/media/launch/contact/project-contact.jpg`, referenced by `src/pages/ContactPage.tsx`.
 - Homepage partner banner image path: `public/media/launch/homepage/partner-banner-west-side-place.jpg`, referenced by `src/data/homepage.ts`.
+- Homepage Latest Projects image paths are the five controlled project sources referenced by `src/data/homepage.ts`: `public/media/launch/homepage/project-west-side-place.jpg`, `public/media/launch/homepage/project-moon-gate.jpg`, `public/media/launch/homepage/project-artisan-park.jpg`, `public/media/launch/homepage/project-xavier-college.jpg`, and `public/media/launch/contact/project-contact.jpg`.
 - Homepage section imagery and partner logos now use controlled files under `public/media/launch/homepage`.
 - Our Story portraits now use controlled files under `public/media/launch/our-story`; the carbon banner uses the controlled route banner because the old WordPress carbon banner returned 404.
 - Legacy project listing/detail media now uses controlled files under `public/media/launch/projects`.
@@ -517,13 +518,14 @@ Route state contract:
 - Homepage uses `HomepageLayout` with `HomepageHeader`/`HomepageFooter` proxy components that currently render the shared `SiteHeader`/`SiteFooter`.
 - The previous homepage `Browse by stone type` showcase has been removed by request; homepage material discovery should be reintroduced only through a new Urblo-aligned section if the client wants that pathway.
 - The previous homepage sustainability/tabbed feature section is currently not rendered by request. The proof metrics block now appears directly after the hero and uses the approved stone/city framing plus four proof metrics.
+- Homepage Latest Projects is driven by `homepageData.latestProjects.projects`, currently a five-project array with slug, title, location, category, year, summary, image, and image alt text. `HomepageSections.tsx` renders the data as an active project detail panel plus draggable thumbnail rail; thumbnails select state only, while the upper `View project` link navigates to `/projects/:slug`.
 - Homepage typography is self-hosted from local static assets under `/public/fonts/urblo`:
   - `Avenir LT Std` weights `300/400/500/600/800`
   - `Didot LT Std` italic `400` and normal `600`
   - `Space Grotesk` local WOFF2
 - Homepage runtime no longer depends on remote WordPress font CSS/TTF/WOFF assets.
 
-## Last Runtime Quality Gate Status (Measured 2026-05-29)
+## Last Runtime Quality Gate Status (Measured 2026-06-01)
 - `npm run build`: pass
 - `npm run lint`: pass
 - `npx tsc -b`: pass

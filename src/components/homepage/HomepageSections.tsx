@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useState, type ReactNode } from 'react';
+import { Fragment, useEffect, useRef, useState, type PointerEvent, type ReactNode } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Autoplay, Navigation, Pagination } from 'swiper/modules';
@@ -14,7 +14,6 @@ import {
   type HomepageFeaturePanelId,
   type HomepageLogo,
   type HomepageMetric,
-  type HomepageProject,
 } from '../../data/homepage';
 import { siteCtas } from '../../data/siteChrome';
 import AnimatedNumber from '../AnimatedNumber';
@@ -948,77 +947,234 @@ function MetricsSection() {
   );
 }
 
-function ProjectCard({
-  project,
-  light = false,
-}: {
-  project: HomepageProject;
-  light?: boolean;
-}) {
-  return (
-    <Link
-      to={`/projects/${project.slug}`}
-      className={`group relative block overflow-hidden rounded-[4px] ${
-        light ? 'min-h-[230px]' : 'min-h-[760px]'
-      }`}
-    >
-      <img
-        src={project.image}
-        alt={project.title}
-        className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-      />
-      <div className={`absolute inset-0 ${light ? 'bg-black/28' : 'bg-black/38'}`} />
-      <div className="relative flex h-full flex-col justify-end px-8 py-8 text-white">
-        <h3 className={`uppercase ${light ? 'text-[20px]' : 'text-[36px]'} font-semibold`}>
-          {project.title}
-        </h3>
-        <p
-          className={`mt-3 max-w-[28rem] ${
-            light ? 'text-[14px] leading-6' : 'text-[18px] leading-8'
-          } text-white/85`}
-        >
-          {project.excerpt}
-        </p>
-        {!light ? (
-          <div className="mt-8 inline-flex items-center gap-3 text-[18px] font-semibold text-white/85">
-            <span>Take a look</span>
-            <ArrowIcon light />
-          </div>
-        ) : null}
-      </div>
-    </Link>
-  );
-}
-
 function LatestProjectsSection() {
+  const projects = homepageData.latestProjects.projects;
+  const [activeProjectIndex, setActiveProjectIndex] = useState(0);
+  const activeProject = projects[activeProjectIndex] ?? projects[0];
+  const railRef = useRef<HTMLDivElement>(null);
+  const dragStateRef = useRef({
+    isDown: false,
+    moved: false,
+    startX: 0,
+    scrollLeft: 0,
+  });
+  const suppressClickRef = useRef(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const reduceMotion = useReducedMotion() ?? false;
+
+  const finishDrag = (event: PointerEvent<HTMLDivElement>) => {
+    const rail = railRef.current;
+    if (rail?.hasPointerCapture(event.pointerId)) {
+      rail.releasePointerCapture(event.pointerId);
+    }
+
+    if (dragStateRef.current.moved) {
+      suppressClickRef.current = true;
+      window.setTimeout(() => {
+        suppressClickRef.current = false;
+      }, 0);
+    }
+
+    dragStateRef.current.isDown = false;
+    setIsDragging(false);
+  };
+
+  const selectProject = (index: number) => {
+    setActiveProjectIndex(index);
+  };
+
   return (
-    <section className="bg-black px-6 py-20 text-white md:px-10 lg:px-[92px] lg:py-24">
+    <section
+      data-section="latest-projects"
+      className="bg-[#f6f6f2] px-6 py-20 text-black md:px-10 lg:px-[92px] lg:py-28"
+    >
       <div className="mx-auto max-w-[1440px]">
-        <div className="grid gap-10 lg:grid-cols-[0.78fr_1.22fr]">
-          <Reveal>
-            <div className="space-y-8">
-              <div className="inline-block border-t-[5px] border-[var(--urblo-lime)] pt-4" />
-              <h2 className="font-display text-[48px] uppercase leading-[1.02] tracking-[0.03em] md:text-[70px]">
+        <Reveal>
+          <div className="grid gap-12 lg:grid-cols-[minmax(0,0.84fr)_minmax(520px,1.16fr)] lg:items-end">
+            <div className="max-w-[620px]">
+              <div className="h-[5px] w-16 bg-[var(--urblo-lime)]" />
+              <h2 className="mt-7 font-sans text-[42px] font-light leading-[1.05] tracking-normal text-black md:text-[64px] lg:text-[78px]">
                 {homepageData.latestProjects.title}
               </h2>
-              <p className="max-w-[34rem] text-[20px] font-semibold leading-8 text-white/88 md:text-[22px]">
+              <p className="mt-7 max-w-[38rem] text-[18px] font-light leading-8 text-[var(--urblo-text)] md:text-[22px] md:leading-9">
                 {homepageData.latestProjects.intro}
               </p>
+
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={activeProject.slug}
+                  initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 14 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -10 }}
+                  transition={{ duration: reduceMotion ? 0.18 : 0.34, ease: 'easeOut' }}
+                  className="mt-12 border-t border-black/18 pt-8"
+                >
+                  <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-black/48">
+                    {String(activeProjectIndex + 1).padStart(2, '0')} /{' '}
+                    {String(projects.length).padStart(2, '0')}
+                  </p>
+                  <h3 className="mt-5 max-w-[34rem] text-[28px] font-semibold leading-[1.12] text-black md:text-[38px]">
+                    {activeProject.title}
+                  </h3>
+                  <p className="mt-5 max-w-[34rem] text-[16px] leading-8 text-[var(--urblo-text)]">
+                    {activeProject.summary}
+                  </p>
+                  <dl className="mt-8 grid gap-x-7 gap-y-5 border-y border-black/12 py-6 text-[13px] uppercase tracking-[0.12em] text-black/52 sm:grid-cols-3">
+                    <div>
+                      <dt>Location</dt>
+                      <dd className="mt-2 text-[14px] font-semibold normal-case tracking-normal text-black">
+                        {activeProject.location}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Scope</dt>
+                      <dd className="mt-2 text-[14px] font-semibold normal-case tracking-normal text-black">
+                        {activeProject.category}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Year</dt>
+                      <dd className="mt-2 text-[14px] font-semibold tracking-normal text-black">
+                        {activeProject.year}
+                      </dd>
+                    </div>
+                  </dl>
+                  <Link
+                    to={`/projects/${activeProject.slug}`}
+                    className="group mt-8 inline-flex min-h-[48px] items-center gap-4 rounded-full border border-black/[0.18] px-5 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-black transition duration-200 hover:border-[var(--urblo-lime)] hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--urblo-lime)]"
+                  >
+                    <span>View project</span>
+                    <span
+                      className="inline-flex items-center justify-center text-black transition duration-200 group-hover:translate-x-1"
+                      aria-hidden="true"
+                    >
+                      <ArrowIcon />
+                    </span>
+                  </Link>
+                </motion.div>
+              </AnimatePresence>
             </div>
-          </Reveal>
 
-          <Reveal delay={0.08}>
-            <ProjectCard project={homepageData.latestProjects.featured} />
-          </Reveal>
-        </div>
+            <div className="relative min-h-[420px] overflow-hidden bg-black md:min-h-[560px] lg:min-h-[680px]">
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.img
+                  key={activeProject.image}
+                  src={activeProject.image}
+                  alt={activeProject.imageAlt}
+                  className="absolute inset-0 h-full w-full object-cover"
+                  initial={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 1.025 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.99 }}
+                  transition={{ duration: reduceMotion ? 0.2 : 0.45, ease: 'easeOut' }}
+                />
+              </AnimatePresence>
+              <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/42 to-transparent" />
+            </div>
+          </div>
+        </Reveal>
 
-        <div className="mt-8 grid gap-6 md:grid-cols-2">
-          {homepageData.latestProjects.gallery.map((project, index) => (
-            <Reveal key={project.slug} delay={0.06 * index}>
-              <ProjectCard project={project} light />
-            </Reveal>
-          ))}
-        </div>
+        <Reveal delay={0.08}>
+          <div className="mt-12 border-t border-black/18 pt-7 lg:mt-16">
+            <div
+              ref={railRef}
+              data-project-rail="homepage-latest-projects"
+              className={`flex snap-x snap-mandatory gap-6 overflow-x-auto pb-4 pr-1 select-none [scrollbar-color:rgba(0,0,0,0.3)_transparent] [scrollbar-width:thin] ${
+                isDragging ? 'cursor-grabbing' : 'cursor-grab'
+              }`}
+              onPointerDown={(event) => {
+                if (event.pointerType === 'mouse' && event.button !== 0) return;
+
+                const rail = railRef.current;
+                if (!rail) return;
+
+                dragStateRef.current = {
+                  isDown: true,
+                  moved: false,
+                  startX: event.clientX,
+                  scrollLeft: rail.scrollLeft,
+                };
+                rail.setPointerCapture(event.pointerId);
+                setIsDragging(true);
+              }}
+              onPointerMove={(event) => {
+                const rail = railRef.current;
+                const dragState = dragStateRef.current;
+                if (!rail || !dragState.isDown) return;
+
+                const delta = event.clientX - dragState.startX;
+                if (Math.abs(delta) > 4) {
+                  dragState.moved = true;
+                }
+                rail.scrollLeft = dragState.scrollLeft - delta;
+              }}
+              onPointerUp={finishDrag}
+              onPointerCancel={finishDrag}
+              onLostPointerCapture={() => {
+                dragStateRef.current.isDown = false;
+                setIsDragging(false);
+              }}
+            >
+              {projects.map((project, index) => {
+                const isActive = activeProject.slug === project.slug;
+
+                return (
+                  <button
+                    key={project.slug}
+                    type="button"
+                    data-project-thumb={project.slug}
+                    aria-pressed={isActive}
+                    aria-label={`Show ${project.title}`}
+                    className="group w-[82%] flex-none snap-start text-left outline-none sm:w-[46%] lg:w-[calc(25%_-_18px)]"
+                    onMouseEnter={() => {
+                      if (!dragStateRef.current.isDown) selectProject(index);
+                    }}
+                    onFocus={() => selectProject(index)}
+                    onClick={() => {
+                      if (suppressClickRef.current) return;
+                      selectProject(index);
+                    }}
+                  >
+                    <span className="relative block aspect-[1.36] overflow-hidden bg-black/10">
+                      <img
+                        src={project.image}
+                        alt=""
+                        draggable={false}
+                        className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.035] group-focus-visible:scale-[1.035]"
+                      />
+                      <span
+                        className={`absolute inset-x-0 top-0 h-[5px] transition duration-200 ${
+                          isActive ? 'bg-[var(--urblo-lime)]' : 'bg-transparent'
+                        }`}
+                      />
+                      <span
+                        className={`absolute inset-0 transition duration-200 ${
+                          isActive ? 'bg-black/0' : 'bg-black/12 group-hover:bg-black/0'
+                        }`}
+                      />
+                    </span>
+                    <span className="mt-5 grid grid-cols-[3.2rem_minmax(0,1fr)] gap-4">
+                      <span
+                        className={`pt-1 text-[12px] font-semibold uppercase tracking-[0.16em] transition duration-200 ${
+                          isActive ? 'text-black' : 'text-black/42'
+                        }`}
+                      >
+                        {String(index + 1).padStart(2, '0')}
+                      </span>
+                      <span>
+                        <span className="block text-[18px] font-semibold leading-[1.16] text-black md:text-[20px]">
+                          {project.title}
+                        </span>
+                        <span className="mt-2 block text-[14px] leading-6 text-[var(--urblo-text)]">
+                          {project.location} / {project.year}
+                        </span>
+                      </span>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </Reveal>
       </div>
     </section>
   );
