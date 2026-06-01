@@ -2,6 +2,36 @@
 
 Last updated: 2026-06-01
 
+## Entry - 2026-06-01 (Homepage Hero Final Dot)
+
+### Scope
+- Updated the homepage first-viewport verb stack so `DESIGN.` and `SOURCE.` no longer render green punctuation.
+- Kept only the final `DELIVER.` terminal dot in Urblo lime, matching the latest user direction for the hero signal color.
+- Updated Harness design/handoff/roadmap/task notes so future agents do not restore green punctuation to all three hero lines.
+
+### Changed Files
+- `docs/DESIGN.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `src/components/homepage/HomepageSections.tsx`
+
+### Verification Results
+- `npm run build`: pass. Existing Browserslist/caniuse-lite staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:check`: pass.
+- `jq empty docs/agent/tasks.json`: pass.
+- `git diff --check`: pass.
+- Browser QA through the in-app Browser against local Vite preview on `http://127.0.0.1:4174`: pass.
+- Browser QA desktop `1440x900`: computed hero dot colors are `DESIGN.` white, `SOURCE.` white, `DELIVER.` Urblo lime; no framework overlay, console warnings/errors, or horizontal overflow.
+- Browser QA mobile `390x844`: computed hero dot colors are `DESIGN.` white, `SOURCE.` white, `DELIVER.` Urblo lime; no framework overlay, console warnings/errors, or horizontal overflow.
+
+### Risks and Gaps
+- None identified beyond normal deployed-preview QA after Cloudflare Pages preview exists.
+
 ## Entry - 2026-06-01 (Founder Capability Statement Web Page)
 
 ### Scope

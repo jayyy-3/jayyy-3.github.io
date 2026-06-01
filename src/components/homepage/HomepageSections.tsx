@@ -267,12 +267,13 @@ function HeroStatementLine({
     <span className={`block whitespace-nowrap py-[0.035em] ${lineOffset}`}>
       {characters.map((character, characterIndex) => {
         const isDot = character === '.';
+        const isFinalDot = isDot && word === 'DELIVER';
 
         return (
           <motion.span
             key={`${word}-${character}-${characterIndex}`}
             aria-hidden="true"
-            className={`inline-block ${isDot ? 'text-[var(--urblo-lime)]' : ''}`}
+            className={`inline-block ${isFinalDot ? 'text-[var(--urblo-lime)]' : ''}`}
             initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: '0.16em' }}
             animate={{ opacity: 1, y: '0em' }}
             transition={{
