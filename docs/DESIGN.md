@@ -1,6 +1,6 @@
 # Urblo Design Contract
 
-Last updated: 2026-05-28
+Last updated: 2026-06-01
 
 ## Purpose
 This document governs Urblo's visual and UX execution. It is the design contract for Codex work in this repository.
@@ -192,6 +192,11 @@ Avoid:
 - broad claims that imply guaranteed cost, timing, carbon, or compliance outcomes without conditions
 - oversized hero drama that delays the actual capability framework
 
+Current source state:
+- `/capabilities` is now a web-native version of the Founder-supplied `Urblo Capability Statement_2026.pdf`, not the earlier provisional placeholder.
+- The page should keep the PDF's stronger positioning and proof structure: philosophy, capability/product range, lifecycle support, national reach, Urblo advantage, selected project proof, and a guarded PDF download.
+- The email-gated download CTA should feel like a project lead capture, not a newsletter widget; it must stay clear about the form endpoint and live credential dependency in Harness docs.
+
 Project Material Map pattern:
 - Use real project photography as an inspection surface, not a decorative gimmick.
 - Hotspots should identify material and finish placement first; avoid broad conceptual markers unless they are tied to a material/application fact.
@@ -220,6 +225,10 @@ Priorities:
 Our Story should feel human, disciplined, and credible. It should support trust in Natalie, Cameron, SAI Stone, and the Urblo model without becoming a founder vanity page.
 
 Use portrait/team content only when it strengthens credibility. Keep team UI stable and proportionate when the team count changes.
+
+Current source state:
+- Natalie Ma's portrait and co-founder/director bio are sourced from the 2026 Capability Statement PDF.
+- Founder copy should foreground design fluency plus buildability, not generic founder biography.
 
 ### Contact
 Contact should be direct and low-friction.

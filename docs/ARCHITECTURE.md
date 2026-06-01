@@ -1,11 +1,11 @@
 # Urblo Web - Architecture and Contracts
 
-Last updated: 2026-05-29
+Last updated: 2026-06-01
 
 ## System Boundary
 - Current implementation: frontend-only React application shipped as static assets.
 - Current implementation: Cloudflare Pages Function source now exists for `/api/enquiries` and `/api/sample-requests`.
-- Current implementation: the public Contact page submits enquiries and sample requests to those API routes. The API source attempts server-side audit events after successful lead inserts, and Sample Request uses a service-role-only Supabase RPC so the request row and first item row are created atomically. Live Supabase row creation still requires server-side Cloudflare environment variables.
+- Current implementation: the public Contact page submits enquiries and sample requests to those API routes. The Capability Statement download form on `/capabilities` also submits an email-only lead to `/api/enquiries` with `project_type = Capability statement download` before revealing the PDF download link. The API source attempts server-side audit events after successful lead inserts, and Sample Request uses a service-role-only Supabase RPC so the request row and first item row are created atomically. Live Supabase row creation still requires server-side Cloudflare environment variables.
 - Current Supabase project: `Urblo` (`npkidywzwddbnfrnxlmo`, `ap-southeast-2`) has the foundation schema/RLS migrations, baseline seeds, admin settings/profile/helper hardening, admin profile email uniqueness, and media Storage policies applied. Admin role helper RPC execution is revoked from browser roles in the exposed public schema, while RLS and Storage policies call private SECURITY DEFINER helpers from a non-exposed schema. The `/admin` auth shell source is implemented and config-gated, but live active-admin login still requires persistent browser-safe Supabase key configuration and a confirmed first admin profile. Settings/admin profiles, Media, Stone Library, Projects, Products, Articles, Leads, and Audit are the first source CRUD/workflow/review screens; admin CRUD/workflow save flows now call a shared audit writer after successful primary mutations, Stone Library finish image links have their own audit actions, and Media/Leads CSV exports are audit-gated, with live audit row creation still pending credentials.
 - Launch target: Cloudflare Pages static frontend, Cloudflare Pages Functions API endpoints, Supabase Postgres/Auth/Storage, and an Urblo-owned admin interface for content operations.
 - Planning source: `docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md`.
@@ -134,11 +134,15 @@ Last updated: 2026-05-29
   - `npm run agent:smoke` => `bash scripts/agent-smoke.sh`
   - Serves `dist/` with Vite preview and checks the React shell for key clean routes, `public/articles/index.json`, and critical CTA contracts.
   - Builds first only when `dist/` is missing; runtime tasks should still run `npm run build` before smoke.
-  - Runs `scripts/check-forms-api.mjs` and `scripts/check-contact-form-ui-source.mjs` after route/CTA shell checks so Contact submit routing, API mock behavior, Cloudflare Pages Function method boundaries, inline visitor states, and no-mailto main submit contracts stay covered without secrets.
+  - Runs `scripts/check-forms-api.mjs`, `scripts/check-contact-form-ui-source.mjs`, and `scripts/check-capabilities-page-source.mjs` after route/CTA shell checks so Contact submit routing, Capability Statement download routing, API mock behavior, Cloudflare Pages Function method boundaries, inline visitor states, and no-mailto main submit contracts stay covered without secrets.
 - Contact form UI source verification:
   - `npm run agent:forms-ui` => `node scripts/check-contact-form-ui-source.mjs`
   - Verifies Contact page source keeps the main submit flow on `/api/enquiries` and `/api/sample-requests`, includes inline validation/success/error/submitting states, preserves sample-request mode fields, keeps direct email/phone fallback channels, includes the optional `VITE_TURNSTILE_SITE_KEY` widget/token path, and does not use submit-flow `mailto:` or window navigation.
   - This is a source-only verifier. It does not replace live Supabase form persistence, Turnstile, email, browser-responsive QA, or Cloudflare endpoint verification.
+- Capability Statement UI source verification:
+  - `npm run agent:capabilities-ui` => `node scripts/check-capabilities-page-source.mjs`
+  - Verifies `/capabilities` keeps the Founder-sourced Capability Statement structure, shared CTA data, static PDF/media assets, email-gated `/api/enquiries` download lead capture, Turnstile widget/token reuse, and no-mailto/window-navigation submit contract.
+  - This is a source-only verifier. It does not replace live Supabase lead persistence, final Turnstile proof, or browser-responsive QA.
 - Live form verification:
   - `npm run agent:forms-live -- --allow-writes` => `node scripts/check-forms-api-live.mjs --allow-writes`
   - Loads local environment values from `.env.local`, `.env`, `.dev.vars`, and the shell.
@@ -227,7 +231,7 @@ Routing uses clean paths through `BrowserRouter`. Cloudflare Pages direct refres
 | `/projects` | `Projects` | Project listing page. |
 | `/projects/:slug` | `ProjectDetails` | Project detail page. Uses page-owned project hero via `DefaultLayout showBanner={false}`. |
 | `/our-story` | `OurStory` | About page. |
-| `/capabilities` | `CapabilitiesPage` | Provisional capability framework page for design translation, specification support, sourcing/fabrication, and delivery coordination. |
+| `/capabilities` | `CapabilitiesPage` | Web-native 2026 Capability Statement page sourced from the Founder PDF, including capabilities, lifecycle support, national reach, selected proof, and an email-gated PDF download form. |
 | `/contact` | `ContactPage` | Contact surface with direct contact channels plus API-backed enquiry/sample-request submit flows. Sample mode is available at `/contact?intent=sample-request`; direct email and phone remain manual fallback channels. |
 | `/articles` | `ArticlesPage` | Article list page. |
 | `/articles/:slug` | `ArticlePage` | Article detail page. Uses page-owned article hero via `DefaultLayout showBanner={false}`. |
@@ -254,8 +258,9 @@ Route state contract:
 
 ### Implemented navigation surfaces
 - Shared header links: `/projects`, `/stone-library`, `/our-story`, `/articles`, `/products`, `/contact`
+- Shared header links also include `/capabilities` after the 2026 Capability Statement page replaced the provisional capability placeholder.
 - Homepage proof-section CTA: `/capabilities`
-- Shared footer links: `/contact?intent=sample-request`, `/contact`
+- Shared footer links: `/capabilities`, `/contact?intent=sample-request`, `/contact`
 - Shared footer social links: Instagram and LinkedIn use external links with `target="_blank"` plus `rel="noopener noreferrer"`; Facebook and YouTube are hidden until real destinations are available.
 
 ### Gaps
@@ -286,7 +291,10 @@ Route state contract:
 - Homepage hero uses `100svh` so the first viewport reads as a full-screen hero across desktop and mobile.
 - Homepage hero video uses `preload="none"` and is constrained to desktop/tablet width through `media="(min-width: 768px)"`; mobile viewports keep the poster and do not select the MP4 source.
 - The desktop MP4 was re-encoded from about 16MB to about 3MB for launch. Cloudflare Stream/R2 remains optional if the client later wants adaptive delivery, analytics, or non-repo video management.
-- Route banners are local launch media referenced from `src/App.tsx` through the `ROUTE_BANNERS` map. `/capabilities` currently reuses the projects banner until dedicated capability imagery is approved.
+- Route banners are local launch media referenced from `src/App.tsx` through the `ROUTE_BANNERS` map. `/capabilities` now owns a full-bleed page hero sourced from the 2026 Capability Statement PDF instead of using a shared route banner.
+- Capability Statement PDF download path: `public/downloads/urblo-capability-statement-2026.pdf`.
+- Capability Statement web imagery path: `public/media/launch/capabilities`.
+- Our Story Natalie source portrait path: `public/media/launch/our-story/natalie-ma-2026.jpg`.
 - Contact image path: `public/media/launch/contact/project-contact.jpg`, referenced by `src/pages/ContactPage.tsx` and reused in homepage data where the same old WordPress image was previously used.
 - Homepage section imagery and partner logos now use controlled files under `public/media/launch/homepage`.
 - Our Story portraits now use controlled files under `public/media/launch/our-story`; the carbon banner uses the controlled route banner because the old WordPress carbon banner returned 404.

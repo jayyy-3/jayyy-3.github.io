@@ -66,6 +66,13 @@ const stateRoutes = [
 const requiredAssets = [
   '/articles/index.json',
   '/articles/Modular-Mastery-How-PrimeBlock-Core-Transformed-Aitken-College/content.html',
+  '/downloads/urblo-capability-statement-2026.pdf',
+  '/media/launch/capabilities/factory-preassembly.jpg',
+  '/media/launch/capabilities/west-side-place-aerial.jpg',
+  '/media/launch/capabilities/site-install-review.jpg',
+  '/media/launch/capabilities/curved-stone-preassembly.jpg',
+  '/media/launch/capabilities/moon-gate-framed-view.jpg',
+  '/media/launch/our-story/natalie-ma-2026.jpg',
 ]
 
 const redirectContracts = [
@@ -94,6 +101,14 @@ const ctaContracts = [
   },
   {
     name: 'Homepage Capabilities navigation',
+    target: '/capabilities',
+  },
+  {
+    name: 'Header Capabilities navigation',
+    target: '/capabilities',
+  },
+  {
+    name: 'Footer Capabilities navigation',
     target: '/capabilities',
   },
   {
@@ -224,3 +239,4 @@ NODE
 
 node scripts/check-forms-api.mjs
 node scripts/check-contact-form-ui-source.mjs
+node scripts/check-capabilities-page-source.mjs

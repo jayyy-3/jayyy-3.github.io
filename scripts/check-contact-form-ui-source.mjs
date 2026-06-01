@@ -2,11 +2,13 @@
 import fs from 'node:fs';
 
 const contactSource = fs.readFileSync('src/pages/ContactPage.tsx', 'utf8');
+const turnstileSource = fs.readFileSync('src/components/TurnstileField.tsx', 'utf8');
+const turnstileConfigSource = fs.readFileSync('src/lib/turnstileConfig.ts', 'utf8');
 
 const failures = [];
 
-function requireIncludes(label, value) {
-  if (!contactSource.includes(value)) {
+function requireIncludes(label, value, source = contactSource) {
+  if (!source.includes(value)) {
     failures.push(`Contact form source is missing ${label}: ${value}`);
   }
 }
@@ -64,12 +66,13 @@ requireIncludes(
 );
 requireIncludes('direct email fallback channel', 'href="mailto:info@urblo.com.au?subject=Contact%20Us"');
 requireIncludes('direct phone fallback channel', 'href="tel:1300187256"');
-requireIncludes('public Turnstile site key env', 'import.meta.env.VITE_TURNSTILE_SITE_KEY');
+requireIncludes('public Turnstile site key env', 'import.meta.env.VITE_TURNSTILE_SITE_KEY', turnstileConfigSource);
 requireIncludes(
   'explicit Turnstile client script',
   'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit',
+  turnstileSource,
 );
-requireIncludes('Turnstile field component', 'function TurnstileField');
+requireIncludes('Turnstile field component', 'function TurnstileField', turnstileSource);
 requireIncludes(
   'Turnstile visitor verification copy',
   'Complete the verification check before sending the request.',

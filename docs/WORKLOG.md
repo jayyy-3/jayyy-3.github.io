@@ -1,6 +1,70 @@
 # WORKLOG - Urblo Execution Log
 
-Last updated: 2026-05-29
+Last updated: 2026-06-01
+
+## Entry - 2026-06-01 (Founder Capability Statement Web Page)
+
+### Scope
+- Replaced the provisional `/capabilities` page with a web-native version of Natalie Ma's 2026 Capability Statement, using the supplied PDF as the current client-approved capability source where it supersedes older placeholder copy.
+- Added the downloadable 2026 Capability Statement PDF plus extracted capability and Natalie imagery under controlled `public/` launch paths.
+- Added an email-gated Capability Statement download form that posts to `/api/enquiries` as `Capability statement download`, reveals the direct PDF link only after a successful API response, and reuses the shared Turnstile widget path when `VITE_TURNSTILE_SITE_KEY` is configured.
+- Centralized the live CTA definitions used by capability, contact, sample request, and PDF download surfaces in `src/data/siteChrome.ts`, and added `/capabilities` to shared header/footer navigation.
+- Updated `/our-story` so Natalie Ma's portrait, role, bio, and founder quote are sourced from the Capability Statement and visible in the team card without requiring hover.
+- Updated Harness docs and source checks so future agents treat the Founder statement page, shared CTA data, PDF asset, media assets, and download lead-capture contract as guarded surfaces.
+
+### Changed Files
+- `AGENTS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/DESIGN.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `docs/agent/verification.md`
+- `package.json`
+- `public/downloads/urblo-capability-statement-2026.pdf`
+- `public/media/launch/capabilities/*`
+- `public/media/launch/our-story/natalie-ma-2026.jpg`
+- `scripts/agent-init.sh`
+- `scripts/agent-smoke.sh`
+- `scripts/check-capabilities-page-source.mjs`
+- `scripts/check-contact-form-ui-source.mjs`
+- `scripts/check-harness.mjs`
+- `src/App.tsx`
+- `src/components/TurnstileField.tsx`
+- `src/components/homepage/HomepageSections.tsx`
+- `src/data/siteChrome.ts`
+- `src/lib/turnstileConfig.ts`
+- `src/pages/CapabilitiesPage.tsx`
+- `src/pages/ContactPage.tsx`
+- `src/pages/OurStory.tsx`
+
+### Verification Results
+- `npm run build`: pass. Existing Browserslist/caniuse-lite staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass, including `/capabilities`, PDF/media assets, shared Capabilities CTAs, Contact form UI source check, and Capability Statement source check.
+- `npm run agent:capabilities-ui`: pass.
+- `npm run agent:forms-ui`: pass.
+- `npm run agent:check`: pass.
+- `jq empty docs/agent/tasks.json`: pass.
+- `git diff --check`: pass.
+- Browser QA through the in-app Browser against local Vite preview on `http://127.0.0.1:4174`: pass.
+- Browser QA `/capabilities` desktop `1440x900`: correct title/route, nonblank hero, no framework overlay, no console warnings/errors, no horizontal overflow, hero leaves real next-section content visible.
+- Browser QA `/capabilities` mobile `390x844`: correct title/route, nonblank hero, no framework overlay, no console warnings/errors, no horizontal overflow, next-section content visible.
+- Browser QA Capability Statement form: invalid email shows inline validation, direct PDF link is hidden before success, and a valid email on local static preview shows the expected API-configuration error without revealing the direct PDF link.
+- Browser QA `/our-story` desktop and mobile: Natalie image resolves to `public/media/launch/our-story/natalie-ma-2026.jpg`; Natalie role, PDF-sourced bio, and founder quote are visible; no framework overlay, console warnings/errors, or horizontal overflow were observed.
+
+### Risks and Gaps
+- Live Capability Statement download lead capture is not proven until the same server-side `/api/enquiries` credentials are configured and Jay approves tagged live form QA writes.
+- Real Turnstile proof still requires public `VITE_TURNSTILE_SITE_KEY`, server-side Turnstile secret, a valid token, and the existing approval-gated live verifier.
+- Real notification proof still requires Resend sender/recipient configuration and approval-gated live form writes.
+- Browser QA was local built-preview only. Cloudflare Pages preview smoke remains pending until a Pages preview URL exists.
+- Current web imagery is extracted from the supplied Capability Statement PDF; higher-resolution source photography can replace these assets later without changing the page contract.
+
+### Next Handoff
+- Continue live form verification after service-role credentials and Jay approval are available: `npm run agent:forms-live -- --allow-writes`, then the browser-boundary, email, and Turnstile variants when their required inputs exist.
+- After Cloudflare Pages preview exists, run `npm run agent:cloudflare-preview-smoke -- --base-url https://<preview>.pages.dev` and re-run the live form verifier against that deployed origin after environment variables are configured.
 
 ## Entry - 2026-05-29 (Cloudflare Pages Account Read-Only Probe)
 

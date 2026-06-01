@@ -22,8 +22,29 @@ export const siteLogoUrl = '/media/launch/identity/urblo-logo.png';
 export const siteBrandStatement =
   'devoted to supporting ethical and significant projects every step of the way.';
 
+export const siteCtas = {
+  capabilities: {
+    label: 'Capabilities',
+    to: '/capabilities',
+  },
+  contact: {
+    label: 'Discuss a project',
+    to: '/contact',
+  },
+  sampleRequest: {
+    label: 'Request samples',
+    to: '/contact?intent=sample-request',
+  },
+  capabilityStatementDownload: {
+    label: 'Download capability statement',
+    href: '/downloads/urblo-capability-statement-2026.pdf',
+    filename: 'urblo-capability-statement-2026.pdf',
+  },
+} as const;
+
 export const siteNavLinks: SiteNavLink[] = [
   { label: 'Projects', to: '/projects' },
+  { label: siteCtas.capabilities.label, to: siteCtas.capabilities.to },
   { label: 'Stone Library', to: '/stone-library' },
   { label: 'Our Story', to: '/our-story' },
   { label: 'Articles', to: '/articles' },
@@ -33,12 +54,16 @@ export const siteNavLinks: SiteNavLink[] = [
 
 export const siteFooterLinks: SiteNavLink[] = [
   {
+    label: siteCtas.capabilities.label,
+    to: siteCtas.capabilities.to,
+  },
+  {
     label: 'Sample Request',
-    to: '/contact?intent=sample-request',
+    to: siteCtas.sampleRequest.to,
   },
   {
     label: 'Contact Us',
-    to: '/contact',
+    to: siteCtas.contact.to,
   },
 ];
 

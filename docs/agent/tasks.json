@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lastUpdated": "2026-05-29",
+  "lastUpdated": "2026-06-01",
   "sourceOfTruth": "Machine-readable task queue for active and upcoming agent work. Human-readable roadmap lives in docs/NEXT_STEPS.md.",
   "tasks": [
     {
@@ -1159,9 +1159,16 @@
         "src/pages/ArticlePage.tsx",
         "src/pages/ContactPage.tsx",
         "src/pages/CapabilitiesPage.tsx",
+        "src/components/TurnstileField.tsx",
+        "src/lib/turnstileConfig.ts",
+        "src/data/siteChrome.ts",
         "src/App.tsx",
         "src/components/site/SiteHeader.tsx",
         "src/components/site/SiteFooter.tsx",
+        "public/downloads/urblo-capability-statement-2026.pdf",
+        "public/media/launch/capabilities",
+        "public/media/launch/our-story/natalie-ma-2026.jpg",
+        "scripts/check-capabilities-page-source.mjs",
         "scripts/agent-smoke.sh"
       ],
       "notes": [
@@ -1172,7 +1179,8 @@
         "2026-05-26: Homepage sustainability/tabbed feature module is no longer rendered by request. The proof metrics section now sits directly after the hero with stone/city copy and updated 50+/130+/20+/3500+ metrics.",
         "2026-05-26: Homepage partner banner wording now uses the approved anchor line: Design-led stone solutions for streetscapes & civil landscapes.",
         "2026-05-26: The partner banner highlights Design-led in Urblo lime while keeping the rest of the sentence white.",
-        "2026-05-26: The homepage proof section now includes a lightweight Our Capabilities CTA that routes to a new provisional /capabilities page for the design/specification/sourcing/delivery capability framework."
+        "2026-05-26: The homepage proof section now includes a lightweight Our Capabilities CTA that routes to a new provisional /capabilities page for the design/specification/sourcing/delivery capability framework.",
+        "2026-06-01: Founder-supplied `Urblo Capability Statement_2026.pdf` supersedes the provisional `/capabilities` copy. `/capabilities` should render a web-native capability statement with Founder-sourced imagery/content, shared CTA data, and an email-gated PDF download that submits to `/api/enquiries` as `Capability statement download`. Our Story Natalie content should use the PDF portrait and bio source."
       ],
       "acceptance": [
         "Target pages reach agreed parity versus approved references.",
@@ -1183,8 +1191,9 @@
         "npm run build",
         "npm run lint",
         "npx tsc -b",
+        "npm run agent:capabilities-ui",
         "npm run agent:smoke",
-        "Browser verification: homepage section order, removed sustainability copy, updated proof copy, updated metrics, partner banner wording, Design-led lime highlight, Our Capabilities CTA, and /capabilities page render"
+        "Browser verification: homepage section order, removed sustainability copy, updated proof copy, updated metrics, partner banner wording, Design-led lime highlight, Our Capabilities CTA, /capabilities page render and download-form validation, and /our-story Natalie card render"
       ]
     },
     {

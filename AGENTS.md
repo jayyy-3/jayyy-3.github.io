@@ -1,6 +1,6 @@
 # AGENTS - Urblo AI Harness Entry
 
-Last updated: 2026-05-29
+Last updated: 2026-06-01
 
 ## Project Mission
 Urblo web exists to communicate a design-led, engineering-backed, proof-driven natural stone solution system for streetscapes and civil landscapes.
@@ -109,6 +109,7 @@ Before declaring implementation complete, verify all checks below:
 - `NOW-ADMIN-CMS-001` is an umbrella objective, not a single executable implementation task; admin IA/access is defined in `docs/ADMIN_IA_ACCESS.md`, and implementation still uses the smaller auth/CRUD/media/leads tasks in `docs/agent/tasks.json`.
 - Stone Library migration is complete: old `/materials*` route family has been removed and replaced with `/stone-library` plus `/stone-library/:stoneGroupId`.
 - `NEXT-STONELIB-DRIVE-IMAGE-AUDIT-001` and `NEXT-STONELIB-IMG-001` are complete for current website stones only; Drive-only products remain out of scope until the client decides to add them.
+- `/capabilities` now uses Natalie Ma's 2026 Capability Statement as the client-supplied source, with Founder-sourced imagery, shared CTA data, an email-gated PDF download flow through `/api/enquiries`, and `npm run agent:capabilities-ui` as its no-secret source gate; live download lead capture remains blocked until form credentials are configured.
 - Contact route is declared at `/contact`; shared header/footer navigation points to declared routes, and Sample Request routes to `/contact?intent=sample-request`. The main Contact/Sample Request submit source now posts to Pages Functions; direct email/phone links remain manual contact channels, and production persistence is still pending service-role environment verification.
 - Last runtime gates were measured on 2026-05-29 and were green (`npm run build`, `npm run lint`, `npx tsc -b`, `npm run agent:smoke`) during the production dependency audit checkpoint.
 - Route-level code splitting is in place and the previous `>500kB` chunk warning is resolved; continue monitoring bundle output as features are added.

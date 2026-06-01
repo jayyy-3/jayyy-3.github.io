@@ -1,6 +1,6 @@
 # Agent Verification Matrix
 
-Last updated: 2026-05-29
+Last updated: 2026-06-01
 
 ## Purpose
 Use this matrix to choose the smallest verification set that proves a change is safe. Runtime changes still need the full build/lint/typecheck gate unless a task explicitly defines a temporary exception.
@@ -39,6 +39,7 @@ Run:
 - `npm run lint`
 - `npx tsc -b`
 - `npm run agent:smoke`
+- `npm run agent:capabilities-ui` when changing `/capabilities`, shared CTA data, Capability Statement assets, or the email-gated PDF download form.
 
 Evidence to record:
 - Affected routes.
@@ -143,6 +144,7 @@ Run:
 - `npx tsc -b`
 - `npm run agent:smoke`
 - `npm run agent:forms-ui` when changing Contact form UI state, submit routing, or sample-request mode.
+- `npm run agent:capabilities-ui` when changing the Capability Statement download form, PDF asset path, shared CTA data, or Turnstile reuse on `/capabilities`.
 - API-level positive and negative submission tests when endpoints exist.
 - `npm run agent:forms-live -- --allow-writes --allow-email --require-email` when verifying real notification delivery after Resend variables and Jay approval are available.
 - `npm run agent:forms-live -- --allow-writes --require-turnstile --turnstile-token <token>` when verifying real Turnstile handling after `VITE_TURNSTILE_SITE_KEY`, the Turnstile secret/token, and Jay approval are available.

@@ -1,8 +1,7 @@
 import { motion } from 'framer-motion';
-import AnimatedNumber from '../components/AnimatedNumber';
 
 export default function OurStory() {
-  const counterVariants = {
+  const proofVariants = {
     hidden: { opacity: 0, y: 24 },
     visible: (index: number) => ({
       opacity: 1,
@@ -13,11 +12,13 @@ export default function OurStory() {
 
   const team = [
     {
-      name: 'Natalie',
-      role: 'Co-Founder',
-      img: '/media/launch/our-story/natalie-ma.jpg',
+      name: 'Natalie Ma',
+      role: 'Co-Founder & Director',
+      img: '/media/launch/our-story/natalie-ma-2026.jpg',
       bio:
-        'Natalie founded Urblo with SAI Stone to bridge the gap between designers and suppliers through natural materials.',
+        'A trained architectural designer with brand and marketing strategy experience, Natalie leads Urblo around one brief: bridge the gap between creative design and built reality.',
+      quote:
+        'We started Urblo to bridge a gap we kept seeing - between the creative ambition of design and the practical reality of what gets built.',
     },
     {
       name: 'Cameron',
@@ -54,14 +55,14 @@ export default function OurStory() {
           </div>
           <div className="space-y-5 text-[18px] leading-8 text-[var(--urblo-text)] md:text-[20px]">
             <p>
-              Urblo was conceived as a response to the growing demand for greener alternatives to
-              concrete seats. From this point, Urblo is rooted in the fusion of contemporary design
-              and timeless durability, seamlessly integrating stone blocks into modern cityscapes.
+              Founded in Melbourne in 2024, Urblo is a specialist manufacturer and supplier of
+              premium stone solutions, bespoke street furniture, and complex hardscape elements for
+              civil and urban projects Australia-wide.
             </p>
             <p>
-              We create products that enhance urban spaces while respecting the People and
-              Environment. Join us in our mission to redefine urban landscapes with the strength and
-              beauty of stone.
+              The company exists to bridge a long-standing gap between creative ambition and what
+              actually gets built. Co-founded with SAI Stone, Urblo pairs design fluency with more
+              than two decades of stone-industry depth.
             </p>
           </div>
         </div>
@@ -70,25 +71,21 @@ export default function OurStory() {
       <section className="bg-black py-20 text-white">
         <div className="urblo-page-container grid gap-12 text-center sm:grid-cols-3">
           {[
-            { end: 30, suffix: '+', label: 'Projects' },
-            { end: 430, suffix: '+', label: 'Clients' },
-            { end: 18, suffix: '+', label: 'Landscape architects helped' },
+            { value: '2024', label: 'Founded in Melbourne' },
+            { value: 'MCC', label: 'Melbourne City Council appointed supplier network' },
+            { value: '20+', label: 'Years of stone expertise through SAI Stone' },
           ].map((item, index) => (
             <motion.div
               key={item.label}
               custom={index}
-              variants={counterVariants}
+              variants={proofVariants}
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true, amount: 0.3 }}
             >
-              <AnimatedNumber
-                value={item.end}
-                suffix={item.suffix}
-                duration={2}
-                className="text-[64px] font-semibold leading-none"
-                suffixClassName="ml-1 text-[var(--urblo-lime)]"
-              />
+              <div className="text-[64px] font-semibold leading-none text-white">
+                {item.value}
+              </div>
               <div className="mt-4 text-[18px] uppercase tracking-[0.12em] text-white/76">
                 {item.label}
               </div>
@@ -143,14 +140,21 @@ export default function OurStory() {
               <article key={member.name} className="group">
                 <div className="overflow-hidden rounded-[4px] border border-white/10 bg-white/5">
                   <div className="relative overflow-hidden">
-                    <img src={member.img} alt={member.name} className="aspect-[2/3] w-full object-cover" />
-                    <div className="absolute inset-0 flex items-end bg-gradient-to-t from-black/90 to-black/10 p-6 opacity-100 transition-opacity duration-300 md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100">
-                      <p className="text-sm leading-6 text-white/88">{member.bio}</p>
-                    </div>
+                    <img
+                      src={member.img}
+                      alt={member.name}
+                      className="aspect-[2/3] w-full object-cover transition duration-500 group-hover:scale-[1.02]"
+                    />
                   </div>
-                  <div className="space-y-1 p-5">
+                  <div className="p-5">
                     <div className="text-[20px] font-semibold text-white">{member.name}</div>
                     <div className="text-[13px] uppercase tracking-[0.12em] text-white/55">{member.role}</div>
+                    <p className="mt-4 text-sm leading-6 text-white/72">{member.bio}</p>
+                    {'quote' in member ? (
+                      <p className="mt-5 border-l border-[var(--urblo-lime)] pl-4 text-[16px] font-semibold leading-7 text-white">
+                        "{member.quote}"
+                      </p>
+                    ) : null}
                   </div>
                 </div>
               </article>

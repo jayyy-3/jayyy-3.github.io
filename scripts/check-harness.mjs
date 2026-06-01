@@ -18,6 +18,7 @@ const requiredFiles = [
   'scripts/agent-smoke.sh',
   'scripts/check-admin-auth-browser.mjs',
   'scripts/check-admin-config-gate.mjs',
+  'scripts/check-capabilities-page-source.mjs',
   'scripts/check-contact-form-ui-source.mjs',
   'scripts/check-doc-paths.mjs',
   'scripts/check-harness.mjs',
@@ -37,6 +38,7 @@ const requiredPackageScripts = {
   'agent:first-admin-bootstrap': 'node scripts/bootstrap-first-admin.mjs',
   'agent:forms-live': 'node scripts/check-forms-api-live.mjs',
   'agent:forms-ui': 'node scripts/check-contact-form-ui-source.mjs',
+  'agent:capabilities-ui': 'node scripts/check-capabilities-page-source.mjs',
   'agent:init': 'bash scripts/agent-init.sh',
   'agent:live-readiness': 'node scripts/check-live-readiness.mjs',
   'agent:public-supabase-readiness': 'node scripts/check-public-supabase-readiness.mjs',
@@ -71,6 +73,9 @@ try {
   const smoke = readFileSync(join(root, 'scripts/agent-smoke.sh'), 'utf8')
   if (!smoke.includes('node scripts/check-contact-form-ui-source.mjs')) {
     failures.push('scripts/agent-smoke.sh must run the Contact form UI source contract check.')
+  }
+  if (!smoke.includes('node scripts/check-capabilities-page-source.mjs')) {
+    failures.push('scripts/agent-smoke.sh must run the Capabilities page source contract check.')
   }
 } catch (error) {
   failures.push(`Unable to read scripts/agent-smoke.sh: ${error.message}`)

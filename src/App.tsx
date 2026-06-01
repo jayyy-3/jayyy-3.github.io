@@ -34,7 +34,6 @@ const ROUTE_BANNERS = {
     products: '/media/launch/banners/products.jpg',
     materials: '/media/launch/banners/materials.jpg',
     projects: '/media/launch/banners/projects.jpg',
-    capabilities: '/media/launch/banners/projects.jpg',
     ourStory: '/media/launch/banners/our-story.jpg',
     contact: '/media/launch/banners/our-story.jpg',
     articles: '/media/launch/banners/articles.jpg',
@@ -336,7 +335,7 @@ function AnimatedRoutes() {
                 <Route
                     path="/capabilities"
                     element={
-                        <DefaultLayout bgImage={ROUTE_BANNERS.capabilities}>
+                        <DefaultLayout showBanner={false}>
                             {loadPage(<CapabilitiesPage />)}
                         </DefaultLayout>
                     }
