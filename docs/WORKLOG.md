@@ -2,6 +2,65 @@
 
 Last updated: 2026-06-02
 
+## Entry - 2026-06-02 (Projects Archive, Detail, and Media Blocks)
+
+### Scope
+- Rebuilt `/projects` as a functional archive with breadcrumb, large title, proof-led intro, project count, sector filters, grid/list view controls, and equal-sized project images.
+- Rebuilt `/projects/:slug` as a full-width case-study surface with oversized opening, previous/next project navigation, hero media, Project Information facts, narrative, ordered media blocks, Featured Materials where data supports it, and shared CTA.
+- Added `ProjectHotspotImage` as the shared public hotspot renderer and made `ProjectMaterialMap` delegate to it.
+- Extended static project data with listing metadata, story copy, ordered media blocks, and Moon Gate hotspot metadata.
+- Extended `/admin/projects` source with ordered `project_media` block editing for normal images, hotspot images, and optional YouTube video rows.
+- Added draggable/click hotspot placement on the selected admin material map image while keeping numeric x/y percentage fields.
+- Prepared `supabase/migrations/202606020001_project_media_blocks.sql` for the future live `project_media` block contract.
+- Updated content import and admin verifiers so the static-to-Supabase path understands structured project media blocks.
+
+### Changed Files
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/DESIGN.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `scripts/check-admin-crud-coverage.mjs`
+- `scripts/check-admin-crud-live.mjs`
+- `scripts/check-content-import-readiness.mjs`
+- `src/App.tsx`
+- `src/components/projects/ProjectHotspotImage.tsx`
+- `src/components/projects/ProjectMaterialMap.tsx`
+- `src/data/projectData.ts`
+- `src/pages/ProjectDetails.tsx`
+- `src/pages/Projects.tsx`
+- `src/pages/admin/AdminProjectsPage.tsx`
+- `supabase/migrations/202606020001_project_media_blocks.sql`
+
+### Verification Results
+- `npm run build`: pass. Existing Browserslist/caniuse-lite staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass, including `/projects`, `/projects/moon-gate-woolley-street`, admin route shells, shared CTA contracts, and current project/capability assets.
+- `npm run agent:check`: pass.
+- `npm run agent:admin-crud-coverage`: pass, including `project_media` coverage and source assertions for hotspot stage/marker controls, pointer placement handlers, and coordinate-update callbacks.
+- `npm run agent:content-import -- --out .tmp/content-import-preview.json`: pass with 115 media candidates, 5 projects, 15 `project_media` rows, 1 `project_material_map`, 2 `project_hotspots`, 0 warnings, and 0 blockers.
+- `npm run agent:content-import:apply-sql`: pass; regenerated ignored review/plan/preflight/apply/rollback artifacts under `.tmp/` without live Supabase writes.
+- In-app Browser QA at `http://127.0.0.1:4174/projects`, desktop default viewport: page identity `Projects | Urblo`, nonblank `/projects` content, 5 equal `396x297` grid images, Education filter changed count to `02`, List view changed filtered images to equal `120x90`, `0` horizontal overflow, and no framework overlay.
+- In-app Browser QA at `390x844`: `/projects` rendered 5 equal `327x245` grid images, Commercial filter changed count to `01`, retained `0` horizontal overflow, and no framework overlay.
+- In-app Browser QA for `/projects/moon-gate-woolley-street`: page identity `Project Detail | Urblo`, h1 `Moon Gate | Woolley Street`, Project Information, previous/next navigation, full-width hero/media, 2 hotspot buttons, Featured Materials, `0` horizontal overflow, and no framework overlay. Desktop and mobile hotspot tap/click on `Flamed seating elements` set `aria-pressed="true"` and updated the inspector with New Grey/Flamed metadata, application copy, and Stone Library link.
+- In-app Browser QA for `/projects/west-side-place`: page identity `Project Detail | Urblo`, h1 `West Side Place`, Project Information, narrative, previous/next navigation, ordered normal image captions, no hotspot controls as expected, `0` horizontal overflow, and no framework overlay at desktop and `390x844`.
+- In-app Browser QA for `/admin/projects`: current no-browser-key environment renders the configuration-required admin auth state without private Projects module content, framework overlay, or horizontal overflow.
+- Console health: Browser logs only the existing Cloudflare Turnstile warning `[Cloudflare Turnstile] Unknown parameter passed to api.js: "?ver=...", ignoring.` No task-caused runtime errors were observed.
+
+### Risks and Gaps
+- The new Supabase migration is source-prepared only and has not been applied to the live Supabase project.
+- Current static project data has no client-approved Urblo YouTube video configured, so public browser QA can verify the renderer/source contract but not a live configured video block.
+- Live admin drag-and-drop QA is pending browser-safe Supabase config plus an active admin/editor profile. This checkpoint verifies the source implementation and strengthened no-secret admin coverage gate instead.
+- Public Projects remain static/file-backed until content import and public read cutover are approved.
+
+### Next Handoff
+- `NEXT-UI-PARITY-001`
+- `NOW-ADMIN-CONTENT-CRUD-001`
+
 ## Entry - 2026-06-02 (Homepage Latest Projects Full-Screen Stability)
 
 ### Scope

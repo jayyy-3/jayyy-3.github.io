@@ -145,6 +145,7 @@ const pageChecks = [
       'projects',
       'project_facts',
       'project_materials',
+      'project_media',
       'project_material_maps',
       'project_hotspots',
       'stone_groups',
@@ -160,6 +161,10 @@ const pageChecks = [
       'project_fact.update',
       'project_material.create',
       'project_material.update',
+      'project_media.create',
+      'project_media.update',
+      'project_media.publish',
+      'project_media.archive',
       'project_material_map.create',
       'project_material_map.update',
       'project_material_map.publish',
@@ -169,7 +174,14 @@ const pageChecks = [
       'project_hotspot.publish',
       'project_hotspot.archive',
     ],
-    requiredText: ['Current role is read-only for Projects', 'Physical deletes remain hidden'],
+    requiredText: ['Current role is read-only for Projects', 'Physical deletes remain hidden', 'Media blocks', 'Drag point placement'],
+    requiredPatterns: [
+      { pattern: /data-hotspot-stage/, label: 'hotspot placement stage marker' },
+      { pattern: /data-hotspot-marker/, label: 'hotspot placement marker control' },
+      { pattern: /onPointerDown=\{/, label: 'hotspot pointer-down placement handler' },
+      { pattern: /onPointerMove=\{/, label: 'hotspot pointer-move drag handler' },
+      { pattern: /onPositionChange=\{\(nextPosition\)/, label: 'hotspot coordinate update callback' },
+    ],
   },
   {
     label: 'Products',
@@ -637,6 +649,10 @@ function checkPage(page) {
     requireIncludes(text, needle, page.file);
   }
 
+  for (const { pattern, label } of page.requiredPatterns ?? []) {
+    requireRegex(text, pattern, page.file, label);
+  }
+
   if (page.exportGate) {
     const actionIndex = text.indexOf(page.exportGate);
     const blockedIndex = text.indexOf('blocked because the audit event could not be recorded');
@@ -729,6 +745,7 @@ function checkAdminLiveVerifierBoundaries() {
     'product.publish',
     'product_model.publish',
     'project.publish',
+    'project_media.publish',
     'project_material_map.publish',
     'project_hotspot.publish',
     'article.publish',

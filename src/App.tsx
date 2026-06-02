@@ -308,7 +308,7 @@ function AnimatedRoutes() {
                 <Route
                     path="/projects"
                     element={
-                        <DefaultLayout bgImage={ROUTE_BANNERS.projects}>
+                        <DefaultLayout showBanner={false}>
                             {loadPage(<ProjectsPage />)}
                         </DefaultLayout>
                     }

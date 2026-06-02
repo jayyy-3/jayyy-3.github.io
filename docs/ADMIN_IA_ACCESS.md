@@ -1,11 +1,11 @@
 # Urblo Admin IA and Access Contract
 
-Last updated: 2026-05-29
+Last updated: 2026-06-02
 
 ## Purpose
 This document defines the executable contract for Urblo's `/admin` site.
 
-Admin auth shell source is now implemented and config-gated. Settings/admin profiles, Media, Stone Library, Projects, Products, Articles, Leads, and Audit are the first source CRUD/workflow/review screens. The dashboard now has source-side content health checks for media metadata gaps, project claim review, missing Product/Article media, TBC Stone Library rows, and stale new leads. Stone Library source now includes finish image links from `stone_finish_images` to `media_assets`. Admin CRUD/workflow save flows now call a shared audit writer after successful primary mutations. Media and Leads now have CSV export paths that must record audit events before downloading. This does not mean live first-admin verification, live admin-profile save verification, live upload/save/export verification, Stone Library/Projects/Products/Articles/Leads live save/export verification, or live audit row creation verification are complete; it defines and tracks what those implementation tasks must build next.
+Admin auth shell source is now implemented and config-gated. Settings/admin profiles, Media, Stone Library, Projects, Products, Articles, Leads, and Audit are the first source CRUD/workflow/review screens. The dashboard now has source-side content health checks for media metadata gaps, project claim review, missing Product/Article media, TBC Stone Library rows, and stale new leads. Stone Library source now includes finish image links from `stone_finish_images` to `media_assets`. Projects source now includes ordered media block editing for normal images, hotspot images, and optional YouTube video rows, with draggable hotspot placement on selected material maps. Admin CRUD/workflow save flows now call a shared audit writer after successful primary mutations. Media and Leads now have CSV export paths that must record audit events before downloading. This does not mean live first-admin verification, live admin-profile save verification, live upload/save/export verification, Stone Library/Projects/Products/Articles/Leads live save/export verification, or live audit row creation verification are complete; it defines and tracks what those implementation tasks must build next.
 
 ## Product Principle
 The admin site exists so Urblo can maintain launch-critical content without code edits while protecting public pages from drafts, unreviewed claims, missing media, and broken lead workflows.
@@ -29,7 +29,7 @@ The first admin release should feel like an operating console, not a marketing s
 | `/admin/leads` | Enquiry and sample request inbox | Admin/editor/viewer read; owner/admin assign/export | First operational module after auth. |
 | `/admin/media` | Media library and asset metadata | Admin/editor write; viewer read | Uploads require Supabase Storage. Alt text and usage notes are required before publish. |
 | `/admin/stone-library` | Stone groups, variants, finishes, and images | Admin/editor write; viewer read | Missing image and TBC states must stay explicit. |
-| `/admin/projects` | Project list and case study editor | Admin/editor write; viewer read | Includes galleries, material schedules, and material-map hotspots. |
+| `/admin/projects` | Project list and case study editor | Admin/editor write; viewer read | Includes ordered media blocks, material schedules, material maps, and draggable hotspots. |
 | `/admin/products` | Product families, models, specs, and defaults | Admin/editor write; viewer read | Material defaults should reference Stone Library records where possible. |
 | `/admin/articles` | Structured article editor | Admin/editor write; viewer read | Uses approved blocks, not raw newsletter HTML as normal authoring. |
 | `/admin/settings` | Site settings, admin users, notification settings | Owner/admin only | Includes admin profile management and global site settings. |
@@ -77,7 +77,7 @@ Current launch removal model:
 | 2 | Leads inbox | Makes Contact and Sample Request business-safe. | Forms, Turnstile, email notification, RLS. |
 | 3 | Media library | Needed by every content module. | Supabase Storage, `media_assets`, image validation. |
 | 4 | Stone Library | Highest repeated maintenance value and clearest CRUD model. | Media, Stone Library tables, public read contract. |
-| 5 | Projects | Enables material-map case studies and launch proof updates. | Media, Stone Library references, claim review fields. |
+| 5 | Projects | Enables case studies, material-map proof, and launch project updates. | Media, Stone Library references, claim review fields, `project_media` block migration. |
 | 6 | Products | Depends on stable Stone Library references for material defaults. | Product tables, Stone Library references, media. |
 | 7 | Articles | Most editorial complexity; use structured blocks after simpler modules prove the pattern. | Media, article block schema, claim-safe templates. |
 | 8 | Settings and audit hardening | Needed before broader team handoff. | Admin roles, audit events, notification settings. |
@@ -115,8 +115,8 @@ Current launch removal model:
 |---|---|---|---|
 | Project record | title, summary, lead, location, date labels, collaborators, status, SEO, order | slug uniqueness, timestamps | legacy migration source fields |
 | Facts and claims | fact labels/values, claim status, display order | content health warnings for unapproved claims | claim taxonomy if later formalized |
-| Media and gallery | cover, hero, gallery, captions, order | image dimensions and usage records | storage policy |
-| Material map | map image, hotspot positions, labels, linked material rows | coordinate validation | advanced editor calibration rules |
+| Media blocks | cover, hero IDs, block type, image media, hotspot map link, optional YouTube ID, block title, label, caption, order, status | image dimensions and usage records | storage policy, one-active-YouTube constraint |
+| Material map | map image, hotspot positions, labels, linked material rows | coordinate validation, percentage placement | advanced editor calibration rules |
 
 ### Products
 
@@ -172,7 +172,7 @@ Current implementation:
 - `/admin/settings` validates duplicate Supabase Auth user IDs and duplicate admin profile emails before save so database uniqueness failures are not the first user-facing feedback.
 - `/admin/media` is the first media CRUD source screen behind the auth gate, with admin/editor upload and metadata controls, audit-gated media manifest export, viewer read-only behavior, and publish/archive guardrails.
 - `/admin/stone-library` is the first content CRUD source screen behind the auth gate, with group, variant, finish capability, finish image link, validation, publish/archive, and read-only states.
-- `/admin/projects` is the next content CRUD source screen behind the auth gate, with project, fact, material schedule, material map, hotspot, validation, claim-review, publish/archive, and read-only states.
+- `/admin/projects` is the next content CRUD source screen behind the auth gate, with project, fact, material schedule, media block, material map, hotspot, validation, claim-review, publish/archive, draggable placement, and read-only states. Live media block writes require `supabase/migrations/202606020001_project_media_blocks.sql`.
 - `/admin/products` is the next content CRUD source screen behind the auth gate, with product family, model, material default, spec, validation, publish/archive, and read-only states.
 - `/admin/articles` is the next content CRUD source screen behind the auth gate, with article metadata, structured block rows, reference links, legacy-source provenance, validation, publish/archive, and read-only states.
 - `/admin/leads` is the first lead workflow source screen behind the auth gate, with enquiry/sample request queues, contact detail, sample items, status updates, assignment, internal notes, notification state, read-only states, and an owner/admin CSV export action that is blocked unless an audit event is recorded.
