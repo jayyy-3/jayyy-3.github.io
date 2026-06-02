@@ -19,6 +19,8 @@ export interface HomepageProject {
   summary: string;
   image: string;
   imageAlt: string;
+  featureImage?: string;
+  featureImageAlt?: string;
 }
 
 export interface HomepageProductCategory {
@@ -276,6 +278,8 @@ export const homepageData = {
           'Over 500 linear metres of stone elements coordinated across a dense urban precinct, balancing scale, detailing, and installation predictability.',
         image: '/media/launch/homepage/project-west-side-place.jpg',
         imageAlt: 'West Side Place public realm with stone seating and planting edges',
+        featureImage: '/media/launch/projects/west-side-place/detail-2.jpg',
+        featureImageAlt: 'West Side Place stone elements and planting details',
       },
       {
         slug: 'moon-gate-woolley-street',
@@ -287,6 +291,8 @@ export const homepageData = {
           'Five custom-fabricated stone elements form a sculptural threshold and seating sequence for a civic dining precinct.',
         image: '/media/launch/homepage/project-moon-gate.jpg',
         imageAlt: 'Moon Gate stone sculpture and seating in a streetscape setting',
+        featureImage: '/images/projects/moon-gate/moon-gate-seat-detail.jpg',
+        featureImageAlt: 'Close view of Moon Gate stone seating detail',
       },
       {
         slug: 'artisan-park-yarrabend',
@@ -298,6 +304,8 @@ export const homepageData = {
           'Architectural block seating and landscape plinths built for a community park where stone detail, scale, and carbon-offset scope all matter.',
         image: '/media/launch/homepage/project-artisan-park.jpg',
         imageAlt: 'Artisan Park stone blocks integrated with planting and public seating',
+        featureImage: '/media/launch/projects/artisan-park-yarrabend/detail-2.png',
+        featureImageAlt: 'Artisan Park stone block seating in a civic landscape',
       },
       {
         slug: 'xavier-college',
@@ -309,6 +317,8 @@ export const homepageData = {
           'Warm sandstone masonry details for an education setting, supporting landscape integration with a quieter heritage register.',
         image: '/media/launch/homepage/project-xavier-college.jpg',
         imageAlt: 'Sandstone landscape detailing at Xavier College',
+        featureImage: '/media/launch/projects/xavier-college/detail-2.jpg',
+        featureImageAlt: 'Xavier College sandstone landscape detail',
       },
       {
         slug: 'australian-catholic-university',
@@ -320,6 +330,8 @@ export const homepageData = {
           'Precision-built bluestone seating with a calm civic character, developed for a high-use institutional landscape.',
         image: '/media/launch/contact/project-contact.jpg',
         imageAlt: 'Bluestone seating and paving at Australian Catholic University',
+        featureImage: '/media/launch/projects/australian-catholic-university/detail-2.jpg',
+        featureImageAlt: 'Australian Catholic University bluestone seating detail',
       },
     ] satisfies HomepageProject[],
   },

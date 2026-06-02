@@ -23,7 +23,7 @@ Docs-only and harness-only work should run:
 Cloudflare/Supabase implementation work should also follow the new verification profiles in `docs/agent/verification.md`.
 
 ## Last Runtime Baseline
-Measured 2026-06-02 during the homepage Latest Projects full-screen stability checkpoint:
+Measured 2026-06-02 during the homepage Latest Projects sketch-ratio checkpoint:
 - `npm run build`: pass
 - `npm run lint`: pass
 - `npx tsc -b`: pass
@@ -118,6 +118,7 @@ Source of truth: `docs/agent/tasks.json`.
 - `NOW-ROUTE-ERROR-STATES-001`: unknown URLs now render a branded not-found state, and article/product detail routes now have deliberate loading, not-found, and load-error states.
 - `NEXT-PRODUCT-DETAIL-CONVERSION-001`: product details now show selected configuration feedback, a prefilled discussion CTA, specification caveats, and pending-image treatment for missing selector imagery.
 - `NEXT-STONELIB-IMG-002`: secondary finish frames are implemented for approved Juparana and Zen Grey source frames as active-finish support media with lightbox frame selection.
+- Homepage Latest Projects sketch-ratio pass: the section now follows the approved two-row/four-column composition, uses optional `featureImage` data for the upper two-column image, keeps lower project images as fixed-height portrait slots, and preserves one-viewport height plus stable hover/tap regions across desktop and mobile QA.
 - `NEXT-SLUG-URL-NORMALIZE-001`: product and article public slugs now use lowercase kebab-case with explicit Cloudflare 301 redirects and runtime alias handling for old URLs.
 - `NEXT-MOTION-POLISH-001`: homepage and Our Story proof metrics now visibly count up from zero when scrolled into view, and public route changes use restrained reduced-motion-aware enter transitions.
 - `NEXT-PAGE-TITLE-TYPOGRAPHY-001`: Projects page title typography is now the global public page H1 system, including Article detail.

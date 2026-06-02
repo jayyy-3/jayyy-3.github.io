@@ -79,6 +79,11 @@ const requiredAssets = [
   '/media/launch/homepage/project-west-side-place.jpg',
   '/media/launch/homepage/project-xavier-college.jpg',
   '/media/launch/contact/project-contact.jpg',
+  '/media/launch/projects/australian-catholic-university/detail-2.jpg',
+  '/media/launch/projects/artisan-park-yarrabend/detail-2.png',
+  '/media/launch/projects/west-side-place/detail-2.jpg',
+  '/media/launch/projects/xavier-college/detail-2.jpg',
+  '/images/projects/moon-gate/moon-gate-seat-detail.jpg',
 ]
 
 const redirectContracts = [

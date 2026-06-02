@@ -2,6 +2,48 @@
 
 Last updated: 2026-06-02
 
+## Entry - 2026-06-02 (Homepage Latest Projects Sketch Ratio)
+
+### Scope
+- Reworked the homepage Latest Projects layout to match the supplied sketch ratio: upper copy spans two columns, upper feature image spans two columns, and the lower draggable rail shows four portrait project images on desktop.
+- Added optional `featureImage` and `featureImageAlt` fields to `HomepageProject` so the upper image can be selected independently from the lower rail image. Current static records use existing second-detail project media where available and fall back to the rail image if a future record omits feature media.
+- Hid the rail scrollbar and converted rail labels into image overlays so lower project cards can use the full fixed-height portrait slot.
+- Kept the section at exactly one viewport (`100svh`) and preserved stable copy/feature/rail heights across hover selection. Mobile uses a simplified active summary plus matching feature/rail heights.
+- Extended `npm run agent:smoke` required assets to include the new homepage feature image paths.
+
+### Changed Files
+- `docs/ARCHITECTURE.md`
+- `docs/DESIGN.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `scripts/agent-smoke.sh`
+- `src/components/homepage/HomepageSections.tsx`
+- `src/data/homepage.ts`
+- `src/index.css`
+
+### Verification Results
+- `npm run build`: pass. Existing Browserslist/caniuse-lite staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass, including the new homepage feature image asset paths.
+- `npm run agent:check`: pass.
+- `jq empty docs/agent/tasks.json`: pass.
+- `git diff --check`: pass.
+- Browser plugin QA against `http://127.0.0.1:4174/`: pass for page identity, nonblank Project Section DOM, no relevant console warnings/errors, no horizontal overflow, section height equal to viewport height, and matching feature/rail heights in the active in-app viewport. Screenshot capture through Browser timed out, so screenshots were captured with Playwright fallback.
+- Playwright Chromium fallback against `http://127.0.0.1:4174/`: pass at `1440x900`, `1366x768`, and `390x844`. Desktop checks confirmed section height equals viewport height, upper feature image height equals lower portrait image height, upper feature image width equals two rail image slots plus gutter, four project rail images are visible at desktop width, `View project` remains visible, hover changes the active project to Moon Gate, section/copy/feature/rail heights remain unchanged after hover, horizontal overflow is `0`, no framework overlay is present, and console issues are `0`. Mobile checks confirmed matching feature/rail heights, visible CTA, draggable rail overflow, no horizontal document overflow, and stable heights after hover.
+
+### Risks and Gaps
+- Deployed-preview visual QA remains pending until a Cloudflare Pages preview URL exists.
+- Homepage project records remain static/file-backed until approved content import and public Supabase cutover.
+- Admin-side selection of homepage feature media should map to the same `featureImage` concept when the CMS/public content migration is approved.
+
+### Next Handoff
+- `NEXT-UI-PARITY-001`
+- `NEXT-PROJECTS-INTAKE-001`
+- `NOW-CLOUDFLARE-PAGES-DEPLOY-001`
+
 ## Entry - 2026-06-02 (Homepage Latest Projects Full-Screen Stability)
 
 ### Scope

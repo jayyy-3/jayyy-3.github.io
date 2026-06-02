@@ -951,6 +951,8 @@ function LatestProjectsSection() {
   const projects = homepageData.latestProjects.projects;
   const [activeProjectIndex, setActiveProjectIndex] = useState(0);
   const activeProject = projects[activeProjectIndex] ?? projects[0];
+  const activeFeatureImage = activeProject.featureImage ?? activeProject.image;
+  const activeFeatureImageAlt = activeProject.featureImageAlt ?? activeProject.imageAlt;
   const railRef = useRef<HTMLDivElement>(null);
   const dragStateRef = useRef({
     isDown: false,
@@ -986,80 +988,74 @@ function LatestProjectsSection() {
   return (
     <section
       data-section="latest-projects"
-      className="h-[100svh] overflow-hidden bg-[#f6f6f2] px-5 py-5 text-black sm:px-6 md:px-10 md:py-6 lg:px-[92px] lg:py-8"
+      className="h-[100svh] overflow-hidden bg-[#f6f6f2] px-5 py-4 text-black sm:px-6 md:px-10 md:py-6 lg:px-[92px] lg:py-8"
     >
-      <div className="mx-auto flex h-full max-w-[1440px] flex-col gap-4 md:gap-5">
-        <Reveal className="shrink-0">
-          <div className="grid gap-4 lg:grid-cols-[minmax(0,0.82fr)_minmax(420px,1.18fr)] lg:items-end">
-            <div className="max-w-[680px]">
-              <div className="h-[5px] w-16 bg-[var(--urblo-lime)]" />
-              <h2 className="mt-4 font-sans text-[34px] font-light leading-[1.05] tracking-normal text-black md:text-[52px] lg:mt-5 lg:text-[58px] xl:text-[68px]">
-                {homepageData.latestProjects.title}
-              </h2>
-            </div>
-            <p className="max-w-[42rem] text-[16px] font-light leading-7 text-[var(--urblo-text)] md:text-[18px] md:leading-8 lg:justify-self-end lg:pb-1">
-              {homepageData.latestProjects.intro}
-            </p>
-          </div>
-        </Reveal>
-
-        <Reveal className="min-h-0 flex-1">
-          <div
-            data-project-active-region="homepage-latest-projects"
-            className="homepage-project-active-region grid h-full min-h-0 gap-4 md:gap-5 lg:grid-cols-[minmax(0,0.82fr)_minmax(420px,1.18fr)]"
-          >
+      <div className="mx-auto h-full max-w-[1440px]">
+        <div
+          data-project-active-region="homepage-latest-projects"
+          className="homepage-project-layout grid h-full min-h-0 gap-3 md:gap-4 xl:gap-6"
+        >
+          <Reveal className="homepage-project-copy min-h-0">
             <div
               data-project-active-copy="homepage-latest-projects"
-              className="min-h-0 border-t border-black/18 pt-4 md:pt-5"
+              className="flex h-full min-h-0 flex-col overflow-hidden border-t border-black/18 pt-3 md:pt-4 lg:pt-5"
             >
-              <div className="relative h-full min-h-0 overflow-hidden">
-                <AnimatePresence initial={false}>
+              <div className="shrink-0">
+                <div className="h-[5px] w-16 bg-[var(--urblo-lime)]" />
+                <h2 className="homepage-project-title mt-3 max-w-[18ch] font-sans text-[32px] font-light leading-[1.02] tracking-normal text-black sm:text-[38px] md:text-[46px] lg:mt-4 lg:text-[56px] xl:text-[66px]">
+                  {homepageData.latestProjects.title}
+                </h2>
+                <p className="homepage-project-intro mt-3 max-w-[42rem] text-[14px] font-light leading-6 text-[var(--urblo-text)] sm:text-[15px] md:mt-4 md:text-[17px] md:leading-7">
+                  {homepageData.latestProjects.intro}
+                </p>
+              </div>
+
+              <div className="homepage-project-active-panel mt-auto min-h-0 pt-3 md:pt-4">
+                <AnimatePresence mode="wait" initial={false}>
                   <motion.div
                     key={activeProject.slug}
                     initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -8 }}
                     transition={{ duration: reduceMotion ? 0.18 : 0.3, ease: 'easeOut' }}
-                    className="absolute inset-0 grid grid-rows-[auto_minmax(0,1fr)_auto] gap-2 md:gap-3"
+                    className="grid gap-2 md:gap-3"
                   >
-                    <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-black/48 md:text-[12px]">
-                        {String(activeProjectIndex + 1).padStart(2, '0')} /{' '}
-                        {String(projects.length).padStart(2, '0')}
-                      </p>
-                      <h3 className="mt-3 line-clamp-2 max-w-[34rem] text-[23px] font-semibold leading-[1.12] text-black md:mt-4 md:text-[31px] xl:text-[36px]">
-                        {activeProject.title}
-                      </h3>
-                    </div>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-black/48 md:text-[11px]">
+                      {String(activeProjectIndex + 1).padStart(2, '0')} /{' '}
+                      {String(projects.length).padStart(2, '0')}
+                    </p>
+                    <h3 className="line-clamp-2 max-w-[34rem] text-[21px] font-semibold leading-[1.08] text-black sm:text-[24px] md:text-[28px] xl:text-[34px]">
+                      {activeProject.title}
+                    </h3>
 
-                    <p className="homepage-project-active-summary line-clamp-2 min-h-0 max-w-[34rem] overflow-hidden text-[14px] leading-6 text-[var(--urblo-text)] md:line-clamp-3 md:text-[15px] md:leading-7 xl:line-clamp-4">
+                    <p className="homepage-project-active-summary line-clamp-2 max-w-[34rem] overflow-hidden text-[13px] leading-5 text-[var(--urblo-text)] md:line-clamp-3 md:text-[14px] md:leading-6 xl:text-[15px] xl:leading-7">
                       {activeProject.summary}
                     </p>
 
-                    <div className="homepage-project-active-actions shrink-0">
-                      <dl className="homepage-project-active-facts hidden grid-cols-2 gap-x-4 gap-y-3 border-y border-black/12 py-4 text-[11px] uppercase tracking-[0.12em] text-black/52 sm:grid sm:grid-cols-3 md:text-[12px]">
+                    <div className="homepage-project-active-actions">
+                      <dl className="homepage-project-active-facts hidden grid-cols-2 gap-x-4 gap-y-2 border-y border-black/12 py-3 text-[10px] uppercase tracking-[0.12em] text-black/52 sm:grid sm:grid-cols-3 md:text-[11px]">
                         <div>
                           <dt>Location</dt>
-                          <dd className="mt-1.5 line-clamp-1 text-[13px] font-semibold normal-case tracking-normal text-black md:text-[14px]">
+                          <dd className="mt-1 line-clamp-1 text-[12px] font-semibold normal-case tracking-normal text-black md:text-[13px]">
                             {activeProject.location}
                           </dd>
                         </div>
                         <div className="hidden sm:block">
                           <dt>Scope</dt>
-                          <dd className="mt-1.5 line-clamp-1 text-[13px] font-semibold normal-case tracking-normal text-black md:text-[14px]">
+                          <dd className="mt-1 line-clamp-1 text-[12px] font-semibold normal-case tracking-normal text-black md:text-[13px]">
                             {activeProject.category}
                           </dd>
                         </div>
                         <div>
                           <dt>Year</dt>
-                          <dd className="mt-1.5 text-[13px] font-semibold tracking-normal text-black md:text-[14px]">
+                          <dd className="mt-1 text-[12px] font-semibold tracking-normal text-black md:text-[13px]">
                             {activeProject.year}
                           </dd>
                         </div>
                       </dl>
                       <Link
                         to={`/projects/${activeProject.slug}`}
-                        className="homepage-project-active-link group mt-4 inline-flex min-h-[42px] items-center gap-3 rounded-full border border-black/[0.18] px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-black transition duration-200 hover:border-[var(--urblo-lime)] hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--urblo-lime)] md:mt-5 md:min-h-[46px] md:px-5 md:text-[12px]"
+                        className="homepage-project-active-link group mt-3 inline-flex min-h-[38px] items-center gap-3 rounded-full border border-black/[0.18] px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-black transition duration-200 hover:border-[var(--urblo-lime)] hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--urblo-lime)] md:mt-4 md:min-h-[42px] md:px-5 md:text-[11px]"
                       >
                         <span>View project</span>
                         <span
@@ -1074,16 +1070,18 @@ function LatestProjectsSection() {
                 </AnimatePresence>
               </div>
             </div>
+          </Reveal>
 
+          <Reveal className="homepage-project-feature min-h-0">
             <div
               data-project-active-image="homepage-latest-projects"
-              className="relative min-h-0 overflow-hidden bg-black"
+              className="relative h-full min-h-0 overflow-hidden bg-black"
             >
               <AnimatePresence mode="wait" initial={false}>
                 <motion.img
-                  key={activeProject.image}
-                  src={activeProject.image}
-                  alt={activeProject.imageAlt}
+                  key={activeFeatureImage}
+                  src={activeFeatureImage}
+                  alt={activeFeatureImageAlt}
                   className="absolute inset-0 h-full w-full object-cover"
                   initial={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 1.025 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -1091,17 +1089,15 @@ function LatestProjectsSection() {
                   transition={{ duration: reduceMotion ? 0.2 : 0.45, ease: 'easeOut' }}
                 />
               </AnimatePresence>
-              <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/42 to-transparent" />
+              <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/38 to-transparent" />
             </div>
-          </div>
-        </Reveal>
+          </Reveal>
 
-        <Reveal delay={0.08} className="shrink-0">
-          <div className="border-t border-black/18 pt-4">
+          <Reveal delay={0.08} className="homepage-project-rail min-h-0">
             <div
               ref={railRef}
               data-project-rail="homepage-latest-projects"
-              className={`flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3 pr-1 select-none [scrollbar-color:rgba(0,0,0,0.3)_transparent] [scrollbar-width:thin] md:gap-5 lg:gap-6 ${
+              className={`homepage-project-rail-track flex h-full snap-x snap-mandatory gap-3 overflow-x-auto pr-1 select-none md:gap-4 xl:gap-6 ${
                 isDragging ? 'cursor-grabbing' : 'cursor-grab'
               }`}
               onPointerDown={(event) => {
@@ -1147,7 +1143,7 @@ function LatestProjectsSection() {
                     data-project-thumb={project.slug}
                     aria-pressed={isActive}
                     aria-label={`Show ${project.title}`}
-                    className="group w-[78%] flex-none snap-start text-left outline-none sm:w-[calc(50%_-_8px)] md:w-[calc(33.333%_-_14px)] lg:w-[calc(25%_-_18px)]"
+                    className="group h-full w-[42%] flex-none snap-start text-left outline-none sm:w-[calc(50%_-_8px)] md:w-[calc(25%_-_12px)] xl:w-[calc(25%_-_18px)]"
                     onMouseEnter={() => {
                       if (!dragStateRef.current.isDown) selectProject(index);
                     }}
@@ -1157,7 +1153,7 @@ function LatestProjectsSection() {
                       selectProject(index);
                     }}
                   >
-                    <span className="homepage-project-thumb-media relative block h-[72px] overflow-hidden bg-black/10 sm:h-[86px] md:h-[98px] lg:h-[110px] xl:h-[124px]">
+                    <span className="homepage-project-thumb-media relative block h-full overflow-hidden bg-black/10">
                       <img
                         src={project.image}
                         alt=""
@@ -1171,23 +1167,21 @@ function LatestProjectsSection() {
                       />
                       <span
                         className={`absolute inset-0 transition duration-200 ${
-                          isActive ? 'bg-black/0' : 'bg-black/12 group-hover:bg-black/0'
+                          isActive ? 'bg-black/10' : 'bg-black/24 group-hover:bg-black/12'
                         }`}
                       />
-                    </span>
-                    <span className="mt-3 grid grid-cols-[2.35rem_minmax(0,1fr)] gap-3 md:grid-cols-[2.7rem_minmax(0,1fr)] md:gap-4">
-                      <span
-                        className={`pt-0.5 text-[11px] font-semibold uppercase tracking-[0.16em] transition duration-200 md:text-[12px] ${
-                          isActive ? 'text-black' : 'text-black/42'
-                        }`}
-                      >
-                        {String(index + 1).padStart(2, '0')}
-                      </span>
-                      <span>
-                        <span className="block truncate text-[15px] font-semibold leading-[1.16] text-black md:text-[17px] lg:text-[18px]">
+                      <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/78 via-black/38 to-transparent px-3 pb-3 pt-12 text-white md:px-4 md:pb-4">
+                        <span
+                          className={`block text-[10px] font-semibold uppercase tracking-[0.16em] transition duration-200 md:text-[11px] ${
+                            isActive ? 'text-[var(--urblo-lime)]' : 'text-white/64'
+                          }`}
+                        >
+                          {String(index + 1).padStart(2, '0')}
+                        </span>
+                        <span className="mt-2 block line-clamp-2 text-[16px] font-semibold leading-[1.05] text-white md:text-[18px] lg:text-[20px]">
                           {project.title}
                         </span>
-                        <span className="mt-1 block truncate text-[12px] leading-5 text-[var(--urblo-text)] md:text-[13px]">
+                        <span className="mt-1 block truncate text-[11px] leading-5 text-white/72 md:text-[12px]">
                           {project.location} / {project.year}
                         </span>
                       </span>
@@ -1196,8 +1190,8 @@ function LatestProjectsSection() {
                 );
               })}
             </div>
-          </div>
-        </Reveal>
+          </Reveal>
+        </div>
       </div>
     </section>
   );

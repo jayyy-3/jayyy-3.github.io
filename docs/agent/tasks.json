@@ -1160,6 +1160,11 @@
         "public/media/launch/homepage/project-west-side-place.jpg",
         "public/media/launch/homepage/project-xavier-college.jpg",
         "public/media/launch/contact/project-contact.jpg",
+        "public/media/launch/projects/australian-catholic-university/detail-2.jpg",
+        "public/media/launch/projects/artisan-park-yarrabend/detail-2.png",
+        "public/media/launch/projects/west-side-place/detail-2.jpg",
+        "public/media/launch/projects/xavier-college/detail-2.jpg",
+        "public/images/projects/moon-gate/moon-gate-seat-detail.jpg",
         "src/pages/OurStory.tsx",
         "src/pages/ArticlesPage.tsx",
         "src/pages/ArticlePage.tsx",
@@ -1190,7 +1195,8 @@
         "2026-06-01: Founder-supplied `Urblo Capability Statement_2026.pdf` supersedes the provisional `/capabilities` copy. `/capabilities` should render a web-native capability statement with Founder-sourced imagery/content, shared CTA data, and an email-gated PDF download that submits to `/api/enquiries` as `Capability statement download`. Our Story Natalie content should use the PDF portrait and bio source.",
         "2026-06-01: `/capabilities` has been reworked as a reference-style capability hub rather than an editorial PDF-like page. The source contract now guards five concrete capability scopes, lifecycle/reach support, selected-project proof ledger coverage, and required download/form behavior. The previously sideways site-review image was rotated upright before reuse.",
         "2026-06-01: Homepage Latest Projects now uses `The work speaks.` with five project records in `homepageData.latestProjects.projects`. Runtime renders an active project detail/image panel plus a draggable thumbnail rail that shows four projects at desktop width; thumbnails select the active project and the upper `View project` CTA navigates to project detail.",
-        "2026-06-02: Homepage Latest Projects now occupies exactly one viewport with `100svh`; active copy, image, and rail heights remain fixed across hover/tap selection. Short desktop viewports hide the active summary and align facts beside the CTA, while short mobile viewports simplify the copy and rail media so controls remain visible without overlap."
+        "2026-06-02: Homepage Latest Projects now occupies exactly one viewport with `100svh`; active copy, image, and rail heights remain fixed across hover/tap selection. Short desktop viewports hide the active summary and align facts beside the CTA, while short mobile viewports simplify the copy and rail media so controls remain visible without overlap.",
+        "2026-06-02: Homepage Latest Projects now follows the approved sketch ratio: upper copy spans two columns, upper feature image spans two columns, and the lower draggable rail shows four fixed-height portrait project images on desktop. `HomepageProject` now supports optional `featureImage` and `featureImageAlt` for independent upper-image selection, populated from existing second-detail project media with fallback to the rail image."
       ],
       "acceptance": [
         "Target pages reach agreed parity versus approved references.",
@@ -1204,7 +1210,8 @@
         "npm run agent:capabilities-ui",
         "npm run agent:smoke",
         "Browser verification: homepage section order, removed sustainability copy, updated proof copy, updated metrics, partner banner wording, Design-led lime highlight, Latest Projects active panel, four-visible desktop project rail, draggable rail behavior, hover/focus/tap project selection, Our Capabilities CTA, /capabilities page render and download-form validation, and /our-story Natalie card render",
-        "Playwright fallback verification: Latest Projects is exactly one viewport high and keeps 0 height delta for section, active copy, active image, and rail across hover/tap selection at 1440x900, 1366x768, 1280x720, 390x844, and 375x667"
+        "Playwright fallback verification: Latest Projects is exactly one viewport high and keeps 0 height delta for section, active copy, active image, and rail across hover/tap selection at 1440x900, 1366x768, 1280x720, 390x844, and 375x667",
+        "Browser plugin DOM/console verification plus Playwright Chromium screenshots: sketch-ratio Latest Projects section verified at 1440x900, 1366x768, and 390x844 with feature image height matching rail image height, desktop feature width equal to two rail slots plus gutter, visible View project CTA, hover selection changing active project without height shift, 0 horizontal overflow, no framework overlay, and 0 console issues"
       ]
     },
     {
