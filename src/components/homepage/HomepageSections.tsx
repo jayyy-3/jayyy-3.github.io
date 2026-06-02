@@ -323,6 +323,58 @@ function HeroStatementLine({
 
 function HeroSection() {
   const reduceMotion = useReducedMotion() ?? false;
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return undefined;
+
+    let disposed = false;
+
+    const primeMobileVideo = () => {
+      video.muted = true;
+      video.defaultMuted = true;
+      video.playsInline = true;
+      video.setAttribute('muted', '');
+      video.setAttribute('playsinline', '');
+      video.setAttribute('webkit-playsinline', '');
+    };
+
+    const playVideo = () => {
+      if (disposed) return;
+      primeMobileVideo();
+      const playPromise = video.play();
+      if (playPromise) {
+        playPromise.catch(() => {
+          // Some mobile browsers defer background video until the first user gesture.
+        });
+      }
+    };
+
+    const playWhenVisible = () => {
+      if (document.visibilityState === 'visible') {
+        playVideo();
+      }
+    };
+
+    primeMobileVideo();
+    playVideo();
+
+    video.addEventListener('loadeddata', playVideo, { once: true });
+    window.addEventListener('pointerdown', playVideo, { capture: true, passive: true });
+    window.addEventListener('touchstart', playVideo, { capture: true, passive: true });
+    window.addEventListener('pageshow', playVideo);
+    document.addEventListener('visibilitychange', playWhenVisible);
+
+    return () => {
+      disposed = true;
+      video.removeEventListener('loadeddata', playVideo);
+      window.removeEventListener('pointerdown', playVideo, { capture: true });
+      window.removeEventListener('touchstart', playVideo, { capture: true });
+      window.removeEventListener('pageshow', playVideo);
+      document.removeEventListener('visibilitychange', playWhenVisible);
+    };
+  }, []);
 
   return (
     <section
@@ -330,6 +382,7 @@ function HeroSection() {
       style={{ backgroundImage: `url('${homepageData.hero.posterUrl}')` }}
     >
       <video
+        ref={videoRef}
         className="absolute inset-0 h-full w-full object-cover"
         autoPlay
         muted
