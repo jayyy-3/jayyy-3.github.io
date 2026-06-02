@@ -1,11 +1,12 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { FormEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { FormEvent, PointerEvent as ReactPointerEvent, ReactNode } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import {
     Archive,
     CheckCircle2,
     FileText,
     MapPin,
+    MousePointer2,
     Plus,
     Save,
     ShieldAlert,
@@ -19,6 +20,15 @@ import RequireAdmin from './RequireAdmin';
 type ProjectStatus = 'draft' | 'published' | 'archived';
 type ClaimStatus = 'needs_review' | 'approved' | 'deferred';
 type CarbonStatus = '' | 'yes' | 'no' | 'not_available' | 'tbc';
+type ProjectMediaRole =
+    | 'cover'
+    | 'hero'
+    | 'gallery'
+    | 'material_map'
+    | 'supporting'
+    | 'normal_image'
+    | 'hotspot_image'
+    | 'youtube_video';
 
 interface ProjectRow {
     id: number;
@@ -84,6 +94,23 @@ interface ProjectMaterialMapRow {
     updated_at: string;
 }
 
+interface ProjectMediaRow {
+    id: number;
+    project_id: number;
+    media_asset_id: number | null;
+    project_material_map_id: number | null;
+    media_role: ProjectMediaRole;
+    block_title: string | null;
+    youtube_url: string | null;
+    label: string | null;
+    caption: string | null;
+    sort_order: number;
+    status: ProjectStatus;
+    published_at: string | null;
+    archived_at: string | null;
+    updated_at: string;
+}
+
 interface ProjectHotspotRow {
     id: number;
     project_material_map_id: number;
@@ -118,10 +145,12 @@ interface FinishOptionRow {
 
 interface MediaOptionRow {
     id: number;
+    bucket: string | null;
     alt: string | null;
     caption: string | null;
     object_path: string | null;
     source_url: string | null;
+    source_kind: string;
     media_type: string;
     status: string;
 }
@@ -170,6 +199,18 @@ interface MapFormState {
     mediaAssetId: string;
     title: string;
     intro: string;
+    sortOrder: string;
+    status: ProjectStatus;
+}
+
+interface MediaBlockFormState {
+    mediaRole: ProjectMediaRole;
+    mediaAssetId: string;
+    projectMaterialMapId: string;
+    blockTitle: string;
+    youtubeUrl: string;
+    label: string;
+    caption: string;
     sortOrder: string;
     status: ProjectStatus;
 }
@@ -235,6 +276,18 @@ const emptyMapForm: MapFormState = {
     status: 'draft',
 };
 
+const emptyMediaBlockForm: MediaBlockFormState = {
+    mediaRole: 'normal_image',
+    mediaAssetId: '',
+    projectMaterialMapId: '',
+    blockTitle: '',
+    youtubeUrl: '',
+    label: '',
+    caption: '',
+    sortOrder: '0',
+    status: 'draft',
+};
+
 const emptyHotspotForm: HotspotFormState = {
     projectMaterialId: '',
     hotspotKey: '',
@@ -266,6 +319,7 @@ function AdminProjectsContent() {
     const [facts, setFacts] = useState<ProjectFactRow[]>([]);
     const [materials, setMaterials] = useState<ProjectMaterialRow[]>([]);
     const [maps, setMaps] = useState<ProjectMaterialMapRow[]>([]);
+    const [mediaBlocks, setMediaBlocks] = useState<ProjectMediaRow[]>([]);
     const [hotspots, setHotspots] = useState<ProjectHotspotRow[]>([]);
     const [stoneOptions, setStoneOptions] = useState<StoneOptionRow[]>([]);
     const [finishOptions, setFinishOptions] = useState<FinishOptionRow[]>([]);
@@ -274,17 +328,20 @@ function AdminProjectsContent() {
     const [selectedFactId, setSelectedFactId] = useState<number | null>(null);
     const [selectedMaterialId, setSelectedMaterialId] = useState<number | null>(null);
     const [selectedMapId, setSelectedMapId] = useState<number | null>(null);
+    const [selectedMediaBlockId, setSelectedMediaBlockId] = useState<number | null>(null);
     const [selectedHotspotId, setSelectedHotspotId] = useState<number | null>(null);
     const [projectForm, setProjectForm] = useState<ProjectFormState>(emptyProjectForm);
     const [factForm, setFactForm] = useState<FactFormState>(emptyFactForm);
     const [materialForm, setMaterialForm] = useState<MaterialFormState>(emptyMaterialForm);
     const [mapForm, setMapForm] = useState<MapFormState>(emptyMapForm);
+    const [mediaBlockForm, setMediaBlockForm] = useState<MediaBlockFormState>(emptyMediaBlockForm);
     const [hotspotForm, setHotspotForm] = useState<HotspotFormState>(emptyHotspotForm);
     const [isLoading, setIsLoading] = useState(true);
     const [isSavingProject, setIsSavingProject] = useState(false);
     const [isSavingFact, setIsSavingFact] = useState(false);
     const [isSavingMaterial, setIsSavingMaterial] = useState(false);
     const [isSavingMap, setIsSavingMap] = useState(false);
+    const [isSavingMediaBlock, setIsSavingMediaBlock] = useState(false);
     const [isSavingHotspot, setIsSavingHotspot] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [notice, setNotice] = useState<string | null>(null);
@@ -297,10 +354,19 @@ function AdminProjectsContent() {
         () => maps.find((map) => map.id === selectedMapId) ?? null,
         [maps, selectedMapId],
     );
+    const selectedMediaBlock = useMemo(
+        () => mediaBlocks.find((mediaBlock) => mediaBlock.id === selectedMediaBlockId) ?? null,
+        [mediaBlocks, selectedMediaBlockId],
+    );
     const selectedHotspot = useMemo(
         () => hotspots.find((hotspot) => hotspot.id === selectedHotspotId) ?? null,
         [hotspots, selectedHotspotId],
     );
+    const selectedMapMedia = useMemo(
+        () => (selectedMap ? mediaOptions.find((media) => media.id === selectedMap.media_asset_id) ?? null : null),
+        [mediaOptions, selectedMap],
+    );
+    const selectedMapImageUrl = useMemo(() => getMediaUrl(selectedMapMedia), [selectedMapMedia]);
     const projectCounts = useMemo(() => summarizeProjects(projects), [projects]);
 
     const loadHotspots = useCallback(async (client: SupabaseClient, mapId: number | null, preferredHotspotId: number | null) => {
@@ -339,7 +405,7 @@ function AdminProjectsContent() {
             preferredMapId: number | null = null,
             preferredHotspotId: number | null = null,
         ) => {
-            const [factsResult, materialsResult, mapsResult] = await Promise.all([
+            const [factsResult, materialsResult, mapsResult, mediaBlocksResult] = await Promise.all([
                 client
                     .from('project_facts')
                     .select('id,project_id,fact_label,fact_value,fact_value_json,claim_status,sort_order,updated_at')
@@ -362,18 +428,30 @@ function AdminProjectsContent() {
                     .eq('project_id', projectId)
                     .order('sort_order', { ascending: true })
                     .returns<ProjectMaterialMapRow[]>(),
+                client
+                    .from('project_media')
+                    .select(
+                        'id,project_id,media_asset_id,project_material_map_id,media_role,block_title,youtube_url,label,caption,sort_order,status,published_at,archived_at,updated_at',
+                    )
+                    .eq('project_id', projectId)
+                    .order('sort_order', { ascending: true })
+                    .order('id', { ascending: true })
+                    .returns<ProjectMediaRow[]>(),
             ]);
 
             if (factsResult.error) throw new Error(factsResult.error.message);
             if (materialsResult.error) throw new Error(materialsResult.error.message);
             if (mapsResult.error) throw new Error(mapsResult.error.message);
+            if (mediaBlocksResult.error) throw new Error(mediaBlocksResult.error.message);
 
             const factRows = factsResult.data ?? [];
             const materialRows = materialsResult.data ?? [];
             const mapRows = mapsResult.data ?? [];
+            const mediaBlockRows = mediaBlocksResult.data ?? [];
             const nextFact = factRows[0] ?? null;
             const nextMaterial = materialRows[0] ?? null;
             const nextMap = mapRows.find((map) => map.id === preferredMapId) ?? mapRows[0] ?? null;
+            const nextMediaBlock = mediaBlockRows[0] ?? null;
 
             setFacts(factRows);
             setSelectedFactId(nextFact?.id ?? null);
@@ -384,6 +462,9 @@ function AdminProjectsContent() {
             setMaps(mapRows);
             setSelectedMapId(nextMap?.id ?? null);
             setMapForm(rowToMapForm(nextMap));
+            setMediaBlocks(mediaBlockRows);
+            setSelectedMediaBlockId(nextMediaBlock?.id ?? null);
+            setMediaBlockForm(rowToMediaBlockForm(nextMediaBlock));
             await loadHotspots(client, nextMap?.id ?? null, preferredHotspotId);
         },
         [loadHotspots],
@@ -420,7 +501,7 @@ function AdminProjectsContent() {
                     .returns<FinishOptionRow[]>(),
                 client
                     .from('media_assets')
-                    .select('id,alt,caption,object_path,source_url,media_type,status')
+                    .select('id,bucket,alt,caption,object_path,source_url,source_kind,media_type,status')
                     .order('updated_at', { ascending: false })
                     .limit(120)
                     .returns<MediaOptionRow[]>(),
@@ -484,14 +565,17 @@ function AdminProjectsContent() {
         setFacts([]);
         setMaterials([]);
         setMaps([]);
+        setMediaBlocks([]);
         setHotspots([]);
         setSelectedFactId(null);
         setSelectedMaterialId(null);
         setSelectedMapId(null);
+        setSelectedMediaBlockId(null);
         setSelectedHotspotId(null);
         setFactForm(emptyFactForm);
         setMaterialForm(emptyMaterialForm);
         setMapForm(emptyMapForm);
+        setMediaBlockForm(emptyMediaBlockForm);
         setHotspotForm(emptyHotspotForm);
     }
 
@@ -537,6 +621,11 @@ function AdminProjectsContent() {
 
     function updateMapField<Key extends keyof MapFormState>(key: Key, value: MapFormState[Key]) {
         setMapForm((current) => ({ ...current, [key]: value }));
+        setNotice(null);
+    }
+
+    function updateMediaBlockField<Key extends keyof MediaBlockFormState>(key: Key, value: MediaBlockFormState[Key]) {
+        setMediaBlockForm((current) => ({ ...current, [key]: value }));
         setNotice(null);
     }
 
@@ -824,6 +913,82 @@ function AdminProjectsContent() {
             withAuditNotice(nextStatus === 'published' ? 'Material map published.' : 'Material map saved.', auditError),
         );
         await loadProjectBundle(supabase, selectedProject.id, response.data.id, selectedHotspotId);
+    }
+
+    async function saveMediaBlock(nextStatus: ProjectStatus) {
+        if (!supabase || !canEdit || !user || !selectedProject) return;
+
+        const validation = validateMediaBlockForm({ ...mediaBlockForm, status: nextStatus }, maps);
+        if (validation.error !== null) {
+            setError(validation.error);
+            return;
+        }
+
+        const now = new Date().toISOString();
+        const payload = {
+            project_id: selectedProject.id,
+            media_role: mediaBlockForm.mediaRole,
+            media_asset_id: validation.mediaAssetId,
+            project_material_map_id: validation.projectMaterialMapId,
+            block_title: mediaBlockForm.blockTitle.trim() || null,
+            youtube_url: validation.youtubeUrl,
+            label: mediaBlockForm.label.trim() || null,
+            caption: mediaBlockForm.caption.trim() || null,
+            sort_order: validation.sortOrder,
+            status: nextStatus,
+            updated_by: user.id,
+            published_at:
+                nextStatus === 'published' ? (selectedMediaBlock?.published_at ?? now) : selectedMediaBlock?.published_at,
+            archived_at: nextStatus === 'archived' ? now : null,
+        };
+
+        setIsSavingMediaBlock(true);
+        setError(null);
+        setNotice(null);
+
+        const response = selectedMediaBlockId
+            ? await supabase
+                  .from('project_media')
+                  .update(payload)
+                  .eq('id', selectedMediaBlockId)
+                  .select(
+                      'id,project_id,media_asset_id,project_material_map_id,media_role,block_title,youtube_url,label,caption,sort_order,status,published_at,archived_at,updated_at',
+                  )
+                  .single<ProjectMediaRow>()
+            : await supabase
+                  .from('project_media')
+                  .insert({ ...payload, created_by: user.id })
+                  .select(
+                      'id,project_id,media_asset_id,project_material_map_id,media_role,block_title,youtube_url,label,caption,sort_order,status,published_at,archived_at,updated_at',
+                  )
+                  .single<ProjectMediaRow>();
+
+        setIsSavingMediaBlock(false);
+
+        if (response.error) {
+            setError(response.error.message);
+            return;
+        }
+
+        const auditError = await recordAdminAuditEvent(supabase, {
+            actorUserId: user.id,
+            action: selectedMediaBlockId
+                ? nextStatus === 'published'
+                    ? 'project_media.publish'
+                    : nextStatus === 'archived'
+                      ? 'project_media.archive'
+                      : 'project_media.update'
+                : 'project_media.create',
+            entityType: 'project_media',
+            entityId: response.data.id,
+            metadata: {
+                projectId: response.data.project_id,
+                role: response.data.media_role,
+                status: response.data.status,
+            },
+        });
+        setNotice(withAuditNotice(nextStatus === 'published' ? 'Project media block published.' : 'Project media block saved.', auditError));
+        await loadProjectBundle(supabase, selectedProject.id, selectedMapId, selectedHotspotId);
     }
 
     async function saveHotspot(nextStatus: ProjectStatus) {
@@ -1327,6 +1492,135 @@ function AdminProjectsContent() {
                                 {isSavingMaterial ? 'Saving' : 'Save material'}
                             </button>
                         </SubrecordEditor>
+
+                        <SubrecordEditor
+                            title="Media blocks"
+                            eyebrow={`${mediaBlocks.length} blocks`}
+                            onNew={() => {
+                                setSelectedMediaBlockId(null);
+                                setMediaBlockForm(emptyMediaBlockForm);
+                            }}
+                            disabled={!canEdit || !selectedProject}
+                        >
+                            <RecordChips
+                                rows={mediaBlocks}
+                                selectedId={selectedMediaBlockId}
+                                getLabel={(row) => `${getProjectMediaRoleLabel(row.media_role)} ${row.sort_order}`}
+                                onSelect={(row) => {
+                                    setSelectedMediaBlockId(row.id);
+                                    setMediaBlockForm(rowToMediaBlockForm(row));
+                                }}
+                            />
+                            <SelectField
+                                label="Block type"
+                                value={mediaBlockForm.mediaRole}
+                                disabled={!canEdit || isSavingMediaBlock || !selectedProject}
+                                onChange={(value) => updateMediaBlockField('mediaRole', value as ProjectMediaRole)}
+                                options={projectMediaRoleOptions}
+                            />
+                            {mediaBlockForm.mediaRole === 'hotspot_image' ? (
+                                <SelectField
+                                    label="Hotspot map"
+                                    value={mediaBlockForm.projectMaterialMapId}
+                                    disabled={!canEdit || isSavingMediaBlock || !selectedProject}
+                                    onChange={(value) => {
+                                        const map = maps.find((entry) => String(entry.id) === value) ?? null;
+                                        updateMediaBlockField('projectMaterialMapId', value);
+                                        if (map) {
+                                            updateMediaBlockField('mediaAssetId', String(map.media_asset_id));
+                                        }
+                                    }}
+                                    options={[
+                                        ['', 'Select material map'],
+                                        ...maps.map((map) => [String(map.id), map.title || `Map ${map.id}`] as [string, string]),
+                                    ]}
+                                />
+                            ) : null}
+                            {mediaBlockForm.mediaRole !== 'youtube_video' ? (
+                                <SelectField
+                                    label="Media asset"
+                                    value={mediaBlockForm.mediaAssetId}
+                                    disabled={!canEdit || isSavingMediaBlock || !selectedProject}
+                                    onChange={(value) => updateMediaBlockField('mediaAssetId', value)}
+                                    options={[
+                                        ['', 'Select media'],
+                                        ...mediaOptions.map((media) => [String(media.id), formatMediaOption(media)] as [string, string]),
+                                    ]}
+                                />
+                            ) : (
+                                <TextField
+                                    label="YouTube URL or ID"
+                                    value={mediaBlockForm.youtubeUrl}
+                                    disabled={!canEdit || isSavingMediaBlock || !selectedProject}
+                                    onChange={(value) => updateMediaBlockField('youtubeUrl', value)}
+                                />
+                            )}
+                            <TextField
+                                label="Block title"
+                                value={mediaBlockForm.blockTitle}
+                                disabled={!canEdit || isSavingMediaBlock || !selectedProject}
+                                onChange={(value) => updateMediaBlockField('blockTitle', value)}
+                            />
+                            <TextField
+                                label="Label"
+                                value={mediaBlockForm.label}
+                                disabled={!canEdit || isSavingMediaBlock || !selectedProject}
+                                onChange={(value) => updateMediaBlockField('label', value)}
+                            />
+                            <label className="block text-xs font-bold uppercase tracking-[0.14em] text-black/55">
+                                Caption
+                                <textarea
+                                    value={mediaBlockForm.caption}
+                                    onChange={(event) => updateMediaBlockField('caption', event.target.value)}
+                                    disabled={!canEdit || isSavingMediaBlock || !selectedProject}
+                                    rows={3}
+                                    className={`${fieldClass} py-3 leading-6`}
+                                />
+                            </label>
+                            <SelectField
+                                label="Status"
+                                value={mediaBlockForm.status}
+                                disabled={!canEdit || isSavingMediaBlock || !selectedProject}
+                                onChange={(value) => updateMediaBlockField('status', value as ProjectStatus)}
+                                options={statusOptions}
+                            />
+                            <TextField
+                                label="Sort order"
+                                value={mediaBlockForm.sortOrder}
+                                disabled={!canEdit || isSavingMediaBlock || !selectedProject}
+                                inputMode="numeric"
+                                onChange={(value) => updateMediaBlockField('sortOrder', value)}
+                            />
+                            <div className="grid gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => void saveMediaBlock(mediaBlockForm.status)}
+                                    disabled={!canEdit || isSavingMediaBlock || !selectedProject}
+                                    className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded border border-black/15 bg-white px-3 text-xs font-bold uppercase tracking-[0.14em] text-black transition hover:border-black disabled:cursor-not-allowed disabled:text-black/35"
+                                >
+                                    <Save className="h-4 w-4" />
+                                    {isSavingMediaBlock ? 'Saving' : 'Save media block'}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => void saveMediaBlock('published')}
+                                    disabled={!canEdit || isSavingMediaBlock || !selectedProject}
+                                    className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded bg-[var(--urblo-lime)] px-3 text-xs font-bold uppercase tracking-[0.14em] text-black transition hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:bg-black/20 disabled:text-black/35"
+                                >
+                                    <CheckCircle2 className="h-4 w-4" />
+                                    Publish block
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => void saveMediaBlock('archived')}
+                                    disabled={!canEdit || isSavingMediaBlock || !selectedProject}
+                                    className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded bg-black px-3 text-xs font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#33363f] disabled:cursor-not-allowed disabled:bg-black/25"
+                                >
+                                    <Archive className="h-4 w-4" />
+                                    Archive block
+                                </button>
+                            </div>
+                        </SubrecordEditor>
                     </section>
                 </section>
 
@@ -1335,6 +1629,7 @@ function AdminProjectsContent() {
                         <MapPin className="h-5 w-5 text-[var(--urblo-lime)]" />
                         <h2 className="mt-5 text-xl font-semibold">Map health</h2>
                         <div className="mt-5 grid gap-3 text-sm leading-6 text-white/72">
+                            <p>{mediaBlocks.length} detail media blocks on the selected project.</p>
                             <p>{maps.length} material maps on the selected project.</p>
                             <p>{hotspots.length} hotspots on the selected map.</p>
                             <p>{mediaOptions.length} media records available for ID linking.</p>
@@ -1506,6 +1801,23 @@ function AdminProjectsContent() {
                                 onChange={(value) => updateHotspotField('yPercent', value)}
                             />
                         </div>
+                        <HotspotPlacementEditor
+                            imageUrl={selectedMapImageUrl}
+                            imageAlt={selectedMap?.title || 'Selected project material map'}
+                            hotspots={hotspots}
+                            activeHotspotId={selectedHotspotId}
+                            xPercent={hotspotForm.xPercent}
+                            yPercent={hotspotForm.yPercent}
+                            disabled={!canEdit || isSavingHotspot || !selectedMap}
+                            onSelect={(hotspot) => {
+                                setSelectedHotspotId(hotspot.id);
+                                setHotspotForm(rowToHotspotForm(hotspot));
+                            }}
+                            onPositionChange={(nextPosition) => {
+                                updateHotspotField('xPercent', nextPosition.xPercent.toFixed(2));
+                                updateHotspotField('yPercent', nextPosition.yPercent.toFixed(2));
+                            }}
+                        />
                         <SelectField
                             label="Linked material"
                             value={hotspotForm.projectMaterialId}
@@ -1627,6 +1939,201 @@ const claimOptions: Array<[string, string]> = [
     ['deferred', 'Deferred'],
 ];
 
+const projectMediaRoleOptions: Array<[string, string]> = [
+    ['normal_image', 'Normal image'],
+    ['hotspot_image', 'Hotspot image'],
+    ['youtube_video', 'YouTube video'],
+    ['gallery', 'Gallery image'],
+    ['supporting', 'Supporting image'],
+    ['material_map', 'Material map image'],
+    ['hero', 'Hero reference'],
+    ['cover', 'Cover reference'],
+];
+
+function getProjectMediaRoleLabel(role: ProjectMediaRole) {
+    return (
+        projectMediaRoleOptions.find(([value]) => value === role)?.[1] ??
+        role.replace(/_/g, ' ')
+    );
+}
+
+function formatMediaOption(media: MediaOptionRow) {
+    const label = media.alt || media.caption || media.object_path || media.source_url || `Asset ${media.id}`;
+    return `#${media.id} / ${label}`;
+}
+
+function getMediaUrl(asset: MediaOptionRow | null) {
+    if (!asset) {
+        return null;
+    }
+
+    if (asset.source_kind === 'storage' && asset.bucket === 'urblo-public-media' && asset.object_path && supabase) {
+        return supabase.storage.from(asset.bucket).getPublicUrl(asset.object_path).data.publicUrl;
+    }
+
+    return asset.source_url || asset.object_path;
+}
+
+function parsePercentValue(value: string) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) && parsed >= 0 && parsed <= 100 ? parsed : null;
+}
+
+function clampPercent(value: number) {
+    return Math.min(100, Math.max(0, value));
+}
+
+function HotspotPlacementEditor({
+    imageUrl,
+    imageAlt,
+    hotspots,
+    activeHotspotId,
+    xPercent,
+    yPercent,
+    disabled,
+    onSelect,
+    onPositionChange,
+}: {
+    imageUrl: string | null;
+    imageAlt: string;
+    hotspots: ProjectHotspotRow[];
+    activeHotspotId: number | null;
+    xPercent: string;
+    yPercent: string;
+    disabled?: boolean;
+    onSelect: (hotspot: ProjectHotspotRow) => void;
+    onPositionChange: (position: { xPercent: number; yPercent: number }) => void;
+}) {
+    const stageRef = useRef<HTMLDivElement | null>(null);
+    const [dragging, setDragging] = useState(false);
+
+    const activeX = parsePercentValue(xPercent);
+    const activeY = parsePercentValue(yPercent);
+    const displayedHotspots = hotspots.map((hotspot) => {
+        if (hotspot.id === activeHotspotId && activeX !== null && activeY !== null) {
+            return { ...hotspot, x_percent: activeX, y_percent: activeY };
+        }
+
+        return hotspot;
+    });
+
+    if (!activeHotspotId && activeX !== null && activeY !== null) {
+        displayedHotspots.push({
+            id: -1,
+            project_material_map_id: 0,
+            project_material_id: null,
+            hotspot_key: 'draft-hotspot',
+            x_percent: activeX,
+            y_percent: activeY,
+            label: 'Draft hotspot',
+            application: null,
+            note: null,
+            preview_media_id: null,
+            sort_order: 0,
+            status: 'draft',
+            published_at: null,
+            archived_at: null,
+            updated_at: '',
+        });
+    }
+
+    function updateFromPointer(event: ReactPointerEvent<HTMLElement>) {
+        if (disabled || !stageRef.current) return;
+
+        const rect = stageRef.current.getBoundingClientRect();
+        const x = ((event.clientX - rect.left) / rect.width) * 100;
+        const y = ((event.clientY - rect.top) / rect.height) * 100;
+        onPositionChange({
+            xPercent: clampPercent(x),
+            yPercent: clampPercent(y),
+        });
+    }
+
+    if (!imageUrl) {
+        return (
+            <div className="rounded border border-black/10 bg-black/[0.03] p-4 text-sm leading-6 text-black/55">
+                Select a material map with a public media URL to position hotspots visually.
+            </div>
+        );
+    }
+
+    return (
+        <div className="rounded border border-black/10 bg-white p-3">
+            <div className="mb-3 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.14em] text-black/45">
+                <MousePointer2 className="h-4 w-4 text-black" />
+                Drag point placement
+            </div>
+            <div
+                ref={stageRef}
+                data-hotspot-stage
+                className={[
+                    'relative overflow-hidden bg-black',
+                    disabled ? 'cursor-not-allowed opacity-70' : 'cursor-crosshair',
+                ].join(' ')}
+                onPointerDown={(event) => {
+                    if (disabled || (event.target as HTMLElement).closest('[data-hotspot-marker]')) return;
+                    setDragging(true);
+                    event.currentTarget.setPointerCapture(event.pointerId);
+                    updateFromPointer(event);
+                }}
+                onPointerMove={(event) => {
+                    if (dragging) updateFromPointer(event);
+                }}
+                onPointerUp={(event) => {
+                    setDragging(false);
+                    event.currentTarget.releasePointerCapture(event.pointerId);
+                }}
+                onPointerCancel={() => setDragging(false)}
+            >
+                <img src={imageUrl} alt={imageAlt} className="aspect-[4/3] w-full object-cover" />
+                {displayedHotspots.map((hotspot) => {
+                    const active = hotspot.id === activeHotspotId || (hotspot.id === -1 && !activeHotspotId);
+
+                    return (
+                        <button
+                            key={hotspot.id}
+                            type="button"
+                            data-hotspot-marker
+                            disabled={disabled && !active}
+                            className={[
+                                'absolute flex h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--urblo-lime)] focus-visible:ring-offset-2 focus-visible:ring-offset-black',
+                                active
+                                    ? 'border-[var(--urblo-lime)] bg-white shadow-[0_0_0_5px_rgba(0,255,25,0.20)]'
+                                    : 'border-white/80 bg-black/40 text-white hover:border-[var(--urblo-lime)]',
+                            ].join(' ')}
+                            style={{ left: `${hotspot.x_percent}%`, top: `${hotspot.y_percent}%` }}
+                            aria-label={`Position ${hotspot.label || hotspot.hotspot_key}`}
+                            onPointerDown={(event) => {
+                                if (disabled) return;
+                                event.stopPropagation();
+                                if (hotspot.id !== -1) {
+                                    onSelect(hotspot);
+                                }
+                                setDragging(true);
+                                event.currentTarget.setPointerCapture(event.pointerId);
+                                updateFromPointer(event);
+                            }}
+                            onPointerMove={(event) => {
+                                if (dragging && active) updateFromPointer(event);
+                            }}
+                            onPointerUp={(event) => {
+                                setDragging(false);
+                                event.currentTarget.releasePointerCapture(event.pointerId);
+                            }}
+                            onPointerCancel={() => setDragging(false)}
+                        >
+                            <span className={active ? 'h-2.5 w-2.5 rounded-full bg-[var(--urblo-lime)]' : 'h-2.5 w-2.5 rounded-full bg-white'} />
+                        </button>
+                    );
+                })}
+            </div>
+            <p className="mt-3 text-xs leading-5 text-black/48">
+                Coordinates are saved only after the hotspot form is saved or published.
+            </p>
+        </div>
+    );
+}
+
 function TextField({
     label,
     value,
@@ -1711,7 +2218,7 @@ function SubrecordEditor({
     eyebrow: string;
     disabled?: boolean;
     onNew: () => void;
-    children: React.ReactNode;
+    children: ReactNode;
 }) {
     return (
         <section className="border border-black/10 bg-white p-5">
@@ -1852,6 +2359,22 @@ function rowToMapForm(row: ProjectMaterialMapRow | null): MapFormState {
     };
 }
 
+function rowToMediaBlockForm(row: ProjectMediaRow | null): MediaBlockFormState {
+    if (!row) return emptyMediaBlockForm;
+
+    return {
+        mediaRole: row.media_role,
+        mediaAssetId: row.media_asset_id === null ? '' : String(row.media_asset_id),
+        projectMaterialMapId: row.project_material_map_id === null ? '' : String(row.project_material_map_id),
+        blockTitle: row.block_title ?? '',
+        youtubeUrl: row.youtube_url ?? '',
+        label: row.label ?? '',
+        caption: row.caption ?? '',
+        sortOrder: String(row.sort_order),
+        status: row.status,
+    };
+}
+
 function rowToHotspotForm(row: ProjectHotspotRow | null): HotspotFormState {
     if (!row) return emptyHotspotForm;
 
@@ -1950,6 +2473,60 @@ function validateMapForm(form: MapFormState) {
     return { error: null, sortOrder: sortOrder.value, mediaAssetId: mediaAssetId.value };
 }
 
+function validateMediaBlockForm(form: MediaBlockFormState, maps: ProjectMaterialMapRow[]) {
+    const sortOrder = requiredInteger(form.sortOrder, 'Sort order');
+    if (sortOrder.error) return validationFailure(sortOrder.error);
+
+    if (form.mediaRole === 'youtube_video') {
+        const youtubeUrl = normalizeYouTubeInput(form.youtubeUrl);
+        if (!youtubeUrl) return validationFailure('YouTube blocks require a valid YouTube URL or video ID.');
+        if (form.status === 'published' && !form.blockTitle.trim()) {
+            return validationFailure('Published YouTube blocks require a block title.');
+        }
+
+        return {
+            error: null,
+            sortOrder: sortOrder.value,
+            mediaAssetId: null,
+            projectMaterialMapId: null,
+            youtubeUrl,
+        };
+    }
+
+    const projectMaterialMapId = optionalPositiveInteger(form.projectMaterialMapId, 'Hotspot map ID');
+    if (projectMaterialMapId.error) return validationFailure(projectMaterialMapId.error);
+
+    let mediaAssetId = optionalPositiveInteger(form.mediaAssetId, 'Media asset ID');
+    if (mediaAssetId.error) return validationFailure(mediaAssetId.error);
+
+    if (form.mediaRole === 'hotspot_image') {
+        if (!projectMaterialMapId.value) {
+            return validationFailure('Hotspot image blocks require a linked material map.');
+        }
+
+        const linkedMap = maps.find((map) => map.id === projectMaterialMapId.value);
+        if (!linkedMap) {
+            return validationFailure('Selected material map was not found.');
+        }
+
+        if (!mediaAssetId.value) {
+            mediaAssetId = { error: null, value: linkedMap.media_asset_id };
+        }
+    }
+
+    if (!mediaAssetId.value) {
+        return validationFailure('Image media blocks require a media asset.');
+    }
+
+    return {
+        error: null,
+        sortOrder: sortOrder.value,
+        mediaAssetId: mediaAssetId.value,
+        projectMaterialMapId: form.mediaRole === 'hotspot_image' ? projectMaterialMapId.value : null,
+        youtubeUrl: null,
+    };
+}
+
 function validateHotspotForm(form: HotspotFormState) {
     if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(form.hotspotKey.trim())) {
         return validationFailure('Hotspot key must be lowercase kebab-case.');
@@ -2011,6 +2588,30 @@ function percentNumber(value: string, label: string): { error: string | null; va
         return { error: `${label} must be a number between 0 and 100.`, value: 0 };
     }
     return { error: null, value: parsed };
+}
+
+function normalizeYouTubeInput(value: string) {
+    const trimmed = value.trim();
+    if (!trimmed) return null;
+
+    if (/^[a-zA-Z0-9_-]{6,}$/.test(trimmed) && !trimmed.includes('/')) {
+        return trimmed;
+    }
+
+    try {
+        const url = new URL(trimmed);
+        if (url.hostname.includes('youtu.be')) {
+            return url.pathname.replace('/', '') || null;
+        }
+        if (url.hostname.includes('youtube.com') || url.hostname.includes('youtube-nocookie.com')) {
+            const id = url.searchParams.get('v') || url.pathname.split('/').filter(Boolean).pop();
+            return id && /^[a-zA-Z0-9_-]{6,}$/.test(id) ? id : null;
+        }
+    } catch {
+        return null;
+    }
+
+    return null;
 }
 
 function summarizeProjects(projects: ProjectRow[]) {

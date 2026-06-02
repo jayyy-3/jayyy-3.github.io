@@ -21,7 +21,7 @@ const livePlan = [
   'Create, publish, and archive a tagged media_assets row; optionally upload a tiny private Storage object.',
   'Create tagged Stone Library group, variant, finish capability, and finish image records.',
   'Create tagged Product, model, material-default, and spec records.',
-  'Create tagged Project, facts, material schedule, material map, and hotspot records.',
+  'Create tagged Project, facts, material schedule, media block, material map, and hotspot records.',
   'Create tagged Article metadata and structured block records.',
   'Create tagged private enquiry/sample-request QA rows, then update workflow fields.',
   'Record admin_audit_events for primary writes and export-gate actions.',
@@ -61,6 +61,9 @@ const EXPECTED_AUDIT_ACTIONS = [
   { action: 'project.archive', entityType: 'projects', count: 1 },
   { action: 'project_fact.create', entityType: 'project_facts', count: 1 },
   { action: 'project_material.create', entityType: 'project_materials', count: 1 },
+  { action: 'project_media.create', entityType: 'project_media', count: 1 },
+  { action: 'project_media.publish', entityType: 'project_media', count: 1 },
+  { action: 'project_media.archive', entityType: 'project_media', count: 1 },
   { action: 'project_material_map.create', entityType: 'project_material_maps', count: 1 },
   { action: 'project_material_map.publish', entityType: 'project_material_maps', count: 1 },
   { action: 'project_material_map.archive', entityType: 'project_material_maps', count: 1 },
@@ -1044,6 +1047,30 @@ async function run() {
     metadata,
   );
 
+  const projectMediaBlock = await insertRow(config, accessToken, 'project_media', {
+    project_id: project.id,
+    media_asset_id: media.id,
+    project_material_map_id: materialMap.id,
+    media_role: 'hotspot_image',
+    block_title: 'QA hotspot image block',
+    label: 'QA media block',
+    caption: marker,
+    status: 'draft',
+    sort_order: 0,
+    created_by: authUser.id,
+    updated_by: authUser.id,
+  });
+  created.push(`project_media#${projectMediaBlock.id}`);
+  await recordAudit(
+    config,
+    accessToken,
+    authUser.id,
+    'project_media.create',
+    'project_media',
+    projectMediaBlock.id,
+    metadata,
+  );
+
   const hotspot = await insertRow(config, accessToken, 'project_hotspots', {
     project_material_map_id: materialMap.id,
     project_material_id: projectMaterial.id,
@@ -1172,6 +1199,7 @@ async function run() {
     ['product_models', productModel.id, 'product_model.publish', 'product_models'],
     ['projects', project.id, 'project.publish', 'projects'],
     ['project_material_maps', materialMap.id, 'project_material_map.publish', 'project_material_maps'],
+    ['project_media', projectMediaBlock.id, 'project_media.publish', 'project_media'],
     ['project_hotspots', hotspot.id, 'project_hotspot.publish', 'project_hotspots'],
     ['articles', article.id, 'article.publish', 'articles'],
     ['article_blocks', articleBlock.id, 'article_block.publish', 'article_blocks'],
@@ -1189,6 +1217,7 @@ async function run() {
 
   for (const [table, id, action, entityType] of [
     ['project_hotspots', hotspot.id, 'project_hotspot.archive', 'project_hotspots'],
+    ['project_media', projectMediaBlock.id, 'project_media.archive', 'project_media'],
     ['project_material_maps', materialMap.id, 'project_material_map.archive', 'project_material_maps'],
     ['projects', project.id, 'project.archive', 'projects'],
     ['article_blocks', articleBlock.id, 'article_block.archive', 'article_blocks'],
@@ -1232,6 +1261,7 @@ async function run() {
     assertNotPubliclyVisible(config, 'stone_groups', { stone_group_key: slug }, 'Tagged stone_groups row'),
     assertNotPubliclyVisible(config, 'products', { slug }, 'Tagged products row'),
     assertNotPubliclyVisible(config, 'projects', { slug }, 'Tagged projects row'),
+    assertNotPubliclyVisible(config, 'project_media', { id: projectMediaBlock.id }, 'Tagged project_media row'),
     assertNotPubliclyVisible(config, 'articles', { slug }, 'Tagged articles row'),
     assertNotAnonymousReadable(config, 'enquiries', { id: enquiry.id }, 'Tagged enquiry row'),
     assertNotAnonymousReadable(config, 'sample_requests', { id: sampleRequest.id }, 'Tagged sample_request row'),

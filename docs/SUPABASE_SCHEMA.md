@@ -1,6 +1,6 @@
 # Urblo Supabase Schema Plan
 
-Last updated: 2026-05-29
+Last updated: 2026-06-02
 
 ## Purpose
 This document defines the first production Supabase data model for the Urblo website launch.
@@ -22,7 +22,8 @@ The Supabase connector can access the Urblo project directly. Do not ask the use
 | Admin hardening migrations | Applied on 2026-05-28: `admin_settings_role_hardening`, `admin_profile_owner_hardening`, `security_definer_function_grants`; applied on 2026-05-29: `security_definer_private_helpers`, `admin_profile_email_uniqueness` |
 | Form helper migrations | Applied on 2026-05-29: `sample_request_atomic_insert`, adding service-role-only atomic `sample_requests` + `sample_request_items` insert RPC |
 | Media Storage migrations | Applied on 2026-05-28: `media_storage_foundation`, `media_storage_listing_hardening` |
-| First content CRUD sources | Implemented on 2026-05-28: `/admin/stone-library` source screen for Stone Library groups, variants, and finish capabilities; expanded on 2026-05-29 with finish image links to media records. `/admin/projects` source screen for project records, facts, material schedules, material maps, and hotspots; `/admin/products` source screen for product families, models, material defaults, and specs; `/admin/articles` source screen for article metadata and structured article blocks |
+| First content CRUD sources | Implemented on 2026-05-28: `/admin/stone-library` source screen for Stone Library groups, variants, and finish capabilities; expanded on 2026-05-29 with finish image links to media records. `/admin/projects` source screen for project records, facts, material schedules, media blocks, material maps, and hotspots; `/admin/products` source screen for product families, models, material defaults, and specs; `/admin/articles` source screen for article metadata and structured article blocks |
+| Project media block migration | Prepared in source on 2026-06-02: `supabase/migrations/202606020001_project_media_blocks.sql` extends `project_media` for `normal_image`, `hotspot_image`, and optional `youtube_video` detail blocks. It has not been applied to the live Supabase project in this checkpoint. |
 | First lead workflow source | Implemented on 2026-05-28: `/admin/leads` source screen for enquiry/sample request status, assignment, internal notes, notification state, sample item inspection, and audit-gated owner/admin CSV export |
 | First audit visibility source | Implemented on 2026-05-28: `/admin/audit` source screen for owner/admin audit event inspection |
 | First admin audit writer source | Implemented on 2026-05-28: `src/lib/adminAudit.ts` inserts audit rows after successful admin CRUD/workflow saves; live row creation remains pending browser-safe Supabase config and active admin profiles |
@@ -156,9 +157,9 @@ Acceptance:
 Outcome: the project proof workflow has a protected source editing surface before public runtime migration.
 
 Acceptance:
-- In progress on 2026-05-28. `/admin/projects` source implements project, fact, material schedule, material map, and hotspot editing behind the existing Supabase Auth/profile gate.
-- The screen reads `projects`, `project_facts`, `project_materials`, `project_material_maps`, `project_hotspots`, `stone_groups`, `finish_definitions`, and `media_assets`; editor/admin/owner roles can save records and publish/archive projects, maps, and hotspots once live browser-safe Supabase config exists.
-- The screen includes loading, empty, validation, save, publish/archive, read-only, claim-review, and error states.
+- In progress on 2026-06-02. `/admin/projects` source implements project, fact, material schedule, ordered media block, material map, and hotspot editing behind the existing Supabase Auth/profile gate.
+- The screen reads `projects`, `project_facts`, `project_materials`, `project_media`, `project_material_maps`, `project_hotspots`, `stone_groups`, `finish_definitions`, and `media_assets`; editor/admin/owner roles can save records and publish/archive projects, media blocks, maps, and hotspots once live browser-safe Supabase config exists and `supabase/migrations/202606020001_project_media_blocks.sql` has been applied.
+- The screen includes loading, empty, validation, save, publish/archive, read-only, claim-review, media block type, YouTube ID, draggable hotspot placement, and error states.
 - Public Project routes remain static/file-backed until static project data is imported into Supabase and the public read path is deliberately migrated.
 - Live browser save verification still requires browser-safe Supabase key configuration and an active admin/editor profile.
 
@@ -576,18 +577,27 @@ Fields:
 - shared audit fields
 
 ### `project_media`
-Purpose: galleries, covers, map images, and supporting images.
+Purpose: ordered project detail media blocks plus legacy cover/hero/gallery/supporting references.
 
 Fields:
 - `id bigint identity primary key`
 - `project_id bigint not null references projects(id) on delete cascade`
-- `media_asset_id bigint not null references media_assets(id)`
-- `media_role text not null check (media_role in ('cover', 'hero', 'gallery', 'material_map', 'supporting'))`
+- `media_asset_id bigint references media_assets(id)`; nullable only for `youtube_video`
+- `project_material_map_id bigint references project_material_maps(id) on delete set null`; required for `hotspot_image`
+- `media_role text not null check (media_role in ('cover', 'hero', 'gallery', 'material_map', 'supporting', 'normal_image', 'hotspot_image', 'youtube_video'))`
+- `block_title text`
+- `youtube_url text`; stores the normalized YouTube video ID/URL for `youtube_video`
 - `label text`
 - `caption text`
 - `sort_order integer not null default 0`
 - `status text not null default 'published' check (status in ('draft', 'published', 'archived'))`
 - shared audit fields
+
+Constraints:
+- `youtube_video` rows require `youtube_url`, must not have `media_asset_id`, and must not link `project_material_map_id`.
+- `hotspot_image` rows require both `media_asset_id` and `project_material_map_id`.
+- Other image/reference roles require `media_asset_id` and must not set `youtube_url` or `project_material_map_id`.
+- At most one non-archived `youtube_video` row is allowed per project.
 
 ### `project_materials`
 Purpose: material schedule rows.

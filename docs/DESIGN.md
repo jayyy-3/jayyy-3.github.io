@@ -1,6 +1,6 @@
 # Urblo Design Contract
 
-Last updated: 2026-06-01
+Last updated: 2026-06-02
 
 ## Purpose
 This document governs Urblo's visual and UX execution. It is the design contract for Codex work in this repository.
@@ -180,6 +180,14 @@ Each project should answer:
 
 Avoid purely visual gallery behavior without project facts.
 
+Current archive/detail rhythm:
+- `/projects` is a functional project archive, not a masonry mood board. It should use a breadcrumb, large page title, short proof-led intro, project count, real filters, real view controls, and equal-sized image frames across project cards.
+- Project cards should prioritize sector, title, location/state/year, and concise project summary. Images must stay inspectable and consistently cropped; do not use uneven masonry sizing for the Urblo archive.
+- `/projects/:slug` should follow a case-study sequence: breadcrumb, oversized title, previous/next project navigation, full-width hero, Project Information with facts grid, narrative, ordered full-width media blocks, material schedule/Featured Materials where data supports it, optional video, and a final shared CTA.
+- Detail media is full-width and responsive. Do not use the old half-width/offset detail image treatment for project case studies.
+- Project detail media blocks are ordered proof modules: `normal_image`, `hotspot_image`, and optional `youtube_video`. A project may have no YouTube video; do not add unrelated or placeholder video content just to fill the module.
+- YouTube blocks should render near the end of the ordered media sequence when configured, use privacy-friendly `youtube-nocookie` embeds, and keep captions/facts outside the iframe.
+
 ### Capabilities
 Capabilities should read as an operational capability map, not a generic services page.
 
@@ -208,8 +216,9 @@ Project Material Map pattern:
 - Hotspots should identify material and finish placement first; avoid broad conceptual markers unless they are tied to a material/application fact.
 - Desktop may use hover as preview, but click/focus must also work.
 - Mobile must use tap/focus behavior and show the selected material inspector close to the image.
+- Hotspot coordinates are stored as x/y percentages and must remain visually aligned through responsive image resizing.
 - Keep marker count low enough for the image to remain inspectable.
-- Hotspot inspectors should name stone, finish, application, project note, and next action when useful.
+- Hotspot inspectors should name title, stone, finish, application, project note/description, optional preview image, and next action when useful.
 - Separate confirmed project facts from MVP-inferred narrative until the designer/project team confirms the content.
 
 Project typography:
@@ -283,7 +292,8 @@ Current source state:
 - `/admin/settings` is the first source CRUD surface and should remain dense, form-led, and status-led. Its admin team controls should feel like access operations, not a decorative people directory: compact rows, clear role/status pills, explicit owner protection, and no destructive controls.
 - `/admin/media` is the first media library source surface and should remain operational: compact record list, upload panel, metadata editor, explicit draft/published/archived state, audit-gated media manifest export, and clear publication guardrails.
 - `/admin/stone-library` is the first content CRUD source surface and should remain operational: compact stone list, status-led group and variant forms, finish capability matrix, finish image link controls, explicit TBC states, and publication guardrails.
-- `/admin/projects` is now a protected source CRUD surface and should remain proof-operational: compact project list, claim-review state, structured facts/material schedules, material-map and hotspot controls, and clear publication guardrails.
+- `/admin/projects` is now a protected source CRUD surface and should remain proof-operational: compact project list, claim-review state, structured facts/material schedules, ordered media block controls, material-map and draggable hotspot controls, and clear publication guardrails.
+- Admin hotspot editing should use direct point placement on the selected map image plus numeric x/y fields. Physical delete controls stay out of the launch path; archive/status changes are the removal model.
 - `/admin/products` is now a protected source CRUD surface and should remain configuration-operational: compact product list, model/spec/default-material controls, Stone Library references, and clear publication guardrails.
 - `/admin/articles` is now a protected structured editorial CRUD surface and should remain operational: compact article list, metadata form, structured block rows, reference linking, legacy-source provenance, and clear publication guardrails.
 - `/admin/leads` is now a protected lead workflow source surface and should remain privacy-conscious: compact inbox, clear contact detail, sample item rows, status/assignment/notes workflow, notification state, audit-gated owner/admin CSV export, and no decorative CRM clutter.

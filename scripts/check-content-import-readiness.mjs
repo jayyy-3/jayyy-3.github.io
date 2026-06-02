@@ -801,28 +801,6 @@ function buildDraftImportSql(payload) {
         '  select 1 from public.project_facts existing',
         '  where existing.project_id = p.id and existing.fact_label = r.fact_label and existing.sort_order = r.sort_order',
         ');',
-        '',
-        '-- Project media.',
-        'with',
-        jsonRecordset(payload.rows.project_media, 'project_media_rows', [
-            'project_slug text',
-            'media_role text',
-            'source_url text',
-            'label text',
-            'caption text',
-            'sort_order integer',
-            'status text',
-        ]),
-        'insert into public.project_media (project_id, media_asset_id, media_role, label, caption, sort_order, status)',
-        "select p.id, m.id, r.media_role, r.label, r.caption, r.sort_order, 'draft'",
-        'from project_media_rows r',
-        'join public.projects p on p.slug = r.project_slug',
-        'join public.media_assets m on m.source_url = r.source_url',
-        'where not exists (',
-        '  select 1 from public.project_media existing',
-        '  where existing.project_id = p.id and existing.media_asset_id = m.id and existing.media_role = r.media_role and existing.sort_order = r.sort_order',
-        ');',
-        '',
         '-- Project materials.',
         'with',
         jsonRecordset(payload.rows.project_materials, 'project_material_rows', [
@@ -868,8 +846,44 @@ function buildDraftImportSql(payload) {
         '  where existing.project_id = p.id and existing.media_asset_id = m.id and existing.sort_order = r.sort_order',
         ');',
         '',
+        '-- Project media.',
+        'with',
+        jsonRecordset(payload.rows.project_media, 'project_media_rows', [
+            'project_slug text',
+            'media_role text',
+            'source_url text',
+            'project_material_map_source_url text',
+            'project_material_map_sort_order integer',
+            'block_title text',
+            'youtube_url text',
+            'label text',
+            'caption text',
+            'sort_order integer',
+            'status text',
+        ]),
+        'insert into public.project_media (project_id, media_asset_id, project_material_map_id, media_role, block_title, youtube_url, label, caption, sort_order, status)',
+        "select p.id, m.id, maps.id, r.media_role, r.block_title, r.youtube_url, r.label, r.caption, r.sort_order, 'draft'",
+        'from project_media_rows r',
+        'join public.projects p on p.slug = r.project_slug',
+        'left join public.media_assets m on m.source_url = r.source_url',
+        'left join public.media_assets map_media on map_media.source_url = r.project_material_map_source_url',
+        'left join public.project_material_maps maps on maps.project_id = p.id and maps.media_asset_id = map_media.id and maps.sort_order = r.project_material_map_sort_order',
+        'where not exists (',
+        '  select 1 from public.project_media existing',
+        '  where existing.project_id = p.id and existing.media_role = r.media_role and existing.sort_order = r.sort_order',
+        ');',
+        '',
         '-- Project hotspots.',
         'with',
+        `${jsonRecordset(payload.rows.project_material_maps, 'map_rows', [
+            'project_slug text',
+            'map_key text',
+            'media_source_url text',
+            'title text',
+            'intro text',
+            'sort_order integer',
+            'status text',
+        ])},`,
         jsonRecordset(payload.rows.project_hotspots, 'hotspot_rows', [
             'project_slug text',
             'map_key text',
@@ -878,6 +892,7 @@ function buildDraftImportSql(payload) {
             'finish_key text',
             'x_percent numeric',
             'y_percent numeric',
+            'label text',
             'application text',
             'note text',
             'preview_source_url text',
@@ -885,10 +900,12 @@ function buildDraftImportSql(payload) {
             'status text',
         ]),
         'insert into public.project_hotspots (project_material_map_id, project_material_id, hotspot_key, x_percent, y_percent, label, application, note, preview_media_id, sort_order, status)',
-        'select maps.id, materials.id, r.hotspot_key, r.x_percent, r.y_percent, r.application, r.application, r.note, preview.id, r.sort_order, \'draft\'',
+        'select maps.id, materials.id, r.hotspot_key, r.x_percent, r.y_percent, r.label, r.application, r.note, preview.id, r.sort_order, \'draft\'',
         'from hotspot_rows r',
         'join public.projects p on p.slug = r.project_slug',
-        'join public.project_material_maps maps on maps.project_id = p.id and maps.sort_order = 0',
+        'join public.project_material_maps maps on maps.project_id = p.id',
+        'join public.media_assets map_media on map_media.id = maps.media_asset_id',
+        'join map_rows mr on mr.project_slug = r.project_slug and mr.map_key = r.map_key and mr.media_source_url = map_media.source_url and mr.sort_order = maps.sort_order',
         'left join public.stone_groups sg on sg.stone_group_key = r.stone_group_key',
         'left join public.finish_definitions fd on fd.finish_key = r.finish_key',
         'left join public.project_materials materials on materials.project_id = p.id and materials.application = r.application and (materials.stone_group_id = sg.id or sg.id is null) and (materials.finish_definition_id = fd.id or fd.id is null)',
@@ -1123,6 +1140,10 @@ function buildDraftRollbackSql(payload) {
                 'project_slug text',
                 'media_role text',
                 'source_url text',
+                'project_material_map_source_url text',
+                'project_material_map_sort_order integer',
+                'block_title text',
+                'youtube_url text',
                 'label text',
                 'caption text',
                 'sort_order integer',
@@ -1130,11 +1151,9 @@ function buildDraftRollbackSql(payload) {
             ],
             deleteLines: [
                 'delete from public.project_media target',
-                'using project_media_rows r, public.projects p, public.media_assets media',
+                'using project_media_rows r, public.projects p',
                 'where p.slug = r.project_slug',
                 '  and target.project_id = p.id',
-                '  and media.source_url = r.source_url',
-                '  and target.media_asset_id = media.id',
                 '  and target.media_role = r.media_role',
                 '  and target.sort_order = r.sort_order',
                 "  and target.status = 'draft'",
@@ -2047,29 +2066,101 @@ projects.forEach((project, projectIndex) => {
         });
     });
 
-    (project.images ?? []).forEach((image, imageIndex) => {
-        addMediaCandidate(image, `project gallery source ${project.slug}/${imageIndex + 1}`, `${project.name} image ${imageIndex + 1}`);
-        projectMedia.push({
-            project_slug: project.slug,
-            media_role: 'gallery',
-            source_url: image,
-            sort_order: imageIndex,
-            status: 'draft',
-        });
-    });
+    const mediaBlocks = Array.isArray(project.mediaBlocks) ? project.mediaBlocks : [];
+    const hotspotBlocks = mediaBlocks.filter((block) => block.type === 'hotspot_image');
 
-    (project.gallery ?? []).forEach((image, imageIndex) => {
-        addMediaCandidate(image.src, `project gallery ${project.slug}/${image.label}`, image.alt);
-        projectMedia.push({
-            project_slug: project.slug,
-            media_role: 'gallery',
-            source_url: image.src,
-            label: image.label,
-            caption: image.caption,
-            sort_order: imageIndex,
-            status: 'draft',
+    if (mediaBlocks.length) {
+        let youtubeBlockCount = 0;
+
+        mediaBlocks.forEach((block, blockIndex) => {
+            if (block.type === 'normal_image') {
+                addMediaCandidate(block.src, `project media block ${project.slug}/${block.id}`, block.alt);
+                projectMedia.push({
+                    project_slug: project.slug,
+                    media_role: 'normal_image',
+                    source_url: block.src,
+                    project_material_map_source_url: null,
+                    project_material_map_sort_order: null,
+                    block_title: block.title ?? null,
+                    youtube_url: null,
+                    label: block.label ?? null,
+                    caption: block.caption ?? null,
+                    sort_order: blockIndex,
+                    status: 'draft',
+                });
+                return;
+            }
+
+            if (block.type === 'hotspot_image') {
+                addMediaCandidate(block.image, `project hotspot media block ${project.slug}/${block.id}`, block.imageAlt);
+                projectMedia.push({
+                    project_slug: project.slug,
+                    media_role: 'hotspot_image',
+                    source_url: block.image,
+                    project_material_map_source_url: block.image,
+                    project_material_map_sort_order: hotspotBlocks.findIndex((entry) => entry.id === block.id),
+                    block_title: block.title,
+                    youtube_url: null,
+                    label: block.title,
+                    caption: block.caption ?? null,
+                    sort_order: blockIndex,
+                    status: 'draft',
+                });
+                return;
+            }
+
+            youtubeBlockCount += 1;
+            projectMedia.push({
+                project_slug: project.slug,
+                media_role: 'youtube_video',
+                source_url: null,
+                project_material_map_source_url: null,
+                project_material_map_sort_order: null,
+                block_title: block.title,
+                youtube_url: block.youtubeId,
+                label: 'Video',
+                caption: block.caption ?? null,
+                sort_order: blockIndex,
+                status: 'draft',
+            });
         });
-    });
+
+        if (youtubeBlockCount > 1) {
+            blockers.push(`Project ${project.slug} has ${youtubeBlockCount} YouTube media blocks; only one is supported.`);
+        }
+    } else {
+        (project.images ?? []).forEach((image, imageIndex) => {
+            addMediaCandidate(image, `project gallery source ${project.slug}/${imageIndex + 1}`, `${project.name} image ${imageIndex + 1}`);
+            projectMedia.push({
+                project_slug: project.slug,
+                media_role: 'gallery',
+                source_url: image,
+                project_material_map_source_url: null,
+                project_material_map_sort_order: null,
+                block_title: null,
+                youtube_url: null,
+                sort_order: imageIndex,
+                status: 'draft',
+            });
+        });
+
+        (project.gallery ?? []).forEach((image, imageIndex) => {
+            addMediaCandidate(image.src, `project gallery ${project.slug}/${image.label}`, image.alt);
+            projectMedia.push({
+                project_slug: project.slug,
+                media_role: 'gallery',
+                source_url: image.src,
+                project_material_map_source_url: null,
+                project_material_map_sort_order: null,
+                block_title: null,
+                youtube_url: null,
+                label: image.label,
+                caption: image.caption,
+                sort_order: imageIndex,
+                status: 'draft',
+            });
+        });
+    }
 
     (project.materials ?? []).forEach((material, materialIndex) => {
         if (!stoneGroupKeys.has(material.stoneGroupId)) {
@@ -2091,19 +2182,43 @@ projects.forEach((project, projectIndex) => {
         });
     });
 
-    if (project.materialMap) {
-        addMediaCandidate(project.materialMap.image, `project material map ${project.slug}`, project.materialMap.imageAlt);
+    const materialMapBlocks = hotspotBlocks.length
+        ? hotspotBlocks.map((block, blockIndex) => ({
+            mapKey: block.id,
+            image: block.image,
+            imageAlt: block.imageAlt,
+            title: block.title,
+            intro: block.intro ?? null,
+            hotspots: block.hotspots ?? [],
+            sortOrder: blockIndex,
+        }))
+        : project.materialMap
+          ? [
+              {
+                  mapKey: `${project.slug}-material-map`,
+                  image: project.materialMap.image,
+                  imageAlt: project.materialMap.imageAlt,
+                  title: project.materialMap.title,
+                  intro: project.materialMap.intro,
+                  hotspots: project.materialMap.hotspots ?? [],
+                  sortOrder: 0,
+              },
+          ]
+          : [];
+
+    materialMapBlocks.forEach((mapBlock) => {
+        addMediaCandidate(mapBlock.image, `project material map ${project.slug}/${mapBlock.mapKey}`, mapBlock.imageAlt);
         projectMaterialMaps.push({
             project_slug: project.slug,
-            map_key: `${project.slug}-material-map`,
-            media_source_url: project.materialMap.image,
-            title: project.materialMap.title,
-            intro: project.materialMap.intro,
-            sort_order: 0,
+            map_key: mapBlock.mapKey,
+            media_source_url: mapBlock.image,
+            title: mapBlock.title,
+            intro: mapBlock.intro,
+            sort_order: mapBlock.sortOrder,
             status: 'draft',
         });
 
-        (project.materialMap.hotspots ?? []).forEach((hotspot, hotspotIndex) => {
+        (mapBlock.hotspots ?? []).forEach((hotspot, hotspotIndex) => {
             if (!stoneGroupKeys.has(hotspot.stoneGroupId)) {
                 blockers.push(`Unknown hotspot stone ${hotspot.stoneGroupId} on ${project.slug}/${hotspot.id}`);
             }
@@ -2113,20 +2228,21 @@ projects.forEach((project, projectIndex) => {
             addMediaCandidate(hotspot.image, `project hotspot ${project.slug}/${hotspot.id}`, hotspot.imageAlt);
             projectHotspots.push({
                 project_slug: project.slug,
-                map_key: `${project.slug}-material-map`,
+                map_key: mapBlock.mapKey,
                 hotspot_key: hotspot.id,
                 stone_group_key: hotspot.stoneGroupId,
                 finish_key: hotspot.finishKey,
                 x_percent: hotspot.x,
                 y_percent: hotspot.y,
+                label: hotspot.title ?? hotspot.application,
                 application: hotspot.application,
-                note: hotspot.note,
+                note: hotspot.note || hotspot.description || null,
                 preview_source_url: hotspot.image ?? null,
                 sort_order: hotspotIndex,
                 status: 'draft',
             });
         });
-    }
+    });
 });
 
 const articleRows = [];

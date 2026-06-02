@@ -1,6 +1,6 @@
 # Urblo Web - Architecture and Contracts
 
-Last updated: 2026-06-01
+Last updated: 2026-06-02
 
 ## System Boundary
 - Current implementation: frontend-only React application shipped as static assets.
@@ -65,7 +65,7 @@ Last updated: 2026-06-01
   - Current admin CRUD source: `/admin/settings` reads and saves the default `site_settings` row and manages existing Supabase Auth users' admin profile rows for owner/admin roles, including clear form validation for duplicate Auth user IDs and duplicate profile emails before save. First admin bootstrap still happens outside the screen after Jay confirms the email.
   - Current admin media source: `/admin/media` reads and saves `media_assets` records, uploads Storage objects, and exports the currently loaded media manifest to CSV for active owner/admin/editor roles once browser-safe Supabase config and an active profile exist. CSV export must write an `admin_audit_events` row before downloading.
   - Current Stone Library admin source: `/admin/stone-library` reads and saves `stone_groups`, `stone_variants`, `stone_finish_capabilities`, and `stone_finish_images` records, with `media_assets` available for finish-image linking, for active owner/admin/editor roles once browser-safe Supabase config and an active profile exist.
-  - Current Projects admin source: `/admin/projects` reads and saves `projects`, `project_facts`, `project_materials`, `project_material_maps`, and `project_hotspots` records for active owner/admin/editor roles once browser-safe Supabase config and an active profile exist.
+  - Current Projects admin source: `/admin/projects` reads and saves `projects`, `project_facts`, `project_materials`, `project_media`, `project_material_maps`, and `project_hotspots` records for active owner/admin/editor roles once browser-safe Supabase config and an active profile exist. Project media blocks support normal image, hotspot image, and optional YouTube video rows after `supabase/migrations/202606020001_project_media_blocks.sql` is applied.
   - Current Products admin source: `/admin/products` reads and saves `products`, `product_models`, `product_material_defaults`, and `product_specs` records for active owner/admin/editor roles once browser-safe Supabase config and an active profile exist.
   - Current Articles admin source: `/admin/articles` reads and saves `articles` and `article_blocks` records for active owner/admin/editor roles once browser-safe Supabase config and an active profile exist.
   - Current Leads admin source: `/admin/leads` reads `enquiries`, `sample_requests`, and `sample_request_items`; active owner/admin roles can update lead status, assignment, internal notes, and export the currently loaded lead queue to CSV once browser-safe Supabase config and an active profile exist. CSV export must write an `admin_audit_events` row before downloading.
@@ -378,15 +378,21 @@ Route state contract:
 ### Project Data Contract
 - Source of project listing and detail records: `src/data/projectData.ts`
 - Listing page: `src/pages/Projects.tsx`
-  - Reads `projectListingMeta` from the shared data module.
+  - Reads the shared `projects` array and uses page-owned opening content because `/projects` is wrapped with `DefaultLayout showBanner={false}`.
+  - Functional archive state includes equal-sized image cards, sector filters, and grid/list view controls.
 - Detail page: `src/pages/ProjectDetails.tsx`
-  - Reads the same `projects` array and renders optional material-map fields when present.
-  - Falls back to fact/detail plus image rendering for projects that have not been migrated into the material-map model.
-- Project material map component: `src/components/projects/ProjectMaterialMap.tsx`
+  - Reads the same `projects` array and renders the shared case-study structure: breadcrumb, oversized title, previous/next navigation, full-width hero, Project Information facts, narrative, ordered media blocks, Featured Materials when configured, and final CTA.
+  - Uses `mediaBlocks` when present and falls back to `images` as normal image blocks for older records.
+- Project media block contract:
+  - `normal_image`: full-width responsive image proof with optional label/caption.
+  - `hotspot_image`: full-width responsive project image with material/finish hotspot inspector.
+  - `youtube_video`: optional one-per-project video block rendered with `youtube-nocookie` when project data or future Supabase content provides a YouTube ID. Current static project data has no live YouTube block because no client-approved Urblo project video is configured.
+- Project hotspot component: `src/components/projects/ProjectHotspotImage.tsx`
   - Desktop interaction: hover/focus/click changes the active material inspector.
   - Mobile interaction: tap/focus changes the active material inspector directly below the project image; no hover-only dependency.
   - Hotspot coordinates are stored as image-percentage positions in `src/data/projectData.ts`.
   - Hotspots are material-placement records keyed by `stoneGroupId` and `finishKey`; stone names, finish labels, finish preview images, and detail links resolve through `StoneLibraryService` where possible.
+- Legacy wrapper: `src/components/projects/ProjectMaterialMap.tsx` now delegates to `ProjectHotspotImage` so older imports keep the same runtime behavior.
 - Moon Gate MVP assets:
   - Local deployment assets live under `public/images/projects/moon-gate`.
   - `Moon Gate | Woolley Street` is the first project using `hero`, `lead`, `materialMap`, `materials`, `gallery`, and `cta` fields.
@@ -419,7 +425,8 @@ Route state contract:
 - Media:
   - Storage-backed or external media records with source, status, alt text, credit, usage notes, technical metadata, and public/private bucket state.
 - Projects:
-  - Project metadata, hero/gallery media, published status, SEO, evidence facts, material schedules, and hotspot records.
+  - Project metadata, hero/gallery/detail media, published status, SEO, evidence facts, material schedules, ordered media block rows, material maps, and hotspot records.
+  - `project_media` stores ordered detail modules through `media_role` values including `normal_image`, `hotspot_image`, and `youtube_video`; `hotspot_image` rows link to `project_material_maps`, while YouTube rows store the normalized YouTube ID/URL without a media asset.
   - Hotspots store image-percentage coordinates and references to Stone Library records where possible.
 - Stone Library:
   - Stone groups, variants, finishes, finish imagery, specifications, availability, and display ordering.
@@ -442,6 +449,7 @@ Route state contract:
   - The optional `--plan-out` flag writes a local ignored Markdown apply/rollback plan for review without writing Supabase rows.
   - The optional `--preflight-sql-out` flag writes a local ignored read-only SQL artifact for reviewing current target table counts, status distribution, RLS state, and policies before any import is approved.
   - The optional `--apply-sql-out` flag writes a local ignored guarded draft import SQL artifact. It is not executed by the harness, aborts by default unless an explicit in-transaction approval setting is added, keeps imported content in `draft`, and requires a second explicit merge approval if target parent natural keys already exist.
+  - Project import now prefers structured `mediaBlocks` from `src/data/projectData.ts` over legacy gallery fields, maps `normal_image` and `hotspot_image` rows into `project_media`, prepares `project_material_maps` for hotspot images, and keeps YouTube rows supported when future project data includes a client-approved video.
 - Admin IA/access:
   - `/admin` route, login, unauthorized, loading, module, settings, and audit states are defined in `docs/ADMIN_IA_ACCESS.md`.
   - Current `/admin` source implements real Supabase Auth wiring, session/profile loading, login, unauthorized, dashboard, and protected module scaffolds.
@@ -451,7 +459,7 @@ Route state contract:
   - The one-time first-admin service-role bootstrap path must create an `admin_profile.bootstrap` audit event for its access-control change before live admin readiness is considered fully verified.
   - `/admin/media` is the first media CRUD screen and uses `media_assets` plus Supabase Storage buckets for upload-backed draft records, external records, metadata editing, audit-gated manifest export, and publish/archive guardrails.
   - `/admin/stone-library` is the first content CRUD screen and uses Stone Library group, variant, finish definition, finish capability, finish image, and linked media records.
-  - `/admin/projects` is the next content CRUD screen and uses project records, facts, material schedule rows, material maps, and hotspots.
+  - `/admin/projects` is the next content CRUD screen and uses project records, facts, material schedule rows, media blocks, material maps, and hotspots. Media block source writes depend on `supabase/migrations/202606020001_project_media_blocks.sql` before live admin use.
   - `/admin/products` is the next content CRUD screen and uses product family, model, material default, and spec records.
   - `/admin/articles` is the next content CRUD screen and uses article metadata plus structured article block records.
   - `/admin/leads` is the first lead workflow screen and uses enquiries, sample requests, sample request items, active admin profile options, Stone Library labels, and finish labels. Owner/admin CSV export is limited to the currently loaded queue and blocked if its audit event cannot be recorded.

@@ -658,7 +658,9 @@
         "src/pages/ArticlePage.tsx",
         "scripts/check-admin-crud-coverage.mjs",
         "scripts/check-admin-crud-live.mjs",
-        "src/pages/admin/AdminDashboardPage.tsx"
+        "src/pages/admin/AdminDashboardPage.tsx",
+        "src/components/projects/ProjectHotspotImage.tsx",
+        "supabase/migrations/202606020001_project_media_blocks.sql"
       ],
       "notes": [
         "Live save verification remains blocked until browser-safe Supabase key configuration and active admin/editor profiles exist. Source-only CRUD can continue behind the existing config/auth gate.",
@@ -695,7 +697,10 @@
         "2026-05-29: Admin CRUD coverage verifier now also checks validation feedback paths, save paths, and content/media publish/archive lifecycle paths so source screens cannot silently lose launch-critical UI states.",
         "2026-05-29: Admin CRUD coverage verifier now scans admin source and the live verifier for Supabase `.delete()` mutations, HTTP `DELETE` requests, destructive RPC names, and visible `Delete`/`Remove` controls.",
         "2026-05-29: Admin CRUD live verifier plan now includes tagged `stone_finish_images` create/publish/archive coverage through authenticated RLS for the later credential-gated live run. It publishes then archives public-facing QA parent rows, verifies those tagged archived public-content rows and private lead rows are not anonymously visible through browser-key reads, and performs no physical deletes.",
-        "2026-05-29: `/admin` dashboard now includes a real content health queue for published media missing metadata, project claim review, published products/articles missing key media, TBC Stone Library records, and stale new leads. `npm run agent:admin-crud-coverage` guards those dashboard health checks source-side, and `npm run agent:admin-crud-live` stages tagged predicate readback for live admin QA."
+        "2026-05-29: `/admin` dashboard now includes a real content health queue for published media missing metadata, project claim review, published products/articles missing key media, TBC Stone Library records, and stale new leads. `npm run agent:admin-crud-coverage` guards those dashboard health checks source-side, and `npm run agent:admin-crud-live` stages tagged predicate readback for live admin QA.",
+        "2026-06-02: `/admin/projects` source now includes ordered project media block editing through `project_media`: normal image, hotspot image linked to a material map, and optional YouTube video. Hotspot placement now supports direct drag/click point setting on the selected material map image while retaining numeric x/y percentage fields.",
+        "2026-06-02: `supabase/migrations/202606020001_project_media_blocks.sql` is prepared in source to add `project_material_map_id`, `block_title`, nullable media asset support for YouTube rows, `youtube_url`, role constraints for `normal_image`/`hotspot_image`/`youtube_video`, and a one-active-YouTube-per-project index. The migration has not been live-applied in this worktree.",
+        "2026-06-02: Content import dry-run now prefers structured project `mediaBlocks`, generating 15 project media rows including the Moon Gate hotspot media block with 0 warnings and 0 blockers."
       ],
       "acceptance": [
         "Admin users can draft, publish, edit, and archive Projects, Stone Library records including finish image links, Products, and Articles through the non-destructive launch lifecycle.",
@@ -715,7 +720,9 @@
         "`npm run agent:live-readiness` reports content import apply, merge/upsert, and public read cutover approval gates without mutating Supabase.",
         "`npm run agent:admin-crud-coverage` fails if `/admin/articles` loses approved structured block options, structured-content validation, or reintroduces raw HTML/newsletter authoring helpers.",
         "`npm run agent:admin-crud-coverage` fails if launch-critical admin screens lose validation/save paths or content/media publish/archive lifecycle paths.",
-        "`npm run agent:admin-crud-coverage` fails if launch-critical admin source or the live verifier introduces physical delete mutations, HTTP DELETE requests, destructive RPC names, or visible Delete/Remove controls."
+        "`npm run agent:admin-crud-coverage` fails if launch-critical admin source or the live verifier introduces physical delete mutations, HTTP DELETE requests, destructive RPC names, or visible Delete/Remove controls.",
+        "Projects admin can source normal image, hotspot image, and optional YouTube media blocks without physical delete controls.",
+        "Project media block source contracts are covered by migration, content import, admin coverage, and live verifier source updates before live Supabase use."
       ],
       "verification": [
         "npm run build",
@@ -1180,7 +1187,12 @@
         "public/media/launch/capabilities",
         "public/media/launch/our-story/natalie-ma-2026.jpg",
         "scripts/check-capabilities-page-source.mjs",
-        "scripts/agent-smoke.sh"
+        "scripts/agent-smoke.sh",
+        "src/pages/Projects.tsx",
+        "src/pages/ProjectDetails.tsx",
+        "src/components/projects/ProjectHotspotImage.tsx",
+        "src/components/projects/ProjectMaterialMap.tsx",
+        "src/data/projectData.ts"
       ],
       "notes": [
         "2026-05-22 full-site QA found the overall shell is coherent, but Products, Articles, and legacy Project details still feel less resolved than Stone Library and Moon Gate.",
@@ -1196,12 +1208,17 @@
         "2026-06-01: `/capabilities` has been reworked as a reference-style capability hub rather than an editorial PDF-like page. The source contract now guards five concrete capability scopes, lifecycle/reach support, selected-project proof ledger coverage, and required download/form behavior. The previously sideways site-review image was rotated upright before reuse.",
         "2026-06-01: Homepage Latest Projects now uses `The work speaks.` with five project records in `homepageData.latestProjects.projects`. Runtime renders an active project detail/image panel plus a draggable thumbnail rail that shows four projects at desktop width; thumbnails select the active project and the upper `View project` CTA navigates to project detail.",
         "2026-06-02: Homepage Latest Projects now occupies exactly one viewport with `100svh`; active copy, image, and rail heights remain fixed across hover/tap selection. Short desktop viewports hide the active summary and align facts beside the CTA, while short mobile viewports simplify the copy and rail media so controls remain visible without overlap.",
-        "2026-06-02: Homepage Latest Projects now follows the approved sketch ratio: upper copy spans two columns, upper feature image spans two columns, and the lower draggable rail shows four fixed-height portrait project images on desktop. `HomepageProject` now supports optional `featureImage` and `featureImageAlt` for independent upper-image selection, populated from existing second-detail project media with fallback to the rail image."
+        "2026-06-02: Homepage Latest Projects now follows the approved sketch ratio: upper copy spans two columns, upper feature image spans two columns, and the lower draggable rail shows four fixed-height portrait project images on desktop. `HomepageProject` now supports optional `featureImage` and `featureImageAlt` for independent upper-image selection, populated from existing second-detail project media with fallback to the rail image.",
+        "2026-06-02: Public Projects archive/detail pages were redesigned against the supplied Sam the Paving Man structural reference in Urblo visual language. `/projects` now has breadcrumb, large title, proof intro, count, working sector filters, grid/list controls, and equal-sized project images. `/projects/:slug` now has oversized opening, previous/next navigation, full-width hero/media, Project Information facts, ordered media blocks, hotspot image support, Featured Materials, and shared CTA.",
+        "2026-06-02: Current static project data supports `normal_image` and `hotspot_image` media blocks. The `youtube_video` renderer/source/admin/migration contract exists for one optional video per project, but no client-approved Urblo project YouTube block is configured in current data.",
+        "2026-06-02: In-app Browser QA verified `/projects` desktop/mobile filters, grid/list controls, equal-sized images, Moon Gate desktop/mobile hotspot inspector behavior, West Side Place desktop/mobile normal media flow, no framework overlays, and zero horizontal overflow. `/admin/projects` live drag QA remains credential-gated; `npm run agent:admin-crud-coverage` now checks the hotspot stage/marker and pointer placement source contract."
       ],
       "acceptance": [
         "Target pages reach agreed parity versus approved references.",
         "Responsive parity is checked on desktop and mobile.",
-        "Before/after evidence and gap list are captured in worklog."
+        "Before/after evidence and gap list are captured in worklog.",
+        "Projects archive filters and grid/list controls work from current project data.",
+        "Project detail pages use full-width media blocks, accessible hotspots, previous/next navigation, and shared CTA without half-width/offset media layouts."
       ],
       "verification": [
         "npm run build",
@@ -1211,7 +1228,11 @@
         "npm run agent:smoke",
         "Browser verification: homepage section order, removed sustainability copy, updated proof copy, updated metrics, partner banner wording, Design-led lime highlight, Latest Projects active panel, four-visible desktop project rail, draggable rail behavior, hover/focus/tap project selection, Our Capabilities CTA, /capabilities page render and download-form validation, and /our-story Natalie card render",
         "Playwright fallback verification: Latest Projects is exactly one viewport high and keeps 0 height delta for section, active copy, active image, and rail across hover/tap selection at 1440x900, 1366x768, 1280x720, 390x844, and 375x667",
-        "Browser plugin DOM/console verification plus Playwright Chromium screenshots: sketch-ratio Latest Projects section verified at 1440x900, 1366x768, and 390x844 with feature image height matching rail image height, desktop feature width equal to two rail slots plus gutter, visible View project CTA, hover selection changing active project without height shift, 0 horizontal overflow, no framework overlay, and 0 console issues"
+        "Browser plugin DOM/console verification plus Playwright Chromium screenshots: sketch-ratio Latest Projects section verified at 1440x900, 1366x768, and 390x844 with feature image height matching rail image height, desktop feature width equal to two rail slots plus gutter, visible View project CTA, hover selection changing active project without height shift, 0 horizontal overflow, no framework overlay, and 0 console issues",
+        "Browser verification: /projects and at least two /projects/:slug detail pages on desktop/mobile, including filters, view controls, equal image sizing, previous/next navigation, hotspot interaction, no overflow, and no console errors.",
+        "npm run agent:admin-crud-coverage",
+        "npm run agent:content-import -- --out .tmp/content-import-preview.json",
+        "npm run agent:content-import:apply-sql"
       ]
     },
     {
