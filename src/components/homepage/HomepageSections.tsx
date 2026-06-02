@@ -40,6 +40,39 @@ function Reveal({
   );
 }
 
+function useNearViewport<T extends Element>(rootMargin = '800px') {
+  const ref = useRef<T | null>(null);
+  const [shouldLoad, setShouldLoad] = useState(false);
+
+  useEffect(() => {
+    if (shouldLoad) return undefined;
+
+    const element = ref.current;
+    if (!element) return undefined;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setShouldLoad(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin },
+    );
+
+    observer.observe(element);
+
+    return () => observer.disconnect();
+  }, [rootMargin, shouldLoad]);
+
+  return [ref, shouldLoad] as const;
+}
+
+const lazyImageProps = {
+  loading: 'lazy',
+  decoding: 'async',
+} as const;
+
 function ArrowIcon({ light = false }: { light?: boolean }) {
   return (
     <svg
@@ -292,14 +325,17 @@ function HeroSection() {
   const reduceMotion = useReducedMotion() ?? false;
 
   return (
-    <section className="relative min-h-[100svh] overflow-hidden bg-black text-white">
+    <section
+      className="relative min-h-[100svh] overflow-hidden bg-black bg-cover bg-center text-white"
+      style={{ backgroundImage: `url('${homepageData.hero.posterUrl}')` }}
+    >
       <video
         className="absolute inset-0 h-full w-full object-cover"
         autoPlay
         muted
         loop
         playsInline
-        preload="none"
+        preload="auto"
         poster={homepageData.hero.posterUrl}
         aria-label="Urblo stone streetscape project video"
       >
@@ -336,6 +372,7 @@ function SustainabilityOverviewPanel() {
               src={homepageData.sustainability.footprintUrl}
               alt="Carbon neutral footprint"
               className="h-auto w-full object-cover"
+              {...lazyImageProps}
             />
             <div className="absolute inset-0 flex items-center justify-center">
               <motion.svg
@@ -400,6 +437,7 @@ function InstallationPanel({
               key={step.id}
               src={step.image}
               alt={step.title}
+              {...lazyImageProps}
               className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${
                 step.id === activeStep.id ? 'opacity-100' : 'opacity-0'
               }`}
@@ -502,7 +540,7 @@ function CostSavingPanel({ active }: { active: boolean }) {
           },
         ].map((item) => (
           <div key={item.title} className="relative h-[220px]">
-            <img src={item.image} alt={item.title} className="h-full w-full object-cover" />
+            <img src={item.image} alt={item.title} className="h-full w-full object-cover" {...lazyImageProps} />
             <div className="absolute inset-0 bg-black/30" />
             <div className="absolute inset-0 flex items-center justify-center text-[34px] font-bold uppercase leading-[1.2] text-white">
               {item.title}
@@ -516,6 +554,7 @@ function CostSavingPanel({ active }: { active: boolean }) {
           <img
             src={homepageData.sustainability.costSaving.leftImage}
             alt={homepageData.sustainability.costSaving.leftTitle}
+            {...lazyImageProps}
             className="h-full w-full object-cover"
           />
           <div className="absolute inset-0 bg-black/22" />
@@ -564,6 +603,7 @@ function CostSavingPanel({ active }: { active: boolean }) {
           <img
             src={homepageData.sustainability.costSaving.rightImage}
             alt={homepageData.sustainability.costSaving.rightTitle}
+            {...lazyImageProps}
             className="h-full w-full object-cover"
           />
           <div className="absolute inset-0 bg-black/22" />
@@ -620,7 +660,7 @@ function CollaborationCard({ card }: { card: HomepageCollaborationCard }) {
       <div className={`relative h-full ${dark ? 'bg-black/40 text-white' : 'bg-[#F5F5F5] text-black'}`}>
         {card.image ? (
           <>
-            <img src={card.image} alt={card.title} className="h-full w-full object-cover" />
+            <img src={card.image} alt={card.title} className="h-full w-full object-cover" {...lazyImageProps} />
             <div className="absolute inset-0 bg-black/40" />
           </>
         ) : null}
@@ -750,14 +790,18 @@ function PartnerBannerSection() {
   const highlight = 'Design-led';
   const bannerText = homepageData.partnerBanner.text;
   const bodyText = bannerText.startsWith(highlight) ? bannerText.slice(highlight.length) : ` ${bannerText}`;
+  const [sectionRef, loadImage] = useNearViewport<HTMLElement>('400px');
 
   return (
-    <section className="relative min-h-[516px] overflow-hidden bg-black text-white">
-      <img
-        src={homepageData.partnerBanner.image}
-        alt=""
-        className="absolute inset-0 h-full w-full object-cover"
-      />
+    <section ref={sectionRef} className="relative min-h-[516px] overflow-hidden bg-black text-white">
+      {loadImage ? (
+        <img
+          src={homepageData.partnerBanner.image}
+          alt=""
+          {...lazyImageProps}
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+      ) : null}
       <div className="absolute inset-0 bg-black/60" />
       <div className="relative mx-auto flex min-h-[516px] max-w-[1440px] items-center px-6 py-16 md:px-10 lg:px-[92px]">
         <Reveal className="max-w-[70rem] text-[38px] font-semibold uppercase leading-[1.35] text-white md:text-[52px] xl:text-[60px]">
@@ -771,6 +815,7 @@ function PartnerBannerSection() {
 
 function ProductShowcaseSection() {
   const [focusedProduct, setFocusedProduct] = useState<string | null>(null);
+  const [backgroundRef, loadBackground] = useNearViewport<HTMLDivElement>('700px');
 
   return (
     <section className="bg-white py-20 lg:py-24">
@@ -796,10 +841,13 @@ function ProductShowcaseSection() {
       <Reveal delay={0.15} className="mt-10">
         <div className="relative left-1/2 w-screen -translate-x-1/2">
           <div
+            ref={backgroundRef}
             className="homepage-product-display relative overflow-hidden rounded-[4px] bg-cover bg-center bg-no-repeat"
-            style={{
-              backgroundImage: `url('${homepageData.productShowcase.backgroundImage}')`,
-            }}
+            style={
+              loadBackground
+                ? { backgroundImage: `url('${homepageData.productShowcase.backgroundImage}')` }
+                : undefined
+            }
           >
             <div className="absolute inset-0 bg-black/25" />
 
@@ -963,6 +1011,7 @@ function LatestProjectsSection() {
   const suppressClickRef = useRef(false);
   const [isDragging, setIsDragging] = useState(false);
   const reduceMotion = useReducedMotion() ?? false;
+  const [sectionRef, loadProjectMedia] = useNearViewport<HTMLElement>('700px');
 
   const finishDrag = (event: PointerEvent<HTMLDivElement>) => {
     const rail = railRef.current;
@@ -987,6 +1036,7 @@ function LatestProjectsSection() {
 
   return (
     <section
+      ref={sectionRef}
       data-section="latest-projects"
       className="h-[100svh] overflow-hidden bg-[#f6f6f2] px-5 py-4 text-black sm:px-6 md:px-10 md:py-6 lg:px-[92px] lg:py-8"
     >
@@ -1078,16 +1128,20 @@ function LatestProjectsSection() {
               className="relative h-full min-h-0 overflow-hidden bg-black"
             >
               <AnimatePresence mode="wait" initial={false}>
-                <motion.img
-                  key={activeFeatureImage}
-                  src={activeFeatureImage}
-                  alt={activeFeatureImageAlt}
-                  className="absolute inset-0 h-full w-full object-cover"
-                  initial={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 1.025 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.99 }}
-                  transition={{ duration: reduceMotion ? 0.2 : 0.45, ease: 'easeOut' }}
-                />
+                {loadProjectMedia ? (
+                  <motion.img
+                    key={activeFeatureImage}
+                    src={activeFeatureImage}
+                    alt={activeFeatureImageAlt}
+                    loading="lazy"
+                    decoding="async"
+                    className="absolute inset-0 h-full w-full object-cover"
+                    initial={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 1.025 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.99 }}
+                    transition={{ duration: reduceMotion ? 0.2 : 0.45, ease: 'easeOut' }}
+                  />
+                ) : null}
               </AnimatePresence>
               <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/38 to-transparent" />
             </div>
@@ -1154,12 +1208,15 @@ function LatestProjectsSection() {
                     }}
                   >
                     <span className="homepage-project-thumb-media relative block h-full overflow-hidden bg-black/10">
-                      <img
-                        src={project.image}
-                        alt=""
-                        draggable={false}
-                        className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.035] group-focus-visible:scale-[1.035]"
-                      />
+                      {loadProjectMedia ? (
+                        <img
+                          src={project.image}
+                          alt=""
+                          draggable={false}
+                          {...lazyImageProps}
+                          className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.035] group-focus-visible:scale-[1.035]"
+                        />
+                      ) : null}
                       <span
                         className={`absolute inset-x-0 top-0 h-[5px] transition duration-200 ${
                           isActive ? 'bg-[var(--urblo-lime)]' : 'bg-transparent'
@@ -1198,12 +1255,19 @@ function LatestProjectsSection() {
 }
 
 function ManifestoSection() {
+  const [backgroundRef, loadBackground] = useNearViewport<HTMLDivElement>('700px');
+
   return (
     <section className="overflow-hidden bg-white pb-0 pt-20 text-white">
       <Reveal>
         <div
+          ref={backgroundRef}
           className="relative overflow-hidden bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: `url('${homepageData.manifesto.backgroundImage}')` }}
+          style={
+            loadBackground
+              ? { backgroundImage: `url('${homepageData.manifesto.backgroundImage}')` }
+              : undefined
+          }
         >
           <div className="absolute inset-0 bg-black/75" />
 
@@ -1221,6 +1285,7 @@ function ManifestoSection() {
                 <img
                   src={homepageData.manifesto.image}
                   alt=""
+                  {...lazyImageProps}
                   className="h-full w-full object-cover"
                 />
               </div>
@@ -1255,7 +1320,12 @@ function ManifestoSection() {
 function LogoCarouselItem({ logo }: { logo: HomepageLogo }) {
   return (
     <div className="flex h-[110px] w-[240px] shrink-0 items-center justify-center px-8 md:w-[320px] lg:w-[360px] xl:w-[489.5px]">
-      <img src={logo.image} alt={logo.alt} className="max-h-[52px] w-auto max-w-full object-contain" />
+      <img
+        src={logo.image}
+        alt={logo.alt}
+        className="max-h-[52px] w-auto max-w-full object-contain"
+        {...lazyImageProps}
+      />
     </div>
   );
 }
@@ -1337,15 +1407,20 @@ function VideoModal({
 
 function VideoCTASection() {
   const [open, setOpen] = useState(false);
+  const [sectionRef, loadBackground] = useNearViewport<HTMLElement>('700px');
 
   return (
     <>
-      <section className="relative min-h-[617px] overflow-hidden bg-black text-white">
-        <img
-          src={homepageData.videoCta.backgroundImage}
-          alt=""
-          className="absolute inset-0 h-full w-full object-cover"
-        />
+      <section ref={sectionRef} className="relative min-h-[617px] overflow-hidden bg-black text-white">
+        {loadBackground ? (
+          <img
+            src={homepageData.videoCta.backgroundImage}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        ) : null}
         <div className="absolute inset-0 bg-black/45" />
 
         <div className="relative mx-auto flex min-h-[617px] max-w-[1440px] items-center justify-center px-6 py-16">
