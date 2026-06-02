@@ -339,6 +339,7 @@ function HeroSection() {
         poster={homepageData.hero.posterUrl}
         aria-label="Urblo stone streetscape project video"
       >
+        <source src={homepageData.hero.mobileVideoUrl} type="video/mp4" media="(max-width: 767px)" />
         <source src={homepageData.hero.videoUrl} type="video/mp4" media="(min-width: 768px)" />
       </video>
       <div className="absolute inset-0 bg-black/40" />

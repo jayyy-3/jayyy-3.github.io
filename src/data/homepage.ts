@@ -102,6 +102,7 @@ export const homepageData = {
   logoUrl: '/media/launch/identity/urblo-logo.png',
   hero: {
     videoUrl: '/media/launch/home/urblo-hero.mp4',
+    mobileVideoUrl: '/media/launch/home/urblo-hero-mobile.mp4',
     posterUrl: '/media/launch/home/hero-poster.jpg',
   },
   sustainability: {
