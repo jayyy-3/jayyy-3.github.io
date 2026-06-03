@@ -8071,8 +8071,15 @@ Last updated: 2026-06-04
 - `docs/agent/tasks.json`
 
 ### Verification Results
+- `npm run build`: pass. Browserslist staleness notice remains.
 - `npm run lint`: pass.
 - `npx tsc -b`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:check`: pass.
+- `npm run agent:smoke`: pass after approved local preview-server permission; sandbox-only run failed with `Vite preview did not respond at http://127.0.0.1:4173`.
+- `npm run agent:admin-config-gate`: pass for 11 admin routes after approved local preview/browser permission.
+- `jq empty docs/agent/tasks.json`: pass.
+- `git diff --check`: pass.
 
 ### Risks and Gaps
 - This is the first IA/status-language batch, not the full CMS redesign. Projects still needs a deeper list/detail/preview editing flow; Media, Stone Library, Products, Articles, Leads, and Settings still need the shared UX system applied.
@@ -8080,6 +8087,42 @@ Last updated: 2026-06-04
 
 ### Next Handoff
 - `NOW-ADMIN-CONTENT-CRUD-001`
+- `NOW-ADMIN-CMS-001`
+
+## Entry - 2026-06-04 (Admin Media and Stone Library UX Baseline)
+
+### Scope
+- Extended the CMS editor-experience baseline beyond Dashboard/Projects.
+- Updated `/admin/media` with shared Draft/Published/Archived status language, status counts, list search, status filtering, and a website-visibility rule in the metadata editor.
+- Updated `/admin/stone-library` group lists with search, status filtering, and clearer TBC language that treats TBC as needing confirmation rather than public-ready.
+
+### Changed Files
+- `src/pages/admin/AdminMediaPage.tsx`
+- `src/pages/admin/AdminStoneLibraryPage.tsx`
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:check`: pass.
+- `npm run agent:smoke`: pass after approved local preview-server permission; sandbox-only run failed with `Vite preview did not respond at http://127.0.0.1:4173`.
+- `npm run agent:admin-config-gate`: pass for 11 admin routes after approved local preview/browser permission.
+- `jq empty docs/agent/tasks.json`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- Media and Stone Library now have better list/state orientation, but Stone Library still needs deeper editor-flow simplification for variants, finish capabilities, and finish images.
+- Products, Articles, Leads, and Settings still need the shared UX/status/list treatment.
+
+### Next Handoff
+- `NOW-ADMIN-CONTENT-CRUD-001`
+- `NOW-ADMIN-MEDIA-LEADS-001`
 - `NOW-ADMIN-CMS-001`
 
 ## Entry Template (Use for Every Future Session)

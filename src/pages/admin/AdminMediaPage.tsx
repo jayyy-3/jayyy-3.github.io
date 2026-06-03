@@ -9,6 +9,7 @@ import {
     Image as ImageIcon,
     Plus,
     Save,
+    Search,
     ShieldCheck,
 } from 'lucide-react';
 import { recordAdminAuditEvent, withAuditNotice } from '../../lib/adminAudit';
@@ -16,8 +17,10 @@ import { supabase } from '../../lib/supabaseClient';
 import { useAdminAuth } from '../../lib/adminAuthHooks';
 import AdminShell from './AdminShell';
 import RequireAdmin from './RequireAdmin';
+import { CmsLiveRuleCard, CmsStatusCounts, CmsStatusMeaning, CmsStatusPill } from './AdminCmsPrimitives';
 
 type MediaStatus = 'draft' | 'published' | 'archived';
+type MediaListFilter = MediaStatus | 'all';
 type SourceKind = 'storage' | 'external_legacy' | 'r2' | 'stream';
 type MediaType = 'image' | 'video' | 'document' | 'other';
 type MediaBucket = 'urblo-admin-media' | 'urblo-public-media';
@@ -110,6 +113,8 @@ function AdminMediaContent() {
     const [assets, setAssets] = useState<MediaAssetRow[]>([]);
     const [selectedId, setSelectedId] = useState<number | null>(null);
     const [form, setForm] = useState<MediaFormState>(emptyForm);
+    const [mediaSearch, setMediaSearch] = useState('');
+    const [mediaStatusFilter, setMediaStatusFilter] = useState<MediaListFilter>('all');
     const [uploadBucket, setUploadBucket] = useState<MediaBucket>('urblo-admin-media');
     const [file, setFile] = useState<File | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -417,6 +422,29 @@ function AdminMediaContent() {
 
     const previewUrl = getMediaUrl(selectedAsset);
     const mediaCounts = useMemo(() => summarizeMedia(assets), [assets]);
+    const filteredAssets = useMemo(
+        () =>
+            assets.filter((asset) => {
+                const matchesStatus = mediaStatusFilter === 'all' || asset.status === mediaStatusFilter;
+                const search = mediaSearch.trim().toLowerCase();
+                const matchesSearch =
+                    !search ||
+                    [
+                        asset.alt,
+                        asset.caption,
+                        asset.credit,
+                        asset.object_path,
+                        asset.source_url,
+                        asset.bucket,
+                        asset.source_kind,
+                        asset.media_type,
+                    ]
+                        .filter(Boolean)
+                        .some((value) => String(value).toLowerCase().includes(search));
+                return matchesStatus && matchesSearch;
+            }),
+        [assets, mediaSearch, mediaStatusFilter],
+    );
 
     return (
         <AdminShell
@@ -456,6 +484,39 @@ function AdminMediaContent() {
                             {mediaCounts.published} published, {mediaCounts.draft} draft, {mediaCounts.archived}{' '}
                             archived.
                         </p>
+                        <div className="mt-4">
+                            <CmsStatusCounts
+                                draft={mediaCounts.draft}
+                                published={mediaCounts.published}
+                                archived={mediaCounts.archived}
+                            />
+                        </div>
+                        <label className="mt-4 flex min-h-11 items-center gap-2 border border-black/10 bg-[#f8f9f5] px-3 text-sm text-black">
+                            <Search className="h-4 w-4 shrink-0 text-black/42" />
+                            <input
+                                value={mediaSearch}
+                                onChange={(event) => setMediaSearch(event.target.value)}
+                                placeholder="Search alt, source, bucket, type"
+                                className="min-w-0 flex-1 bg-transparent text-sm font-medium outline-none placeholder:text-black/36"
+                            />
+                        </label>
+                        <div className="mt-3 grid grid-cols-4 gap-1">
+                            {(['all', 'published', 'draft', 'archived'] as const).map((filter) => (
+                                <button
+                                    key={filter}
+                                    type="button"
+                                    onClick={() => setMediaStatusFilter(filter)}
+                                    className={[
+                                        'min-h-9 rounded border px-2 text-[11px] font-bold uppercase tracking-[0.1em] transition',
+                                        mediaStatusFilter === filter
+                                            ? 'border-black bg-black text-white'
+                                            : 'border-black/10 bg-white text-black/55 hover:border-black',
+                                    ].join(' ')}
+                                >
+                                    {filter}
+                                </button>
+                            ))}
+                        </div>
                     </div>
 
                     <div className="max-h-[720px] overflow-auto">
@@ -468,9 +529,9 @@ function AdminMediaContent() {
                                     />
                                 ))}
                             </div>
-                        ) : assets.length ? (
+                        ) : filteredAssets.length ? (
                             <div className="divide-y divide-black/10">
-                                {assets.map((asset) => (
+                                {filteredAssets.map((asset) => (
                                     <button
                                         key={asset.id}
                                         type="button"
@@ -489,7 +550,7 @@ function AdminMediaContent() {
                                                     {asset.source_kind} · {asset.media_type}
                                                 </span>
                                             </span>
-                                            <StatusPill status={asset.status} />
+                                            <CmsStatusPill status={asset.status} />
                                         </div>
                                         <p className="mt-3 truncate text-xs text-black/45">
                                             {asset.bucket ?? 'external'} / {asset.object_path ?? asset.source_url ?? 'No source'}
@@ -500,10 +561,13 @@ function AdminMediaContent() {
                         ) : (
                             <div className="p-5">
                                 <ImageIcon className="h-5 w-5 text-black" />
-                                <h2 className="mt-5 text-xl font-semibold text-black">No media records yet</h2>
+                                <h2 className="mt-5 text-xl font-semibold text-black">
+                                    {assets.length ? 'No matching media' : 'No media records yet'}
+                                </h2>
                                 <p className="mt-3 text-sm leading-6 text-black/58">
-                                    Upload a draft file or start an external record. Published media requires alt
-                                    text, usage notes, and a public-safe source.
+                                    {assets.length
+                                        ? 'Clear the search or choose another status filter.'
+                                        : 'Upload a draft file or start an external record. Published media requires alt text, usage notes, and a public-safe source.'}
                                 </p>
                             </div>
                         )}
@@ -524,7 +588,13 @@ function AdminMediaContent() {
                                     Keep media inspectable, credited, and safe before connecting it to public content.
                                 </p>
                             </div>
-                            <StatusPill status={form.status} />
+                            <CmsStatusPill status={form.status} />
+                        </div>
+
+                        <div className="mt-5">
+                            <CmsLiveRuleCard>
+                                <CmsStatusMeaning compact />
+                            </CmsLiveRuleCard>
                         </div>
 
                         <div className="mt-7 grid gap-4 md:grid-cols-2">
@@ -825,23 +895,6 @@ function AdminMediaContent() {
                 </aside>
             </div>
         </AdminShell>
-    );
-}
-
-function StatusPill({ status }: { status: MediaStatus }) {
-    return (
-        <span
-            className={[
-                'inline-flex h-8 shrink-0 items-center rounded border px-3 text-[11px] font-bold uppercase tracking-[0.14em]',
-                status === 'published'
-                    ? 'border-[var(--urblo-lime)] bg-[rgba(0,255,25,0.12)] text-black'
-                    : status === 'archived'
-                      ? 'border-black/15 bg-black text-white'
-                      : 'border-black/15 bg-white text-black/50',
-            ].join(' ')}
-        >
-            {status}
-        </span>
     );
 }
 

@@ -9,6 +9,7 @@ import {
     ListChecks,
     Plus,
     Save,
+    Search,
     ShieldAlert,
 } from 'lucide-react';
 import { recordAdminAuditEvent, withAuditNotice } from '../../lib/adminAudit';
@@ -16,8 +17,10 @@ import { supabase } from '../../lib/supabaseClient';
 import { useAdminAuth } from '../../lib/adminAuthHooks';
 import AdminShell from './AdminShell';
 import RequireAdmin from './RequireAdmin';
+import { CmsStatusCounts } from './AdminCmsPrimitives';
 
 type StoneStatus = 'draft' | 'published' | 'archived' | 'tbc';
+type StoneListFilter = StoneStatus | 'all';
 type Capability = 'yes' | 'no' | 'tbc';
 type FinishStatus = 'draft' | 'published' | 'archived';
 type FinishImageStatus = 'draft' | 'published' | 'archived';
@@ -211,6 +214,8 @@ function AdminStoneLibraryContent() {
     const [selectedVariantId, setSelectedVariantId] = useState<number | null>(null);
     const [selectedImageId, setSelectedImageId] = useState<number | null>(null);
     const [groupForm, setGroupForm] = useState<StoneGroupFormState>(emptyGroupForm);
+    const [groupSearch, setGroupSearch] = useState('');
+    const [groupStatusFilter, setGroupStatusFilter] = useState<StoneListFilter>('all');
     const [variantForm, setVariantForm] = useState<StoneVariantFormState>(emptyVariantForm);
     const [capabilityForms, setCapabilityForms] = useState<Record<number, CapabilityFormState>>({});
     const [finishImageForm, setFinishImageForm] = useState<FinishImageFormState>(emptyFinishImageForm);
@@ -231,6 +236,27 @@ function AdminStoneLibraryContent() {
         [variants, selectedVariantId],
     );
     const groupCounts = useMemo(() => summarizeGroups(groups), [groups]);
+    const filteredGroups = useMemo(
+        () =>
+            groups.filter((group) => {
+                const matchesStatus = groupStatusFilter === 'all' || group.status === groupStatusFilter;
+                const search = groupSearch.trim().toLowerCase();
+                const matchesSearch =
+                    !search ||
+                    [
+                        group.display_name,
+                        group.stone_group_key,
+                        group.source_name,
+                        group.stone_type_display,
+                        group.origin_region,
+                        group.origin_country,
+                    ]
+                        .filter(Boolean)
+                        .some((value) => String(value).toLowerCase().includes(search));
+                return matchesStatus && matchesSearch;
+            }),
+        [groupSearch, groupStatusFilter, groups],
+    );
     const capabilityCounts = useMemo(
         () => summarizeCapabilities(Object.values(capabilityForms)),
         [capabilityForms],
@@ -906,6 +932,42 @@ function AdminStoneLibraryContent() {
                             {groupCounts.published} published, {groupCounts.draft} draft, {groupCounts.tbc} TBC,{' '}
                             {groupCounts.archived} archived.
                         </p>
+                        <div className="mt-4">
+                            <CmsStatusCounts
+                                draft={groupCounts.draft + groupCounts.tbc}
+                                published={groupCounts.published}
+                                archived={groupCounts.archived}
+                            />
+                            <p className="mt-2 text-xs font-semibold uppercase tracking-[0.12em] text-black/40">
+                                TBC is counted with draft because it is not public-ready.
+                            </p>
+                        </div>
+                        <label className="mt-4 flex min-h-11 items-center gap-2 border border-black/10 bg-[#f8f9f5] px-3 text-sm text-black">
+                            <Search className="h-4 w-4 shrink-0 text-black/42" />
+                            <input
+                                value={groupSearch}
+                                onChange={(event) => setGroupSearch(event.target.value)}
+                                placeholder="Search stone, key, type, origin"
+                                className="min-w-0 flex-1 bg-transparent text-sm font-medium outline-none placeholder:text-black/36"
+                            />
+                        </label>
+                        <div className="mt-3 grid grid-cols-5 gap-1">
+                            {(['all', 'published', 'draft', 'tbc', 'archived'] as const).map((filter) => (
+                                <button
+                                    key={filter}
+                                    type="button"
+                                    onClick={() => setGroupStatusFilter(filter)}
+                                    className={[
+                                        'min-h-9 rounded border px-1 text-[10px] font-bold uppercase tracking-[0.08em] transition',
+                                        groupStatusFilter === filter
+                                            ? 'border-black bg-black text-white'
+                                            : 'border-black/10 bg-white text-black/55 hover:border-black',
+                                    ].join(' ')}
+                                >
+                                    {filter}
+                                </button>
+                            ))}
+                        </div>
                     </div>
 
                     <div className="max-h-[760px] overflow-auto">
@@ -918,9 +980,9 @@ function AdminStoneLibraryContent() {
                                     />
                                 ))}
                             </div>
-                        ) : groups.length ? (
+                        ) : filteredGroups.length ? (
                             <div className="divide-y divide-black/10">
-                                {groups.map((group) => (
+                                {filteredGroups.map((group) => (
                                     <button
                                         key={group.id}
                                         type="button"
@@ -951,11 +1013,13 @@ function AdminStoneLibraryContent() {
                         ) : (
                             <div className="p-5">
                                 <Archive className="h-5 w-5 text-black" />
-                                <h2 className="mt-5 text-xl font-semibold text-black">No stone records yet</h2>
+                                <h2 className="mt-5 text-xl font-semibold text-black">
+                                    {groups.length ? 'No matching stones' : 'No stone records yet'}
+                                </h2>
                                 <p className="mt-3 text-sm leading-6 text-black/58">
-                                    Create the first stone group, then add variants and finish capabilities. Current
-                                    public Stone Library pages still use static data until the content migration is
-                                    switched on.
+                                    {groups.length
+                                        ? 'Clear the search or choose another status filter.'
+                                        : 'Create the first stone group, then add variants and finish capabilities.'}
                                 </p>
                             </div>
                         )}
@@ -1655,6 +1719,7 @@ function AdminStoneLibraryContent() {
 }
 
 function StatusPill({ status }: { status: StoneStatus }) {
+    const label = status === 'tbc' ? 'Needs confirmation' : status;
     return (
         <span
             className={[
@@ -1668,7 +1733,7 @@ function StatusPill({ status }: { status: StoneStatus }) {
                         : 'border-black/15 bg-white text-black/50',
             ].join(' ')}
         >
-            {status}
+            {label}
         </span>
     );
 }
