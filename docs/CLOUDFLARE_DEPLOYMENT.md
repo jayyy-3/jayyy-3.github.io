@@ -269,8 +269,8 @@ Current project:
 - Build command: `npm run build`
 - Output directory: `dist`
 - Root directory: `/`
-- Latest deployment: `bc830b5f-4c98-46ab-8962-586478ff9259`
-- Latest deployment URL: `https://bc830b5f.urblo.pages.dev`
+- Latest verified CMS code deployment: `bc830b5f-4c98-46ab-8962-586478ff9259`
+- Latest verified CMS code deployment URL: `https://bc830b5f.urblo.pages.dev`
 - Production URL: `https://urblo.pages.dev`
 - Deployment status: `success`
 - Deployment commit: `7a318ab`
