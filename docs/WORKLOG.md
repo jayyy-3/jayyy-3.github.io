@@ -7665,9 +7665,14 @@ Last updated: 2026-06-02
 - In-app Browser local production-preview check on `http://127.0.0.1:4173/`: pass. Desktop header opened successfully, console errors/warnings were empty, visible primary links were Projects, Capabilities, Stone Library, Our Story, and Contact Us, and the visible desktop hamburger menu links were Articles and Products.
 - Playwright local production-preview desktop 1440x900: pass. Primary nav measured from x=736 to x=1310, hamburger x=1334 to x=1382, nav-to-button gap 24px, right gutter 58px, no horizontal overflow, and zero console issues.
 - Playwright local production-preview mobile 390x844: pass. Desktop primary nav was hidden, hamburger right gutter was 20px, opened menu exposed Projects, Capabilities, Stone Library, Our Story, Articles, Products, and Contact Us, no horizontal overflow, and zero console issues.
+- Production deploy check: pass. `https://urblo.com.au/` and `https://www.urblo.com.au/` now serve `/assets/index-DZ_ipi64.js` for commit `f21bbd4`.
+- `npm run agent:cloudflare-preview-smoke -- --base-url https://urblo.com.au`: pass.
+- `npm run agent:cloudflare-preview-smoke -- --base-url https://www.urblo.com.au`: pass.
+- In-app Browser production desktop check on `https://urblo.com.au/`: pass. Visible primary links were Projects, Capabilities, Stone Library, Our Story, and Contact Us; nav-to-button gap was 24px, right gutter was 57px, desktop hamburger exposed only Articles and Products, and console errors/warnings were empty.
+- Playwright production mobile 390x844: pass. Desktop primary nav was hidden, hamburger right gutter was 20px, opened menu exposed Projects, Capabilities, Stone Library, Our Story, Articles, Products, and Contact Us, no horizontal overflow, and zero console issues.
 
 ### Risks and Gaps
-- Production Cloudflare smoke and browser verification are required after this commit deploys.
+- No known header-alignment regression remains after local and production checks.
 
 ### Next Handoff
 - `NEXT-UI-PARITY-001`
