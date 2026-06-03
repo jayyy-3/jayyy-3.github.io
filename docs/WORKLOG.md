@@ -2,14 +2,15 @@
 
 Last updated: 2026-06-03
 
-## Entry - 2026-06-03 (SMTP2GO Notification Path)
+## Entry - 2026-06-03 (SMTP2GO Notification Path Verified)
 
 ### Scope
 - Selected SMTP2GO as the preferred Contact/Sample Request notification provider because Urblo already has a subscription.
 - Updated the Pages Function form handler to prefer `SMTP2GO_API_KEY` through SMTP2GO's HTTP API and retain Resend as a compatibility fallback.
 - Updated source/mock/live readiness checks and launch docs so final email proof uses SMTP2GO variables.
 - Added SMTP2GO DNS records in Cloudflare for return-path, DKIM, and tracking verification.
-- Kept live delivery unproven until Cloudflare Pages has the real SMTP2GO API key, sender, recipient variables, a redeploy, and Jay approval for tagged real-email QA writes.
+- Pushed commit `3408f34` and verified Cloudflare Pages production deployment `0439e4f9-73d4-44d1-ac5a-17b7cf363dfa`.
+- Ran approved tagged production SMTP2GO proof against `https://urblo.com.au` using HTTP submissions plus Supabase connector readback.
 
 ### Changed Files
 - `AGENTS.md`
@@ -37,6 +38,22 @@ Last updated: 2026-06-03
 - Readback confirmed all three records have `proxied = false` and TTL auto.
 - Readback confirmed Google MX records remain `aspmx.l.google.com` plus `alt1` through `alt4`, and apex TXT/SPF records remain present.
 
+### Cloudflare Deployment Evidence
+- Production deployment: `0439e4f9-73d4-44d1-ac5a-17b7cf363dfa`.
+- Deployment URL: `https://0439e4f9.urblo.pages.dev`.
+- Commit: `3408f34a50daac7967e6f66fe260de28f25bc76e`.
+- Deployment status: `success`.
+
+### Live SMTP2GO Proof
+- Marker: `smtp2go-live-1780493701494-8916a935`.
+- Contact HTTP proof against `https://urblo.com.au/api/enquiries`: HTTP `201`, response id `3`, `notificationStatus = sent`.
+- Sample Request HTTP proof against `https://urblo.com.au/api/sample-requests`: HTTP `201`, response sample request id `2`, sample item id `2`, `notificationStatus = sent`.
+- Supabase connector readback: `enquiries.id = 3` exists with matching tagged email/source route and `notification_status = sent`.
+- Supabase connector readback: `sample_requests.id = 2` exists with matching tagged email/source route and `notification_status = sent`.
+- Supabase connector readback: `sample_request_items.id = 2` exists for `sample_request_id = 2`, `quantity = 1`, and notes including Angola Black, Honed, SMTP2GO Verification, and the marker.
+- Supabase connector readback: `admin_audit_events.id = 4` records `enquiry.create` for `enquiries.id = 3` with matching source-route metadata.
+- Supabase connector readback: `admin_audit_events.id = 5` records `sample_request.create` for `sample_requests.id = 2` with matching source-route metadata, `itemId = 2`, and `quantity = 1`.
+
 ### Verification Results
 - `node --check scripts/check-forms-api.mjs`: pass.
 - `node --check scripts/check-forms-api-live.mjs`: pass.
@@ -52,14 +69,15 @@ Last updated: 2026-06-03
 - `npm run lint`: pass.
 - `npx tsc -b`: pass.
 - `npm run agent:smoke`: pass after rerunning with approved local preview-server permission; the first sandboxed run could not reach the Vite preview server.
+- `git push origin main`: pass after GitHub credentials became available; pushed `3408f34` to `origin/main`.
+- `npm run agent:forms-live -- --allow-writes --allow-email --require-email --base-url https://urblo.com.au`: expected local verifier guard stopped before writes because no local `SUPABASE_SERVICE_ROLE_KEY` is available in this workspace. Equivalent approved production HTTP proof plus Supabase connector readback was used instead.
 
 ### Risks and Gaps
-- Real SMTP2GO delivery is not verified until `SMTP2GO_API_KEY`, `LEAD_NOTIFICATION_FROM`, and recipient variables are configured in Cloudflare Pages and `npm run agent:forms-live -- --allow-writes --allow-email --require-email` is run with approval.
-- SMTP2GO still needs to verify the newly added DNS records on its side; until verification passes, SMTP2GO can reject sender-domain mail.
+- Real SMTP2GO delivery is verified for the current provider path; future rechecks with the packaged live verifier require local `SUPABASE_SERVICE_ROLE_KEY` for row readback.
 - Browser-safe Supabase private-row proof, Turnstile proof, and admin lead workflow proof remain separate launch checks.
 
 ### Next Handoff
-- `NEXT-FORMS-EMAIL-NOTIFY-001`
+- `NEXT-FORMS-EMAIL-NOTIFY-001` is complete for the current provider path.
 - `NOW-FORMS-SUPABASE-001`
 - `NOW-ADMIN-AUTH-RLS-001`
 

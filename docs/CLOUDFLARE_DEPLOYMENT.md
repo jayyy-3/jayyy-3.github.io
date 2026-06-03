@@ -7,7 +7,7 @@ This runbook captures the repo-side Cloudflare Pages deployment contract and the
 
 It records the current Cloudflare Pages project and the account-level steps that remain before production cutover.
 
-Current account checkpoint: `urblo.com.au` is readable in Hunter's Cloudflare account (`077afae2c6f4e77badadf21e49e58eb7`), the zone ID is `544d6bf99e48f4b36d7abb24f053ab17`, and the `urblo` Pages project exists with default domain `urblo.pages.dev`. GitHub source is connected to `jayyy-3/jayyy-3.github.io`, the latest production redeploy after server-side form env configuration (`17588cfa-2204-4b95-b6e0-4e3531e366bb`) is successful, deployed preview smoke passes, and basic deployed Contact/Sample Request persistence is verified. Production custom domains `urblo.com.au` and `www.urblo.com.au` are attached and active, and both website DNS records now point to `urblo.pages.dev`; `npm run agent:cloudflare-preview-smoke` passes on both custom domains. SMTP2GO CNAME records for return-path, DKIM, and tracking are added as DNS-only records. Google MX/SPF/TXT records and `qa.urblo.com.au` were not changed.
+Current account checkpoint: `urblo.com.au` is readable in Hunter's Cloudflare account (`077afae2c6f4e77badadf21e49e58eb7`), the zone ID is `544d6bf99e48f4b36d7abb24f053ab17`, and the `urblo` Pages project exists with default domain `urblo.pages.dev`. GitHub source is connected to `jayyy-3/jayyy-3.github.io`, the latest production redeploy after SMTP2GO source deployment (`0439e4f9-73d4-44d1-ac5a-17b7cf363dfa`) is successful, deployed preview smoke passes, and deployed Contact/Sample Request persistence plus SMTP2GO notification delivery are verified. Production custom domains `urblo.com.au` and `www.urblo.com.au` are attached and active, and both website DNS records now point to `urblo.pages.dev`; `npm run agent:cloudflare-preview-smoke` passes on both custom domains. SMTP2GO CNAME records for return-path, DKIM, and tracking are added as DNS-only records. Google MX/SPF/TXT records and `qa.urblo.com.au` were not changed.
 
 Repo-side readiness is checked by `npm run agent:cloudflare-readiness`. This command verifies the build contract, SPA fallback, Pages Functions routing scope, headers, API handler files, environment placeholders, and this runbook without touching Cloudflare account state.
 
@@ -165,7 +165,7 @@ Current `/functions/api` endpoints:
 - Credential-gated live verification can be run with:
   - `npm run agent:forms-live -- --allow-writes` for direct handler verification against local service-role credentials after Jay approves tagged form QA writes.
   - `npm run agent:forms-live -- --allow-writes --require-browser-boundary` for final private-row proof after both service-role and browser-safe Supabase keys are configured and Jay approval is in place.
-  - `npm run agent:forms-live -- --allow-writes --allow-email --require-email` for final email proof after SMTP2GO sender/recipient variables are configured and Jay approves tagged form QA writes. This asserts both valid live submissions store `notification_status = 'sent'`.
+  - SMTP2GO email proof is verified on production for the current provider path: approved tagged Contact/Sample Request submissions against `https://urblo.com.au` returned `notificationStatus = sent`, and Supabase readback confirmed both stored lead rows are `sent`.
   - `npm run agent:forms-live -- --allow-writes --require-turnstile --turnstile-token <token>` for final Turnstile proof after the public Turnstile site key, server-side Turnstile secret, and a valid token are available for the target environment. The verifier refuses to start without `VITE_TURNSTILE_SITE_KEY`, then asserts both valid live submissions store `turnstile_success = true`.
   - `npm run agent:forms-live -- --allow-writes --base-url https://<preview>.pages.dev` for deployed endpoint verification, after the Pages environment has the service-role key and Jay approves tagged form QA writes against that target. The base URL must be an origin only; placeholders or URLs with path/query/hash fail before any live writes.
 - The live verification command creates tagged test enquiry and sample-request rows, verifies their `admin_audit_events`, verifies invalid payloads create no rows, checks response-vs-stored notification status, and keeps the test rows until Jay approves cleanup. With `--require-browser-boundary`, it also proves those private lead rows are not anonymously readable through browser-key REST access.
@@ -224,13 +224,14 @@ Run from the repo root before deploying:
 - `npm run agent:check`
 - `git diff --check`
 
-After SMTP2GO notification variables are configured, run:
-- `npm run agent:forms-live -- --allow-writes --allow-email --require-email` to prove lead emails are sent to `info@urblo.com.au` or the approved replacement recipient
+SMTP2GO notification proof has been run for the current provider path:
+- Approved tagged HTTP submissions against `https://urblo.com.au` returned `notificationStatus = sent`.
+- Supabase connector readback confirmed `enquiries.id = 3`, `sample_requests.id = 2`, and `sample_request_items.id = 2`, with both stored lead rows at `notification_status = sent`.
 
 After remaining form secrets are configured and Jay approves tagged form QA writes, run:
 - `npm run agent:forms-live -- --allow-writes`
 - `npm run agent:forms-live -- --allow-writes --require-browser-boundary` after the browser-safe Supabase key is configured
-- `npm run agent:forms-live -- --allow-writes --allow-email --require-email` after SMTP2GO sender/recipient variables are configured and the team is ready to send real verification emails
+- Re-run `npm run agent:forms-live -- --allow-writes --allow-email --require-email` only when intentionally rechecking real notification delivery with local service-role verification credentials available.
 - `npm run agent:forms-live -- --allow-writes --require-turnstile --turnstile-token <token>` after the Turnstile site key/secret are configured and a valid target-environment token is available
 
 For deployed Pages preview form verification after Jay approves tagged writes against that target, run:
@@ -262,18 +263,18 @@ Current project:
 - Build command: `npm run build`
 - Output directory: `dist`
 - Root directory: `/`
-- Latest deployment: `17588cfa-2204-4b95-b6e0-4e3531e366bb`
-- Latest deployment URL: `https://17588cfa.urblo.pages.dev`
+- Latest deployment: `0439e4f9-73d4-44d1-ac5a-17b7cf363dfa`
+- Latest deployment URL: `https://0439e4f9.urblo.pages.dev`
 - Production URL: `https://urblo.pages.dev`
 - Deployment status: `success`
-- Deployment commit: `9a1e9c6`
+- Deployment commit: `3408f34`
 
 The next account-level action is to configure browser-safe Supabase variables needed for private-row boundary and admin verification.
 
 Still pending after preview validation:
 - Cloudflare Pages production already has `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`; preview environment variables remain empty;
-- adding browser-safe Supabase, Turnstile, and SMTP2GO variables as appropriate;
-- running remaining live form proofs for browser-key private-row denial, real notification delivery, and Turnstile after those inputs exist;
+- adding browser-safe Supabase and Turnstile variables as appropriate;
+- running remaining live form proofs for browser-key private-row denial and Turnstile after those inputs exist;
 - configuring first-admin/admin browser QA inputs;
 - adding the production custom domain only after launch approval;
 - DNS cutover and rollback testing only after explicit approval.

@@ -305,7 +305,7 @@
     },
     {
       "id": "NEXT-FORMS-EMAIL-NOTIFY-001",
-      "status": "now",
+      "status": "done",
       "priority": 4.2,
       "summary": "Configure SMTP2GO form email notifications to info@urblo.com.au.",
       "files": [
@@ -327,7 +327,9 @@
         "2026-06-03: Jay confirmed Urblo has an SMTP2GO subscription, so SMTP2GO is the selected provider path. The form handler now prefers `SMTP2GO_API_KEY` and falls back to `RESEND_API_KEY` for compatibility.",
         "Notification sender/recipient env remains `LEAD_NOTIFICATION_FROM`, `LEAD_NOTIFICATION_TO`, `ENQUIRY_NOTIFICATION_TO`, and `SAMPLE_REQUEST_NOTIFICATION_TO`; `RESEND_FROM_EMAIL` stays a sender compatibility alias.",
         "Cloudflare Email Routing is not a replacement for active transactional sending from the form handler.",
-        "Until SMTP2GO variables are configured in Cloudflare Pages and real tagged QA emails are approved/proven, form rows persist to Supabase with `notification_status = not_required`."
+        "2026-06-03: SMTP2GO DNS-only CNAME records were added in Cloudflare for return-path, DKIM, and tracking: `em905485.urblo.com.au`, `s905485._domainkey.urblo.com.au`, and `link.urblo.com.au`.",
+        "2026-06-03: Commit `3408f34` deployed successfully to Cloudflare Pages production deployment `0439e4f9-73d4-44d1-ac5a-17b7cf363dfa` after SMTP2GO source support was pushed.",
+        "2026-06-03: Approved tagged production SMTP2GO proof against `https://urblo.com.au` created `enquiries.id = 3`, `sample_requests.id = 2`, `sample_request_items.id = 2`, and `admin_audit_events.id = 4/5`; both valid responses returned `notificationStatus = sent`, and Supabase readback confirmed both stored lead rows have `notification_status = sent`."
       ],
       "acceptance": [
         "Approved email provider is selected.",
@@ -338,8 +340,8 @@
       ],
       "verification": [
         "node scripts/check-forms-api.mjs",
-        "npm run agent:forms-live -- --allow-writes --allow-email --require-email",
-        "Supabase MCP: execute_sql confirms live proof rows store notification_status = sent",
+        "Approved production HTTP proof against https://urblo.com.au returned notificationStatus = sent for Contact and Sample Request",
+        "Supabase MCP: execute_sql confirmed enquiries.id = 3 and sample_requests.id = 2 store notification_status = sent",
         "npm run agent:check",
         "git diff --check"
       ]
@@ -361,7 +363,8 @@
         "2026-05-25: Contact now blocks empty local email drafts unless the visitor provides project notes plus either email or phone. This is a runtime guardrail, not a substitute for Supabase-backed lead persistence.",
         "2026-05-26: Execute through NOW-SUPABASE-FOUNDATION-001, NOW-SUPABASE-SEED-BASELINE-001, and NOW-FORMS-BACKEND-001 so database safety is verified before public submit behavior changes.",
         "2026-05-27: Main Contact and Sample Request submit source no longer depends on mailto.",
-        "2026-06-02: Basic deployed Contact and Sample Request persistence is verified on `https://urblo.pages.dev`; valid tagged submissions created lead/sample/audit rows and invalid tagged submissions created none. Notification acceptance, Turnstile, browser-key private-row denial, and admin-visible lead workflow remain pending.",
+        "2026-06-02: Basic deployed Contact and Sample Request persistence is verified on `https://urblo.pages.dev`; valid tagged submissions created lead/sample/audit rows and invalid tagged submissions created none. Turnstile, browser-key private-row denial, and admin-visible lead workflow remain pending.",
+        "2026-06-03: SMTP2GO notification acceptance is verified on `https://urblo.com.au`; tagged Contact and Sample Request submissions returned and stored `notification_status = sent`.",
         "2026-05-29: Final notification and Turnstile acceptance are now guarded by explicit live verifier flags: `--allow-email --require-email` for sent notification_status, and `--require-turnstile --turnstile-token <token>` for a configured public Turnstile site key plus turnstile_success = true.",
         "2026-05-29: The public Contact form has an optional Cloudflare Turnstile widget behind `VITE_TURNSTILE_SITE_KEY`; production Turnstile still requires the server-side secret and final live proof token."
       ],
@@ -375,7 +378,7 @@
         "npm run lint",
         "npx tsc -b",
         "npm run agent:smoke",
-        "npm run agent:forms-live -- --allow-writes --allow-email --require-email (after SMTP2GO variables and Jay approval are available)",
+        "SMTP2GO live proof: production HTTP submissions and Supabase readback confirmed notification_status = sent on 2026-06-03",
         "npm run agent:forms-live -- --allow-writes --require-turnstile --turnstile-token <token> (after VITE_TURNSTILE_SITE_KEY, Turnstile secret/token, and Jay approval are available)"
       ]
     },
