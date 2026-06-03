@@ -1,6 +1,42 @@
 # WORKLOG - Urblo Execution Log
 
-Last updated: 2026-06-03
+Last updated: 2026-06-04
+
+## Entry - 2026-06-04 (Production Active Admin Browser QA Passed)
+
+### Scope
+- Ran no-write active-admin browser QA against `https://urblo.com.au` for `info@urblo.com.au`.
+- Installed the local Playwright Firefox runtime needed by the verifier.
+- Used a browser-safe Supabase publishable key and a one-time shell/session credential path; no secrets were written to repo files or docs.
+- Updated launch harness docs so active-admin browser QA is no longer listed as a blocker.
+
+### Verification
+- `curl -I https://urblo.com.au/`: HTTP `200` when run with external network access.
+- `npm run agent:admin-auth-browser -- --allow-login --strict --base-url https://urblo.com.au`: pass.
+- The verifier reported 9 authenticated admin routes checked and wrote ignored screenshots under `.tmp/admin-auth-browser/screenshots`.
+
+### Screenshots
+- `.tmp/admin-auth-browser/screenshots/login.png`
+- `.tmp/admin-auth-browser/screenshots/admin.png`
+- `.tmp/admin-auth-browser/screenshots/admin-leads.png`
+- `.tmp/admin-auth-browser/screenshots/admin-media.png`
+- `.tmp/admin-auth-browser/screenshots/admin-settings.png`
+- `.tmp/admin-auth-browser/screenshots/admin-stone-library.png`
+- `.tmp/admin-auth-browser/screenshots/admin-projects.png`
+- `.tmp/admin-auth-browser/screenshots/admin-products.png`
+- `.tmp/admin-auth-browser/screenshots/admin-articles.png`
+- `.tmp/admin-auth-browser/screenshots/admin-audit.png`
+- `.tmp/admin-auth-browser/screenshots/signed-out.png`
+
+### Risks and Gaps
+- Admin CRUD/live lead workflow verification is still pending explicit tagged-write approval.
+- Optional Storage upload proof still requires intentional `--include-storage`.
+- Turnstile remains unconfigured/unverified.
+- The temporary admin password used for QA should be rotated after launch hardening.
+
+### Next Handoff
+- Run `npm run agent:admin-crud-live` in plan-only mode, then run `npm run agent:admin-crud-live -- --allow-writes` only after Jay approves tagged admin QA writes.
+- Decide whether Turnstile proof is required before launch and configure its site key/secret/token path if yes.
 
 ## Entry - 2026-06-03 (First Admin Profile Bootstrapped)
 

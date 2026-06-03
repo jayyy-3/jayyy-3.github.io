@@ -1,6 +1,6 @@
 # Urblo Web - Architecture and Contracts
 
-Last updated: 2026-06-03
+Last updated: 2026-06-04
 
 ## System Boundary
 - Current implementation: frontend-only React application shipped as static assets.
@@ -207,7 +207,7 @@ Last updated: 2026-06-03
   - `npm run agent:admin-auth-browser` => `node scripts/check-admin-auth-browser.mjs`
   - Loads local environment values from `.env.local`, `.env`, `.dev.vars`, and the shell without printing secret values.
   - Default mode is plan-only and prints required variable names/sources. It does not sign in unless `--allow-login` is supplied.
-  - Live mode starts built Vite preview by default, signs in through `/admin/login` with `URBLO_ADMIN_EMAIL` and `URBLO_ADMIN_PASSWORD`, verifies authenticated admin route shells in Firefox, verifies Sign out returns the protected route to `/admin/login?next=...`, captures ignored screenshots under `.tmp/admin-auth-browser/screenshots`, and creates no content rows, Storage objects, or audit events. `VITE_SUPABASE_URL` is optional because the browser client defaults to the Urblo project URL.
+  - Live mode starts built Vite preview by default, signs in through `/admin/login` with `URBLO_ADMIN_EMAIL` and `URBLO_ADMIN_PASSWORD`, verifies authenticated admin route shells in Firefox, verifies Sign out returns the protected route to `/admin/login?next=...`, captures ignored screenshots under `.tmp/admin-auth-browser/screenshots`, and creates no content rows, Storage objects, or audit events. `VITE_SUPABASE_URL` is optional because the browser client defaults to the Urblo project URL. The 2026-06-04 production run against `https://urblo.com.au` passed for `info@urblo.com.au`, covering all 9 authenticated admin route shells plus Sign out.
   - Unauthorized-profile mode uses `--allow-login --expect-unauthorized --strict` with `URBLO_UNPROFILED_EMAIL` and `URBLO_UNPROFILED_PASSWORD` for a valid Auth user that has no active `admin_profiles` row; it must land on `/admin/unauthorized`, then probe all launch-critical admin routes while signed in and keep them on `/admin/unauthorized` without rendering private admin module content. It still creates no rows or Storage objects.
   - Use `--base-url <origin>` to run the same authenticated browser check against another preview origin after browser-safe Supabase config exists there.
 - Admin CRUD live verification:
@@ -549,8 +549,8 @@ Route state contract:
 
 ## Known Architecture Risks
 - Cloudflare + Supabase is the approved launch target, and Supabase foundation schema/RLS plus baseline seeds are applied. Form endpoint source, basic deployed row/audit creation, SMTP2GO notification delivery, and browser-key private-row denial are verified; final form proof still needs Turnstile and admin lead workflow verification.
-- Supabase Auth shell source now exists, the browser-safe key is configured in production, and first-admin data-layer bootstrap is complete for `info@urblo.com.au`; live admin access still needs authenticated browser verification with the real admin password/session.
-- Supabase Storage policies and `/admin/media` source are implemented, but live upload verification still requires an authenticated admin/editor browser session. Admin profile source management and owner-role RLS hardening are implemented, but live team-management verification still requires owner/admin browser QA. Source CRUD screens now exist for Stone Library, Projects, Products, Articles, Leads, and Audit; Supabase cannot replace static/file-backed public content until live save verification, approved content import, and public read cutover are completed.
+- Supabase Auth shell source now exists, the browser-safe key is configured in production, first-admin data-layer bootstrap is complete for `info@urblo.com.au`, and active-admin browser QA has passed; live admin write/workflow verification still needs explicit tagged-write approval.
+- Supabase Storage policies and `/admin/media` source are implemented, but live upload verification still requires explicit tagged-write approval. Admin profile source management and owner-role RLS hardening are implemented, but live team-management verification still requires approval-gated owner/admin write QA. Source CRUD screens now exist for Stone Library, Projects, Products, Articles, Leads, and Audit; Supabase cannot replace static/file-backed public content until live save verification, approved content import, and public read cutover are completed.
 - Cloudflare Pages repo-side clean URL configuration is in place, the `urblo` Pages project is deployed on `urblo.pages.dev`, production custom domains `urblo.com.au` and `www.urblo.com.au` are cut over, and deployed smoke passes on Pages plus both custom domains. Rollback DNS values are recorded in `docs/CLOUDFLARE_DEPLOYMENT.md`.
 - Sample Request now routes through the Contact page sample-request mode and Pages Function source, and basic production persistence through the atomic request/item path is verified. SMTP2GO email and browser-key private-row denial are verified; Turnstile and admin workflow proof remain open.
 - Public Projects, Stone Library, Products, and Articles remain file-backed until approved static-to-Supabase content import and public read cutover are implemented and verified.

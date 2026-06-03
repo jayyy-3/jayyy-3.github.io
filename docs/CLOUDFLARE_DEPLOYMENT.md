@@ -1,6 +1,6 @@
 # Urblo Cloudflare Pages Deployment Runbook
 
-Last updated: 2026-06-03
+Last updated: 2026-06-04
 
 ## Purpose
 This runbook captures the repo-side Cloudflare Pages deployment contract and the manual account steps required before production cutover.
@@ -244,6 +244,9 @@ For active-admin browser QA after the first admin profile is configured, run:
 - `npm run agent:admin-auth-browser -- --allow-login --strict`
 - `npm run agent:admin-auth-browser -- --allow-login --expect-unauthorized --strict` after a valid unprofiled Auth test user is available; this also probes all launch-critical admin routes and keeps them unauthorized without private module content
 
+Active-admin browser QA has been run for the current production path:
+- `npm run agent:admin-auth-browser -- --allow-login --strict --base-url https://urblo.com.au` passed on 2026-06-04 for `info@urblo.com.au`, covering all 9 authenticated admin route shells plus Sign out with no content writes.
+
 After a real owner/admin browser session is available and tagged QA writes are approved, run:
 - `npm run agent:admin-crud-live -- --allow-writes`
 - `npm run agent:admin-crud-live -- --allow-writes --include-storage` when verifying Storage upload policy too.
@@ -266,13 +269,12 @@ Current project:
 - Deployment status: `success`
 - Deployment commit: `7100bba`
 
-The next account-level action is active-admin browser QA using the real `info@urblo.com.au` password/session supplied outside chat; first Supabase Auth user/profile bootstrap is complete.
+The next account-level action is approval-gated admin workflow/content write QA; first Supabase Auth user/profile bootstrap and active-admin browser QA are complete.
 
 Still pending after preview validation:
 - Cloudflare Pages production already has `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`; preview environment variables remain empty;
 - adding Turnstile variables if bot-protection proof is required before launch;
 - running the remaining Turnstile live form proof after those inputs exist;
-- configuring active-admin browser QA inputs;
 - running tagged admin workflow/content QA only after explicit approval and a real owner/admin session.
 
 ## Sources
