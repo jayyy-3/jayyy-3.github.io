@@ -2,6 +2,44 @@
 
 Last updated: 2026-06-03
 
+## Entry - 2026-06-03 (First Admin Profile Bootstrapped)
+
+### Scope
+- Verified Supabase Auth contains confirmed user `info@urblo.com.au`.
+- Created the first active admin profile linked to that Auth user with role `owner`.
+- Recorded `admin_profile.bootstrap` in `admin_audit_events`.
+- Verified admin readiness data with Supabase connector and browser-key REST boundary checks.
+- Did not run browser login QA because no admin password/session was available to Codex.
+
+### Changed Files
+- `AGENTS.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Supabase Evidence
+- Auth user: `info@urblo.com.au`, user id `74b9e1d1-5f29-482c-836e-4feec8cd0087`, email confirmed on 2026-06-03.
+- Admin profile: `info@urblo.com.au`, display name `Urblo Admin`, role `owner`, `is_active = true`.
+- Active admin profile count: `1`.
+- Bootstrap audit: `admin_audit_events.id = 8`, action `admin_profile.bootstrap`, metadata includes role `owner` and source `codex-first-admin-bootstrap`.
+- Baseline seeds remain present: 12 published finish definitions and one published site settings row.
+
+### Browser-Key Readiness Evidence
+- Production browser key type: publishable.
+- Anonymous browser-key REST read of published `site_settings`: HTTP `200`, one row.
+- Anonymous browser-key REST read of published `finish_definitions`: HTTP `200`, 12 rows.
+- Anonymous browser-key REST read of `admin_profiles`: HTTP `401`, denied.
+
+### Risks and Gaps
+- Active-admin browser login QA is still pending because Codex does not have `URBLO_ADMIN_PASSWORD` or an admin access token.
+- Admin lead workflow/export QA and admin CRUD live verification remain pending until an authenticated owner/admin browser session is available and Jay approves tagged admin QA writes.
+- Turnstile remains unconfigured/unverified.
+
+### Next Handoff
+- Provide admin credentials outside chat via local `.env.local`/shell variables, then run `npm run agent:admin-auth-browser -- --allow-login --strict --base-url https://urblo.com.au`.
+- After no-write admin browser QA passes, run admin lead workflow/admin CRUD live checks only after explicit tagged-write approval.
+
 ## Entry - 2026-06-03 (Supabase Browser-Key Boundary Verified)
 
 ### Scope

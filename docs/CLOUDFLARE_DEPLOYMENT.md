@@ -170,9 +170,8 @@ Current `/functions/api` endpoints:
   - `npm run agent:forms-live -- --allow-writes --base-url https://<preview>.pages.dev` for deployed endpoint verification, after the Pages environment has the service-role key and Jay approves tagged form QA writes against that target. The base URL must be an origin only; placeholders or URLs with path/query/hash fail before any live writes.
 - The live verification command creates tagged test enquiry and sample-request rows, verifies their `admin_audit_events`, verifies invalid payloads create no rows, checks response-vs-stored notification status, and keeps the test rows until Jay approves cleanup. With `--require-browser-boundary`, it also proves those private lead rows are not anonymously readable through browser-key REST access.
 - Admin route tests require a browser-safe Supabase key, a Supabase Auth user, and a matching active `admin_profiles` row.
-- Before creating/upserting the first admin profile or sending an invitation, run `npm run agent:first-admin-bootstrap -- --verify-only --admin-email <first-admin-email>` with the service-role key to inspect the existing Auth/profile/seed state.
-- First-admin profile/invite writes require Jay approval, `--allow-writes`, and a matching `--confirm-email`: `npm run agent:first-admin-bootstrap -- --allow-writes --admin-email <first-admin-email> --confirm-email <first-admin-email>`. Add `--invite` only when Jay explicitly approves sending the Supabase Auth invitation.
-- Before browser admin QA, run `npm run agent:admin-live-readiness -- --admin-email <first-admin-email>` with a real email address to verify the browser-safe key, service-role verification key, active admin profile, and baseline seed rows without mutating Supabase.
+- First-admin data-layer bootstrap is complete for `info@urblo.com.au`: the confirmed Auth user has one active `owner` profile, and `admin_audit_events.id = 8` records `admin_profile.bootstrap`.
+- Before browser admin QA, run `npm run agent:admin-live-readiness -- --admin-email info@urblo.com.au` with local verification credentials when intentionally rechecking the browser-safe key, service-role verification key, active admin profile, and baseline seed rows without mutating Supabase.
 - Before live admin save/export QA, run `npm run agent:admin-crud-live` in plan-only mode, then run `npm run agent:admin-crud-live -- --allow-writes` only after a real owner/admin Supabase Auth session is available and Jay approves tagged QA writes. Use `--include-storage` when intentionally verifying private Storage object upload policy.
 - Settings save tests require an active owner/admin profile because `site_settings` write RLS is owner/admin only. Admin profile save tests require existing Supabase Auth users and must verify owner-role changes are owner-protected.
 - Media upload/save tests require an active owner/admin/editor profile because Storage object writes and `media_assets` mutations are admin/editor only.
@@ -240,10 +239,8 @@ For deployed Pages preview form verification after Jay approves tagged writes ag
 For deployed Pages preview route/asset/redirect/API safe-failure smoke, run:
 - `npm run agent:cloudflare-preview-smoke -- --base-url https://<preview>.pages.dev`
 
-After admin browser-safe keys and the first admin profile are configured, run:
-- `npm run agent:first-admin-bootstrap -- --verify-only --admin-email <first-admin-email>`
-- `npm run agent:first-admin-bootstrap -- --allow-writes --admin-email <first-admin-email> --confirm-email <first-admin-email>` only after Jay approves creating/upserting the first profile or sending an invite
-- `npm run agent:admin-live-readiness -- --admin-email <first-admin-email>`
+For active-admin browser QA after the first admin profile is configured, run:
+- `npm run agent:admin-live-readiness -- --admin-email info@urblo.com.au` when intentionally rechecking the read-only readiness proof with local verification credentials
 - `npm run agent:admin-auth-browser -- --allow-login --strict`
 - `npm run agent:admin-auth-browser -- --allow-login --expect-unauthorized --strict` after a valid unprofiled Auth test user is available; this also probes all launch-critical admin routes and keeps them unauthorized without private module content
 
@@ -269,15 +266,14 @@ Current project:
 - Deployment status: `success`
 - Deployment commit: `7100bba`
 
-The next account-level action is to create/invite the first Supabase Auth user and link an active owner/admin `admin_profiles` row.
+The next account-level action is active-admin browser QA using the real `info@urblo.com.au` password/session supplied outside chat; first Supabase Auth user/profile bootstrap is complete.
 
 Still pending after preview validation:
 - Cloudflare Pages production already has `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`; preview environment variables remain empty;
 - adding Turnstile variables if bot-protection proof is required before launch;
 - running the remaining Turnstile live form proof after those inputs exist;
-- configuring first-admin/admin browser QA inputs;
-- adding the production custom domain only after launch approval;
-- DNS cutover and rollback testing only after explicit approval.
+- configuring active-admin browser QA inputs;
+- running tagged admin workflow/content QA only after explicit approval and a real owner/admin session.
 
 ## Sources
 - Cloudflare Pages redirects: https://developers.cloudflare.com/pages/configuration/redirects/
