@@ -1,11 +1,13 @@
 # Urblo Cloudflare Pages Deployment Runbook
 
-Last updated: 2026-05-29
+Last updated: 2026-06-02
 
 ## Purpose
 This runbook captures the repo-side Cloudflare Pages deployment contract and the manual account steps required before production cutover.
 
-It does not prove that the Cloudflare Pages project already exists. Account-level setup must still be completed in the Cloudflare dashboard.
+It records the current Cloudflare Pages project and the account-level steps that remain before production cutover.
+
+Current account checkpoint: `urblo.com.au` is readable in Hunter's Cloudflare account (`077afae2c6f4e77badadf21e49e58eb7`), the zone ID is `544d6bf99e48f4b36d7abb24f053ab17`, and the `urblo` Pages project exists with default domain `urblo.pages.dev`. GitHub source is connected to `jayyy-3/jayyy-3.github.io`, the latest production redeploy after server-side form env configuration (`17588cfa-2204-4b95-b6e0-4e3531e366bb`) is successful, deployed preview smoke passes, and basic deployed Contact/Sample Request persistence is verified. Production custom domains `urblo.com.au` and `www.urblo.com.au` are attached and active, and both website DNS records now point to `urblo.pages.dev`; `npm run agent:cloudflare-preview-smoke` passes on both custom domains. Google MX/SPF/TXT records and `qa.urblo.com.au` were not changed.
 
 Repo-side readiness is checked by `npm run agent:cloudflare-readiness`. This command verifies the build contract, SPA fallback, Pages Functions routing scope, headers, API handler files, environment placeholders, and this runbook without touching Cloudflare account state.
 
@@ -157,6 +159,7 @@ Current `/functions/api` endpoints:
 - Static routes like `/projects` and `/assets/...` should not invoke Functions.
 - Cloudflare analytics should show static traffic and API traffic separately.
 - Valid form tests require `SUPABASE_SERVICE_ROLE_KEY` in the Pages Function environment.
+- Basic deployed form persistence is already verified on `https://urblo.pages.dev` for one tagged valid enquiry and one tagged valid sample request, including the sample item and source-route audit rows; invalid tagged payloads created no rows or audit events. The QA rows are retained for auditability until Jay approves cleanup.
 - Credential-gated live verification can be run with:
   - `npm run agent:forms-live -- --allow-writes` for direct handler verification against local service-role credentials after Jay approves tagged form QA writes.
   - `npm run agent:forms-live -- --allow-writes --require-browser-boundary` for final private-row proof after both service-role and browser-safe Supabase keys are configured and Jay approval is in place.
@@ -179,12 +182,25 @@ Current `/functions/api` endpoints:
 - Audit visibility tests require an active owner/admin profile because `admin_audit_events` is private operational history.
 
 ### 5. Custom Domain Cutover
-Before switching production DNS:
-- Confirm current DNS records and owner.
-- Lower TTL if needed.
-- Confirm email DNS records are not touched.
-- Confirm old WordPress media dependency plan, especially `/wp-content/uploads` URLs.
-- Keep GitHub Pages or the old site available as rollback until the new site has passed production smoke tests.
+Current custom-domain state:
+- `urblo.com.au` is attached to the `urblo` Pages project.
+- `www.urblo.com.au` is attached to the `urblo` Pages project.
+- Both custom domains are active in the Cloudflare Pages domain API.
+- Apex website DNS record is now `CNAME urblo.com.au -> urblo.pages.dev`, proxied, TTL auto.
+- `www` website DNS record is now `CNAME www.urblo.com.au -> urblo.pages.dev`, proxied, TTL auto.
+- Google Workspace MX records, apex TXT/SPF/verification records, NS records, and `qa.urblo.com.au` were not changed.
+- `npm run agent:cloudflare-preview-smoke -- --base-url https://urblo.com.au` passes.
+- `npm run agent:cloudflare-preview-smoke -- --base-url https://www.urblo.com.au` passes.
+
+Original website DNS backup for rollback:
+- Apex record id `9bc69b26cbeef071e02f4a1bd5f715e7` was `A urblo.com.au -> 159.198.65.164`, proxied, TTL auto.
+- `www` record id `4ce8ffa7ee003ae79acac67096ca33ab` was `CNAME www.urblo.com.au -> urblo.com.au`, proxied, TTL auto.
+- `qa.urblo.com.au` remains `A qa.urblo.com.au -> 159.198.65.164`, proxied, TTL auto, and can be used as an old-site reference while it remains unchanged.
+
+Rollback DNS action if the launch must be reversed:
+- Overwrite apex record `9bc69b26cbeef071e02f4a1bd5f715e7` back to `type = A`, `name = urblo.com.au`, `content = 159.198.65.164`, `proxied = true`, `ttl = 1`.
+- Overwrite `www` record `4ce8ffa7ee003ae79acac67096ca33ab` back to `type = CNAME`, `name = www.urblo.com.au`, `content = urblo.com.au`, `proxied = true`, `ttl = 1`.
+- Do not touch MX, TXT, SPF, NS, or `qa` records during rollback.
 
 ### 6. Rollback
 Rollback options:
@@ -202,7 +218,10 @@ Run from the repo root before deploying:
 - `npm run agent:check`
 - `git diff --check`
 
-After form secrets are configured and Jay approves tagged form QA writes, run:
+After email notification service is chosen and configured, run:
+- `npm run agent:forms-live -- --allow-writes --allow-email --require-email` to prove lead emails are sent to `info@urblo.com.au` or the approved replacement recipient
+
+After remaining form secrets are configured and Jay approves tagged form QA writes, run:
 - `npm run agent:forms-live -- --allow-writes`
 - `npm run agent:forms-live -- --allow-writes --require-browser-boundary` after the browser-safe Supabase key is configured
 - `npm run agent:forms-live -- --allow-writes --allow-email --require-email` after Resend sender/recipient variables are configured and the team is ready to send real verification emails
@@ -225,15 +244,33 @@ After a real owner/admin browser session is available and tagged QA writes are a
 - `npm run agent:admin-crud-live -- --allow-writes`
 - `npm run agent:admin-crud-live -- --allow-writes --include-storage` when verifying Storage upload policy too.
 
-## Current Blocker
-Repo-side Cloudflare Pages preparation can be committed now.
+## Current Account State
+Repo-side Cloudflare Pages preparation is complete, account read access is verified for the production zone, and the Hunter-account Pages project `urblo` now exists with a successful production deployment.
 
-The following still require account access:
-- creating the Cloudflare Pages project;
-- adding environment variables;
-- validating the `*.pages.dev` preview URL with `npm run agent:cloudflare-preview-smoke -- --base-url https://<preview>.pages.dev`;
-- adding the production custom domain;
-- DNS cutover and rollback testing.
+Current project:
+- Account: Hunter (`077afae2c6f4e77badadf21e49e58eb7`)
+- Project: `urblo`
+- Project ID: `3c4c5af3-a2a8-4058-bc0e-0ee6e8cfcaca`
+- Default domain: `urblo.pages.dev`
+- Production branch: `main`
+- Build command: `npm run build`
+- Output directory: `dist`
+- Root directory: `/`
+- Latest deployment: `17588cfa-2204-4b95-b6e0-4e3531e366bb`
+- Latest deployment URL: `https://17588cfa.urblo.pages.dev`
+- Production URL: `https://urblo.pages.dev`
+- Deployment status: `success`
+- Deployment commit: `9a1e9c6`
+
+The next account-level action is to configure browser-safe Supabase variables needed for private-row boundary and admin verification.
+
+Still pending after preview validation:
+- Cloudflare Pages production already has `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`; preview environment variables remain empty;
+- adding browser-safe Supabase, Turnstile, and Resend variables as appropriate;
+- running remaining live form proofs for browser-key private-row denial, real notification delivery, and Turnstile after those inputs exist;
+- configuring first-admin/admin browser QA inputs;
+- adding the production custom domain only after launch approval;
+- DNS cutover and rollback testing only after explicit approval.
 
 ## Sources
 - Cloudflare Pages redirects: https://developers.cloudflare.com/pages/configuration/redirects/

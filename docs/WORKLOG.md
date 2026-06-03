@@ -2,6 +2,255 @@
 
 Last updated: 2026-06-02
 
+## Entry - 2026-06-02 (Production Domain Cutover)
+
+### Scope
+- Added production custom domains `urblo.com.au` and `www.urblo.com.au` to the Cloudflare Pages project `urblo`.
+- Cut over apex and `www` website DNS to Cloudflare Pages.
+- Preserved the previous website DNS values in Cloudflare DNS record comments and in `docs/CLOUDFLARE_DEPLOYMENT.md` for rollback.
+- Kept Google Workspace MX records, apex TXT/SPF/verification records, NS records, and `qa.urblo.com.au` unchanged.
+- Recorded the post-launch email-notification follow-up: Contact and Sample Request notifications should eventually go to `info@urblo.com.au`, but provider selection/configuration is deferred.
+
+### Changed Files
+- `AGENTS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/CLOUDFLARE_DEPLOYMENT.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Cloudflare Evidence
+- Account: Hunter (`077afae2c6f4e77badadf21e49e58eb7`)
+- Zone: `urblo.com.au` (`544d6bf99e48f4b36d7abb24f053ab17`)
+- Pages project: `urblo`
+- Custom domains added:
+  - `urblo.com.au`
+  - `www.urblo.com.au`
+- Current apex website DNS: `CNAME urblo.com.au -> urblo.pages.dev`, proxied, TTL auto.
+- Current `www` website DNS: `CNAME www.urblo.com.au -> urblo.pages.dev`, proxied, TTL auto.
+- Rollback apex website DNS: record id `9bc69b26cbeef071e02f4a1bd5f715e7`, `A urblo.com.au -> 159.198.65.164`, proxied, TTL auto.
+- Rollback `www` website DNS: record id `4ce8ffa7ee003ae79acac67096ca33ab`, `CNAME www.urblo.com.au -> urblo.com.au`, proxied, TTL auto.
+- Unchanged reference old-site DNS: `qa.urblo.com.au -> 159.198.65.164`, proxied, TTL auto.
+- Google MX records remained pointed at `aspmx.l.google.com` and `alt1` through `alt4`.
+
+### Verification Results
+- `curl -I https://urblo.com.au`: HTTP `200`.
+- `curl -I https://www.urblo.com.au`: HTTP `200`.
+- `curl -I https://urblo.com.au/stone-library/angola-black`: HTTP `200`.
+- `curl -I https://www.urblo.com.au/contact`: HTTP `200`.
+- `curl -I https://urblo.com.au/api/enquiries`: HTTP `405`, expected safe-failure for GET.
+- `npm run agent:cloudflare-preview-smoke -- --base-url https://urblo.com.au`: pass.
+- `npm run agent:cloudflare-preview-smoke -- --base-url https://www.urblo.com.au`: pass.
+- Cloudflare Pages domain API: `urblo.com.au` and `www.urblo.com.au` are both `active`; verification and HTTP validation are both `active`.
+
+### Risks and Gaps
+- Email notification is still not configured; form rows persist to Supabase and currently use `notification_status = not_required`.
+- Browser-safe Supabase/admin readiness remains pending.
+- Turnstile proof remains pending.
+- If rollback is needed, use the DNS values recorded above and in `docs/CLOUDFLARE_DEPLOYMENT.md`; do not touch MX/TXT/SPF/NS records.
+
+### Next Handoff
+- `NOW-ADMIN-AUTH-RLS-001`
+- `NOW-FORMS-SUPABASE-001`
+- `NEXT-FORMS-EMAIL-NOTIFY-001`
+
+## Entry - 2026-06-02 (Cloudflare Deployed Form Persistence Verified)
+
+### Scope
+- Ran approved tagged live form QA writes against the deployed Cloudflare Pages production URL after the server-side Supabase env vars were configured and redeployed.
+- Verified Contact and Sample Request valid submissions persisted to Supabase through deployed Pages Functions.
+- Verified invalid tagged submissions returned validation failures and created no matching lead or audit rows.
+- Rechecked the created rows with the Supabase connector using read-only SQL.
+- Did not clean up or delete QA rows; they remain available for auditability until Jay explicitly approves cleanup.
+
+### Changed Files
+- `AGENTS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/CLOUDFLARE_DEPLOYMENT.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Live Target
+- Base URL: `https://urblo.pages.dev`
+- Cloudflare Pages redeploy after env configuration: `17588cfa-2204-4b95-b6e0-4e3531e366bb`
+- Marker: `urblo-live-1780380851058-3c7e6822`
+
+### Verification Results
+- Valid enquiry POST: HTTP `201`, response id `1`, `notificationStatus = not_required`.
+- Valid sample request POST: HTTP `201`, response sample request id `1`, sample item id `1`, `notificationStatus = not_required`.
+- Invalid enquiry POST: HTTP `400 validation_failed`.
+- Invalid sample request POST: HTTP `400 validation_failed`.
+- Supabase connector readback: `enquiries.id = 1` exists with email `enquiry-urblo-live-1780380851058-3c7e6822@example.com`, matching `source_route`, `notification_status = not_required`, and `turnstile_success = null`.
+- Supabase connector readback: `sample_requests.id = 1` exists with email `sample-urblo-live-1780380851058-3c7e6822@example.com`, matching `source_route`, `notification_status = not_required`, and `turnstile_success = null`.
+- Supabase connector readback: `sample_request_items.id = 1` exists for `sample_request_id = 1`, `quantity = 2`, and notes including Angola Black, Honed, Live Forms Check, and the marker.
+- Supabase connector readback: `admin_audit_events.id = 1` records `enquiry.create` for `enquiries.id = 1` with matching source-route metadata.
+- Supabase connector readback: `admin_audit_events.id = 2` records `sample_request.create` for `sample_requests.id = 1` with matching source-route metadata, `itemId = 1`, and `quantity = 2`.
+- Supabase connector readback: invalid tagged enquiry rows = `0`, invalid tagged sample request rows = `0`, invalid tagged audit rows = `0`.
+
+### Risks and Gaps
+- This proves base deployed persistence and server-side audit creation only.
+- `notification_status = not_required` because Resend variables are not configured; real notification proof still needs `npm run agent:forms-live -- --allow-writes --allow-email --require-email`.
+- `turnstile_success = null` because Turnstile is not configured; bot-protection proof still needs `VITE_TURNSTILE_SITE_KEY`, server-side Turnstile secret, a valid token, and `npm run agent:forms-live -- --allow-writes --require-turnstile --turnstile-token <token>`.
+- Browser-key private-row denial was not verified because no browser-safe Supabase key is configured in Cloudflare Pages production.
+- Admin lead workflow/export was not verified because first-admin/admin browser configuration is still pending.
+- DNS and custom domains were not changed.
+
+### Next Handoff
+- `NOW-ADMIN-AUTH-RLS-001`
+- `NOW-ADMIN-MEDIA-LEADS-001`
+- `NOW-FORMS-SUPABASE-001`
+
+## Entry - 2026-06-02 (Cloudflare Form Env Check)
+
+### Scope
+- Checked Cloudflare Pages environment variable presence for the `urblo` project after Jay configured the two server-side form variables.
+- Confirmed production has `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`.
+- Confirmed preview environment variables are currently empty.
+- Re-ran no-write deployed Pages smoke.
+
+### Changed Files
+- `docs/CLOUDFLARE_DEPLOYMENT.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- Cloudflare API project readback: pass. Production env includes `SUPABASE_URL` as plain text pointing to the Urblo Supabase project URL and `SUPABASE_SERVICE_ROLE_KEY` as secret text. Secret value was not printed.
+- Cloudflare API project readback: preview env vars are empty.
+- `npm run agent:cloudflare-preview-smoke -- --base-url https://urblo.pages.dev`: pass.
+- `GET https://urblo.pages.dev/api/enquiries`: HTTP `405` with `method_not_allowed`, confirming the deployed Function still rejects unsafe method use without writes.
+
+### Risks and Gaps
+- Live form persistence was not run because it creates tagged Supabase QA rows and requires Jay approval.
+- The standard `npm run agent:forms-live -- --allow-writes --base-url https://urblo.pages.dev` verifier also needs a local service-role verification key, or an approved connector-backed equivalent, to prove created rows and audit metadata.
+- Browser-safe Supabase key, Turnstile, Resend, first-admin, and admin live verification inputs remain pending.
+
+### Next Handoff
+- `NOW-FORMS-BACKEND-001`
+
+## Entry - 2026-06-02 (Cloudflare Pages Preview Verified)
+
+### Scope
+- Verified Jay's Cloudflare Pages GitHub source configuration is now active.
+- Confirmed the `urblo` Pages project is connected to `jayyy-3/jayyy-3.github.io`.
+- Confirmed the first production deployment completed successfully on `urblo.pages.dev`.
+- Ran deployed preview smoke against the live Pages default domain.
+- Confirmed no production custom domain or DNS cutover was applied.
+
+### Changed Files
+- `AGENTS.md`
+- `docs/CLOUDFLARE_DEPLOYMENT.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Cloudflare Evidence
+- Account: Hunter (`077afae2c6f4e77badadf21e49e58eb7`)
+- Pages project: `urblo`
+- Project ID: `3c4c5af3-a2a8-4058-bc0e-0ee6e8cfcaca`
+- Production URL: `https://urblo.pages.dev`
+- Latest deployment: `542c25f4-2e55-437a-abbe-58d427aff48c`
+- Deployment URL: `https://542c25f4.urblo.pages.dev`
+- Environment: `production`
+- Deployment status: `success`
+- Commit: `9a1e9c6`
+- Git source: `jayyy-3/jayyy-3.github.io`, branch `main`
+- Custom domains: none
+- Core DNS remains unchanged: apex and `qa` are proxied `A` records to `159.198.65.164`, and `www` is a proxied CNAME to `urblo.com.au`.
+
+### Verification Results
+- `npm run agent:cloudflare-preview-smoke -- --base-url https://urblo.pages.dev`: pass. Verified direct refresh for public/admin route shells, unknown-route fallback, deployed assets and route chunks, admin config/profile-gate bundle markers, browser service-role boundary, legacy product/article redirects, and no-write API safe-failure behavior for `/api/enquiries` and `/api/sample-requests`.
+- `npm run agent:live-readiness -- --base-url https://urblo.pages.dev`: report-only pass. Cloudflare deployed-preview route/API smoke is ready; live form/admin checks remain missing service-role/browser-safe Supabase variables, first-admin inputs, admin credentials, Turnstile/Resend variables where applicable, and Jay approval for tagged live writes.
+- `curl -I https://urblo.pages.dev`: HTTP `200`.
+- Cloudflare API project readback: pass. Source, deployment, build config, and no-custom-domain state match expectations.
+
+### Risks and Gaps
+- Live form persistence is still unverified until Cloudflare Pages environment variables include `SUPABASE_SERVICE_ROLE_KEY`/`SUPABASE_URL` and Jay approves tagged form QA writes.
+- Admin auth/live CRUD remains unverified until browser-safe Supabase key configuration, first-admin setup, and active admin credentials are available.
+- No production custom domain is attached yet; DNS cutover remains explicitly approval-gated.
+
+### Next Handoff
+- `NOW-FORMS-BACKEND-001`
+- `NOW-ADMIN-AUTH-RLS-001`
+- `NOW-CLOUDFLARE-PAGES-DEPLOY-001`
+
+## Entry - 2026-06-02 (Cloudflare Pages Project Creation)
+
+### Scope
+- Created the Cloudflare Pages project `urblo` in Hunter's Cloudflare account.
+- Set production branch to `main`, build command to `npm run build`, output directory to `dist`, and root directory to `/`.
+- Attempted to connect the GitHub repo `jayyy-3/jayyy-3.github.io` during project creation and again through the source endpoint.
+- Confirmed DNS and custom domains were not changed.
+
+### Changed Files
+- `AGENTS.md`
+- `docs/CLOUDFLARE_DEPLOYMENT.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Cloudflare Evidence
+- Account: Hunter (`077afae2c6f4e77badadf21e49e58eb7`)
+- Zone: `urblo.com.au` (`544d6bf99e48f4b36d7abb24f053ab17`)
+- Pages project: `urblo`
+- Project ID: `3c4c5af3-a2a8-4058-bc0e-0ee6e8cfcaca`
+- Default domain: `urblo.pages.dev`
+- Deployments: `0`
+- Custom domains: none
+- Current core DNS remains unchanged: apex and `qa` are proxied `A` records to `159.198.65.164`, and `www` is a proxied CNAME to `urblo.com.au`.
+
+### Verification Results
+- `npm run build`: pass. Existing Browserslist/caniuse-lite staleness notice remains.
+- Cloudflare API project readback: pass. Project exists with expected branch/build/output settings and no latest deployment.
+- Cloudflare API deployment list: pass. `0` deployments.
+- Cloudflare API domains list: pass. No custom domains.
+- `curl -I https://urblo.pages.dev`: returns Cloudflare `522`, expected while the Pages project has no deployment.
+
+### Risks and Gaps
+- GitHub source connection failed twice with Cloudflare API error `8000011`: `There is an internal issue with your Cloudflare Pages Git installation`.
+- `wrangler` is available through `npx`, but this workspace is not logged in and no local `CLOUDFLARE_API_TOKEN` is configured, so direct upload could not run.
+- Preview smoke cannot run until either the Pages GitHub app is reinstalled/reauthorized for this repo or a local Cloudflare API token is provided for `npx wrangler pages deploy dist --project-name=urblo --branch=main`.
+- No DNS record, environment variable, secret, deployment, or production custom domain was changed.
+
+### Next Handoff
+- `NOW-CLOUDFLARE-PAGES-DEPLOY-001`
+
+## Entry - 2026-06-02 (Cloudflare Harness Drift Repair)
+
+### Scope
+- Repaired Harness drift after Cloudflare access was rechecked.
+- Updated the Cloudflare task from zone-access blocked to actionable Pages project creation.
+- Recorded the then-current recheck result that `urblo.com.au` was readable in Hunter's Cloudflare account, no Pages project existed before the subsequent `urblo` project creation, and apex/`www`/`qa` DNS still pointed to the old WordPress target.
+- Kept production custom domain and DNS cutover explicitly out of scope until approval.
+
+### Changed Files
+- `AGENTS.md`
+- `docs/CLOUDFLARE_DEPLOYMENT.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run agent:check`: pass. Harness path checks and Supabase foundation source readiness passed.
+- `npm run agent:cloudflare-readiness`: pass. Repo-side Pages build contract, SPA fallback, Function routing scope, headers, API handlers, env placeholders, and deployment runbook remain valid.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- No Cloudflare Pages project, deployment, custom domain, DNS record, environment variable, or secret was created or changed in this docs repair.
+- Preview smoke still waits for a real `*.pages.dev` URL.
+- DNS cutover remains a separate approval-gated launch step.
+
+### Next Handoff
+- `NOW-CLOUDFLARE-PAGES-DEPLOY-001`
+
 ## Entry - 2026-06-02 (Projects Archive, Detail, and Media Blocks)
 
 ### Scope
@@ -7269,6 +7518,125 @@ Last updated: 2026-06-02
 - `NOW-FORMS-BACKEND-001`
 - `NOW-FORMS-SUPABASE-001`
 - `NOW-ADMIN-AUTH-RLS-001`
+
+## Entry - 2026-06-02 (Homepage Mobile Hero Video Source)
+
+### Scope
+- Added a mobile-specific homepage hero video so phone viewports no longer stay poster-only.
+- Generated `public/media/launch/home/urblo-hero-mobile.mp4` from the controlled desktop MP4 as a 540x960, 9:16, no-audio, fast-start H.264 export at about 1.1MB.
+- Updated homepage hero source selection so mobile uses `media="(max-width: 767px)"` and desktop/tablet keeps the existing `media="(min-width: 768px)"` MP4.
+
+### Changed Files
+- `public/media/launch/home/urblo-hero-mobile.mp4`
+- `src/data/homepage.ts`
+- `src/components/homepage/HomepageSections.tsx`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- Transcode check: mobile MP4 is H.264 540x960, SAR 1:1, DAR 9:16, 30fps, no audio, 17.67s, about 530kbps / 1.1MB.
+- Playwright local production-preview mobile 390x844: pass. `video.currentSrc` selected `/media/launch/home/urblo-hero-mobile.mp4`, `readyState=4`, `paused=false`, intrinsic video size 540x960, no horizontal overflow, no console issues.
+- Playwright local production-preview desktop 1440x900: pass. `video.currentSrc` selected `/media/launch/home/urblo-hero.mp4`, `readyState=4`, `paused=false`, intrinsic video size 1280x720, no horizontal overflow, no console issues.
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:cloudflare-readiness`: pass.
+- `npm run agent:smoke`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- Production verification is required after Cloudflare Pages deploys this commit.
+- Mobile video uses a center portrait crop from the landscape source. If the client wants shot-by-shot art direction, generate a dedicated mobile edit rather than a centered crop.
+- The first-visit Welcome acknowledgement modal still overlays the mobile first viewport until dismissed.
+
+### Next Handoff
+- `NOW-CLOUDFLARE-PAGES-DEPLOY-001`
+- `NOW-ASSET-MIGRATION-001`
+- `LATER-PERF-001`
+
+## Entry - 2026-06-02 (Homepage Hero Video Performance Investigation)
+
+### Scope
+- Investigated slow homepage video loading on `https://urblo.com.au` after Cloudflare Pages cutover.
+- Compared production custom domain, Pages default domain, and GitHub Pages delivery for `public/media/launch/home/urblo-hero.mp4`.
+- Found the MP4 is a 3.1MB Cloudflare-served, byte-range-capable asset, but the homepage initially loaded the hero MP4/poster plus heavy below-the-fold homepage images at the same time.
+- Added an HTML preload for the hero poster, kept the poster as a hero section background fallback, changed desktop hero video to `preload="auto"`, and deferred partner banner, Product Showcase background, Latest Projects media, Manifesto background, and Video CTA imagery until their sections are near the viewport.
+
+### Changed Files
+- `index.html`
+- `src/components/homepage/HomepageSections.tsx`
+- `docs/ARCHITECTURE.md`
+- `docs/DESIGN.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- Production `curl -I https://urblo.com.au/media/launch/home/urblo-hero.mp4`: `200`, `content-type: video/mp4`, `content-length: 3107047`, `Cache-Control: public, max-age=86400`, `accept-ranges: bytes`, and Cloudflare cache hit observed.
+- Production Playwright resource timing before the fix showed `urblo-hero.mp4`, `hero-poster.jpg`, `partner-banner-west-side-place.jpg`, Latest Projects images, and homepage background images all starting around the first homepage render.
+- Local production-preview Playwright resource timing after the fix showed the initial hero-load set limited to `hero-poster.jpg`, app/home JS/CSS chunks, and `urblo-hero.mp4`.
+- Desktop Playwright screenshot/DOM check on `http://127.0.0.1:4173/`: pass. Hero height was 900px, no horizontal overflow, video `readyState=4`, `paused=false`.
+- Mobile Playwright check at 390x844: pass. No MP4 request, no selected `currentSrc`, hero height 844px, no horizontal overflow.
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:cloudflare-readiness`: pass.
+- `npm run agent:smoke`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- The production custom-domain timing still needs deployed-after-fix verification after Cloudflare Pages receives this build.
+- Local forced IPv6 `curl -6` timed out across Cloudflare hosts from this machine; because `urblo.pages.dev` also timed out under forced IPv6, this appears environment/network-specific and was not treated as an Urblo DNS change.
+- The first-visit Welcome acknowledgement modal still affects perceived first viewport composition but was outside this performance fix.
+- The current MP4 remains static repo media. Cloudflare Stream/R2 or a smaller adaptive/mobile video variant remains optional if real-user production metrics still show slow hero playback.
+
+### Next Handoff
+- `NOW-CLOUDFLARE-PAGES-DEPLOY-001`
+- `NOW-ASSET-MIGRATION-001`
+- `LATER-PERF-001`
+
+## Entry - 2026-06-03 (Homepage Section Order, Header Menu, and YouTube CTA)
+
+### Scope
+- Reduced the homepage `Design-led stone solutions for streetscapes & civil landscapes.` partner banner to a slimmer transition band.
+- Moved Latest Projects directly below that partner banner, before Product Showcase.
+- Replaced the bottom homepage local-video modal with a lazy `youtube-nocookie` iframe for YouTube video `UfRtQZSi7cM`, loaded only after the Play button is clicked.
+- Updated the shared header so desktop keeps Projects, Capabilities, Stone Library, Our Story, and Contact Us visible while Articles and Products move into the right-side hamburger. Mobile keeps the full navigation list inside the hamburger.
+- Updated Harness docs for the new homepage rhythm, header navigation contract, and video CTA contract.
+
+### Changed Files
+- `src/components/homepage/HomepageSections.tsx`
+- `src/components/site/SiteHeader.tsx`
+- `src/data/homepage.ts`
+- `docs/ARCHITECTURE.md`
+- `docs/DESIGN.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass for the touched runtime/Harness files.
+- In-app Browser verification: attempted against local Vite preview, but the browser backend reported `net::ERR_BLOCKED_BY_CLIENT` for `http://127.0.0.1:4173/`; Playwright fallback was used.
+- Playwright local production-preview desktop 1440x900: desktop primary nav showed Projects, Capabilities, Stone Library, Our Story, and Contact Us without Articles/Products; the hamburger exposed Articles and Products; the `Design-led` banner resolved to the slimmer 258px band; Latest Projects followed the banner; the Play modal mounted `https://www.youtube-nocookie.com/embed/UfRtQZSi7cM?autoplay=1&rel=0&modestbranding=1&playsinline=1`; no horizontal overflow.
+- Playwright local production-preview mobile 390x844: hamburger exposed the full navigation including Articles and Products; no horizontal overflow.
+
+### Risks and Gaps
+- The YouTube iframe depends on the third-party YouTube player once the visitor clicks Play; this is intentionally lazy-loaded and not part of initial homepage render.
+- Production Cloudflare smoke and browser verification are still required after this commit deploys.
+
+### Next Handoff
+- `NEXT-UI-PARITY-001`
+- `NOW-CLOUDFLARE-PAGES-DEPLOY-001`
 
 ## Entry Template (Use for Every Future Session)
 

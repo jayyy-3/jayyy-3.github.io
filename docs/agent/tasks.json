@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lastUpdated": "2026-06-01",
+  "lastUpdated": "2026-06-02",
   "sourceOfTruth": "Machine-readable task queue for active and upcoming agent work. Human-readable roadmap lives in docs/NEXT_STEPS.md.",
   "tasks": [
     {
@@ -165,7 +165,7 @@
       ],
       "notes": [
         "Run after Supabase foundation and baseline seed work. Turnstile and email notification can be staged: database insert comes first, notification can remain pending until the email provider secret exists.",
-        "The main public submit source now posts to Pages Functions; remaining completion proof is live persistence, notification behavior, and admin-visible lead workflow verification.",
+        "The main public submit source now posts to Pages Functions; basic deployed persistence and server-side audit creation are verified. Remaining completion proof is browser-key privacy boundary, notification behavior, Turnstile behavior, and admin-visible lead workflow verification.",
         "2026-05-27: Added Pages Function source for /api/enquiries and /api/sample-requests. Contact page now posts enquiries to /api/enquiries; Sample Request mode posts to /api/sample-requests and creates a sample item payload. Footer/sample CTAs now route to /contact?intent=sample-request.",
         "2026-05-27: Mock API checks pass for valid enquiry, invalid enquiry, valid sample request with item row, and configured Turnstile failure. Live Supabase insert verification remains pending server-side SUPABASE_SERVICE_ROLE_KEY configuration.",
         "2026-05-28: Form handlers now attempt server-side admin_audit_events writes after successful enquiry/sample request inserts. Mock API checks verify audit calls, audit-failure resilience after lead storage, missing service-role fail-closed behavior before Supabase calls, and configured Turnstile failure.",
@@ -185,7 +185,8 @@
         "2026-05-29: Applied `sample_request_atomic_insert` on Supabase project npkidywzwddbnfrnxlmo. `/api/sample-requests` now calls service-role-only `submit_sample_request_with_item(jsonb, jsonb)` so the sample request row and first item row are created inside one database transaction. The function is security-invoker, not executable by anon/authenticated, executable by service_role, and source/mock checks fail if separate direct table inserts return or if the migration source loses the RPC grant/revoke contract.",
         "2026-05-29: `scripts/check-forms-api-live.mjs` now supports final proof flags for notification and Turnstile behavior. `--allow-email --require-email` asserts valid live enquiry/sample-request rows store notification_status = sent, and `--require-turnstile --turnstile-token <token>` now refuses to start without `VITE_TURNSTILE_SITE_KEY` before asserting valid live rows store turnstile_success = true. `npm run agent:live-readiness` reports those inputs separately, with `--turnstile-token-provided` as a no-secret readiness flag.",
         "2026-05-29: Contact form source now renders the Cloudflare Turnstile widget only when the public `VITE_TURNSTILE_SITE_KEY` is configured, blocks submit until a widget token exists in that mode, and sends `turnstileToken` to the existing Pages Function verifier. Source/Cloudflare readiness checks now guard the public site-key env contract.",
-        "2026-05-29: `scripts/check-forms-api-live.mjs` HTTP mode now rejects copied placeholders and non-origin `--base-url` values before service-role Supabase reads/writes can start, using the shared live input validation helper."
+        "2026-05-29: `scripts/check-forms-api-live.mjs` HTTP mode now rejects copied placeholders and non-origin `--base-url` values before service-role Supabase reads/writes can start, using the shared live input validation helper.",
+        "2026-06-02: After Cloudflare Pages production env vars were configured and deployment `17588cfa-2204-4b95-b6e0-4e3531e366bb` succeeded, approved tagged QA writes against `https://urblo.pages.dev` verified base persistence. Valid enquiry returned 201 and created `enquiries.id = 1`; valid sample request returned 201 and created `sample_requests.id = 1` plus `sample_request_items.id = 1`; matching server-side audit rows `admin_audit_events.id = 1/2` include source-route metadata. Invalid tagged enquiry/sample payloads returned 400 and Supabase readback confirmed zero matching lead or audit rows. Stored notification_status is `not_required` because Resend is not configured, and turnstile_success is null because Turnstile is not configured."
       ],
       "acceptance": [
         "Valid enquiry submissions create Supabase enquiry rows through a server-side endpoint.",
@@ -203,7 +204,7 @@
         "npm run agent:forms-ui",
         "node scripts/check-forms-api.mjs",
         "npm run agent:live-readiness",
-        "npm run agent:forms-live -- --allow-writes (after SUPABASE_SERVICE_ROLE_KEY is configured and Jay approves tagged live form QA writes)",
+        "npm run agent:forms-live -- --allow-writes (base deployed persistence verified on 2026-06-02; use for future approved tagged form QA writes)",
         "npm run agent:forms-live -- --allow-writes --require-browser-boundary (after service-role and browser-safe keys are configured and Jay approves tagged live form QA writes)",
         "npm run agent:forms-live -- --allow-writes --allow-email --require-email (after Resend sender/recipient variables are configured and Jay approves real tagged form QA emails)",
         "npm run agent:forms-live -- --allow-writes --require-turnstile --turnstile-token <token> (after VITE_TURNSTILE_SITE_KEY, Turnstile secret, and a valid target-environment token are available)",
@@ -222,15 +223,15 @@
         "Supabase MCP: list_migrations includes sample_request_atomic_insert",
         "Supabase MCP: execute_sql verifies submit_sample_request_with_item is security-invoker, executable by service_role, and not executable by anon/authenticated",
         "Mock API test: endpoint wrappers reject GET with 405, answer OPTIONS with 204 and CORS headers, reject malformed JSON with invalid_json before Supabase calls, and reject invalid sample-request POST before Supabase calls",
-        "API test: valid enquiry creates one Supabase row",
-        "API test: invalid enquiry creates no Supabase row",
-        "API test: valid sample request creates request and item rows",
+        "API test: valid enquiry creates one Supabase row (verified on 2026-06-02 against https://urblo.pages.dev)",
+        "API test: invalid enquiry creates no Supabase row (verified on 2026-06-02 against https://urblo.pages.dev)",
+        "API test: valid sample request creates request and item rows (verified on 2026-06-02 against https://urblo.pages.dev)",
         "Browser or Playwright verification: Contact form success and validation states"
       ]
     },
     {
       "id": "NOW-CLOUDFLARE-PAGES-DEPLOY-001",
-      "status": "blocked",
+      "status": "now",
       "priority": 3,
       "summary": "Implement Cloudflare Pages deployment, preview, function routing, and rollback runbook.",
       "files": [
@@ -262,7 +263,8 @@
         "Repo-side Cloudflare Pages build command, output directory, SPA fallback, function routing, and launch headers are documented and verified locally.",
         "Only future API routes are configured to invoke Pages Functions; static site traffic remains static.",
         "Clean URL direct refresh works locally for declared routes.",
-        "Cloudflare Pages project creation, production custom domain, DNS cutover, and rollback require account access before this task can be marked done.",
+        "Cloudflare zone/account read access is verified, the Hunter-account `urblo` Pages project exists, GitHub source is connected, production custom domains are attached, apex/`www` website DNS points to `urblo.pages.dev`, and smoke passes against `https://urblo.pages.dev`, `https://urblo.com.au`, and `https://www.urblo.com.au`.",
+        "Rollback DNS values for the previous WordPress target are recorded in `docs/CLOUDFLARE_DEPLOYMENT.md`.",
         "After a preview URL exists, direct-refresh routes, recursively discovered deployed route chunks, deployed admin bundle config/profile-gate markers, browser service-role env boundaries, Cloudflare redirects, and API safe-failure behavior can be checked with `npm run agent:cloudflare-preview-smoke -- --base-url https://<preview>.pages.dev`."
       ],
       "verification": [
@@ -290,7 +292,47 @@
         "2026-05-29: `npm run agent:cloudflare-readiness` now guards the deployed-preview manual route list against stale legacy direct-refresh URLs by requiring canonical `/products/prime-block`, article detail, and `/capabilities` route checks while keeping old product/article URLs as redirect checks.",
         "2026-05-29: `npm run agent:cloudflare-preview-smoke` now recursively follows deployed JS/CSS route chunks, verifies deployed admin config-required and `admin_profiles` bundle markers, rejects browser service-role env access patterns, and checks malformed JSON API safe failures. Local preview mode validates the route/asset/bundle portion before a real Pages preview URL exists.",
         "2026-05-29: `npm run agent:cloudflare-preview-smoke` now rejects copied placeholders and URLs with path/query/hash in `--base-url` before any deployed route, asset, redirect, or Function request runs.",
-        "2026-05-29: Read-only Cloudflare API probe found Jay's account (`a9cbf84bf6677e2af8c76b353afe0d9d`) reachable with 0 Pages projects, while Hunter's account (`077afae2c6f4e77badadf21e49e58eb7`) returns an API authentication error with the current token. No Pages project, deployment, domain, DNS record, environment variable, or secret was created or changed."
+        "2026-05-29: Read-only Cloudflare API probe found Jay's account (`a9cbf84bf6677e2af8c76b353afe0d9d`) reachable with 0 Pages projects, while Hunter's account (`077afae2c6f4e77badadf21e49e58eb7`) returned an API authentication error with the then-current token. No Pages project, deployment, domain, DNS record, environment variable, or secret was created or changed.",
+        "2026-06-02: Cloudflare access was rechecked. `urblo.com.au` zone read access is now verified in Hunter's account (`077afae2c6f4e77badadf21e49e58eb7`), zone ID `544d6bf99e48f4b36d7abb24f053ab17`; Hunter and Jay accounts both initially had 0 Pages projects. Apex, `www`, and `qa` DNS still point to the old WordPress target. Next step is Pages project creation/preview validation only, with no DNS cutover.",
+        "2026-06-02: Created Hunter-account Pages project `urblo` (`3c4c5af3-a2a8-4058-bc0e-0ee6e8cfcaca`) with default domain `urblo.pages.dev`, production branch `main`, build command `npm run build`, output directory `dist`, and root dir `/`. Initial GitHub source connection to `jayyy-3/jayyy-3.github.io` failed with Cloudflare API error `8000011` for the Pages Git installation. DNS records, environment variables, and secrets were not changed.",
+        "2026-06-02: Jay reauthorized/configured the Pages GitHub integration. Source is connected to `jayyy-3/jayyy-3.github.io`; production deployment `542c25f4-2e55-437a-abbe-58d427aff48c` for commit `9a1e9c6` completed successfully. `npm run agent:cloudflare-preview-smoke -- --base-url https://urblo.pages.dev` passed. No production custom domain is attached and DNS still points to the old WordPress target.",
+        "2026-06-02: Cloudflare Pages production environment now has `SUPABASE_URL` as plain text and `SUPABASE_SERVICE_ROLE_KEY` as secret text for the `urblo` project. Preview environment variables are empty. No-write deployed smoke still passes.",
+        "2026-06-02: After env configuration, production redeploy `17588cfa-2204-4b95-b6e0-4e3531e366bb` succeeded and approved tagged live form QA writes verified basic deployed persistence/audit behavior on `https://urblo.pages.dev`. DNS and custom domains were not changed at that checkpoint.",
+        "2026-06-02: Production custom domains `urblo.com.au` and `www.urblo.com.au` were attached to the Pages project. Apex website DNS was changed from `A urblo.com.au -> 159.198.65.164` to proxied `CNAME urblo.com.au -> urblo.pages.dev`; `www` was changed from proxied `CNAME www.urblo.com.au -> urblo.com.au` to proxied `CNAME www.urblo.com.au -> urblo.pages.dev`. Google MX/SPF/TXT, NS records, and `qa.urblo.com.au` were not changed. `npm run agent:cloudflare-preview-smoke -- --base-url https://urblo.com.au` and the same command for `https://www.urblo.com.au` passed."
+      ]
+    },
+    {
+      "id": "NEXT-FORMS-EMAIL-NOTIFY-001",
+      "status": "next",
+      "priority": 4.2,
+      "summary": "Configure form email notifications to info@urblo.com.au after launch.",
+      "files": [
+        "docs/CLOUDFLARE_DEPLOYMENT.md",
+        "docs/HANDOFF.md",
+        "docs/NEXT_STEPS.md",
+        "docs/WORKLOG.md",
+        "docs/agent/tasks.json",
+        "functions/_lib/forms.js",
+        ".env.example"
+      ],
+      "notes": [
+        "2026-06-02: Jay asked whether forms can notify `info@urblo.com.au`; then decided to launch first and remember the email-notification requirement.",
+        "Current code supports Resend with `RESEND_API_KEY`, `LEAD_NOTIFICATION_FROM` or `RESEND_FROM_EMAIL`, and `LEAD_NOTIFICATION_TO` / `ENQUIRY_NOTIFICATION_TO` / `SAMPLE_REQUEST_NOTIFICATION_TO`, but Resend is not mandatory if another provider is chosen and the handler is adapted.",
+        "Cloudflare Email Routing is not a replacement for active transactional sending from the form handler.",
+        "Until an email provider is configured, form rows persist to Supabase with `notification_status = not_required`."
+      ],
+      "acceptance": [
+        "Approved email provider is selected.",
+        "Contact enquiry notifications are sent to `info@urblo.com.au` or an approved replacement recipient.",
+        "Sample Request notifications are sent to `info@urblo.com.au` or an approved replacement recipient.",
+        "Stored `notification_status` becomes `sent` for successful live proof submissions.",
+        "No service API key is exposed to browser code or committed docs."
+      ],
+      "verification": [
+        "npm run agent:forms-live -- --allow-writes --allow-email --require-email",
+        "Supabase MCP: execute_sql confirms live proof rows store notification_status = sent",
+        "npm run agent:check",
+        "git diff --check"
       ]
     },
     {
@@ -309,7 +351,8 @@
         "2026-05-22 full-site QA confirmed Contact page copy is clear about opening an email draft, but Sample Request and other mailto CTAs still need consistent fallback wording until Supabase submissions are live.",
         "2026-05-25: Contact now blocks empty local email drafts unless the visitor provides project notes plus either email or phone. This is a runtime guardrail, not a substitute for Supabase-backed lead persistence.",
         "2026-05-26: Execute through NOW-SUPABASE-FOUNDATION-001, NOW-SUPABASE-SEED-BASELINE-001, and NOW-FORMS-BACKEND-001 so database safety is verified before public submit behavior changes.",
-        "2026-05-27: Main Contact and Sample Request submit source no longer depends on mailto. Live persistence and notification acceptance remain pending server-side environment variable verification.",
+        "2026-05-27: Main Contact and Sample Request submit source no longer depends on mailto.",
+        "2026-06-02: Basic deployed Contact and Sample Request persistence is verified on `https://urblo.pages.dev`; valid tagged submissions created lead/sample/audit rows and invalid tagged submissions created none. Notification acceptance, Turnstile, browser-key private-row denial, and admin-visible lead workflow remain pending.",
         "2026-05-29: Final notification and Turnstile acceptance are now guarded by explicit live verifier flags: `--allow-email --require-email` for sent notification_status, and `--require-turnstile --turnstile-token <token>` for a configured public Turnstile site key plus turnstile_success = true.",
         "2026-05-29: The public Contact form has an optional Cloudflare Turnstile widget behind `VITE_TURNSTILE_SITE_KEY`; production Turnstile still requires the server-side secret and final live proof token."
       ],
@@ -785,7 +828,7 @@
         "2026-05-28: Media now includes an admin/editor CSV export action for the currently visible media manifest. Export first records a media_assets.export_manifest audit event and blocks the download if audit logging fails.",
         "Live media upload/save/export verification remains pending browser-safe Supabase key configuration and an active admin/editor profile.",
         "2026-05-28: Added `/admin/leads` source for enquiry and sample request queues, sample items, status, assignment, internal notes, notification state, read-only role behavior, and privacy guardrails.",
-        "Live lead workflow save verification remains pending browser-safe Supabase key configuration and an active owner/admin profile. Live lead row creation still requires server-side form persistence, Turnstile verification, and transactional email secrets.",
+        "Live lead workflow save verification remains pending browser-safe Supabase key configuration and an active owner/admin profile. Basic live lead row creation is verified through deployed Contact/Sample Request submissions; Turnstile verification and transactional email proof remain separate final form checks.",
         "2026-05-28: Media and Leads save flows now call the shared admin audit writer after successful primary saves. Live audit row creation remains pending browser-safe Supabase config and active profiles.",
         "2026-05-28: Leads now includes an owner/admin CSV export action for the currently loaded queue. Export first records a leads.export_csv audit event and blocks the download if audit logging fails.",
         "2026-05-28: Admin CRUD coverage verifier now checks Media and Leads table references, Storage upload source, read-only states, shared audit writer coverage, and audit-gated CSV/manifest exports before live credential QA.",
@@ -849,6 +892,7 @@
         "2026-05-22: P0 launch stopgap is implemented for logo, homepage poster/video, route banners, and contact imagery under public/media/launch.",
         "2026-05-22: Homepage video replaced with a web-ready H.264 export from the user-provided Urblo_Homepage.mp4; homepage and Our Story visible media now use controlled local assets.",
         "2026-05-25: Homepage hero now uses a full-viewport 100svh layout, preload=none, and mobile poster-only behavior.",
+        "2026-06-02: Homepage hero performance investigation found the MP4 itself is a 3.1MB Cloudflare-cached asset, but first load was competing with the partner banner, Latest Projects images, and other homepage media. `index.html` now preloads the poster, the hero uses the poster as a fallback background, desktop video uses preload=auto, mobile uses a separate 540x960 `urblo-hero-mobile.mp4`, and below-the-fold heavy homepage media is section-deferred.",
         "2026-05-25: Desktop homepage MP4 was re-encoded from about 16MB to about 3MB as H.264 1280x720, 30fps, no-audio, fast-start media. Browser QA confirmed desktop 1280x720 playback and mobile no-source behavior.",
         "2026-05-22: Legacy project media and Stone Library fallback media now use controlled local assets; direct old WordPress media references are removed from runtime data.",
         "2026-05-22: Article covers now use controlled local WebP assets and ArticlePage rewrites known email proxy images/campaign links before DOMPurify sanitization.",
@@ -856,7 +900,7 @@
       ],
       "acceptance": [
         "All first-viewport critical media, logo assets, homepage video/poster assets, and priority project/stone imagery have a controlled hosting path.",
-        "Homepage video has a launch-safe source, poster, compression/fallback policy, and mobile behavior.",
+        "Homepage video has launch-safe desktop and mobile sources, poster, compression/fallback policy, and viewport-specific source selection.",
         "Residual old-site URLs are inventoried with owner, risk, and migration priority."
       ],
       "verification": [
@@ -1209,6 +1253,7 @@
         "2026-06-01: Homepage Latest Projects now uses `The work speaks.` with five project records in `homepageData.latestProjects.projects`. Runtime renders an active project detail/image panel plus a draggable thumbnail rail that shows four projects at desktop width; thumbnails select the active project and the upper `View project` CTA navigates to project detail.",
         "2026-06-02: Homepage Latest Projects now occupies exactly one viewport with `100svh`; active copy, image, and rail heights remain fixed across hover/tap selection. Short desktop viewports hide the active summary and align facts beside the CTA, while short mobile viewports simplify the copy and rail media so controls remain visible without overlap.",
         "2026-06-02: Homepage Latest Projects now follows the approved sketch ratio: upper copy spans two columns, upper feature image spans two columns, and the lower draggable rail shows four fixed-height portrait project images on desktop. `HomepageProject` now supports optional `featureImage` and `featureImageAlt` for independent upper-image selection, populated from existing second-detail project media with fallback to the rail image.",
+        "2026-06-03: Homepage `Design-led` partner banner is reduced to a slimmer transition band, Latest Projects now renders immediately below it before Product Showcase, the bottom Play modal uses a lazy `youtube-nocookie` embed for `UfRtQZSi7cM`, and the desktop header moves Articles/Products behind the right-side hamburger while mobile keeps the full-menu hamburger.",
         "2026-06-02: Public Projects archive/detail pages were redesigned against the supplied Sam the Paving Man structural reference in Urblo visual language. `/projects` now has breadcrumb, large title, proof intro, count, working sector filters, grid/list controls, and equal-sized project images. `/projects/:slug` now has oversized opening, previous/next navigation, full-width hero/media, Project Information facts, ordered media blocks, hotspot image support, Featured Materials, and shared CTA.",
         "2026-06-02: Current static project data supports `normal_image` and `hotspot_image` media blocks. The `youtube_video` renderer/source/admin/migration contract exists for one optional video per project, but no client-approved Urblo project YouTube block is configured in current data.",
         "2026-06-02: In-app Browser QA verified `/projects` desktop/mobile filters, grid/list controls, equal-sized images, Moon Gate desktop/mobile hotspot inspector behavior, West Side Place desktop/mobile normal media flow, no framework overlays, and zero horizontal overflow. `/admin/projects` live drag QA remains credential-gated; `npm run agent:admin-crud-coverage` now checks the hotspot stage/marker and pointer placement source contract."
@@ -1229,6 +1274,7 @@
         "Browser verification: homepage section order, removed sustainability copy, updated proof copy, updated metrics, partner banner wording, Design-led lime highlight, Latest Projects active panel, four-visible desktop project rail, draggable rail behavior, hover/focus/tap project selection, Our Capabilities CTA, /capabilities page render and download-form validation, and /our-story Natalie card render",
         "Playwright fallback verification: Latest Projects is exactly one viewport high and keeps 0 height delta for section, active copy, active image, and rail across hover/tap selection at 1440x900, 1366x768, 1280x720, 390x844, and 375x667",
         "Browser plugin DOM/console verification plus Playwright Chromium screenshots: sketch-ratio Latest Projects section verified at 1440x900, 1366x768, and 390x844 with feature image height matching rail image height, desktop feature width equal to two rail slots plus gutter, visible View project CTA, hover selection changing active project without height shift, 0 horizontal overflow, no framework overlay, and 0 console issues",
+        "Playwright fallback verification: desktop header hides Articles/Products from the visible primary nav and exposes them in the right-side hamburger; mobile hamburger exposes the full navigation; slim Design-led banner is followed immediately by Latest Projects; Play opens the youtube-nocookie UfRtQZSi7cM modal; desktop/mobile show no horizontal overflow",
         "Browser verification: /projects and at least two /projects/:slug detail pages on desktop/mobile, including filters, view controls, equal image sizing, previous/next navigation, hotspot interaction, no overflow, and no console errors.",
         "npm run agent:admin-crud-coverage",
         "npm run agent:content-import -- --out .tmp/content-import-preview.json",
@@ -1766,6 +1812,8 @@
       "summary": "Reduce client bundle size and improve chunk strategy.",
       "files": [
         "AGENTS.md",
+        "index.html",
+        "src/components/homepage/HomepageSections.tsx",
         "src/App.tsx",
         "docs/ARCHITECTURE.md",
         "docs/HANDOFF.md",
@@ -1775,7 +1823,8 @@
       ],
       "notes": [
         "2026-05-22: Public page components are lazy-loaded at the route level in src/App.tsx.",
-        "2026-05-22: Production build initial app shell JS dropped from about 674 kB to about 255 kB, and the previous >500kB JavaScript chunk warning no longer appears."
+        "2026-05-22: Production build initial app shell JS dropped from about 674 kB to about 255 kB, and the previous >500kB JavaScript chunk warning no longer appears.",
+        "2026-06-02: Homepage initial media competition is reduced by preloading the hero poster, switching desktop hero video to preload=auto, and deferring heavy non-hero homepage images/backgrounds until their sections are near the viewport."
       ],
       "acceptance": [
         "Large chunk warning is reduced or documented with a deliberate split strategy.",

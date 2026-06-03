@@ -5,7 +5,7 @@ Last updated: 2026-06-02
 ## System Boundary
 - Current implementation: frontend-only React application shipped as static assets.
 - Current implementation: Cloudflare Pages Function source now exists for `/api/enquiries` and `/api/sample-requests`.
-- Current implementation: the public Contact page submits enquiries and sample requests to those API routes. The Capability Statement download form on `/capabilities` also submits an email-only lead to `/api/enquiries` with `project_type = Capability statement download` before revealing the PDF download link. The API source attempts server-side audit events after successful lead inserts, and Sample Request uses a service-role-only Supabase RPC so the request row and first item row are created atomically. Live Supabase row creation still requires server-side Cloudflare environment variables.
+- Current implementation: the public Contact page submits enquiries and sample requests to those API routes. The Capability Statement download form on `/capabilities` also submits an email-only lead to `/api/enquiries` with `project_type = Capability statement download` before revealing the PDF download link. The API source attempts server-side audit events after successful lead inserts, and Sample Request uses a service-role-only Supabase RPC so the request row and first item row are created atomically. Basic deployed Contact/Sample Request persistence is verified on `https://urblo.pages.dev`; the Capability-specific download capture path still needs separate live route verification.
 - Current Supabase project: `Urblo` (`npkidywzwddbnfrnxlmo`, `ap-southeast-2`) has the foundation schema/RLS migrations, baseline seeds, admin settings/profile/helper hardening, admin profile email uniqueness, and media Storage policies applied. Admin role helper RPC execution is revoked from browser roles in the exposed public schema, while RLS and Storage policies call private SECURITY DEFINER helpers from a non-exposed schema. The `/admin` auth shell source is implemented and config-gated, but live active-admin login still requires persistent browser-safe Supabase key configuration and a confirmed first admin profile. Settings/admin profiles, Media, Stone Library, Projects, Products, Articles, Leads, and Audit are the first source CRUD/workflow/review screens; admin CRUD/workflow save flows now call a shared audit writer after successful primary mutations, Stone Library finish image links have their own audit actions, and Media/Leads CSV exports are audit-gated, with live audit row creation still pending credentials.
 - Launch target: Cloudflare Pages static frontend, Cloudflare Pages Functions API endpoints, Supabase Postgres/Auth/Storage, and an Urblo-owned admin interface for content operations.
 - Planning source: `docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md`.
@@ -81,7 +81,7 @@ Last updated: 2026-06-02
   - Form Functions attempt `admin_audit_events` writes with `actor_user_id = null` after successful enquiry/sample request inserts. Audit write failure does not fail the visitor response.
   - Sample Request Functions call `submit_sample_request_with_item(jsonb, jsonb)` with the server-side service role key so the `sample_requests` row and first `sample_request_items` row are inserted in one database transaction. The RPC is `security invoker`, executable by `service_role`, and not executable by browser roles.
   - Form notification source uses Resend only when server-side notification inputs exist. Mock checks verify configured notification paths start with `notification_status = pending`, call Resend, then patch the lead row to `sent` or `failed` without failing the already-stored visitor response.
-  - Live form persistence verification is staged through `npm run agent:forms-live -- --allow-writes`. The command requires `--allow-writes`, a server-side Supabase service-role key, and Jay approval for tagged live form QA writes; HTTP mode rejects placeholder or non-origin `--base-url` values before any Supabase reads/writes; it verifies valid enquiry/sample request rows plus source-route audit metadata, verifies invalid enquiry/sample request payloads create no rows or matching audit events, verifies response-vs-stored notification status, and retains tagged test rows for auditability until Jay approves cleanup. When a browser-safe key is configured, the verifier checks that created private lead rows are not anonymously readable; `--require-browser-boundary` makes that browser-key boundary mandatory for final launch proof.
+  - Live form persistence verification is staged through `npm run agent:forms-live -- --allow-writes`. The command requires `--allow-writes`, a server-side Supabase service-role key, and Jay approval for tagged live form QA writes; HTTP mode rejects placeholder or non-origin `--base-url` values before any Supabase reads/writes; it verifies valid enquiry/sample request rows plus source-route audit metadata, verifies invalid enquiry/sample request payloads create no rows or matching audit events, verifies response-vs-stored notification status, and retains tagged test rows for auditability until Jay approves cleanup. The 2026-06-02 deployed proof against `https://urblo.pages.dev` created `enquiries.id = 1`, `sample_requests.id = 1`, `sample_request_items.id = 1`, and `admin_audit_events.id = 1/2`; invalid tagged payloads created zero rows or audit events. When a browser-safe key is configured, the verifier checks that created private lead rows are not anonymously readable; `--require-browser-boundary` makes that browser-key boundary mandatory for final launch proof.
   - Optional public form key: `VITE_TURNSTILE_SITE_KEY`.
   - Optional server-side form secrets: `TURNSTILE_SECRET_KEY` or `CF_TURNSTILE_SECRET_KEY`, `RESEND_API_KEY`, `LEAD_NOTIFICATION_FROM` or `RESEND_FROM_EMAIL`, `LEAD_NOTIFICATION_TO`, `ENQUIRY_NOTIFICATION_TO`, and `SAMPLE_REQUEST_NOTIFICATION_TO`.
 - Vite base config: `vite.config.ts`
@@ -257,14 +257,15 @@ Route state contract:
 ## Navigation Contract vs Implemented Routes
 
 ### Implemented navigation surfaces
-- Shared header links: `/projects`, `/stone-library`, `/our-story`, `/articles`, `/products`, `/contact`
-- Shared header links also include `/capabilities` after the 2026 Capability Statement page replaced the provisional capability placeholder.
+- Shared desktop header primary links: `/projects`, `/capabilities`, `/stone-library`, `/our-story`, `/contact`
+- Shared desktop header hamburger links: `/articles`, `/products`
+- Shared mobile header hamburger links: `/projects`, `/capabilities`, `/stone-library`, `/our-story`, `/articles`, `/products`, `/contact`
 - Homepage proof-section CTA: `/capabilities`
 - Shared footer links: `/capabilities`, `/contact?intent=sample-request`, `/contact`
 - Shared footer social links: Instagram and LinkedIn use external links with `target="_blank"` plus `rel="noopener noreferrer"`; Facebook and YouTube are hidden until real destinations are available.
 
 ### Gaps
-- Current implementation gap: live Contact and Sample Request persistence still requires server-side Cloudflare environment variables and production endpoint verification.
+- Current implementation gap: basic live Contact and Sample Request persistence is verified, but private-row browser-key denial, real email notification, Turnstile, admin-visible lead workflow, and the Capability-specific download lead path still require production verification.
 - Launch target: Contact and Sample Request submit through Cloudflare Pages Functions into Supabase, with Turnstile protection, email notification, and admin-visible lead records.
 
 ## Metadata Contract
@@ -287,9 +288,11 @@ Route state contract:
 - Shared site logo path: `public/media/launch/identity/urblo-logo.png`, referenced by `src/data/siteChrome.ts` and `src/data/homepage.ts`.
 - Homepage hero poster path: `public/media/launch/home/hero-poster.jpg`.
 - Homepage hero video path: `public/media/launch/home/urblo-hero.mp4`.
+- Homepage mobile hero video path: `public/media/launch/home/urblo-hero-mobile.mp4`.
 - Current homepage video asset is a web-ready H.264 1280x720, 30fps, no-audio, fast-start export from the user-provided `Urblo_Homepage.mp4`; the original HEVC source was not committed.
 - Homepage hero uses `100svh` so the first viewport reads as a full-screen hero across desktop and mobile.
-- Homepage hero video uses `preload="none"` and is constrained to desktop/tablet width through `media="(min-width: 768px)"`; mobile viewports keep the poster and do not select the MP4 source.
+- Homepage hero preloads the poster from `index.html`, uses the poster as the section background fallback, uses the 540x960 mobile MP4 for `media="(max-width: 767px)"`, and uses `preload="auto"` for the desktop/tablet MP4 constrained through `media="(min-width: 768px)"`.
+- Homepage below-the-fold heavy media, including the partner banner, Product Showcase background, Latest Projects imagery, Manifesto background, and Video CTA image, must stay deferred until the relevant section is near the viewport so those assets do not compete with first-viewport video loading.
 - The desktop MP4 was re-encoded from about 16MB to about 3MB for launch. Cloudflare Stream/R2 remains optional if the client later wants adaptive delivery, analytics, or non-repo video management.
 - Route banners are local launch media referenced from `src/App.tsx` through the `ROUTE_BANNERS` map. `/capabilities` now owns a full-bleed page hero sourced from the 2026 Capability Statement PDF instead of using a shared route banner.
 - Capability Statement PDF download path: `public/downloads/urblo-capability-statement-2026.pdf`.
@@ -526,25 +529,29 @@ Route state contract:
 - Homepage uses `HomepageLayout` with `HomepageHeader`/`HomepageFooter` proxy components that currently render the shared `SiteHeader`/`SiteFooter`.
 - The previous homepage `Browse by stone type` showcase has been removed by request; homepage material discovery should be reintroduced only through a new Urblo-aligned section if the client wants that pathway.
 - The previous homepage sustainability/tabbed feature section is currently not rendered by request. The proof metrics block now appears directly after the hero and uses the approved stone/city framing plus four proof metrics.
+- Homepage partner banner is the slim `Design-led stone solutions for streetscapes & civil landscapes.` transition band, using the West Side Place aerial image and roughly half the original vertical space.
 - Homepage Latest Projects is driven by `homepageData.latestProjects.projects`, currently a five-project array with slug, title, location, category, year, summary, rail image, rail image alt text, optional feature image, and optional feature image alt text. `HomepageSections.tsx` renders the data as a sketch-aligned two-row/four-column browser: the upper copy and upper feature image each span two columns, the lower draggable rail shows four portrait project images on desktop, and the active `View project` link navigates to `/projects/:slug`. The feature image falls back to the rail image when no separate `featureImage` is configured.
+- Homepage Latest Projects is intentionally rendered immediately below the partner banner, before the Product Showcase, so project proof follows the positioning line rather than appearing later as a filler block.
+- Homepage bottom video CTA is configured by `homepageData.videoCta.youtubeId` and opens a lazy `youtube-nocookie.com/embed/UfRtQZSi7cM` iframe only inside the Play modal. Closing the modal unmounts the iframe and stops playback.
 - Homepage typography is self-hosted from local static assets under `/public/fonts/urblo`:
   - `Avenir LT Std` weights `300/400/500/600/800`
   - `Didot LT Std` italic `400` and normal `600`
   - `Space Grotesk` local WOFF2
 - Homepage runtime no longer depends on remote WordPress font CSS/TTF/WOFF assets.
 
-## Last Runtime Quality Gate Status (Measured 2026-06-01)
+## Last Runtime Quality Gate Status (Measured 2026-06-03)
 - `npm run build`: pass
 - `npm run lint`: pass
 - `npx tsc -b`: pass
 - `npm run agent:smoke`: pass
+- `npm run agent:check`: pass
 
 ## Known Architecture Risks
-- Cloudflare + Supabase is the approved launch target, and Supabase foundation schema/RLS plus baseline seeds are applied. Form endpoint source is implemented, but live row creation still needs server-side environment variables and Cloudflare endpoint verification.
+- Cloudflare + Supabase is the approved launch target, and Supabase foundation schema/RLS plus baseline seeds are applied. Form endpoint source and basic deployed row/audit creation are verified; final form proof still needs browser-key privacy boundary, email, Turnstile, and admin lead workflow verification.
 - Supabase Auth shell source now exists, but live admin access still needs browser-safe key configuration, first admin email/profile creation, and authenticated browser verification.
 - Supabase Storage policies and `/admin/media` source are implemented, but live upload verification still requires browser-safe Supabase key configuration and an active admin/editor profile. Admin profile source management and owner-role RLS hardening are implemented, but live team-management verification still requires first-admin access. Source CRUD screens now exist for Stone Library, Projects, Products, Articles, Leads, and Audit; Supabase cannot replace static/file-backed public content until live save verification, approved content import, and public read cutover are completed.
-- Cloudflare Pages repo-side clean URL configuration is in place, but dashboard project creation, preview validation, custom domain, DNS cutover, and rollback still require account access.
-- Sample Request now routes through the Contact page sample-request mode and Pages Function source, but production persistence has not been verified without the server-side service-role environment variable.
+- Cloudflare Pages repo-side clean URL configuration is in place, the `urblo` Pages project is deployed on `urblo.pages.dev`, production custom domains `urblo.com.au` and `www.urblo.com.au` are cut over, and deployed smoke passes on Pages plus both custom domains. Rollback DNS values are recorded in `docs/CLOUDFLARE_DEPLOYMENT.md`.
+- Sample Request now routes through the Contact page sample-request mode and Pages Function source, and basic production persistence through the atomic request/item path is verified. Email, Turnstile, browser-key private-row denial, and admin workflow proof remain open.
 - Public Projects, Stone Library, Products, and Articles remain file-backed until approved static-to-Supabase content import and public read cutover are implemented and verified.
 - Admin shell exists, with Settings/admin profiles, Media, Stone Library, Projects, Products, Articles, Leads, and Audit as the first source CRUD/workflow/review screens. Stone Library source now includes finish image links to media records. Shared audit event writes are implemented in source for admin CRUD/workflow saves, but live row creation verification and live admin-user management are not complete yet.
 - Project and Stone Library content migration needs strict separation between confirmed facts and inferred MVP copy.

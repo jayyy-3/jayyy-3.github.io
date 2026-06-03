@@ -50,10 +50,14 @@ function NavItem({
 export default function SiteHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
+  const desktopMenuLabels = new Set(['Articles', 'Products']);
+  const desktopNavLinks = siteNavLinks.filter((item) => !desktopMenuLabels.has(item.label));
+  const desktopMenuLinks = siteNavLinks.filter((item) => desktopMenuLabels.has(item.label));
 
   const activeLookup = useMemo(() => {
     return new Map(siteNavLinks.map((item) => [item.label, navItemActive(location.pathname, item)]));
   }, [location.pathname]);
+  const desktopMenuActive = desktopMenuLinks.some((item) => activeLookup.get(item.label));
 
   return (
     <header className="absolute inset-x-0 top-0 z-50 border-b border-white/20 bg-black/88 text-white backdrop-blur-sm">
@@ -63,14 +67,16 @@ export default function SiteHeader() {
         </Link>
 
         <nav className="hidden items-center gap-8 text-[18px] font-light tracking-[0.02em] lg:flex">
-          {siteNavLinks.map((item) => (
+          {desktopNavLinks.map((item) => (
             <NavItem key={item.label} item={item} active={activeLookup.get(item.label) ?? false} />
           ))}
         </nav>
 
         <button
           type="button"
-          className="inline-flex h-12 w-12 items-center justify-center lg:hidden"
+          className={`inline-flex h-12 w-12 items-center justify-center transition-colors hover:text-[var(--urblo-lime)] ${
+            desktopMenuActive ? 'text-[var(--urblo-lime)]' : 'text-white'
+          }`}
           aria-expanded={menuOpen}
           aria-label="Toggle menu"
           onClick={() => setMenuOpen((open) => !open)}
@@ -96,9 +102,19 @@ export default function SiteHeader() {
       </div>
 
       {menuOpen ? (
-        <div className="border-t border-white/10 bg-black/96 px-6 py-6 lg:hidden">
-          <nav className="flex flex-col gap-4 text-lg font-light tracking-[0.02em]">
+        <div className="border-t border-white/10 bg-black/96 px-6 py-6 lg:absolute lg:right-[clamp(20px,3.2vw,64px)] lg:top-[102px] lg:w-[260px] lg:border lg:border-white/12 lg:px-6 lg:py-5 lg:shadow-2xl">
+          <nav className="flex flex-col gap-4 text-lg font-light tracking-[0.02em] lg:hidden">
             {siteNavLinks.map((item) => (
+              <NavItem
+                key={item.label}
+                item={item}
+                active={activeLookup.get(item.label) ?? false}
+                onClick={() => setMenuOpen(false)}
+              />
+            ))}
+          </nav>
+          <nav className="hidden flex-col gap-4 text-[18px] font-light tracking-[0.02em] lg:flex">
+            {desktopMenuLinks.map((item) => (
               <NavItem
                 key={item.label}
                 item={item}

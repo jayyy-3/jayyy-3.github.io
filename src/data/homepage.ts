@@ -363,7 +363,7 @@ export const homepageData = {
   ] satisfies HomepageLogo[],
   videoCta: {
     backgroundImage: '/media/launch/homepage/video-cta-bg.jpg',
-    videoUrl: '/media/launch/home/urblo-hero.mp4',
+    youtubeId: 'UfRtQZSi7cM',
   },
   footer: {
     address: ['5 Hamilton St,', 'Oakleigh VIC 3166'],

@@ -847,7 +847,7 @@ function PartnerBannerSection() {
   const [sectionRef, loadImage] = useNearViewport<HTMLElement>('400px');
 
   return (
-    <section ref={sectionRef} className="relative min-h-[516px] overflow-hidden bg-black text-white">
+    <section ref={sectionRef} className="relative min-h-[258px] overflow-hidden bg-black text-white">
       {loadImage ? (
         <img
           src={homepageData.partnerBanner.image}
@@ -857,7 +857,7 @@ function PartnerBannerSection() {
         />
       ) : null}
       <div className="absolute inset-0 bg-black/60" />
-      <div className="relative mx-auto flex min-h-[516px] max-w-[1440px] items-center px-6 py-16 md:px-10 lg:px-[92px]">
+      <div className="relative mx-auto flex min-h-[258px] max-w-[1440px] items-center px-6 py-8 md:px-10 lg:px-[92px]">
         <Reveal className="max-w-[70rem] text-[38px] font-semibold uppercase leading-[1.35] text-white md:text-[52px] xl:text-[60px]">
           <span className="text-[var(--urblo-lime)]">{highlight}</span>
           {bodyText}
@@ -1447,12 +1447,13 @@ function VideoModal({
             <path d="M6 6l12 12M18 6L6 18" strokeLinecap="round" />
           </svg>
         </button>
-        <video
+        <iframe
           className="aspect-video w-full"
-          controls
-          autoPlay
-          playsInline
-          src={homepageData.videoCta.videoUrl}
+          src={`https://www.youtube-nocookie.com/embed/${homepageData.videoCta.youtubeId}?autoplay=1&rel=0&modestbranding=1&playsinline=1`}
+          title="Urblo project video"
+          loading="lazy"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
         />
       </div>
     </div>
@@ -1501,8 +1502,8 @@ export default function HomepageSections() {
       {showSustainabilitySection ? <SustainabilitySection /> : null}
       <MetricsSection />
       <PartnerBannerSection />
-      <ProductShowcaseSection />
       <LatestProjectsSection />
+      <ProductShowcaseSection />
       <ManifestoSection />
       <LogoCarouselSection />
       <VideoCTASection />
