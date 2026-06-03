@@ -66,39 +66,41 @@ export default function SiteHeader() {
           <img src={siteLogoUrl} alt="Urblo logo" className="h-10 w-auto md:h-[45px]" />
         </Link>
 
-        <nav className="hidden items-center gap-8 text-[18px] font-light tracking-[0.02em] lg:flex">
-          {desktopNavLinks.map((item) => (
-            <NavItem key={item.label} item={item} active={activeLookup.get(item.label) ?? false} />
-          ))}
-        </nav>
+        <div className="flex items-center justify-end gap-4 lg:gap-6">
+          <nav className="hidden items-center gap-8 text-[18px] font-light tracking-[0.02em] lg:flex">
+            {desktopNavLinks.map((item) => (
+              <NavItem key={item.label} item={item} active={activeLookup.get(item.label) ?? false} />
+            ))}
+          </nav>
 
-        <button
-          type="button"
-          className={`inline-flex h-12 w-12 items-center justify-center transition-colors hover:text-[var(--urblo-lime)] ${
-            desktopMenuActive ? 'text-[var(--urblo-lime)]' : 'text-white'
-          }`}
-          aria-expanded={menuOpen}
-          aria-label="Toggle menu"
-          onClick={() => setMenuOpen((open) => !open)}
-        >
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            className="h-7 w-7"
+          <button
+            type="button"
+            className={`inline-flex h-12 w-12 items-center justify-center transition-colors hover:text-[var(--urblo-lime)] ${
+              desktopMenuActive ? 'text-[var(--urblo-lime)]' : 'text-white'
+            }`}
+            aria-expanded={menuOpen}
+            aria-label="Toggle menu"
+            onClick={() => setMenuOpen((open) => !open)}
           >
-            {menuOpen ? (
-              <path d="M6 6l12 12M18 6L6 18" />
-            ) : (
-              <>
-                <path d="M3 7h18" />
-                <path d="M3 12h18" />
-                <path d="M3 17h18" />
-              </>
-            )}
-          </svg>
-        </button>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              className="h-7 w-7"
+            >
+              {menuOpen ? (
+                <path d="M6 6l12 12M18 6L6 18" />
+              ) : (
+                <>
+                  <path d="M3 7h18" />
+                  <path d="M3 12h18" />
+                  <path d="M3 17h18" />
+                </>
+              )}
+            </svg>
+          </button>
+        </div>
       </div>
 
       {menuOpen ? (

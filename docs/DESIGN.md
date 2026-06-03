@@ -143,6 +143,7 @@ Current launch rhythm:
 
 Header behavior:
 - Desktop header keeps Projects, Capabilities, Stone Library, Our Story, and Contact Us visible, while Articles and Products live behind the right-side hamburger menu.
+- On desktop, the visible primary nav and hamburger are one right-aligned control group. Do not distribute the primary nav as a centered middle column between the logo and menu button.
 - Mobile header keeps the same hamburger control but exposes the full navigation list in the opened menu.
 - The hamburger is a compact navigation affordance, not a promotional CTA; avoid adding pill labels or extra explanatory copy around it.
 

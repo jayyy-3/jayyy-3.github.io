@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lastUpdated": "2026-06-02",
+  "lastUpdated": "2026-06-03",
   "sourceOfTruth": "Machine-readable task queue for active and upcoming agent work. Human-readable roadmap lives in docs/NEXT_STEPS.md.",
   "tasks": [
     {
@@ -1254,6 +1254,7 @@
         "2026-06-02: Homepage Latest Projects now occupies exactly one viewport with `100svh`; active copy, image, and rail heights remain fixed across hover/tap selection. Short desktop viewports hide the active summary and align facts beside the CTA, while short mobile viewports simplify the copy and rail media so controls remain visible without overlap.",
         "2026-06-02: Homepage Latest Projects now follows the approved sketch ratio: upper copy spans two columns, upper feature image spans two columns, and the lower draggable rail shows four fixed-height portrait project images on desktop. `HomepageProject` now supports optional `featureImage` and `featureImageAlt` for independent upper-image selection, populated from existing second-detail project media with fallback to the rail image.",
         "2026-06-03: Homepage `Design-led` partner banner is reduced to a slimmer transition band, Latest Projects now renders immediately below it before Product Showcase, the bottom Play modal uses a lazy `youtube-nocookie` embed for `UfRtQZSi7cM`, and the desktop header moves Articles/Products behind the right-side hamburger while mobile keeps the full-menu hamburger.",
+        "2026-06-03: Desktop header layout keeps the visible primary nav and hamburger as one right-aligned group so the nav does not sit centered between the logo and menu button.",
         "2026-06-02: Public Projects archive/detail pages were redesigned against the supplied Sam the Paving Man structural reference in Urblo visual language. `/projects` now has breadcrumb, large title, proof intro, count, working sector filters, grid/list controls, and equal-sized project images. `/projects/:slug` now has oversized opening, previous/next navigation, full-width hero/media, Project Information facts, ordered media blocks, hotspot image support, Featured Materials, and shared CTA.",
         "2026-06-02: Current static project data supports `normal_image` and `hotspot_image` media blocks. The `youtube_video` renderer/source/admin/migration contract exists for one optional video per project, but no client-approved Urblo project YouTube block is configured in current data.",
         "2026-06-02: In-app Browser QA verified `/projects` desktop/mobile filters, grid/list controls, equal-sized images, Moon Gate desktop/mobile hotspot inspector behavior, West Side Place desktop/mobile normal media flow, no framework overlays, and zero horizontal overflow. `/admin/projects` live drag QA remains credential-gated; `npm run agent:admin-crud-coverage` now checks the hotspot stage/marker and pointer placement source contract."

@@ -7638,6 +7638,41 @@ Last updated: 2026-06-02
 - `NEXT-UI-PARITY-001`
 - `NOW-CLOUDFLARE-PAGES-DEPLOY-001`
 
+## Entry - 2026-06-03 (Desktop Header Right Alignment)
+
+### Scope
+- Restored the desktop shared header layout so the visible primary nav and hamburger button are one right-aligned group rather than separate centered/right columns.
+- Kept Articles and Products inside the desktop hamburger menu.
+- Kept mobile behavior unchanged: the hamburger exposes the full navigation list.
+- Updated Harness docs with the explicit right-aligned header contract to prevent future centered-nav regressions.
+
+### Changed Files
+- `src/components/site/SiteHeader.tsx`
+- `docs/ARCHITECTURE.md`
+- `docs/DESIGN.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- In-app Browser local production-preview check on `http://127.0.0.1:4173/`: pass. Desktop header opened successfully, console errors/warnings were empty, visible primary links were Projects, Capabilities, Stone Library, Our Story, and Contact Us, and the visible desktop hamburger menu links were Articles and Products.
+- Playwright local production-preview desktop 1440x900: pass. Primary nav measured from x=736 to x=1310, hamburger x=1334 to x=1382, nav-to-button gap 24px, right gutter 58px, no horizontal overflow, and zero console issues.
+- Playwright local production-preview mobile 390x844: pass. Desktop primary nav was hidden, hamburger right gutter was 20px, opened menu exposed Projects, Capabilities, Stone Library, Our Story, Articles, Products, and Contact Us, no horizontal overflow, and zero console issues.
+
+### Risks and Gaps
+- Production Cloudflare smoke and browser verification are required after this commit deploys.
+
+### Next Handoff
+- `NEXT-UI-PARITY-001`
+- `NOW-CLOUDFLARE-PAGES-DEPLOY-001`
+
 ## Entry Template (Use for Every Future Session)
 
 ### Date

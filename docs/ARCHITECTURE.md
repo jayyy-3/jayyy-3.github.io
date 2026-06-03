@@ -259,6 +259,7 @@ Route state contract:
 ### Implemented navigation surfaces
 - Shared desktop header primary links: `/projects`, `/capabilities`, `/stone-library`, `/our-story`, `/contact`
 - Shared desktop header hamburger links: `/articles`, `/products`
+- Shared desktop header layout: logo remains left; the primary links and hamburger are rendered as one right-aligned group, not as separate centered/right columns.
 - Shared mobile header hamburger links: `/projects`, `/capabilities`, `/stone-library`, `/our-story`, `/articles`, `/products`, `/contact`
 - Homepage proof-section CTA: `/capabilities`
 - Shared footer links: `/capabilities`, `/contact?intent=sample-request`, `/contact`
