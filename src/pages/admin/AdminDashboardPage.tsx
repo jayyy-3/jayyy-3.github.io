@@ -7,6 +7,7 @@ import { useAdminAuth } from '../../lib/adminAuthHooks';
 import AdminShell from './AdminShell';
 import RequireAdmin from './RequireAdmin';
 import { adminModules } from './adminContent';
+import { CmsLiveRuleCard, CmsStatusCounts, CmsStatusMeaning, CmsWorkflowSteps } from './AdminCmsPrimitives';
 
 interface DashboardMetric {
     label: string;
@@ -30,10 +31,19 @@ interface DashboardHealthItem {
     severity: 'ready' | 'warning';
 }
 
+interface ContentStatusSnapshot {
+    label: string;
+    path: string;
+    draft: number;
+    published: number;
+    archived: number;
+}
+
 interface DashboardState {
     isLoading: boolean;
     error: string | null;
     metrics: DashboardMetric[];
+    contentStatus: ContentStatusSnapshot[];
     healthItems: DashboardHealthItem[];
     recentLeads: RecentLead[];
 }
@@ -79,6 +89,7 @@ function AdminDashboardContent() {
         isLoading: true,
         error: null,
         metrics: [],
+        contentStatus: [],
         healthItems: [],
         recentLeads: [],
     });
@@ -106,6 +117,24 @@ function AdminDashboardContent() {
                 label,
                 value: count ?? 0,
                 note: 'Published rows',
+            };
+        });
+
+        const contentStatusRequests = contentTables.map(async ({ table, label }) => {
+            const [draft, published, archived] = await Promise.all(
+                (['draft', 'published', 'archived'] as const).map((status) =>
+                    resolveCount(
+                        client.from(table).select('id', { count: 'exact', head: true }).eq('status', status),
+                    ),
+                ),
+            );
+            const module = adminModules.find((item) => item.label === label || item.label === label.replace(/s$/, ''));
+            return {
+                label,
+                path: module?.path ?? '/admin',
+                draft,
+                published,
+                archived,
             };
         });
 
@@ -209,9 +238,10 @@ function AdminDashboardContent() {
         ];
 
         try {
-            const [contentMetrics, healthItems, newEnquiries, newSamples, recentEnquiries, recentSamples] =
+            const [contentMetrics, contentStatus, healthItems, newEnquiries, newSamples, recentEnquiries, recentSamples] =
                 await Promise.all([
                     Promise.all(metricRequests),
+                    Promise.all(contentStatusRequests),
                     Promise.all(healthRequests),
                     newEnquiriesRequest,
                     newSamplesRequest,
@@ -257,6 +287,7 @@ function AdminDashboardContent() {
                 isLoading: false,
                 error: null,
                 metrics: [...leadMetrics, ...contentMetrics],
+                contentStatus,
                 healthItems,
                 recentLeads,
             });
@@ -265,6 +296,7 @@ function AdminDashboardContent() {
                 isLoading: false,
                 error: error instanceof Error ? error.message : 'Dashboard query failed.',
                 metrics: [],
+                contentStatus: [],
                 healthItems: [],
                 recentLeads: [],
             });
@@ -293,6 +325,69 @@ function AdminDashboardContent() {
         >
             <div className="grid gap-5 xl:grid-cols-[1fr_380px]">
                 <section className="space-y-5">
+                    <CmsLiveRuleCard>
+                        <CmsStatusMeaning />
+                    </CmsLiveRuleCard>
+
+                    <section className="border border-black/10 bg-white p-4">
+                        <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+                            <div>
+                                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-black/45">
+                                    Editor workflow
+                                </p>
+                                <h2 className="mt-2 text-2xl font-semibold text-black">
+                                    Edit, review, publish
+                                </h2>
+                            </div>
+                            <p className="max-w-xl text-sm leading-6 text-black/58">
+                                Treat Draft as the safe workspace. Publish only after the readiness panel is clear.
+                            </p>
+                        </div>
+                        <div className="mt-4">
+                            <CmsWorkflowSteps />
+                        </div>
+                    </section>
+
+                    <section className="border border-black/10 bg-white">
+                        <div className="border-b border-black/10 p-4">
+                            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-black/45">
+                                Content status
+                            </p>
+                            <h2 className="mt-2 text-2xl font-semibold text-black">What is live vs still in draft</h2>
+                        </div>
+                        <div className="divide-y divide-black/10">
+                            {dashboard.isLoading ? (
+                                Array.from({ length: 4 }).map((_, index) => (
+                                    <div key={index} className="min-h-[104px] animate-pulse bg-[#f8f9f5] p-4" />
+                                ))
+                            ) : dashboard.contentStatus.length ? (
+                                dashboard.contentStatus.map((snapshot) => (
+                                    <Link
+                                        key={snapshot.label}
+                                        to={snapshot.path}
+                                        className="grid gap-4 p-4 transition hover:bg-[#f8f9f5] lg:grid-cols-[180px_1fr]"
+                                    >
+                                        <div>
+                                            <p className="text-base font-semibold text-black">{snapshot.label}</p>
+                                            <p className="mt-1 text-sm leading-6 text-black/55">
+                                                Published is eligible for the website. Draft is safe to edit.
+                                            </p>
+                                        </div>
+                                        <CmsStatusCounts
+                                            draft={snapshot.draft}
+                                            published={snapshot.published}
+                                            archived={snapshot.archived}
+                                        />
+                                    </Link>
+                                ))
+                            ) : (
+                                <div className="p-4 text-sm leading-6 text-black/58">
+                                    Status counts will appear after CMS content is loaded.
+                                </div>
+                            )}
+                        </div>
+                    </section>
+
                     <div className="grid gap-3 md:grid-cols-3">
                         {dashboard.isLoading
                             ? Array.from({ length: 6 }).map((_, index) => (

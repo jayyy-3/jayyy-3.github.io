@@ -2117,8 +2117,15 @@ Last updated: 2026-06-04
 - `src/pages/admin/AdminDashboardPage.tsx`
 
 ### Verification Results
+- `npm run build`: pass. Browserslist staleness notice remains.
 - `npm run lint`: pass.
 - `npx tsc -b`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:check`: pass.
+- `npm run agent:smoke`: pass after approved local preview-server permission; sandbox-only run failed with `Vite preview did not respond at http://127.0.0.1:4173`.
+- `npm run agent:admin-config-gate`: pass for 11 admin routes after approved local preview/browser permission; screenshots written to ignored `.tmp/admin-config-gate/screenshots`.
+- `jq empty docs/agent/tasks.json`: pass.
+- `git diff --check`: pass.
 - `npm run build`: pass. Browserslist staleness notice remains.
 - `npm run agent:smoke`: pass, including public/admin route shells, Forms API checks, and Contact form UI source checks.
 - `npm run agent:forms-ui`: pass.
@@ -8041,6 +8048,39 @@ Last updated: 2026-06-04
 
 ### Next Handoff
 - `NOW-ADMIN-CONTENT-CRUD-001`
+
+## Entry - 2026-06-04 (Admin CMS IA/UX Baseline)
+
+### Scope
+- Started the broader CMS productization pass for non-technical editors.
+- Added shared CMS status primitives so Draft, Published, and Archived have one editor-facing meaning across admin surfaces.
+- Reworked the admin shell navigation into Work queue, Content library, and Operations, with persistent copy explaining that only Published content can appear publicly.
+- Expanded Dashboard from a technical health queue into an editor orientation screen with Draft/Published/Archived status counts and a clear Edit -> Review -> Publish workflow.
+- Improved `/admin/projects` list UX with search, status filtering, status counts, shared CMS status pills, and plain-language readiness labels.
+
+### Changed Files
+- `src/pages/admin/AdminCmsPrimitives.tsx`
+- `src/pages/admin/AdminShell.tsx`
+- `src/pages/admin/AdminDashboardPage.tsx`
+- `src/pages/admin/AdminProjectsPage.tsx`
+- `src/pages/admin/adminContent.ts`
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+
+### Risks and Gaps
+- This is the first IA/status-language batch, not the full CMS redesign. Projects still needs a deeper list/detail/preview editing flow; Media, Stone Library, Products, Articles, Leads, and Settings still need the shared UX system applied.
+- Status counts are read from Supabase through the existing authenticated admin client and depend on the active admin session/RLS.
+
+### Next Handoff
+- `NOW-ADMIN-CONTENT-CRUD-001`
+- `NOW-ADMIN-CMS-001`
 
 ## Entry Template (Use for Every Future Session)
 

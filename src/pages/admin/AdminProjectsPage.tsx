@@ -9,6 +9,7 @@ import {
     MousePointer2,
     Plus,
     Save,
+    Search,
     ShieldAlert,
 } from 'lucide-react';
 import { recordAdminAuditEvent, withAuditNotice } from '../../lib/adminAudit';
@@ -16,8 +17,10 @@ import { supabase } from '../../lib/supabaseClient';
 import { useAdminAuth } from '../../lib/adminAuthHooks';
 import AdminShell from './AdminShell';
 import RequireAdmin from './RequireAdmin';
+import { CmsLiveRuleCard, CmsStatusCounts, CmsStatusMeaning, CmsStatusPill, ReadinessBadge } from './AdminCmsPrimitives';
 
 type ProjectStatus = 'draft' | 'published' | 'archived';
+type ProjectListFilter = ProjectStatus | 'all';
 type ClaimStatus = 'needs_review' | 'approved' | 'deferred';
 type CarbonStatus = '' | 'yes' | 'no' | 'not_available' | 'tbc';
 type ProjectMediaRole =
@@ -339,6 +342,8 @@ function AdminProjectsContent() {
     const [selectedMediaBlockId, setSelectedMediaBlockId] = useState<number | null>(null);
     const [selectedHotspotId, setSelectedHotspotId] = useState<number | null>(null);
     const [projectForm, setProjectForm] = useState<ProjectFormState>(emptyProjectForm);
+    const [projectSearch, setProjectSearch] = useState('');
+    const [projectStatusFilter, setProjectStatusFilter] = useState<ProjectListFilter>('all');
     const [factForm, setFactForm] = useState<FactFormState>(emptyFactForm);
     const [materialForm, setMaterialForm] = useState<MaterialFormState>(emptyMaterialForm);
     const [mapForm, setMapForm] = useState<MapFormState>(emptyMapForm);
@@ -376,6 +381,20 @@ function AdminProjectsContent() {
     );
     const selectedMapImageUrl = useMemo(() => getMediaUrl(selectedMapMedia), [selectedMapMedia]);
     const projectCounts = useMemo(() => summarizeProjects(projects), [projects]);
+    const filteredProjects = useMemo(
+        () =>
+            projects.filter((project) => {
+                const matchesStatus = projectStatusFilter === 'all' || project.status === projectStatusFilter;
+                const search = projectSearch.trim().toLowerCase();
+                const matchesSearch =
+                    !search ||
+                    [project.title, project.slug, project.location, project.client, project.landscape_architect]
+                        .filter(Boolean)
+                        .some((value) => String(value).toLowerCase().includes(search));
+                return matchesStatus && matchesSearch;
+            }),
+        [projectSearch, projectStatusFilter, projects],
+    );
     const publishBlockers = useMemo(
         () => getProjectPublishBlockers(projectForm, facts, materials),
         [facts, materials, projectForm],
@@ -1136,6 +1155,39 @@ function AdminProjectsContent() {
                             {projectCounts.published} published, {projectCounts.draft} draft, {projectCounts.archived}{' '}
                             archived.
                         </p>
+                        <div className="mt-4">
+                            <CmsStatusCounts
+                                draft={projectCounts.draft}
+                                published={projectCounts.published}
+                                archived={projectCounts.archived}
+                            />
+                        </div>
+                        <label className="mt-4 flex min-h-11 items-center gap-2 border border-black/10 bg-[#f8f9f5] px-3 text-sm text-black">
+                            <Search className="h-4 w-4 shrink-0 text-black/42" />
+                            <input
+                                value={projectSearch}
+                                onChange={(event) => setProjectSearch(event.target.value)}
+                                placeholder="Search projects, slug, location, client"
+                                className="min-w-0 flex-1 bg-transparent text-sm font-medium outline-none placeholder:text-black/36"
+                            />
+                        </label>
+                        <div className="mt-3 grid grid-cols-4 gap-1">
+                            {(['all', 'published', 'draft', 'archived'] as const).map((filter) => (
+                                <button
+                                    key={filter}
+                                    type="button"
+                                    onClick={() => setProjectStatusFilter(filter)}
+                                    className={[
+                                        'min-h-9 rounded border px-2 text-[11px] font-bold uppercase tracking-[0.1em] transition',
+                                        projectStatusFilter === filter
+                                            ? 'border-black bg-black text-white'
+                                            : 'border-black/10 bg-white text-black/55 hover:border-black',
+                                    ].join(' ')}
+                                >
+                                    {filter}
+                                </button>
+                            ))}
+                        </div>
                     </div>
                     <div className="max-h-[760px] overflow-auto">
                         {isLoading ? (
@@ -1147,9 +1199,11 @@ function AdminProjectsContent() {
                                     />
                                 ))}
                             </div>
-                        ) : projects.length ? (
+                        ) : filteredProjects.length ? (
                             <div className="divide-y divide-black/10">
-                                {projects.map((project) => (
+                                {filteredProjects.map((project) => {
+                                    const rowNeedsReview = project.claim_review_status === 'needs_review';
+                                    return (
                                     <button
                                         key={project.id}
                                         type="button"
@@ -1168,21 +1222,30 @@ function AdminProjectsContent() {
                                                     {project.slug} / {project.location ?? 'Location TBC'}
                                                 </span>
                                             </span>
-                                            <StatusPill status={project.status} />
+                                            <CmsStatusPill status={project.status} />
                                         </div>
-                                        <p className="mt-3 truncate text-xs text-black/45">
-                                            {project.claim_review_status} claim review
-                                        </p>
+                                        <div className="mt-3 flex flex-wrap items-center gap-2">
+                                            <ReadinessBadge ready={!rowNeedsReview} />
+                                            <span className="text-xs font-semibold text-black/45">
+                                                {rowNeedsReview
+                                                    ? 'Claims must be approved or deferred before publish.'
+                                                    : 'Project claims reviewed.'}
+                                            </span>
+                                        </div>
                                     </button>
-                                ))}
+                                    );
+                                })}
                             </div>
                         ) : (
                             <div className="p-5">
                                 <FileText className="h-5 w-5 text-black" />
-                                <h2 className="mt-5 text-xl font-semibold text-black">No project records yet</h2>
+                                <h2 className="mt-5 text-xl font-semibold text-black">
+                                    {projects.length ? 'No matching projects' : 'No project records yet'}
+                                </h2>
                                 <p className="mt-3 text-sm leading-6 text-black/58">
-                                    Create a project record, then add facts, materials, a material map, and hotspots.
-                                    Public project pages remain static until the migration is switched on.
+                                    {projects.length
+                                        ? 'Clear the search or choose another status filter.'
+                                        : 'Create a project record, then add facts, materials, a material map, and hotspots.'}
                                 </p>
                             </div>
                         )}
@@ -1204,7 +1267,13 @@ function AdminProjectsContent() {
                                     structured for later public migration.
                                 </p>
                             </div>
-                            <StatusPill status={projectForm.status} />
+                            <CmsStatusPill status={projectForm.status} />
+                        </div>
+
+                        <div className="mt-5">
+                            <CmsLiveRuleCard>
+                                <CmsStatusMeaning compact />
+                            </CmsLiveRuleCard>
                         </div>
 
                         <div className="mt-7 grid gap-4 md:grid-cols-2">
@@ -1365,7 +1434,7 @@ function AdminProjectsContent() {
                         </label>
 
                         <div className="mt-6 flex flex-wrap gap-2">
-                            <ActionButton disabled={!canEdit || isSavingProject || isLoading} label={isSavingProject ? 'Saving' : 'Save project'} icon="save" />
+                            <ActionButton disabled={!canEdit || isSavingProject || isLoading} label={isSavingProject ? 'Saving' : 'Save draft'} icon="save" />
                             <button
                                 type="button"
                                 disabled={!canEdit || isSavingProject || isLoading}
@@ -2444,23 +2513,6 @@ function RecordChips<T extends { id: number }>({
                 </button>
             ))}
         </div>
-    );
-}
-
-function StatusPill({ status }: { status: ProjectStatus }) {
-    return (
-        <span
-            className={[
-                'inline-flex h-8 shrink-0 items-center rounded border px-3 text-[11px] font-bold uppercase tracking-[0.14em]',
-                status === 'published'
-                    ? 'border-[var(--urblo-lime)] bg-[rgba(0,255,25,0.12)] text-black'
-                    : status === 'archived'
-                      ? 'border-black/15 bg-black text-white'
-                      : 'border-black/15 bg-white text-black/50',
-            ].join(' ')}
-        >
-            {status}
-        </span>
     );
 }
 
