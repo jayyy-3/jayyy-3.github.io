@@ -1,5 +1,5 @@
 -- Extend project media from gallery records into ordered project detail media blocks.
--- Prepared in source only; apply during the next approved Supabase migration run.
+-- Applied to the live Supabase project during the approved 2026-06-04 admin QA run.
 
 alter table public.project_media
   alter column media_asset_id drop not null;

@@ -722,7 +722,7 @@
         "scripts/check-admin-crud-live.mjs",
         "src/pages/admin/AdminDashboardPage.tsx",
         "src/components/projects/ProjectHotspotImage.tsx",
-        "supabase/migrations/202606020001_project_media_blocks.sql"
+        "supabase/migrations/20260603142359_project_media_blocks.sql"
       ],
       "notes": [
         "Live save verification remains blocked until browser-safe Supabase key configuration and active admin/editor profiles exist. Source-only CRUD can continue behind the existing config/auth gate.",
@@ -761,7 +761,8 @@
         "2026-05-29: Admin CRUD live verifier plan now includes tagged `stone_finish_images` create/publish/archive coverage through authenticated RLS for the later credential-gated live run. It publishes then archives public-facing QA parent rows, verifies those tagged archived public-content rows and private lead rows are not anonymously visible through browser-key reads, and performs no physical deletes.",
         "2026-05-29: `/admin` dashboard now includes a real content health queue for published media missing metadata, project claim review, published products/articles missing key media, TBC Stone Library records, and stale new leads. `npm run agent:admin-crud-coverage` guards those dashboard health checks source-side, and `npm run agent:admin-crud-live` stages tagged predicate readback for live admin QA.",
         "2026-06-02: `/admin/projects` source now includes ordered project media block editing through `project_media`: normal image, hotspot image linked to a material map, and optional YouTube video. Hotspot placement now supports direct drag/click point setting on the selected material map image while retaining numeric x/y percentage fields.",
-        "2026-06-02: `supabase/migrations/202606020001_project_media_blocks.sql` is prepared in source to add `project_material_map_id`, `block_title`, nullable media asset support for YouTube rows, `youtube_url`, role constraints for `normal_image`/`hotspot_image`/`youtube_video`, and a one-active-YouTube-per-project index. The migration has not been live-applied in this worktree.",
+        "2026-06-02: `supabase/migrations/20260603142359_project_media_blocks.sql` adds `project_material_map_id`, `block_title`, nullable media asset support for YouTube rows, `youtube_url`, role constraints for `normal_image`/`hotspot_image`/`youtube_video`, and a one-active-YouTube-per-project index. The migration was applied and verified on production on 2026-06-04.",
+        "2026-06-04: `npm run agent:admin-crud-live -- --allow-writes` passed for marker `admin-live-1780496690772-b8a47213`: created tagged QA rows across Settings, Media, Stone Library, Products, Projects, Articles, Leads, and audit-export paths; recorded 48 audit rows; matched dashboard health predicates; published then archived tagged public-content rows; and verified anonymous browser-key reads returned zero tagged public-content/private lead rows. The run did not include Storage upload proof.",
         "2026-06-02: Content import dry-run now prefers structured project `mediaBlocks`, generating 15 project media rows including the Moon Gate hotspot media block with 0 warnings and 0 blockers."
       ],
       "acceptance": [

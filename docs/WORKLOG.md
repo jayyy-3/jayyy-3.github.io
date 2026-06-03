@@ -2,6 +2,48 @@
 
 Last updated: 2026-06-04
 
+## Entry - 2026-06-04 (Admin CRUD Live QA and Project Media Migration)
+
+### Scope
+- Applied the approved `project_media_blocks` migration to the live Supabase project and aligned the local migration filename with the remote migration version.
+- Verified `project_media` now has `project_material_map_id`, `block_title`, and `youtube_url`, plus the expected media-role and block-contract constraints/indexes.
+- Re-ran approval-gated non-Storage admin CRUD/live lead workflow QA.
+- Archived partial public-facing QA rows left by the failed pre-migration run and recorded cleanup audit rows.
+
+### Supabase Evidence
+- Remote migration list includes `20260603142359 project_media_blocks`.
+- Columns verified: `project_media.project_material_map_id`, `project_media.block_title`, and `project_media.youtube_url`.
+- Constraints verified: `project_media_media_role_check` and `project_media_block_contract_check`.
+- Indexes verified: `project_media_project_material_map_idx`, `project_media_project_role_sort_idx`, and `project_media_one_active_youtube_idx`.
+
+### Verification
+- Failed pre-migration run marker: `admin-live-1780496442071-f27c2b7d`; it stopped at missing `project_media.block_title`.
+- Passed run marker: `admin-live-1780496690772-b8a47213`.
+- `npm run agent:admin-crud-live -- --allow-writes`: pass.
+- Created tagged QA rows: `site_settings#4`, `media_assets#2`, `stone_groups#2`, `stone_variants#2`, `stone_finish_capabilities#2`, `stone_finish_images#2`, `products#2`, `product_models#2`, `product_material_defaults#2`, `product_specs#2`, `projects#2`, `project_facts#2`, `project_materials#2`, `project_material_maps#2`, `project_media#1`, `project_hotspots#1`, `articles#1`, `article_blocks#1`, `enquiries#5`, `sample_requests#4`, and `sample_request_items#4`.
+- Audit rows recorded by the passing run: `48`.
+- Dashboard health predicates matched tagged QA rows before archive cleanup.
+- Tagged public-content rows were published, archived, and then checked for anonymous invisibility.
+- Anonymous browser-key reads returned zero tagged QA content rows and no private lead rows.
+
+### Cleanup
+- Partial failed-run public-facing rows were archived non-destructively: `site_settings#3`, `media_assets#1`, `stone_groups#1`, `products#1`, and `projects#1`.
+- Cleanup audit rows recorded: `admin_audit_events.id = 73` through `77`.
+
+### Advisor Notes
+- Security advisor returned one Auth warning: leaked password protection is disabled.
+- Performance advisor returned existing INFO/WARN items around unused indexes and multiple permissive SELECT policies; these are follow-up tuning items, not blockers for the completed QA run.
+
+### Risks and Gaps
+- Optional Storage upload proof was not run because `--include-storage` was not approved/requested.
+- Turnstile remains unconfigured/unverified.
+- Static-to-Supabase content import and public read cutover still need explicit approval and review.
+
+### Next Handoff
+- Decide whether to run `npm run agent:admin-crud-live -- --allow-writes --include-storage` for final Storage upload proof.
+- Decide whether Turnstile proof is required before launch and configure its site key/secret/token path if yes.
+- Continue toward guarded content import/public read cutover after content review approval.
+
 ## Entry - 2026-06-04 (Production Active Admin Browser QA Passed)
 
 ### Scope
@@ -466,7 +508,7 @@ Last updated: 2026-06-04
 - Extended static project data with listing metadata, story copy, ordered media blocks, and Moon Gate hotspot metadata.
 - Extended `/admin/projects` source with ordered `project_media` block editing for normal images, hotspot images, and optional YouTube video rows.
 - Added draggable/click hotspot placement on the selected admin material map image while keeping numeric x/y percentage fields.
-- Prepared `supabase/migrations/202606020001_project_media_blocks.sql` for the future live `project_media` block contract.
+- Prepared the project media block migration for the future live `project_media` block contract. This migration was later applied as `supabase/migrations/20260603142359_project_media_blocks.sql` during the 2026-06-04 approved admin QA run.
 - Updated content import and admin verifiers so the static-to-Supabase path understands structured project media blocks.
 
 ### Changed Files
@@ -488,7 +530,7 @@ Last updated: 2026-06-04
 - `src/pages/ProjectDetails.tsx`
 - `src/pages/Projects.tsx`
 - `src/pages/admin/AdminProjectsPage.tsx`
-- `supabase/migrations/202606020001_project_media_blocks.sql`
+- `supabase/migrations/20260603142359_project_media_blocks.sql`
 
 ### Verification Results
 - `npm run build`: pass. Existing Browserslist/caniuse-lite staleness notice remains.
@@ -507,7 +549,7 @@ Last updated: 2026-06-04
 - Console health: Browser logs only the existing Cloudflare Turnstile warning `[Cloudflare Turnstile] Unknown parameter passed to api.js: "?ver=...", ignoring.` No task-caused runtime errors were observed.
 
 ### Risks and Gaps
-- The new Supabase migration is source-prepared only and has not been applied to the live Supabase project.
+- Superseded on 2026-06-04: the project media block migration is now applied and verified in the live Supabase project.
 - Current static project data has no client-approved Urblo YouTube video configured, so public browser QA can verify the renderer/source contract but not a live configured video block.
 - Live admin drag-and-drop QA is pending browser-safe Supabase config plus an active admin/editor profile. This checkpoint verifies the source implementation and strengthened no-secret admin coverage gate instead.
 - Public Projects remain static/file-backed until content import and public read cutover are approved.

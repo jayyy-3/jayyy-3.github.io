@@ -251,6 +251,11 @@ After a real owner/admin browser session is available and tagged QA writes are a
 - `npm run agent:admin-crud-live -- --allow-writes`
 - `npm run agent:admin-crud-live -- --allow-writes --include-storage` when verifying Storage upload policy too.
 
+Admin CRUD/live lead workflow QA has been run for the current non-Storage path:
+- `supabase/migrations/20260603142359_project_media_blocks.sql` is applied and verified in production.
+- `npm run agent:admin-crud-live -- --allow-writes` passed on 2026-06-04 for marker `admin-live-1780496690772-b8a47213`, recording 48 audit rows and verifying tagged archived public-content/private lead rows are not anonymously visible.
+- The failed pre-migration marker `admin-live-1780496442071-f27c2b7d` left partial public-facing QA rows; those rows were archived non-destructively and audit rows `73`-`77` recorded the cleanup.
+
 ## Current Account State
 Repo-side Cloudflare Pages preparation is complete, account read access is verified for the production zone, and the Hunter-account Pages project `urblo` now exists with a successful production deployment.
 
@@ -269,7 +274,7 @@ Current project:
 - Deployment status: `success`
 - Deployment commit: `7100bba`
 
-The next account-level action is approval-gated admin workflow/content write QA; first Supabase Auth user/profile bootstrap and active-admin browser QA are complete.
+The next account-level action is deciding whether optional Storage upload proof and Turnstile proof are required before launch; first Supabase Auth user/profile bootstrap, active-admin browser QA, project media block migration, and non-Storage admin CRUD/live lead workflow QA are complete.
 
 Still pending after preview validation:
 - Cloudflare Pages production already has `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`; preview environment variables remain empty;
