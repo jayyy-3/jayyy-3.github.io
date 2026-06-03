@@ -15,6 +15,7 @@ const PREVIEW_URL_NAMES = ['CLOUDFLARE_PAGES_PREVIEW_URL', 'PAGES_PREVIEW_URL'];
 const TURNSTILE_NAMES = ['TURNSTILE_SECRET_KEY', 'CF_TURNSTILE_SECRET_KEY'];
 const TURNSTILE_SITE_KEY_NAMES = ['VITE_TURNSTILE_SITE_KEY'];
 const EMAIL_NAMES = [
+  'SMTP2GO_API_KEY',
   'RESEND_API_KEY',
   'LEAD_NOTIFICATION_FROM',
   'RESEND_FROM_EMAIL',
@@ -219,7 +220,8 @@ function buildChecks(env, sources, options) {
     isValidEmail(env.URBLO_UNPROFILED_EMAIL || '') && Boolean(env.URBLO_UNPROFILED_PASSWORD);
   const turnstile = firstPresent(env, TURNSTILE_NAMES);
   const turnstileSiteKey = firstPresent(env, TURNSTILE_SITE_KEY_NAMES);
-  const emailSenderReady = Boolean(env.RESEND_API_KEY) && Boolean(env.LEAD_NOTIFICATION_FROM || env.RESEND_FROM_EMAIL);
+  const emailProvider = firstPresent(env, ['SMTP2GO_API_KEY', 'RESEND_API_KEY']);
+  const emailSenderReady = Boolean(emailProvider) && Boolean(env.LEAD_NOTIFICATION_FROM || env.RESEND_FROM_EMAIL);
   const enquiryEmailReady = emailSenderReady && Boolean(env.ENQUIRY_NOTIFICATION_TO || env.LEAD_NOTIFICATION_TO);
   const sampleEmailReady = emailSenderReady && Boolean(env.SAMPLE_REQUEST_NOTIFICATION_TO || env.LEAD_NOTIFICATION_TO);
 
@@ -292,7 +294,7 @@ function buildChecks(env, sources, options) {
       command: 'npm run agent:forms-live -- --allow-writes --allow-email --require-email',
       present: [
         describeSource(serviceKey, sources),
-        env.RESEND_API_KEY ? `RESEND_API_KEY (${sources.RESEND_API_KEY || 'unknown source'})` : '',
+        describeSource(emailProvider, sources),
         env.LEAD_NOTIFICATION_FROM || env.RESEND_FROM_EMAIL
           ? `${env.LEAD_NOTIFICATION_FROM ? 'LEAD_NOTIFICATION_FROM' : 'RESEND_FROM_EMAIL'} (${
               sources[env.LEAD_NOTIFICATION_FROM ? 'LEAD_NOTIFICATION_FROM' : 'RESEND_FROM_EMAIL'] || 'unknown source'
@@ -304,7 +306,7 @@ function buildChecks(env, sources, options) {
       ].filter(Boolean),
       missing: [
         serviceKey ? '' : 'SUPABASE_SERVICE_ROLE_KEY or SUPABASE_SERVICE_KEY',
-        env.RESEND_API_KEY ? '' : 'RESEND_API_KEY',
+        emailProvider ? '' : 'SMTP2GO_API_KEY or RESEND_API_KEY',
         env.LEAD_NOTIFICATION_FROM || env.RESEND_FROM_EMAIL
           ? ''
           : 'LEAD_NOTIFICATION_FROM or RESEND_FROM_EMAIL',

@@ -64,6 +64,8 @@ async function withFetchMock(handler, options = {}) {
   const calls = [];
   const auditStatus = options.auditStatus ?? 201;
   const resendStatus = options.resendStatus ?? 202;
+  const smtp2goStatus = options.smtp2goStatus ?? 200;
+  const smtp2goBody = options.smtp2goBody ?? { data: { succeeded: 1, failed: 0 } };
 
   globalThis.fetch = async (input, init = {}) => {
     const url = String(input);
@@ -105,6 +107,10 @@ async function withFetchMock(handler, options = {}) {
       }
 
       return Response.json({ id: 'email-test-id' }, { status: resendStatus });
+    }
+
+    if (url.includes('api.smtp2go.com/v3/email/send')) {
+      return Response.json(smtp2goBody, { status: smtp2goStatus });
     }
 
     if (url.includes('/turnstile/v0/siteverify')) {
@@ -302,6 +308,76 @@ await withFetchMock(async (calls) => {
   assert.equal(calls[3].init.method, 'PATCH');
   assert.equal(JSON.parse(calls[3].init.body).notification_status, 'sent');
 });
+
+await withFetchMock(async (calls) => {
+  const response = await handleEnquiryRequest(
+    jsonRequest('/api/enquiries', {
+      name: 'SMTP2GO Success',
+      email: 'smtp2go-success@example.com',
+      message: 'This should send a mocked SMTP2GO notification and mark the enquiry sent.',
+      sourceRoute: '/contact',
+    }),
+    {
+      ...env,
+      ENQUIRY_NOTIFICATION_TO: 'leads@example.com',
+      LEAD_NOTIFICATION_FROM: 'Urblo <leads@example.com>',
+      SMTP2GO_API_KEY: 'test-smtp2go-key',
+      RESEND_API_KEY: 'test-resend-key',
+    },
+  );
+  const body = await readJson(response);
+
+  assert.equal(response.status, 201);
+  assert.equal(body.ok, true);
+  assert.equal(body.notificationStatus, 'sent');
+  assert.equal(calls.length, 4);
+  assert.match(calls[0].url, /\/rest\/v1\/enquiries\?select=id$/);
+  assert.equal(JSON.parse(calls[0].init.body).notification_status, 'pending');
+  assert.match(calls[1].url, /\/rest\/v1\/admin_audit_events$/);
+  assert.match(calls[2].url, /api\.smtp2go\.com\/v3\/email\/send$/);
+  assert.equal(calls[2].init.headers['X-Smtp2go-Api-Key'], 'test-smtp2go-key');
+  const emailBody = JSON.parse(calls[2].init.body);
+  assert.equal(emailBody.api_key, 'test-smtp2go-key');
+  assert.equal(emailBody.sender, 'Urblo <leads@example.com>');
+  assert.equal(emailBody.to[0], 'leads@example.com');
+  assert.match(emailBody.text_body, /SMTP2GO Success/);
+  assert.match(calls[3].url, /\/rest\/v1\/enquiries\?id=eq\.101$/);
+  assert.equal(calls[3].init.method, 'PATCH');
+  assert.equal(JSON.parse(calls[3].init.body).notification_status, 'sent');
+});
+
+await withFetchMock(async (calls) => {
+  const response = await handleSampleRequest(
+    jsonRequest('/api/sample-requests', {
+      name: 'SMTP2GO Failure',
+      email: 'smtp2go-failure@example.com',
+      shippingAddress: '12 Test Lane, Melbourne VIC 3000',
+      sampleStone: 'Zen Grey',
+      sampleQuantity: '1',
+      sourceRoute: '/contact?intent=sample-request',
+    }),
+    {
+      ...env,
+      LEAD_NOTIFICATION_FROM: 'Urblo <leads@example.com>',
+      SMTP2GO_API_KEY: 'test-smtp2go-key',
+      SAMPLE_REQUEST_NOTIFICATION_TO: 'samples@example.com',
+    },
+  );
+  const body = await readJson(response);
+
+  assert.equal(response.status, 201);
+  assert.equal(body.ok, true);
+  assert.equal(body.notificationStatus, 'failed');
+  assert.equal(calls.length, 4);
+  assert.match(calls[0].url, /\/rest\/v1\/rpc\/submit_sample_request_with_item$/);
+  assert.equal(JSON.parse(calls[0].init.body).p_request.notification_status, 'pending');
+  assert.match(calls[1].url, /\/rest\/v1\/admin_audit_events$/);
+  assert.match(calls[2].url, /api\.smtp2go\.com\/v3\/email\/send$/);
+  assert.equal(JSON.parse(calls[2].init.body).to[0], 'samples@example.com');
+  assert.match(calls[3].url, /\/rest\/v1\/sample_requests\?id=eq\.202$/);
+  assert.equal(calls[3].init.method, 'PATCH');
+  assert.equal(JSON.parse(calls[3].init.body).notification_status, 'failed');
+}, { smtp2goBody: { data: { succeeded: 0, failed: 1 } } });
 
 await withFetchMock(async (calls) => {
   const response = await handleSampleRequest(

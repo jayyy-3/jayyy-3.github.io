@@ -110,15 +110,29 @@ function getNotificationConfig(env, type) {
       : env.ENQUIRY_NOTIFICATION_TO || env.LEAD_NOTIFICATION_TO;
   const from = env.LEAD_NOTIFICATION_FROM || env.RESEND_FROM_EMAIL;
 
-  if (!env.RESEND_API_KEY || !to || !from) {
+  if (!to || !from) {
     return null;
   }
 
-  return {
-    apiKey: env.RESEND_API_KEY,
-    from,
-    to,
-  };
+  if (env.SMTP2GO_API_KEY) {
+    return {
+      provider: 'smtp2go',
+      apiKey: env.SMTP2GO_API_KEY,
+      from,
+      to,
+    };
+  }
+
+  if (env.RESEND_API_KEY) {
+    return {
+      provider: 'resend',
+      apiKey: env.RESEND_API_KEY,
+      from,
+      to,
+    };
+  }
+
+  return null;
 }
 
 async function readPayload(request) {
@@ -397,26 +411,64 @@ async function sendLeadNotification(env, type, id, payload) {
     return 'not_required';
   }
 
+  const subject = `New Urblo ${type} #${id}`;
+  const text = leadSummary(type, id, payload);
   let response;
   try {
-    response = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        authorization: `Bearer ${config.apiKey}`,
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: config.from,
-        to: [config.to],
-        subject: `New Urblo ${type} #${id}`,
-        text: leadSummary(type, id, payload),
-      }),
-    });
+    if (config.provider === 'smtp2go') {
+      response = await fetch('https://api.smtp2go.com/v3/email/send', {
+        method: 'POST',
+        headers: {
+          'X-Smtp2go-Api-Key': config.apiKey,
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          api_key: config.apiKey,
+          sender: config.from,
+          to: [config.to],
+          subject,
+          text_body: text,
+        }),
+      });
+    } else {
+      response = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          authorization: `Bearer ${config.apiKey}`,
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: config.from,
+          to: [config.to],
+          subject,
+          text,
+        }),
+      });
+    }
   } catch {
     return 'failed';
   }
 
-  return response.ok ? 'sent' : 'failed';
+  if (!response.ok) {
+    return 'failed';
+  }
+
+  if (config.provider !== 'smtp2go') {
+    return 'sent';
+  }
+
+  try {
+    const result = await response.json();
+    const failed = Number(result?.data?.failed ?? 0);
+    const succeeded = Number(result?.data?.succeeded ?? 1);
+    if (failed > 0 || succeeded < 1 || result?.data?.error || result?.data?.errors) {
+      return 'failed';
+    }
+  } catch {
+    return 'sent';
+  }
+
+  return 'sent';
 }
 
 async function updateNotificationStatus(env, tableName, id, notificationStatus, initialStatus) {

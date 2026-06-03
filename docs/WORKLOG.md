@@ -1,6 +1,67 @@
 # WORKLOG - Urblo Execution Log
 
-Last updated: 2026-06-02
+Last updated: 2026-06-03
+
+## Entry - 2026-06-03 (SMTP2GO Notification Path)
+
+### Scope
+- Selected SMTP2GO as the preferred Contact/Sample Request notification provider because Urblo already has a subscription.
+- Updated the Pages Function form handler to prefer `SMTP2GO_API_KEY` through SMTP2GO's HTTP API and retain Resend as a compatibility fallback.
+- Updated source/mock/live readiness checks and launch docs so final email proof uses SMTP2GO variables.
+- Added SMTP2GO DNS records in Cloudflare for return-path, DKIM, and tracking verification.
+- Kept live delivery unproven until Cloudflare Pages has the real SMTP2GO API key, sender, recipient variables, a redeploy, and Jay approval for tagged real-email QA writes.
+
+### Changed Files
+- `AGENTS.md`
+- `.env.example`
+- `functions/_lib/forms.js`
+- `scripts/check-forms-api.mjs`
+- `scripts/check-forms-api-live.mjs`
+- `scripts/check-live-readiness.mjs`
+- `scripts/check-cloudflare-pages-readiness.mjs`
+- `docs/ARCHITECTURE.md`
+- `docs/CLOUDFLARE_DEPLOYMENT.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/agent/tasks.json`
+- `docs/agent/verification.md`
+
+### Cloudflare DNS Evidence
+- Account: Hunter (`077afae2c6f4e77badadf21e49e58eb7`)
+- Zone: `urblo.com.au` (`544d6bf99e48f4b36d7abb24f053ab17`)
+- Added DNS-only CNAME `em905485.urblo.com.au -> return.smtp2go.net`, record id `999d935aa8b2323d0d1b613aa5bcc276`.
+- Added DNS-only CNAME `s905485._domainkey.urblo.com.au -> dkim.smtp2go.net`, record id `15b74562f23fb255774c77ad46c7d473`.
+- Added DNS-only CNAME `link.urblo.com.au -> track.smtp2go.net`, record id `86625766121803fd24d38c7e84c785e5`.
+- Readback confirmed all three records have `proxied = false` and TTL auto.
+- Readback confirmed Google MX records remain `aspmx.l.google.com` plus `alt1` through `alt4`, and apex TXT/SPF records remain present.
+
+### Verification Results
+- `node --check scripts/check-forms-api.mjs`: pass.
+- `node --check scripts/check-forms-api-live.mjs`: pass.
+- `node --check scripts/check-live-readiness.mjs`: pass.
+- `node --check scripts/check-cloudflare-pages-readiness.mjs`: pass.
+- `node scripts/check-forms-api.mjs`: pass, including SMTP2GO and Resend notification mocks.
+- `npm run agent:forms-ui`: pass.
+- `npm run agent:live-readiness`: report-only pass; email proof now reports `SMTP2GO_API_KEY or RESEND_API_KEY` as the provider input.
+- `npm run agent:cloudflare-readiness`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run build`: pass.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass after rerunning with approved local preview-server permission; the first sandboxed run could not reach the Vite preview server.
+
+### Risks and Gaps
+- Real SMTP2GO delivery is not verified until `SMTP2GO_API_KEY`, `LEAD_NOTIFICATION_FROM`, and recipient variables are configured in Cloudflare Pages and `npm run agent:forms-live -- --allow-writes --allow-email --require-email` is run with approval.
+- SMTP2GO still needs to verify the newly added DNS records on its side; until verification passes, SMTP2GO can reject sender-domain mail.
+- Browser-safe Supabase private-row proof, Turnstile proof, and admin lead workflow proof remain separate launch checks.
+
+### Next Handoff
+- `NEXT-FORMS-EMAIL-NOTIFY-001`
+- `NOW-FORMS-SUPABASE-001`
+- `NOW-ADMIN-AUTH-RLS-001`
 
 ## Entry - 2026-06-02 (Production Domain Cutover)
 
@@ -93,7 +154,7 @@ Last updated: 2026-06-02
 
 ### Risks and Gaps
 - This proves base deployed persistence and server-side audit creation only.
-- `notification_status = not_required` because Resend variables are not configured; real notification proof still needs `npm run agent:forms-live -- --allow-writes --allow-email --require-email`.
+- `notification_status = not_required` because no email provider variables were configured at that checkpoint; real SMTP2GO notification proof still needs `npm run agent:forms-live -- --allow-writes --allow-email --require-email`.
 - `turnstile_success = null` because Turnstile is not configured; bot-protection proof still needs `VITE_TURNSTILE_SITE_KEY`, server-side Turnstile secret, a valid token, and `npm run agent:forms-live -- --allow-writes --require-turnstile --turnstile-token <token>`.
 - Browser-key private-row denial was not verified because no browser-safe Supabase key is configured in Cloudflare Pages production.
 - Admin lead workflow/export was not verified because first-admin/admin browser configuration is still pending.
@@ -128,7 +189,7 @@ Last updated: 2026-06-02
 ### Risks and Gaps
 - Live form persistence was not run because it creates tagged Supabase QA rows and requires Jay approval.
 - The standard `npm run agent:forms-live -- --allow-writes --base-url https://urblo.pages.dev` verifier also needs a local service-role verification key, or an approved connector-backed equivalent, to prove created rows and audit metadata.
-- Browser-safe Supabase key, Turnstile, Resend, first-admin, and admin live verification inputs remain pending.
+- Browser-safe Supabase key, Turnstile, email provider, first-admin, and admin live verification inputs remain pending.
 
 ### Next Handoff
 - `NOW-FORMS-BACKEND-001`
@@ -166,7 +227,7 @@ Last updated: 2026-06-02
 
 ### Verification Results
 - `npm run agent:cloudflare-preview-smoke -- --base-url https://urblo.pages.dev`: pass. Verified direct refresh for public/admin route shells, unknown-route fallback, deployed assets and route chunks, admin config/profile-gate bundle markers, browser service-role boundary, legacy product/article redirects, and no-write API safe-failure behavior for `/api/enquiries` and `/api/sample-requests`.
-- `npm run agent:live-readiness -- --base-url https://urblo.pages.dev`: report-only pass. Cloudflare deployed-preview route/API smoke is ready; live form/admin checks remain missing service-role/browser-safe Supabase variables, first-admin inputs, admin credentials, Turnstile/Resend variables where applicable, and Jay approval for tagged live writes.
+- `npm run agent:live-readiness -- --base-url https://urblo.pages.dev`: report-only pass. Cloudflare deployed-preview route/API smoke is ready; live form/admin checks remain missing service-role/browser-safe Supabase variables, first-admin inputs, admin credentials, Turnstile/email variables where applicable, and Jay approval for tagged live writes.
 - `curl -I https://urblo.pages.dev`: HTTP `200`.
 - Cloudflare API project readback: pass. Source, deployment, build config, and no-custom-domain state match expectations.
 
@@ -7677,6 +7738,50 @@ Last updated: 2026-06-02
 ### Next Handoff
 - `NEXT-UI-PARITY-001`
 - `NOW-CLOUDFLARE-PAGES-DEPLOY-001`
+
+## Entry - 2026-06-03 (Harness Task-State Reconciliation)
+
+### Scope
+- Reconciled `docs/agent/tasks.json` against current code, deployed Cloudflare state, controlled launch media, and no-secret verification gates.
+- Marked `NOW-CLOUDFLARE-PAGES-DEPLOY-001` complete because Cloudflare Pages production deployment, custom domains, DNS cutover, Function routing scope, route/asset/redirect/API smoke, and rollback documentation are verified.
+- Marked `NOW-ASSET-MIGRATION-001` complete for launch-critical media because identity assets, route banners, Contact imagery, homepage desktop/mobile video, poster, priority project/Stone Library imagery, article covers, and known article runtime media cleanup use controlled launch paths.
+- Kept Forms/Admin/Content tasks open where acceptance still requires browser-safe Supabase config, first-admin/profile setup, admin live QA, email/Turnstile proof, tagged live admin writes, approved content import, or public read cutover.
+- Updated Handoff and roadmap wording so Cloudflare hosting and launch-critical asset migration no longer appear as current blockers.
+
+### Changed Files
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm ci --cache .npm-cache`: pass after approved network access; dependencies installed from lockfile and audit reported 0 vulnerabilities.
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass after approved local preview-server permission; sandbox-only run failed with `listen EPERM` on `127.0.0.1:4173`.
+- `npm run agent:check`: pass.
+- `npm run agent:forms-ui`: pass.
+- `node scripts/check-forms-api.mjs`: pass.
+- `npm run agent:cloudflare-readiness`: pass.
+- `npm run agent:cloudflare-preview-smoke -- --base-url https://urblo.com.au`: pass after approved network access.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:content-import:apply-sql`: pass; regenerated ignored `.tmp` review artifacts only.
+- `npm run agent:public-supabase-readiness`: pass.
+- `npm run agent:admin-crud-live`: pass in plan-only/no-write mode.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- `NOW-FORMS-BACKEND-001` remains open only because final private-row browser-key boundary, email, Turnstile, and admin-visible lead workflow proof are not complete.
+- Admin auth/settings/media/content/leads/audit source is implemented and source-verified, but live verification still requires browser-safe Supabase configuration, first-admin/profile setup, real owner/admin session credentials, and Jay approval for tagged QA writes.
+- Static-to-Supabase content import remains draft/no-write only; applying import SQL, allowing merge/upsert, and switching public reads require explicit Jay approval.
+- Article claim cleanup remains paused and raw newsletter HTML remains a migration source rather than the final authoring model.
+
+### Next Handoff
+- `NOW-ADMIN-AUTH-RLS-001`
+- `NOW-FORMS-SUPABASE-001`
+- `NOW-ADMIN-CONTENT-CRUD-001`
+- `NOW-ADMIN-MEDIA-LEADS-001`
 
 ## Entry Template (Use for Every Future Session)
 

@@ -24,6 +24,7 @@ const requiredEnvNames = [
   'SUPABASE_SERVICE_KEY',
   'TURNSTILE_SECRET_KEY',
   'CF_TURNSTILE_SECRET_KEY',
+  'SMTP2GO_API_KEY',
   'RESEND_API_KEY',
   'LEAD_NOTIFICATION_FROM',
   'RESEND_FROM_EMAIL',
@@ -161,6 +162,7 @@ function checkFunctions() {
     'SUPABASE_SERVICE_KEY',
     'TURNSTILE_SECRET_KEY',
     'CF_TURNSTILE_SECRET_KEY',
+    'SMTP2GO_API_KEY',
     'RESEND_API_KEY',
   ]) {
     requireIncludes(forms, serverEnv, 'functions/_lib/forms.js');

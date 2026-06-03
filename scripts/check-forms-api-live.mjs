@@ -9,6 +9,7 @@ const DEFAULT_ENV_FILES = ['.env.local', '.env', '.dev.vars'];
 const SERVICE_KEY_NAMES = ['SUPABASE_SERVICE_ROLE_KEY', 'SUPABASE_SERVICE_KEY'];
 const BROWSER_KEY_NAMES = ['VITE_SUPABASE_PUBLISHABLE_KEY', 'VITE_SUPABASE_ANON_KEY'];
 const EMAIL_ENV_NAMES = [
+  'SMTP2GO_API_KEY',
   'RESEND_API_KEY',
   'LEAD_NOTIFICATION_FROM',
   'RESEND_FROM_EMAIL',
@@ -149,7 +150,7 @@ function hasNotificationConfig(env, type) {
       : env.ENQUIRY_NOTIFICATION_TO || env.LEAD_NOTIFICATION_TO;
   const from = env.LEAD_NOTIFICATION_FROM || env.RESEND_FROM_EMAIL;
 
-  return Boolean(env.RESEND_API_KEY && to && from);
+  return Boolean((env.SMTP2GO_API_KEY || env.RESEND_API_KEY) && to && from);
 }
 
 function hasTurnstileConfig(env) {
@@ -436,7 +437,7 @@ async function run() {
       throw new Error(
         `Missing email notification configuration for ${missingEmailTypes.join(
           ' and ',
-        )}. Set RESEND_API_KEY, LEAD_NOTIFICATION_FROM or RESEND_FROM_EMAIL, and the relevant recipient variable before using --require-email.`,
+        )}. Set SMTP2GO_API_KEY or RESEND_API_KEY, LEAD_NOTIFICATION_FROM or RESEND_FROM_EMAIL, and the relevant recipient variable before using --require-email.`,
       );
     }
   }

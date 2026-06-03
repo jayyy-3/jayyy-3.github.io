@@ -29,7 +29,7 @@ Last updated: 2026-06-02
 - Authentication: Supabase Auth for the admin area.
 - Admin UI: Urblo-owned `/admin` interface, not raw Supabase Studio for customer operation.
 - Public form protection: Cloudflare Turnstile.
-- Transactional email: external email API such as Resend, wired from server-side API code only.
+- Transactional email: SMTP2GO HTTP API preferred, with Resend compatibility retained, wired from server-side API code only.
 - Media storage:
   - Current static stopgap: launch-critical identity, hero, contact, and route banner assets live under `public/media/launch`.
   - Supabase Storage for normal editorial, Stone Library, project, and article imagery. Initial buckets are applied: `urblo-public-media` for public-safe assets and `urblo-admin-media` for private draft/review assets.
@@ -80,10 +80,10 @@ Last updated: 2026-06-02
   - Form Functions require `SUPABASE_SERVICE_ROLE_KEY` server-side; `SUPABASE_SERVICE_KEY` remains a compatibility alias only. `SUPABASE_URL` may be configured, but defaults to the Urblo project URL if omitted.
   - Form Functions attempt `admin_audit_events` writes with `actor_user_id = null` after successful enquiry/sample request inserts. Audit write failure does not fail the visitor response.
   - Sample Request Functions call `submit_sample_request_with_item(jsonb, jsonb)` with the server-side service role key so the `sample_requests` row and first `sample_request_items` row are inserted in one database transaction. The RPC is `security invoker`, executable by `service_role`, and not executable by browser roles.
-  - Form notification source uses Resend only when server-side notification inputs exist. Mock checks verify configured notification paths start with `notification_status = pending`, call Resend, then patch the lead row to `sent` or `failed` without failing the already-stored visitor response.
+  - Form notification source uses SMTP2GO when `SMTP2GO_API_KEY` exists, otherwise Resend when `RESEND_API_KEY` exists. Mock checks verify configured notification paths start with `notification_status = pending`, call the configured provider, then patch the lead row to `sent` or `failed` without failing the already-stored visitor response.
   - Live form persistence verification is staged through `npm run agent:forms-live -- --allow-writes`. The command requires `--allow-writes`, a server-side Supabase service-role key, and Jay approval for tagged live form QA writes; HTTP mode rejects placeholder or non-origin `--base-url` values before any Supabase reads/writes; it verifies valid enquiry/sample request rows plus source-route audit metadata, verifies invalid enquiry/sample request payloads create no rows or matching audit events, verifies response-vs-stored notification status, and retains tagged test rows for auditability until Jay approves cleanup. The 2026-06-02 deployed proof against `https://urblo.pages.dev` created `enquiries.id = 1`, `sample_requests.id = 1`, `sample_request_items.id = 1`, and `admin_audit_events.id = 1/2`; invalid tagged payloads created zero rows or audit events. When a browser-safe key is configured, the verifier checks that created private lead rows are not anonymously readable; `--require-browser-boundary` makes that browser-key boundary mandatory for final launch proof.
   - Optional public form key: `VITE_TURNSTILE_SITE_KEY`.
-  - Optional server-side form secrets: `TURNSTILE_SECRET_KEY` or `CF_TURNSTILE_SECRET_KEY`, `RESEND_API_KEY`, `LEAD_NOTIFICATION_FROM` or `RESEND_FROM_EMAIL`, `LEAD_NOTIFICATION_TO`, `ENQUIRY_NOTIFICATION_TO`, and `SAMPLE_REQUEST_NOTIFICATION_TO`.
+  - Optional server-side form secrets: `TURNSTILE_SECRET_KEY` or `CF_TURNSTILE_SECRET_KEY`, `SMTP2GO_API_KEY` or `RESEND_API_KEY`, `LEAD_NOTIFICATION_FROM` or `RESEND_FROM_EMAIL`, `LEAD_NOTIFICATION_TO`, `ENQUIRY_NOTIFICATION_TO`, and `SAMPLE_REQUEST_NOTIFICATION_TO`.
 - Vite base config: `vite.config.ts`
   - `base: '/'` for root-domain Cloudflare Pages clean URL routing.
 - Cloudflare Pages static config:
@@ -490,7 +490,7 @@ Route state contract:
   - Cloudflare Pages Functions validate payloads before Supabase writes.
   - Sample Request writes create the request row and first item row through a service-role-only atomic RPC rather than separate REST inserts.
   - Turnstile fails closed when the Turnstile secret is configured; when absent, `turnstile_success` is stored as `null`.
-  - Email notification is staged through optional Resend environment variables; when absent, rows use `notification_status = 'not_required'`.
+  - Email notification is staged through optional SMTP2GO or Resend environment variables; when absent, rows use `notification_status = 'not_required'`.
   - No Supabase service-role key is referenced by browser code.
 
 ## State Contract (`src/store/productStore.ts`)

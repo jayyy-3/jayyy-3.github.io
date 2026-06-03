@@ -170,7 +170,8 @@
         "2026-05-27: Mock API checks pass for valid enquiry, invalid enquiry, valid sample request with item row, and configured Turnstile failure. Live Supabase insert verification remains pending server-side SUPABASE_SERVICE_ROLE_KEY configuration.",
         "2026-05-28: Form handlers now attempt server-side admin_audit_events writes after successful enquiry/sample request inserts. Mock API checks verify audit calls, audit-failure resilience after lead storage, missing service-role fail-closed behavior before Supabase calls, and configured Turnstile failure.",
         "2026-05-29: Mock API checks now cover configured Resend notification success/failure paths without real email secrets, including pending initial row status, Resend call shape, and final notification_status patches to sent or failed.",
-        "2026-05-28: `.env.example`, Cloudflare deployment docs, and architecture docs now list canonical form/admin environment variables plus supported compatibility aliases for Supabase service key, Turnstile, Resend sender, and lead notification recipient configuration.",
+        "2026-06-03: SMTP2GO is now the selected provider path and source support is implemented through the HTTP API, while Resend compatibility remains. Mock API checks cover SMTP2GO success/failure paths without real email secrets.",
+        "2026-05-28: `.env.example`, Cloudflare deployment docs, and architecture docs now list canonical form/admin environment variables plus supported compatibility aliases for Supabase service key, Turnstile, SMTP2GO/Resend sender, and lead notification recipient configuration.",
         "2026-05-28: Added `npm run agent:forms-live -- --allow-writes` as the write-gated and credential-gated live verification runner for valid enquiry, invalid enquiry, valid sample request, invalid sample request, sample item, and server-side audit rows. The command intentionally fails when `--allow-writes` or the service-role key is unavailable and retains tagged test rows for auditability unless Jay approves cleanup.",
         "2026-05-29: `npm run agent:forms-live -- --allow-writes` now also verifies that each valid response notificationStatus matches the stored lead row notification_status, catching email status patch failures during live verification.",
         "2026-05-29: `npm run agent:forms-live -- --allow-writes` now checks created private lead rows against anonymous browser-key reads whenever a browser-safe key is configured, and `--require-browser-boundary` makes that privacy check mandatory for final launch proof.",
@@ -186,7 +187,7 @@
         "2026-05-29: `scripts/check-forms-api-live.mjs` now supports final proof flags for notification and Turnstile behavior. `--allow-email --require-email` asserts valid live enquiry/sample-request rows store notification_status = sent, and `--require-turnstile --turnstile-token <token>` now refuses to start without `VITE_TURNSTILE_SITE_KEY` before asserting valid live rows store turnstile_success = true. `npm run agent:live-readiness` reports those inputs separately, with `--turnstile-token-provided` as a no-secret readiness flag.",
         "2026-05-29: Contact form source now renders the Cloudflare Turnstile widget only when the public `VITE_TURNSTILE_SITE_KEY` is configured, blocks submit until a widget token exists in that mode, and sends `turnstileToken` to the existing Pages Function verifier. Source/Cloudflare readiness checks now guard the public site-key env contract.",
         "2026-05-29: `scripts/check-forms-api-live.mjs` HTTP mode now rejects copied placeholders and non-origin `--base-url` values before service-role Supabase reads/writes can start, using the shared live input validation helper.",
-        "2026-06-02: After Cloudflare Pages production env vars were configured and deployment `17588cfa-2204-4b95-b6e0-4e3531e366bb` succeeded, approved tagged QA writes against `https://urblo.pages.dev` verified base persistence. Valid enquiry returned 201 and created `enquiries.id = 1`; valid sample request returned 201 and created `sample_requests.id = 1` plus `sample_request_items.id = 1`; matching server-side audit rows `admin_audit_events.id = 1/2` include source-route metadata. Invalid tagged enquiry/sample payloads returned 400 and Supabase readback confirmed zero matching lead or audit rows. Stored notification_status is `not_required` because Resend is not configured, and turnstile_success is null because Turnstile is not configured."
+        "2026-06-02: After Cloudflare Pages production env vars were configured and deployment `17588cfa-2204-4b95-b6e0-4e3531e366bb` succeeded, approved tagged QA writes against `https://urblo.pages.dev` verified base persistence. Valid enquiry returned 201 and created `enquiries.id = 1`; valid sample request returned 201 and created `sample_requests.id = 1` plus `sample_request_items.id = 1`; matching server-side audit rows `admin_audit_events.id = 1/2` include source-route metadata. Invalid tagged enquiry/sample payloads returned 400 and Supabase readback confirmed zero matching lead or audit rows. Stored notification_status is `not_required` because no email provider is configured, and turnstile_success is null because Turnstile is not configured."
       ],
       "acceptance": [
         "Valid enquiry submissions create Supabase enquiry rows through a server-side endpoint.",
@@ -206,7 +207,7 @@
         "npm run agent:live-readiness",
         "npm run agent:forms-live -- --allow-writes (base deployed persistence verified on 2026-06-02; use for future approved tagged form QA writes)",
         "npm run agent:forms-live -- --allow-writes --require-browser-boundary (after service-role and browser-safe keys are configured and Jay approves tagged live form QA writes)",
-        "npm run agent:forms-live -- --allow-writes --allow-email --require-email (after Resend sender/recipient variables are configured and Jay approves real tagged form QA emails)",
+        "npm run agent:forms-live -- --allow-writes --allow-email --require-email (after SMTP2GO sender/recipient variables are configured and Jay approves real tagged form QA emails)",
         "npm run agent:forms-live -- --allow-writes --require-turnstile --turnstile-token <token> (after VITE_TURNSTILE_SITE_KEY, Turnstile secret, and a valid target-environment token are available)",
         "Live Forms API test: valid form audit rows include source-route metadata, and invalid form payloads create no matching audit events",
         "Live Forms API test: valid response notificationStatus matches stored notification_status",
@@ -231,7 +232,7 @@
     },
     {
       "id": "NOW-CLOUDFLARE-PAGES-DEPLOY-001",
-      "status": "now",
+      "status": "done",
       "priority": 3,
       "summary": "Implement Cloudflare Pages deployment, preview, function routing, and rollback runbook.",
       "files": [
@@ -298,28 +299,35 @@
         "2026-06-02: Jay reauthorized/configured the Pages GitHub integration. Source is connected to `jayyy-3/jayyy-3.github.io`; production deployment `542c25f4-2e55-437a-abbe-58d427aff48c` for commit `9a1e9c6` completed successfully. `npm run agent:cloudflare-preview-smoke -- --base-url https://urblo.pages.dev` passed. No production custom domain is attached and DNS still points to the old WordPress target.",
         "2026-06-02: Cloudflare Pages production environment now has `SUPABASE_URL` as plain text and `SUPABASE_SERVICE_ROLE_KEY` as secret text for the `urblo` project. Preview environment variables are empty. No-write deployed smoke still passes.",
         "2026-06-02: After env configuration, production redeploy `17588cfa-2204-4b95-b6e0-4e3531e366bb` succeeded and approved tagged live form QA writes verified basic deployed persistence/audit behavior on `https://urblo.pages.dev`. DNS and custom domains were not changed at that checkpoint.",
-        "2026-06-02: Production custom domains `urblo.com.au` and `www.urblo.com.au` were attached to the Pages project. Apex website DNS was changed from `A urblo.com.au -> 159.198.65.164` to proxied `CNAME urblo.com.au -> urblo.pages.dev`; `www` was changed from proxied `CNAME www.urblo.com.au -> urblo.com.au` to proxied `CNAME www.urblo.com.au -> urblo.pages.dev`. Google MX/SPF/TXT, NS records, and `qa.urblo.com.au` were not changed. `npm run agent:cloudflare-preview-smoke -- --base-url https://urblo.com.au` and the same command for `https://www.urblo.com.au` passed."
+        "2026-06-02: Production custom domains `urblo.com.au` and `www.urblo.com.au` were attached to the Pages project. Apex website DNS was changed from `A urblo.com.au -> 159.198.65.164` to proxied `CNAME urblo.com.au -> urblo.pages.dev`; `www` was changed from proxied `CNAME www.urblo.com.au -> urblo.com.au` to proxied `CNAME www.urblo.com.au -> urblo.pages.dev`. Google MX/SPF/TXT, NS records, and `qa.urblo.com.au` were not changed. `npm run agent:cloudflare-preview-smoke -- --base-url https://urblo.com.au` and the same command for `https://www.urblo.com.au` passed.",
+        "2026-06-03 reconciliation: Marked done after repo-side readiness, production/default/custom-domain Cloudflare smoke, production DNS cutover, custom domains, Function safe-failure checks, and rollback DNS documentation were all verified. Remaining form/admin live proofs stay tracked in their own Supabase/admin tasks rather than keeping this deployment task open."
       ]
     },
     {
       "id": "NEXT-FORMS-EMAIL-NOTIFY-001",
-      "status": "next",
+      "status": "now",
       "priority": 4.2,
-      "summary": "Configure form email notifications to info@urblo.com.au after launch.",
+      "summary": "Configure SMTP2GO form email notifications to info@urblo.com.au.",
       "files": [
         "docs/CLOUDFLARE_DEPLOYMENT.md",
         "docs/HANDOFF.md",
         "docs/NEXT_STEPS.md",
         "docs/WORKLOG.md",
         "docs/agent/tasks.json",
+        "docs/agent/verification.md",
+        "scripts/check-forms-api.mjs",
+        "scripts/check-forms-api-live.mjs",
+        "scripts/check-live-readiness.mjs",
+        "scripts/check-cloudflare-pages-readiness.mjs",
         "functions/_lib/forms.js",
         ".env.example"
       ],
       "notes": [
         "2026-06-02: Jay asked whether forms can notify `info@urblo.com.au`; then decided to launch first and remember the email-notification requirement.",
-        "Current code supports Resend with `RESEND_API_KEY`, `LEAD_NOTIFICATION_FROM` or `RESEND_FROM_EMAIL`, and `LEAD_NOTIFICATION_TO` / `ENQUIRY_NOTIFICATION_TO` / `SAMPLE_REQUEST_NOTIFICATION_TO`, but Resend is not mandatory if another provider is chosen and the handler is adapted.",
+        "2026-06-03: Jay confirmed Urblo has an SMTP2GO subscription, so SMTP2GO is the selected provider path. The form handler now prefers `SMTP2GO_API_KEY` and falls back to `RESEND_API_KEY` for compatibility.",
+        "Notification sender/recipient env remains `LEAD_NOTIFICATION_FROM`, `LEAD_NOTIFICATION_TO`, `ENQUIRY_NOTIFICATION_TO`, and `SAMPLE_REQUEST_NOTIFICATION_TO`; `RESEND_FROM_EMAIL` stays a sender compatibility alias.",
         "Cloudflare Email Routing is not a replacement for active transactional sending from the form handler.",
-        "Until an email provider is configured, form rows persist to Supabase with `notification_status = not_required`."
+        "Until SMTP2GO variables are configured in Cloudflare Pages and real tagged QA emails are approved/proven, form rows persist to Supabase with `notification_status = not_required`."
       ],
       "acceptance": [
         "Approved email provider is selected.",
@@ -329,6 +337,7 @@
         "No service API key is exposed to browser code or committed docs."
       ],
       "verification": [
+        "node scripts/check-forms-api.mjs",
         "npm run agent:forms-live -- --allow-writes --allow-email --require-email",
         "Supabase MCP: execute_sql confirms live proof rows store notification_status = sent",
         "npm run agent:check",
@@ -366,7 +375,7 @@
         "npm run lint",
         "npx tsc -b",
         "npm run agent:smoke",
-        "npm run agent:forms-live -- --allow-writes --allow-email --require-email (after Resend variables and Jay approval are available)",
+        "npm run agent:forms-live -- --allow-writes --allow-email --require-email (after SMTP2GO variables and Jay approval are available)",
         "npm run agent:forms-live -- --allow-writes --require-turnstile --turnstile-token <token> (after VITE_TURNSTILE_SITE_KEY, Turnstile secret/token, and Jay approval are available)"
       ]
     },
@@ -862,7 +871,7 @@
     },
     {
       "id": "NOW-ASSET-MIGRATION-001",
-      "status": "now",
+      "status": "done",
       "priority": 6,
       "summary": "Migrate priority media away from old WordPress URLs and define controlled storage for launch.",
       "files": [
@@ -896,7 +905,8 @@
         "2026-05-25: Desktop homepage MP4 was re-encoded from about 16MB to about 3MB as H.264 1280x720, 30fps, no-audio, fast-start media. Browser QA confirmed desktop 1280x720 playback and mobile no-source behavior.",
         "2026-05-22: Legacy project media and Stone Library fallback media now use controlled local assets; direct old WordPress media references are removed from runtime data.",
         "2026-05-22: Article covers now use controlled local WebP assets and ArticlePage rewrites known email proxy images/campaign links before DOMPurify sanitization.",
-        "Task remains open for migrating static launch assets into Supabase media records, structured article blocks, full media ownership metadata, and final Cloudflare R2/Stream review for homepage video. `/admin/media` now provides the source screen for future media record maintenance."
+        "Task remains open for migrating static launch assets into Supabase media records, structured article blocks, full media ownership metadata, and final Cloudflare R2/Stream review for homepage video. `/admin/media` now provides the source screen for future media record maintenance.",
+        "2026-06-03 reconciliation: Marked done for launch-critical controlled media after logo, route banners, Contact imagery, homepage desktop/mobile video, poster, priority project/stone imagery, article cover/runtime cleanup, and old WordPress media dependency inventory met acceptance. Longer-term CMS media records, article block cleanup, and optional R2/Stream decisions remain tracked under admin media/content/article follow-ups."
       ],
       "acceptance": [
         "All first-viewport critical media, logo assets, homepage video/poster assets, and priority project/stone imagery have a controlled hosting path.",

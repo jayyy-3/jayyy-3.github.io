@@ -56,12 +56,12 @@ Platform pricing is mostly USD. The AUD estimates below use a planning rate of a
 | Cloudflare Workers / Pages Functions | Workers Paid / Standard | 5 | 7 | Gives safer headroom for `/api/*`, form handling, and future small backend endpoints. |
 | Cloudflare Turnstile | Free | 0 | 0 | Protects public forms without CAPTCHA friction. |
 | Supabase | Pro | 25 | 35 | Production Postgres, Auth, Storage, daily backups, and no free-plan project pause. |
-| Transactional email | Resend Free initially, Pro when needed | 0 to 20 | 0 to 28 | Sends enquiry/sample notifications. Free may be enough early; paid removes tighter daily limits. |
+| Transactional email | SMTP2GO subscription | Existing subscription | Existing subscription | Sends enquiry/sample notifications through the SMTP2GO HTTP API. Resend remains a compatibility fallback in source. |
 | Cloudflare R2 for large static media | Usually 0 early, usage-based later | 0 to 2 | 0 to 3 | Optional controlled storage for larger media; depends on storage and read operations. |
 
 Recommended launch budget:
 - Lean production: about USD 30/month, roughly AUD 42/month. This assumes Supabase Pro, Workers Paid, and free email quota.
-- Safer production: about USD 50/month, roughly AUD 70/month. This adds Resend Pro for more reliable transactional email headroom.
+- Safer production: about USD 30/month, roughly AUD 42/month, plus the existing SMTP2GO subscription already held by the business.
 - Media-heavy later phase: keep a reserve of USD 5-20/month for R2/Stream or video delivery changes if homepage video traffic grows.
 
 The key client-facing tradeoff is simple: the recurring platform cost is modest compared with the cost of losing enquiries, publishing broken content, or needing a developer for every project/article update.
@@ -183,7 +183,7 @@ Required work:
 - Add Cloudflare Turnstile verification. Source implemented and fails closed when a secret is configured.
 - Insert submissions into Supabase. Source implemented; live verification pending `SUPABASE_SERVICE_ROLE_KEY`.
 - Record server-side audit events for successful lead inserts. Source implemented; live verification pending `SUPABASE_SERVICE_ROLE_KEY`.
-- Send transactional email notification. Resend integration is staged behind server-side environment variables.
+- Send transactional email notification. SMTP2GO integration is staged behind server-side environment variables, with Resend compatibility retained.
 - Show clear success/error states to the visitor. Source implemented.
 - Add admin status workflow: new, contacted, quoted, won, closed, spam.
 - Lead inbox source is implemented under `/admin/leads`; live usefulness still depends on verified Supabase form persistence and notification secrets.
@@ -270,4 +270,4 @@ The site is not production-ready until all of the following are true:
 - Cloudflare R2 pricing: https://developers.cloudflare.com/r2/pricing/
 - Cloudflare Turnstile pricing: https://www.cloudflare.com/en-gb/application-services/products/turnstile/
 - Supabase pricing and billing: https://supabase.com/pricing and https://supabase.com/docs/guides/platform/billing-on-supabase
-- Resend pricing: https://resend.com/pricing
+- SMTP2GO API docs: https://developers.smtp2go.com/docs/send-an-email
