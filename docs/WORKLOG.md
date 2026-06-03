@@ -31,6 +31,9 @@ Last updated: 2026-06-04
 - `npm run agent:check`: pass.
 - `git diff --check`: pass.
 - Playwright Firefox public render QA against local preview: `/stone-library`, `/products`, `/projects`, and `/articles` rendered expected H1/content with no console/page errors.
+- Git commit `7a318ab` pushed to `origin/main`.
+- Cloudflare Pages production deployment `bc830b5f-4c98-46ab-8962-586478ff9259` for commit `7a318ab` reached `deploy` status `success`.
+- `npm run agent:cloudflare-preview-smoke -- --base-url https://urblo.com.au`: pass on the current production deployment.
 
 ### Risks and Gaps
 - Imported production content is intentionally still `draft`; public pages continue using static fallback until an editor publishes rows in `/admin`.

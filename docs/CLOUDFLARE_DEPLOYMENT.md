@@ -254,6 +254,7 @@ After a real owner/admin browser session is available and tagged QA writes are a
 Admin CRUD/live lead workflow QA has been run for the current non-Storage path:
 - `supabase/migrations/20260603142359_project_media_blocks.sql` is applied and verified in production.
 - `npm run agent:admin-crud-live -- --allow-writes` passed on 2026-06-04 for marker `admin-live-1780496690772-b8a47213`, recording 48 audit rows and verifying tagged archived public-content/private lead rows are not anonymously visible.
+- `npm run agent:admin-crud-live -- --allow-writes --include-storage` passed on 2026-06-04 for marker `admin-live-1780497462544-23b1d5e3`, verifying private Storage upload/readback and anonymous private/public object denial.
 - The failed pre-migration marker `admin-live-1780496442071-f27c2b7d` left partial public-facing QA rows; those rows were archived non-destructively and audit rows `73`-`77` recorded the cleanup.
 
 ## Current Account State
@@ -268,13 +269,13 @@ Current project:
 - Build command: `npm run build`
 - Output directory: `dist`
 - Root directory: `/`
-- Latest deployment: `7d10ba13-5b9f-4d6e-86b9-e28218978189`
-- Latest deployment URL: `https://7d10ba13.urblo.pages.dev`
+- Latest deployment: `bc830b5f-4c98-46ab-8962-586478ff9259`
+- Latest deployment URL: `https://bc830b5f.urblo.pages.dev`
 - Production URL: `https://urblo.pages.dev`
 - Deployment status: `success`
-- Deployment commit: `7100bba`
+- Deployment commit: `7a318ab`
 
-The next account-level action is deciding whether optional Storage upload proof and Turnstile proof are required before launch; first Supabase Auth user/profile bootstrap, active-admin browser QA, project media block migration, and non-Storage admin CRUD/live lead workflow QA are complete.
+The next account-level action is deciding whether Turnstile proof is required before launch; first Supabase Auth user/profile bootstrap, active-admin browser QA, project media block migration, admin CRUD/live lead workflow QA, Storage upload proof, draft content import, and public published-read cutover are complete.
 
 Still pending after preview validation:
 - Cloudflare Pages production already has `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`; preview environment variables remain empty;
