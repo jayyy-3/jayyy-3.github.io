@@ -2,6 +2,59 @@
 
 Last updated: 2026-06-03
 
+## Entry - 2026-06-03 (Supabase Browser-Key Boundary Verified)
+
+### Scope
+- Verified Cloudflare Pages production now includes the deployed Supabase browser-safe publishable key after redeploy.
+- Triggered Cloudflare Pages production redeploy `7d10ba13-5b9f-4d6e-86b9-e28218978189` for commit `7100bba` so build-time `VITE_` variables were included in the production bundle.
+- Ran approved tagged production Contact and Sample Request submissions against `https://urblo.com.au`.
+- Used the deployed public Supabase publishable key to verify private lead rows are not anonymously readable through REST.
+- Checked Supabase Auth/admin profile readiness and found no Auth users and no admin profiles yet.
+
+### Changed Files
+- `AGENTS.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Cloudflare Deployment Evidence
+- Production deployment: `7d10ba13-5b9f-4d6e-86b9-e28218978189`.
+- Deployment URL: `https://7d10ba13.urblo.pages.dev`.
+- Commit: `7100bba34959885242103a1103aba32d450dd834`.
+- Deployment status: `success`.
+- Production bundle check: Supabase URL is present, a browser-safe publishable key is present, and no key value was printed.
+
+### Live Boundary Proof
+- Marker: `boundary-live-1780494471331-3df3d8f9`.
+- Contact HTTP proof against `https://urblo.com.au/api/enquiries`: HTTP `201`, response id `4`, `notificationStatus = sent`.
+- Sample Request HTTP proof against `https://urblo.com.au/api/sample-requests`: HTTP `201`, response sample request id `3`, sample item id `3`, `notificationStatus = sent`.
+- Anonymous REST read with the deployed Supabase publishable key returned HTTP `401` for `enquiries.id = 4`.
+- Anonymous REST read with the deployed Supabase publishable key returned HTTP `401` for `sample_requests.id = 3`.
+- Anonymous REST read with the deployed Supabase publishable key returned HTTP `401` for `sample_request_items.id = 3`.
+- Supabase connector readback confirmed the tagged enquiry, sample request, sample item, and audit rows exist.
+- Supabase connector readback confirmed `admin_audit_events.id = 6/7` for the tagged boundary run.
+
+### Admin Readiness
+- `public.admin_profiles` is currently empty.
+- `auth.users` is currently empty.
+- Admin live login/profile QA is blocked until the first Supabase Auth user exists and an active `admin_profiles` row is linked to that user.
+
+### Verification Results
+- Cloudflare deployment readback: deployment `7d10ba13-5b9f-4d6e-86b9-e28218978189` is `deploy/success`.
+- Production bundle check: pass, browser-safe publishable key present without printing the key.
+- Production private-row boundary proof: pass, anonymous reads denied for the tagged private lead rows.
+- Supabase connector readback: pass for tagged rows and audit rows.
+
+### Risks and Gaps
+- Turnstile remains unconfigured/unverified.
+- First admin bootstrap remains pending because there are no Supabase Auth users or admin profiles yet.
+- Admin browser login and admin lead workflow remain blocked until the first admin Auth/profile path exists.
+
+### Next Handoff
+- Create or invite the first Supabase Auth user, then create/link the first active owner/admin `admin_profiles` row.
+- Run admin readiness and no-write admin browser QA after that account exists.
+
 ## Entry - 2026-06-03 (SMTP2GO Notification Path Verified)
 
 ### Scope

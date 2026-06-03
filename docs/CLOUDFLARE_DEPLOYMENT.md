@@ -164,7 +164,7 @@ Current `/functions/api` endpoints:
 - Basic deployed form persistence is already verified on `https://urblo.pages.dev` for one tagged valid enquiry and one tagged valid sample request, including the sample item and source-route audit rows; invalid tagged payloads created no rows or audit events. The QA rows are retained for auditability until Jay approves cleanup.
 - Credential-gated live verification can be run with:
   - `npm run agent:forms-live -- --allow-writes` for direct handler verification against local service-role credentials after Jay approves tagged form QA writes.
-  - `npm run agent:forms-live -- --allow-writes --require-browser-boundary` for final private-row proof after both service-role and browser-safe Supabase keys are configured and Jay approval is in place.
+  - Browser-key private-row proof is verified on production for the current Supabase publishable-key path: approved tagged Contact/Sample Request submissions against `https://urblo.com.au` created private lead rows, and anonymous REST reads through the deployed publishable key returned HTTP 401 for `enquiries`, `sample_requests`, and `sample_request_items`.
   - SMTP2GO email proof is verified on production for the current provider path: approved tagged Contact/Sample Request submissions against `https://urblo.com.au` returned `notificationStatus = sent`, and Supabase readback confirmed both stored lead rows are `sent`.
   - `npm run agent:forms-live -- --allow-writes --require-turnstile --turnstile-token <token>` for final Turnstile proof after the public Turnstile site key, server-side Turnstile secret, and a valid token are available for the target environment. The verifier refuses to start without `VITE_TURNSTILE_SITE_KEY`, then asserts both valid live submissions store `turnstile_success = true`.
   - `npm run agent:forms-live -- --allow-writes --base-url https://<preview>.pages.dev` for deployed endpoint verification, after the Pages environment has the service-role key and Jay approves tagged form QA writes against that target. The base URL must be an origin only; placeholders or URLs with path/query/hash fail before any live writes.
@@ -230,7 +230,7 @@ SMTP2GO notification proof has been run for the current provider path:
 
 After remaining form secrets are configured and Jay approves tagged form QA writes, run:
 - `npm run agent:forms-live -- --allow-writes`
-- `npm run agent:forms-live -- --allow-writes --require-browser-boundary` after the browser-safe Supabase key is configured
+- Re-run `npm run agent:forms-live -- --allow-writes --require-browser-boundary` only when intentionally rechecking private-row denial with local service-role verification credentials available.
 - Re-run `npm run agent:forms-live -- --allow-writes --allow-email --require-email` only when intentionally rechecking real notification delivery with local service-role verification credentials available.
 - `npm run agent:forms-live -- --allow-writes --require-turnstile --turnstile-token <token>` after the Turnstile site key/secret are configured and a valid target-environment token is available
 
@@ -263,18 +263,18 @@ Current project:
 - Build command: `npm run build`
 - Output directory: `dist`
 - Root directory: `/`
-- Latest deployment: `0439e4f9-73d4-44d1-ac5a-17b7cf363dfa`
-- Latest deployment URL: `https://0439e4f9.urblo.pages.dev`
+- Latest deployment: `7d10ba13-5b9f-4d6e-86b9-e28218978189`
+- Latest deployment URL: `https://7d10ba13.urblo.pages.dev`
 - Production URL: `https://urblo.pages.dev`
 - Deployment status: `success`
-- Deployment commit: `3408f34`
+- Deployment commit: `7100bba`
 
-The next account-level action is to configure browser-safe Supabase variables needed for private-row boundary and admin verification.
+The next account-level action is to create/invite the first Supabase Auth user and link an active owner/admin `admin_profiles` row.
 
 Still pending after preview validation:
 - Cloudflare Pages production already has `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`; preview environment variables remain empty;
-- adding browser-safe Supabase and Turnstile variables as appropriate;
-- running remaining live form proofs for browser-key private-row denial and Turnstile after those inputs exist;
+- adding Turnstile variables if bot-protection proof is required before launch;
+- running the remaining Turnstile live form proof after those inputs exist;
 - configuring first-admin/admin browser QA inputs;
 - adding the production custom domain only after launch approval;
 - DNS cutover and rollback testing only after explicit approval.
