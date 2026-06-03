@@ -228,6 +228,14 @@ interface HotspotFormState {
     status: ProjectStatus;
 }
 
+interface PublishBlocker {
+    id: string;
+    area: 'project' | 'fact' | 'material';
+    label: string;
+    detail: string;
+    rowId?: number;
+}
+
 const emptyProjectForm: ProjectFormState = {
     status: 'draft',
     slug: '',
@@ -368,6 +376,10 @@ function AdminProjectsContent() {
     );
     const selectedMapImageUrl = useMemo(() => getMediaUrl(selectedMapMedia), [selectedMapMedia]);
     const projectCounts = useMemo(() => summarizeProjects(projects), [projects]);
+    const publishBlockers = useMemo(
+        () => getProjectPublishBlockers(projectForm, facts, materials),
+        [facts, materials, projectForm],
+    );
 
     const loadHotspots = useCallback(async (client: SupabaseClient, mapId: number | null, preferredHotspotId: number | null) => {
         if (!mapId) {
@@ -637,6 +649,16 @@ function AdminProjectsContent() {
     async function saveProject(nextStatus: ProjectStatus) {
         if (!supabase || !canEdit || !user) return;
 
+        if (nextStatus === 'published') {
+            const blockers = getProjectPublishBlockers(projectForm, facts, materials);
+            if (blockers.length) {
+                selectPublishBlocker(blockers[0]);
+                setError(formatPublishBlockerError(blockers));
+                setNotice(null);
+                return;
+            }
+        }
+
         const validation = validateProjectForm({ ...projectForm, status: nextStatus });
         if (validation.error !== null) {
             setError(validation.error);
@@ -717,6 +739,24 @@ function AdminProjectsContent() {
         });
         setNotice(withAuditNotice(nextStatus === 'published' ? 'Project published.' : 'Project saved.', auditError));
         await loadProjects(response.data.id);
+    }
+
+    function selectPublishBlocker(blocker: PublishBlocker) {
+        if (blocker.area === 'fact' && blocker.rowId) {
+            const fact = facts.find((row) => row.id === blocker.rowId);
+            if (fact) {
+                setSelectedFactId(fact.id);
+                setFactForm(rowToFactForm(fact));
+            }
+        }
+
+        if (blocker.area === 'material' && blocker.rowId) {
+            const material = materials.find((row) => row.id === blocker.rowId);
+            if (material) {
+                setSelectedMaterialId(material.id);
+                setMaterialForm(rowToMaterialForm(material));
+            }
+        }
     }
 
     async function handleProjectSubmit(event: FormEvent<HTMLFormElement>) {
@@ -1625,6 +1665,12 @@ function AdminProjectsContent() {
                 </section>
 
                 <aside className="space-y-5">
+                    <PublishReadinessPanel
+                        blockers={publishBlockers}
+                        disabled={!selectedProject}
+                        onSelect={selectPublishBlocker}
+                    />
+
                     <section className="border border-black/10 bg-black p-5 text-white">
                         <MapPin className="h-5 w-5 text-[var(--urblo-lime)]" />
                         <h2 className="mt-5 text-xl font-semibold">Map health</h2>
@@ -1974,6 +2020,64 @@ function getMediaUrl(asset: MediaOptionRow | null) {
     return asset.source_url || asset.object_path;
 }
 
+function getProjectPublishBlockers(
+    projectForm: ProjectFormState,
+    facts: ProjectFactRow[],
+    materials: ProjectMaterialRow[],
+): PublishBlocker[] {
+    const blockers: PublishBlocker[] = [];
+
+    if (projectForm.claimReviewStatus === 'needs_review') {
+        blockers.push({
+            id: 'project-claim-review',
+            area: 'project',
+            label: 'Project claim review',
+            detail: 'Set the Project editor claim review field to Approved or Deferred.',
+        });
+    }
+
+    if (!projectForm.summary.trim() && !projectForm.lead.trim()) {
+        blockers.push({
+            id: 'project-summary-lead',
+            area: 'project',
+            label: 'Project summary or lead',
+            detail: 'Add summary or lead copy before publishing.',
+        });
+    }
+
+    facts
+        .filter((fact) => fact.claim_status === 'needs_review')
+        .forEach((fact) => {
+            blockers.push({
+                id: `fact-${fact.id}`,
+                area: 'fact',
+                rowId: fact.id,
+                label: `Fact: ${fact.fact_label}`,
+                detail: 'Set this fact claim status to Approved or Deferred.',
+            });
+        });
+
+    materials
+        .filter((material) => material.claim_status === 'needs_review')
+        .forEach((material) => {
+            blockers.push({
+                id: `material-${material.id}`,
+                area: 'material',
+                rowId: material.id,
+                label: `Material: ${material.application}`,
+                detail: 'Set this material claim status to Approved or Deferred.',
+            });
+        });
+
+    return blockers;
+}
+
+function formatPublishBlockerError(blockers: PublishBlocker[]) {
+    const visible = blockers.slice(0, 4).map((blocker) => `${blocker.label}: ${blocker.detail}`);
+    const remaining = blockers.length > visible.length ? ` ${blockers.length - visible.length} more item(s) need review.` : '';
+    return `Project is not ready to publish. ${visible.join(' ')}${remaining}`;
+}
+
 function parsePercentValue(value: string) {
     const parsed = Number(value);
     return Number.isFinite(parsed) && parsed >= 0 && parsed <= 100 ? parsed : null;
@@ -1981,6 +2085,71 @@ function parsePercentValue(value: string) {
 
 function clampPercent(value: number) {
     return Math.min(100, Math.max(0, value));
+}
+
+function PublishReadinessPanel({
+    blockers,
+    disabled,
+    onSelect,
+}: {
+    blockers: PublishBlocker[];
+    disabled?: boolean;
+    onSelect: (blocker: PublishBlocker) => void;
+}) {
+    const ready = !disabled && blockers.length === 0;
+
+    return (
+        <section
+            className={[
+                'border p-5',
+                ready
+                    ? 'border-[var(--urblo-lime)] bg-[rgba(0,255,25,0.08)]'
+                    : 'border-amber-200 bg-amber-50',
+            ].join(' ')}
+        >
+            <div className="flex items-start gap-3">
+                {ready ? (
+                    <CheckCircle2 className="mt-1 h-5 w-5 shrink-0 text-black" />
+                ) : (
+                    <ShieldAlert className="mt-1 h-5 w-5 shrink-0 text-amber-700" />
+                )}
+                <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-black/45">
+                        Publish readiness
+                    </p>
+                    <h2 className="mt-2 text-xl font-semibold text-black">
+                        {disabled ? 'Select a project' : ready ? 'Ready to publish' : `${blockers.length} item(s) to review`}
+                    </h2>
+                </div>
+            </div>
+
+            {disabled ? (
+                <p className="mt-4 text-sm leading-6 text-black/60">
+                    Choose a project record to see the exact publish blockers.
+                </p>
+            ) : ready ? (
+                <p className="mt-4 text-sm leading-6 text-black/70">
+                    Project claim review, fact claims, material claims, and required public copy are ready.
+                </p>
+            ) : (
+                <div className="mt-4 space-y-2">
+                    {blockers.map((blocker) => (
+                        <button
+                            key={blocker.id}
+                            type="button"
+                            onClick={() => onSelect(blocker)}
+                            className="block w-full rounded border border-amber-300 bg-white px-3 py-3 text-left transition hover:border-black"
+                        >
+                            <span className="block text-xs font-bold uppercase tracking-[0.12em] text-black">
+                                {blocker.label}
+                            </span>
+                            <span className="mt-1 block text-sm leading-6 text-black/62">{blocker.detail}</span>
+                        </button>
+                    ))}
+                </div>
+            )}
+        </section>
+    );
 }
 
 function HotspotPlacementEditor({

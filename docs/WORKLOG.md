@@ -8015,6 +8015,33 @@ Last updated: 2026-06-04
 - `NOW-ADMIN-CONTENT-CRUD-001`
 - `NOW-ADMIN-MEDIA-LEADS-001`
 
+## Entry - 2026-06-04 (Admin Project Publish Readiness UX)
+
+### Scope
+- Improved `/admin/projects` publishing feedback after a live editor hit the claim-review validation while trying to publish a project.
+- Added a visible Publish readiness panel that lists exact blockers for project claim review, missing summary/lead copy, project facts still marked `needs_review`, and project materials still marked `needs_review`.
+- Made blocker items actionable so selecting a fact/material blocker loads the affected row into its editor instead of leaving the user to search manually.
+
+### Changed Files
+- `src/pages/admin/AdminProjectsPage.tsx`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+
+### Risks and Gaps
+- This is a targeted Projects publish UX fix, not the broader CMS IA redesign requested after first live editing use.
+- Imported CMS content remains draft until editors review and publish individual rows.
+
+### Next Handoff
+- `NOW-ADMIN-CONTENT-CRUD-001`
+
 ## Entry Template (Use for Every Future Session)
 
 ### Date
