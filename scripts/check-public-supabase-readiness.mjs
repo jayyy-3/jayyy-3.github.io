@@ -451,11 +451,16 @@ function checkSupabasePolicySource() {
 
 function checkPublicRuntimeBoundary() {
   const app = readRequired('src/App.tsx');
+  const publicClient = readRequired('src/lib/publicContentClient.ts');
 
   for (const route of publicRoutes) {
     requireIncludes(app, route, 'src/App.tsx');
   }
   requireIncludes(app, '/admin/*', 'src/App.tsx');
+  requireIncludes(publicClient, '@supabase/supabase-js', 'src/lib/publicContentClient.ts');
+  requireIncludes(publicClient, 'VITE_SUPABASE_PUBLISHABLE_KEY', 'src/lib/publicContentClient.ts');
+  requireIncludes(publicClient, 'VITE_SUPABASE_ANON_KEY', 'src/lib/publicContentClient.ts');
+  requireIncludes(publicClient, 'persistSession: false', 'src/lib/publicContentClient.ts');
 
   const scannedFiles = walkFiles('src').filter((file) => {
     if (!/\.(tsx?|jsx?)$/.test(file)) return false;
@@ -463,17 +468,36 @@ function checkPublicRuntimeBoundary() {
     if (file.startsWith('src/pages/admin/')) return false;
     if (file.startsWith('src/lib/admin')) return false;
     if (file === 'src/lib/supabaseClient.ts') return false;
+    if (file === 'src/lib/publicContentClient.ts') return false;
     return true;
   });
 
   for (const file of scannedFiles) {
     const text = readRequired(file);
-    for (const forbidden of ['@supabase/supabase-js', 'supabaseClient', 'VITE_SUPABASE_', "from('stone_groups')"]) {
+    for (const forbidden of ['@supabase/supabase-js', 'supabaseClient', 'VITE_SUPABASE_', 'service_role', 'SUPABASE_SERVICE_ROLE']) {
       if (text.includes(forbidden)) {
-        failures.push(`${file}: public runtime must stay static/file-backed until approved cutover; found ${forbidden}`);
+        failures.push(`${file}: public runtime must use publicContentClient and must not expose admin/service-role boundaries; found ${forbidden}`);
       }
     }
   }
+
+  const cutoverServices = [
+    'src/service/StoneLibraryService.ts',
+    'src/service/ProductService.ts',
+    'src/service/ProjectService.ts',
+    'src/service/ArticleService.ts',
+  ];
+
+  for (const file of cutoverServices) {
+    const text = readRequired(file);
+    requireIncludes(text, 'getPublicContentClient', file);
+    requireIncludes(text, ".eq('status', 'published')", file);
+  }
+
+  requireIncludes(readRequired('src/service/ProductService.ts'), 'return publishedProducts.length ? publishedProducts : products', 'ProductService static fallback');
+  requireIncludes(readRequired('src/service/ProjectService.ts'), 'return publishedProjects.length ? publishedProjects : staticProjects', 'ProjectService static fallback');
+  requireIncludes(readRequired('src/service/ArticleService.ts'), 'publishedArticles.length ? publishedArticles : await getStaticArticles()', 'ArticleService static fallback');
+  requireIncludes(readRequired('src/pages/StoneLibraryPage.tsx'), 'StoneLibraryService.getStoneCards(filters)', 'Stone Library static fallback');
 }
 
 function checkCloudflareStaticBoundary() {
@@ -499,10 +523,10 @@ function checkDocsContracts() {
   const handoff = readRequired('docs/HANDOFF.md');
 
   for (const fragment of [
-    'Public Stone Library routes remain static/file-backed',
-    'Public Project routes remain static/file-backed',
-    'Public Product routes remain static/file-backed',
-    'Public Article routes remain static/file-backed',
+    'Public Stone Library routes use Supabase published reads with static fallback',
+    'Public Project routes use Supabase published reads with static fallback',
+    'Public Product routes use Supabase published reads with static fallback',
+    'Public Article routes use Supabase published reads with static fallback',
   ]) {
     requireIncludes(schema, fragment, 'docs/SUPABASE_SCHEMA.md');
   }
@@ -516,8 +540,8 @@ function checkDocsContracts() {
   }
 
   requireIncludes(architecture, 'public page components are lazy-loaded', 'docs/ARCHITECTURE.md');
-  requireIncludes(architecture, 'Public Projects, Stone Library, Products, and Articles remain file-backed', 'docs/ARCHITECTURE.md');
-  requireIncludes(handoff, 'content import/public-read preparation', 'docs/HANDOFF.md');
+  requireIncludes(architecture, 'Public Projects, Stone Library, Products, and Articles prefer published Supabase content with static fallback', 'docs/ARCHITECTURE.md');
+  requireIncludes(handoff, 'content import/public-read cutover', 'docs/HANDOFF.md');
 }
 
 const payload = getContentImportPayload();
@@ -547,6 +571,6 @@ console.log(
     'Verified content import preflight SQL includes Data API role/sequence grant inspection for anon, authenticated, and service_role.',
     'Verified guarded draft import SQL keeps the approval and merge gates manual, avoids destructive/publish statements, and forces imported content status to draft.',
     'Verified guarded draft rollback SQL keeps its destructive gate manual, follows reverse dependency order, and targets draft/import rows only.',
-    'Verified published-only public RLS policy source, read-only anon grants, static public runtime boundary, Cloudflare SPA/API routing scope, and cutover docs.',
+    'Verified published-only public RLS policy source, read-only anon grants, public Supabase read boundary with static fallback, Cloudflare SPA/API routing scope, and cutover docs.',
   ].join('\n'),
 );

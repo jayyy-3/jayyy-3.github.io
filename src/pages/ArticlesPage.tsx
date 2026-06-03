@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import ArticleCard from '../components/ArticleCard';
 import RouteState from '../components/RouteState';
+import ArticleService from '../service/ArticleService';
 import type { ArticleMeta } from '../types/article';
 
 export default function ArticlesPage() {
@@ -11,19 +12,9 @@ export default function ArticlesPage() {
   useEffect(() => {
     setStatus('loading');
 
-    fetch(import.meta.env.BASE_URL + 'articles/index.json')
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`Article index returned ${response.status}`);
-        }
-        return response.json();
-      })
+    ArticleService.getAll()
       .then((list: ArticleMeta[]) => {
-        setArticles(
-          list.sort(
-            (a, b) => new Date(b.date ?? 0).getTime() - new Date(a.date ?? 0).getTime(),
-          ),
-        );
+        setArticles(list);
         setStatus('ready');
       })
       .catch(() => setStatus('error'));

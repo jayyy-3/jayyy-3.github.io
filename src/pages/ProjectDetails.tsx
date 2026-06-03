@@ -1,13 +1,14 @@
+import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, ArrowUpRight } from 'lucide-react';
 import ProjectHotspotImage from '../components/projects/ProjectHotspotImage';
 import RouteState from '../components/RouteState';
 import {
-  projects,
   type ProjectData,
   type ProjectMaterial,
   type ProjectMediaBlock,
 } from '../data/projectData';
+import ProjectService from '../service/ProjectService';
 import StoneLibraryService from '../service/StoneLibraryService';
 
 function renderDetailValue(value: string | string[]) {
@@ -47,12 +48,12 @@ function resolveProjectMaterial(material: ProjectMaterial) {
   };
 }
 
-function getProjectNeighbour(project: ProjectData, direction: -1 | 1) {
-  const currentIndex = projects.findIndex((item) => item.slug === project.slug);
+function getProjectNeighbour(project: ProjectData, allProjects: ProjectData[], direction: -1 | 1) {
+  const currentIndex = allProjects.findIndex((item) => item.slug === project.slug);
   if (currentIndex === -1) return null;
 
-  const nextIndex = (currentIndex + direction + projects.length) % projects.length;
-  return projects[nextIndex];
+  const nextIndex = (currentIndex + direction + allProjects.length) % allProjects.length;
+  return allProjects[nextIndex];
 }
 
 function defaultMediaBlocks(project: ProjectData): ProjectMediaBlock[] {
@@ -68,9 +69,9 @@ function defaultMediaBlocks(project: ProjectData): ProjectMediaBlock[] {
   }));
 }
 
-function ProjectOpening({ project }: { project: ProjectData }) {
-  const previousProject = getProjectNeighbour(project, -1);
-  const nextProject = getProjectNeighbour(project, 1);
+function ProjectOpening({ project, allProjects }: { project: ProjectData; allProjects: ProjectData[] }) {
+  const previousProject = getProjectNeighbour(project, allProjects, -1);
+  const nextProject = getProjectNeighbour(project, allProjects, 1);
   const heroDate = Array.isArray(project.details.Date)
     ? project.details.Date.join(' / ')
     : project.details.Date || project.listing.date;
@@ -380,7 +381,54 @@ function ProjectCta({ project }: { project: ProjectData }) {
 
 export default function ProjectDetails() {
   const { slug = '' } = useParams();
+  const [projects, setProjects] = useState<ProjectData[]>([]);
+  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const project = projects.find((item) => item.slug === slug);
+
+  useEffect(() => {
+    let isCurrent = true;
+    setStatus('loading');
+
+    ProjectService.getAll()
+      .then((result) => {
+        if (!isCurrent) return;
+        setProjects(result);
+        setStatus('ready');
+      })
+      .catch(() => {
+        if (isCurrent) setStatus('error');
+      });
+
+    return () => {
+      isCurrent = false;
+    };
+  }, []);
+
+  if (status === 'loading') {
+    return (
+      <RouteState
+        eyebrow="Loading"
+        title="Preparing project"
+        copy="The project record is loading. This should only take a moment."
+        headerOffset
+      />
+    );
+  }
+
+  if (status === 'error') {
+    return (
+      <RouteState
+        eyebrow="Project Error"
+        title="Project could not load"
+        copy="The project record could not be loaded right now. Return to projects or contact Urblo if this keeps happening."
+        headerOffset
+        actions={[
+          { label: 'Projects', to: '/projects' },
+          { label: 'Contact Us', to: '/contact', variant: 'secondary' },
+        ]}
+      />
+    );
+  }
 
   if (!project) {
     return (
@@ -399,7 +447,7 @@ export default function ProjectDetails() {
 
   return (
     <div className="bg-white">
-      <ProjectOpening project={project} />
+      <ProjectOpening project={project} allProjects={projects} />
       <ProjectHero project={project} />
       <ProjectInformation project={project} />
       <ProjectMedia project={project} />

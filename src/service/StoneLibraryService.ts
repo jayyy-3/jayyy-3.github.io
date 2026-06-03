@@ -4,6 +4,7 @@ import {
     getStoneDefaultImage,
     getStoneFinishImageResolution,
 } from '../data/stoneFinishImages';
+import { getPublicContentClient } from '../lib/publicContentClient';
 import type { OptionItem } from '../types/product';
 import type {
     FinishCapabilityVM,
@@ -25,6 +26,54 @@ import type {
 } from '../types/stone-library';
 
 const stoneLibrary = stoneLibraryJson as StoneLibraryRaw;
+
+type PublishedStoneGroupRow = {
+    id: number;
+    stone_group_key: string;
+    display_name: string;
+    status: 'published' | 'tbc';
+    stone_type_display: string | null;
+    origin_region: string | null;
+    origin_country: string | null;
+};
+
+type PublishedVariantRow = {
+    id: number;
+    stone_group_id: number;
+    variant_key: string;
+};
+
+type PublishedCapabilityRow = {
+    stone_variant_id: number;
+    capability: 'yes' | 'no' | 'tbc';
+    finish_definitions?: {
+        finish_key: string;
+        display_name: string;
+        sort_order: number;
+    } | {
+        finish_key: string;
+        display_name: string;
+        sort_order: number;
+    }[] | null;
+};
+
+type PublishedImageRow = {
+    stone_group_id: number | null;
+    stone_variant_id: number | null;
+    finish_definition_id: number | null;
+    sort_order: number;
+    media_assets?: {
+        source_url: string | null;
+        alt: string | null;
+    } | {
+        source_url: string | null;
+        alt: string | null;
+    }[] | null;
+};
+
+function firstRelation<T>(value: T | T[] | null | undefined): T | null {
+    return Array.isArray(value) ? value[0] ?? null : value ?? null;
+}
 
 const finishDefinitionByKey = new Map<FinishKey, StoneFinishRaw>(
     stoneLibrary.finishes.map((finish) => [
@@ -408,6 +457,134 @@ class StoneLibraryService {
         return {
             stoneTypes,
             finishes,
+        };
+    }
+
+    static async getPublishedStoneCards(filters: StoneCardFilters = {}): Promise<StoneCardVM[]> {
+        const supabase = getPublicContentClient();
+        if (!supabase) {
+            return [];
+        }
+
+        const { data: groups, error: groupError } = await supabase
+            .from('stone_groups')
+            .select('id, stone_group_key, display_name, status, stone_type_display, origin_region, origin_country')
+            .eq('status', 'published')
+            .order('sort_order', { ascending: true });
+
+        if (groupError || !groups?.length) {
+            return [];
+        }
+
+        const groupRows = groups as PublishedStoneGroupRow[];
+        const groupIds = groupRows.map((group) => group.id);
+        const { data: variants } = await supabase
+            .from('stone_variants')
+            .select('id, stone_group_id, variant_key')
+            .in('stone_group_id', groupIds)
+            .eq('status', 'published')
+            .order('sort_order', { ascending: true });
+
+        const variantRows = (variants ?? []) as PublishedVariantRow[];
+        const variantIds = variantRows.map((variant) => variant.id);
+        const { data: capabilities } = variantIds.length
+            ? await supabase
+                .from('stone_finish_capabilities')
+                .select('stone_variant_id, capability, finish_definitions (finish_key, display_name, sort_order)')
+                .in('stone_variant_id', variantIds)
+            : { data: [] };
+
+        const { data: images } = await supabase
+            .from('stone_finish_images')
+            .select('stone_group_id, stone_variant_id, finish_definition_id, sort_order, media_assets (source_url, alt)')
+            .in('stone_group_id', groupIds)
+            .eq('status', 'published')
+            .order('sort_order', { ascending: true });
+
+        const variantsByGroup = new Map<number, PublishedVariantRow[]>();
+        for (const variant of variantRows) {
+            variantsByGroup.set(variant.stone_group_id, [...(variantsByGroup.get(variant.stone_group_id) ?? []), variant]);
+        }
+
+        const capabilitiesByVariant = new Map<number, PublishedCapabilityRow[]>();
+        for (const capability of (capabilities ?? []) as unknown as PublishedCapabilityRow[]) {
+            capabilitiesByVariant.set(capability.stone_variant_id, [
+                ...(capabilitiesByVariant.get(capability.stone_variant_id) ?? []),
+                capability,
+            ]);
+        }
+
+        const imagesByGroup = new Map<number, PublishedImageRow[]>();
+        for (const image of (images ?? []) as unknown as PublishedImageRow[]) {
+            if (!image.stone_group_id) continue;
+            imagesByGroup.set(image.stone_group_id, [...(imagesByGroup.get(image.stone_group_id) ?? []), image]);
+        }
+
+        const query = filters.query ? normalizeText(filters.query) : '';
+        return groupRows
+            .map((group) => {
+                const groupVariants = variantsByGroup.get(group.id) ?? [];
+                const finishKeys = Array.from(
+                    new Set(
+                        groupVariants.flatMap((variant) =>
+                            (capabilitiesByVariant.get(variant.id) ?? [])
+                                .filter((capability) => capability.capability !== 'no')
+                                .map((capability) => firstRelation(capability.finish_definitions)?.finish_key)
+                                .filter((finishKey): finishKey is string => Boolean(finishKey)),
+                        ),
+                    ),
+                );
+                const cover = imagesByGroup.get(group.id)?.find((image) => firstRelation(image.media_assets)?.source_url);
+                const originLabel = [group.origin_region, group.origin_country].filter(Boolean).join(', ') || 'Origin TBC';
+
+                return {
+                    stoneGroupId: group.stone_group_key,
+                    name: group.display_name,
+                    status: group.status === 'tbc' ? 'tbc' as const : 'active' as const,
+                    stoneType: group.stone_type_display || 'Stone',
+                    originLabel,
+                    finishCount: finishKeys.length,
+                    availableFinishKeys: finishKeys,
+                    coverImageUrl: firstRelation(cover?.media_assets)?.source_url || undefined,
+                    coverImageAlt: firstRelation(cover?.media_assets)?.alt || group.display_name,
+                    variantCount: groupVariants.length,
+                };
+            })
+            .filter((card) => {
+                if (filters.stoneType && card.stoneType !== filters.stoneType) return false;
+                if (filters.finishKey && !card.availableFinishKeys.includes(filters.finishKey)) return false;
+                if (!query) return true;
+                return [card.name, card.stoneType, card.originLabel].join(' ').toLowerCase().includes(query);
+            })
+            .sort((a, b) => a.name.localeCompare(b.name));
+    }
+
+    static async getPublishedFilterFacets(): Promise<StoneFilterFacets | null> {
+        const cards = await StoneLibraryService.getPublishedStoneCards();
+        if (!cards.length) {
+            return null;
+        }
+
+        const typeCounter = new Map<string, number>();
+        const finishCounter = new Map<string, number>();
+        cards.forEach((card) => {
+            typeCounter.set(card.stoneType, (typeCounter.get(card.stoneType) ?? 0) + 1);
+            card.availableFinishKeys.forEach((finishKey) => {
+                finishCounter.set(finishKey, (finishCounter.get(finishKey) ?? 0) + 1);
+            });
+        });
+
+        return {
+            stoneTypes: Array.from(typeCounter.entries())
+                .map(([value, count]) => ({ value, label: value, count }))
+                .sort(compareByLabel),
+            finishes: Array.from(finishCounter.entries())
+                .map(([value, count]) => ({
+                    value,
+                    label: finishDefinitionByKey.get(value as FinishKey)?.displayName || toTitleCase(value),
+                    count,
+                }))
+                .sort(compareByLabel),
         };
     }
 

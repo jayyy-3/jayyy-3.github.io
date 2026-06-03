@@ -1,24 +1,63 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import FilterBar from '../components/stone-library/FilterBar';
 import StoneCard from '../components/stone-library/StoneCard';
 import StoneLibraryService from '../service/StoneLibraryService';
 
+import type { StoneCardVM, StoneFilterFacets } from '../types/stone-library';
+
 export default function StoneLibraryPage() {
-  const facets = useMemo(() => StoneLibraryService.getFilterFacets(), []);
+  const [publishedCards, setPublishedCards] = useState<StoneCardVM[] | null>(null);
+  const [publishedFacets, setPublishedFacets] = useState<StoneFilterFacets | null>(null);
 
   const [search, setSearch] = useState('');
   const [stoneType, setStoneType] = useState('');
   const [finishKey, setFinishKey] = useState('');
+  const facets = publishedFacets ?? StoneLibraryService.getFilterFacets();
 
   const cards = useMemo(
-    () =>
-      StoneLibraryService.getStoneCards({
+    () => {
+      const filters = {
         query: search,
         stoneType: stoneType || undefined,
         finishKey: finishKey || undefined,
-      }),
-    [search, stoneType, finishKey],
+      };
+
+      if (publishedCards) {
+        const query = search.trim().toLowerCase();
+        return publishedCards.filter((card) => {
+          if (filters.stoneType && card.stoneType !== filters.stoneType) return false;
+          if (filters.finishKey && !card.availableFinishKeys.includes(filters.finishKey)) return false;
+          if (!query) return true;
+          return [card.name, card.stoneType, card.originLabel].join(' ').toLowerCase().includes(query);
+        });
+      }
+
+      return StoneLibraryService.getStoneCards(filters);
+    },
+    [publishedCards, search, stoneType, finishKey],
   );
+
+  useEffect(() => {
+    let isCurrent = true;
+    Promise.all([
+      StoneLibraryService.getPublishedStoneCards(),
+      StoneLibraryService.getPublishedFilterFacets(),
+    ])
+      .then(([nextCards, nextFacets]) => {
+        if (!isCurrent || !nextCards.length || !nextFacets) return;
+        setPublishedCards(nextCards);
+        setPublishedFacets(nextFacets);
+      })
+      .catch(() => {
+        if (!isCurrent) return;
+        setPublishedCards(null);
+        setPublishedFacets(null);
+      });
+
+    return () => {
+      isCurrent = false;
+    };
+  }, []);
 
   function clearFilters() {
     setSearch('');

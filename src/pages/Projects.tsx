@@ -1,13 +1,14 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowUpRight, Grid2X2, List } from 'lucide-react';
-import { projects } from '../data/projectData';
+import type { ProjectData } from '../data/projectData';
+import ProjectService from '../service/ProjectService';
 
 type ProjectViewMode = 'grid' | 'list';
 
 const allSectorLabel = 'All sectors';
 
-function getSectorOptions() {
+function getSectorOptions(projects: ProjectData[]) {
   return [
     allSectorLabel,
     ...Array.from(new Set(projects.map((project) => project.listing.sector))).sort((a, b) =>
@@ -16,7 +17,7 @@ function getSectorOptions() {
   ];
 }
 
-function ProjectsGridCard({ project }: { project: (typeof projects)[number] }) {
+function ProjectsGridCard({ project }: { project: ProjectData }) {
   return (
     <Link
       to={`/projects/${project.slug}`}
@@ -51,7 +52,7 @@ function ProjectsGridCard({ project }: { project: (typeof projects)[number] }) {
   );
 }
 
-function ProjectsListRow({ project, index }: { project: (typeof projects)[number]; index: number }) {
+function ProjectsListRow({ project, index }: { project: ProjectData; index: number }) {
   return (
     <Link
       to={`/projects/${project.slug}`}
@@ -90,9 +91,14 @@ function ProjectsListRow({ project, index }: { project: (typeof projects)[number
 }
 
 export default function Projects() {
+  const [projects, setProjects] = useState<ProjectData[]>([]);
   const [activeSector, setActiveSector] = useState(allSectorLabel);
   const [viewMode, setViewMode] = useState<ProjectViewMode>('grid');
-  const sectorOptions = useMemo(getSectorOptions, []);
+  const sectorOptions = useMemo(() => getSectorOptions(projects), [projects]);
+
+  useEffect(() => {
+    ProjectService.getAll().then(setProjects);
+  }, []);
 
   const filteredProjects = useMemo(() => {
     if (activeSector === allSectorLabel) {
@@ -100,7 +106,7 @@ export default function Projects() {
     }
 
     return projects.filter((project) => project.listing.sector === activeSector);
-  }, [activeSector]);
+  }, [activeSector, projects]);
 
   return (
     <div className="bg-white pt-[102px]">

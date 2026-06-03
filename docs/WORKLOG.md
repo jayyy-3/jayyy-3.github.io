@@ -2,6 +2,48 @@
 
 Last updated: 2026-06-04
 
+## Entry - 2026-06-04 (CMS Storage Proof, Draft Import, and Public Read Cutover)
+
+### Scope
+- Ran the approved Storage-inclusive admin live QA path.
+- Added `scripts/apply-content-import-live.mjs` and `npm run agent:content-import:live` as a plan-only-by-default live draft import runner.
+- Imported the reviewed static-to-Supabase payload into production Supabase as draft/review rows through browser-key owner/admin RLS.
+- Cut public Projects, Products, Articles, and the Stone Library listing to prefer published Supabase reads with static fallback.
+- Updated `npm run agent:public-supabase-readiness` from a static-only boundary check to a public browser-key read boundary plus static fallback check.
+
+### Supabase Evidence
+- Storage QA marker: `admin-live-1780497462544-23b1d5e3`.
+- Storage object uploaded: `urblo-admin-media/live-check/admin-live-1780497462544-23b1d5e3.png`.
+- Storage-inclusive admin QA recorded 48 audit rows, verified signed-in admin readback, and verified anonymous browser-key denial through private and public Storage object endpoints.
+- Draft content import wrote/upserted 115 media assets, 13 stone groups, 15 variants, 153 finish capabilities, 53 finish image rows, 6 products, 28 product models, 18 material defaults, 18 specs, 5 projects, 41 project facts, 2 project materials, 1 project material map, 15 project media rows, 2 hotspots, 4 articles, and 95 article blocks.
+- Stored parent counts after import: 13 stone groups, 6 products, 5 projects, and 4 articles.
+- Anonymous browser-key reads exposed zero imported draft parent rows.
+
+### Verification
+- `npm run agent:content-import:apply-sql`: pass; local ignored artifacts generated with 0 warnings and 0 blockers.
+- `npm run agent:content-import:live`: pass in plan-only mode.
+- `npm run agent:content-import:live -- --allow-writes`: pass with approved admin session.
+- `npx tsc -b`: pass after public-read adapter changes.
+- `npm run build`: pass.
+- `npm run lint`: pass.
+- `npm run agent:smoke`: pass when rerun with local preview listen permission; the first sandboxed attempt failed with `listen EPERM` before route checks.
+- `npm run agent:public-supabase-readiness`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- Playwright Firefox public render QA against local preview: `/stone-library`, `/products`, `/projects`, and `/articles` rendered expected H1/content with no console/page errors.
+
+### Risks and Gaps
+- Imported production content is intentionally still `draft`; public pages continue using static fallback until an editor publishes rows in `/admin`.
+- Stone Library detail remains static-backed until the deeper public variant/finish detail mapper is completed.
+- Article detail continues rendering sanitized legacy HTML from `legacy_source_path`; structured public block rendering remains a follow-up.
+- Turnstile remains unconfigured/unverified.
+- Unprofiled unauthorized admin browser QA remains staged but unrun.
+
+### Next Handoff
+- Finish full runtime/docs gates for this cutover branch.
+- Publish a small reviewed content sample in `/admin` and smoke the public Supabase read path end to end.
+- Complete Stone Library detail public adapter and article structured block renderer if the client wants public pages to reflect every CMS field immediately.
+
 ## Entry - 2026-06-04 (Admin CRUD Live QA and Project Media Migration)
 
 ### Scope

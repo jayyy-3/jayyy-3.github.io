@@ -4,6 +4,7 @@ import { Link, Navigate, useParams } from 'react-router-dom';
 import ReadingProgressBar from '../components/ReadingProgressBar';
 import RouteState from '../components/RouteState';
 import { prepareArticleHtml, resolveArticleAssetPath } from '../lib/articleMedia';
+import ArticleService from '../service/ArticleService';
 import type { ArticleMeta } from '../types/article';
 
 export default function ArticlePage() {
@@ -62,13 +63,7 @@ export default function ArticlePage() {
   useEffect(() => {
     setIndexStatus('loading');
 
-    fetch(import.meta.env.BASE_URL + 'articles/index.json')
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`Article index returned ${response.status}`);
-        }
-        return response.json();
-      })
+    ArticleService.getAll()
       .then((result) => {
         setArticles(result);
         setIndexStatus('ready');
