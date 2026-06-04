@@ -2,6 +2,41 @@
 
 Last updated: 2026-06-04
 
+## Entry - 2026-06-04 (Admin Leads Export Reference UX)
+
+### Scope
+- Continued the `/admin` CMS editor-handoff goal with a focused Leads export cleanup.
+- Replaced the Leads CSV `Lead ID` column with `Reference`.
+- Exported enquiries and sample requests now use editor-facing references such as `enquiry-123` and `sample-123` instead of bare database numbers.
+- Expanded admin CRUD coverage so Leads export language cannot drift back to `Lead ID`.
+
+### Changed Files
+- `src/pages/admin/AdminLeadsPage.tsx`
+- `scripts/check-admin-crud-coverage.mjs`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/ADMIN_EDITOR_GUIDE.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass. Coverage now requires Leads CSV Reference language and rejects `Lead ID`.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npx tsc -b`: pass.
+- `npm run lint`: pass.
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run agent:smoke`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions.
+- `npm run agent:admin-config-gate`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions; 11 admin routes passed the no-config gate.
+
+### Risks and Gaps
+- This is a local source/docs UX pass. The latest local CMS UX commits still need push/deploy approval plus a final production editor walkthrough before the CMS handoff goal can be considered complete.
+- Browser-safe invite/create-user inside `/admin/settings` remains the largest remaining non-technical handoff gap; current CMS access still depends on creating or inviting the login account outside the browser admin.
+
+### Next Handoff
+- Continue with push/deploy approval, decide whether to build an invite/create-user flow, and run the final production editor walkthrough.
+
 ## Entry - 2026-06-04 (Admin Products and Articles Media Language UX)
 
 ### Scope

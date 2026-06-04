@@ -85,7 +85,7 @@ The approved import has already written production Projects, Stone Library, Prod
 
 ## Leads Export
 
-In Leads, CSV export uses the current search, lead-kind filter, and workflow-status filter. The visible count beside the export button shows how many rows will be exported out of the loaded queue. Clear filters before exporting the full loaded queue. Exports are recorded in change history before the CSV downloads.
+In Leads, CSV export uses the current search, lead-kind filter, and workflow-status filter. The visible count beside the export button shows how many rows will be exported out of the loaded queue. Clear filters before exporting the full loaded queue. Exports are recorded in change history before the CSV downloads. Exported rows use a `Reference` value such as `enquiry-123` or `sample-123` so the file can be shared without explaining internal database IDs.
 
 ## Publishing Checks
 

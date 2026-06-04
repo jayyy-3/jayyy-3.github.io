@@ -1080,7 +1080,7 @@ function buildLeadExportCsv(
     const rows = [
         [
             'Lead type',
-            'Lead ID',
+            'Reference',
             'Workflow status',
             'Created',
             'Last updated',
@@ -1100,7 +1100,7 @@ function buildLeadExportCsv(
         ],
         ...enquiries.map((lead) => [
             'Enquiry',
-            lead.id,
+            formatLeadReference('enquiry', lead.id),
             lead.status,
             lead.created_at,
             lead.updated_at,
@@ -1120,7 +1120,7 @@ function buildLeadExportCsv(
         ]),
         ...sampleRequests.map((lead) => [
             'Sample request',
-            lead.id,
+            formatLeadReference('sample', lead.id),
             lead.status,
             lead.created_at,
             lead.updated_at,
@@ -1141,6 +1141,10 @@ function buildLeadExportCsv(
     ];
 
     return `${rows.map((row) => row.map(csvCell).join(',')).join('\n')}\n`;
+}
+
+function formatLeadReference(kind: LeadKind, id: number) {
+    return kind === 'enquiry' ? `enquiry-${id}` : `sample-${id}`;
 }
 
 function formatSampleItems(
