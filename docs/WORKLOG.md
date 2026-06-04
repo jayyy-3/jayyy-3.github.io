@@ -2,6 +2,40 @@
 
 Last updated: 2026-06-04
 
+## Entry - 2026-06-04 (Admin Stone Library Finish Image UX)
+
+### Scope
+- Continued the `/admin` CMS editor-experience productization goal with a focused Stone Library finish-image pass.
+- Added selected-media preview, source/status feedback, and missing-media feedback to the finish image link editor.
+- Locked the Finish Image Publish action when the selected media record is not Published in `/admin/media`, with editor-facing guidance explaining what to fix.
+- Updated the save-time validation copy so the error points editors back to publishing the media record, not to an internal database rule.
+
+### Changed Files
+- `src/pages/admin/AdminStoneLibraryPage.tsx`
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run build`: pass.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass after preserving the existing source-gate phrase for published finish-image media requirements.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run agent:smoke`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions.
+- `npm run agent:admin-config-gate`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions; 11 admin routes passed the no-config gate.
+
+### Risks and Gaps
+- Stone Library finish images are clearer, but the finish capability grid still has dense source/admin-note fields that need more editorial guidance.
+- Stone Library detail remains static-backed until the public variant/finish detail mapper is completed.
+
+### Next Handoff
+- Continue the CMS goal by simplifying Products media/default selectors or adding clearer Stone Library finish capability guidance.
+
 ## Entry - 2026-06-04 (Admin Projects Media Selector UX)
 
 ### Scope

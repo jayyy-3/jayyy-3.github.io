@@ -278,6 +278,12 @@ function AdminStoneLibraryContent() {
     );
     const variantById = useMemo(() => new Map(variants.map((variant) => [variant.id, variant])), [variants]);
     const mediaById = useMemo(() => new Map(mediaAssets.map((asset) => [asset.id, asset])), [mediaAssets]);
+    const selectedFinishImageMedia = useMemo(
+        () => findMediaAsset(mediaAssets, finishImageForm.mediaAssetId),
+        [finishImageForm.mediaAssetId, mediaAssets],
+    );
+    const finishImagePublishBlocked =
+        Boolean(finishImageForm.mediaAssetId) && selectedFinishImageMedia?.status !== 'published';
 
     const loadFinishImages = useCallback(async (client: SupabaseClient, groupId: number, preferredImageId?: number) => {
         const { data, error: imageError } = await client
@@ -828,7 +834,9 @@ function AdminStoneLibraryContent() {
 
         const linkedMedia = mediaById.get(validation.mediaAssetId);
         if (nextStatus === 'published' && linkedMedia?.status !== 'published') {
-            setError('Published finish images require a published media record.');
+            setError(
+                'Published finish images require a published media record. Choose a media record that is already Published in Media.',
+            );
             return;
         }
 
@@ -1473,23 +1481,13 @@ function AdminStoneLibraryContent() {
                                         ))}
                                     </select>
                                 </label>
-                                <label className="text-xs font-bold uppercase tracking-[0.14em] text-black/55">
-                                    Media record
-                                    <select
-                                        value={finishImageForm.mediaAssetId}
-                                        onChange={(event) => updateFinishImageField('mediaAssetId', event.target.value)}
-                                        disabled={!canEdit || isSavingFinishImage || !selectedVariant}
-                                        required
-                                        className={fieldClass}
-                                    >
-                                        <option value="">Select media</option>
-                                        {mediaAssets.map((asset) => (
-                                            <option key={asset.id} value={asset.id}>
-                                                {mediaLabel(asset, asset.id)}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </label>
+                                <FinishImageMediaSelect
+                                    value={finishImageForm.mediaAssetId}
+                                    disabled={!canEdit || isSavingFinishImage || !selectedVariant}
+                                    mediaAssets={mediaAssets}
+                                    selectedMedia={selectedFinishImageMedia}
+                                    onChange={(value) => updateFinishImageField('mediaAssetId', value)}
+                                />
                                 <label className="text-xs font-bold uppercase tracking-[0.14em] text-black/55">
                                     Role
                                     <select
@@ -1544,8 +1542,19 @@ function AdminStoneLibraryContent() {
                                 </button>
                                 <button
                                     type="button"
-                                    disabled={!canEdit || isSavingFinishImage || !selectedVariant}
+                                    disabled={
+                                        !canEdit ||
+                                        isSavingFinishImage ||
+                                        !selectedVariant ||
+                                        !finishImageForm.mediaAssetId ||
+                                        finishImagePublishBlocked
+                                    }
                                     onClick={() => void saveFinishImage('published')}
+                                    title={
+                                        finishImagePublishBlocked
+                                            ? 'Publish the selected media record in Media before publishing this finish image.'
+                                            : 'Publish this finish image link.'
+                                    }
                                     className="inline-flex min-h-11 items-center justify-center gap-2 rounded bg-[var(--urblo-lime)] px-4 text-xs font-bold uppercase tracking-[0.14em] text-black transition hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:bg-black/20 disabled:text-black/35"
                                 >
                                     <CheckCircle2 className="h-4 w-4" />
@@ -1561,6 +1570,11 @@ function AdminStoneLibraryContent() {
                                     Archive image
                                 </button>
                             </div>
+                            {finishImagePublishBlocked ? (
+                                <p className="mt-3 border border-amber-200 bg-amber-50 p-3 text-sm font-semibold leading-6 text-amber-800">
+                                    Publish is locked because the selected media record is not Published in Media.
+                                </p>
+                            ) : null}
                         </form>
                     </section>
                 </section>
@@ -2033,6 +2047,24 @@ function hasAvailableCapability(forms: Record<number, CapabilityFormState>) {
     return Object.values(forms).some((form) => form.capability === 'yes' || form.capability === 'tbc');
 }
 
+function findMediaAsset(mediaAssets: MediaAssetOption[], value: string) {
+    const mediaId = Number(value);
+    if (!Number.isFinite(mediaId)) return null;
+    return mediaAssets.find((asset) => asset.id === mediaId) ?? null;
+}
+
+function getMediaAssetUrl(asset: MediaAssetOption | null) {
+    if (!asset) return null;
+
+    if (asset.source_url) return asset.source_url;
+
+    if (asset.bucket === 'urblo-public-media' && asset.object_path && supabase) {
+        return supabase.storage.from(asset.bucket).getPublicUrl(asset.object_path).data.publicUrl;
+    }
+
+    return asset.object_path;
+}
+
 function mediaLabel(asset: MediaAssetOption | undefined, id: number) {
     if (!asset) {
         return `Media #${id}`;
@@ -2040,4 +2072,84 @@ function mediaLabel(asset: MediaAssetOption | undefined, id: number) {
 
     const source = asset.source_url || [asset.bucket, asset.object_path].filter(Boolean).join('/');
     return `${asset.alt || source || `Media #${id}`} (${asset.status})`;
+}
+
+function FinishImageMediaSelect({
+    value,
+    disabled,
+    mediaAssets,
+    selectedMedia,
+    onChange,
+}: {
+    value: string;
+    disabled?: boolean;
+    mediaAssets: MediaAssetOption[];
+    selectedMedia: MediaAssetOption | null;
+    onChange: (value: string) => void;
+}) {
+    const previewUrl = getMediaAssetUrl(selectedMedia);
+
+    return (
+        <div className="space-y-2 md:col-span-2">
+            <label className="block text-xs font-bold uppercase tracking-[0.14em] text-black/55">
+                Media record
+                <select
+                    value={value}
+                    onChange={(event) => onChange(event.target.value)}
+                    disabled={disabled}
+                    required
+                    className={fieldClass}
+                >
+                    <option value="">Select media</option>
+                    {mediaAssets.map((asset) => (
+                        <option key={asset.id} value={asset.id}>
+                            {mediaLabel(asset, asset.id)}
+                        </option>
+                    ))}
+                </select>
+            </label>
+            {selectedMedia ? (
+                <div className="flex gap-3 border border-black/10 bg-[#f8f9f5] p-3">
+                    <div className="flex h-24 w-28 shrink-0 items-center justify-center overflow-hidden bg-white">
+                        {previewUrl && selectedMedia.media_type === 'image' ? (
+                            <img
+                                src={previewUrl}
+                                alt={selectedMedia.alt || selectedMedia.usage_notes || 'Selected media'}
+                                className="h-full w-full object-cover"
+                                loading="lazy"
+                            />
+                        ) : (
+                            <ImageIcon className="h-5 w-5 text-black/35" />
+                        )}
+                    </div>
+                    <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-black">
+                            {selectedMedia.alt ||
+                                selectedMedia.usage_notes ||
+                                selectedMedia.object_path ||
+                                selectedMedia.source_url ||
+                                `Media #${selectedMedia.id}`}
+                        </p>
+                        <p className="mt-1 text-xs font-bold uppercase tracking-[0.12em] text-black/45">
+                            {selectedMedia.media_type} / {selectedMedia.status} / #{selectedMedia.id}
+                        </p>
+                        <p className="mt-2 line-clamp-2 text-xs leading-5 text-black/52">
+                            {selectedMedia.source_url ||
+                                [selectedMedia.bucket, selectedMedia.object_path].filter(Boolean).join('/') ||
+                                'No source path recorded.'}
+                        </p>
+                        {selectedMedia.status !== 'published' ? (
+                            <p className="mt-2 text-xs font-bold uppercase tracking-[0.12em] text-amber-800">
+                                Publish this media record in Media before making this finish image public.
+                            </p>
+                        ) : null}
+                    </div>
+                </div>
+            ) : value ? (
+                <p className="border border-amber-200 bg-amber-50 p-3 text-sm font-semibold leading-6 text-amber-800">
+                    Selected media is not in the available media list.
+                </p>
+            ) : null}
+        </div>
+    );
 }
