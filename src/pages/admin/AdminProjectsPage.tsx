@@ -1170,7 +1170,7 @@ function AdminProjectsContent() {
     return (
         <AdminShell
             title="Projects"
-            eyebrow={canEdit ? 'Admin/Editor' : 'Read only'}
+            eyebrow={canEdit ? 'Editing access' : 'Read only'}
             actions={
                 <button
                     type="button"
@@ -1187,7 +1187,7 @@ function AdminProjectsContent() {
                 <section className="border border-black/10 bg-white">
                     <div className="border-b border-black/10 p-4">
                         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-black/45">
-                            Project records
+                            Project case studies
                         </p>
                         <h2 className="mt-2 text-2xl font-semibold text-black">{projects.length} projects</h2>
                         <p className="mt-2 text-sm leading-6 text-black/55">
@@ -1279,12 +1279,12 @@ function AdminProjectsContent() {
                             <div className="p-5">
                                 <FileText className="h-5 w-5 text-black" />
                                 <h2 className="mt-5 text-xl font-semibold text-black">
-                                    {projects.length ? 'No matching projects' : 'No project records yet'}
+                                    {projects.length ? 'No matching projects' : 'No project case studies yet'}
                                 </h2>
                                 <p className="mt-3 text-sm leading-6 text-black/58">
                                     {projects.length
                                         ? 'Clear the search or choose another status filter.'
-                                        : 'Create a project record, then add facts, materials, a material map, and hotspots.'}
+                                        : 'Create a project, then add facts, materials, a material map, and hotspots.'}
                                 </p>
                             </div>
                         )}
@@ -1531,7 +1531,7 @@ function AdminProjectsContent() {
                         <SubrecordEditor
                             ref={factsEditorRef}
                             title="Facts"
-                            eyebrow={`${facts.length} rows`}
+                            eyebrow={`${facts.length} details`}
                             onNew={() => {
                                 setSelectedFactId(null);
                                 setFactForm(emptyFactForm);
@@ -1602,7 +1602,7 @@ function AdminProjectsContent() {
                         <SubrecordEditor
                             ref={materialsEditorRef}
                             title="Materials"
-                            eyebrow={`${materials.length} rows`}
+                            eyebrow={`${materials.length} materials`}
                             onNew={() => {
                                 setSelectedMaterialId(null);
                                 setMaterialForm(emptyMaterialForm);
@@ -1821,7 +1821,7 @@ function AdminProjectsContent() {
                             <p>{mediaBlocks.length} detail media blocks on the selected project.</p>
                             <p>{maps.length} material maps on the selected project.</p>
                             <p>{hotspots.length} hotspots on the selected map.</p>
-                            <p>{mediaOptions.length} Media library records available for project images and video blocks.</p>
+                            <p>{mediaOptions.length} Media library items available for project images and video blocks.</p>
                         </div>
                     </section>
 
@@ -2111,7 +2111,7 @@ function AdminProjectsContent() {
                     ) : null}
                     {!canEdit ? (
                         <section className="border border-black/10 bg-white p-5 text-sm leading-6 text-black/62">
-                            Current role is read-only for Projects. Ask an editor/admin to update project records.
+                            Current role is read-only for Projects. Ask an editor or CMS manager to update projects.
                         </section>
                     ) : null}
                 </aside>
@@ -2411,7 +2411,7 @@ function PublishReadinessPanel({
 
             {disabled ? (
                 <p className="mt-4 text-sm leading-6 text-black/60">
-                    Create or select a project record to see the exact publish checks.
+                    Create or select a project to see the exact publish checks.
                 </p>
             ) : ready ? (
                 <p className="mt-4 text-sm leading-6 text-black/70">
@@ -2722,7 +2722,7 @@ function RecordChips<T extends { id: number }>({
     onSelect: (row: T) => void;
 }) {
     if (!rows.length) {
-        return <p className="text-sm leading-6 text-black/50">No records yet.</p>;
+        return <p className="text-sm leading-6 text-black/50">Nothing added yet.</p>;
     }
 
     return (
