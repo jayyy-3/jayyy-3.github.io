@@ -8160,6 +8160,41 @@ Last updated: 2026-06-04
 - `NOW-ADMIN-CONTENT-CRUD-001`
 - `NOW-ADMIN-CMS-001`
 
+## Entry - 2026-06-04 (Admin Leads and Settings UX Baseline)
+
+### Scope
+- Extended the CMS editor-experience baseline to Leads and Settings.
+- Updated `/admin/leads` with inbox search plus kind/status filters for enquiry/sample workflow triage.
+- Updated `/admin/settings` with shared Draft/Published/Archived status language and clearer guidance separating public site identity settings from admin team access.
+
+### Changed Files
+- `src/pages/admin/AdminLeadsPage.tsx`
+- `src/pages/admin/AdminSettingsPage.tsx`
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run build`: pass.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:check`: pass.
+- `npm run agent:smoke`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions.
+- `npm run agent:admin-config-gate`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions; 11 admin routes passed the no-config gate.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- Leads and Settings now have better orientation, but Settings still exposes footer JSON and admin Auth user IDs; those remain the least non-technical parts of the CMS.
+- Final non-technical editor usage guide remains outstanding.
+
+### Next Handoff
+- `NOW-ADMIN-MEDIA-LEADS-001`
+- `NOW-ADMIN-CMS-001`
+
 ## Entry Template (Use for Every Future Session)
 
 ### Date

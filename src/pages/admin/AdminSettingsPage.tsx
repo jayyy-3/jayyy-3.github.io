@@ -7,6 +7,7 @@ import { supabase } from '../../lib/supabaseClient';
 import { useAdminAuth } from '../../lib/adminAuthHooks';
 import AdminShell from './AdminShell';
 import RequireAdmin from './RequireAdmin';
+import { CmsLiveRuleCard, CmsStatusMeaning, CmsStatusPill } from './AdminCmsPrimitives';
 
 type SiteSettingsStatus = 'draft' | 'published' | 'archived';
 type AdminRole = 'owner' | 'admin' | 'editor' | 'viewer';
@@ -245,9 +246,13 @@ function AdminSettingsContent() {
                                 <h2 className="mt-2 text-2xl font-semibold text-black">Global contact and SEO</h2>
                                 <p className="mt-2 text-sm leading-6 text-black/58">{statusNote}</p>
                             </div>
-                            <span className="inline-flex h-8 items-center rounded border border-[var(--urblo-lime)] bg-[rgba(0,255,25,0.12)] px-3 text-[11px] font-bold uppercase tracking-[0.14em] text-black">
-                                {form.status}
-                            </span>
+                            <CmsStatusPill status={form.status} />
+                        </div>
+
+                        <div className="mt-5">
+                            <CmsLiveRuleCard>
+                                <CmsStatusMeaning compact />
+                            </CmsLiveRuleCard>
                         </div>
 
                         {isLoading ? (
@@ -400,6 +405,17 @@ function AdminSettingsContent() {
                             Viewer/editor roles can inspect this row. Owner/admin roles are required for save,
                             publish, and archive actions.
                         </p>
+                    </section>
+
+                    <section className="border border-black/10 bg-white p-5">
+                        <ShieldCheck className="h-5 w-5 text-black" />
+                        <h2 className="mt-5 text-xl font-semibold text-black">What this changes</h2>
+                        <ul className="mt-4 space-y-3 text-sm leading-6 text-black/62">
+                            <li>Company, email, phone, social links, footer data, and default SEO are site-wide.</li>
+                            <li>Published settings are the public-ready default row.</li>
+                            <li>Admin team changes affect who can edit the CMS, not public website content.</li>
+                            <li>Existing Supabase Auth users must exist before their admin profile is added here.</li>
+                        </ul>
                     </section>
 
                     {error ? (
@@ -673,10 +689,10 @@ function AdminProfilesManager({
             <aside className="space-y-5">
                 <section className="border border-black/10 bg-black p-5 text-white">
                     <Users className="h-5 w-5 text-[var(--urblo-lime)]" />
-                    <h2 className="mt-5 text-xl font-semibold">Owner protection is enforced</h2>
+                    <h2 className="mt-5 text-xl font-semibold">Team access rules</h2>
                     <p className="mt-3 text-sm leading-6 text-white/68">
-                        Admins can maintain non-owner roles. Owner role assignment and owner-profile changes are
-                        reserved for owners, with no destructive delete controls in this screen.
+                        Owner changes are owner-only. Admins can maintain non-owner roles. Editors can edit content.
+                        Viewers can inspect the CMS without mutating records.
                     </p>
                 </section>
 

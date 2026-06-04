@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { CheckCircle2, Download, Inbox, Mail, PackageCheck, Save, ShieldAlert } from 'lucide-react';
+import { CheckCircle2, Download, Inbox, Mail, PackageCheck, Save, Search, ShieldAlert } from 'lucide-react';
 import { recordAdminAuditEvent, withAuditNotice } from '../../lib/adminAudit';
 import { supabase } from '../../lib/supabaseClient';
 import { useAdminAuth } from '../../lib/adminAuthHooks';
@@ -9,8 +9,10 @@ import AdminShell from './AdminShell';
 import RequireAdmin from './RequireAdmin';
 
 type LeadKind = 'enquiry' | 'sample';
+type LeadKindFilter = LeadKind | 'all';
 type EnquiryStatus = 'new' | 'contacted' | 'quoted' | 'won' | 'closed' | 'spam';
 type SampleStatus = 'new' | 'confirmed' | 'packed' | 'sent' | 'closed' | 'spam';
+type LeadStatusFilter = 'all' | EnquiryStatus | SampleStatus;
 type NotificationStatus = 'pending' | 'sent' | 'failed' | 'not_required';
 
 interface EnquiryRow {
@@ -143,6 +145,9 @@ function AdminLeadsContent() {
     const [selectedKind, setSelectedKind] = useState<LeadKind | null>(null);
     const [selectedId, setSelectedId] = useState<number | null>(null);
     const [form, setForm] = useState<LeadFormState>(emptyForm);
+    const [leadSearch, setLeadSearch] = useState('');
+    const [kindFilter, setKindFilter] = useState<LeadKindFilter>('all');
+    const [statusFilter, setStatusFilter] = useState<LeadStatusFilter>('all');
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [isExporting, setIsExporting] = useState(false);
@@ -197,6 +202,21 @@ function AdminLeadsContent() {
         [sampleItems, selectedId, selectedKind],
     );
     const inboxSummary = useMemo(() => summarizeInbox(enquiries, sampleRequests), [enquiries, sampleRequests]);
+    const filteredLeads = useMemo(
+        () =>
+            combinedLeads.filter((lead) => {
+                const matchesKind = kindFilter === 'all' || lead.kind === kindFilter;
+                const matchesStatus = statusFilter === 'all' || lead.status === statusFilter;
+                const search = leadSearch.trim().toLowerCase();
+                const matchesSearch =
+                    !search ||
+                    [lead.name, lead.email, lead.company, lead.context, lead.status, lead.kind]
+                        .filter(Boolean)
+                        .some((value) => String(value).toLowerCase().includes(search));
+                return matchesKind && matchesStatus && matchesSearch;
+            }),
+        [combinedLeads, kindFilter, leadSearch, statusFilter],
+    );
 
     const loadLeads = useCallback(
         async (preferred?: { kind: LeadKind; id: number } | null) => {
@@ -423,6 +443,51 @@ function AdminLeadsContent() {
                         <p className="mt-2 text-sm leading-6 text-black/55">
                             {inboxSummary.enquiries} enquiries, {inboxSummary.samples} sample requests.
                         </p>
+                        <label className="mt-4 flex min-h-11 items-center gap-2 border border-black/10 bg-[#f8f9f5] px-3 text-sm text-black">
+                            <Search className="h-4 w-4 shrink-0 text-black/42" />
+                            <input
+                                value={leadSearch}
+                                onChange={(event) => setLeadSearch(event.target.value)}
+                                placeholder="Search name, email, company, context"
+                                className="min-w-0 flex-1 bg-transparent text-sm font-medium outline-none placeholder:text-black/36"
+                            />
+                        </label>
+                        <div className="mt-3 grid grid-cols-3 gap-1">
+                            {(['all', 'enquiry', 'sample'] as const).map((filter) => (
+                                <button
+                                    key={filter}
+                                    type="button"
+                                    onClick={() => setKindFilter(filter)}
+                                    className={[
+                                        'min-h-9 rounded border px-2 text-[11px] font-bold uppercase tracking-[0.1em] transition',
+                                        kindFilter === filter
+                                            ? 'border-black bg-black text-white'
+                                            : 'border-black/10 bg-white text-black/55 hover:border-black',
+                                    ].join(' ')}
+                                >
+                                    {filter === 'sample' ? 'samples' : filter}
+                                </button>
+                            ))}
+                        </div>
+                        <label className="mt-3 block text-xs font-bold uppercase tracking-[0.14em] text-black/55">
+                            Workflow status
+                            <select
+                                value={statusFilter}
+                                onChange={(event) => setStatusFilter(event.target.value as LeadStatusFilter)}
+                                className={fieldClass}
+                            >
+                                <option value="all">All statuses</option>
+                                <option value="new">New</option>
+                                <option value="contacted">Contacted</option>
+                                <option value="quoted">Quoted</option>
+                                <option value="confirmed">Confirmed</option>
+                                <option value="packed">Packed</option>
+                                <option value="sent">Sent</option>
+                                <option value="won">Won</option>
+                                <option value="closed">Closed</option>
+                                <option value="spam">Spam</option>
+                            </select>
+                        </label>
                     </div>
                     <div className="max-h-[760px] overflow-auto">
                         {isLoading ? (
@@ -434,9 +499,9 @@ function AdminLeadsContent() {
                                     />
                                 ))}
                             </div>
-                        ) : combinedLeads.length ? (
+                        ) : filteredLeads.length ? (
                             <div className="divide-y divide-black/10">
-                                {combinedLeads.map((lead) => (
+                                {filteredLeads.map((lead) => (
                                     <button
                                         key={`${lead.kind}-${lead.id}`}
                                         type="button"
@@ -469,10 +534,13 @@ function AdminLeadsContent() {
                         ) : (
                             <div className="p-5">
                                 <Inbox className="h-5 w-5 text-black" />
-                                <h2 className="mt-5 text-xl font-semibold text-black">No visible leads yet</h2>
+                                <h2 className="mt-5 text-xl font-semibold text-black">
+                                    {combinedLeads.length ? 'No matching leads' : 'No visible leads yet'}
+                                </h2>
                                 <p className="mt-3 text-sm leading-6 text-black/58">
-                                    This inbox will populate after live form persistence is verified with the server-side
-                                    Supabase service-role key.
+                                    {combinedLeads.length
+                                        ? 'Clear the search or choose another filter.'
+                                        : 'This inbox will populate after live form persistence creates contact and sample request rows.'}
                                 </p>
                             </div>
                         )}
