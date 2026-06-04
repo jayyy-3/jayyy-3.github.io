@@ -470,10 +470,10 @@ function AdminSettingsContent() {
                 <aside className="space-y-5">
                     <section className="border border-black/10 bg-black p-5 text-white">
                         <CheckCircle2 className="h-5 w-5 text-[var(--urblo-lime)]" />
-                        <h2 className="mt-5 text-xl font-semibold">Settings are RLS protected</h2>
+                        <h2 className="mt-5 text-xl font-semibold">Owner/admin only</h2>
                         <p className="mt-3 text-sm leading-6 text-white/68">
-                            Viewer/editor roles can inspect this row. Owner/admin roles are required for save,
-                            publish, and archive actions.
+                            Viewer/editor roles can inspect this screen. Owner/admin roles are required for site
+                            settings, team access, publishing, and archive actions.
                         </p>
                     </section>
 
@@ -771,16 +771,30 @@ function AdminProfilesManager({
 
                 <section className="border border-black/10 bg-white p-5">
                     <KeyRound className="h-5 w-5 text-black" />
-                    <h2 className="mt-5 text-xl font-semibold text-black">Adding a person</h2>
+                    <h2 className="mt-5 text-xl font-semibold text-black">Access setup checklist</h2>
                     <ol className="mt-4 space-y-3 text-sm leading-6 text-black/62">
-                        <li>1. Create or invite their login account outside this screen.</li>
-                        <li>2. Copy that account ID into the form below.</li>
-                        <li>3. Choose a role, keep the profile active, then save.</li>
+                        <li>1. Create or invite the person's login account before using this form.</li>
+                        <li>2. Copy the login account ID into Existing login account ID.</li>
+                        <li>3. Choose the lowest role they need and keep Active profile enabled.</li>
+                        <li>4. Save, then ask them to sign in at `/admin`.</li>
                     </ol>
                     <p className="mt-4 text-xs leading-5 text-black/45">
-                        The account ID is a security link between the login account and this CMS role. Email alone is
-                        not enough to grant access.
+                        This screen grants CMS permission to an existing login account. It does not create the login
+                        account or send an invite email.
                     </p>
+                </section>
+
+                <section className="border border-black/10 bg-white p-5">
+                    <ShieldCheck className="h-5 w-5 text-black" />
+                    <h2 className="mt-5 text-xl font-semibold text-black">Role guide</h2>
+                    <dl className="mt-4 space-y-3 text-sm leading-6 text-black/62">
+                        {(['owner', 'admin', 'editor', 'viewer'] as const).map((role) => (
+                            <div key={role}>
+                                <dt className="font-semibold text-black">{roleLabels[role]}</dt>
+                                <dd>{roleDescriptions[role]}</dd>
+                            </div>
+                        ))}
+                    </dl>
                 </section>
 
                 {error ? (
@@ -804,7 +818,7 @@ function AdminProfilesManager({
                     </div>
 
                     <label className="mt-5 block text-xs font-bold uppercase tracking-[0.14em] text-black/55">
-                        Login account ID
+                        Existing login account ID
                         <input
                             value={form.userId}
                             onChange={(event) => updateProfileField('userId', event.target.value)}
@@ -813,8 +827,7 @@ function AdminProfilesManager({
                             className={fieldClass}
                         />
                         <span className="mt-2 block text-xs normal-case leading-5 tracking-normal text-black/48">
-                            Paste the account ID from the login user record. This field is locked after the profile is
-                            created.
+                            Paste the ID from the already-created login account. Email alone cannot grant CMS access.
                         </span>
                     </label>
 
@@ -891,8 +904,8 @@ function AdminProfilesManager({
                     </div>
 
                     <p className="mt-4 text-xs leading-5 text-black/48">
-                        Active owner profiles: {activeOwnerCount}. Login accounts must exist before CMS access can be
-                        granted here.
+                        Active owner profiles: {activeOwnerCount}. After saving, the person can sign in at `/admin`
+                        with their existing login account.
                     </p>
                 </form>
             </aside>

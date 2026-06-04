@@ -25,8 +25,9 @@ First-admin bootstrap is already complete for `info@urblo.com.au`.
 For additional people:
 1. Create or invite their Supabase Auth login account outside `/admin/settings`.
 2. Open `/admin/settings`.
-3. In `Admin team`, add the person by pasting the login account ID, email, display name, and role.
-4. Keep `Active profile` enabled and save.
+3. In `Admin team`, follow Access setup checklist.
+4. Paste the existing login account ID, email, display name, and lowest suitable role.
+5. Keep `Active profile` enabled, save, then ask the person to sign in at `/admin`.
 
 The current browser admin cannot create the underlying login account by itself. Email alone is not enough to grant access; the login account ID links the Auth user to the CMS role.
 
@@ -65,7 +66,7 @@ Physical delete is not part of the launch CMS workflow.
 | Articles | Edit article metadata, search title/description, and structured article blocks through block-type forms. | CMS-ready for metadata/block rows; public detail still renders sanitized legacy HTML until structured public block rendering is built. |
 | Media | Upload/manage media, metadata, status, and manifest export. | CMS-ready with editor-facing private/public library labels and a publish checklist. |
 | Leads | Triage enquiries and sample requests, follow recommended next steps, assign owners, add internal notes, and export with audit logging. | Workflow-ready for owner/admin. |
-| Settings | Edit global identity, footer content, SEO defaults, and CMS access. | CMS-ready; creating/inviting the login account still happens outside this screen. |
+| Settings | Edit global identity, footer content, SEO defaults, and CMS access. | CMS-ready with access setup checklist and role guide; creating/inviting the login account still happens outside this screen. |
 | Audit | Inspect admin mutation history. | Read-only visibility for owner/admin. |
 
 ## Public Website Fallbacks

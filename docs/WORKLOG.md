@@ -2,6 +2,44 @@
 
 Last updated: 2026-06-04
 
+## Entry - 2026-06-04 (Admin Settings Access Handoff UX)
+
+### Scope
+- Continued the `/admin` CMS editor-experience productization goal with a focused Settings/team-access pass.
+- Replaced the remaining technical Settings protection copy with owner/admin-facing language.
+- Added an Access setup checklist that explains the actual handoff sequence: create or invite a login account first, paste the existing login account ID, choose the lowest suitable role, keep the profile active, then ask the person to sign in at `/admin`.
+- Renamed the form field to Existing login account ID and clarified that email alone cannot grant CMS access.
+- Added a Role guide for Owner, Admin, Editor, and Viewer so non-technical owners understand permission tradeoffs before saving access.
+- Expanded the admin CRUD coverage guard, CMS handoff docs, roadmap, task queue, and editor guide to reflect the account-handoff contract.
+
+### Changed Files
+- `src/pages/admin/AdminSettingsPage.tsx`
+- `scripts/check-admin-crud-coverage.mjs`
+- `docs/ADMIN_EDITOR_GUIDE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npx tsc -b`: pass.
+- `npm run lint`: pass.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run agent:smoke`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions.
+- `npm run agent:admin-config-gate`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions; 11 admin routes passed the no-config gate.
+- Visual sanity check: reviewed `.tmp/admin-config-gate/screenshots/admin-settings.png`; `/admin/settings` still renders the no-config protected shell without private settings/team content exposure.
+
+### Risks and Gaps
+- The browser CMS still cannot create the underlying login account or send an invite; it now states that clearly and guides the profile-grant step.
+- Live Settings/team-access save proof remains a production authenticated owner/admin walkthrough item after local commits are pushed and deployed.
+
+### Next Handoff
+- Continue the CMS goal with a signed-in production editor walkthrough after deployment, or the remaining Stone Library detail/public Article rendering gaps.
+
 ## Entry - 2026-06-04 (Admin Dashboard Editor Start UX)
 
 ### Scope

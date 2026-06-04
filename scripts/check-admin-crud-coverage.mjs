@@ -81,6 +81,11 @@ const pageChecks = [
       'Do not remove your own active admin access from this screen.',
       'This login account already has CMS access.',
       'Admin profile email is already assigned to another user.',
+      'Access setup checklist',
+      'Existing login account ID',
+      'Email alone cannot grant CMS access.',
+      'send an invite email',
+      'Role guide',
     ],
   },
   {
