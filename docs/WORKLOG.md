@@ -8402,6 +8402,42 @@ Last updated: 2026-06-04
 - `NOW-ADMIN-SETTINGS-CRUD-001`
 - `NOW-ADMIN-CMS-001`
 
+## Entry - 2026-06-04 (Admin Settings Team Access UX)
+
+### Scope
+- Continued the Settings productization pass for non-technical editors.
+- Reframed admin profile management as granting CMS access to existing login accounts instead of mapping Supabase Auth user IDs.
+- Added an adding-a-person sequence, role labels/descriptions, shortened account IDs in the team list, and editor-facing duplicate-account validation copy.
+- Preserved the existing Auth user/profile binding, owner/admin write permission model, owner-role protection, self-lockout guardrail, and audit writer behavior.
+
+### Changed Files
+- `src/pages/admin/AdminSettingsPage.tsx`
+- `scripts/check-admin-crud-coverage.mjs`
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run agent:smoke`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions.
+- `npm run agent:admin-config-gate`: pass after rerun outside the sandbox because local Vite preview/browser checks were blocked by sandbox permissions; 11 admin routes passed the no-config gate.
+
+### Risks and Gaps
+- `/admin/settings` still cannot create or invite the underlying login account from the browser. The current handoff flow is: create/invite the login account outside this screen, then grant CMS access here.
+- A future service-role-backed invite flow would be the cleanest way to remove the remaining account-ID step from non-technical handoff.
+
+### Next Handoff
+- `NOW-ADMIN-SETTINGS-CRUD-001`
+- `NOW-ADMIN-CMS-001`
+
 ## Entry Template (Use for Every Future Session)
 
 ### Date

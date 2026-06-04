@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { CheckCircle2, Pencil, Plus, Save, ShieldCheck, UserPlus, Users, X } from 'lucide-react';
+import { CheckCircle2, KeyRound, Pencil, Plus, Save, ShieldCheck, UserPlus, Users, X } from 'lucide-react';
 import { recordAdminAuditEvent, withAuditNotice } from '../../lib/adminAudit';
 import { supabase } from '../../lib/supabaseClient';
 import { useAdminAuth } from '../../lib/adminAuthHooks';
@@ -104,6 +104,20 @@ const roleRank: Record<AdminRole, number> = {
     admin: 1,
     editor: 2,
     viewer: 3,
+};
+
+const roleLabels: Record<AdminRole, string> = {
+    owner: 'Owner',
+    admin: 'Admin',
+    editor: 'Editor',
+    viewer: 'Viewer',
+};
+
+const roleDescriptions: Record<AdminRole, string> = {
+    owner: 'Full account control, including owner access.',
+    admin: 'Can manage settings, team access, content, media, and leads.',
+    editor: 'Can edit content and media, but cannot manage settings or leads export.',
+    viewer: 'Can inspect CMS content without saving changes.',
 };
 
 const fieldClass =
@@ -675,8 +689,8 @@ function AdminProfilesManager({
                         </p>
                         <h2 className="mt-2 text-2xl font-semibold text-black">Profiles and access</h2>
                         <p className="mt-2 max-w-2xl text-sm leading-6 text-black/58">
-                            Manage existing Supabase Auth users by mapping their user ID to an Urblo role. First
-                            admin bootstrap still happens outside this screen.
+                            Grant CMS access to people who already have a login account. Create or invite the login
+                            account first, then add the account ID here with the role they should have.
                         </p>
                     </div>
                     <span className="inline-flex h-8 items-center rounded border border-black/10 bg-black/[0.04] px-3 text-[11px] font-bold uppercase tracking-[0.14em] text-black/58">
@@ -718,12 +732,15 @@ function AdminProfilesManager({
                                             <p className="text-sm font-bold text-black">{adminProfile.email}</p>
                                             <StatusPill active={adminProfile.is_active} />
                                             <span className="rounded border border-black/10 px-2 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-black/55">
-                                                {adminProfile.role}
+                                                {roleLabels[adminProfile.role]}
                                             </span>
                                         </div>
                                         <p className="mt-2 text-xs leading-5 text-black/52">
-                                            {adminProfile.display_name || 'No display name'} · User ID{' '}
-                                            {adminProfile.user_id}
+                                            {adminProfile.display_name || 'No display name'} · Account{' '}
+                                            {formatAccountId(adminProfile.user_id)}
+                                        </p>
+                                        <p className="mt-1 text-xs leading-5 text-black/45">
+                                            {roleDescriptions[adminProfile.role]}
                                         </p>
                                     </div>
                                     <button
@@ -752,6 +769,20 @@ function AdminProfilesManager({
                     </p>
                 </section>
 
+                <section className="border border-black/10 bg-white p-5">
+                    <KeyRound className="h-5 w-5 text-black" />
+                    <h2 className="mt-5 text-xl font-semibold text-black">Adding a person</h2>
+                    <ol className="mt-4 space-y-3 text-sm leading-6 text-black/62">
+                        <li>1. Create or invite their login account outside this screen.</li>
+                        <li>2. Copy that account ID into the form below.</li>
+                        <li>3. Choose a role, keep the profile active, then save.</li>
+                    </ol>
+                    <p className="mt-4 text-xs leading-5 text-black/45">
+                        The account ID is a security link between the login account and this CMS role. Email alone is
+                        not enough to grant access.
+                    </p>
+                </section>
+
                 {error ? (
                     <section className="border border-red-200 bg-red-50 p-4 text-sm font-semibold leading-6 text-red-700">
                         {error}
@@ -773,7 +804,7 @@ function AdminProfilesManager({
                     </div>
 
                     <label className="mt-5 block text-xs font-bold uppercase tracking-[0.14em] text-black/55">
-                        Auth user ID
+                        Login account ID
                         <input
                             value={form.userId}
                             onChange={(event) => updateProfileField('userId', event.target.value)}
@@ -781,6 +812,10 @@ function AdminProfilesManager({
                             placeholder="00000000-0000-0000-0000-000000000000"
                             className={fieldClass}
                         />
+                        <span className="mt-2 block text-xs normal-case leading-5 tracking-normal text-black/48">
+                            Paste the account ID from the login user record. This field is locked after the profile is
+                            created.
+                        </span>
                     </label>
 
                     <label className="mt-4 block text-xs font-bold uppercase tracking-[0.14em] text-black/55">
@@ -814,10 +849,13 @@ function AdminProfilesManager({
                         >
                             {roleOptions.map((role) => (
                                 <option key={role} value={role}>
-                                    {role}
+                                    {roleLabels[role]}
                                 </option>
                             ))}
                         </select>
+                        <span className="mt-2 block text-xs normal-case leading-5 tracking-normal text-black/48">
+                            {roleDescriptions[form.role]}
+                        </span>
                     </label>
 
                     <label className="mt-4 flex items-center gap-3 text-xs font-bold uppercase tracking-[0.14em] text-black/55">
@@ -853,8 +891,8 @@ function AdminProfilesManager({
                     </div>
 
                     <p className="mt-4 text-xs leading-5 text-black/48">
-                        Active owner profiles: {activeOwnerCount}. Existing Auth users must be created before a
-                        profile row can be added here.
+                        Active owner profiles: {activeOwnerCount}. Login accounts must exist before CMS access can be
+                        granted here.
                     </p>
                 </form>
             </aside>
@@ -894,6 +932,10 @@ function profileRowToForm(row: AdminProfileRow): AdminProfileFormState {
         role: row.role,
         isActive: row.is_active,
     };
+}
+
+function formatAccountId(userId: string) {
+    return `${userId.slice(0, 8)}...${userId.slice(-4)}`;
 }
 
 function StatusPill({ active }: { active: boolean }) {
@@ -1178,7 +1220,7 @@ function validateAdminProfileForm(
         : null;
 
     if (!editingUserId && !isUuid(userId)) {
-        return 'A valid Supabase Auth user ID is required.';
+        return 'Paste a valid login account ID before saving this profile.';
     }
 
     if (!isEmail(email)) {
@@ -1186,7 +1228,7 @@ function validateAdminProfileForm(
     }
 
     if (!editingUserId && existingProfiles.some((profile) => profile.user_id === userId)) {
-        return 'This Supabase Auth user ID already has an admin profile.';
+        return 'This login account already has CMS access.';
     }
 
     const duplicateEmailProfile = existingProfiles.find(
