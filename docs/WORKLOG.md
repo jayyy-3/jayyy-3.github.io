@@ -2,6 +2,40 @@
 
 Last updated: 2026-06-04
 
+## Entry - 2026-06-04 (Admin Editor Guide Refresh)
+
+### Scope
+- Continued the `/admin` CMS editor-handoff goal by refreshing `docs/ADMIN_EDITOR_GUIDE.md` after the page-level UX language passes.
+- Updated the guide to use Website owner, CMS manager, Editor, and Viewer roles instead of older Owner/Admin wording.
+- Updated account setup language around CMS team / People and access, Active access, login account ID, and the current limitation that login-account creation still happens outside browser CMS.
+- Updated module notes for Dashboard, Projects, Stone Library, Products, Articles, Media, Leads, Settings, and Activity log to match current editor-facing language.
+- Updated fallback and publishing sections for imported Draft rows, Article sections, Published in Media, Leads change-history export, and Open public page behavior.
+- Added an explicit handoff gap that the local CMS UX commits must be pushed and deployed before production editors see the latest interface.
+
+### Changed Files
+- `docs/ADMIN_EDITOR_GUIDE.md`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npx tsc -b`: pass.
+- `npm run lint`: pass.
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run agent:smoke`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions.
+- `npm run agent:admin-config-gate`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions; 11 admin routes passed the no-config gate.
+
+### Risks and Gaps
+- This guide is now current with the local source state, but production still needs the local CMS UX commits pushed/deployed plus a final editor walkthrough.
+
+### Next Handoff
+- Continue with push/deploy approval, then run the final production editor walkthrough against the updated `/admin` interface.
+
 ## Entry - 2026-06-04 (Admin Settings Team Access UX)
 
 ### Scope
