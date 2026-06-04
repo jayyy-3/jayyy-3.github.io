@@ -544,6 +544,7 @@ function AdminProfilesManager({
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [notice, setNotice] = useState<string | null>(null);
+    const [copiedAccountId, setCopiedAccountId] = useState<string | null>(null);
 
     const loadProfiles = useCallback(async () => {
         if (!supabase || !canManage) {
@@ -603,6 +604,17 @@ function AdminProfilesManager({
         setForm(emptyProfileForm);
         setError(null);
         setNotice(null);
+    }
+
+    async function copyAccountId(userId: string) {
+        try {
+            await navigator.clipboard.writeText(userId);
+            setCopiedAccountId(userId);
+            setNotice('Login account ID copied. Paste it into Existing login account ID when granting CMS access.');
+            setTimeout(() => setCopiedAccountId(null), 2400);
+        } catch {
+            setError('Could not copy the login account ID. Select the ID text and copy it manually.');
+        }
     }
 
     async function handleProfileSubmit(event: FormEvent<HTMLFormElement>) {
@@ -737,21 +749,33 @@ function AdminProfilesManager({
                                         </div>
                                         <p className="mt-2 text-xs leading-5 text-black/52">
                                             {adminProfile.display_name || 'No display name'} · Account{' '}
-                                            {formatAccountId(adminProfile.user_id)}
+                                            <span className="font-mono">{formatAccountId(adminProfile.user_id)}</span>
                                         </p>
                                         <p className="mt-1 text-xs leading-5 text-black/45">
                                             {roleDescriptions[adminProfile.role]}
                                         </p>
                                     </div>
-                                    <button
-                                        type="button"
-                                        onClick={() => startEdit(adminProfile)}
-                                        disabled={!canEditProfile || isSaving}
-                                        className="inline-flex min-h-10 items-center justify-center gap-2 rounded border border-black/15 px-3 text-[11px] font-bold uppercase tracking-[0.14em] text-black transition hover:border-black disabled:cursor-not-allowed disabled:text-black/35"
-                                    >
-                                        <Pencil className="h-3.5 w-3.5" />
-                                        Edit
-                                    </button>
+                                    <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-1">
+                                        <button
+                                            type="button"
+                                            onClick={() => void copyAccountId(adminProfile.user_id)}
+                                            disabled={isSaving}
+                                            className="inline-flex min-h-10 items-center justify-center gap-2 rounded border border-black/15 px-3 text-[11px] font-bold uppercase tracking-[0.14em] text-black transition hover:border-black disabled:cursor-not-allowed disabled:text-black/35"
+                                            title="Copy the full login account ID for CMS access setup."
+                                        >
+                                            <KeyRound className="h-3.5 w-3.5" />
+                                            {copiedAccountId === adminProfile.user_id ? 'Copied ID' : 'Copy ID'}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => startEdit(adminProfile)}
+                                            disabled={!canEditProfile || isSaving}
+                                            className="inline-flex min-h-10 items-center justify-center gap-2 rounded border border-black/15 px-3 text-[11px] font-bold uppercase tracking-[0.14em] text-black transition hover:border-black disabled:cursor-not-allowed disabled:text-black/35"
+                                        >
+                                            <Pencil className="h-3.5 w-3.5" />
+                                            Edit
+                                        </button>
+                                    </div>
                                 </div>
                             );
                         })}
@@ -774,7 +798,7 @@ function AdminProfilesManager({
                     <h2 className="mt-5 text-xl font-semibold text-black">Access setup checklist</h2>
                     <ol className="mt-4 space-y-3 text-sm leading-6 text-black/62">
                         <li>1. Create or invite the person's login account before using this form.</li>
-                        <li>2. Copy the login account ID into Existing login account ID.</li>
+                        <li>2. Copy the full login account ID into Existing login account ID.</li>
                         <li>3. Choose the lowest role they need and keep Active profile enabled.</li>
                         <li>4. Save, then ask them to sign in at `/admin`.</li>
                     </ol>
@@ -813,9 +837,13 @@ function AdminProfilesManager({
                     <div className="flex items-center gap-2">
                         <UserPlus className="h-4 w-4 text-black/65" />
                         <h3 className="text-sm font-bold uppercase tracking-[0.14em] text-black">
-                            {editingUserId ? 'Edit profile' : 'Add profile'}
+                            {editingUserId ? 'Edit CMS access' : 'Grant CMS access'}
                         </h3>
                     </div>
+                    <p className="mt-3 text-sm leading-6 text-black/58">
+                        This grants a role to an existing login account. It is separate from creating the login account
+                        or sending a password email.
+                    </p>
 
                     <label className="mt-5 block text-xs font-bold uppercase tracking-[0.14em] text-black/55">
                         Existing login account ID
@@ -889,7 +917,7 @@ function AdminProfilesManager({
                             className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded bg-black px-4 text-xs font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#33363f] disabled:cursor-not-allowed disabled:bg-black/30"
                         >
                             <ShieldCheck className="h-4 w-4" />
-                            {isSaving ? 'Saving' : editingUserId ? 'Save profile' : 'Add profile'}
+                            {isSaving ? 'Saving' : editingUserId ? 'Save access' : 'Grant access'}
                         </button>
                         {editingUserId ? (
                             <button

@@ -672,6 +672,7 @@
         "2026-05-29: `/admin/settings` now validates duplicate login account IDs and duplicate normalized admin profile emails before save, and admin CRUD coverage guards those messages.",
         "2026-06-04: `/admin/settings` now frames admin profiles as CMS access for existing login accounts, explains the add-person sequence, shows role descriptions, shortens account IDs in the team list, and uses editor-facing duplicate-account validation copy while preserving the existing Auth user/profile binding contract.",
         "2026-06-04: `/admin/settings` now shows an Access setup checklist, labels the ID field as Existing login account ID, states that the browser CMS does not create login accounts or send invites, and adds a Role guide for owner/admin/editor/viewer handoff.",
+        "2026-06-04: `/admin/settings` now includes Copy ID controls for full login account IDs and Grant CMS access wording so owner/admin users can distinguish login-account creation from CMS role assignment.",
         "Live settings/profile save verification still requires browser-safe Supabase key configuration and an active owner/admin profile.",
         "2026-05-28: Admin CRUD coverage verifier now checks settings/admin profile table references, owner/self-lockout guardrail copy, mutation paths, and site_settings/admin_profile audit actions.",
         "2026-05-28: Admin CRUD live verifier now includes a tagged site_settings create/update/publish/archive path through owner/admin RLS, but it does not create or mutate first-admin profile rows."

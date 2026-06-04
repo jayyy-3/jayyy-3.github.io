@@ -2,6 +2,42 @@
 
 Last updated: 2026-06-04
 
+## Entry - 2026-06-04 (Admin Settings Access Grant UX)
+
+### Scope
+- Continued the `/admin` CMS editor-handoff goal by making Settings team access easier for non-technical owner/admin users to operate.
+- Added a Copy ID action on existing admin profile rows so owners/admins can copy the full login account ID instead of relying on a shortened display value.
+- Renamed the profile form from generic add/edit language to Grant CMS access / Edit CMS access, clarifying that this grants CMS permission to an already-created login account.
+- Added inline copy feedback after copying a login account ID and clearer form copy separating login-account creation from CMS role assignment.
+- Expanded admin CRUD coverage so the Settings access-grant and copy-ID handoff contract is source-guarded.
+
+### Changed Files
+- `src/pages/admin/AdminSettingsPage.tsx`
+- `scripts/check-admin-crud-coverage.mjs`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/ADMIN_EDITOR_GUIDE.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npx tsc -b`: pass.
+- `npm run lint`: pass.
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass. Coverage now requires the Settings access-grant and copy-ID handoff source contract.
+- `npm run agent:check`: pass.
+- `npm run agent:public-supabase-readiness`: pass.
+- `git diff --check`: pass.
+- `npm run agent:smoke`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions.
+- `npm run agent:admin-config-gate`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions; 11 admin routes passed the no-config gate.
+
+### Risks and Gaps
+- This still does not create Supabase Auth login accounts from the browser CMS; owners/admins still need the login account to exist before granting CMS access.
+
+### Next Handoff
+- Continue the CMS goal with final production editor walkthrough proof and any remaining Settings/account creation handoff gaps.
+
 ## Entry - 2026-06-04 (Admin Leads Visible Export UX)
 
 ### Scope
