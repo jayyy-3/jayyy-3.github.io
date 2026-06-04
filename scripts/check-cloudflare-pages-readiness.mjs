@@ -145,6 +145,8 @@ function checkFunctions() {
   const enquiries = readRequired('functions/api/enquiries.js');
   const samples = readRequired('functions/api/sample-requests.js');
   const forms = readRequired('functions/_lib/forms.js');
+  const adminInviteRoute = readRequired('functions/api/admin/invite-user.js');
+  const adminInvite = readRequired('functions/_lib/admin-invite.js');
 
   for (const [label, text, handler] of [
     ['functions/api/enquiries.js', enquiries, 'handleEnquiryRequest'],
@@ -168,8 +170,25 @@ function checkFunctions() {
     requireIncludes(forms, serverEnv, 'functions/_lib/forms.js');
   }
 
+  requireIncludes(adminInviteRoute, 'export async function onRequest(context)', 'functions/api/admin/invite-user.js');
+  requireIncludes(adminInviteRoute, "context.request.method === 'OPTIONS'", 'functions/api/admin/invite-user.js');
+  requireIncludes(adminInviteRoute, "context.request.method !== 'POST'", 'functions/api/admin/invite-user.js');
+  requireIncludes(adminInviteRoute, 'handleAdminInviteUserRequest', 'functions/api/admin/invite-user.js');
+  requireIncludes(adminInviteRoute, 'context.env', 'functions/api/admin/invite-user.js');
+  requireIncludes(adminInvite, 'SUPABASE_SERVICE_ROLE_KEY', 'functions/_lib/admin-invite.js');
+  requireIncludes(adminInvite, 'inviteUserByEmail', 'functions/_lib/admin-invite.js');
+  requireIncludes(adminInvite, 'getBearerToken', 'functions/_lib/admin-invite.js');
+  requireIncludes(adminInvite, 'requireManagingAdmin', 'functions/_lib/admin-invite.js');
+  requireIncludes(adminInvite, "['owner', 'admin'].includes(profile.role)", 'functions/_lib/admin-invite.js');
+  requireIncludes(adminInvite, ".from('admin_profiles')", 'functions/_lib/admin-invite.js');
+  requireIncludes(adminInvite, ".from('admin_audit_events')", 'functions/_lib/admin-invite.js');
+
   if (/VITE_SUPABASE_(?:ANON|PUBLISHABLE)_KEY/.test(forms)) {
     failures.push('functions/_lib/forms.js: server Functions must not use browser Supabase keys');
+  }
+
+  if (/VITE_SUPABASE_(?:ANON|PUBLISHABLE)_KEY/.test(adminInvite)) {
+    failures.push('functions/_lib/admin-invite.js: admin invite Function must not use browser Supabase keys');
   }
 }
 

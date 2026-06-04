@@ -88,9 +88,11 @@ const pageChecks = [
       'Login setup code',
       'Email alone cannot grant CMS access.',
       'Copy the full login setup code',
-      'Grant CMS access',
+      'Invite and grant access',
+      'Grant existing login',
       'Login setup code copied.',
-      'send an invite email',
+      '/api/admin/invite-user',
+      'Invite and grant access sends the login email from the secure server endpoint',
       'Role guide',
       'CMS manager only',
       'Global contact and search defaults',
@@ -104,6 +106,7 @@ const pageChecks = [
       'Supabase Auth users',
       'Admin profile management is restricted',
       'No admin profile rows',
+      'does not create the login account',
       'Admin profile email is already assigned',
       'Only an owner can assign the owner role.',
       'At least one active owner profile must remain.',
@@ -637,6 +640,8 @@ function checkRoutes() {
   const adminAuthBrowser = readRequired('scripts/check-admin-auth-browser.mjs');
   const firstAdminBootstrap = readRequired('scripts/bootstrap-first-admin.mjs');
   const adminLiveReadiness = readRequired('scripts/check-admin-live-readiness.mjs');
+  const adminInviteFunction = readRequired('functions/_lib/admin-invite.js');
+  const adminInviteRoute = readRequired('functions/api/admin/invite-user.js');
   const adminProfileEmailMigration = readRequired(
     'supabase/migrations/202605290002_admin_profile_email_uniqueness.sql',
   );
@@ -699,6 +704,16 @@ function checkRoutes() {
   requireIncludes(auth, ".eq('is_active', true)", 'src/lib/adminAuth.tsx');
   requireIncludes(client, 'VITE_SUPABASE_PUBLISHABLE_KEY', 'src/lib/supabaseClient.ts');
   requireIncludes(client, 'VITE_SUPABASE_ANON_KEY', 'src/lib/supabaseClient.ts');
+  requireIncludes(adminInviteRoute, 'handleAdminInviteUserRequest', 'functions/api/admin/invite-user.js');
+  requireIncludes(adminInviteFunction, 'inviteUserByEmail', 'functions/_lib/admin-invite.js');
+  requireIncludes(adminInviteFunction, 'getBearerToken', 'functions/_lib/admin-invite.js');
+  requireIncludes(adminInviteFunction, 'requireManagingAdmin', 'functions/_lib/admin-invite.js');
+  requireIncludes(adminInviteFunction, ".from('admin_profiles')", 'functions/_lib/admin-invite.js');
+  requireIncludes(adminInviteFunction, ".from('admin_audit_events')", 'functions/_lib/admin-invite.js');
+  requireIncludes(adminInviteFunction, 'Only a Website owner can invite another Website owner.', 'functions/_lib/admin-invite.js');
+  requireIncludes(adminInviteFunction, 'SUPABASE_SERVICE_ROLE_KEY', 'functions/_lib/admin-invite.js');
+  requireIncludes(adminInviteFunction, "source: 'functions/api/admin/invite-user.js'", 'functions/_lib/admin-invite.js');
+  requireIncludes(adminInviteFunction, 'persistSession: false', 'functions/_lib/admin-invite.js');
 
   if (/SERVICE_ROLE|SUPABASE_SERVICE|service_role/.test(client)) {
     failures.push('src/lib/supabaseClient.ts: browser client must not reference service-role keys');

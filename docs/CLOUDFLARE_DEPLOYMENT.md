@@ -102,9 +102,13 @@ Useful local env groups:
 - Form persistence: `SUPABASE_SERVICE_ROLE_KEY`.
 - Private-row browser boundary: `SUPABASE_SERVICE_ROLE_KEY` plus `VITE_SUPABASE_PUBLISHABLE_KEY` or `VITE_SUPABASE_ANON_KEY`.
 - Admin read-only readiness: browser-safe Supabase key, service-role key, and first admin email.
+- First-admin bootstrap verification: `npm run agent:first-admin-bootstrap -- --verify-only --admin-email <first-admin-email>`.
+- First-admin bootstrap write path, only after approval: `npm run agent:first-admin-bootstrap -- --allow-writes --admin-email <first-admin-email> --confirm-email <first-admin-email>`.
+- Admin read-only live readiness: `npm run agent:admin-live-readiness -- --admin-email <first-admin-email>`.
 - Admin browser QA: browser-safe Supabase key plus `URBLO_ADMIN_EMAIL` and `URBLO_ADMIN_PASSWORD`.
 - Unprofiled admin browser QA: browser-safe Supabase key plus `URBLO_UNPROFILED_EMAIL` and `URBLO_UNPROFILED_PASSWORD` for a valid Auth user with no active `admin_profiles` row.
 - Admin CRUD live writes: browser-safe Supabase key plus either `URBLO_ADMIN_ACCESS_TOKEN` or `URBLO_ADMIN_EMAIL` and `URBLO_ADMIN_PASSWORD`.
+- CMS invite flow: Cloudflare Pages Functions use `SUPABASE_SERVICE_ROLE_KEY` server-side at `/api/admin/invite-user`; signed-in Website owner/CMS manager sessions call it from `/admin/settings`, and the service key must never appear in browser source.
 - `URBLO_FIRST_ADMIN_EMAIL` is only for bootstrap/readiness checks; live browser login and live admin-write verification use `URBLO_ADMIN_EMAIL` or an explicit admin access token.
 - Email proof: `SMTP2GO_API_KEY`, sender, and recipient variables; `RESEND_API_KEY` is still supported as a compatibility provider.
 - Turnstile proof: `VITE_TURNSTILE_SITE_KEY`, server-side Turnstile secret, and a valid target-environment token passed to the verifier.

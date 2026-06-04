@@ -71,6 +71,12 @@ interface AdminProfileFormState {
     isActive: boolean;
 }
 
+interface AdminInviteFormState {
+    email: string;
+    displayName: string;
+    role: AdminRole;
+}
+
 const emptyForm: SettingsFormState = {
     status: 'published',
     companyName: 'Urblo',
@@ -95,6 +101,12 @@ const emptyProfileForm: AdminProfileFormState = {
     displayName: '',
     role: 'editor',
     isActive: true,
+};
+
+const emptyInviteForm: AdminInviteFormState = {
+    email: '',
+    displayName: '',
+    role: 'editor',
 };
 
 const adminProfileSelect = 'user_id,email,display_name,role,is_active,created_at,updated_at';
@@ -542,9 +554,11 @@ function AdminProfilesManager({
     const [editingUserId, setEditingUserId] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
+    const [isInviting, setIsInviting] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [notice, setNotice] = useState<string | null>(null);
     const [copiedAccountId, setCopiedAccountId] = useState<string | null>(null);
+    const [inviteForm, setInviteForm] = useState<AdminInviteFormState>(emptyInviteForm);
 
     const loadProfiles = useCallback(async () => {
         if (!supabase || !canManage) {
@@ -589,6 +603,14 @@ function AdminProfilesManager({
         value: AdminProfileFormState[Key],
     ) {
         setForm((current) => ({ ...current, [key]: value }));
+        setNotice(null);
+    }
+
+    function updateInviteField<Key extends keyof AdminInviteFormState>(
+        key: Key,
+        value: AdminInviteFormState[Key],
+    ) {
+        setInviteForm((current) => ({ ...current, [key]: value }));
         setNotice(null);
     }
 
@@ -686,6 +708,76 @@ function AdminProfilesManager({
         setNotice(withAuditNotice(editingUserId ? 'CMS access updated.' : 'CMS access granted.', auditError));
         setEditingUserId(null);
         setForm(emptyProfileForm);
+        await loadProfiles();
+    }
+
+    async function handleInviteSubmit(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+
+        if (!supabase || !canManage) {
+            return;
+        }
+
+        const validation = validateAdminInviteForm(inviteForm, {
+            currentRole,
+            existingProfiles: profiles,
+        });
+
+        if (validation) {
+            setError(validation);
+            return;
+        }
+
+        setIsInviting(true);
+        setError(null);
+        setNotice(null);
+
+        const {
+            data: { session },
+            error: sessionError,
+        } = await supabase.auth.getSession();
+
+        if (sessionError || !session?.access_token) {
+            setIsInviting(false);
+            setError(sessionError?.message || 'Sign in again before inviting a CMS user.');
+            return;
+        }
+
+        const response = await fetch('/api/admin/invite-user', {
+            method: 'POST',
+            headers: {
+                authorization: `Bearer ${session.access_token}`,
+                'content-type': 'application/json',
+            },
+            body: JSON.stringify({
+                email: inviteForm.email.trim(),
+                displayName: inviteForm.displayName.trim(),
+                role: inviteForm.role,
+                redirectTo: `${window.location.origin}/admin/login`,
+            }),
+        });
+
+        const result = (await response.json().catch(() => null)) as {
+            profile?: AdminProfileRow;
+            auditRecorded?: boolean;
+            auditError?: string | null;
+            message?: string;
+        } | null;
+
+        setIsInviting(false);
+
+        if (!response.ok || !result?.profile) {
+            setError(result?.message || 'The invite could not be sent. Ask a Website owner or CMS manager to review it.');
+            return;
+        }
+
+        setInviteForm(emptyInviteForm);
+        setNotice(
+            withAuditNotice(
+                `Invite sent to ${result.profile.email}. CMS access is ready when they accept the email and sign in.`,
+                result.auditRecorded ? null : result.auditError || 'Change history was not recorded.',
+            ),
+        );
         await loadProfiles();
     }
 
@@ -797,14 +889,14 @@ function AdminProfilesManager({
                     <KeyRound className="h-5 w-5 text-black" />
                     <h2 className="mt-5 text-xl font-semibold text-black">Access setup checklist</h2>
                     <ol className="mt-4 space-y-3 text-sm leading-6 text-black/62">
-                        <li>1. Create or invite the person's login account before using this form.</li>
-                        <li>2. Copy the full login setup code into Login setup code.</li>
-                        <li>3. Choose the lowest role they need and keep Active access enabled.</li>
-                        <li>4. Save, then ask them to sign in at `/admin`.</li>
+                        <li>1. Use Invite and grant access for a new CMS user.</li>
+                        <li>2. Choose the lowest role they need.</li>
+                        <li>3. Ask them to accept the invite email and sign in at `/admin`.</li>
+                        <li>4. Use Grant existing login only when the person already has a login account.</li>
                     </ol>
                     <p className="mt-4 text-xs leading-5 text-black/45">
-                        This screen grants CMS permission to an existing login account. It does not create the login
-                        account or send an invite email.
+                        Invite and grant access sends the login email from the secure server endpoint; the browser never
+                        sees the private Supabase service key.
                     </p>
                 </section>
 
@@ -833,16 +925,76 @@ function AdminProfilesManager({
                     </section>
                 ) : null}
 
-                <form onSubmit={(event) => void handleProfileSubmit(event)} className="border border-black/10 bg-white p-5">
+                <form onSubmit={(event) => void handleInviteSubmit(event)} className="border border-black/10 bg-white p-5">
                     <div className="flex items-center gap-2">
                         <UserPlus className="h-4 w-4 text-black/65" />
                         <h3 className="text-sm font-bold uppercase tracking-[0.14em] text-black">
-                            {editingUserId ? 'Edit CMS access' : 'Grant CMS access'}
+                            Invite and grant access
                         </h3>
                     </div>
                     <p className="mt-3 text-sm leading-6 text-black/58">
-                        This grants a role to an existing login account. It is separate from creating the login account
-                        or sending a password email.
+                        Send a login invite and create the person's CMS access in one step.
+                    </p>
+
+                    <label className="mt-5 block text-xs font-bold uppercase tracking-[0.14em] text-black/55">
+                        Email
+                        <input
+                            type="email"
+                            value={inviteForm.email}
+                            onChange={(event) => updateInviteField('email', event.target.value)}
+                            disabled={!canManage || isInviting}
+                            className={fieldClass}
+                        />
+                    </label>
+
+                    <label className="mt-4 block text-xs font-bold uppercase tracking-[0.14em] text-black/55">
+                        Display name
+                        <input
+                            value={inviteForm.displayName}
+                            onChange={(event) => updateInviteField('displayName', event.target.value)}
+                            disabled={!canManage || isInviting}
+                            className={fieldClass}
+                        />
+                    </label>
+
+                    <label className="mt-4 block text-xs font-bold uppercase tracking-[0.14em] text-black/55">
+                        Role
+                        <select
+                            value={inviteForm.role}
+                            onChange={(event) => updateInviteField('role', event.target.value as AdminRole)}
+                            disabled={!canManage || isInviting}
+                            className={fieldClass}
+                        >
+                            {roleOptions.map((role) => (
+                                <option key={role} value={role}>
+                                    {roleLabels[role]}
+                                </option>
+                            ))}
+                        </select>
+                        <span className="mt-2 block text-xs normal-case leading-5 tracking-normal text-black/48">
+                            {roleDescriptions[inviteForm.role]}
+                        </span>
+                    </label>
+
+                    <button
+                        type="submit"
+                        disabled={!canManage || isInviting}
+                        className="mt-5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded bg-black px-4 text-xs font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#33363f] disabled:cursor-not-allowed disabled:bg-black/30"
+                    >
+                        <UserPlus className="h-4 w-4" />
+                        {isInviting ? 'Sending invite' : 'Send invite'}
+                    </button>
+                </form>
+
+                <form onSubmit={(event) => void handleProfileSubmit(event)} className="border border-black/10 bg-white p-5">
+                    <div className="flex items-center gap-2">
+                        <KeyRound className="h-4 w-4 text-black/65" />
+                        <h3 className="text-sm font-bold uppercase tracking-[0.14em] text-black">
+                            {editingUserId ? 'Edit CMS access' : 'Grant existing login'}
+                        </h3>
+                    </div>
+                    <p className="mt-3 text-sm leading-6 text-black/58">
+                        Use this backup path when a login account already exists and you have its setup code.
                     </p>
 
                     <label className="mt-5 block text-xs font-bold uppercase tracking-[0.14em] text-black/55">
@@ -1300,6 +1452,33 @@ function validateAdminProfileForm(
 
     if (editingLastActiveOwner && (!form.isActive || form.role !== 'owner')) {
         return 'At least one active website owner must remain.';
+    }
+
+    return null;
+}
+
+function validateAdminInviteForm(
+    form: AdminInviteFormState,
+    {
+        currentRole,
+        existingProfiles,
+    }: {
+        currentRole: AdminRole | null;
+        existingProfiles: AdminProfileRow[];
+    },
+) {
+    const email = form.email.trim();
+
+    if (!isEmail(email)) {
+        return 'Enter a valid invite email address.';
+    }
+
+    if (existingProfiles.some((profile) => profile.email.trim().toLowerCase() === email.toLowerCase())) {
+        return 'This email already has CMS access.';
+    }
+
+    if (form.role === 'owner' && currentRole !== 'owner') {
+        return 'Only a website owner can invite another Website owner.';
     }
 
     return null;

@@ -23,13 +23,13 @@ Use the admin only with an approved Urblo login account. If a signed-in user doe
 First-admin bootstrap is already complete for `info@urblo.com.au`.
 
 For additional people:
-1. Create or invite their login account outside `/admin/settings`.
-2. Open `/admin/settings`.
-3. In `CMS team` / `People and access`, follow Access setup checklist.
-4. Use Copy setup code where available, or paste the existing login setup code, email, display name, and lowest suitable role into Grant CMS access.
-5. Keep `Active access` enabled, save, then ask the person to sign in at `/admin`.
+1. Open `/admin/settings`.
+2. In `CMS team` / `People and access`, use Invite and grant access for a new CMS user.
+3. Enter their email, optional display name, and the lowest suitable role, then send the invite.
+4. Ask them to accept the invite email and sign in at `/admin`.
+5. Use Grant existing login only when the person already has a login account and you have the setup code.
 
-The current browser admin cannot create the underlying login account by itself. Email alone is not enough to grant access; the login setup code links the login user to the CMS role.
+The invite flow uses a secure server endpoint and records the access change in Change history. The latest invite UI still needs deployment and live invite proof before production editors rely on it.
 
 ## Status Rules
 
@@ -67,7 +67,7 @@ Physical delete is not part of the launch CMS workflow.
 | Articles | Edit article metadata, search title/description, and Article sections through section-type forms. | CMS-ready for metadata/section rows; public detail prefers Published article sections and keeps sanitized original import HTML as fallback. |
 | Media | Upload/manage media, metadata, status, and manifest export. | CMS-ready with editor-facing private/public library labels and a publish checklist. |
 | Leads | Triage enquiries and sample requests, follow recommended next steps, assign owners, add internal notes, and export the current filtered queue with change history. | Workflow-ready for CMS managers. |
-| Settings | Edit global contact/search defaults, footer content, and CMS access. | CMS-ready with People and access, Access setup checklist, Copy setup code controls, Grant CMS access form, Active access, and role guide; creating/inviting the login account still happens outside this screen. |
+| Settings | Edit global contact/search defaults, footer content, and CMS access. | CMS-ready with People and access, Access setup checklist, Invite and grant access, Grant existing login, Copy setup code controls, Active access, and role guide; the invite path needs deployment/live proof before production handoff. |
 | Change history | Inspect saved changes, exports, publish/archive actions, and sensitive operations. | Read-only visibility for Website owner and CMS manager roles. |
 
 ## Public Website Fallbacks
@@ -102,7 +102,7 @@ If Publish is blocked, use the on-screen checklist or validation message to fix 
 ## Handoff Gaps
 
 The CMS is much closer to editor-handoff state, but these are still open:
-- Add a browser-safe invite/create-user flow if non-technical owners should create login accounts without outside help.
+- Deploy and live-test the new Settings invite flow before relying on browser-side account creation for production editors.
 - Push and deploy the local CMS UX commits before expecting production editors to see the latest interface language.
 - Run a final Stone Library publish walkthrough in production so editors can confirm family, variant, finish, and finish-image changes read correctly after review.
 - Run a final Article publish walkthrough in production so editors can confirm the imported article sections read correctly after review.

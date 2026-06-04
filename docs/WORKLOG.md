@@ -2,6 +2,49 @@
 
 Last updated: 2026-06-04
 
+## Entry - 2026-06-04 (Admin Settings Invite Flow UX)
+
+### Scope
+- Continued the `/admin` CMS editor-handoff goal with a high-impact Settings account-access improvement.
+- Added protected Cloudflare Pages Function source for `/api/admin/invite-user`.
+- The invite Function verifies the signed-in bearer session, requires an active Website owner or CMS manager profile, keeps the Supabase service key server-side, sends a Supabase Auth invite, creates the `admin_profiles` row, and records `admin_profile.invite` in Change history.
+- Updated `/admin/settings` with an Invite and grant access form for new CMS users, while keeping Grant existing login as the setup-code fallback.
+- Expanded admin CRUD and Cloudflare readiness coverage so the invite UI, protected Function, service-key boundary, role checks, profile insert, and Change history insert cannot silently drift.
+
+### Changed Files
+- `functions/_lib/admin-invite.js`
+- `functions/api/admin/invite-user.js`
+- `src/pages/admin/AdminSettingsPage.tsx`
+- `scripts/check-admin-crud-coverage.mjs`
+- `scripts/check-cloudflare-pages-readiness.mjs`
+- `docs/ARCHITECTURE.md`
+- `docs/CLOUDFLARE_DEPLOYMENT.md`
+- `docs/ADMIN_EDITOR_GUIDE.md`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `node --check functions/_lib/admin-invite.js && node --check functions/api/admin/invite-user.js`: pass.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass. Coverage now guards Settings invite UI, protected invite Function, bearer-session check, owner/admin role check, service-key boundary, profile insert, and Change history insert.
+- `npm run agent:cloudflare-readiness`: pass. Readiness now covers `/api/admin/invite-user` routing and server-side invite Function contracts.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npx tsc -b`: pass.
+- `npm run lint`: pass.
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run agent:smoke`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions.
+- `npm run agent:admin-config-gate`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions; 11 admin routes passed the no-config gate.
+
+### Risks and Gaps
+- This is a local source/docs UX pass. The latest local CMS UX commits still need push/deploy approval plus live invite QA before production editors rely on browser-side account creation.
+- The new invite flow has not yet sent a real Supabase Auth invite in production from `/admin/settings`.
+
+### Next Handoff
+- Continue with full runtime gates, then push/deploy approval and a live invite walkthrough.
+
 ## Entry - 2026-06-04 (Admin Leads Export Reference UX)
 
 ### Scope
