@@ -51,7 +51,8 @@ Only Published rows can appear on the public site. Imported production content i
 5. Open the record, edit fields, and save.
 6. Review readiness guidance or publish blockers.
 7. Publish only when the record is ready for the public site.
-8. Archive content when it should be hidden without deleting it.
+8. Use the editor header's Open public page control to confirm the live route after publishing.
+9. Archive content when it should be hidden without deleting it.
 
 Physical delete is not part of the launch CMS workflow.
 

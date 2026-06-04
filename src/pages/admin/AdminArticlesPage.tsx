@@ -17,7 +17,7 @@ import { supabase } from '../../lib/supabaseClient';
 import { useAdminAuth } from '../../lib/adminAuthHooks';
 import AdminShell from './AdminShell';
 import RequireAdmin from './RequireAdmin';
-import { CmsLiveRuleCard, CmsStatusCounts, CmsStatusMeaning, CmsStatusPill } from './AdminCmsPrimitives';
+import { CmsLiveRuleCard, CmsPublicPageLink, CmsStatusCounts, CmsStatusMeaning, CmsStatusPill } from './AdminCmsPrimitives';
 
 type ArticleStatus = 'draft' | 'published' | 'archived';
 type ArticleListFilter = ArticleStatus | 'all';
@@ -704,7 +704,13 @@ function AdminArticlesContent() {
                                     migration provenance.
                                 </p>
                             </div>
-                            <CmsStatusPill status={articleForm.status} />
+                            <div className="flex flex-wrap items-center gap-2">
+                                <CmsPublicPageLink
+                                    href={articleForm.slug ? `/articles/${articleForm.slug}` : undefined}
+                                    status={articleForm.status}
+                                />
+                                <CmsStatusPill status={articleForm.status} />
+                            </div>
                         </div>
 
                         <div className="mt-5">

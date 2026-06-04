@@ -17,7 +17,7 @@ import { supabase } from '../../lib/supabaseClient';
 import { useAdminAuth } from '../../lib/adminAuthHooks';
 import AdminShell from './AdminShell';
 import RequireAdmin from './RequireAdmin';
-import { CmsLiveRuleCard, CmsStatusCounts, CmsStatusMeaning, CmsStatusPill, ReadinessBadge } from './AdminCmsPrimitives';
+import { CmsLiveRuleCard, CmsPublicPageLink, CmsStatusCounts, CmsStatusMeaning, CmsStatusPill, ReadinessBadge } from './AdminCmsPrimitives';
 
 type ProjectStatus = 'draft' | 'published' | 'archived';
 type ProjectListFilter = ProjectStatus | 'all';
@@ -1304,7 +1304,13 @@ function AdminProjectsContent() {
                                     structured for later public migration.
                                 </p>
                             </div>
-                            <CmsStatusPill status={projectForm.status} />
+                            <div className="flex flex-wrap items-center gap-2">
+                                <CmsPublicPageLink
+                                    href={projectForm.slug ? `/projects/${projectForm.slug}` : undefined}
+                                    status={projectForm.status}
+                                />
+                                <CmsStatusPill status={projectForm.status} />
+                            </div>
                         </div>
 
                         <div className="mt-5">

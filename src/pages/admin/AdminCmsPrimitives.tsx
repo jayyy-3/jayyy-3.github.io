@@ -1,4 +1,4 @@
-import { Archive, CheckCircle2, CircleDashed, Eye, EyeOff, ShieldAlert } from 'lucide-react';
+import { Archive, CheckCircle2, CircleDashed, ExternalLink, Eye, EyeOff, ShieldAlert } from 'lucide-react';
 import type { ComponentType, ReactNode } from 'react';
 
 export type CmsPublishStatus = 'draft' | 'published' | 'archived';
@@ -164,6 +164,51 @@ export function CmsWorkflowSteps() {
                 </article>
             ))}
         </div>
+    );
+}
+
+export function CmsPublicPageLink({
+    href,
+    status,
+    label = 'Open public page',
+    disabledLabel = 'Public page hidden',
+}: {
+    href?: string;
+    status: CmsPublishStatus | 'tbc';
+    label?: string;
+    disabledLabel?: string;
+}) {
+    const isPublished = status === 'published';
+    const reason =
+        status === 'draft' || status === 'tbc'
+            ? 'This record is still Draft/Needs confirmation, so public pages will not show it yet.'
+            : status === 'archived'
+              ? 'This record is Archived, so public pages will keep it hidden.'
+              : 'This record can appear on public CMS-backed pages.';
+
+    if (isPublished && href) {
+        return (
+            <a
+                href={href}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex min-h-10 items-center justify-center gap-2 rounded border border-black/15 bg-white px-3 text-xs font-bold uppercase tracking-[0.12em] text-black transition hover:border-black hover:bg-black hover:text-white"
+                title={reason}
+            >
+                <ExternalLink className="h-4 w-4" />
+                {label}
+            </a>
+        );
+    }
+
+    return (
+        <span
+            className="inline-flex min-h-10 items-center justify-center gap-2 rounded border border-black/10 bg-black/[0.04] px-3 text-xs font-bold uppercase tracking-[0.12em] text-black/42"
+            title={reason}
+        >
+            <EyeOff className="h-4 w-4" />
+            {disabledLabel}
+        </span>
     );
 }
 

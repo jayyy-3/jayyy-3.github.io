@@ -17,7 +17,7 @@ import { supabase } from '../../lib/supabaseClient';
 import { useAdminAuth } from '../../lib/adminAuthHooks';
 import AdminShell from './AdminShell';
 import RequireAdmin from './RequireAdmin';
-import { CmsStatusCounts } from './AdminCmsPrimitives';
+import { CmsPublicPageLink, CmsStatusCounts } from './AdminCmsPrimitives';
 
 type StoneStatus = 'draft' | 'published' | 'archived' | 'tbc';
 type StoneListFilter = StoneStatus | 'all';
@@ -1069,7 +1069,13 @@ function AdminStoneLibraryContent() {
                                     publishing.
                                 </p>
                             </div>
-                            <StatusPill status={groupForm.status} />
+                            <div className="flex flex-wrap items-center gap-2">
+                                <CmsPublicPageLink
+                                    href={groupForm.stoneGroupKey ? `/stone-library/${groupForm.stoneGroupKey}` : undefined}
+                                    status={groupForm.status}
+                                />
+                                <StatusPill status={groupForm.status} />
+                            </div>
                         </div>
 
                         <div className="mt-7 grid gap-4 md:grid-cols-2">

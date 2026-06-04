@@ -621,7 +621,7 @@ function AdminDashboardContent() {
                             <li>Create or confirm the person's login account, then grant a CMS role in Settings.</li>
                             <li>Walk through one real Project, Product, Article, Media item, and Stone family.</li>
                             <li>Publish only after each on-screen checklist is clear.</li>
-                            <li>Remember that Stone Library detail and Article body rendering still have public fallback gaps.</li>
+                            <li>Use the Open public page link in each editor after publishing to confirm the live route.</li>
                         </ul>
                     </section>
                 </aside>

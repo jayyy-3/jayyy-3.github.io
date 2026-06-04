@@ -2,6 +2,48 @@
 
 Last updated: 2026-06-04
 
+## Entry - 2026-06-04 (Admin Public Page Confirmation Links)
+
+### Scope
+- Continued the `/admin` CMS editor-handoff goal by making post-publish confirmation visible inside content editors.
+- Added shared `CmsPublicPageLink` UI that opens the public route only when a record is Published; Draft, TBC, and Archived records show a hidden-state explanation instead.
+- Added the public-page confirmation control to Projects, Stone Library, Products, and Articles editor headers.
+- Updated Dashboard handoff guidance so it no longer claims Stone Library detail and Article body rendering are unresolved public gaps; editors are now told to use the public-page link after publishing.
+- Expanded admin CRUD coverage so the public-page confirmation control must remain on launch-critical content editors.
+
+### Changed Files
+- `src/pages/admin/AdminCmsPrimitives.tsx`
+- `src/pages/admin/AdminDashboardPage.tsx`
+- `src/pages/admin/AdminProjectsPage.tsx`
+- `src/pages/admin/AdminStoneLibraryPage.tsx`
+- `src/pages/admin/AdminProductsPage.tsx`
+- `src/pages/admin/AdminArticlesPage.tsx`
+- `scripts/check-admin-crud-coverage.mjs`
+- `docs/ADMIN_EDITOR_GUIDE.md`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npx tsc -b`: pass.
+- `npm run lint`: pass.
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass. Coverage now requires the public-page confirmation control on Projects, Stone Library, Products, and Articles.
+- `npm run agent:check`: pass.
+- `npm run agent:public-supabase-readiness`: pass.
+- `git diff --check`: pass.
+- `npm run agent:smoke`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions.
+- `npm run agent:admin-config-gate`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions; 11 admin routes passed the no-config gate.
+
+### Risks and Gaps
+- The public-page link is a confirmation shortcut; it does not replace the production signed-in editor walkthrough after deployment.
+- Draft/TBC/Archived rows remain hidden by design, so editors still need to publish and then confirm the route.
+
+### Next Handoff
+- Continue the CMS goal with production walkthrough proof and any remaining editor confusion found during real-content use.
+
 ## Entry - 2026-06-04 (Public Stone Library Detail CMS Adapter)
 
 ### Scope

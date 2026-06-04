@@ -17,7 +17,7 @@ import { supabase } from '../../lib/supabaseClient';
 import { useAdminAuth } from '../../lib/adminAuthHooks';
 import AdminShell from './AdminShell';
 import RequireAdmin from './RequireAdmin';
-import { CmsLiveRuleCard, CmsStatusCounts, CmsStatusMeaning, CmsStatusPill } from './AdminCmsPrimitives';
+import { CmsLiveRuleCard, CmsPublicPageLink, CmsStatusCounts, CmsStatusMeaning, CmsStatusPill } from './AdminCmsPrimitives';
 
 type ProductStatus = 'draft' | 'published' | 'archived';
 type ProductListFilter = ProductStatus | 'all';
@@ -816,7 +816,13 @@ function AdminProductsContent() {
                                     from static data without losing route contracts.
                                 </p>
                             </div>
-                            <CmsStatusPill status={productForm.status} />
+                            <div className="flex flex-wrap items-center gap-2">
+                                <CmsPublicPageLink
+                                    href={productForm.slug ? `/products/${productForm.slug}` : undefined}
+                                    status={productForm.status}
+                                />
+                                <CmsStatusPill status={productForm.status} />
+                            </div>
                         </div>
 
                         <div className="mt-5">
