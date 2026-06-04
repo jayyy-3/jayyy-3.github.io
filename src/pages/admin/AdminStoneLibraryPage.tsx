@@ -855,7 +855,7 @@ function AdminStoneLibraryContent() {
         const linkedMedia = mediaById.get(validation.mediaAssetId);
         if (nextStatus === 'published' && linkedMedia?.status !== 'published') {
             setError(
-                'Published finish images require a published media record. Choose a media record that is already Published in Media.',
+                'Publish is locked. Open Media and publish the selected media record before publishing this finish image.',
             );
             return;
         }
@@ -957,8 +957,8 @@ function AdminStoneLibraryContent() {
                         </p>
                         <h2 className="mt-2 text-2xl font-semibold text-black">{groups.length} stone groups</h2>
                         <p className="mt-2 text-sm leading-6 text-black/55">
-                            {groupCounts.published} published, {groupCounts.draft} draft, {groupCounts.tbc} TBC,{' '}
-                            {groupCounts.archived} archived.
+                            {groupCounts.published} published, {groupCounts.draft} draft, {groupCounts.tbc} need
+                            confirmation, {groupCounts.archived} archived.
                         </p>
                         <div className="mt-4">
                             <CmsStatusCounts
@@ -967,7 +967,7 @@ function AdminStoneLibraryContent() {
                                 archived={groupCounts.archived}
                             />
                             <p className="mt-2 text-xs font-semibold uppercase tracking-[0.12em] text-black/40">
-                                TBC is counted with draft because it is not public-ready.
+                                Needs confirmation is counted with Draft because it is not public-ready.
                             </p>
                         </div>
                         <label className="mt-4 flex min-h-11 items-center gap-2 border border-black/10 bg-[#f8f9f5] px-3 text-sm text-black">
@@ -979,7 +979,7 @@ function AdminStoneLibraryContent() {
                                 className="min-w-0 flex-1 bg-transparent text-sm font-medium outline-none placeholder:text-black/36"
                             />
                         </label>
-                        <div className="mt-3 grid grid-cols-5 gap-1">
+                        <div className="mt-3 grid grid-cols-2 gap-1 sm:grid-cols-5">
                             {(['all', 'published', 'draft', 'tbc', 'archived'] as const).map((filter) => (
                                 <button
                                     key={filter}
@@ -992,7 +992,7 @@ function AdminStoneLibraryContent() {
                                             : 'border-black/10 bg-white text-black/55 hover:border-black',
                                     ].join(' ')}
                                 >
-                                    {filter}
+                                    {getStoneFilterLabel(filter)}
                                 </button>
                             ))}
                         </div>
@@ -1026,14 +1026,14 @@ function AdminStoneLibraryContent() {
                                                     {group.display_name}
                                                 </span>
                                                 <span className="mt-1 block truncate text-xs font-semibold uppercase tracking-[0.12em] text-black/40">
-                                                    {group.stone_group_key} / {group.stone_type_display ?? 'Type TBC'}
+                                                    {group.stone_group_key} / {group.stone_type_display ?? 'Type needs confirmation'}
                                                 </span>
                                             </span>
                                             <StatusPill status={group.status} />
                                         </div>
                                         <p className="mt-3 truncate text-xs text-black/45">
                                             {[group.origin_region, group.origin_country].filter(Boolean).join(', ') ||
-                                                'Origin TBC'}
+                                                'Origin needs confirmation'}
                                         </p>
                                     </button>
                                 ))}
@@ -1108,7 +1108,7 @@ function AdminStoneLibraryContent() {
                                     className={fieldClass}
                                 >
                                     <option value="draft">Draft</option>
-                                    <option value="tbc">TBC</option>
+                                    <option value="tbc">Needs confirmation</option>
                                     <option value="published">Published</option>
                                     <option value="archived">Archived</option>
                                 </select>
@@ -1142,7 +1142,7 @@ function AdminStoneLibraryContent() {
                                 />
                             </label>
                             <label className="text-xs font-bold uppercase tracking-[0.14em] text-black/55">
-                                Source type note
+                                Stone type proof note
                                 <input
                                     value={groupForm.stoneTypeSource}
                                     onChange={(event) => updateGroupField('stoneTypeSource', event.target.value)}
@@ -1169,7 +1169,7 @@ function AdminStoneLibraryContent() {
                                 />
                             </label>
                             <label className="text-xs font-bold uppercase tracking-[0.14em] text-black/55">
-                                Price source
+                                Pricing note
                                 <input
                                     value={groupForm.priceSource}
                                     onChange={(event) => updateGroupField('priceSource', event.target.value)}
@@ -1191,6 +1191,10 @@ function AdminStoneLibraryContent() {
                                     <option value="3">Premium</option>
                                 </select>
                             </label>
+                        </div>
+
+                        <div className="mt-3">
+                            <StoneStatusHelp status={groupForm.status} />
                         </div>
 
                         <div className="mt-5 grid gap-4 md:grid-cols-3">
@@ -1355,7 +1359,7 @@ function AdminStoneLibraryContent() {
                                     className={fieldClass}
                                 >
                                     <option value="draft">Draft</option>
-                                    <option value="tbc">TBC</option>
+                                    <option value="tbc">Needs confirmation</option>
                                     <option value="published">Published</option>
                                     <option value="archived">Archived</option>
                                 </select>
@@ -1388,6 +1392,10 @@ function AdminStoneLibraryContent() {
                                     className={fieldClass}
                                 />
                             </label>
+                        </div>
+
+                        <div className="mt-3">
+                            <StoneStatusHelp status={variantForm.status} />
                         </div>
 
                         <StonePublishChecklist items={variantPublishChecklist} title="Variant publish checklist" />
@@ -1629,7 +1637,7 @@ function AdminStoneLibraryContent() {
                                 {capabilityCounts.no} not available finish options for the selected variant.
                             </p>
                             <p>{visibleFinishImages.length} finish image links visible for the selected variant.</p>
-                            <p>{finishDefinitions.length} canonical finish definitions loaded from Supabase.</p>
+                            <p>{finishDefinitions.length} finish options available for this stone.</p>
                             <p>{mediaAssets.length} image/video media records available for linking.</p>
                         </div>
                     </section>
@@ -1639,14 +1647,14 @@ function AdminStoneLibraryContent() {
                             <ShieldAlert className="h-5 w-5 text-black" />
                             <ImageIcon className="h-5 w-5 text-black/45" />
                         </div>
-                        <h2 className="mt-5 text-xl font-semibold text-black">Publication guardrails</h2>
+                        <h2 className="mt-5 text-xl font-semibold text-black">Publishing rules</h2>
                         <ul className="mt-4 space-y-3 text-sm leading-6 text-black/62">
                             <li>Published groups require a name, key, type display, summary, and at least one variant.</li>
                             <li>Published variants require a variant key and at least one Available or Needs confirmation finish.</li>
-                            <li>Published finish images require a selected finish and media record.</li>
-                            <li>TBC records stay explicit and admin-visible instead of being hidden in notes.</li>
+                            <li>Published finish images require a selected finish and a media record that is Published in Media.</li>
+                            <li>Needs confirmation stays visible to editors until the stone or finish is ready for the website.</li>
                             <li>Viewer roles can inspect but not mutate Stone Library records.</li>
-                            <li>Physical deletes remain hidden; archive is the safe operational path.</li>
+                            <li>Use Archive to remove a stone from the website while keeping its editing history.</li>
                         </ul>
                     </section>
 
@@ -1698,7 +1706,7 @@ function AdminStoneLibraryContent() {
                                             </select>
                                         </label>
                                         <label className="mt-3 block text-xs font-bold uppercase tracking-[0.14em] text-black/55">
-                                            Sources
+                                            Review notes
                                             <input
                                                 value={form.sourcesText}
                                                 onChange={(event) =>
@@ -1710,7 +1718,7 @@ function AdminStoneLibraryContent() {
                                             />
                                         </label>
                                         <label className="mt-3 block text-xs font-bold uppercase tracking-[0.14em] text-black/55">
-                                            Behavior note
+                                            Public behavior note
                                             <textarea
                                                 value={form.behaviorNote}
                                                 onChange={(event) =>
@@ -1722,7 +1730,7 @@ function AdminStoneLibraryContent() {
                                             />
                                         </label>
                                         <label className="mt-3 block text-xs font-bold uppercase tracking-[0.14em] text-black/55">
-                                            Admin note
+                                            Internal note
                                             <textarea
                                                 value={form.adminNote}
                                                 onChange={(event) =>
@@ -1788,6 +1796,33 @@ function StatusPill({ status }: { status: StoneStatus }) {
         >
             {label}
         </span>
+    );
+}
+
+function getStoneFilterLabel(filter: StoneListFilter) {
+    const labels: Record<StoneListFilter, string> = {
+        all: 'All',
+        published: 'Published',
+        draft: 'Draft',
+        tbc: 'Needs confirmation',
+        archived: 'Archived',
+    };
+
+    return labels[filter];
+}
+
+function StoneStatusHelp({ status }: { status: StoneStatus }) {
+    const messages: Record<StoneStatus, string> = {
+        draft: 'Draft is safe to edit and will not appear on the public website.',
+        tbc: 'Needs confirmation stays visible in the CMS, but is treated like Draft for public pages.',
+        published: 'Published can appear in the public Stone Library and linked product material choices.',
+        archived: 'Archived is hidden from the public website and kept for editing history.',
+    };
+
+    return (
+        <p className="rounded border border-black/10 bg-[#f8f9f5] px-3 py-2 text-xs font-semibold leading-5 text-black/58">
+            {messages[status]}
+        </p>
     );
 }
 
@@ -2238,8 +2273,8 @@ function mediaLabel(asset: MediaAssetOption | undefined, id: number) {
         return `Media #${id}`;
     }
 
-    const source = asset.source_url || [asset.bucket, asset.object_path].filter(Boolean).join('/');
-    return `${asset.alt || source || `Media #${id}`} (${asset.status})`;
+    const label = asset.alt || asset.usage_notes || `Media #${id}`;
+    return `${label} - ${asset.status === 'published' ? 'Published' : 'Not published yet'}`;
 }
 
 function FinishImageMediaSelect({
@@ -2294,17 +2329,15 @@ function FinishImageMediaSelect({
                         <p className="truncate text-sm font-semibold text-black">
                             {selectedMedia.alt ||
                                 selectedMedia.usage_notes ||
-                                selectedMedia.object_path ||
-                                selectedMedia.source_url ||
                                 `Media #${selectedMedia.id}`}
                         </p>
                         <p className="mt-1 text-xs font-bold uppercase tracking-[0.12em] text-black/45">
-                            {selectedMedia.media_type} / {selectedMedia.status} / #{selectedMedia.id}
+                            {selectedMedia.status === 'published' ? 'Published in Media' : 'Not published in Media'} / #{selectedMedia.id}
                         </p>
                         <p className="mt-2 line-clamp-2 text-xs leading-5 text-black/52">
-                            {selectedMedia.source_url ||
-                                [selectedMedia.bucket, selectedMedia.object_path].filter(Boolean).join('/') ||
-                                'No source path recorded.'}
+                            {selectedMedia.status === 'published'
+                                ? 'This media record can support a public finish image.'
+                                : 'Open Media, review the asset, then publish it before this finish image goes public.'}
                         </p>
                         {selectedMedia.status !== 'published' ? (
                             <p className="mt-2 text-xs font-bold uppercase tracking-[0.12em] text-amber-800">

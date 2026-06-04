@@ -2,6 +2,42 @@
 
 Last updated: 2026-06-04
 
+## Entry - 2026-06-04 (Admin Stone Library Confirmation UX)
+
+### Scope
+- Continued the `/admin` CMS editor-handoff goal by clarifying Stone Library status, confirmation, and finish-image publishing language.
+- Replaced visible Stone Library `TBC` wording in current editor controls with Needs confirmation language and added group/variant status help that explains whether each state can appear publicly.
+- Renamed Source type note and Price source to Stone type proof note and Pricing note.
+- Rewrote finish-image publish blocker language so editors know to open Media and publish the selected media record before publishing a finish image.
+- Updated finish-image media selector labels/previews so they show Published in Media / Not published in Media instead of raw media paths or status/path strings.
+- Renamed Stone Library publication guardrails to Publishing rules and replaced physical-delete language with archive-history language.
+- Expanded admin CRUD coverage to guard the new Stone Library editor-facing language and reject the old TBC/technical publishing copy.
+
+### Changed Files
+- `src/pages/admin/AdminStoneLibraryPage.tsx`
+- `scripts/check-admin-crud-coverage.mjs`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass. Coverage now guards Stone Library's Needs confirmation/status-help/finish-image media guidance and rejects older TBC/source/price/guardrail publishing copy.
+- `npx tsc -b`: pass.
+- `npm run lint`: pass.
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run agent:smoke`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions.
+- `npm run agent:admin-config-gate`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions; 11 admin routes passed the no-config gate.
+
+### Risks and Gaps
+- This is a targeted Stone Library status/confirmation-language pass. Authenticated rendered Stone Library QA still needs production or local credentialed browser walkthrough after deployment.
+
+### Next Handoff
+- Continue the CMS goal with deeper Stone Library workflow ergonomics or proceed to remaining Products/Articles/Leads/Settings unification.
+
 ## Entry - 2026-06-04 (Admin Media Visibility Language UX)
 
 ### Scope
