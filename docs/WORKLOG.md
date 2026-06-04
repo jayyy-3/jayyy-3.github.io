@@ -2,6 +2,42 @@
 
 Last updated: 2026-06-04
 
+## Entry - 2026-06-04 (Admin Leads Visible Export UX)
+
+### Scope
+- Continued the `/admin` CMS editor-handoff goal by correcting the Leads export flow to match what editors see.
+- Changed `Export visible queue` so it exports only the current search/filter result rather than every loaded lead row.
+- Added visible count copy showing filtered rows versus total loaded rows, and clarified that exports use the current search and filters.
+- Updated export audit metadata to record filtered enquiry/sample/item counts, total loaded rows, and the active filter/search state.
+- Expanded admin CRUD coverage so the visible filtered export contract is source-guarded.
+
+### Changed Files
+- `src/pages/admin/AdminLeadsPage.tsx`
+- `scripts/check-admin-crud-coverage.mjs`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/ADMIN_EDITOR_GUIDE.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npx tsc -b`: pass.
+- `npm run lint`: pass.
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass. Coverage now requires the Leads visible filtered export source contract.
+- `npm run agent:check`: pass.
+- `npm run agent:public-supabase-readiness`: pass.
+- `git diff --check`: pass.
+- `npm run agent:smoke`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions.
+- `npm run agent:admin-config-gate`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions; 11 admin routes passed the no-config gate.
+
+### Risks and Gaps
+- This is source-verified locally until the production editor walkthrough confirms CSV export behavior with real lead filters after deployment.
+
+### Next Handoff
+- Continue the CMS goal with Settings/team-access handoff clarity and final production editor walkthrough proof.
+
 ## Entry - 2026-06-04 (Admin Product Model Publish Checklist UX)
 
 ### Scope

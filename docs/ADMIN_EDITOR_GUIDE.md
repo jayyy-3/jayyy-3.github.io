@@ -66,7 +66,7 @@ Physical delete is not part of the launch CMS workflow.
 | Products | Edit product families, models, images, search title/description, materials, and specs. | CMS-ready with media selectors, product/model publish checklists, and Stone Library link feedback. |
 | Articles | Edit article metadata, search title/description, and structured article blocks through block-type forms. | CMS-ready for metadata/block rows; public detail prefers Published structured blocks and keeps sanitized legacy HTML as fallback. |
 | Media | Upload/manage media, metadata, status, and manifest export. | CMS-ready with editor-facing private/public library labels and a publish checklist. |
-| Leads | Triage enquiries and sample requests, follow recommended next steps, assign owners, add internal notes, and export with audit logging. | Workflow-ready for owner/admin. |
+| Leads | Triage enquiries and sample requests, follow recommended next steps, assign owners, add internal notes, and export the current filtered queue with audit logging. | Workflow-ready for owner/admin. |
 | Settings | Edit global identity, footer content, SEO defaults, and CMS access. | CMS-ready with access setup checklist and role guide; creating/inviting the login account still happens outside this screen. |
 | Audit | Inspect admin mutation history. | Read-only visibility for owner/admin. |
 
@@ -80,6 +80,10 @@ The public site currently behaves as follows:
 - Article detail body: uses Published Supabase structured blocks when available; otherwise falls back to sanitized legacy HTML from the legacy source path.
 - Stone Library listing/detail: uses Published Supabase stone data when available; otherwise falls back to static Stone Library data.
 - Leads and form submissions: Supabase-backed production form persistence and SMTP2GO notification proof are complete.
+
+## Leads Export
+
+In Leads, CSV export uses the current search, lead-kind filter, and workflow-status filter. The visible count beside the export button shows how many rows will be exported out of the loaded queue. Clear filters before exporting the full loaded queue.
 
 ## Publishing Checks
 

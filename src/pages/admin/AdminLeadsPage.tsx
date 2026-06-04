@@ -376,7 +376,15 @@ function AdminLeadsContent() {
     }
 
     async function exportLeadCsv() {
-        if (!supabase || !canManageLeads || !user || combinedLeads.length === 0) return;
+        if (!supabase || !canManageLeads || !user || filteredLeads.length === 0) return;
+
+        const visibleEnquiryIds = new Set(
+            filteredLeads.filter((lead) => lead.kind === 'enquiry').map((lead) => lead.id),
+        );
+        const visibleSampleIds = new Set(filteredLeads.filter((lead) => lead.kind === 'sample').map((lead) => lead.id));
+        const visibleEnquiries = enquiries.filter((lead) => visibleEnquiryIds.has(lead.id));
+        const visibleSampleRequests = sampleRequests.filter((lead) => visibleSampleIds.has(lead.id));
+        const visibleSampleItems = sampleItems.filter((item) => visibleSampleIds.has(item.sample_request_id));
 
         setIsExporting(true);
         setError(null);
@@ -388,12 +396,18 @@ function AdminLeadsContent() {
             entityType: 'lead_export',
             entityId: null,
             metadata: {
-                enquiryCount: enquiries.length,
-                sampleRequestCount: sampleRequests.length,
-                sampleItemCount: sampleItems.length,
-                exportedVisibleRows: combinedLeads.length,
-                newestCreatedAt: combinedLeads[0]?.createdAt ?? null,
-                oldestCreatedAt: combinedLeads[combinedLeads.length - 1]?.createdAt ?? null,
+                enquiryCount: visibleEnquiries.length,
+                sampleRequestCount: visibleSampleRequests.length,
+                sampleItemCount: visibleSampleItems.length,
+                exportedVisibleRows: filteredLeads.length,
+                totalLoadedRows: combinedLeads.length,
+                filters: {
+                    kind: kindFilter,
+                    status: statusFilter,
+                    searchApplied: Boolean(leadSearch.trim()),
+                },
+                newestCreatedAt: filteredLeads[0]?.createdAt ?? null,
+                oldestCreatedAt: filteredLeads[filteredLeads.length - 1]?.createdAt ?? null,
             },
         });
 
@@ -403,10 +417,17 @@ function AdminLeadsContent() {
             return;
         }
 
-        const csv = buildLeadExportCsv(enquiries, sampleRequests, sampleItems, adminProfiles, stoneOptions, finishOptions);
+        const csv = buildLeadExportCsv(
+            visibleEnquiries,
+            visibleSampleRequests,
+            visibleSampleItems,
+            adminProfiles,
+            stoneOptions,
+            finishOptions,
+        );
         downloadTextFile(csv, `urblo-leads-${new Date().toISOString().slice(0, 10)}.csv`);
         setIsExporting(false);
-        setNotice(`Exported ${combinedLeads.length} visible lead records. Audit event recorded.`);
+        setNotice(`Exported ${filteredLeads.length} visible lead records. Audit event recorded.`);
     }
 
     const statusOptions = selectedKind === 'sample' ? sampleStatusOptions : enquiryStatusOptions;
@@ -420,15 +441,20 @@ function AdminLeadsContent() {
                     <button
                         type="button"
                         onClick={() => void exportLeadCsv()}
-                        disabled={!canManageLeads || isExporting || combinedLeads.length === 0}
+                        disabled={!canManageLeads || isExporting || filteredLeads.length === 0}
                         className="inline-flex min-h-10 items-center justify-center gap-2 rounded border border-black/15 bg-white px-3 text-xs font-bold uppercase tracking-[0.12em] text-black transition hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:bg-black/[0.04] disabled:text-black/35"
+                        title={
+                            filteredLeads.length
+                                ? 'Export only the leads currently visible after search and filters.'
+                                : 'No visible leads match the current search and filters.'
+                        }
                     >
                         <Download className="h-4 w-4" />
                         {isExporting ? 'Recording export' : 'Export visible queue'}
                     </button>
                     <div className="inline-flex min-h-10 items-center gap-2 rounded border border-black/15 bg-white px-3 text-xs font-bold uppercase tracking-[0.12em] text-black/58">
                         <Inbox className="h-4 w-4" />
-                        {inboxSummary.total} visible
+                        {filteredLeads.length}/{inboxSummary.total} visible
                     </div>
                 </div>
             }
@@ -442,6 +468,10 @@ function AdminLeadsContent() {
                         <h2 className="mt-2 text-2xl font-semibold text-black">{inboxSummary.newCount} new</h2>
                         <p className="mt-2 text-sm leading-6 text-black/55">
                             {inboxSummary.enquiries} enquiries, {inboxSummary.samples} sample requests.
+                        </p>
+                        <p className="mt-2 text-xs font-semibold uppercase tracking-[0.12em] text-black/45">
+                            Export uses the current search and filters: {filteredLeads.length} visible of{' '}
+                            {inboxSummary.total} loaded.
                         </p>
                         <label className="mt-4 flex min-h-11 items-center gap-2 border border-black/10 bg-[#f8f9f5] px-3 text-sm text-black">
                             <Search className="h-4 w-4 shrink-0 text-black/42" />
@@ -703,7 +733,7 @@ function AdminLeadsContent() {
                         <ul className="mt-4 space-y-3 text-sm leading-6 text-black/62">
                             <li>New leads enter this inbox from the public Contact and Sample Request forms.</li>
                             <li>Owner/admin roles can update workflow status, assignment, and internal notes.</li>
-                            <li>Owner/admin CSV exports are audit-gated and limited to the currently loaded queue.</li>
+                            <li>Owner/admin CSV exports are audit-gated and limited to the currently visible filtered queue.</li>
                             <li>Physical deletes stay hidden until privacy policy and retention rules are confirmed.</li>
                             <li>Use Spam only for junk submissions; use Closed when the conversation is intentionally finished.</li>
                         </ul>
