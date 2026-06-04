@@ -819,8 +819,8 @@ function AdminProductsContent() {
                                     {selectedProduct ? selectedProduct.name : 'New product'}
                                 </h2>
                                 <p className="mt-2 text-sm leading-6 text-black/58">
-                                    Keep models, material defaults, and specs structured so product pages can migrate
-                                    from static data without losing route contracts.
+                                    Edit the public product family, add at least one publish-ready model, then publish
+                                    when the checklist is clear.
                                 </p>
                             </div>
                             <div className="flex flex-wrap items-center gap-2">
@@ -847,7 +847,7 @@ function AdminProductsContent() {
                                 onChange={(value) => updateProductField('name', value)}
                             />
                             <TextField
-                                label="Slug"
+                                label="Website URL key"
                                 value={productForm.slug}
                                 disabled={!canEdit || isSavingProduct || isLoading || Boolean(selectedProduct)}
                                 required
@@ -876,6 +876,10 @@ function AdminProductsContent() {
                                 emptyLabel="No hero image"
                                 onChange={(value) => updateProductField('heroMediaId', value)}
                             />
+                        </div>
+
+                        <div className="mt-3">
+                            <ProductStatusHelp status={productForm.status} />
                         </div>
 
                         <label className="mt-5 block text-xs font-bold uppercase tracking-[0.14em] text-black/55">
@@ -966,7 +970,7 @@ function AdminProductsContent() {
                                 options={statusOptions}
                             />
                             <TextField
-                                label="Model key"
+                                label="Model website key"
                                 value={modelForm.modelKey}
                                 disabled={!canEdit || isSavingModel || !selectedProduct || Boolean(selectedModel)}
                                 onChange={(value) => updateModelField('modelKey', value)}
@@ -993,6 +997,7 @@ function AdminProductsContent() {
                                 inputMode="numeric"
                                 onChange={(value) => updateModelField('sortOrder', value)}
                             />
+                            <ProductStatusHelp status={modelForm.status} />
                             <PublishChecklist
                                 items={modelPublishChecklist}
                                 className="mt-0"
@@ -1088,7 +1093,7 @@ function AdminProductsContent() {
                         <div className="mt-5 grid gap-3 text-sm leading-6 text-white/72">
                             <p>{models.length} model rows on the selected product.</p>
                             <p>{materialDefaults.length} material defaults configured.</p>
-                            <p>{mediaOptions.length} media records available for ID linking.</p>
+                            <p>{mediaOptions.length} media records available for image selection.</p>
                         </div>
                     </section>
 
@@ -1121,7 +1126,7 @@ function AdminProductsContent() {
                         <RecordChips
                             rows={materialDefaults}
                             selectedId={selectedMaterialDefaultId}
-                            getLabel={(row) => `${row.material_category}: ${row.display_label ?? row.material_slug ?? 'TBC'}`}
+                            getLabel={(row) => `${row.material_category}: ${row.display_label ?? row.material_slug ?? 'Needs label'}`}
                             onSelect={(row) => {
                                 setSelectedMaterialDefaultId(row.id);
                                 setMaterialDefaultForm(rowToMaterialDefaultForm(row));
@@ -1189,12 +1194,12 @@ function AdminProductsContent() {
 
                     <section className="border border-black/10 bg-white p-5">
                         <ShieldAlert className="h-5 w-5 text-black" />
-                        <h2 className="mt-5 text-xl font-semibold text-black">Publication guardrails</h2>
+                        <h2 className="mt-5 text-xl font-semibold text-black">Publishing rules</h2>
                         <ul className="mt-4 space-y-3 text-sm leading-6 text-black/62">
-                            <li>Published products require a lowercase slug and short description.</li>
-                            <li>Published models should carry approved render media before public migration.</li>
+                            <li>Published products require a website URL key, short description, hero image, model, material default, and spec.</li>
+                            <li>Published models need a website key, label, and selected image from Media.</li>
                             <li>Material defaults can reference Stone Library rows or keep clear non-stone labels.</li>
-                            <li>Physical deletes remain hidden; archive is the safe operational path.</li>
+                            <li>Use Archive to remove a product from the website while keeping its editing history.</li>
                         </ul>
                     </section>
 
@@ -1224,6 +1229,20 @@ const statusOptions: Array<[string, string]> = [
     ['published', 'Published'],
     ['archived', 'Archived'],
 ];
+
+function ProductStatusHelp({ status }: { status: ProductStatus }) {
+    const messages: Record<ProductStatus, string> = {
+        draft: 'Draft is safe to edit and will not appear on the public website.',
+        published: 'Published can appear on public product pages where CMS content is active.',
+        archived: 'Archived is hidden from the public website and kept for editing history.',
+    };
+
+    return (
+        <p className="rounded border border-black/10 bg-[#f8f9f5] px-3 py-2 text-xs font-semibold leading-5 text-black/58">
+            {messages[status]}
+        </p>
+    );
+}
 
 function TextField({
     label,
@@ -1303,8 +1322,8 @@ function getMediaUrl(asset: MediaOptionRow | null) {
 }
 
 function formatMediaOption(media: MediaOptionRow) {
-    const label = media.alt || media.caption || media.object_path || media.source_url || `Asset ${media.id}`;
-    return `#${media.id} / ${label}`;
+    const label = media.alt || media.caption || `Media #${media.id}`;
+    return `${label} - ${media.status === 'published' ? 'Published in Media' : 'Not published in Media'}`;
 }
 
 function MediaSelect({
@@ -1354,13 +1373,15 @@ function MediaSelect({
                     </div>
                     <div className="min-w-0">
                         <p className="truncate text-sm font-semibold text-black">
-                            {selectedMedia.alt || selectedMedia.caption || selectedMedia.object_path || `Asset ${selectedMedia.id}`}
+                            {selectedMedia.alt || selectedMedia.caption || `Media #${selectedMedia.id}`}
                         </p>
                         <p className="mt-1 text-xs font-bold uppercase tracking-[0.12em] text-black/45">
-                            {selectedMedia.media_type} / {selectedMedia.status} / #{selectedMedia.id}
+                            {selectedMedia.status === 'published' ? 'Published in Media' : 'Not published in Media'} / #{selectedMedia.id}
                         </p>
                         <p className="mt-2 line-clamp-2 text-xs leading-5 text-black/52">
-                            {selectedMedia.source_url || selectedMedia.object_path || 'No source path recorded.'}
+                            {selectedMedia.status === 'published'
+                                ? 'This media record can support a public product image.'
+                                : 'Open Media, review the asset, then publish it before relying on it for public product pages.'}
                         </p>
                     </div>
                 </div>
@@ -1605,7 +1626,7 @@ function validateProductForm(form: ProductFormState) {
 
 function validateModelForm(form: ModelFormState) {
     if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(form.modelKey.trim())) {
-        return validationFailure('Model key must be lowercase kebab-case.');
+        return validationFailure('Model website key must use lowercase words separated by hyphens.');
     }
 
     if (!form.label.trim()) return validationFailure('Model label is required.');
@@ -1616,7 +1637,7 @@ function validateModelForm(form: ModelFormState) {
     if (imageMediaId.error) return validationFailure(imageMediaId.error);
 
     if (form.status === 'published' && imageMediaId.value === null) {
-        return validationFailure('Cannot publish model yet. Choose a model image first.');
+        return validationFailure('Publish is locked. Choose a model image before publishing this model.');
     }
 
     return { error: null, sortOrder: sortOrder.value, imageMediaId: imageMediaId.value };
@@ -1707,10 +1728,10 @@ function getProductModelPublishChecklist(form: ModelFormState) {
 
     return [
         {
-            label: 'Model key',
+            label: 'Model website key',
             ready: modelKeyIsReady,
             detail: modelKeyIsReady
-                ? 'The internal model key is URL-safe and ready for structured product data.'
+                ? 'The model website key is ready for product data.'
                 : 'Use lowercase words separated by hyphens, for example square-seat.',
         },
         {

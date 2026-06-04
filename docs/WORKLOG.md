@@ -2,6 +2,41 @@
 
 Last updated: 2026-06-04
 
+## Entry - 2026-06-04 (Admin Products Publishing Language UX)
+
+### Scope
+- Continued the `/admin` CMS editor-handoff goal by clarifying Products status, media, and publishing language.
+- Renamed the product Slug field to Website URL key and the model key field/checklist language to Model website key.
+- Added product/model status help explaining when Draft, Published, and Archived records can appear publicly.
+- Rewrote product/model media selector labels and previews so editors see Published in Media / Not published in Media instead of raw media paths or status/path strings.
+- Rewrote Product publishing rules and archive language around public visibility and editing history.
+- Expanded admin CRUD coverage so Products keeps the editor-facing website-key/media/status language and rejects older physical-delete, ID-linking, and model-key blocker wording.
+
+### Changed Files
+- `src/pages/admin/AdminProductsPage.tsx`
+- `scripts/check-admin-crud-coverage.mjs`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass. Coverage now guards Products' Website URL key / Model website key / status-help / Media preview language and rejects older physical-delete, ID-linking, Cannot publish model, and Model key visible wording.
+- `npx tsc -b`: pass.
+- `npm run lint`: pass.
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run agent:smoke`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions.
+- `npm run agent:admin-config-gate`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions; 11 admin routes passed the no-config gate.
+
+### Risks and Gaps
+- This is a targeted Products status/media-language pass. Articles, Leads, and Settings remain the next CMS UX unification targets.
+
+### Next Handoff
+- Continue the CMS goal with Articles media/legacy-source publishing language, then Leads and Settings.
+
 ## Entry - 2026-06-04 (Admin Stone Library Confirmation UX)
 
 ### Scope
