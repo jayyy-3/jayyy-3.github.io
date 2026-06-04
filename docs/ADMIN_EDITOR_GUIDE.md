@@ -58,7 +58,7 @@ Physical delete is not part of the launch CMS workflow.
 
 | Module | Use It For | Current CMS State |
 |---|---|---|
-| Dashboard | See work queue, status counts, and content health warnings. | Source-ready and verified. |
+| Dashboard | Choose the next editing job, inspect live/draft counts, and open health-queue fixes. | Editor start page with lead/content/media quick actions and correct Stone Library status routing. |
 | Projects | Edit case studies, facts, materials, images, maps, and hotspots. | CMS-ready with publish checklist and media selectors. |
 | Stone Library | Edit stone families, variants, finish availability, and finish imagery. | CMS-ready for listing data with family/variant publish checklists; detail page still uses static-backed detail adapter. |
 | Products | Edit product families, models, images, search title/description, materials, and specs. | CMS-ready with media selectors, publish checklist, and Stone Library link feedback. |

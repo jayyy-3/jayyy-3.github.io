@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { AlertTriangle, ArrowUpRight, CheckCircle2, Clock3 } from 'lucide-react';
+import { ArrowUpRight, Clock3, Compass, FilePenLine } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabaseClient';
 import { useAdminAuth } from '../../lib/adminAuthHooks';
@@ -34,6 +34,7 @@ interface DashboardHealthItem {
 interface ContentStatusSnapshot {
     label: string;
     path: string;
+    moduleLabel: string;
     draft: number;
     published: number;
     archived: number;
@@ -49,11 +50,29 @@ interface DashboardState {
 }
 
 const contentTables = [
-    { table: 'stone_groups', label: 'Stone groups' },
-    { table: 'projects', label: 'Projects' },
-    { table: 'products', label: 'Products' },
-    { table: 'articles', label: 'Articles' },
+    { table: 'stone_groups', label: 'Stone families', moduleLabel: 'Stone Library', path: '/admin/stone-library' },
+    { table: 'projects', label: 'Projects', moduleLabel: 'Projects', path: '/admin/projects' },
+    { table: 'products', label: 'Products', moduleLabel: 'Products', path: '/admin/products' },
+    { table: 'articles', label: 'Articles', moduleLabel: 'Articles', path: '/admin/articles' },
 ] as const;
+
+const editorStartActions = [
+    {
+        label: 'Review new leads',
+        note: 'Start here when a customer enquiry or sample request arrives.',
+        path: '/admin/leads',
+    },
+    {
+        label: 'Publish content',
+        note: 'Open Projects, Products, Articles, or Stone Library and clear the publish checklist.',
+        path: '/admin/projects',
+    },
+    {
+        label: 'Prepare media',
+        note: 'Publish images only after source, public location, alt text, and usage notes are ready.',
+        path: '/admin/media',
+    },
+];
 
 async function resolveCount(
     query: PromiseLike<{ count: number | null; error: { message?: string } | null }>,
@@ -81,6 +100,22 @@ export default function AdminDashboardPage() {
             <AdminDashboardContent />
         </RequireAdmin>
     );
+}
+
+function editorDependencyLabel(dependency: string) {
+    const labels: Record<string, string> = {
+        'Supabase Auth + admin_profiles': 'Private CMS access',
+        'Forms live-write verification': 'Customer inbox',
+        'Supabase Storage + media_assets RLS': 'Media library',
+        'Stone Library tables + admin_profiles RLS': 'Stone data',
+        'Media and Stone Library references': 'Uses Media and Stone Library',
+        'Stable Stone Library references': 'Uses Stone Library materials',
+        'Article block migration': 'Structured story content',
+        'Owner/admin role verification': 'Owner/admin only',
+        'Admin mutation helpers': 'Audit history',
+    };
+
+    return labels[dependency] ?? dependency;
 }
 
 function AdminDashboardContent() {
@@ -120,7 +155,7 @@ function AdminDashboardContent() {
             };
         });
 
-        const contentStatusRequests = contentTables.map(async ({ table, label }) => {
+        const contentStatusRequests = contentTables.map(async ({ table, label, moduleLabel, path }) => {
             const [draft, published, archived] = await Promise.all(
                 (['draft', 'published', 'archived'] as const).map((status) =>
                     resolveCount(
@@ -128,10 +163,10 @@ function AdminDashboardContent() {
                     ),
                 ),
             );
-            const module = adminModules.find((item) => item.label === label || item.label === label.replace(/s$/, ''));
             return {
                 label,
-                path: module?.path ?? '/admin',
+                moduleLabel,
+                path,
                 draft,
                 published,
                 archived,
@@ -184,7 +219,7 @@ function AdminDashboardContent() {
                     .eq('status', 'published')
                     .eq('claim_review_status', 'needs_review'),
             ).then((count) =>
-                healthItem('Project claims needing review', count, 'Review project claims', '/admin/projects'),
+                healthItem('Published projects with proof still under review', count, 'Review project proof', '/admin/projects'),
             ),
             resolveCount(
                 client
@@ -192,7 +227,7 @@ function AdminDashboardContent() {
                     .select('id', { count: 'exact', head: true })
                     .eq('claim_status', 'needs_review'),
             ).then((count) =>
-                healthItem('Project fact rows needing review', count, 'Review proof facts', '/admin/projects'),
+                healthItem('Project facts still under review', count, 'Review proof facts', '/admin/projects'),
             ),
             resolveCount(
                 client
@@ -215,7 +250,7 @@ function AdminDashboardContent() {
             resolveCount(
                 client.from('stone_groups').select('id', { count: 'exact', head: true }).eq('status', 'tbc'),
             ).then((count) =>
-                healthItem('Stone groups still marked TBC', count, 'Review Stone Library state', '/admin/stone-library'),
+                healthItem('Stone families still marked Needs confirmation', count, 'Review Stone Library', '/admin/stone-library'),
             ),
             Promise.all([
                 resolveCount(
@@ -333,6 +368,40 @@ function AdminDashboardContent() {
                         <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
                             <div>
                                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-black/45">
+                                    Start here
+                                </p>
+                                <h2 className="mt-2 text-2xl font-semibold text-black">
+                                    Choose the next editing job
+                                </h2>
+                            </div>
+                            <p className="max-w-xl text-sm leading-6 text-black/58">
+                                Use this dashboard to decide what needs attention before opening a detail editor.
+                            </p>
+                        </div>
+                        <div className="mt-4 grid gap-3 md:grid-cols-3">
+                            {editorStartActions.map((action) => (
+                                <Link
+                                    key={action.label}
+                                    to={action.path}
+                                    className="flex min-h-[132px] flex-col justify-between border border-black/10 bg-[#f8f9f5] p-4 transition hover:border-black hover:bg-white"
+                                >
+                                    <span>
+                                        <span className="block text-base font-semibold text-black">{action.label}</span>
+                                        <span className="mt-2 block text-sm leading-6 text-black/58">{action.note}</span>
+                                    </span>
+                                    <span className="mt-4 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.12em] text-black">
+                                        Open
+                                        <ArrowUpRight className="h-4 w-4" />
+                                    </span>
+                                </Link>
+                            ))}
+                        </div>
+                    </section>
+
+                    <section className="border border-black/10 bg-white p-4">
+                        <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+                            <div>
+                                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-black/45">
                                     Editor workflow
                                 </p>
                                 <h2 className="mt-2 text-2xl font-semibold text-black">
@@ -370,7 +439,7 @@ function AdminDashboardContent() {
                                         <div>
                                             <p className="text-base font-semibold text-black">{snapshot.label}</p>
                                             <p className="mt-1 text-sm leading-6 text-black/55">
-                                                Published is eligible for the website. Draft is safe to edit.
+                                                Open {snapshot.moduleLabel}. Published can appear on the website; Draft is safe to edit.
                                             </p>
                                         </div>
                                         <CmsStatusCounts
@@ -469,9 +538,9 @@ function AdminDashboardContent() {
                     <section className="border border-black/10 bg-white">
                         <div className="border-b border-black/10 p-4">
                             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-black/45">
-                                Module rollout
+                                CMS sections
                             </p>
-                            <h2 className="mt-2 text-2xl font-semibold text-black">Launch-critical CMS path</h2>
+                            <h2 className="mt-2 text-2xl font-semibold text-black">Where each editing job lives</h2>
                         </div>
                         <div className="divide-y divide-black/10">
                             {activeModules.map(({ key, label, path, summary, dependency, Icon }) => (
@@ -485,7 +554,7 @@ function AdminDashboardContent() {
                                         <span className="block text-base font-semibold text-black">{label}</span>
                                         <span className="mt-1 block text-sm leading-6 text-black/60">{summary}</span>
                                         <span className="mt-2 block text-xs font-semibold uppercase tracking-[0.14em] text-black/38">
-                                            {dependency}
+                                            {editorDependencyLabel(dependency)}
                                         </span>
                                     </span>
                                     <span
@@ -494,7 +563,7 @@ function AdminDashboardContent() {
                                             'border-[var(--urblo-lime)] bg-[rgba(0,255,25,0.12)] text-black',
                                         ].join(' ')}
                                     >
-                                        Source ready
+                                        Open editor
                                     </span>
                                 </Link>
                             ))}
@@ -504,11 +573,11 @@ function AdminDashboardContent() {
 
                 <aside className="space-y-5">
                     <section className="border border-black/10 bg-black p-5 text-white">
-                        <CheckCircle2 className="h-5 w-5 text-[var(--urblo-lime)]" />
-                        <h2 className="mt-5 text-2xl font-semibold">Auth gate is live</h2>
+                        <Compass className="h-5 w-5 text-[var(--urblo-lime)]" />
+                        <h2 className="mt-5 text-2xl font-semibold">Editor handoff status</h2>
                         <p className="mt-3 text-sm leading-6 text-white/68">
-                            This dashboard only renders after Supabase Auth returns a session and RLS allows
-                            the matching active `admin_profiles` row.
+                            The private CMS is login-protected. Editors can work in Draft, use publish checklists,
+                            and archive content without deleting it.
                         </p>
                     </section>
 
@@ -546,13 +615,13 @@ function AdminDashboardContent() {
                     </section>
 
                     <section className="border border-black/10 bg-white p-5">
-                        <AlertTriangle className="h-5 w-5 text-black" />
-                        <h2 className="mt-5 text-xl font-semibold text-black">Open launch checks</h2>
+                        <FilePenLine className="h-5 w-5 text-black" />
+                        <h2 className="mt-5 text-xl font-semibold text-black">Before handing to an editor</h2>
                         <ul className="mt-4 space-y-3 text-sm leading-6 text-black/62">
-                            <li>Configure server-side `SUPABASE_SERVICE_ROLE_KEY` for live form writes.</li>
-                            <li>Confirm the first admin email before creating an owner/admin profile.</li>
-                            <li>Verify live admin save, upload, and export audit rows after browser-safe Supabase config.</li>
-                            <li>Approve the static content import scope before applying draft rows to Supabase.</li>
+                            <li>Create or confirm the person's login account, then grant a CMS role in Settings.</li>
+                            <li>Walk through one real Project, Product, Article, Media item, and Stone family.</li>
+                            <li>Publish only after each on-screen checklist is clear.</li>
+                            <li>Remember that Stone Library detail and Article body rendering still have public fallback gaps.</li>
                         </ul>
                     </section>
                 </aside>

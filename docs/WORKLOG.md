@@ -2,6 +2,44 @@
 
 Last updated: 2026-06-04
 
+## Entry - 2026-06-04 (Admin Dashboard Editor Start UX)
+
+### Scope
+- Continued the `/admin` CMS editor-experience productization goal with a focused Dashboard first-screen pass.
+- Added Start here quick actions for Review new leads, Publish content, and Prepare media so non-technical editors have a clear first decision after login.
+- Fixed content-status routing for Stone families so the status row opens `/admin/stone-library` instead of falling back to `/admin`.
+- Reworded Dashboard health labels away from database/claim jargon and toward editor-facing review tasks.
+- Replaced stale launch-secret/checklist guidance with handoff guidance for account role setup, real-content walkthrough, publish checklists, and known public fallback gaps.
+- Updated admin CRUD coverage, CMS handoff docs, roadmap, task queue, and editor guide to reflect the Dashboard editor-start contract.
+
+### Changed Files
+- `src/pages/admin/AdminDashboardPage.tsx`
+- `scripts/check-admin-crud-coverage.mjs`
+- `docs/ADMIN_EDITOR_GUIDE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npx tsc -b`: pass.
+- `npm run lint`: pass.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run agent:smoke`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions.
+- `npm run agent:admin-config-gate`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions; 11 admin routes passed the no-config gate.
+- Visual sanity check: reviewed `.tmp/admin-config-gate/screenshots/admin.png`; `/admin` still renders the no-config protected shell without private dashboard content exposure.
+
+### Risks and Gaps
+- Dashboard editor-start UX is source-verified locally but still needs signed-in production editor walkthrough after these local commits are pushed and deployed.
+- Stone Library detail and Article body rendering still have public fallback gaps, now called out in the Dashboard handoff guidance.
+
+### Next Handoff
+- Continue the CMS goal with a signed-in production editor walkthrough after deployment, or the remaining Stone Library detail/public Article rendering gaps.
+
 ## Entry - 2026-06-04 (Admin Stone Library Publish Checklist UX)
 
 ### Scope
