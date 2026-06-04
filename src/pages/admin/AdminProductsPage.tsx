@@ -93,7 +93,9 @@ interface ProductFormState {
     name: string;
     shortDescription: string;
     heroMediaId: string;
-    seoJson: string;
+    seoBaseJson: string;
+    seoTitle: string;
+    seoDescription: string;
     sortOrder: string;
 }
 
@@ -124,7 +126,9 @@ const emptyProductForm: ProductFormState = {
     name: '',
     shortDescription: '',
     heroMediaId: '',
-    seoJson: '',
+    seoBaseJson: '{}',
+    seoTitle: '',
+    seoDescription: '',
     sortOrder: '0',
 };
 
@@ -209,6 +213,11 @@ function AdminProductsContent() {
         () => findStoneOption(stoneOptions, materialDefaultForm.stoneGroupId),
         [materialDefaultForm.stoneGroupId, stoneOptions],
     );
+    const publishChecklist = useMemo(
+        () => getProductPublishChecklist(productForm, models, materialDefaults, specs),
+        [materialDefaults, models, productForm, specs],
+    );
+    const canPublishProduct = publishChecklist.every((item) => item.ready);
     const filteredProducts = useMemo(
         () =>
             products.filter((product) => {
@@ -414,6 +423,11 @@ function AdminProductsContent() {
 
     async function saveProduct(nextStatus: ProductStatus) {
         if (!supabase || !canEdit || !user) return;
+
+        if (nextStatus === 'published' && !canPublishProduct) {
+            setError('Complete the publish checklist before publishing this product.');
+            return;
+        }
 
         const validation = validateProductForm({ ...productForm, status: nextStatus });
         if (validation.error !== null) {
@@ -862,16 +876,28 @@ function AdminProductsContent() {
                             />
                         </label>
 
-                        <label className="mt-5 block text-xs font-bold uppercase tracking-[0.14em] text-black/55">
-                            SEO JSON
-                            <textarea
-                                value={productForm.seoJson}
-                                onChange={(event) => updateProductField('seoJson', event.target.value)}
-                                disabled={!canEdit || isSavingProduct || isLoading}
-                                rows={4}
-                                className={`${fieldClass} py-3 font-mono text-xs leading-6 normal-case tracking-normal`}
-                            />
-                        </label>
+                        <div className="mt-5 border border-black/10 bg-[#f8f9f5] p-4">
+                            <p className="text-xs font-bold uppercase tracking-[0.14em] text-black/45">Search preview</p>
+                            <div className="mt-4 grid gap-4 md:grid-cols-2">
+                                <TextField
+                                    label="Search title"
+                                    value={productForm.seoTitle}
+                                    disabled={!canEdit || isSavingProduct || isLoading}
+                                    onChange={(value) => updateProductField('seoTitle', value)}
+                                />
+                                <TextField
+                                    label="Search description"
+                                    value={productForm.seoDescription}
+                                    disabled={!canEdit || isSavingProduct || isLoading}
+                                    onChange={(value) => updateProductField('seoDescription', value)}
+                                />
+                            </div>
+                            <p className="mt-3 text-sm leading-6 text-black/58">
+                                Leave these blank to reuse the product name and short description.
+                            </p>
+                        </div>
+
+                        <PublishChecklist items={publishChecklist} />
 
                         <div className="mt-6 flex flex-wrap gap-2">
                             <ActionButton
@@ -880,9 +906,10 @@ function AdminProductsContent() {
                             />
                             <button
                                 type="button"
-                                disabled={!canEdit || isSavingProduct || isLoading}
+                                disabled={!canEdit || isSavingProduct || isLoading || !canPublishProduct}
                                 onClick={() => void saveProduct('published')}
                                 className="inline-flex min-h-11 items-center justify-center gap-2 rounded bg-[var(--urblo-lime)] px-4 text-xs font-bold uppercase tracking-[0.14em] text-black transition hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:bg-black/20 disabled:text-black/35"
+                                title={canPublishProduct ? 'Publish product' : 'Complete the publish checklist first.'}
                             >
                                 <CheckCircle2 className="h-4 w-4" />
                                 Publish product
@@ -1326,6 +1353,60 @@ function MediaSelect({
     );
 }
 
+function PublishChecklist({ items }: { items: Array<{ label: string; ready: boolean; detail: string }> }) {
+    const readyCount = items.filter((item) => item.ready).length;
+    const allReady = readyCount === items.length;
+
+    return (
+        <section className="mt-5 border border-black/10 bg-white p-4">
+            <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+                <div>
+                    <p className="text-xs font-bold uppercase tracking-[0.14em] text-black/45">Publish checklist</p>
+                    <h3 className="mt-2 text-lg font-semibold text-black">
+                        {allReady ? 'Ready to publish' : `${items.length - readyCount} item${items.length - readyCount === 1 ? '' : 's'} need review`}
+                    </h3>
+                    <p className="mt-2 text-sm leading-6 text-black/58">
+                        Published products can appear on public product pages where CMS cutover is active.
+                    </p>
+                </div>
+                <span
+                    className={[
+                        'inline-flex min-h-8 items-center rounded border px-3 text-[11px] font-bold uppercase tracking-[0.12em]',
+                        allReady
+                            ? 'border-[var(--urblo-lime)] bg-[rgba(0,255,25,0.12)] text-black'
+                            : 'border-amber-300 bg-amber-50 text-amber-800',
+                    ].join(' ')}
+                >
+                    {readyCount}/{items.length} ready
+                </span>
+            </div>
+            <div className="mt-4 grid gap-2">
+                {items.map((item) => (
+                    <div
+                        key={item.label}
+                        className={[
+                            'border p-3',
+                            item.ready ? 'border-[var(--urblo-lime)] bg-[rgba(0,255,25,0.08)]' : 'border-amber-200 bg-amber-50',
+                        ].join(' ')}
+                    >
+                        <div className="flex items-start gap-2">
+                            {item.ready ? (
+                                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-black" />
+                            ) : (
+                                <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-800" />
+                            )}
+                            <div>
+                                <p className="text-sm font-semibold text-black">{item.label}</p>
+                                <p className="mt-1 text-sm leading-5 text-black/58">{item.detail}</p>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </section>
+    );
+}
+
 function ActionButton({ disabled, label }: { disabled?: boolean; label: string }) {
     return (
         <button
@@ -1412,6 +1493,7 @@ function RecordChips<T extends { id: number }>({
 
 function rowToProductForm(row: ProductRow | null): ProductFormState {
     if (!row) return emptyProductForm;
+    const seo = objectRecord(row.seo);
 
     return {
         status: row.status,
@@ -1419,7 +1501,9 @@ function rowToProductForm(row: ProductRow | null): ProductFormState {
         name: row.name,
         shortDescription: row.short_description ?? '',
         heroMediaId: row.hero_media_id === null ? '' : String(row.hero_media_id),
-        seoJson: row.seo ? JSON.stringify(row.seo, null, 2) : '',
+        seoBaseJson: JSON.stringify(seo, null, 2),
+        seoTitle: stringFromRecord(seo, 'title'),
+        seoDescription: stringFromRecord(seo, 'description'),
         sortOrder: String(row.sort_order),
     };
 }
@@ -1468,17 +1552,24 @@ function validateProductForm(form: ProductFormState) {
     if (sortOrder.error) return validationFailure(sortOrder.error);
     if (heroMediaId.error) return validationFailure(heroMediaId.error);
 
-    let seo: unknown = {};
-    if (form.seoJson.trim()) {
-        try {
-            seo = JSON.parse(form.seoJson);
-        } catch {
-            return validationFailure('SEO JSON is not valid JSON.');
-        }
+    const seo = parseRecordJson(form.seoBaseJson);
+    if (form.seoTitle.trim()) {
+        seo.title = form.seoTitle.trim();
+    } else {
+        delete seo.title;
+    }
+    if (form.seoDescription.trim()) {
+        seo.description = form.seoDescription.trim();
+    } else {
+        delete seo.description;
     }
 
     if (form.status === 'published' && !form.shortDescription.trim()) {
         return validationFailure('Published products require a short description.');
+    }
+
+    if (form.status === 'published' && heroMediaId.value === null) {
+        return validationFailure('Complete the publish checklist before publishing this product.');
     }
 
     return { error: null, sortOrder: sortOrder.value, heroMediaId: heroMediaId.value, seo };
@@ -1520,6 +1611,88 @@ function validateSpecForm(form: SpecFormState) {
     const sortOrder = requiredInteger(form.sortOrder, 'Sort order');
     if (sortOrder.error) return validationFailure(sortOrder.error);
     return { error: null, sortOrder: sortOrder.value };
+}
+
+function getProductPublishChecklist(
+    form: ProductFormState,
+    models: ProductModelRow[],
+    materialDefaults: ProductMaterialDefaultRow[],
+    specs: ProductSpecRow[],
+) {
+    const publishedModels = models.filter((model) => model.status === 'published');
+    const hasPublishedModelImage = publishedModels.some((model) => model.image_media_id !== null);
+    const hasMaterialDefault = materialDefaults.some(
+        (material) => Boolean(material.stone_group_id) || Boolean(material.display_label?.trim()) || Boolean(material.material_slug?.trim()),
+    );
+    const hasSpecs = specs.some((spec) => spec.spec_label.trim() && spec.spec_value.trim());
+
+    return [
+        {
+            label: 'Product name',
+            ready: Boolean(form.name.trim()),
+            detail: form.name.trim() ? 'The public product name is filled in.' : 'Add the product name editors and customers will recognize.',
+        },
+        {
+            label: 'Website URL',
+            ready: /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(form.slug.trim()),
+            detail: 'Use lowercase words separated by hyphens, for example prime-block.',
+        },
+        {
+            label: 'Short description',
+            ready: Boolean(form.shortDescription.trim()),
+            detail: form.shortDescription.trim()
+                ? 'The product has summary copy for cards and public detail pages.'
+                : 'Add a short public summary before publishing.',
+        },
+        {
+            label: 'Hero image',
+            ready: Boolean(form.heroMediaId.trim()),
+            detail: form.heroMediaId.trim()
+                ? 'A hero image is selected.'
+                : 'Choose a product hero image from Media so the public page is not image-light.',
+        },
+        {
+            label: 'Published model',
+            ready: publishedModels.length > 0 && hasPublishedModelImage,
+            detail:
+                publishedModels.length > 0 && hasPublishedModelImage
+                    ? 'At least one published model has a selected image.'
+                    : 'Publish at least one model and choose its model image.',
+        },
+        {
+            label: 'Material defaults',
+            ready: hasMaterialDefault,
+            detail: hasMaterialDefault
+                ? 'Default material guidance exists for this product.'
+                : 'Add at least one default material row or display label.',
+        },
+        {
+            label: 'Specifications',
+            ready: hasSpecs,
+            detail: hasSpecs ? 'At least one product spec is filled in.' : 'Add at least one useful specification row.',
+        },
+    ];
+}
+
+function parseRecordJson(value: string): Record<string, unknown> {
+    try {
+        return objectRecord(JSON.parse(value || '{}'));
+    } catch {
+        return {};
+    }
+}
+
+function objectRecord(value: unknown): Record<string, unknown> {
+    if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+        return value as Record<string, unknown>;
+    }
+
+    return {};
+}
+
+function stringFromRecord(record: Record<string, unknown>, key: string) {
+    const value = record[key];
+    return typeof value === 'string' ? value : '';
 }
 
 function validationFailure(error: string) {

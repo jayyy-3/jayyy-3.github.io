@@ -2,6 +2,43 @@
 
 Last updated: 2026-06-04
 
+## Entry - 2026-06-04 (Admin Products Publish Checklist UX)
+
+### Scope
+- Continued the `/admin` CMS editor-experience productization goal with a focused Products publish-readiness pass.
+- Replaced product-level `SEO JSON` editing with editor-facing Search title and Search description fields while preserving the existing `products.seo` JSON contract behind the form.
+- Added a Product Publish checklist for product name, website URL, short description, hero image, at least one published model with image, material defaults, and specifications.
+- Locked Product Publish and the status-save publish path while checklist blockers remain, so editors see what to fix before attempting publication.
+- Expanded the admin CRUD coverage guard, CMS handoff docs, roadmap, task queue, and editor guide to reflect Product checklist/search-field authoring.
+
+### Changed Files
+- `src/pages/admin/AdminProductsPage.tsx`
+- `scripts/check-admin-crud-coverage.mjs`
+- `docs/ADMIN_EDITOR_GUIDE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npx tsc -b`: pass.
+- `npm run lint`: pass.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run agent:smoke`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions.
+- `npm run agent:admin-config-gate`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions; 11 admin routes passed the no-config gate.
+- Visual sanity check: reviewed `.tmp/admin-config-gate/screenshots/admin-products.png`; `/admin/products` still renders the no-config protected shell without private content exposure.
+
+### Risks and Gaps
+- The checklist is source-verified locally but still needs signed-in production editor walkthrough after these local commits are pushed and deployed.
+- Product public pages already prefer published Supabase rows with static fallback; this change improves editor readiness but does not alter public rendering.
+
+### Next Handoff
+- Continue the CMS goal with a signed-in production editor walkthrough after deployment, or the remaining Stone Library detail/public Article rendering gaps.
+
 ## Entry - 2026-06-04 (Admin Articles Form Authoring UX)
 
 ### Scope

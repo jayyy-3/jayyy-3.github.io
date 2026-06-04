@@ -209,7 +209,13 @@ const pageChecks = [
       'product_spec.create',
       'product_spec.update',
     ],
-    requiredText: ['Current role is read-only for Products', 'Physical deletes remain hidden'],
+    requiredText: [
+      'Current role is read-only for Products',
+      'Physical deletes remain hidden',
+      'Publish checklist',
+      'Search preview',
+      'Complete the publish checklist before publishing this product.',
+    ],
   },
   {
     label: 'Articles',
@@ -710,6 +716,16 @@ function checkArticleStructuredAuthoring() {
   requireIncludes(text, 'do not paste newsletter HTML as normal authoring', 'src/pages/admin/AdminArticlesPage.tsx');
 }
 
+function checkProductEditorAuthoring() {
+  const text = readRequired('src/pages/admin/AdminProductsPage.tsx');
+  requireIncludes(text, 'Search title', 'src/pages/admin/AdminProductsPage.tsx');
+  requireIncludes(text, 'Search description', 'src/pages/admin/AdminProductsPage.tsx');
+  requireIncludes(text, 'getProductPublishChecklist', 'src/pages/admin/AdminProductsPage.tsx');
+  requireIncludes(text, 'Complete the publish checklist before publishing this product.', 'src/pages/admin/AdminProductsPage.tsx');
+  requireNotIncludes(text, 'SEO JSON', 'src/pages/admin/AdminProductsPage.tsx product editor authoring');
+  requireNotIncludes(text, 'seoJson', 'src/pages/admin/AdminProductsPage.tsx product editor authoring');
+}
+
 function checkAdminLiveVerifierBoundaries() {
   const text = readRequired('scripts/check-admin-crud-live.mjs');
   requireIncludes(text, 'assertNotPubliclyVisible', 'scripts/check-admin-crud-live.mjs');
@@ -851,6 +867,7 @@ checkBrowserSecretBoundaries();
 checkAdminDestructiveBoundaries();
 pageChecks.forEach(checkPage);
 checkArticleStructuredAuthoring();
+checkProductEditorAuthoring();
 checkAdminLiveVerifierBoundaries();
 checkAdminRemovalContract();
 
