@@ -10,6 +10,7 @@ const requiredFiles = [
   'docs/HANDOFF.md',
   'docs/DESIGN.md',
   'docs/ARCHITECTURE.md',
+  'docs/ADMIN_EDITOR_GUIDE.md',
   'docs/NEXT_STEPS.md',
   'docs/WORKLOG.md',
   'docs/agent/tasks.json',
@@ -79,6 +80,74 @@ try {
   }
 } catch (error) {
   failures.push(`Unable to read scripts/agent-smoke.sh: ${error.message}`)
+}
+
+const adminEditorGuideRequiredText = [
+  'https://urblo.com.au/admin',
+  'Website owner',
+  'CMS manager',
+  'Editor',
+  'Viewer',
+  'CMS team',
+  'People and access',
+  'Active access',
+  'Draft',
+  'Published',
+  'Archived',
+  'Needs confirmation',
+  'Open public page',
+  'Article sections',
+  'Published in Media',
+  'change history',
+  'static fallback',
+  'sanitized original import HTML',
+  'The approved import has already written production Projects, Stone Library, Products, Articles, and Media candidates into Supabase as Draft rows.',
+  'Push and deploy the local CMS UX commits',
+  'final editor walkthrough',
+]
+const adminEditorGuideRequiredModules = [
+  'Dashboard',
+  'Projects',
+  'Stone Library',
+  'Products',
+  'Articles',
+  'Media',
+  'Leads',
+  'Settings',
+  'Activity log',
+]
+const adminEditorGuideForbiddenText = [
+  'Supabase Auth login account',
+  'Admin team',
+  'Active profile',
+  'structured article blocks',
+  'activity logging',
+  'SEO defaults',
+  'TBC |',
+  'owner/admin',
+  '| Owner |',
+  '| Admin |',
+]
+
+try {
+  const guide = readFileSync(join(root, 'docs/ADMIN_EDITOR_GUIDE.md'), 'utf8')
+  for (const text of adminEditorGuideRequiredText) {
+    if (!guide.includes(text)) {
+      failures.push(`docs/ADMIN_EDITOR_GUIDE.md must include current editor handoff text: ${text}`)
+    }
+  }
+  for (const moduleName of adminEditorGuideRequiredModules) {
+    if (!guide.includes(`| ${moduleName} |`)) {
+      failures.push(`docs/ADMIN_EDITOR_GUIDE.md must document the ${moduleName} admin module.`)
+    }
+  }
+  for (const text of adminEditorGuideForbiddenText) {
+    if (guide.includes(text)) {
+      failures.push(`docs/ADMIN_EDITOR_GUIDE.md must not drift back to old admin terminology: ${text}`)
+    }
+  }
+} catch (error) {
+  failures.push(`Unable to read docs/ADMIN_EDITOR_GUIDE.md: ${error.message}`)
 }
 
 const liveReadinessDocFlags = [

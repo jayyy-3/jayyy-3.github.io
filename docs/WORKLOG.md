@@ -2,6 +2,39 @@
 
 Last updated: 2026-06-04
 
+## Entry - 2026-06-04 (Admin Editor Guide Harness Guard)
+
+### Scope
+- Continued the `/admin` CMS editor-handoff goal by adding a harness guard for the editor guide.
+- Updated `npm run agent:check` so it now requires `docs/ADMIN_EDITOR_GUIDE.md` to keep the production admin address, Website owner / CMS manager / Editor / Viewer roles, CMS team access path, Draft/Published/Archived/Needs confirmation language, admin module coverage, public fallback notes, imported Draft-content note, push/deploy gap, and final editor walkthrough gap.
+- Added old-term regression checks so the guide cannot silently drift back to Supabase Auth login account, Admin team, Active profile, structured article blocks, activity logging, SEO defaults, TBC table labels, or Owner/Admin table-role wording.
+
+### Changed Files
+- `scripts/check-harness.mjs`
+- `docs/ADMIN_EDITOR_GUIDE.md`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `node --check scripts/check-harness.mjs`: pass.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:check`: pass. The new editor-guide guard ran inside the harness.
+- `git diff --check`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npx tsc -b`: pass.
+- `npm run lint`: pass.
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run agent:smoke`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions.
+- `npm run agent:admin-config-gate`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions; 11 admin routes passed the no-config gate.
+
+### Risks and Gaps
+- This is a harness/docs guard only. The latest local CMS UX commits still need push/deploy approval plus a final production editor walkthrough before the CMS handoff goal can be considered complete.
+
+### Next Handoff
+- Continue with push/deploy approval and final production walkthrough.
+
 ## Entry - 2026-06-04 (Admin Editor Guide Refresh)
 
 ### Scope
