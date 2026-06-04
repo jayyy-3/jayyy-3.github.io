@@ -2,6 +2,41 @@
 
 Last updated: 2026-06-04
 
+## Entry - 2026-06-04 (Admin Media Visibility Language UX)
+
+### Scope
+- Continued the `/admin` CMS editor-handoff goal by making Media publishing and file-location choices clearer for non-technical editors.
+- Replaced visible Media source/location labels with editor-facing language: File or link type, Website visibility location, Uploaded file location, and Upload destination.
+- Added inline guidance for Uploaded file, External archive link, Hosted file link, Hosted video link, Private draft library, and Public website library so editors can tell whether a media record can support public pages.
+- Rewrote Media list fallback titles and location summaries so assets without alt/caption no longer surface raw uploaded-file paths as the primary label.
+- Renamed Media publication guardrails to Publishing rules and expanded admin CRUD coverage to keep the editor-facing Media labels while rejecting older Storage file path / Upload bucket / Cloudflare R2 / Cloudflare Stream visible wording.
+
+### Changed Files
+- `src/pages/admin/AdminMediaPage.tsx`
+- `scripts/check-admin-crud-coverage.mjs`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass. Coverage now guards Media's editor-facing source/location labels and rejects older Storage file path / Upload bucket / Cloudflare R2 / Cloudflare Stream visible wording.
+- `npx tsc -b`: pass.
+- `npm run lint`: pass.
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run agent:smoke`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions.
+- `npm run agent:admin-config-gate`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions; 11 admin routes passed the no-config gate.
+
+### Risks and Gaps
+- This is a targeted Media language and visibility-location pass. Stone Library remains the next CMS UX target.
+- Authenticated rendered Media QA still needs a production or local credentialed browser walkthrough after deployment.
+
+### Next Handoff
+- Continue the CMS goal with Stone Library TBC/finish-image publishing clarity.
+
 ## Entry - 2026-06-04 (Admin Projects Proof Review Language UX)
 
 ### Scope

@@ -96,6 +96,42 @@ const bucketLimits: Record<MediaBucket, number> = {
     'urblo-admin-media': 52_428_800,
 };
 
+const mediaBucketOptions: Array<{ value: MediaBucket; label: string; detail: string }> = [
+    {
+        value: 'urblo-admin-media',
+        label: 'Private draft library',
+        detail: 'Hidden from the public website. Good for uploads that are still being checked or are only for the team.',
+    },
+    {
+        value: 'urblo-public-media',
+        label: 'Public website library',
+        detail: 'Ready for public pages to use after the media record is Published.',
+    },
+];
+
+const mediaSourceOptions: Array<{ value: SourceKind; label: string; detail: string }> = [
+    {
+        value: 'storage',
+        label: 'Uploaded file',
+        detail: 'A file uploaded through this Media screen.',
+    },
+    {
+        value: 'external_legacy',
+        label: 'External archive link',
+        detail: 'A public or archived source link kept for reference or reuse.',
+    },
+    {
+        value: 'r2',
+        label: 'Hosted file link',
+        detail: 'A file hosted outside the Media upload library.',
+    },
+    {
+        value: 'stream',
+        label: 'Hosted video link',
+        detail: 'A video hosted outside the Media upload library.',
+    },
+];
+
 const fieldClass =
     'mt-2 min-h-11 w-full rounded border border-black/15 bg-white px-3 text-sm font-medium outline-none transition focus:border-black disabled:bg-black/[0.04] disabled:text-black/45';
 
@@ -207,7 +243,7 @@ function AdminMediaContent() {
         }
 
         if (file.size > bucketLimits[uploadBucket]) {
-            setError(`File is too large for ${uploadBucket}.`);
+            setError(`File is too large for ${formatBucketLabel(uploadBucket)}.`);
             return;
         }
 
@@ -551,7 +587,7 @@ function AdminMediaContent() {
                                         <div className="flex items-start justify-between gap-3">
                                             <span className="min-w-0">
                                                 <span className="block truncate text-sm font-semibold text-black">
-                                                    {asset.alt || asset.caption || asset.object_path || asset.source_url || `Asset ${asset.id}`}
+                                                    {formatAssetTitle(asset)}
                                                 </span>
                                                 <span className="mt-1 block truncate text-xs font-semibold uppercase tracking-[0.12em] text-black/40">
                                                     {formatSourceKind(asset.source_kind)} · {asset.media_type}
@@ -620,30 +656,34 @@ function AdminMediaContent() {
                             </label>
 
                             <label className="text-xs font-bold uppercase tracking-[0.14em] text-black/55">
-                                Media source
+                                File or link type
                                 <select
                                     value={form.sourceKind}
                                     onChange={(event) => updateField('sourceKind', event.target.value as SourceKind)}
                                     disabled={!canEdit || isSaving || isLoading}
                                     className={fieldClass}
                                 >
-                                    <option value="storage">Uploaded file</option>
-                                    <option value="external_legacy">External archive link</option>
-                                    <option value="r2">Cloudflare R2</option>
-                                    <option value="stream">Cloudflare Stream</option>
+                                    {mediaSourceOptions.map(({ value, label }) => (
+                                        <option key={value} value={value}>
+                                            {label}
+                                        </option>
+                                    ))}
                                 </select>
                             </label>
 
                             <label className="text-xs font-bold uppercase tracking-[0.14em] text-black/55">
-                                Publishing location
+                                Website visibility location
                                 <select
                                     value={form.bucket}
                                     onChange={(event) => updateField('bucket', event.target.value as MediaBucket)}
                                     disabled={!canEdit || isSaving || isLoading || form.sourceKind !== 'storage'}
                                     className={fieldClass}
                                 >
-                                    <option value="urblo-admin-media">Private draft library</option>
-                                    <option value="urblo-public-media">Public website library</option>
+                                    {mediaBucketOptions.map(({ value, label }) => (
+                                        <option key={value} value={value}>
+                                            {label}
+                                        </option>
+                                    ))}
                                 </select>
                             </label>
 
@@ -663,24 +703,36 @@ function AdminMediaContent() {
                             </label>
                         </div>
 
+                        <div className="mt-3">
+                            <MediaLocationHelp sourceKind={form.sourceKind} bucket={form.bucket} />
+                        </div>
+
                         <label className="mt-5 block text-xs font-bold uppercase tracking-[0.14em] text-black/55">
-                            Storage file path
+                            Uploaded file location
                             <input
                                 value={form.objectPath}
                                 onChange={(event) => updateField('objectPath', event.target.value)}
                                 disabled={!canEdit || isSaving || isLoading || form.sourceKind !== 'storage'}
                                 className={fieldClass}
                             />
+                            <span className="mt-2 block text-xs font-semibold normal-case leading-5 tracking-normal text-black/45">
+                                Usually filled automatically after upload. Editors normally only change this when fixing
+                                an existing uploaded-file record.
+                            </span>
                         </label>
 
                         <label className="mt-5 block text-xs font-bold uppercase tracking-[0.14em] text-black/55">
-                            External or public URL
+                            Public or reference URL
                             <input
                                 value={form.sourceUrl}
                                 onChange={(event) => updateField('sourceUrl', event.target.value)}
                                 disabled={!canEdit || isSaving || isLoading}
                                 className={fieldClass}
                             />
+                            <span className="mt-2 block text-xs font-semibold normal-case leading-5 tracking-normal text-black/45">
+                                Use this for external archive links, hosted video links, or public files that are not
+                                uploaded through this Media screen.
+                            </span>
                         </label>
 
                         <MediaPublishChecklist items={publishChecklist} />
@@ -785,18 +837,21 @@ function AdminMediaContent() {
                         <h2 className="mt-5 text-xl font-semibold">Upload draft media</h2>
                         <p className="mt-3 text-sm leading-6 text-white/68">
                             Uploads create a draft media record. Public publishing still requires alt text, usage
-                            notes, and the public bucket.
+                            notes, and the Public website library.
                         </p>
                         <label className="mt-5 block text-xs font-bold uppercase tracking-[0.14em] text-white/65">
-                            Upload bucket
+                            Upload destination
                             <select
                                 value={uploadBucket}
                                 onChange={(event) => setUploadBucket(event.target.value as MediaBucket)}
                                 disabled={!canEdit || isUploading}
                                 className="mt-2 min-h-11 w-full rounded border border-white/20 bg-black px-3 text-sm font-semibold text-white outline-none transition focus:border-white disabled:text-white/35"
                             >
-                                <option value="urblo-admin-media">Private draft library</option>
-                                <option value="urblo-public-media">Public website library</option>
+                                {mediaBucketOptions.map(({ value, label }) => (
+                                    <option key={value} value={value}>
+                                        {label}
+                                    </option>
+                                ))}
                             </select>
                         </label>
                         <input
@@ -820,7 +875,7 @@ function AdminMediaContent() {
 
                     <section className="border border-black/10 bg-white p-5">
                         <ShieldCheck className="h-5 w-5 text-black" />
-                        <h2 className="mt-5 text-xl font-semibold text-black">Publication guardrails</h2>
+                        <h2 className="mt-5 text-xl font-semibold text-black">Publishing rules</h2>
                         <ul className="mt-4 space-y-3 text-sm leading-6 text-black/62">
                             <li>Published uploaded files must live in the Public website library.</li>
                             <li>Published media needs usage notes so editors know where it is safe to reuse.</li>
@@ -962,6 +1017,22 @@ function MediaPublishChecklist({ items }: { items: Array<{ label: string; ready:
     );
 }
 
+function MediaLocationHelp({ sourceKind, bucket }: { sourceKind: SourceKind; bucket: MediaBucket }) {
+    const source = mediaSourceOptions.find((item) => item.value === sourceKind) ?? mediaSourceOptions[0];
+    const location = mediaBucketOptions.find((item) => item.value === bucket) ?? mediaBucketOptions[0];
+
+    return (
+        <div className="grid gap-2 md:grid-cols-2">
+            <p className="rounded border border-black/10 bg-[#f8f9f5] px-3 py-2 text-xs font-semibold leading-5 text-black/58">
+                {source.detail}
+            </p>
+            <p className="rounded border border-black/10 bg-[#f8f9f5] px-3 py-2 text-xs font-semibold leading-5 text-black/58">
+                {sourceKind === 'storage' ? location.detail : 'External and hosted links need a usable URL before publishing.'}
+            </p>
+        </div>
+    );
+}
+
 function rowToForm(row: MediaAssetRow | null): MediaFormState {
     if (!row) {
         return emptyForm;
@@ -1003,11 +1074,11 @@ function validateMediaForm(form: MediaFormState): {
     if (sizeBytes.error) return validationFailure(sizeBytes.error);
 
     if (form.sourceKind === 'storage' && !form.objectPath.trim()) {
-        return validationFailure('Uploaded media needs a storage file path before it can be saved.');
+        return validationFailure('Uploaded media needs an uploaded file location before it can be saved.');
     }
 
     if (form.sourceKind !== 'storage' && !form.sourceUrl.trim()) {
-        return validationFailure('External, R2, or Stream media needs a URL before it can be saved.');
+        return validationFailure('External or hosted media needs a URL before it can be saved.');
     }
 
     if (form.status === 'published') {
@@ -1049,8 +1120,8 @@ function getMediaPublishChecklist(form: MediaFormState) {
             ready: hasSource,
             detail:
                 form.sourceKind === 'storage'
-                    ? 'Uploaded media needs a storage file path.'
-                    : 'External, R2, or Stream media needs a URL the team can inspect.',
+                    ? 'Uploaded media needs an uploaded file location.'
+                    : 'External or hosted media needs a URL the team can inspect.',
         },
         {
             label: 'Public location',
@@ -1233,23 +1304,33 @@ function getMediaUrl(asset: MediaAssetRow | null) {
 }
 
 function formatSourceKind(sourceKind: SourceKind) {
-    const labels: Record<SourceKind, string> = {
-        storage: 'Uploaded file',
-        external_legacy: 'External archive',
-        r2: 'Cloudflare R2',
-        stream: 'Cloudflare Stream',
-    };
-
-    return labels[sourceKind];
+    return mediaSourceOptions.find((item) => item.value === sourceKind)?.label ?? sourceKind.replace(/_/g, ' ');
 }
 
 function formatMediaLocation(asset: MediaAssetRow) {
     if (asset.source_kind === 'storage') {
-        const library = asset.bucket === 'urblo-public-media' ? 'Public website library' : 'Private draft library';
-        return `${library} / ${asset.object_path ?? 'No file path'}`;
+        const library =
+            mediaBucketOptions.find((item) => item.value === asset.bucket)?.label ?? 'Private draft library';
+        return `${library} / ${asset.object_path ? 'Uploaded file saved' : 'Missing uploaded file location'}`;
     }
 
-    return `${formatSourceKind(asset.source_kind)} / ${asset.source_url ?? 'No URL'}`;
+    return `${formatSourceKind(asset.source_kind)} / ${asset.source_url ? 'URL saved' : 'Missing URL'}`;
+}
+
+function formatAssetTitle(asset: MediaAssetRow) {
+    if (asset.alt || asset.caption) {
+        return asset.alt || asset.caption || `Asset ${asset.id}`;
+    }
+
+    if (asset.source_kind === 'storage') {
+        return `Uploaded ${asset.media_type} #${asset.id}`;
+    }
+
+    return `${formatSourceKind(asset.source_kind)} #${asset.id}`;
+}
+
+function formatBucketLabel(bucket: MediaBucket) {
+    return mediaBucketOptions.find((item) => item.value === bucket)?.label ?? bucket;
 }
 
 function summarizeMedia(assets: MediaAssetRow[]) {
