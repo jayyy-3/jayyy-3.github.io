@@ -365,6 +365,7 @@ function AdminProjectsContent() {
     const [isSavingHotspot, setIsSavingHotspot] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [notice, setNotice] = useState<string | null>(null);
+    const [highlightedPublishBlockerId, setHighlightedPublishBlockerId] = useState<string | null>(null);
     const projectEditorRef = useRef<HTMLFormElement | null>(null);
     const factsEditorRef = useRef<HTMLElement | null>(null);
     const materialsEditorRef = useRef<HTMLElement | null>(null);
@@ -649,6 +650,7 @@ function AdminProjectsContent() {
         setProjectForm(rowToProjectForm(project));
         setError(null);
         setNotice(null);
+        setHighlightedPublishBlockerId(null);
 
         if (!supabase) {
             return;
@@ -667,11 +669,13 @@ function AdminProjectsContent() {
         resetChildState();
         setError(null);
         setNotice('New project started.');
+        setHighlightedPublishBlockerId(null);
     }
 
     function updateProjectField<Key extends keyof ProjectFormState>(key: Key, value: ProjectFormState[Key]) {
         setProjectForm((current) => ({ ...current, [key]: value }));
         setNotice(null);
+        setHighlightedPublishBlockerId(null);
     }
 
     function updateFactField<Key extends keyof FactFormState>(key: Key, value: FactFormState[Key]) {
@@ -705,6 +709,7 @@ function AdminProjectsContent() {
         if (nextStatus === 'published') {
             const blockers = getProjectPublishBlockers(projectForm, facts, materials);
             if (blockers.length) {
+                setHighlightedPublishBlockerId(blockers[0].id);
                 selectPublishBlocker(blockers[0]);
                 setError(formatPublishBlockerError(blockers));
                 setNotice(null);
@@ -795,6 +800,7 @@ function AdminProjectsContent() {
     }
 
     function selectPublishBlocker(blocker: PublishBlocker) {
+        setHighlightedPublishBlockerId(blocker.id);
         const targetRef =
             blocker.area === 'fact' ? factsEditorRef : blocker.area === 'material' ? materialsEditorRef : projectEditorRef;
 
@@ -1329,6 +1335,7 @@ function AdminProjectsContent() {
                             <PublishReadinessPanel
                                 blockers={publishBlockers}
                                 disabled={!selectedProject && !projectForm.title.trim() && !projectForm.slug.trim()}
+                                highlightedBlockerId={highlightedPublishBlockerId}
                                 onSelect={selectPublishBlocker}
                             />
                         </div>
@@ -1353,6 +1360,7 @@ function AdminProjectsContent() {
                                 value={projectForm.status}
                                 disabled={!canEdit || isSavingProject || isLoading}
                                 onChange={(value) => updateProjectField('status', value as ProjectStatus)}
+                                help="Published is allowed only after the Publish checklist is clear. Use Draft while editing."
                                 options={[
                                     ['draft', 'Draft'],
                                     ['published', 'Published'],
@@ -2351,9 +2359,9 @@ function getProjectPublishBlockers(
 }
 
 function formatPublishBlockerError(blockers: PublishBlocker[]) {
-    const visible = blockers.slice(0, 3).map((blocker) => `${blocker.label}: ${blocker.detail}`);
-    const remaining = blockers.length > visible.length ? ` ${blockers.length - visible.length} more item(s) need review.` : '';
-    return `Publish is locked for now. The Project editor checklist shows what to fix: ${visible.join(' ')}${remaining}`;
+    const first = blockers[0];
+    const remaining = blockers.length > 1 ? ` ${blockers.length - 1} more item(s) remain after that.` : '';
+    return `Publish is locked for now. Start with the highlighted checklist item: ${first.label}. ${first.detail}${remaining}`;
 }
 
 function parsePercentValue(value: string) {
@@ -2368,10 +2376,12 @@ function clampPercent(value: number) {
 function PublishReadinessPanel({
     blockers,
     disabled,
+    highlightedBlockerId,
     onSelect,
 }: {
     blockers: PublishBlocker[];
     disabled?: boolean;
+    highlightedBlockerId?: string | null;
     onSelect: (blocker: PublishBlocker) => void;
 }) {
     const ready = !disabled && blockers.length === 0;
@@ -2429,8 +2439,18 @@ function PublishReadinessPanel({
                             key={blocker.id}
                             type="button"
                             onClick={() => onSelect(blocker)}
-                            className="block w-full rounded border border-amber-300 bg-white px-3 py-3 text-left transition hover:border-black"
+                            className={[
+                                'block w-full rounded border px-3 py-3 text-left transition hover:border-black',
+                                highlightedBlockerId === blocker.id
+                                    ? 'border-black bg-white shadow-[inset_4px_0_0_var(--urblo-lime)]'
+                                    : 'border-amber-300 bg-white',
+                            ].join(' ')}
                         >
+                            {highlightedBlockerId === blocker.id ? (
+                                <span className="mb-2 inline-flex rounded bg-black px-2 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-white">
+                                    Start here
+                                </span>
+                            ) : null}
                             <span className="block text-xs font-bold uppercase tracking-[0.12em] text-black">
                                 {blocker.label}
                             </span>
@@ -2641,12 +2661,14 @@ function SelectField({
     value,
     disabled,
     options,
+    help,
     onChange,
 }: {
     label: string;
     value: string;
     disabled?: boolean;
     options: Array<[string, string]>;
+    help?: string;
     onChange: (value: string) => void;
 }) {
     return (
@@ -2659,6 +2681,7 @@ function SelectField({
                     </option>
                 ))}
             </select>
+            {help ? <span className="mt-2 block text-xs font-semibold leading-5 text-black/50">{help}</span> : null}
         </label>
     );
 }
