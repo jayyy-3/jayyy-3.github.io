@@ -337,9 +337,9 @@ const pageChecks = [
     ],
     actions: ['enquiry.workflow_update', 'sample_request.workflow_update', 'leads.export_csv'],
     requiredText: [
-      'Lead export was blocked because the activity log could not be recorded',
+      'Export is locked because the change history could not be recorded',
       'Current role is read-only for Leads',
-      'Owner/admin CSV exports are activity-logged',
+      'CSV export is recorded in change history',
       'currently visible filtered queue',
       'Export uses the current search and filters',
       'totalLoadedRows',
@@ -347,6 +347,20 @@ const pageChecks = [
       'Export visible queue',
       'Spam check passed',
       'Email sent',
+      'Workflow rules',
+      'Lead managers can update workflow status',
+      'Email delivery failed',
+      'Lead type',
+      'Website page',
+      'Spam check',
+    ],
+    forbiddenText: [
+      'Lead guardrails',
+      'Owner/admin CSV exports are activity-logged',
+      'Physical deletes stay hidden',
+      'failed notification state',
+      'Unknown admin',
+      'Lead export was blocked because the activity log could not be recorded',
     ],
     exportGate: 'leads.export_csv',
   },
@@ -765,7 +779,10 @@ function checkPage(page) {
 
   if (page.exportGate) {
     const actionIndex = text.indexOf(page.exportGate);
-    const blockedIndex = text.indexOf('blocked because the activity log could not be recorded');
+    const blockedIndex = Math.max(
+      text.indexOf('blocked because the activity log could not be recorded'),
+      text.indexOf('change history could not be recorded'),
+    );
     const downloadIndex = text.indexOf('downloadTextFile');
 
     if (actionIndex === -1 || blockedIndex === -1 || downloadIndex === -1) {

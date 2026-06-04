@@ -413,7 +413,7 @@ function AdminLeadsContent() {
 
         if (auditError) {
             setIsExporting(false);
-            setError(`Lead export was blocked because the activity log could not be recorded: ${auditError}`);
+            setError(`Export is locked because the change history could not be recorded: ${auditError}`);
             return;
         }
 
@@ -427,7 +427,7 @@ function AdminLeadsContent() {
         );
         downloadTextFile(csv, `urblo-leads-${new Date().toISOString().slice(0, 10)}.csv`);
         setIsExporting(false);
-        setNotice(`Exported ${filteredLeads.length} visible lead records. Activity log recorded.`);
+        setNotice(`Exported ${filteredLeads.length} visible lead records. Change history recorded.`);
     }
 
     const statusOptions = selectedKind === 'sample' ? sampleStatusOptions : enquiryStatusOptions;
@@ -435,7 +435,7 @@ function AdminLeadsContent() {
     return (
         <AdminShell
             title="Leads"
-            eyebrow={canManageLeads ? 'Owner/Admin workflow' : 'Read only'}
+            eyebrow={canManageLeads ? 'Lead management' : 'Read only'}
             actions={
                 <div className="flex flex-wrap items-center gap-2">
                     <button
@@ -684,7 +684,7 @@ function AdminLeadsContent() {
                                         (admin) =>
                                             [
                                                 admin.user_id,
-                                                `${admin.display_name || admin.email} (${admin.role})`,
+                                                `${admin.display_name || admin.email} (${formatTeamRole(admin.role)})`,
                                             ] as [string, string],
                                     ),
                                 ]}
@@ -722,20 +722,20 @@ function AdminLeadsContent() {
                         <h2 className="mt-5 text-xl font-semibold">Inbox health</h2>
                         <div className="mt-5 grid gap-3 text-sm leading-6 text-white/72">
                             <p>{inboxSummary.newCount} new leads need first response.</p>
-                            <p>{inboxSummary.failedNotifications} records have failed notification state.</p>
+                            <p>{inboxSummary.failedNotifications} leads need email-delivery review.</p>
                             <p>{inboxSummary.spamCount} records are marked spam.</p>
                         </div>
                     </section>
 
                     <section className="border border-black/10 bg-white p-5">
                         <ShieldAlert className="h-5 w-5 text-black" />
-                        <h2 className="mt-5 text-xl font-semibold text-black">Lead guardrails</h2>
+                        <h2 className="mt-5 text-xl font-semibold text-black">Workflow rules</h2>
                         <ul className="mt-4 space-y-3 text-sm leading-6 text-black/62">
                             <li>New leads enter this inbox from the public Contact and Sample Request forms.</li>
-                            <li>Owner/admin roles can update workflow status, assignment, and internal notes.</li>
-                            <li>Owner/admin CSV exports are activity-logged and limited to the currently visible filtered queue.</li>
-                            <li>Physical deletes stay hidden until privacy policy and retention rules are confirmed.</li>
-                            <li>Use Spam only for junk submissions; use Closed when the conversation is intentionally finished.</li>
+                            <li>Lead managers can update workflow status, assignment, and internal notes.</li>
+                            <li>CSV export is recorded in change history and only includes the currently visible filtered queue.</li>
+                            <li>Use Closed to finish a real conversation while keeping its history.</li>
+                            <li>Use Spam only for junk submissions so real customer conversations stay visible.</li>
                         </ul>
                     </section>
 
@@ -748,8 +748,8 @@ function AdminLeadsContent() {
                                 <SpamCheckPill value={selectedLead.turnstile_success} />
                             </div>
                             <p className="mt-4 text-sm leading-6 text-black/58">
-                                These badges explain whether the form notification email was accepted and whether the
-                                anti-spam check passed when the lead was submitted.
+                                These badges explain whether the team notification email was accepted and whether the
+                                website spam check passed when the lead was submitted.
                             </p>
                         </section>
                     ) : null}
@@ -766,7 +766,7 @@ function AdminLeadsContent() {
                     ) : null}
                     {!canManageLeads ? (
                         <section className="border border-black/10 bg-white p-5 text-sm leading-6 text-black/62">
-                            Current role is read-only for Leads. Owner/admin access is required for workflow updates.
+                            Current role is read-only for Leads. Ask a lead manager to update workflow status, assignment, or internal notes.
                         </section>
                     ) : null}
                 </aside>
@@ -894,9 +894,9 @@ function StatusPill({ status }: { status: string }) {
 
 function NotificationPill({ status }: { status: NotificationStatus }) {
     const labels: Record<NotificationStatus, string> = {
-        pending: 'Email pending',
+        pending: 'Email delivery pending',
         sent: 'Email sent',
-        failed: 'Email failed',
+        failed: 'Email delivery failed',
         not_required: 'Email not required',
     };
 
@@ -1077,27 +1077,27 @@ function buildLeadExportCsv(
 
     const rows = [
         [
-            'kind',
-            'id',
-            'status',
-            'created_at',
-            'updated_at',
-            'name',
-            'email',
-            'phone',
-            'company',
-            'context',
-            'source_route',
-            'notification_status',
-            'turnstile_success',
-            'assigned_to',
-            'message',
-            'shipping_address',
-            'sample_items',
-            'internal_notes',
+            'Lead type',
+            'Lead ID',
+            'Workflow status',
+            'Created',
+            'Last updated',
+            'Name',
+            'Email',
+            'Phone',
+            'Company',
+            'Project context',
+            'Website page',
+            'Email delivery',
+            'Spam check',
+            'Assigned owner',
+            'Customer message',
+            'Shipping address',
+            'Requested samples',
+            'Internal notes',
         ],
         ...enquiries.map((lead) => [
-            'enquiry',
+            'Enquiry',
             lead.id,
             lead.status,
             lead.created_at,
@@ -1107,8 +1107,8 @@ function buildLeadExportCsv(
             lead.phone ?? '',
             lead.company ?? '',
             lead.project_type ?? '',
-            lead.source_route ?? '',
-            lead.notification_status,
+            formatSourceRoute(lead.source_route),
+            notificationExportLabel(lead.notification_status),
             turnstileLabel(lead.turnstile_success),
             assigneeName(lead.assigned_to, admins),
             lead.message ?? '',
@@ -1117,7 +1117,7 @@ function buildLeadExportCsv(
             lead.internal_notes ?? '',
         ]),
         ...sampleRequests.map((lead) => [
-            'sample_request',
+            'Sample request',
             lead.id,
             lead.status,
             lead.created_at,
@@ -1127,8 +1127,8 @@ function buildLeadExportCsv(
             lead.phone ?? '',
             lead.company ?? '',
             lead.project_name ?? '',
-            lead.source_route ?? '',
-            lead.notification_status,
+            formatSourceRoute(lead.source_route),
+            notificationExportLabel(lead.notification_status),
             turnstileLabel(lead.turnstile_success),
             assigneeName(lead.assigned_to, admins),
             lead.message ?? '',
@@ -1164,9 +1164,20 @@ function csvCell(value: unknown) {
 }
 
 function turnstileLabel(value: boolean | null) {
-    if (value === true) return 'passed';
-    if (value === false) return 'failed';
-    return 'not_recorded';
+    if (value === true) return 'Spam check passed';
+    if (value === false) return 'Spam check failed';
+    return 'Spam check not recorded';
+}
+
+function notificationExportLabel(status: NotificationStatus) {
+    const labels: Record<NotificationStatus, string> = {
+        pending: 'Email delivery pending',
+        sent: 'Email sent',
+        failed: 'Email delivery failed',
+        not_required: 'Email not required',
+    };
+
+    return labels[status];
 }
 
 function downloadTextFile(content: string, filename: string) {
@@ -1184,7 +1195,17 @@ function downloadTextFile(content: string, filename: string) {
 function assigneeName(userId: string | null, admins: AdminProfileRow[]) {
     if (!userId) return 'Unassigned';
     const admin = admins.find((profile) => profile.user_id === userId);
-    return admin?.display_name || admin?.email || 'Unknown admin';
+    return admin?.display_name || admin?.email || 'Unknown team member';
+}
+
+function formatTeamRole(role: string) {
+    const labels: Record<string, string> = {
+        owner: 'Team owner',
+        admin: 'Lead manager',
+        editor: 'Editor',
+    };
+
+    return labels[role] ?? 'Team member';
 }
 
 function formatDate(value: string) {

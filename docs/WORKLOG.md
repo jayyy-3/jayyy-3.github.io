@@ -2,6 +2,42 @@
 
 Last updated: 2026-06-04
 
+## Entry - 2026-06-04 (Admin Leads Workflow Language UX)
+
+### Scope
+- Continued the `/admin` CMS editor-handoff goal by making Leads feel like a team work queue instead of a technical lead table.
+- Replaced visible owner/admin and activity-log export language with lead manager and change history wording.
+- Renamed Lead guardrails to Workflow rules and replaced physical-delete wording with Closed/Spam workflow guidance.
+- Rewrote inbox health and form-delivery copy so failed notifications become email-delivery review and the anti-spam badge is described as the website spam check.
+- Updated lead assignment labels so team roles read as Team owner, Lead manager, Editor, or Team member instead of raw system role names.
+- Rewrote CSV export headers and values from snake_case/status codes to editor-facing labels such as Lead type, Website page, Email delivery, Spam check, and Assigned owner.
+- Expanded admin CRUD coverage so Leads keeps the editor-facing visible-queue/change-history/workflow language and rejects older activity-log, owner/admin export, physical-delete, failed-notification, and unknown-admin wording.
+
+### Changed Files
+- `src/pages/admin/AdminLeadsPage.tsx`
+- `scripts/check-admin-crud-coverage.mjs`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass. Coverage now guards Leads' lead-manager/change-history/Workflow rules/email-delivery/CSV-header language and rejects older activity-log, owner/admin export, physical-delete, failed-notification, and unknown-admin visible wording.
+- `npx tsc -b`: pass.
+- `npm run lint`: pass.
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run agent:smoke`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions.
+- `npm run agent:admin-config-gate`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions; 11 admin routes passed the no-config gate.
+
+### Risks and Gaps
+- This is a targeted Leads work-queue language pass. Settings remains the next CMS UX unification target.
+
+### Next Handoff
+- Continue the CMS goal with Settings team-access and public-site settings clarity.
+
 ## Entry - 2026-06-04 (Admin Articles Section Publishing UX)
 
 ### Scope
