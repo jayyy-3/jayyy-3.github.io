@@ -26,10 +26,10 @@ For additional people:
 1. Create or invite their login account outside `/admin/settings`.
 2. Open `/admin/settings`.
 3. In `CMS team` / `People and access`, follow Access setup checklist.
-4. Use Copy ID where available, or paste the existing login account ID, email, display name, and lowest suitable role into Grant CMS access.
+4. Use Copy setup code where available, or paste the existing login setup code, email, display name, and lowest suitable role into Grant CMS access.
 5. Keep `Active access` enabled, save, then ask the person to sign in at `/admin`.
 
-The current browser admin cannot create the underlying login account by itself. Email alone is not enough to grant access; the login account ID links the login user to the CMS role.
+The current browser admin cannot create the underlying login account by itself. Email alone is not enough to grant access; the login setup code links the login user to the CMS role.
 
 ## Status Rules
 
@@ -67,7 +67,7 @@ Physical delete is not part of the launch CMS workflow.
 | Articles | Edit article metadata, search title/description, and Article sections through section-type forms. | CMS-ready for metadata/section rows; public detail prefers Published article sections and keeps sanitized original import HTML as fallback. |
 | Media | Upload/manage media, metadata, status, and manifest export. | CMS-ready with editor-facing private/public library labels and a publish checklist. |
 | Leads | Triage enquiries and sample requests, follow recommended next steps, assign owners, add internal notes, and export the current filtered queue with change history. | Workflow-ready for CMS managers. |
-| Settings | Edit global contact/search defaults, footer content, and CMS access. | CMS-ready with People and access, Access setup checklist, Copy ID controls, Grant CMS access form, Active access, and role guide; creating/inviting the login account still happens outside this screen. |
+| Settings | Edit global contact/search defaults, footer content, and CMS access. | CMS-ready with People and access, Access setup checklist, Copy setup code controls, Grant CMS access form, Active access, and role guide; creating/inviting the login account still happens outside this screen. |
 | Change history | Inspect saved changes, exports, publish/archive actions, and sensitive operations. | Read-only visibility for Website owner and CMS manager roles. |
 
 ## Public Website Fallbacks

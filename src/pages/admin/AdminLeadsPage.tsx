@@ -840,12 +840,14 @@ function SampleItems({
                         <div key={item.id} className="grid gap-3 p-4 md:grid-cols-[1fr_120px]">
                             <div>
                                 <p className="text-sm font-semibold text-black">
-                                    {item.stone_group_id ? stoneMap.get(item.stone_group_id) ?? 'Unknown stone' : 'Stone TBC'}
+                                    {item.stone_group_id
+                                        ? stoneMap.get(item.stone_group_id) ?? 'Stone not found'
+                                        : 'Stone not selected'}
                                 </p>
                                 <p className="mt-1 text-xs font-semibold uppercase tracking-[0.12em] text-black/42">
                                     {item.finish_definition_id
-                                        ? finishMap.get(item.finish_definition_id) ?? 'Unknown finish'
-                                        : 'Finish TBC'}
+                                        ? finishMap.get(item.finish_definition_id) ?? 'Finish not found'
+                                        : 'Finish not selected'}
                                 </p>
                                 {item.notes ? <p className="mt-3 text-sm leading-6 text-black/58">{item.notes}</p> : null}
                             </div>
@@ -1148,10 +1150,12 @@ function formatSampleItems(
 ) {
     return items
         .map((item) => {
-            const stone = item.stone_group_id ? stoneMap.get(item.stone_group_id) ?? 'Unknown stone' : 'Stone TBC';
+            const stone = item.stone_group_id
+                ? stoneMap.get(item.stone_group_id) ?? 'Stone not found'
+                : 'Stone not selected';
             const finish = item.finish_definition_id
-                ? finishMap.get(item.finish_definition_id) ?? 'Unknown finish'
-                : 'Finish TBC';
+                ? finishMap.get(item.finish_definition_id) ?? 'Finish not found'
+                : 'Finish not selected';
             const notes = item.notes ? `; notes: ${item.notes}` : '';
             return `${stone} / ${finish} / qty ${item.quantity}${notes}`;
         })

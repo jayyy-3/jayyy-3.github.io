@@ -610,10 +610,10 @@ function AdminProfilesManager({
         try {
             await navigator.clipboard.writeText(userId);
             setCopiedAccountId(userId);
-            setNotice('Login account ID copied. Paste it into Existing login account ID when granting CMS access.');
+            setNotice('Login setup code copied. Paste it into Login setup code when granting CMS access.');
             setTimeout(() => setCopiedAccountId(null), 2400);
         } catch {
-            setError('Could not copy the login account ID. Select the ID text and copy it manually.');
+            setError('Could not copy the login setup code. Select the code text and copy it manually.');
         }
     }
 
@@ -702,11 +702,11 @@ function AdminProfilesManager({
                         <h2 className="mt-2 text-2xl font-semibold text-black">People and access</h2>
                         <p className="mt-2 max-w-2xl text-sm leading-6 text-black/58">
                             Grant CMS access to people who already have a login account. Create or invite the login
-                            account first, then add the account ID here with the role they should have.
+                            account first, then add the setup code here with the role they should have.
                         </p>
                     </div>
                     <span className="inline-flex h-8 items-center rounded border border-black/10 bg-black/[0.04] px-3 text-[11px] font-bold uppercase tracking-[0.14em] text-black/58">
-                        {profiles.length} profiles
+                        {profiles.length} people
                     </span>
                 </div>
 
@@ -748,8 +748,8 @@ function AdminProfilesManager({
                                             </span>
                                         </div>
                                         <p className="mt-2 text-xs leading-5 text-black/52">
-                                            {adminProfile.display_name || 'No display name'} · Account{' '}
-                                            <span className="font-mono">{formatAccountId(adminProfile.user_id)}</span>
+                                            {adminProfile.display_name || 'No display name'} · Setup code{' '}
+                                            <span className="font-mono">{formatAccountSetupCode(adminProfile.user_id)}</span>
                                         </p>
                                         <p className="mt-1 text-xs leading-5 text-black/45">
                                             {roleDescriptions[adminProfile.role]}
@@ -761,10 +761,10 @@ function AdminProfilesManager({
                                             onClick={() => void copyAccountId(adminProfile.user_id)}
                                             disabled={isSaving}
                                             className="inline-flex min-h-10 items-center justify-center gap-2 rounded border border-black/15 px-3 text-[11px] font-bold uppercase tracking-[0.14em] text-black transition hover:border-black disabled:cursor-not-allowed disabled:text-black/35"
-                                            title="Copy the full login account ID for CMS access setup."
+                                            title="Copy the full login setup code for CMS access setup."
                                         >
                                             <KeyRound className="h-3.5 w-3.5" />
-                                            {copiedAccountId === adminProfile.user_id ? 'Copied ID' : 'Copy ID'}
+                                            {copiedAccountId === adminProfile.user_id ? 'Copied' : 'Copy setup code'}
                                         </button>
                                         <button
                                             type="button"
@@ -798,7 +798,7 @@ function AdminProfilesManager({
                     <h2 className="mt-5 text-xl font-semibold text-black">Access setup checklist</h2>
                     <ol className="mt-4 space-y-3 text-sm leading-6 text-black/62">
                         <li>1. Create or invite the person's login account before using this form.</li>
-                        <li>2. Copy the full login account ID into Existing login account ID.</li>
+                        <li>2. Copy the full login setup code into Login setup code.</li>
                         <li>3. Choose the lowest role they need and keep Active access enabled.</li>
                         <li>4. Save, then ask them to sign in at `/admin`.</li>
                     </ol>
@@ -846,7 +846,7 @@ function AdminProfilesManager({
                     </p>
 
                     <label className="mt-5 block text-xs font-bold uppercase tracking-[0.14em] text-black/55">
-                        Existing login account ID
+                        Login setup code
                         <input
                             value={form.userId}
                             onChange={(event) => updateProfileField('userId', event.target.value)}
@@ -855,7 +855,7 @@ function AdminProfilesManager({
                             className={fieldClass}
                         />
                         <span className="mt-2 block text-xs normal-case leading-5 tracking-normal text-black/48">
-                            Paste the ID from the already-created login account. Email alone cannot grant CMS access.
+                            Paste the code from the already-created login account. Email alone cannot grant CMS access.
                         </span>
                     </label>
 
@@ -975,7 +975,7 @@ function profileRowToForm(row: AdminProfileRow): AdminProfileFormState {
     };
 }
 
-function formatAccountId(userId: string) {
+function formatAccountSetupCode(userId: string) {
     return `${userId.slice(0, 8)}...${userId.slice(-4)}`;
 }
 

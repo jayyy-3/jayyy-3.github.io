@@ -2,6 +2,42 @@
 
 Last updated: 2026-06-04
 
+## Entry - 2026-06-04 (Admin Leads and Settings Handoff Language UX)
+
+### Scope
+- Continued the `/admin` CMS editor-handoff goal with a focused Leads and Settings language cleanup.
+- Replaced Sample Request item fallbacks in Leads with Stone not selected / Finish not selected and Stone not found / Finish not found in both the on-screen request detail and CSV export output.
+- Reframed Settings account-linking UI from Copy ID / Existing login account ID to Copy setup code / Login setup code while preserving the existing login-account binding contract.
+- Changed the Settings team count label from profiles to people so the list reads like access management instead of database rows.
+- Expanded admin CRUD coverage so Leads cannot drift back to TBC or Unknown stone/finish language, and Settings cannot drift back to Copy ID / Existing login account ID wording.
+
+### Changed Files
+- `src/pages/admin/AdminLeadsPage.tsx`
+- `src/pages/admin/AdminSettingsPage.tsx`
+- `scripts/check-admin-crud-coverage.mjs`
+- `docs/ADMIN_EDITOR_GUIDE.md`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass. Coverage now guards Leads sample-item fallback language and Settings setup-code language.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npx tsc -b`: pass.
+- `npm run lint`: pass.
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run agent:smoke`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions.
+- `npm run agent:admin-config-gate`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions; 11 admin routes passed the no-config gate.
+
+### Risks and Gaps
+- This is a local source/docs UX pass. The latest local CMS UX commits still need push/deploy approval plus a final production editor walkthrough before the CMS handoff goal can be considered complete.
+
+### Next Handoff
+- Continue with push/deploy approval and final production editor walkthrough.
+
 ## Entry - 2026-06-04 (Admin Articles Migration Language UX)
 
 ### Scope
