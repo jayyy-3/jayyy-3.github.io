@@ -63,7 +63,7 @@ Physical delete is not part of the launch CMS workflow.
 | Stone Library | Edit stone groups, variants, finish capabilities, and finish imagery. | CMS-ready for listing data; detail page still uses static-backed detail adapter. |
 | Products | Edit product families, models, images, search title/description, materials, and specs. | CMS-ready with media selectors, publish checklist, and Stone Library link feedback. |
 | Articles | Edit article metadata, search title/description, and structured article blocks through block-type forms. | CMS-ready for metadata/block rows; public detail still renders sanitized legacy HTML until structured public block rendering is built. |
-| Media | Upload/manage media, metadata, status, and manifest export. | CMS-ready; publish media before using it publicly. |
+| Media | Upload/manage media, metadata, status, and manifest export. | CMS-ready with editor-facing private/public library labels and a publish checklist. |
 | Leads | Triage enquiries and sample requests, follow recommended next steps, assign owners, add internal notes, and export with audit logging. | Workflow-ready for owner/admin. |
 | Settings | Edit global identity, footer content, SEO defaults, and CMS access. | CMS-ready; creating/inviting the login account still happens outside this screen. |
 | Audit | Inspect admin mutation history. | Read-only visibility for owner/admin. |
@@ -87,7 +87,7 @@ Before publishing:
 - Stone Library finish images need a selected media record that is already Published in Media.
 - Products need name, URL, short description, hero image, at least one published model with image, material defaults, and specs before Publish is available.
 - Articles should have title, slug, date, excerpt, cover image where needed, search preview fields where needed, and structured blocks with the required copy/link/media fields filled in.
-- Media should have useful alt text, caption/credit where relevant, usage notes, and Published status before it is used publicly.
+- Media should pass the on-screen checklist: source recorded, uploaded files moved to the Public website library, image alt text filled in, usage notes filled in, and Published status before public reuse.
 
 If Publish is blocked, use the on-screen checklist or validation message to fix the named field, then save/publish again.
 

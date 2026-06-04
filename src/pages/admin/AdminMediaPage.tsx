@@ -296,6 +296,11 @@ function AdminMediaContent() {
             return;
         }
 
+        if (nextStatus === 'published' && !canPublishMedia) {
+            setError('Complete the media publish checklist before publishing this asset.');
+            return;
+        }
+
         const validation = validateMediaForm({ ...form, status: nextStatus });
         if (validation.error) {
             setError(validation.error);
@@ -422,6 +427,8 @@ function AdminMediaContent() {
 
     const previewUrl = getMediaUrl(selectedAsset);
     const mediaCounts = useMemo(() => summarizeMedia(assets), [assets]);
+    const publishChecklist = useMemo(() => getMediaPublishChecklist(form), [form]);
+    const canPublishMedia = publishChecklist.every((item) => item.ready);
     const filteredAssets = useMemo(
         () =>
             assets.filter((asset) => {
@@ -496,7 +503,7 @@ function AdminMediaContent() {
                             <input
                                 value={mediaSearch}
                                 onChange={(event) => setMediaSearch(event.target.value)}
-                                placeholder="Search alt, source, bucket, type"
+                                placeholder="Search description, source, location, type"
                                 className="min-w-0 flex-1 bg-transparent text-sm font-medium outline-none placeholder:text-black/36"
                             />
                         </label>
@@ -547,13 +554,13 @@ function AdminMediaContent() {
                                                     {asset.alt || asset.caption || asset.object_path || asset.source_url || `Asset ${asset.id}`}
                                                 </span>
                                                 <span className="mt-1 block truncate text-xs font-semibold uppercase tracking-[0.12em] text-black/40">
-                                                    {asset.source_kind} · {asset.media_type}
+                                                    {formatSourceKind(asset.source_kind)} · {asset.media_type}
                                                 </span>
                                             </span>
                                             <CmsStatusPill status={asset.status} />
                                         </div>
                                         <p className="mt-3 truncate text-xs text-black/45">
-                                            {asset.bucket ?? 'external'} / {asset.object_path ?? asset.source_url ?? 'No source'}
+                                            {formatMediaLocation(asset)}
                                         </p>
                                     </button>
                                 ))}
@@ -613,30 +620,30 @@ function AdminMediaContent() {
                             </label>
 
                             <label className="text-xs font-bold uppercase tracking-[0.14em] text-black/55">
-                                Source kind
+                                Media source
                                 <select
                                     value={form.sourceKind}
                                     onChange={(event) => updateField('sourceKind', event.target.value as SourceKind)}
                                     disabled={!canEdit || isSaving || isLoading}
                                     className={fieldClass}
                                 >
-                                    <option value="storage">Storage</option>
-                                    <option value="external_legacy">External legacy</option>
+                                    <option value="storage">Uploaded file</option>
+                                    <option value="external_legacy">External archive link</option>
                                     <option value="r2">Cloudflare R2</option>
                                     <option value="stream">Cloudflare Stream</option>
                                 </select>
                             </label>
 
                             <label className="text-xs font-bold uppercase tracking-[0.14em] text-black/55">
-                                Bucket
+                                Publishing location
                                 <select
                                     value={form.bucket}
                                     onChange={(event) => updateField('bucket', event.target.value as MediaBucket)}
                                     disabled={!canEdit || isSaving || isLoading || form.sourceKind !== 'storage'}
                                     className={fieldClass}
                                 >
-                                    <option value="urblo-admin-media">Admin draft bucket</option>
-                                    <option value="urblo-public-media">Public media bucket</option>
+                                    <option value="urblo-admin-media">Private draft library</option>
+                                    <option value="urblo-public-media">Public website library</option>
                                 </select>
                             </label>
 
@@ -657,7 +664,7 @@ function AdminMediaContent() {
                         </div>
 
                         <label className="mt-5 block text-xs font-bold uppercase tracking-[0.14em] text-black/55">
-                            Object path
+                            Storage file path
                             <input
                                 value={form.objectPath}
                                 onChange={(event) => updateField('objectPath', event.target.value)}
@@ -667,7 +674,7 @@ function AdminMediaContent() {
                         </label>
 
                         <label className="mt-5 block text-xs font-bold uppercase tracking-[0.14em] text-black/55">
-                            Source URL
+                            External or public URL
                             <input
                                 value={form.sourceUrl}
                                 onChange={(event) => updateField('sourceUrl', event.target.value)}
@@ -675,6 +682,8 @@ function AdminMediaContent() {
                                 className={fieldClass}
                             />
                         </label>
+
+                        <MediaPublishChecklist items={publishChecklist} />
                     </section>
 
                     <section className="border border-black/10 bg-white p-5 md:p-6">
@@ -724,7 +733,7 @@ function AdminMediaContent() {
 
                     <section className="border border-black/10 bg-white p-5 md:p-6">
                         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-black/45">
-                            Technical metadata
+                            File details
                         </p>
                         <div className="mt-5 grid gap-4 md:grid-cols-2">
                             <label className="text-xs font-bold uppercase tracking-[0.14em] text-black/55">
@@ -786,8 +795,8 @@ function AdminMediaContent() {
                                 disabled={!canEdit || isUploading}
                                 className="mt-2 min-h-11 w-full rounded border border-white/20 bg-black px-3 text-sm font-semibold text-white outline-none transition focus:border-white disabled:text-white/35"
                             >
-                                <option value="urblo-admin-media">Admin draft bucket</option>
-                                <option value="urblo-public-media">Public media bucket</option>
+                                <option value="urblo-admin-media">Private draft library</option>
+                                <option value="urblo-public-media">Public website library</option>
                             </select>
                         </label>
                         <input
@@ -813,9 +822,9 @@ function AdminMediaContent() {
                         <ShieldCheck className="h-5 w-5 text-black" />
                         <h2 className="mt-5 text-xl font-semibold text-black">Publication guardrails</h2>
                         <ul className="mt-4 space-y-3 text-sm leading-6 text-black/62">
-                            <li>Published storage assets must use `urblo-public-media`.</li>
-                            <li>Published media requires usage notes.</li>
-                            <li>Published images require alt text.</li>
+                            <li>Published uploaded files must live in the Public website library.</li>
+                            <li>Published media needs usage notes so editors know where it is safe to reuse.</li>
+                            <li>Published images need alt text before they can support public pages.</li>
                             <li>CSV manifest exports are audit-gated and limited to visible records.</li>
                             <li>Viewer roles can inspect but not mutate media records.</li>
                         </ul>
@@ -875,9 +884,10 @@ function AdminMediaContent() {
                         </button>
                         <button
                             type="button"
-                            disabled={!canEdit || isSaving || isLoading}
+                            disabled={!canEdit || isSaving || isLoading || !canPublishMedia}
                             onClick={() => void saveAsset('published')}
                             className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded bg-[var(--urblo-lime)] px-4 text-xs font-bold uppercase tracking-[0.14em] text-black transition hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:bg-black/20 disabled:text-black/35"
+                            title={canPublishMedia ? 'Publish media' : 'Complete the publish checklist first.'}
                         >
                             <CheckCircle2 className="h-4 w-4" />
                             Publish
@@ -895,6 +905,60 @@ function AdminMediaContent() {
                 </aside>
             </div>
         </AdminShell>
+    );
+}
+
+function MediaPublishChecklist({ items }: { items: Array<{ label: string; ready: boolean; detail: string }> }) {
+    const readyCount = items.filter((item) => item.ready).length;
+    const allReady = readyCount === items.length;
+
+    return (
+        <section className="mt-5 border border-black/10 bg-[#f8f9f5] p-4">
+            <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+                <div>
+                    <p className="text-xs font-bold uppercase tracking-[0.14em] text-black/45">Publish checklist</p>
+                    <h3 className="mt-2 text-lg font-semibold text-black">
+                        {allReady ? 'Ready for public use' : `${items.length - readyCount} item${items.length - readyCount === 1 ? '' : 's'} need review`}
+                    </h3>
+                    <p className="mt-2 text-sm leading-6 text-black/58">
+                        Published media can be selected for public Projects, Products, Articles, and Stone Library images.
+                    </p>
+                </div>
+                <span
+                    className={[
+                        'inline-flex min-h-8 items-center rounded border px-3 text-[11px] font-bold uppercase tracking-[0.12em]',
+                        allReady
+                            ? 'border-[var(--urblo-lime)] bg-[rgba(0,255,25,0.12)] text-black'
+                            : 'border-amber-300 bg-amber-50 text-amber-800',
+                    ].join(' ')}
+                >
+                    {readyCount}/{items.length} ready
+                </span>
+            </div>
+            <div className="mt-4 grid gap-2">
+                {items.map((item) => (
+                    <div
+                        key={item.label}
+                        className={[
+                            'border p-3',
+                            item.ready ? 'border-[var(--urblo-lime)] bg-white' : 'border-amber-200 bg-amber-50',
+                        ].join(' ')}
+                    >
+                        <div className="flex items-start gap-2">
+                            {item.ready ? (
+                                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-black" />
+                            ) : (
+                                <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-amber-800" />
+                            )}
+                            <div>
+                                <p className="text-sm font-semibold text-black">{item.label}</p>
+                                <p className="mt-1 text-sm leading-5 text-black/58">{item.detail}</p>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </section>
     );
 }
 
@@ -939,24 +1003,24 @@ function validateMediaForm(form: MediaFormState): {
     if (sizeBytes.error) return validationFailure(sizeBytes.error);
 
     if (form.sourceKind === 'storage' && !form.objectPath.trim()) {
-        return validationFailure('Storage media requires an object path.');
+        return validationFailure('Uploaded media needs a storage file path before it can be saved.');
     }
 
     if (form.sourceKind !== 'storage' && !form.sourceUrl.trim()) {
-        return validationFailure('External, R2, or Stream media requires a source URL.');
+        return validationFailure('External, R2, or Stream media needs a URL before it can be saved.');
     }
 
     if (form.status === 'published') {
         if (form.sourceKind === 'storage' && form.bucket !== 'urblo-public-media') {
-            return validationFailure('Published storage media must use the public media bucket.');
+            return validationFailure('Move uploaded media to the Public website library before publishing.');
         }
 
         if (form.mediaType === 'image' && !form.alt.trim()) {
-            return validationFailure('Published images require alt text.');
+            return validationFailure('Add image alt text before publishing this media.');
         }
 
         if (!form.usageNotes.trim()) {
-            return validationFailure('Published media requires usage notes.');
+            return validationFailure('Add usage notes before publishing this media.');
         }
     }
 
@@ -969,6 +1033,45 @@ function validateMediaForm(form: MediaFormState): {
         heightPx: heightPx.value,
         sizeBytes: sizeBytes.value,
     };
+}
+
+function getMediaPublishChecklist(form: MediaFormState) {
+    const hasSource =
+        form.sourceKind === 'storage'
+            ? Boolean(form.objectPath.trim())
+            : Boolean(form.sourceUrl.trim());
+    const publicLocationReady = form.sourceKind !== 'storage' || form.bucket === 'urblo-public-media';
+    const altReady = form.mediaType !== 'image' || Boolean(form.alt.trim());
+
+    return [
+        {
+            label: 'Source is recorded',
+            ready: hasSource,
+            detail:
+                form.sourceKind === 'storage'
+                    ? 'Uploaded media needs a storage file path.'
+                    : 'External, R2, or Stream media needs a URL the team can inspect.',
+        },
+        {
+            label: 'Public location',
+            ready: publicLocationReady,
+            detail: publicLocationReady
+                ? 'The selected source can be used by public pages.'
+                : 'Move uploaded media to the Public website library before publishing.',
+        },
+        {
+            label: 'Alt text for images',
+            ready: altReady,
+            detail: altReady ? 'Image accessibility text is ready.' : 'Add a short description of what the image shows.',
+        },
+        {
+            label: 'Usage notes',
+            ready: Boolean(form.usageNotes.trim()),
+            detail: form.usageNotes.trim()
+                ? 'Editors have reuse guidance for this media.'
+                : 'Explain where this media can be used, for example product hero, project detail, or Stone finish.',
+        },
+    ];
 }
 
 function validationFailure(error: string): ReturnType<typeof validateMediaForm> {
@@ -1127,6 +1230,26 @@ function getMediaUrl(asset: MediaAssetRow | null) {
     }
 
     return asset.source_url;
+}
+
+function formatSourceKind(sourceKind: SourceKind) {
+    const labels: Record<SourceKind, string> = {
+        storage: 'Uploaded file',
+        external_legacy: 'External archive',
+        r2: 'Cloudflare R2',
+        stream: 'Cloudflare Stream',
+    };
+
+    return labels[sourceKind];
+}
+
+function formatMediaLocation(asset: MediaAssetRow) {
+    if (asset.source_kind === 'storage') {
+        const library = asset.bucket === 'urblo-public-media' ? 'Public website library' : 'Private draft library';
+        return `${library} / ${asset.object_path ?? 'No file path'}`;
+    }
+
+    return `${formatSourceKind(asset.source_kind)} / ${asset.source_url ?? 'No URL'}`;
 }
 
 function summarizeMedia(assets: MediaAssetRow[]) {

@@ -2,6 +2,43 @@
 
 Last updated: 2026-06-04
 
+## Entry - 2026-06-04 (Admin Media Publish Checklist UX)
+
+### Scope
+- Continued the `/admin` CMS editor-experience productization goal with a focused Media publish-readiness pass.
+- Replaced internal storage/source labels with editor-facing language such as Private draft library, Public website library, Media source, Publishing location, External archive link, and File details.
+- Added a Media Publish checklist for source recording, public location, image alt text, and usage notes.
+- Locked Media Publish and the status-save publish path while checklist blockers remain, so editors see the missing readiness step instead of discovering it through a late validation error.
+- Expanded the admin CRUD coverage guard, CMS handoff docs, roadmap, task queue, and editor guide to reflect Media checklist/library-label authoring.
+
+### Changed Files
+- `src/pages/admin/AdminMediaPage.tsx`
+- `scripts/check-admin-crud-coverage.mjs`
+- `docs/ADMIN_EDITOR_GUIDE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npx tsc -b`: pass.
+- `npm run lint`: pass.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run agent:smoke`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions.
+- `npm run agent:admin-config-gate`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions; 11 admin routes passed the no-config gate.
+- Visual sanity check: reviewed `.tmp/admin-config-gate/screenshots/admin-media.png`; `/admin/media` still renders the no-config protected shell without private content exposure.
+
+### Risks and Gaps
+- The checklist is source-verified locally but still needs signed-in production editor walkthrough after these local commits are pushed and deployed.
+- Public media reuse still depends on editors publishing the relevant media before linking it from content modules.
+
+### Next Handoff
+- Continue the CMS goal with a signed-in production editor walkthrough after deployment, or the remaining Stone Library detail/public Article rendering gaps.
+
 ## Entry - 2026-06-04 (Admin Leads Workflow Guidance UX)
 
 ### Scope
