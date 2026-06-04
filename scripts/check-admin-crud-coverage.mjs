@@ -65,6 +65,16 @@ const pageChecks = [
       'Open editor',
       'handoffLabel',
       'Where each editing job lives',
+      'Live on website',
+      'No review tasks are visible yet.',
+      'customer enquiries exist',
+      'New contact and sample request submissions will appear here',
+    ],
+    forbiddenText: [
+      'Published rows',
+      'live Supabase content',
+      'lead rows exist',
+      'server-side service-role verification',
     ],
     mutates: false,
   },
@@ -1021,6 +1031,8 @@ function checkProductEditorAuthoring() {
 function checkDashboardEditorLanguage() {
   const content = readRequired('src/pages/admin/adminContent.ts');
   const dashboard = readRequired('src/pages/admin/AdminDashboardPage.tsx');
+  const shell = readRequired('src/pages/admin/AdminShell.tsx');
+  const primitives = readRequired('src/pages/admin/AdminCmsPrimitives.tsx');
   const media = readRequired('src/pages/admin/AdminMediaPage.tsx');
 
   requireIncludes(content, 'handoffLabel', 'src/pages/admin/adminContent.ts');
@@ -1037,6 +1049,13 @@ function checkDashboardEditorLanguage() {
   requireNotIncludes(media, 'Activity log recorded.', 'src/pages/admin/AdminMediaPage.tsx');
   requireIncludes(dashboard, 'handoffLabel', 'src/pages/admin/AdminDashboardPage.tsx');
   requireNotIncludes(content, 'dependency:', 'src/pages/admin/adminContent.ts editor module cards');
+  requireIncludes(shell, 'Published content can appear on the website. Draft and Archived stay hidden.', 'src/pages/admin/AdminShell.tsx');
+  requireIncludes(primitives, 'Draft content is safe to edit. Archived content stays hidden.', 'src/pages/admin/AdminCmsPrimitives.tsx');
+  requireIncludes(primitives, 'Change copy, media, facts, and page sections without affecting the website.', 'src/pages/admin/AdminCmsPrimitives.tsx');
+  requireNotIncludes(shell, 'Published content can go live', 'src/pages/admin/AdminShell.tsx');
+  requireNotIncludes(primitives, 'Draft rows are safe to edit', 'src/pages/admin/AdminCmsPrimitives.tsx');
+  requireNotIncludes(primitives, 'published CMS rows', 'src/pages/admin/AdminCmsPrimitives.tsx');
+  requireNotIncludes(primitives, 'structured rows', 'src/pages/admin/AdminCmsPrimitives.tsx');
 
   for (const technicalPhrase of [
     'Supabase Auth',

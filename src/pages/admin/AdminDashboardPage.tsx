@@ -135,7 +135,7 @@ function AdminDashboardContent() {
             return {
                 label,
                 value: count ?? 0,
-                note: 'Published rows',
+                note: 'Live on website',
             };
         });
 
@@ -512,8 +512,8 @@ function AdminDashboardContent() {
                                 ))
                             ) : (
                                 <div className="p-4 text-sm leading-6 text-black/58">
-                                    No health checks are visible yet. The queue will populate after live Supabase
-                                    content and lead rows exist.
+                                    No review tasks are visible yet. The queue will populate after live content and
+                                    customer enquiries exist.
                                 </div>
                             )}
                         </div>
@@ -591,8 +591,8 @@ function AdminDashboardContent() {
                                 ))
                             ) : (
                                 <div className="p-4 text-sm leading-6 text-black/58">
-                                    No visible leads yet. Live form persistence still needs server-side service-role
-                                    verification before this becomes the business inbox.
+                                    No visible leads yet. New contact and sample request submissions will appear here
+                                    once the live forms receive customer messages.
                                 </div>
                             )}
                         </div>

@@ -42,7 +42,7 @@ export default function AdminShell({ title, eyebrow = 'Urblo Admin', actions, ch
                                         Public website
                                     </p>
                                     <p className="mt-1 text-sm leading-5 text-white/72">
-                                        Published content can go live. Draft and archived content stay hidden.
+                                        Published content can appear on the website. Draft and Archived stay hidden.
                                     </p>
                                 </div>
                             </div>

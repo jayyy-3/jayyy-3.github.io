@@ -2,6 +2,42 @@
 
 Last updated: 2026-06-04
 
+## Entry - 2026-06-04 (Admin Dashboard Visibility Language UX)
+
+### Scope
+- Continued the `/admin` CMS editor-handoff goal with a global Dashboard/status-language cleanup.
+- Replaced Dashboard metric, empty-state, and recent-lead guidance that still referenced rows, Supabase, or service-role verification with editor-facing website/live-content language.
+- Reworded the admin shell visibility note so editors see that Published content can appear on the website, while Draft and Archived stay hidden.
+- Reworded shared CMS status/workflow primitives so they describe draft content and page sections instead of rows.
+- Expanded admin CRUD coverage so Dashboard, shell, and shared status primitives cannot drift back to the older technical wording.
+
+### Changed Files
+- `src/pages/admin/AdminShell.tsx`
+- `src/pages/admin/AdminDashboardPage.tsx`
+- `src/pages/admin/AdminCmsPrimitives.tsx`
+- `scripts/check-admin-crud-coverage.mjs`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass. Coverage now guards Dashboard live-on-website, review-task/customer-enquiry empty states, and shared visibility wording while rejecting older rows/Supabase/service-role language.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npx tsc -b`: pass.
+- `npm run lint`: pass.
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run agent:smoke`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions.
+- `npm run agent:admin-config-gate`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions; 11 admin routes passed the no-config gate.
+
+### Risks and Gaps
+- This is a local source/docs UX pass. The latest local CMS UX commits still need push/deploy approval plus production editor walkthrough before the CMS handoff goal can be considered complete.
+
+### Next Handoff
+- Continue with push/deploy approval and production editor walkthrough.
+
 ## Entry - 2026-06-04 (Admin Projects Case Study Language UX)
 
 ### Scope

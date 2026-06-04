@@ -135,8 +135,8 @@ export function CmsLiveRuleCard({ children }: { children?: ReactNode }) {
                     <p className="text-xs font-bold uppercase tracking-[0.14em] text-black/45">Website visibility</p>
                     <h2 className="mt-2 text-xl font-semibold text-black">Only Published content goes public</h2>
                     <p className="mt-2 text-sm leading-6 text-black/62">
-                        Draft rows are safe to edit. Archived rows stay hidden. Public pages use published CMS rows
-                        where cutover is complete, with static fallback still protecting unfinished areas.
+                        Draft content is safe to edit. Archived content stays hidden. Public pages use Published CMS
+                        content where cutover is complete, with static fallback still protecting unfinished areas.
                     </p>
                 </div>
             </div>
@@ -147,7 +147,7 @@ export function CmsLiveRuleCard({ children }: { children?: ReactNode }) {
 
 export function CmsWorkflowSteps() {
     const steps = [
-        { label: 'Edit draft', detail: 'Change copy, media, facts, and structured rows without affecting the website.' },
+        { label: 'Edit draft', detail: 'Change copy, media, facts, and page sections without affecting the website.' },
         { label: 'Review readiness', detail: 'Clear visible blockers before publishing, including claims and required media/copy.' },
         { label: 'Publish', detail: 'Published content becomes eligible for public CMS-backed pages.' },
     ];
