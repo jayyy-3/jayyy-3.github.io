@@ -2,6 +2,41 @@
 
 Last updated: 2026-06-04
 
+## Entry - 2026-06-04 (Admin Projects Publish Checklist UX)
+
+### Scope
+- Continued the `/admin` CMS editor-experience productization goal with a focused Projects publish-flow pass.
+- Moved project Publish readiness into the Project editor instead of leaving it as a side-panel/error-only cue.
+- Expanded the Project Publish checklist to include title, website URL, public summary/lead copy, project claims, fact claims, and material claims.
+- Locked the Project Publish button while blockers remain, renamed the primary form submit from `Save draft` to `Save changes`, and changed the project-level claim field label to `Claims checked`.
+- Made checklist actions scroll/select the relevant Project, Facts, or Materials editor section so editors know where to fix blockers.
+
+### Changed Files
+- `src/pages/admin/AdminProjectsPage.tsx`
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run build`: pass.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run agent:smoke`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions.
+- `npm run agent:admin-config-gate`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions; 11 admin routes passed the no-config gate.
+
+### Risks and Gaps
+- Projects is more usable for publish blockers, but media ID entry and nested media-map/hotspot editing are still technical and need later editor-facing selectors/previews.
+- Customer/editor review-publish proof against real imported draft content remains outstanding until this local CMS UX batch is pushed and verified in production.
+
+### Next Handoff
+- Continue the CMS goal by simplifying remaining nested content editors, with Stone Library detail/finish-image editing and Project media selectors as the next highest-friction areas.
+
 ## Entry - 2026-06-04 (CMS Storage Proof, Draft Import, and Public Read Cutover)
 
 ### Scope

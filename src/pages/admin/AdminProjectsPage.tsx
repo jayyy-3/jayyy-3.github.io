@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent, PointerEvent as ReactPointerEvent, ReactNode } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import {
@@ -234,6 +234,7 @@ interface HotspotFormState {
 interface PublishBlocker {
     id: string;
     area: 'project' | 'fact' | 'material';
+    field?: 'title' | 'slug' | 'summary' | 'claimReview';
     label: string;
     detail: string;
     rowId?: number;
@@ -358,6 +359,9 @@ function AdminProjectsContent() {
     const [isSavingHotspot, setIsSavingHotspot] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [notice, setNotice] = useState<string | null>(null);
+    const projectEditorRef = useRef<HTMLFormElement | null>(null);
+    const factsEditorRef = useRef<HTMLElement | null>(null);
+    const materialsEditorRef = useRef<HTMLElement | null>(null);
 
     const selectedProject = useMemo(
         () => projects.find((project) => project.id === selectedProjectId) ?? null,
@@ -761,6 +765,9 @@ function AdminProjectsContent() {
     }
 
     function selectPublishBlocker(blocker: PublishBlocker) {
+        const targetRef =
+            blocker.area === 'fact' ? factsEditorRef : blocker.area === 'material' ? materialsEditorRef : projectEditorRef;
+
         if (blocker.area === 'fact' && blocker.rowId) {
             const fact = facts.find((row) => row.id === blocker.rowId);
             if (fact) {
@@ -776,6 +783,8 @@ function AdminProjectsContent() {
                 setMaterialForm(rowToMaterialForm(material));
             }
         }
+
+        window.setTimeout(() => targetRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 0);
     }
 
     async function handleProjectSubmit(event: FormEvent<HTMLFormElement>) {
@@ -1253,7 +1262,11 @@ function AdminProjectsContent() {
                 </section>
 
                 <section className="space-y-5">
-                    <form onSubmit={(event) => void handleProjectSubmit(event)} className="border border-black/10 bg-white p-5 md:p-6">
+                    <form
+                        ref={projectEditorRef}
+                        onSubmit={(event) => void handleProjectSubmit(event)}
+                        className="scroll-mt-5 border border-black/10 bg-white p-5 md:p-6"
+                    >
                         <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                             <div>
                                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-black/45">
@@ -1274,6 +1287,14 @@ function AdminProjectsContent() {
                             <CmsLiveRuleCard>
                                 <CmsStatusMeaning compact />
                             </CmsLiveRuleCard>
+                        </div>
+
+                        <div className="mt-5">
+                            <PublishReadinessPanel
+                                blockers={publishBlockers}
+                                disabled={!selectedProject && !projectForm.title.trim() && !projectForm.slug.trim()}
+                                onSelect={selectPublishBlocker}
+                            />
                         </div>
 
                         <div className="mt-7 grid gap-4 md:grid-cols-2">
@@ -1303,7 +1324,7 @@ function AdminProjectsContent() {
                                 ]}
                             />
                             <SelectField
-                                label="Claim review"
+                                label="Claims checked"
                                 value={projectForm.claimReviewStatus}
                                 disabled={!canEdit || isSavingProject || isLoading}
                                 onChange={(value) => updateProjectField('claimReviewStatus', value as ClaimStatus)}
@@ -1434,11 +1455,16 @@ function AdminProjectsContent() {
                         </label>
 
                         <div className="mt-6 flex flex-wrap gap-2">
-                            <ActionButton disabled={!canEdit || isSavingProject || isLoading} label={isSavingProject ? 'Saving' : 'Save draft'} icon="save" />
+                            <ActionButton disabled={!canEdit || isSavingProject || isLoading} label={isSavingProject ? 'Saving' : 'Save changes'} icon="save" />
                             <button
                                 type="button"
-                                disabled={!canEdit || isSavingProject || isLoading}
+                                disabled={!canEdit || isSavingProject || isLoading || publishBlockers.length > 0}
                                 onClick={() => void saveProject('published')}
+                                title={
+                                    publishBlockers.length
+                                        ? 'Open the Publish checklist to clear blockers before publishing.'
+                                        : 'Publish this project to the public website.'
+                                }
                                 className="inline-flex min-h-11 items-center justify-center gap-2 rounded bg-[var(--urblo-lime)] px-4 text-xs font-bold uppercase tracking-[0.14em] text-black transition hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:bg-black/20 disabled:text-black/35"
                             >
                                 <CheckCircle2 className="h-4 w-4" />
@@ -1454,10 +1480,16 @@ function AdminProjectsContent() {
                                 Archive project
                             </button>
                         </div>
+                        {publishBlockers.length ? (
+                            <p className="mt-3 text-sm font-semibold leading-6 text-amber-800">
+                                Publish is locked until the checklist above is clear.
+                            </p>
+                        ) : null}
                     </form>
 
                     <section className="grid gap-5 lg:grid-cols-2">
                         <SubrecordEditor
+                            ref={factsEditorRef}
                             title="Facts"
                             eyebrow={`${facts.length} rows`}
                             onNew={() => {
@@ -1523,6 +1555,7 @@ function AdminProjectsContent() {
                         </SubrecordEditor>
 
                         <SubrecordEditor
+                            ref={materialsEditorRef}
                             title="Materials"
                             eyebrow={`${materials.length} rows`}
                             onNew={() => {
@@ -1734,12 +1767,6 @@ function AdminProjectsContent() {
                 </section>
 
                 <aside className="space-y-5">
-                    <PublishReadinessPanel
-                        blockers={publishBlockers}
-                        disabled={!selectedProject}
-                        onSelect={selectPublishBlocker}
-                    />
-
                     <section className="border border-black/10 bg-black p-5 text-white">
                         <MapPin className="h-5 w-5 text-[var(--urblo-lime)]" />
                         <h2 className="mt-5 text-xl font-semibold">Map health</h2>
@@ -2096,12 +2123,41 @@ function getProjectPublishBlockers(
 ): PublishBlocker[] {
     const blockers: PublishBlocker[] = [];
 
+    if (!projectForm.title.trim()) {
+        blockers.push({
+            id: 'project-title',
+            area: 'project',
+            field: 'title',
+            label: 'Project title',
+            detail: 'Add the public project title shown in the project list and detail page.',
+        });
+    }
+
+    if (!projectForm.slug.trim()) {
+        blockers.push({
+            id: 'project-slug',
+            area: 'project',
+            field: 'slug',
+            label: 'Project website URL',
+            detail: 'Add the lowercase URL slug for this project, for example moon-gate-woolley-street.',
+        });
+    } else if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(projectForm.slug.trim())) {
+        blockers.push({
+            id: 'project-slug-format',
+            area: 'project',
+            field: 'slug',
+            label: 'Project website URL',
+            detail: 'Use lowercase words separated by hyphens, with no spaces or punctuation.',
+        });
+    }
+
     if (projectForm.claimReviewStatus === 'needs_review') {
         blockers.push({
             id: 'project-claim-review',
             area: 'project',
+            field: 'claimReview',
             label: 'Project claim review',
-            detail: 'Set the Project editor claim review field to Approved or Deferred.',
+            detail: 'Set Claims checked to Approved or Deferred after the project claims have been reviewed.',
         });
     }
 
@@ -2109,8 +2165,9 @@ function getProjectPublishBlockers(
         blockers.push({
             id: 'project-summary-lead',
             area: 'project',
-            label: 'Project summary or lead',
-            detail: 'Add summary or lead copy before publishing.',
+            field: 'summary',
+            label: 'Public summary',
+            detail: 'Add Summary or Lead copy so the public project page has introductory text.',
         });
     }
 
@@ -2122,7 +2179,7 @@ function getProjectPublishBlockers(
                 area: 'fact',
                 rowId: fact.id,
                 label: `Fact: ${fact.fact_label}`,
-                detail: 'Set this fact claim status to Approved or Deferred.',
+                detail: 'Open Facts and set this row to Approved or Deferred after review.',
             });
         });
 
@@ -2134,7 +2191,7 @@ function getProjectPublishBlockers(
                 area: 'material',
                 rowId: material.id,
                 label: `Material: ${material.application}`,
-                detail: 'Set this material claim status to Approved or Deferred.',
+                detail: 'Open Materials and set this row to Approved or Deferred after review.',
             });
         });
 
@@ -2142,9 +2199,9 @@ function getProjectPublishBlockers(
 }
 
 function formatPublishBlockerError(blockers: PublishBlocker[]) {
-    const visible = blockers.slice(0, 4).map((blocker) => `${blocker.label}: ${blocker.detail}`);
+    const visible = blockers.slice(0, 3).map((blocker) => `${blocker.label}: ${blocker.detail}`);
     const remaining = blockers.length > visible.length ? ` ${blockers.length - visible.length} more item(s) need review.` : '';
-    return `Project is not ready to publish. ${visible.join(' ')}${remaining}`;
+    return `Cannot publish yet. Use the Publish checklist in the Project editor to fix: ${visible.join(' ')}${remaining}`;
 }
 
 function parsePercentValue(value: string) {
@@ -2166,6 +2223,9 @@ function PublishReadinessPanel({
     onSelect: (blocker: PublishBlocker) => void;
 }) {
     const ready = !disabled && blockers.length === 0;
+    const projectBlockers = blockers.filter((blocker) => blocker.area === 'project').length;
+    const factBlockers = blockers.filter((blocker) => blocker.area === 'fact').length;
+    const materialBlockers = blockers.filter((blocker) => blocker.area === 'material').length;
 
     return (
         <section
@@ -2184,24 +2244,34 @@ function PublishReadinessPanel({
                 )}
                 <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-black/45">
-                        Publish readiness
+                        Publish checklist
                     </p>
                     <h2 className="mt-2 text-xl font-semibold text-black">
-                        {disabled ? 'Select a project' : ready ? 'Ready to publish' : `${blockers.length} item(s) to review`}
+                        {disabled ? 'Start or select a project' : ready ? 'Ready for the public website' : `${blockers.length} blocker(s) before publish`}
                     </h2>
+                    {!disabled && !ready ? (
+                        <p className="mt-2 text-sm leading-6 text-black/62">
+                            Fix the items below before publishing. Buttons jump to the exact section to update.
+                        </p>
+                    ) : null}
                 </div>
             </div>
 
             {disabled ? (
                 <p className="mt-4 text-sm leading-6 text-black/60">
-                    Choose a project record to see the exact publish blockers.
+                    Create or select a project record to see the exact publish checks.
                 </p>
             ) : ready ? (
                 <p className="mt-4 text-sm leading-6 text-black/70">
-                    Project claim review, fact claims, material claims, and required public copy are ready.
+                    Title, URL, public copy, project claims, fact claims, and material claims are ready.
                 </p>
             ) : (
-                <div className="mt-4 space-y-2">
+                <div className="mt-4 space-y-3">
+                    <div className="grid gap-2 text-xs font-bold uppercase tracking-[0.12em] text-black/52 sm:grid-cols-3">
+                        <span className="border border-black/10 bg-white px-3 py-2">Project {projectBlockers}</span>
+                        <span className="border border-black/10 bg-white px-3 py-2">Facts {factBlockers}</span>
+                        <span className="border border-black/10 bg-white px-3 py-2">Materials {materialBlockers}</span>
+                    </div>
                     {blockers.map((blocker) => (
                         <button
                             key={blocker.id}
@@ -2213,12 +2283,21 @@ function PublishReadinessPanel({
                                 {blocker.label}
                             </span>
                             <span className="mt-1 block text-sm leading-6 text-black/62">{blocker.detail}</span>
+                            <span className="mt-2 block text-xs font-bold uppercase tracking-[0.12em] text-amber-800">
+                                {getPublishBlockerActionLabel(blocker)}
+                            </span>
                         </button>
                     ))}
                 </div>
             )}
         </section>
     );
+}
+
+function getPublishBlockerActionLabel(blocker: PublishBlocker) {
+    if (blocker.area === 'fact') return 'Go to Facts';
+    if (blocker.area === 'material') return 'Go to Materials';
+    return 'Go to Project editor';
 }
 
 function HotspotPlacementEditor({
@@ -2445,21 +2524,20 @@ function ActionButton({ disabled, label }: { disabled?: boolean; label: string; 
     );
 }
 
-function SubrecordEditor({
-    title,
-    eyebrow,
-    disabled,
-    onNew,
-    children,
-}: {
+interface SubrecordEditorProps {
     title: string;
     eyebrow: string;
     disabled?: boolean;
     onNew: () => void;
     children: ReactNode;
-}) {
+}
+
+const SubrecordEditor = forwardRef<HTMLElement, SubrecordEditorProps>(function SubrecordEditor(
+    { title, eyebrow, disabled, onNew, children },
+    ref,
+) {
     return (
-        <section className="border border-black/10 bg-white p-5">
+        <section ref={ref} className="scroll-mt-5 border border-black/10 bg-white p-5">
             <div className="flex items-start justify-between gap-3">
                 <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-black/45">{eyebrow}</p>
@@ -2478,7 +2556,7 @@ function SubrecordEditor({
             <div className="mt-5 space-y-4">{children}</div>
         </section>
     );
-}
+});
 
 function RecordChips<T extends { id: number }>({
     rows,
@@ -2628,11 +2706,11 @@ function validateProjectForm(form: ProjectFormState) {
 
     if (form.status === 'published') {
         if (form.claimReviewStatus === 'needs_review') {
-            return validationFailure('Published projects require claim review to be approved or deferred.');
+            return validationFailure('Cannot publish yet. Set Claims checked to Approved or Deferred.');
         }
 
         if (!form.summary.trim() && !form.lead.trim()) {
-            return validationFailure('Published projects require summary or lead copy.');
+            return validationFailure('Cannot publish yet. Add Summary or Lead copy for the public project page.');
         }
     }
 
