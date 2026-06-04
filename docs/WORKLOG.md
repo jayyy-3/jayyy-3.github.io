@@ -2,6 +2,41 @@
 
 Last updated: 2026-06-04
 
+## Entry - 2026-06-04 (Admin Projects Proof Review Language UX)
+
+### Scope
+- Continued the `/admin` CMS editor-handoff goal by tightening the Projects publishing experience around the real editor blocker already observed in production use.
+- Replaced visible Project/Facts/Materials claim-review field language with editor-facing Proof review language.
+- Added inline Proof review explanations for Needs review, Approved for public use, and Deferred / keep private so editors can decide whether a row is safe to publish without understanding `claim_status`.
+- Rewrote Projects list readiness copy, Publish checklist blocker details, publish-lock validation messages, and the right-side publishing rules to explain what is live, what is blocked, and where to fix it.
+- Expanded admin CRUD coverage so Projects keeps the new proof-review language and rejects the older Claims checked / Claim status / Cannot publish wording.
+
+### Changed Files
+- `src/pages/admin/AdminProjectsPage.tsx`
+- `scripts/check-admin-crud-coverage.mjs`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass. Coverage now guards Projects proof-review language and rejects the older Claims checked / Claim status / Cannot publish wording.
+- `npx tsc -b`: pass.
+- `npm run lint`: pass.
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run agent:smoke`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions.
+- `npm run agent:admin-config-gate`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions; 11 admin routes passed the no-config gate.
+
+### Risks and Gaps
+- This is a targeted Projects editor-language pass. The deeper Projects list/detail IA and live editor walkthrough remain active CMS handoff work.
+- Local rendered admin verification covered the no-config shell; the authenticated proof-review UI still needs production or local credentialed browser QA after this batch is deployed.
+
+### Next Handoff
+- Continue the CMS goal with deeper Projects workflow ergonomics, then move to Media and Stone Library.
+
 ## Entry - 2026-06-04 (Admin Dashboard Module Card Language UX)
 
 ### Scope

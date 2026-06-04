@@ -240,6 +240,12 @@ interface PublishBlocker {
     rowId?: number;
 }
 
+interface ProofReviewOption {
+    value: ClaimStatus;
+    label: string;
+    detail: string;
+}
+
 const emptyProjectForm: ProjectFormState = {
     status: 'draft',
     slug: '',
@@ -1261,8 +1267,8 @@ function AdminProjectsContent() {
                                             <ReadinessBadge ready={!rowNeedsReview} />
                                             <span className="text-xs font-semibold text-black/45">
                                                 {rowNeedsReview
-                                                    ? 'Claims must be approved or deferred before publish.'
-                                                    : 'Project claims reviewed.'}
+                                                    ? 'Proof review still needs an editor decision before publish.'
+                                                    : 'Project proof has been reviewed for publication.'}
                                             </span>
                                         </div>
                                     </button>
@@ -1300,8 +1306,8 @@ function AdminProjectsContent() {
                                     {selectedProject ? selectedProject.title : 'New project'}
                                 </h2>
                                 <p className="mt-2 text-sm leading-6 text-black/58">
-                                    Keep case-study claims reviewed before publication. Material-map content stays
-                                    structured for later public migration.
+                                    Edit the public case study, review proof-sensitive rows, then publish when the
+                                    checklist is clear.
                                 </p>
                             </div>
                             <div className="flex flex-wrap items-center gap-2">
@@ -1354,15 +1360,11 @@ function AdminProjectsContent() {
                                 ]}
                             />
                             <SelectField
-                                label="Claims checked"
+                                label="Project proof review"
                                 value={projectForm.claimReviewStatus}
                                 disabled={!canEdit || isSavingProject || isLoading}
                                 onChange={(value) => updateProjectField('claimReviewStatus', value as ClaimStatus)}
-                                options={[
-                                    ['needs_review', 'Needs review'],
-                                    ['approved', 'Approved'],
-                                    ['deferred', 'Deferred'],
-                                ]}
+                                options={proofReviewOptions.map(({ value, label }) => [value, label])}
                             />
                             <TextField
                                 label="Location"
@@ -1390,6 +1392,10 @@ function AdminProjectsContent() {
                                 inputMode="numeric"
                                 onChange={(value) => updateProjectField('sortOrder', value)}
                             />
+                        </div>
+
+                        <div className="mt-3">
+                            <ProofReviewHelp value={projectForm.claimReviewStatus} />
                         </div>
 
                         <label className="mt-5 block text-xs font-bold uppercase tracking-[0.14em] text-black/55">
@@ -1564,12 +1570,13 @@ function AdminProjectsContent() {
                                 />
                             </label>
                             <SelectField
-                                label="Claim status"
+                                label="Proof review"
                                 value={factForm.claimStatus}
                                 disabled={!canEdit || isSavingFact || !selectedProject}
                                 onChange={(value) => updateFactField('claimStatus', value as ClaimStatus)}
-                                options={claimOptions}
+                                options={proofReviewOptions.map(({ value, label }) => [value, label])}
                             />
+                            <ProofReviewHelp value={factForm.claimStatus} />
                             <TextField
                                 label="Sort order"
                                 value={factForm.sortOrder}
@@ -1647,12 +1654,13 @@ function AdminProjectsContent() {
                                 />
                             </label>
                             <SelectField
-                                label="Claim status"
+                                label="Proof review"
                                 value={materialForm.claimStatus}
                                 disabled={!canEdit || isSavingMaterial || !selectedProject}
                                 onChange={(value) => updateMaterialField('claimStatus', value as ClaimStatus)}
-                                options={claimOptions}
+                                options={proofReviewOptions.map(({ value, label }) => [value, label])}
                             />
+                            <ProofReviewHelp value={materialForm.claimStatus} />
                             <TextField
                                 label="Sort order"
                                 value={materialForm.sortOrder}
@@ -2078,12 +2086,12 @@ function AdminProjectsContent() {
 
                     <section className="border border-black/10 bg-white p-5">
                         <ShieldAlert className="h-5 w-5 text-black" />
-                        <h2 className="mt-5 text-xl font-semibold text-black">Publication guardrails</h2>
+                        <h2 className="mt-5 text-xl font-semibold text-black">Publishing rules</h2>
                         <ul className="mt-4 space-y-3 text-sm leading-6 text-black/62">
-                            <li>Published projects require reviewed claims plus either summary or lead copy.</li>
-                            <li>Public facts/materials expose only approved rows.</li>
-                            <li>Published maps require a media ID; hotspots require coordinates between 0 and 100.</li>
-                            <li>Physical deletes remain hidden; archive is the safe operational path.</li>
+                            <li>Publish is locked until project proof, fact proof, and material proof are reviewed.</li>
+                            <li>Approved proof can show publicly; Deferred proof stays saved but is not treated as an approved public claim.</li>
+                            <li>Published maps need an image; hotspots need saved positions inside the image.</li>
+                            <li>Use Archive to remove a project from the website while keeping its editing history.</li>
                         </ul>
                     </section>
 
@@ -2114,10 +2122,22 @@ const statusOptions: Array<[string, string]> = [
     ['archived', 'Archived'],
 ];
 
-const claimOptions: Array<[string, string]> = [
-    ['needs_review', 'Needs review'],
-    ['approved', 'Approved'],
-    ['deferred', 'Deferred'],
+const proofReviewOptions: ProofReviewOption[] = [
+    {
+        value: 'needs_review',
+        label: 'Needs review',
+        detail: 'Not ready for the public website. An editor needs to check the proof or wording first.',
+    },
+    {
+        value: 'approved',
+        label: 'Approved for public use',
+        detail: 'Ready to appear on the public project page as reviewed proof.',
+    },
+    {
+        value: 'deferred',
+        label: 'Deferred / keep private',
+        detail: 'Keep the row saved, but do not treat it as approved public proof.',
+    },
 ];
 
 const projectMediaRoleOptions: Array<[string, string]> = [
@@ -2135,6 +2155,16 @@ function getProjectMediaRoleLabel(role: ProjectMediaRole) {
     return (
         projectMediaRoleOptions.find(([value]) => value === role)?.[1] ??
         role.replace(/_/g, ' ')
+    );
+}
+
+function ProofReviewHelp({ value }: { value: ClaimStatus }) {
+    const option = proofReviewOptions.find((item) => item.value === value) ?? proofReviewOptions[0];
+
+    return (
+        <p className="rounded border border-black/10 bg-[#f8f9f5] px-3 py-2 text-xs font-semibold leading-5 text-black/58">
+            {option.detail}
+        </p>
     );
 }
 
@@ -2269,8 +2299,8 @@ function getProjectPublishBlockers(
             id: 'project-claim-review',
             area: 'project',
             field: 'claimReview',
-            label: 'Project claim review',
-            detail: 'Set Claims checked to Approved or Deferred after the project claims have been reviewed.',
+            label: 'Project proof review',
+            detail: 'Set Project proof review to Approved for public use or Deferred / keep private after review.',
         });
     }
 
@@ -2292,7 +2322,7 @@ function getProjectPublishBlockers(
                 area: 'fact',
                 rowId: fact.id,
                 label: `Fact: ${fact.fact_label}`,
-                detail: 'Open Facts and set this row to Approved or Deferred after review.',
+                detail: 'Open Facts and set Proof review to Approved for public use or Deferred / keep private.',
             });
         });
 
@@ -2304,7 +2334,7 @@ function getProjectPublishBlockers(
                 area: 'material',
                 rowId: material.id,
                 label: `Material: ${material.application}`,
-                detail: 'Open Materials and set this row to Approved or Deferred after review.',
+                detail: 'Open Materials and set Proof review to Approved for public use or Deferred / keep private.',
             });
         });
 
@@ -2314,7 +2344,7 @@ function getProjectPublishBlockers(
 function formatPublishBlockerError(blockers: PublishBlocker[]) {
     const visible = blockers.slice(0, 3).map((blocker) => `${blocker.label}: ${blocker.detail}`);
     const remaining = blockers.length > visible.length ? ` ${blockers.length - visible.length} more item(s) need review.` : '';
-    return `Cannot publish yet. Use the Publish checklist in the Project editor to fix: ${visible.join(' ')}${remaining}`;
+    return `Publish is locked for now. The Project editor checklist shows what to fix: ${visible.join(' ')}${remaining}`;
 }
 
 function parsePercentValue(value: string) {
@@ -2819,11 +2849,11 @@ function validateProjectForm(form: ProjectFormState) {
 
     if (form.status === 'published') {
         if (form.claimReviewStatus === 'needs_review') {
-            return validationFailure('Cannot publish yet. Set Claims checked to Approved or Deferred.');
+            return validationFailure('Publish is locked. Set Project proof review to Approved for public use or Deferred / keep private.');
         }
 
         if (!form.summary.trim() && !form.lead.trim()) {
-            return validationFailure('Cannot publish yet. Add Summary or Lead copy for the public project page.');
+            return validationFailure('Publish is locked. Add Summary or Lead copy for the public project page.');
         }
     }
 

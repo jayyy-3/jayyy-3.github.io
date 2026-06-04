@@ -199,7 +199,19 @@ const pageChecks = [
       'project_hotspot.publish',
       'project_hotspot.archive',
     ],
-    requiredText: ['Current role is read-only for Projects', 'Physical deletes remain hidden', 'Media blocks', 'Drag point placement', 'CmsPublicPageLink'],
+    requiredText: [
+      'Current role is read-only for Projects',
+      'Use Archive to remove a project from the website while keeping its editing history.',
+      'Media blocks',
+      'Drag point placement',
+      'CmsPublicPageLink',
+      'Project proof review',
+      'Proof review',
+      'Publish is locked for now',
+      'Publishing rules',
+      'Deferred / keep private',
+    ],
+    forbiddenText: ['Claims checked', 'Claim status', 'Cannot publish yet.', 'Project claim review'],
     requiredPatterns: [
       { pattern: /data-hotspot-stage/, label: 'hotspot placement stage marker' },
       { pattern: /data-hotspot-marker/, label: 'hotspot placement marker control' },
@@ -697,6 +709,10 @@ function checkPage(page) {
 
   for (const needle of page.requiredText ?? []) {
     requireIncludes(text, needle, page.file);
+  }
+
+  for (const needle of page.forbiddenText ?? []) {
+    requireNotIncludes(text, needle, page.file);
   }
 
   for (const { pattern, label } of page.requiredPatterns ?? []) {
