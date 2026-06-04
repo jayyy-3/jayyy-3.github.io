@@ -300,12 +300,28 @@ const pageChecks = [
     ],
     requiredText: [
       'Current role is read-only for Articles',
-      'legacy',
-      'Physical deletes remain hidden',
       'CmsPublicPageLink',
       'Article publish checklist',
-      'Complete the Article publish checklist before publishing this article.',
+      'Publish is locked. Complete the Article publish checklist before publishing this article.',
       'getArticlePublishChecklist',
+      'Website URL key',
+      'Original import note',
+      'Original import link',
+      'Article sections',
+      'Publishing rules',
+      'Published in Media',
+      'Draft is safe to edit and will not appear on the public website.',
+      'Use Archive to remove an article from the website while keeping its editing history.',
+    ],
+    forbiddenText: [
+      'Legacy source path',
+      'Legacy source URL',
+      'Publication guardrails',
+      'Physical deletes remain hidden',
+      'Article slug must be lowercase kebab-case.',
+      'No source path recorded.',
+      'Raw newsletter HTML',
+      'migration provenance',
     ],
   },
   {
@@ -799,9 +815,10 @@ function checkArticleStructuredAuthoring() {
   }
 
   requireIncludes(text, 'BlockContentEditor', 'src/pages/admin/AdminArticlesPage.tsx');
-  requireIncludes(text, 'Published ${formatBlockTypeLabel(form.blockType)} blocks need editor content', 'src/pages/admin/AdminArticlesPage.tsx');
-  requireIncludes(text, 'Publish at least one structured block so the public article body can appear', 'src/pages/admin/AdminArticlesPage.tsx');
-  requireIncludes(text, 'do not paste newsletter HTML as normal authoring', 'src/pages/admin/AdminArticlesPage.tsx');
+  requireIncludes(text, 'Published ${formatBlockTypeLabel(form.blockType)} sections need editor content', 'src/pages/admin/AdminArticlesPage.tsx');
+  requireIncludes(text, 'Publish at least one article section so the article body can appear', 'src/pages/admin/AdminArticlesPage.tsx');
+  requireIncludes(text, 'Use Article sections for the public article body.', 'src/pages/admin/AdminArticlesPage.tsx');
+  requireNotIncludes(text, 'do not paste newsletter HTML as normal authoring', 'src/pages/admin/AdminArticlesPage.tsx structured article authoring');
 }
 
 function checkProductEditorAuthoring() {

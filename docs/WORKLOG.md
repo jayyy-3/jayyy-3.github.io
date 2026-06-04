@@ -2,6 +2,42 @@
 
 Last updated: 2026-06-04
 
+## Entry - 2026-06-04 (Admin Articles Section Publishing UX)
+
+### Scope
+- Continued the `/admin` CMS editor-handoff goal by clarifying Articles status, section authoring, media, and publishing language.
+- Renamed the visible article Slug field to Website URL key and added article status help explaining Draft, Published, and Archived public visibility.
+- Replaced visible legacy-source labels with Original import note and Original import link so migration provenance stays understandable without exposing internal terminology.
+- Renamed structured block authoring language to Article sections, including section buttons, section health, section checklist items, and section validation messages.
+- Rewrote article media selector labels and previews so editors see Published in Media / Not published in Media instead of raw media paths or status/path strings.
+- Renamed Article publishing guardrails to Publishing rules and replaced physical-delete language with archive-history language.
+- Expanded admin CRUD coverage so Articles keeps the editor-facing website-key/import-note/section/media/status language and rejects older legacy-source, guardrail, physical-delete, slug/kebab-case, and raw source-path wording.
+
+### Changed Files
+- `src/pages/admin/AdminArticlesPage.tsx`
+- `scripts/check-admin-crud-coverage.mjs`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass. Coverage now guards Articles' Website URL key / Original import note-link / Article sections / status-help / Media preview language and rejects older legacy-source, guardrail, physical-delete, slug/kebab-case, raw newsletter, and raw source-path visible wording.
+- `npx tsc -b`: pass.
+- `npm run lint`: pass.
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run agent:smoke`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions.
+- `npm run agent:admin-config-gate`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions; 11 admin routes passed the no-config gate.
+
+### Risks and Gaps
+- This is a targeted Articles language and publish-readiness pass. Leads and Settings remain the next CMS UX unification targets.
+
+### Next Handoff
+- Continue the CMS goal with Leads workflow clarity and Settings team-access/public-site language.
+
 ## Entry - 2026-06-04 (Admin Products Publishing Language UX)
 
 ### Scope

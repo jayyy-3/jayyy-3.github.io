@@ -164,7 +164,7 @@ const blockTypeOptions: Array<[string, string]> = [
 ];
 
 const blockContentHints: Record<ArticleBlockType, string> = {
-    rich_text: 'Normal article copy. Add one clear idea per block so the article can be rearranged later.',
+    rich_text: 'Normal article copy. Add one clear idea per section so the article can be rearranged later.',
     image: 'Pair a selected media record with caption and placement notes.',
     gallery: 'Use the selected media as the lead image, then describe the gallery sequence for review.',
     quote: 'A pull quote with optional attribution.',
@@ -172,7 +172,7 @@ const blockContentHints: Record<ArticleBlockType, string> = {
     cta: 'A button-style reader action with label, link, and optional supporting copy.',
     project_spotlight: 'Choose a linked project and add why the project supports this article.',
     stone_reference: 'Choose a linked stone and add why the material matters here.',
-    comparison_table: 'A table planning block. Add column labels and row notes in plain language.',
+    comparison_table: 'A table planning section. Add column labels and row notes in plain language.',
     proof_metric: 'A short metric or proof point with supporting note.',
     video_embed: 'Approved video URL and caption.',
     callout: 'A highlighted note with heading and body copy.',
@@ -357,7 +357,7 @@ function AdminArticlesContent() {
             try {
                 await loadArticleBlocks(client, nextArticle.id);
             } catch (loadError) {
-                setError(loadError instanceof Error ? loadError.message : 'Article blocks failed to load.');
+                setError(loadError instanceof Error ? loadError.message : 'Article sections failed to load.');
             }
 
             setIsLoading(false);
@@ -388,7 +388,7 @@ function AdminArticlesContent() {
         try {
             await loadArticleBlocks(supabase, article.id);
         } catch (loadError) {
-            setError(loadError instanceof Error ? loadError.message : 'Article blocks failed to load.');
+            setError(loadError instanceof Error ? loadError.message : 'Article sections failed to load.');
         }
     }
 
@@ -423,7 +423,7 @@ function AdminArticlesContent() {
         if (!supabase || !canEdit || !user) return;
 
         if (nextStatus === 'published' && !canPublishArticle) {
-            setError('Complete the Article publish checklist before publishing this article.');
+            setError('Publish is locked. Complete the Article publish checklist before publishing this article.');
             return;
         }
 
@@ -576,7 +576,7 @@ function AdminArticlesContent() {
                 status: response.data.status,
             },
         });
-        setNotice(withAuditNotice(nextStatus === 'published' ? 'Block published.' : 'Block saved.', auditError));
+        setNotice(withAuditNotice(nextStatus === 'published' ? 'Section published.' : 'Section saved.', auditError));
         await loadArticleBlocks(supabase, selectedArticle.id, response.data.id);
     }
 
@@ -619,7 +619,7 @@ function AdminArticlesContent() {
                             <input
                                 value={articleSearch}
                                 onChange={(event) => setArticleSearch(event.target.value)}
-                                placeholder="Search title, slug, tag, author"
+                                placeholder="Search title, website URL, tag, author"
                                 className="min-w-0 flex-1 bg-transparent text-sm font-medium outline-none placeholder:text-black/36"
                             />
                         </label>
@@ -669,7 +669,7 @@ function AdminArticlesContent() {
                                                     {article.title}
                                                 </span>
                                                 <span className="mt-1 block truncate text-xs font-semibold uppercase tracking-[0.12em] text-black/40">
-                                                    {article.slug} / {article.published_on ?? 'date TBC'}
+                                                    {article.slug} / {article.published_on ?? 'Date needs review'}
                                                 </span>
                                             </span>
                                             <CmsStatusPill status={article.status} />
@@ -689,7 +689,7 @@ function AdminArticlesContent() {
                                 <p className="mt-3 text-sm leading-6 text-black/58">
                                     {articles.length
                                         ? 'Clear the search or choose another status filter.'
-                                        : 'Create an article record, then add structured blocks. Raw newsletter HTML should stay migration source, not the authoring model.'}
+                                        : 'Create an article, then add article sections for the public page body.'}
                                 </p>
                             </div>
                         )}
@@ -710,8 +710,7 @@ function AdminArticlesContent() {
                                     {selectedArticle ? selectedArticle.title : 'New article'}
                                 </h2>
                                 <p className="mt-2 text-sm leading-6 text-black/58">
-                                    Author article bodies as structured blocks. Use legacy source fields only to track
-                                    migration provenance.
+                                    Edit the article details, add publish-ready sections, then publish when the checklist is clear.
                                 </p>
                             </div>
                             <div className="flex flex-wrap items-center gap-2">
@@ -738,7 +737,7 @@ function AdminArticlesContent() {
                                 onChange={(value) => updateArticleField('title', value)}
                             />
                             <TextField
-                                label="Slug"
+                                label="Website URL key"
                                 value={articleForm.slug}
                                 disabled={!canEdit || isSavingArticle || isLoading || Boolean(selectedArticle)}
                                 required
@@ -788,6 +787,10 @@ function AdminArticlesContent() {
                             />
                         </div>
 
+                        <div className="mt-3">
+                            <ArticleStatusHelp status={articleForm.status} />
+                        </div>
+
                         <label className="mt-5 block text-xs font-bold uppercase tracking-[0.14em] text-black/55">
                             Excerpt
                             <textarea
@@ -801,13 +804,13 @@ function AdminArticlesContent() {
 
                         <div className="mt-5 grid gap-4 md:grid-cols-2">
                             <TextField
-                                label="Legacy source path"
+                                label="Original import note"
                                 value={articleForm.legacySourcePath}
                                 disabled={!canEdit || isSavingArticle || isLoading}
                                 onChange={(value) => updateArticleField('legacySourcePath', value)}
                             />
                             <TextField
-                                label="Legacy source URL"
+                                label="Original import link"
                                 value={articleForm.legacySourceUrl}
                                 disabled={!canEdit || isSavingArticle || isLoading}
                                 onChange={(value) => updateArticleField('legacySourceUrl', value)}
@@ -865,8 +868,8 @@ function AdminArticlesContent() {
                     </form>
 
                     <SubrecordEditor
-                        title="Structured blocks"
-                        eyebrow={`${blocks.length} rows`}
+                        title="Article sections"
+                        eyebrow={`${blocks.length} sections`}
                         onNew={() => {
                             setSelectedBlockId(null);
                             setBlockForm(emptyBlockForm);
@@ -876,7 +879,7 @@ function AdminArticlesContent() {
                         <RecordChips
                             rows={blocks}
                             selectedId={selectedBlockId}
-                            getLabel={(row) => `${row.sort_order}. ${row.block_type}`}
+                            getLabel={(row) => `${row.sort_order}. ${formatBlockTypeLabel(row.block_type)}`}
                             onSelect={(row) => {
                                 setSelectedBlockId(row.id);
                                 setBlockForm(rowToBlockForm(row));
@@ -891,19 +894,19 @@ function AdminArticlesContent() {
                                 options={statusOptions}
                             />
                             <SelectField
-                                label="Block type"
+                                label="Section type"
                                 value={blockForm.blockType}
                                 disabled={!canEdit || isSavingBlock || !selectedArticle}
                                 onChange={(value) => updateBlockType(value as ArticleBlockType)}
                                 options={blockTypeOptions}
                             />
                             <MediaSelect
-                                label="Block image"
+                                label="Section image"
                                 value={blockForm.mediaAssetId}
                                 disabled={!canEdit || isSavingBlock || !selectedArticle}
                                 mediaOptions={mediaOptions}
                                 selectedMedia={selectedBlockMedia}
-                                emptyLabel="No block image"
+                                emptyLabel="No section image"
                                 onChange={(value) => updateBlockField('mediaAssetId', value)}
                             />
                             <TextField
@@ -952,7 +955,7 @@ function AdminArticlesContent() {
                                 className="inline-flex min-h-10 items-center justify-center gap-2 rounded border border-black/15 bg-white px-3 text-xs font-bold uppercase tracking-[0.14em] text-black transition hover:border-black disabled:cursor-not-allowed disabled:text-black/35"
                             >
                                 <Save className="h-4 w-4" />
-                                {isSavingBlock ? 'Saving' : 'Save block'}
+                                {isSavingBlock ? 'Saving' : 'Save section'}
                             </button>
                             <button
                                 type="button"
@@ -961,7 +964,7 @@ function AdminArticlesContent() {
                                 className="inline-flex min-h-10 items-center justify-center gap-2 rounded bg-[var(--urblo-lime)] px-3 text-xs font-bold uppercase tracking-[0.14em] text-black transition hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:bg-black/20 disabled:text-black/35"
                             >
                                 <CheckCircle2 className="h-4 w-4" />
-                                Publish
+                                Publish section
                             </button>
                             <button
                                 type="button"
@@ -970,7 +973,7 @@ function AdminArticlesContent() {
                                 className="inline-flex min-h-10 items-center justify-center gap-2 rounded bg-black px-3 text-xs font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#33363f] disabled:cursor-not-allowed disabled:bg-black/25"
                             >
                                 <Archive className="h-4 w-4" />
-                                Archive
+                                Archive section
                             </button>
                         </div>
                     </SubrecordEditor>
@@ -979,9 +982,9 @@ function AdminArticlesContent() {
                 <aside className="space-y-5">
                     <section className="border border-black/10 bg-black p-5 text-white">
                         <Braces className="h-5 w-5 text-[var(--urblo-lime)]" />
-                        <h2 className="mt-5 text-xl font-semibold">Block health</h2>
+                        <h2 className="mt-5 text-xl font-semibold">Article section health</h2>
                         <div className="mt-5 grid gap-3 text-sm leading-6 text-white/72">
-                            <p>{blocks.length} structured blocks on the selected article.</p>
+                            <p>{blocks.length} sections on the selected article.</p>
                             <p>{mediaOptions.length} media records available for image selection.</p>
                             <p>{projectOptions.length} project links and {stoneOptions.length} stone links available.</p>
                         </div>
@@ -989,12 +992,12 @@ function AdminArticlesContent() {
 
                     <section className="border border-black/10 bg-white p-5">
                         <ShieldAlert className="h-5 w-5 text-black" />
-                        <h2 className="mt-5 text-xl font-semibold text-black">Publication guardrails</h2>
+                        <h2 className="mt-5 text-xl font-semibold text-black">Publishing rules</h2>
                         <ul className="mt-4 space-y-3 text-sm leading-6 text-black/62">
                             <li>Complete the Article publish checklist before publishing.</li>
-                            <li>Article bodies should use typed blocks; do not paste newsletter HTML as normal authoring.</li>
-                            <li>Publish at least one structured block so the public article body can appear.</li>
-                            <li>Physical deletes remain hidden; archive is the safe operational path.</li>
+                            <li>Use Article sections for the public article body.</li>
+                            <li>Publish at least one article section so the public article body can appear.</li>
+                            <li>Use Archive to remove an article from the website while keeping its editing history.</li>
                         </ul>
                     </section>
 
@@ -1024,6 +1027,20 @@ const statusOptions: Array<[string, string]> = [
     ['published', 'Published'],
     ['archived', 'Archived'],
 ];
+
+function ArticleStatusHelp({ status }: { status: ArticleStatus }) {
+    const messages: Record<ArticleStatus, string> = {
+        draft: 'Draft is safe to edit and will not appear on the public website.',
+        published: 'Published can appear on public article pages where CMS content is active.',
+        archived: 'Archived is hidden from the public website and kept for editing history.',
+    };
+
+    return (
+        <p className="rounded border border-black/10 bg-[#f8f9f5] px-3 py-2 text-xs font-semibold leading-5 text-black/58">
+            {messages[status]}
+        </p>
+    );
+}
 
 function TextField({
     label,
@@ -1097,8 +1114,8 @@ function getMediaUrl(asset: MediaOptionRow | null) {
 }
 
 function formatMediaOption(media: MediaOptionRow) {
-    const label = media.alt || media.caption || media.object_path || media.source_url || `Asset ${media.id}`;
-    return `#${media.id} / ${label}`;
+    const label = media.alt || media.caption || `Media #${media.id}`;
+    return `${label} - ${media.status === 'published' ? 'Published in Media' : 'Not published in Media'}`;
 }
 
 function MediaSelect({
@@ -1148,13 +1165,15 @@ function MediaSelect({
                     </div>
                     <div className="min-w-0">
                         <p className="truncate text-sm font-semibold text-black">
-                            {selectedMedia.alt || selectedMedia.caption || selectedMedia.object_path || `Asset ${selectedMedia.id}`}
+                            {selectedMedia.alt || selectedMedia.caption || `Media #${selectedMedia.id}`}
                         </p>
                         <p className="mt-1 text-xs font-bold uppercase tracking-[0.12em] text-black/45">
-                            {selectedMedia.media_type} / {selectedMedia.status} / #{selectedMedia.id}
+                            {selectedMedia.status === 'published' ? 'Published in Media' : 'Not published in Media'} / #{selectedMedia.id}
                         </p>
                         <p className="mt-2 line-clamp-2 text-xs leading-5 text-black/52">
-                            {selectedMedia.source_url || selectedMedia.object_path || 'No source path recorded.'}
+                            {selectedMedia.status === 'published'
+                                ? 'This media record can support a public article image.'
+                                : 'Open Media, review the asset, then publish it before relying on it for public article pages.'}
                         </p>
                     </div>
                 </div>
@@ -1388,7 +1407,7 @@ function BlockContentEditor({
                             ? 'Project supporting copy'
                             : blockType === 'stone_reference'
                               ? 'Stone supporting copy'
-                              : 'Block copy'
+                              : 'Section copy'
                 }
                 value={contentString(content, 'body') || contentString(content, 'caption') || contentString(content, 'summary')}
                 rows={6}
@@ -1611,11 +1630,11 @@ function formatBlockTypeLabel(blockType: ArticleBlockType) {
 function validateArticleForm(form: ArticleFormState) {
     if (!form.title.trim()) return validationFailure('Article title is required.');
     if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(form.slug.trim())) {
-        return validationFailure('Article slug must be lowercase kebab-case.');
+        return validationFailure('Website URL key must use lowercase words separated by hyphens.');
     }
 
     const sortOrder = requiredInteger(form.sortOrder, 'Sort order');
-    const coverMediaId = optionalPositiveInteger(form.coverMediaId, 'Cover media ID');
+    const coverMediaId = optionalPositiveInteger(form.coverMediaId, 'Cover image');
     if (sortOrder.error) return validationFailure(sortOrder.error);
     if (coverMediaId.error) return validationFailure(coverMediaId.error);
 
@@ -1646,7 +1665,7 @@ function validateArticleForm(form: ArticleFormState) {
 
 function validateBlockForm(form: BlockFormState) {
     const sortOrder = requiredInteger(form.sortOrder, 'Sort order');
-    const mediaAssetId = optionalPositiveInteger(form.mediaAssetId, 'Media asset ID');
+    const mediaAssetId = optionalPositiveInteger(form.mediaAssetId, 'Section image');
     const linkedProjectId = optionalPositiveInteger(form.linkedProjectId, 'Linked project ID');
     const linkedStoneGroupId = optionalPositiveInteger(form.linkedStoneGroupId, 'Linked stone group ID');
     if (sortOrder.error) return validationFailure(sortOrder.error);
@@ -1659,12 +1678,12 @@ function validateBlockForm(form: BlockFormState) {
         try {
             content = JSON.parse(form.contentJson);
         } catch {
-            return validationFailure('Block content could not be read. Re-open the block and try again.');
+            return validationFailure('Section content could not be read. Re-open the section and try again.');
         }
     }
 
     if (form.status === 'published' && !hasPublishReadyBlockContent(form.blockType, content, mediaAssetId.value)) {
-        return validationFailure(`Published ${formatBlockTypeLabel(form.blockType)} blocks need editor content before they can go live.`);
+        return validationFailure(`Published ${formatBlockTypeLabel(form.blockType)} sections need editor content before they can go live.`);
     }
 
     return {
@@ -1837,20 +1856,20 @@ function getArticlePublishChecklist(form: ArticleFormState, blocks: ArticleBlock
                 : 'Add a short excerpt before publishing.',
         },
         {
-            label: 'Published content block',
+            label: 'Published article section',
             ready: publishedBlocks.length > 0,
             detail:
                 publishedBlocks.length > 0
-                    ? 'At least one structured block is marked Published.'
-                    : 'Publish at least one structured content block so the article body can appear.',
+                    ? 'At least one article section is marked Published.'
+                    : 'Publish at least one article section so the article body can appear.',
         },
         {
-            label: 'Block content ready',
+            label: 'Section content ready',
             ready: publishedBlocks.length > 0 && readyPublishedBlocks.length === publishedBlocks.length,
             detail:
                 publishedBlocks.length > 0 && readyPublishedBlocks.length === publishedBlocks.length
-                    ? 'Published blocks have the required copy, links, or media.'
-                    : 'Open each Published block and fill the required copy, link, or media field.',
+                    ? 'Published sections have the required copy, links, or media.'
+                    : 'Open each Published section and fill the required copy, link, or media field.',
         },
     ];
 }
