@@ -496,7 +496,15 @@ function checkPublicRuntimeBoundary() {
 
   requireIncludes(readRequired('src/service/ProductService.ts'), 'return publishedProducts.length ? publishedProducts : products', 'ProductService static fallback');
   requireIncludes(readRequired('src/service/ProjectService.ts'), 'return publishedProjects.length ? publishedProjects : staticProjects', 'ProjectService static fallback');
-  requireIncludes(readRequired('src/service/ArticleService.ts'), 'publishedArticles.length ? publishedArticles : await getStaticArticles()', 'ArticleService static fallback');
+  const articleService = readRequired('src/service/ArticleService.ts');
+  const articlePage = readRequired('src/pages/ArticlePage.tsx');
+  requireIncludes(articleService, 'publishedArticles.length ? publishedArticles : await getStaticArticles()', 'ArticleService static fallback');
+  requireIncludes(articleService, ".from('article_blocks')", 'ArticleService structured block public read');
+  requireIncludes(articleService, ".eq('status', 'published')", 'ArticleService structured block public read');
+  requireIncludes(articleService, 'getBody(meta', 'ArticleService structured body adapter');
+  requireIncludes(articlePage, 'ArticleService.getBody(meta)', 'ArticlePage structured body adapter');
+  requireIncludes(articlePage, 'StructuredArticleBody', 'ArticlePage structured block renderer');
+  requireIncludes(articlePage, "body?.kind === 'structured'", 'ArticlePage structured-vs-legacy rendering');
   requireIncludes(readRequired('src/pages/StoneLibraryPage.tsx'), 'StoneLibraryService.getStoneCards(filters)', 'Stone Library static fallback');
 }
 

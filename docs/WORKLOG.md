@@ -2,6 +2,45 @@
 
 Last updated: 2026-06-04
 
+## Entry - 2026-06-04 (Public Article Structured Block Rendering)
+
+### Scope
+- Continued the `/admin` CMS editor-handoff goal by closing the public Article body gap.
+- Added a public Article body adapter that reads Published Supabase `article_blocks` for the current article slug and falls back to sanitized legacy HTML from `legacy_source_path` when no published structured blocks are available.
+- Added public renderers for structured article block types used by `/admin/articles`, including rich text, media, quote, FAQ, CTA, reference, proof metric, video-link, comparison, and callout blocks.
+- Expanded `npm run agent:public-supabase-readiness` so it fails if Article public detail loses the structured-block adapter or fallback boundary.
+- Updated the editor guide, handoff, roadmap, and task queue to reflect that Article body rendering is now CMS-backed for Published blocks while imported draft content remains private until reviewed and published.
+
+### Changed Files
+- `src/service/ArticleService.ts`
+- `src/pages/ArticlePage.tsx`
+- `scripts/check-public-supabase-readiness.mjs`
+- `docs/ADMIN_EDITOR_GUIDE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npx tsc -b`: pass.
+- `npm run lint`: pass.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:public-supabase-readiness`: pass. Verified 95 draft Article blocks stay structured in import dry run and the public runtime boundary keeps published-only Supabase reads with static/legacy fallback.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run agent:smoke`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions.
+- `npm run agent:admin-config-gate`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions; 11 admin routes passed the no-config gate.
+
+### Risks and Gaps
+- Imported article rows and blocks remain `draft` by design; an editor still needs to review and publish real Article content before the public site shows those CMS-authored bodies.
+- Stone Library detail still needs the deeper Supabase variant/finish detail adapter.
+- A final signed-in production editor walkthrough is still required after local commits are pushed and deployed.
+
+### Next Handoff
+- Continue the CMS goal with a signed-in production walkthrough and Stone Library detail public adapter work.
+
 ## Entry - 2026-06-04 (Admin Settings Access Handoff UX)
 
 ### Scope

@@ -5,11 +5,13 @@ import ReadingProgressBar from '../components/ReadingProgressBar';
 import RouteState from '../components/RouteState';
 import { prepareArticleHtml, resolveArticleAssetPath } from '../lib/articleMedia';
 import ArticleService from '../service/ArticleService';
+import type { ArticleBody, PublicArticleBlock } from '../service/ArticleService';
 import type { ArticleMeta } from '../types/article';
 
 export default function ArticlePage() {
   const { slug = '' } = useParams<{ slug: string }>();
   const [html, setHtml] = useState<string | null>(null);
+  const [body, setBody] = useState<ArticleBody | null>(null);
   const [articles, setArticles] = useState<ArticleMeta[]>([]);
   const [indexStatus, setIndexStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const [contentStatus, setContentStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
@@ -31,21 +33,31 @@ export default function ArticlePage() {
 
     let isCurrent = true;
     setHtml(null);
+    setBody(null);
     setContentStatus('loading');
 
-    const contentSlug = meta.sourceSlug || meta.slug;
-
-    fetch(import.meta.env.BASE_URL + 'articles/' + contentSlug + '/content.html')
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`Article content returned ${response.status}`);
-        }
-        return response.text();
-      })
-      .then((raw) => {
+    ArticleService.getBody(meta)
+      .then(async (nextBody) => {
         if (!isCurrent) {
           return;
         }
+
+        if (nextBody.kind === 'structured' && nextBody.blocks?.length) {
+          setBody(nextBody);
+          setContentStatus('ready');
+          return;
+        }
+
+        const contentSlug = nextBody.legacySourceSlug || meta.sourceSlug || meta.slug;
+        const response = await fetch(import.meta.env.BASE_URL + 'articles/' + contentSlug + '/content.html');
+        if (!response.ok) {
+          throw new Error(`Article content returned ${response.status}`);
+        }
+        const raw = await response.text();
+        if (!isCurrent) {
+          return;
+        }
+        setBody(nextBody);
         setHtml(DOMPurify.sanitize(prepareArticleHtml(raw)));
         setContentStatus('ready');
       })
@@ -127,7 +139,9 @@ export default function ArticlePage() {
     );
   }
 
-  if (contentStatus === 'error' || !html) {
+  const hasStructuredBody = body?.kind === 'structured' && Boolean(body.blocks?.length);
+
+  if (contentStatus === 'error' || (!hasStructuredBody && !html)) {
     return (
       <RouteState
         eyebrow="Article Error"
@@ -170,7 +184,11 @@ export default function ArticlePage() {
       </header>
 
       <div className="article-wrapper border-y border-black/10 bg-[rgba(239,239,239,0.38)] px-6 py-14 md:px-10">
-        <div className="urblo-card w-full max-w-[980px] bg-white px-6 py-8 md:px-10 md:py-10" dangerouslySetInnerHTML={{ __html: html }} />
+        {hasStructuredBody ? (
+          <StructuredArticleBody blocks={body.blocks ?? []} />
+        ) : (
+          <div className="urblo-card w-full max-w-[980px] bg-white px-6 py-8 md:px-10 md:py-10" dangerouslySetInnerHTML={{ __html: html ?? '' }} />
+        )}
       </div>
 
       <nav className="urblo-page-container flex flex-col gap-4 py-10 md:flex-row md:items-center md:justify-between">
@@ -192,4 +210,230 @@ export default function ArticlePage() {
       </nav>
     </div>
   );
+}
+
+function StructuredArticleBody({ blocks }: { blocks: PublicArticleBlock[] }) {
+  return (
+    <article className="mx-auto w-full max-w-[980px] bg-white px-6 py-8 md:px-10 md:py-10">
+      <div className="space-y-8">
+        {blocks.map((block) => (
+          <ArticleBlockRenderer key={block.id} block={block} />
+        ))}
+      </div>
+    </article>
+  );
+}
+
+function ArticleBlockRenderer({ block }: { block: PublicArticleBlock }) {
+  const content = block.content;
+
+  if (block.blockType === 'rich_text') {
+    const body = contentString(content, 'body');
+    const headingLevel = contentNumber(content, 'headingLevel');
+    if (!body) return null;
+    if (headingLevel && headingLevel <= 3) {
+      return <h2 className="text-3xl font-semibold leading-tight text-black">{body}</h2>;
+    }
+    return <ParagraphText text={body} />;
+  }
+
+  if (block.blockType === 'image' || block.blockType === 'gallery') {
+    const caption = contentString(content, 'caption') || contentString(content, 'body') || block.media?.caption;
+    return (
+      <figure className="space-y-3">
+        {block.media?.sourceUrl ? (
+          <img
+            src={block.media.sourceUrl}
+            alt={block.media.alt || caption || 'Article image'}
+            className="w-full object-cover"
+            loading="lazy"
+            decoding="async"
+          />
+        ) : null}
+        {caption ? <figcaption className="text-sm leading-6 text-black/58">{caption}</figcaption> : null}
+      </figure>
+    );
+  }
+
+  if (block.blockType === 'quote') {
+    return (
+      <blockquote className="border-l-4 border-[var(--urblo-lime)] bg-[#f8f9f5] px-5 py-4">
+        <p className="text-2xl font-light leading-snug text-black">{contentString(content, 'quote')}</p>
+        {contentString(content, 'attribution') ? (
+          <cite className="mt-3 block text-sm font-semibold not-italic uppercase tracking-[0.12em] text-black/45">
+            {contentString(content, 'attribution')}
+          </cite>
+        ) : null}
+      </blockquote>
+    );
+  }
+
+  if (block.blockType === 'callout') {
+    return (
+      <section className="border border-black/10 bg-[#f8f9f5] p-5">
+        {contentString(content, 'heading') ? (
+          <h2 className="text-2xl font-semibold text-black">{contentString(content, 'heading')}</h2>
+        ) : null}
+        <ParagraphText text={contentString(content, 'body')} className="mt-3" />
+      </section>
+    );
+  }
+
+  if (block.blockType === 'cta') {
+    const href = contentString(content, 'href') || '/contact';
+    const label = contentString(content, 'label') || 'Contact Urblo';
+    const className = 'mt-5 inline-flex min-h-11 items-center justify-center rounded bg-[var(--urblo-lime)] px-5 text-xs font-bold uppercase tracking-[0.14em] text-black';
+
+    return (
+      <section className="border border-black/10 bg-black p-5 text-white">
+        <ParagraphText text={contentString(content, 'body')} className="text-white/72" />
+        {isInternalHref(href) ? (
+          <Link to={href} className={className}>
+            {label}
+          </Link>
+        ) : (
+          <a href={href} className={className}>
+            {label}
+          </a>
+        )}
+      </section>
+    );
+  }
+
+  if (block.blockType === 'faq') {
+    const items = contentArray(content, 'items');
+    if (!items.length) return null;
+    return (
+      <section className="space-y-3">
+        {items.map((item, index) => {
+          const record = objectRecord(item);
+          return (
+            <div key={index} className="border border-black/10 p-4">
+              <h3 className="text-lg font-semibold text-black">{contentString(record, 'question')}</h3>
+              <ParagraphText text={contentString(record, 'answer')} className="mt-2" />
+            </div>
+          );
+        })}
+      </section>
+    );
+  }
+
+  if (block.blockType === 'proof_metric') {
+    const value = contentString(content, 'value');
+    const label = contentString(content, 'label');
+    if (!value && !label) return null;
+
+    return (
+      <section className="border-y border-black/10 py-6">
+        {value ? <p className="text-[48px] font-light leading-none text-black">{value}</p> : null}
+        {label ? <h2 className="mt-2 text-xl font-semibold text-black">{label}</h2> : null}
+        <ParagraphText text={contentString(content, 'note')} className="mt-3" />
+      </section>
+    );
+  }
+
+  if (block.blockType === 'project_spotlight') {
+    return (
+      <ReferenceBlock
+        title={contentString(content, 'title') || block.linkedProjectTitle || 'Project spotlight'}
+        body={contentString(content, 'body')}
+        href={block.linkedProjectSlug ? `/projects/${block.linkedProjectSlug}` : undefined}
+      />
+    );
+  }
+
+  if (block.blockType === 'stone_reference') {
+    return (
+      <ReferenceBlock
+        title={block.linkedStoneName || 'Stone reference'}
+        body={contentString(content, 'body')}
+        href={block.linkedStoneKey ? `/stone-library/${block.linkedStoneKey}` : undefined}
+      />
+    );
+  }
+
+  if (block.blockType === 'video_embed') {
+    const url = contentString(content, 'url');
+    return <ReferenceBlock title="Video" body={contentString(content, 'caption') || url} href={url || undefined} />;
+  }
+
+  if (block.blockType === 'comparison_table') {
+    return (
+      <section className="border border-black/10 p-5">
+        {contentString(content, 'heading') ? (
+          <h2 className="text-2xl font-semibold text-black">{contentString(content, 'heading')}</h2>
+        ) : null}
+        {contentString(content, 'columnsText') ? (
+          <p className="mt-4 text-xs font-bold uppercase tracking-[0.14em] text-black/48">
+            {contentString(content, 'columnsText')}
+          </p>
+        ) : null}
+        <ParagraphText text={contentString(content, 'rowsText')} className="mt-4" />
+      </section>
+    );
+  }
+
+  return <ParagraphText text={contentString(content, 'body') || contentString(content, 'summary')} />;
+}
+
+function ReferenceBlock({ title, body, href }: { title: string; body?: string; href?: string }) {
+  const content = (
+    <section className="border border-black/10 bg-[#f8f9f5] p-5 transition hover:border-black/30">
+      <h2 className="text-2xl font-semibold text-black">{title}</h2>
+      {body ? <ParagraphText text={body} className="mt-3" /> : null}
+      {href ? (
+        <span className="mt-4 inline-flex text-xs font-bold uppercase tracking-[0.14em] text-black">
+          Open reference
+        </span>
+      ) : null}
+    </section>
+  );
+
+  if (!href) return content;
+
+  return isInternalHref(href) ? (
+    <Link to={href}>{content}</Link>
+  ) : (
+    <a href={href} rel="noreferrer">
+      {content}
+    </a>
+  );
+}
+
+function isInternalHref(href: string) {
+  return href.startsWith('/');
+}
+
+function ParagraphText({ text, className = '' }: { text: string; className?: string }) {
+  if (!text) return null;
+  return (
+    <div className={`space-y-4 text-lg leading-8 text-black/72 ${className}`}>
+      {text.split(/\n{2,}/).map((paragraph, index) => (
+        <p key={index}>{paragraph}</p>
+      ))}
+    </div>
+  );
+}
+
+function objectRecord(value: unknown): Record<string, unknown> {
+  if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+    return value as Record<string, unknown>;
+  }
+
+  return {};
+}
+
+function contentString(content: Record<string, unknown>, key: string) {
+  const value = content[key];
+  return typeof value === 'string' ? value : '';
+}
+
+function contentNumber(content: Record<string, unknown>, key: string) {
+  const value = content[key];
+  return typeof value === 'number' ? value : null;
+}
+
+function contentArray(content: Record<string, unknown>, key: string) {
+  const value = content[key];
+  return Array.isArray(value) ? value : [];
 }
