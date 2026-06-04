@@ -2,6 +2,39 @@
 
 Last updated: 2026-06-04
 
+## Entry - 2026-06-04 (Admin Projects Proof Review Repair UX)
+
+### Scope
+- Continued the `/admin` CMS editor-handoff goal by improving the Projects Facts/Materials repair path after a Publish checklist blocker.
+- Added proof-review status labels to Facts and Materials selection chips so editors can see which saved items still need review before opening each one.
+- Extended Fact and Material proof-review help so Needs review explicitly says it keeps Project Publish locked until the editor chooses Approved for public use or Deferred / keep private.
+- Added a shared proof-review label helper and expanded admin CRUD coverage so the status labels and publish-lock guidance remain guarded.
+
+### Changed Files
+- `src/pages/admin/AdminProjectsPage.tsx`
+- `scripts/check-admin-crud-coverage.mjs`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass. Coverage now guards the Projects Facts/Materials proof-review labels and publish-lock repair context.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npx tsc -b`: pass.
+- `npm run lint`: pass.
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run agent:smoke`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions.
+- `npm run agent:admin-config-gate`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions; 11 admin routes passed the no-config gate.
+
+### Risks and Gaps
+- This is a local source/docs UX pass. The latest local CMS UX commits still need push/deploy approval plus production editor walkthrough before the CMS handoff goal can be considered complete.
+
+### Next Handoff
+- Continue with push/deploy approval and production editor walkthrough.
+
 ## Entry - 2026-06-04 (Admin Projects Publish Blocker Guidance UX)
 
 ### Scope

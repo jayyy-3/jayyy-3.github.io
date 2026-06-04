@@ -1549,7 +1549,7 @@ function AdminProjectsContent() {
                             <RecordChips
                                 rows={facts}
                                 selectedId={selectedFactId}
-                                getLabel={(row) => row.fact_label}
+                                getLabel={(row) => `${row.fact_label} - ${getProofReviewLabel(row.claim_status)}`}
                                 onSelect={(row) => {
                                     setSelectedFactId(row.id);
                                     setFactForm(rowToFactForm(row));
@@ -1588,7 +1588,7 @@ function AdminProjectsContent() {
                                 onChange={(value) => updateFactField('claimStatus', value as ClaimStatus)}
                                 options={proofReviewOptions.map(({ value, label }) => [value, label])}
                             />
-                            <ProofReviewHelp value={factForm.claimStatus} />
+                            <ProofReviewHelp value={factForm.claimStatus} context="fact" />
                             <TextField
                                 label="Sort order"
                                 value={factForm.sortOrder}
@@ -1620,7 +1620,7 @@ function AdminProjectsContent() {
                             <RecordChips
                                 rows={materials}
                                 selectedId={selectedMaterialId}
-                                getLabel={(row) => row.application}
+                                getLabel={(row) => `${row.application} - ${getProofReviewLabel(row.claim_status)}`}
                                 onSelect={(row) => {
                                     setSelectedMaterialId(row.id);
                                     setMaterialForm(rowToMaterialForm(row));
@@ -1672,7 +1672,7 @@ function AdminProjectsContent() {
                                 onChange={(value) => updateMaterialField('claimStatus', value as ClaimStatus)}
                                 options={proofReviewOptions.map(({ value, label }) => [value, label])}
                             />
-                            <ProofReviewHelp value={materialForm.claimStatus} />
+                            <ProofReviewHelp value={materialForm.claimStatus} context="material" />
                             <TextField
                                 label="Sort order"
                                 value={materialForm.sortOrder}
@@ -2170,14 +2170,23 @@ function getProjectMediaRoleLabel(role: ProjectMediaRole) {
     );
 }
 
-function ProofReviewHelp({ value }: { value: ClaimStatus }) {
+function ProofReviewHelp({ value, context = 'project' }: { value: ClaimStatus; context?: 'project' | 'fact' | 'material' }) {
     const option = proofReviewOptions.find((item) => item.value === value) ?? proofReviewOptions[0];
+    const locksPublish =
+        value === 'needs_review' && (context === 'fact' || context === 'material')
+            ? ` This ${context} will keep Project Publish locked until you choose Approved for public use or Deferred / keep private.`
+            : '';
 
     return (
         <p className="rounded border border-black/10 bg-[#f8f9f5] px-3 py-2 text-xs font-semibold leading-5 text-black/58">
             {option.detail}
+            {locksPublish}
         </p>
     );
+}
+
+function getProofReviewLabel(value: ClaimStatus) {
+    return proofReviewOptions.find((item) => item.value === value)?.label ?? 'Needs review';
 }
 
 function formatMediaOption(media: MediaOptionRow) {

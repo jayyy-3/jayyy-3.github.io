@@ -305,6 +305,8 @@ const pageChecks = [
       'Start here',
       'highlightedPublishBlockerId',
       'Published is allowed only after the Publish checklist is clear. Use Draft while editing.',
+      'getProofReviewLabel(row.claim_status)',
+      'will keep Project Publish locked until you choose Approved for public use or Deferred / keep private.',
       'Publishing rules',
       'Deferred / keep private',
     ],
