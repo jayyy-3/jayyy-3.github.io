@@ -458,7 +458,7 @@ function AdminMediaContent() {
         const csv = buildMediaExportCsv(assets);
         downloadTextFile(csv, `urblo-media-manifest-${new Date().toISOString().slice(0, 10)}.csv`);
         setIsExporting(false);
-        setNotice(`Exported ${assets.length} visible media records. Change history recorded.`);
+        setNotice(`Exported ${assets.length} visible media library items. Change history recorded.`);
     }
 
     const previewUrl = getMediaUrl(selectedAsset);
@@ -511,7 +511,7 @@ function AdminMediaContent() {
                         className="inline-flex min-h-10 items-center gap-2 rounded border border-black/15 bg-white px-3 text-xs font-bold uppercase tracking-[0.12em] text-black transition hover:border-black disabled:cursor-not-allowed disabled:text-black/35"
                     >
                         <Plus className="h-4 w-4" />
-                        External record
+                        External media
                     </button>
                 </div>
             }
@@ -520,7 +520,7 @@ function AdminMediaContent() {
                 <section className="border border-black/10 bg-white">
                     <div className="border-b border-black/10 p-4">
                         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-black/45">
-                            Library records
+                            Media library items
                         </p>
                         <h2 className="mt-2 text-2xl font-semibold text-black">{assets.length} assets</h2>
                         <p className="mt-2 text-sm leading-6 text-black/55">
@@ -605,12 +605,12 @@ function AdminMediaContent() {
                             <div className="p-5">
                                 <ImageIcon className="h-5 w-5 text-black" />
                                 <h2 className="mt-5 text-xl font-semibold text-black">
-                                    {assets.length ? 'No matching media' : 'No media records yet'}
+                                    {assets.length ? 'No matching media' : 'No media library items yet'}
                                 </h2>
                                 <p className="mt-3 text-sm leading-6 text-black/58">
                                     {assets.length
                                         ? 'Clear the search or choose another status filter.'
-                                        : 'Upload a draft file or start an external record. Published media requires alt text, usage notes, and a public-safe source.'}
+                                        : 'Upload a draft file or start an external media item. Published media requires alt text, usage notes, and a public-safe source.'}
                                 </p>
                             </div>
                         )}
@@ -625,7 +625,7 @@ function AdminMediaContent() {
                                     Metadata editor
                                 </p>
                                 <h2 className="mt-2 text-2xl font-semibold text-black">
-                                    {selectedId ? `Asset ${selectedId}` : 'New media record'}
+                                    {selectedId ? `Asset ${selectedId}` : 'New media item'}
                                 </h2>
                                 <p className="mt-2 text-sm leading-6 text-black/58">
                                     Keep media inspectable, credited, and safe before connecting it to public content.
@@ -717,7 +717,7 @@ function AdminMediaContent() {
                             />
                             <span className="mt-2 block text-xs font-semibold normal-case leading-5 tracking-normal text-black/45">
                                 Usually filled automatically after upload. Editors normally only change this when fixing
-                                an existing uploaded-file record.
+                                an existing uploaded-file item.
                             </span>
                         </label>
 
