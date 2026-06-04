@@ -68,7 +68,7 @@ Physical delete is not part of the launch CMS workflow.
 | Media | Upload/manage media, metadata, status, and manifest export. | CMS-ready with editor-facing private/public library labels and a publish checklist. |
 | Leads | Triage enquiries and sample requests, follow recommended next steps, assign owners, add internal notes, and export the current filtered queue with change history. | Workflow-ready for CMS managers. |
 | Settings | Edit global contact/search defaults, footer content, and CMS access. | CMS-ready with People and access, Access setup checklist, Copy ID controls, Grant CMS access form, Active access, and role guide; creating/inviting the login account still happens outside this screen. |
-| Activity log | Inspect saved changes, exports, publish/archive actions, and sensitive operations. | Read-only visibility for Website owner and CMS manager roles. |
+| Change history | Inspect saved changes, exports, publish/archive actions, and sensitive operations. | Read-only visibility for Website owner and CMS manager roles. |
 
 ## Public Website Fallbacks
 
@@ -90,7 +90,7 @@ In Leads, CSV export uses the current search, lead-kind filter, and workflow-sta
 ## Publishing Checks
 
 Before publishing:
-- Projects need title, URL, public copy, reviewed project claim status, reviewed facts, and reviewed materials.
+- Projects need title, URL, public copy, proof reviewed for public use, reviewed facts, and reviewed materials.
 - Stone Library families need name, URL key, website stone type, public summary, at least one variant, and reviewed finish availability before Publish is available. Variants need a URL key, editor-facing label, and at least one Available or Needs confirmation finish.
 - Stone Library finish images need a selected media record that is already Published in Media.
 - Products need name, URL, short description, hero image, at least one published model with image, material defaults, and specs before Publish is available. Models have their own checklist and need a clean model key, label, and image before Model Publish is available.

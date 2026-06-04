@@ -31,9 +31,9 @@ The first admin release should feel like an operating console, not a marketing s
 | `/admin/stone-library` | Stone groups, variants, finishes, and images | Admin/editor write; viewer read | Missing image, media-not-published, and TBC states must stay explicit. |
 | `/admin/projects` | Project list and case study editor | Admin/editor write; viewer read | Includes ordered media blocks, material schedules, material maps, draggable hotspots, media pickers/previews, and a Publish checklist with actionable blockers. |
 | `/admin/products` | Product families, models, specs, and defaults | Admin/editor write; viewer read | Product/model media use selectors/previews; material defaults should reference Stone Library records where possible. |
-| `/admin/articles` | Structured article editor | Admin/editor write; viewer read | Uses approved blocks, media pickers/previews, and type-specific content guidance, not raw newsletter HTML as normal authoring. |
-| `/admin/settings` | Site settings, admin users, notification settings | Owner/admin only | Includes admin profile management and global site settings. |
-| `/admin/audit` | Audit event review | Owner/admin read | Mutation history, publish events, and sensitive operations. |
+| `/admin/articles` | Article editor | Admin/editor write; viewer read | Uses Article sections, media pickers/previews, and type-specific content guidance, not raw newsletter HTML as normal authoring. |
+| `/admin/settings` | Website settings and CMS team access | Website owner / CMS manager only | Includes CMS access management and global site settings. |
+| `/admin/audit` | Change history | Website owner / CMS manager read | Saved changes, publish events, exports, and sensitive operations. |
 
 ## Access States
 

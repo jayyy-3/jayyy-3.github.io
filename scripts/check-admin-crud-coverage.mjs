@@ -133,7 +133,8 @@ const pageChecks = [
       'Public website library',
       'Complete the media publish checklist before publishing this asset.',
       'Search description, source, location, type',
-      'Media export was blocked because the activity log could not be recorded',
+      'Media export was blocked because change history could not be recorded',
+      'Change history recorded.',
       'Current role is read-only for Media',
       'File or link type',
       'Website visibility location',
@@ -379,20 +380,31 @@ const pageChecks = [
       'failed notification state',
       'Unknown admin',
       'Lead export was blocked because the activity log could not be recorded',
+      'Export is locked because the activity log could not be recorded',
     ],
     exportGate: 'leads.export_csv',
   },
   {
-    label: 'Activity log',
+    label: 'Change history',
     file: 'src/pages/admin/AdminAuditPage.tsx',
     tables: ['admin_audit_events', 'admin_profiles'],
     requiredText: [
       'canViewAudit',
-      'Activity log visibility is restricted',
-      'Activity log entries are visible only to owner/admin roles',
+      'Change history visibility is restricted',
+      'Change history is visible only to Website owner and CMS manager roles.',
+      'friendlyActionLabels',
+      'friendlyEntityLabels',
+      'CMS team access',
+      'Published project',
       'formatActionLabel',
       'formatEntityType',
       'readOnly',
+    ],
+    forbiddenText: [
+      'Owner/Admin review',
+      'Owner/Admin only',
+      'owner/admin roles',
+      'Activity log entries are visible only to owner/admin roles',
     ],
     mutates: false,
   },
@@ -611,7 +623,8 @@ function checkRoutes() {
   requireIncludes(unauthorized, "auth.status === 'config-missing'", 'src/pages/admin/AdminUnauthorizedPage.tsx');
 
   requireIncludes(audit, ".from('admin_audit_events')", 'src/lib/adminAudit.ts');
-  requireIncludes(audit, 'Activity log was not recorded', 'src/lib/adminAudit.ts');
+  requireIncludes(audit, 'Change history was not recorded', 'src/lib/adminAudit.ts');
+  requireIncludes(audit, 'Website owner or CMS manager', 'src/lib/adminAudit.ts');
   requireIncludes(adminAuthBrowser, '--expect-unauthorized', 'scripts/check-admin-auth-browser.mjs');
   requireIncludes(adminAuthBrowser, 'URBLO_UNPROFILED_EMAIL', 'scripts/check-admin-auth-browser.mjs');
   requireIncludes(adminAuthBrowser, 'URBLO_UNPROFILED_PASSWORD', 'scripts/check-admin-auth-browser.mjs');
@@ -798,7 +811,7 @@ function checkPage(page) {
   if (page.exportGate) {
     const actionIndex = text.indexOf(page.exportGate);
     const blockedIndex = Math.max(
-      text.indexOf('blocked because the activity log could not be recorded'),
+      text.indexOf('blocked because change history could not be recorded'),
       text.indexOf('change history could not be recorded'),
     );
     const downloadIndex = text.indexOf('downloadTextFile');
@@ -872,11 +885,20 @@ function checkProductEditorAuthoring() {
 function checkDashboardEditorLanguage() {
   const content = readRequired('src/pages/admin/adminContent.ts');
   const dashboard = readRequired('src/pages/admin/AdminDashboardPage.tsx');
+  const media = readRequired('src/pages/admin/AdminMediaPage.tsx');
 
   requireIncludes(content, 'handoffLabel', 'src/pages/admin/adminContent.ts');
   requireIncludes(content, 'Private CMS access', 'src/pages/admin/adminContent.ts');
   requireIncludes(content, 'Customer inbox', 'src/pages/admin/adminContent.ts');
-  requireIncludes(content, 'Activity history', 'src/pages/admin/adminContent.ts');
+  requireIncludes(content, 'Article sections', 'src/pages/admin/adminContent.ts');
+  requireIncludes(content, 'Website owner / CMS manager', 'src/pages/admin/adminContent.ts');
+  requireIncludes(content, 'Change history', 'src/pages/admin/adminContent.ts');
+  requireIncludes(content, 'Read-only record', 'src/pages/admin/adminContent.ts');
+  requireNotIncludes(content, 'Owner/admin only', 'src/pages/admin/adminContent.ts operations labels');
+  requireNotIncludes(content, 'Structured story content', 'src/pages/admin/adminContent.ts article labels');
+  requireNotIncludes(content, 'Activity history', 'src/pages/admin/adminContent.ts audit labels');
+  requireIncludes(media, 'Change history recorded.', 'src/pages/admin/AdminMediaPage.tsx');
+  requireNotIncludes(media, 'Activity log recorded.', 'src/pages/admin/AdminMediaPage.tsx');
   requireIncludes(dashboard, 'handoffLabel', 'src/pages/admin/AdminDashboardPage.tsx');
   requireNotIncludes(content, 'dependency:', 'src/pages/admin/adminContent.ts editor module cards');
 

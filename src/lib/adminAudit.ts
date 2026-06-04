@@ -25,6 +25,6 @@ export async function recordAdminAuditEvent(
 
 export function withAuditNotice(message: string, auditError: string | null) {
     return auditError
-        ? `${message} Activity log was not recorded. Ask an owner/admin to review this save: ${auditError}`
+        ? `${message} Change history was not recorded. Ask a Website owner or CMS manager to review this save: ${auditError}`
         : message;
 }

@@ -114,7 +114,7 @@ const adminEditorGuideRequiredModules = [
   'Media',
   'Leads',
   'Settings',
-  'Activity log',
+  'Change history',
 ]
 const adminEditorGuideForbiddenText = [
   'Supabase Auth login account',
@@ -127,6 +127,7 @@ const adminEditorGuideForbiddenText = [
   'owner/admin',
   '| Owner |',
   '| Admin |',
+  'reviewed project claim status',
 ]
 
 try {

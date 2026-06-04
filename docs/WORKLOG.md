@@ -2,6 +2,49 @@
 
 Last updated: 2026-06-04
 
+## Entry - 2026-06-04 (Admin Change History UX)
+
+### Scope
+- Continued the `/admin` CMS editor-handoff goal by replacing the visible Activity log / Owner/Admin audit language with Change history / Website owner / CMS manager language.
+- Updated `/admin/audit` to present as Change history, with restricted-state copy, list/detail copy, guardrail copy, and health summary language that a non-technical CMS manager can understand.
+- Added friendly action/entity labels for common audit records so saved changes read as Published project, Updated media, Exported leads CSV, CMS team access, Media library, Article sections, and related CMS areas instead of raw dotted actions or table names.
+- Updated admin navigation labels so Operations shows Change history, Settings shows Website owner / CMS manager access, and Articles refers to Article sections rather than structured story content.
+- Updated shared save/export failure notices so editors see Change history wording when audit logging fails or succeeds.
+- Updated docs and coverage so the new Change history language is guarded and the editor guide no longer mentions reviewed project claim status.
+
+### Changed Files
+- `src/pages/admin/AdminAuditPage.tsx`
+- `src/pages/admin/adminContent.ts`
+- `src/pages/admin/AdminMediaPage.tsx`
+- `src/lib/adminAudit.ts`
+- `scripts/check-admin-crud-coverage.mjs`
+- `scripts/check-harness.mjs`
+- `docs/ADMIN_EDITOR_GUIDE.md`
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/SUPABASE_SCHEMA.md`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass. Coverage now reports Change history and guards friendly action/entity labels plus Website owner / CMS manager language.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npx tsc -b`: pass.
+- `npm run lint`: pass.
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run agent:smoke`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions.
+- `npm run agent:admin-config-gate`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions; 11 admin routes passed the no-config gate.
+
+### Risks and Gaps
+- This is a local source/docs UX pass. The latest local CMS UX commits still need push/deploy approval plus a final production editor walkthrough before the CMS handoff goal can be considered complete.
+
+### Next Handoff
+- Continue with push/deploy approval and final production walkthrough.
+
 ## Entry - 2026-06-04 (Admin Editor Guide Harness Guard)
 
 ### Scope

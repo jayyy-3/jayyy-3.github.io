@@ -188,21 +188,21 @@ Outcome: the private enquiry and sample request queues have a protected operatio
 
 Acceptance:
 - In progress on 2026-05-28. `/admin/leads` source implements enquiry/sample request queue inspection behind the existing Supabase Auth/profile gate.
-- The screen reads `enquiries`, `sample_requests`, `sample_request_items`, active `admin_profiles`, `stone_groups`, and `finish_definitions`; owner/admin roles can update lead status, assignment, internal notes, and export the currently loaded queue to CSV once live browser-safe Supabase config exists.
+- The screen reads `enquiries`, `sample_requests`, `sample_request_items`, active `admin_profiles`, `stone_groups`, and `finish_definitions`; Website owner / CMS manager roles can update lead status, assignment, internal notes, and export the currently loaded queue to CSV once live browser-safe Supabase config exists.
 - The screen includes loading, empty, detail, status, assignment, internal notes, notification state, sample item, read-only, export, and error states.
 - Lead rows are still expected to be created only through server-side form endpoints; manual lead creation and physical deletes remain intentionally hidden until privacy/retention policy is confirmed.
 - CSV export is intentionally limited to the currently loaded queue and is blocked unless `admin_audit_events` accepts a `leads.export_csv` event first.
-- Live browser save/export verification still requires browser-safe Supabase key configuration and an active owner/admin profile. Basic live lead creation now has verified rows to inspect, but admin workflow/export proof remains pending.
+- Live browser save/export verification still requires browser-safe Supabase key configuration and an active Website owner / CMS manager profile. Basic live lead creation now has verified rows to inspect, and approved admin CRUD live verification has since covered lead workflow/export behavior.
 
-### Phase 4h - Audit Visibility and Admin Audit Writer Source
-Outcome: private mutation history has a protected owner/admin review surface, and admin CRUD/workflow save flows attempt to write audit rows after successful primary mutations.
+### Phase 4h - Change History and Admin Audit Writer Source
+Outcome: private mutation history has a protected Website owner / CMS manager review surface, and admin CRUD/workflow save flows attempt to write change-history rows after successful primary mutations.
 
 Acceptance:
-- In progress on 2026-05-28. `/admin/audit` source implements read-only audit event inspection behind the existing Supabase Auth/profile gate.
-- The screen reads `admin_audit_events` and active `admin_profiles`; owner/admin roles can inspect actors, actions, entity references, timestamps, and metadata once live browser-safe Supabase config exists.
+- In progress on 2026-05-28. `/admin/audit` source implements read-only Change history inspection behind the existing Supabase Auth/profile gate.
+- The screen reads `admin_audit_events` and active `admin_profiles`; Website owner / CMS manager roles can inspect actors, actions, entity references, timestamps, and metadata once live browser-safe Supabase config exists.
 - The screen includes loading, empty, filter, detail, metadata JSON, restricted-role, and error states.
 - Audit event mutation remains intentionally absent from the screen.
-- Admin Settings, Media, Stone Library, Projects, Products, Articles, and Leads save flows call `recordAdminAuditEvent` after successful primary mutations. If the audit insert fails, the UI appends an audit warning to the success notice instead of rolling back the primary save.
+- Admin Settings, Media, Stone Library, Projects, Products, Articles, and Leads save flows call `recordAdminAuditEvent` after successful primary mutations. If the audit insert fails, the UI appends a Change history warning to the success notice instead of rolling back the primary save.
 - The one-time first-admin bootstrap script also writes `admin_profile.bootstrap` into `admin_audit_events` during approved `--allow-writes` mode. Because that operation runs through service-role setup rather than a signed-in admin browser session, the audit event uses `actor_user_id = null` and metadata for the target Auth user/profile.
 - Live audit row creation verification still requires browser-safe Supabase key configuration and an active profile. Server-side form audit events remain pending live form persistence verification.
 - `npm run agent:admin-crud-live` is now staged for that live proof. Default mode is no-write. With `--allow-writes`, it signs in using `URBLO_ADMIN_EMAIL`/`URBLO_ADMIN_PASSWORD` or uses an admin access token, then writes tagged QA rows across Settings, Media, Stone Library including finish images, Projects, Products, Articles, private lead workflow rows, and export-audit actions through authenticated RLS. `URBLO_FIRST_ADMIN_EMAIL` is not used as a live-login fallback, so bootstrap/readiness identity and live session credentials stay explicit. It verifies dashboard-health predicates against tagged QA rows before archive cleanup, publishes then archives public-facing QA parents where possible, verifies the exact expected tagged audit actions and entity types, verifies tagged archived public-content QA rows and private lead QA rows are not anonymously visible through browser-key reads, verifies optional private Storage upload objects can be read back by the signed-in admin and are not anonymously readable when `--include-storage` is used, and performs no physical deletes.

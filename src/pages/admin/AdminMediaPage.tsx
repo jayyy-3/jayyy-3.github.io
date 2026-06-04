@@ -451,14 +451,14 @@ function AdminMediaContent() {
 
         if (auditError) {
             setIsExporting(false);
-            setError(`Media export was blocked because the activity log could not be recorded: ${auditError}`);
+            setError(`Media export was blocked because change history could not be recorded: ${auditError}`);
             return;
         }
 
         const csv = buildMediaExportCsv(assets);
         downloadTextFile(csv, `urblo-media-manifest-${new Date().toISOString().slice(0, 10)}.csv`);
         setIsExporting(false);
-        setNotice(`Exported ${assets.length} visible media records. Activity log recorded.`);
+        setNotice(`Exported ${assets.length} visible media records. Change history recorded.`);
     }
 
     const previewUrl = getMediaUrl(selectedAsset);
