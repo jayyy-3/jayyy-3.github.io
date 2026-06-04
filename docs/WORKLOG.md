@@ -2,6 +2,40 @@
 
 Last updated: 2026-06-04
 
+## Entry - 2026-06-04 (Admin Projects Media Selector UX)
+
+### Scope
+- Continued the `/admin` CMS editor-experience productization goal with a focused Projects media-linking pass.
+- Replaced raw media ID entry with editor-facing media selectors and previews for project cover image, hero image, material image, media block asset, material map image, and hotspot preview image fields.
+- Kept the existing Supabase data contract unchanged; selectors still write the same media ID values, but editors choose from readable media labels with thumbnail/status/source feedback.
+- Updated validation labels so media errors refer to selected images/media rather than database IDs.
+
+### Changed Files
+- `src/pages/admin/AdminProjectsPage.tsx`
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run build`: pass.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run agent:smoke`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions.
+- `npm run agent:admin-config-gate`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions; 11 admin routes passed the no-config gate.
+
+### Risks and Gaps
+- Projects no longer requires hand-entering media IDs for the main image links, but Products and Stone Library still have similar media-linking patterns that should be unified next.
+- Media picker search/filtering is still basic because it uses the existing select list; a richer reusable media chooser remains a later UX improvement once the pattern is shared across modules.
+
+### Next Handoff
+- Continue the CMS goal by applying the same non-technical media selection pattern to Stone Library finish images and Product media/default imagery.
+
 ## Entry - 2026-06-04 (Admin Projects Publish Checklist UX)
 
 ### Scope

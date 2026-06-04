@@ -384,6 +384,30 @@ function AdminProjectsContent() {
         [mediaOptions, selectedMap],
     );
     const selectedMapImageUrl = useMemo(() => getMediaUrl(selectedMapMedia), [selectedMapMedia]);
+    const selectedCoverMedia = useMemo(
+        () => findMediaOption(mediaOptions, projectForm.coverMediaId),
+        [mediaOptions, projectForm.coverMediaId],
+    );
+    const selectedHeroMedia = useMemo(
+        () => findMediaOption(mediaOptions, projectForm.heroMediaId),
+        [mediaOptions, projectForm.heroMediaId],
+    );
+    const selectedMaterialMedia = useMemo(
+        () => findMediaOption(mediaOptions, materialForm.mediaAssetId),
+        [mediaOptions, materialForm.mediaAssetId],
+    );
+    const selectedMediaBlockAsset = useMemo(
+        () => findMediaOption(mediaOptions, mediaBlockForm.mediaAssetId),
+        [mediaBlockForm.mediaAssetId, mediaOptions],
+    );
+    const selectedMapFormMedia = useMemo(
+        () => findMediaOption(mediaOptions, mapForm.mediaAssetId),
+        [mapForm.mediaAssetId, mediaOptions],
+    );
+    const selectedHotspotPreviewMedia = useMemo(
+        () => findMediaOption(mediaOptions, hotspotForm.previewMediaId),
+        [hotspotForm.previewMediaId, mediaOptions],
+    );
     const projectCounts = useMemo(() => summarizeProjects(projects), [projects]);
     const filteredProjects = useMemo(
         () =>
@@ -1427,18 +1451,22 @@ function AdminProjectsContent() {
                                     ['tbc', 'TBC'],
                                 ]}
                             />
-                            <TextField
-                                label="Cover media ID"
+                            <MediaSelect
+                                label="Cover image"
                                 value={projectForm.coverMediaId}
                                 disabled={!canEdit || isSavingProject || isLoading}
-                                inputMode="numeric"
+                                mediaOptions={mediaOptions}
+                                selectedMedia={selectedCoverMedia}
+                                emptyLabel="No cover image"
                                 onChange={(value) => updateProjectField('coverMediaId', value)}
                             />
-                            <TextField
-                                label="Hero media ID"
+                            <MediaSelect
+                                label="Hero image"
                                 value={projectForm.heroMediaId}
                                 disabled={!canEdit || isSavingProject || isLoading}
-                                inputMode="numeric"
+                                mediaOptions={mediaOptions}
+                                selectedMedia={selectedHeroMedia}
+                                emptyLabel="No hero image"
                                 onChange={(value) => updateProjectField('heroMediaId', value)}
                             />
                         </div>
@@ -1593,11 +1621,13 @@ function AdminProjectsContent() {
                                 disabled={!canEdit || isSavingMaterial || !selectedProject}
                                 onChange={(value) => updateMaterialField('application', value)}
                             />
-                            <TextField
-                                label="Media ID"
+                            <MediaSelect
+                                label="Material image"
                                 value={materialForm.mediaAssetId}
                                 disabled={!canEdit || isSavingMaterial || !selectedProject}
-                                inputMode="numeric"
+                                mediaOptions={mediaOptions}
+                                selectedMedia={selectedMaterialMedia}
+                                emptyLabel="No material image"
                                 onChange={(value) => updateMaterialField('mediaAssetId', value)}
                             />
                             <label className="block text-xs font-bold uppercase tracking-[0.14em] text-black/55">
@@ -1679,15 +1709,14 @@ function AdminProjectsContent() {
                                 />
                             ) : null}
                             {mediaBlockForm.mediaRole !== 'youtube_video' ? (
-                                <SelectField
+                                <MediaSelect
                                     label="Media asset"
                                     value={mediaBlockForm.mediaAssetId}
                                     disabled={!canEdit || isSavingMediaBlock || !selectedProject}
+                                    mediaOptions={mediaOptions}
+                                    selectedMedia={selectedMediaBlockAsset}
+                                    emptyLabel="Select media"
                                     onChange={(value) => updateMediaBlockField('mediaAssetId', value)}
-                                    options={[
-                                        ['', 'Select media'],
-                                        ...mediaOptions.map((media) => [String(media.id), formatMediaOption(media)] as [string, string]),
-                                    ]}
                                 />
                             ) : (
                                 <TextField
@@ -1821,11 +1850,13 @@ function AdminProjectsContent() {
                             onChange={(value) => updateMapField('status', value as ProjectStatus)}
                             options={statusOptions}
                         />
-                        <TextField
-                            label="Map media ID"
+                        <MediaSelect
+                            label="Map image"
                             value={mapForm.mediaAssetId}
                             disabled={!canEdit || isSavingMap || !selectedProject}
-                            inputMode="numeric"
+                            mediaOptions={mediaOptions}
+                            selectedMedia={selectedMapFormMedia}
+                            emptyLabel="Select map image"
                             onChange={(value) => updateMapField('mediaAssetId', value)}
                         />
                         <TextField
@@ -1992,11 +2023,13 @@ function AdminProjectsContent() {
                                 className={`${fieldClass} py-3 leading-6`}
                             />
                         </label>
-                        <TextField
-                            label="Preview media ID"
+                        <MediaSelect
+                            label="Preview image"
                             value={hotspotForm.previewMediaId}
                             disabled={!canEdit || isSavingHotspot || !selectedMap}
-                            inputMode="numeric"
+                            mediaOptions={mediaOptions}
+                            selectedMedia={selectedHotspotPreviewMedia}
+                            emptyLabel="No preview image"
                             onChange={(value) => updateHotspotField('previewMediaId', value)}
                         />
                         <TextField
@@ -2104,6 +2137,12 @@ function formatMediaOption(media: MediaOptionRow) {
     return `#${media.id} / ${label}`;
 }
 
+function findMediaOption(mediaOptions: MediaOptionRow[], value: string) {
+    const mediaId = Number(value);
+    if (!Number.isFinite(mediaId)) return null;
+    return mediaOptions.find((media) => media.id === mediaId) ?? null;
+}
+
 function getMediaUrl(asset: MediaOptionRow | null) {
     if (!asset) {
         return null;
@@ -2114,6 +2153,74 @@ function getMediaUrl(asset: MediaOptionRow | null) {
     }
 
     return asset.source_url || asset.object_path;
+}
+
+function MediaSelect({
+    label,
+    value,
+    disabled,
+    mediaOptions,
+    selectedMedia,
+    emptyLabel,
+    onChange,
+}: {
+    label: string;
+    value: string;
+    disabled?: boolean;
+    mediaOptions: MediaOptionRow[];
+    selectedMedia: MediaOptionRow | null;
+    emptyLabel: string;
+    onChange: (value: string) => void;
+}) {
+    const previewUrl = getMediaUrl(selectedMedia);
+
+    return (
+        <div className="space-y-2">
+            <SelectField
+                label={label}
+                value={value}
+                disabled={disabled}
+                onChange={onChange}
+                options={[
+                    ['', emptyLabel],
+                    ...mediaOptions.map((media) => [String(media.id), formatMediaOption(media)] as [string, string]),
+                ]}
+            />
+            {selectedMedia ? (
+                <div className="flex gap-3 border border-black/10 bg-[#f8f9f5] p-3">
+                    <div className="flex h-20 w-24 shrink-0 items-center justify-center overflow-hidden bg-white">
+                        {previewUrl && selectedMedia.media_type === 'image' ? (
+                            <img
+                                src={previewUrl}
+                                alt={selectedMedia.alt || selectedMedia.caption || label}
+                                className="h-full w-full object-cover"
+                                loading="lazy"
+                            />
+                        ) : (
+                            <FileText className="h-5 w-5 text-black/35" />
+                        )}
+                    </div>
+                    <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-black">
+                            {selectedMedia.alt || selectedMedia.caption || selectedMedia.object_path || `Asset ${selectedMedia.id}`}
+                        </p>
+                        <p className="mt-1 text-xs font-bold uppercase tracking-[0.12em] text-black/45">
+                            {selectedMedia.media_type} / {selectedMedia.status} / #{selectedMedia.id}
+                        </p>
+                        <p className="mt-2 line-clamp-2 text-xs leading-5 text-black/52">
+                            {selectedMedia.source_kind === 'storage'
+                                ? selectedMedia.object_path || 'Storage object'
+                                : selectedMedia.source_url || 'External source'}
+                        </p>
+                    </div>
+                </div>
+            ) : value ? (
+                <p className="border border-amber-200 bg-amber-50 p-3 text-sm font-semibold leading-6 text-amber-800">
+                    Selected media is not in the available media list.
+                </p>
+            ) : null}
+        </div>
+    );
 }
 
 function getProjectPublishBlockers(
@@ -2698,8 +2805,8 @@ function validateProjectForm(form: ProjectFormState) {
     }
 
     const sortOrder = requiredInteger(form.sortOrder, 'Sort order');
-    const heroMediaId = optionalPositiveInteger(form.heroMediaId, 'Hero media ID');
-    const coverMediaId = optionalPositiveInteger(form.coverMediaId, 'Cover media ID');
+    const heroMediaId = optionalPositiveInteger(form.heroMediaId, 'Hero image');
+    const coverMediaId = optionalPositiveInteger(form.coverMediaId, 'Cover image');
     if (sortOrder.error) return validationFailure(sortOrder.error);
     if (heroMediaId.error) return validationFailure(heroMediaId.error);
     if (coverMediaId.error) return validationFailure(coverMediaId.error);
@@ -2744,7 +2851,7 @@ function validateMaterialForm(form: MaterialFormState) {
     const sortOrder = requiredInteger(form.sortOrder, 'Sort order');
     const stoneGroupId = optionalPositiveInteger(form.stoneGroupId, 'Stone group ID');
     const finishDefinitionId = optionalPositiveInteger(form.finishDefinitionId, 'Finish definition ID');
-    const mediaAssetId = optionalPositiveInteger(form.mediaAssetId, 'Media asset ID');
+    const mediaAssetId = optionalPositiveInteger(form.mediaAssetId, 'Material image');
     if (sortOrder.error) return validationFailure(sortOrder.error);
     if (stoneGroupId.error) return validationFailure(stoneGroupId.error);
     if (finishDefinitionId.error) return validationFailure(finishDefinitionId.error);
@@ -2761,7 +2868,7 @@ function validateMaterialForm(form: MaterialFormState) {
 
 function validateMapForm(form: MapFormState) {
     const sortOrder = requiredInteger(form.sortOrder, 'Sort order');
-    const mediaAssetId = requiredPositiveInteger(form.mediaAssetId, 'Map media ID');
+    const mediaAssetId = requiredPositiveInteger(form.mediaAssetId, 'Map image');
     if (sortOrder.error) return validationFailure(sortOrder.error);
     if (mediaAssetId.error) return validationFailure(mediaAssetId.error);
 
@@ -2795,7 +2902,7 @@ function validateMediaBlockForm(form: MediaBlockFormState, maps: ProjectMaterial
     const projectMaterialMapId = optionalPositiveInteger(form.projectMaterialMapId, 'Hotspot map ID');
     if (projectMaterialMapId.error) return validationFailure(projectMaterialMapId.error);
 
-    let mediaAssetId = optionalPositiveInteger(form.mediaAssetId, 'Media asset ID');
+    let mediaAssetId = optionalPositiveInteger(form.mediaAssetId, 'Media asset');
     if (mediaAssetId.error) return validationFailure(mediaAssetId.error);
 
     if (form.mediaRole === 'hotspot_image') {
@@ -2814,7 +2921,7 @@ function validateMediaBlockForm(form: MediaBlockFormState, maps: ProjectMaterial
     }
 
     if (!mediaAssetId.value) {
-        return validationFailure('Image media blocks require a media asset.');
+        return validationFailure('Image media blocks require selected media.');
     }
 
     return {
@@ -2835,7 +2942,7 @@ function validateHotspotForm(form: HotspotFormState) {
     const xPercent = percentNumber(form.xPercent, 'X percent');
     const yPercent = percentNumber(form.yPercent, 'Y percent');
     const projectMaterialId = optionalPositiveInteger(form.projectMaterialId, 'Project material ID');
-    const previewMediaId = optionalPositiveInteger(form.previewMediaId, 'Preview media ID');
+    const previewMediaId = optionalPositiveInteger(form.previewMediaId, 'Preview image');
     if (sortOrder.error) return validationFailure(sortOrder.error);
     if (xPercent.error) return validationFailure(xPercent.error);
     if (yPercent.error) return validationFailure(yPercent.error);
