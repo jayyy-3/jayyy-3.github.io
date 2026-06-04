@@ -1091,9 +1091,9 @@ function AdminProductsContent() {
                         <Layers3 className="h-5 w-5 text-[var(--urblo-lime)]" />
                         <h2 className="mt-5 text-xl font-semibold">Product health</h2>
                         <div className="mt-5 grid gap-3 text-sm leading-6 text-white/72">
-                            <p>{models.length} model rows on the selected product.</p>
+                            <p>{models.length} models on the selected product.</p>
                             <p>{materialDefaults.length} material defaults configured.</p>
-                            <p>{mediaOptions.length} media records available for image selection.</p>
+                            <p>{mediaOptions.length} Media library items available for product images.</p>
                         </div>
                     </section>
 
@@ -1197,7 +1197,7 @@ function AdminProductsContent() {
                         <h2 className="mt-5 text-xl font-semibold text-black">Publishing rules</h2>
                         <ul className="mt-4 space-y-3 text-sm leading-6 text-black/62">
                             <li>Published products require a website URL key, short description, hero image, model, material default, and spec.</li>
-                            <li>Published models need a model website key, label, and selected image from Media.</li>
+                            <li>Published models need a model website key, label, and selected Media library image.</li>
                             <li>Material defaults can reference Stone Library rows or keep clear non-stone labels.</li>
                             <li>Use Archive to remove a product from the website while keeping its editing history.</li>
                         </ul>
@@ -1322,7 +1322,7 @@ function getMediaUrl(asset: MediaOptionRow | null) {
 }
 
 function formatMediaOption(media: MediaOptionRow) {
-    const label = media.alt || media.caption || `Media #${media.id}`;
+    const label = media.alt || media.caption || 'Untitled media';
     return `${label} - ${media.status === 'published' ? 'Published in Media' : 'Not published in Media'}`;
 }
 
@@ -1373,15 +1373,15 @@ function MediaSelect({
                     </div>
                     <div className="min-w-0">
                         <p className="truncate text-sm font-semibold text-black">
-                            {selectedMedia.alt || selectedMedia.caption || `Media #${selectedMedia.id}`}
+                            {selectedMedia.alt || selectedMedia.caption || 'Untitled media'}
                         </p>
                         <p className="mt-1 text-xs font-bold uppercase tracking-[0.12em] text-black/45">
-                            {selectedMedia.status === 'published' ? 'Published in Media' : 'Not published in Media'} / #{selectedMedia.id}
+                            {selectedMedia.status === 'published' ? 'Published in Media' : 'Not published in Media'}
                         </p>
                         <p className="mt-2 line-clamp-2 text-xs leading-5 text-black/52">
                             {selectedMedia.status === 'published'
-                                ? 'This media record can support a public product image.'
-                                : 'Open Media, review the asset, then publish it before relying on it for public product pages.'}
+                                ? 'This Media library item can support a public product image.'
+                                : 'Open Media, review the item, then publish it before relying on it for public product pages.'}
                         </p>
                     </div>
                 </div>
@@ -1516,7 +1516,7 @@ function RecordChips<T extends { id: number }>({
     onSelect: (row: T) => void;
 }) {
     if (!rows.length) {
-        return <p className="text-sm leading-6 text-black/50">No records yet.</p>;
+        return <p className="text-sm leading-6 text-black/50">Nothing added yet.</p>;
     }
 
     return (

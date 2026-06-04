@@ -165,7 +165,7 @@ const blockTypeOptions: Array<[string, string]> = [
 
 const blockContentHints: Record<ArticleBlockType, string> = {
     rich_text: 'Normal article copy. Add one clear idea per section so the article can be rearranged later.',
-    image: 'Pair a selected media record with caption and placement notes.',
+    image: 'Pair a selected Media library item with caption and placement notes.',
     gallery: 'Use the selected media as the lead image, then describe the gallery sequence for review.',
     quote: 'A pull quote with optional attribution.',
     faq: 'Question and answer rows for practical reader objections.',
@@ -985,7 +985,7 @@ function AdminArticlesContent() {
                         <h2 className="mt-5 text-xl font-semibold">Article section health</h2>
                         <div className="mt-5 grid gap-3 text-sm leading-6 text-white/72">
                             <p>{blocks.length} sections on the selected article.</p>
-                            <p>{mediaOptions.length} media records available for image selection.</p>
+                            <p>{mediaOptions.length} Media library items available for article images.</p>
                             <p>{projectOptions.length} project links and {stoneOptions.length} stone links available.</p>
                         </div>
                     </section>
@@ -1114,7 +1114,7 @@ function getMediaUrl(asset: MediaOptionRow | null) {
 }
 
 function formatMediaOption(media: MediaOptionRow) {
-    const label = media.alt || media.caption || `Media #${media.id}`;
+    const label = media.alt || media.caption || 'Untitled media';
     return `${label} - ${media.status === 'published' ? 'Published in Media' : 'Not published in Media'}`;
 }
 
@@ -1165,15 +1165,15 @@ function MediaSelect({
                     </div>
                     <div className="min-w-0">
                         <p className="truncate text-sm font-semibold text-black">
-                            {selectedMedia.alt || selectedMedia.caption || `Media #${selectedMedia.id}`}
+                            {selectedMedia.alt || selectedMedia.caption || 'Untitled media'}
                         </p>
                         <p className="mt-1 text-xs font-bold uppercase tracking-[0.12em] text-black/45">
-                            {selectedMedia.status === 'published' ? 'Published in Media' : 'Not published in Media'} / #{selectedMedia.id}
+                            {selectedMedia.status === 'published' ? 'Published in Media' : 'Not published in Media'}
                         </p>
                         <p className="mt-2 line-clamp-2 text-xs leading-5 text-black/52">
                             {selectedMedia.status === 'published'
-                                ? 'This media record can support a public article image.'
-                                : 'Open Media, review the asset, then publish it before relying on it for public article pages.'}
+                                ? 'This Media library item can support a public article image.'
+                                : 'Open Media, review the item, then publish it before relying on it for public article pages.'}
                         </p>
                     </div>
                 </div>
@@ -1563,7 +1563,7 @@ function RecordChips<T extends { id: number }>({
     onSelect: (row: T) => void;
 }) {
     if (!rows.length) {
-        return <p className="text-sm leading-6 text-black/50">No records yet.</p>;
+        return <p className="text-sm leading-6 text-black/50">Nothing added yet.</p>;
     }
 
     return (

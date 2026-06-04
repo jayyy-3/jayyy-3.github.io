@@ -2,6 +2,42 @@
 
 Last updated: 2026-06-04
 
+## Entry - 2026-06-04 (Admin Products and Articles Media Language UX)
+
+### Scope
+- Continued the `/admin` CMS editor-handoff goal with a focused Products and Articles media-language cleanup.
+- Replaced Products health copy from model rows / media records to models / Media library items.
+- Replaced Products and Articles media picker/preview fallbacks from `Media #id` and `/#id` status text to Untitled media plus Published in Media / Not published in Media labels.
+- Replaced media-record and asset-review helper copy with Media library item and item-review language.
+- Replaced shared subrecord empty copy from No records yet to Nothing added yet.
+- Expanded admin CRUD coverage so Products and Articles cannot drift back to media-record, Media #, #id, asset-review, model-row, or selected-media-record wording in visible editing UI.
+
+### Changed Files
+- `src/pages/admin/AdminProductsPage.tsx`
+- `src/pages/admin/AdminArticlesPage.tsx`
+- `scripts/check-admin-crud-coverage.mjs`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass. Coverage now guards Products and Articles Media library item / Untitled media / Nothing added yet language and rejects media-record, Media #, #id, asset-review, model-row, and selected-media-record wording.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npx tsc -b`: pass.
+- `npm run lint`: pass.
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run agent:smoke`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions.
+- `npm run agent:admin-config-gate`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions; 11 admin routes passed the no-config gate.
+
+### Risks and Gaps
+- This is a local source/docs UX pass. The latest local CMS UX commits still need push/deploy approval plus a final production editor walkthrough before the CMS handoff goal can be considered complete.
+
+### Next Handoff
+- Continue with push/deploy approval and final production editor walkthrough.
+
 ## Entry - 2026-06-04 (Admin Stone Library Media Language UX)
 
 ### Scope
