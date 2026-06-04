@@ -669,7 +669,7 @@ function AdminArticlesContent() {
                                                     {article.title}
                                                 </span>
                                                 <span className="mt-1 block truncate text-xs font-semibold uppercase tracking-[0.12em] text-black/40">
-                                                    {article.slug} / {article.published_on ?? 'Date needs review'}
+                                                    URL: {article.slug} / {article.published_on ?? 'Date not set'}
                                                 </span>
                                             </span>
                                             <CmsStatusPill status={article.status} />
@@ -804,13 +804,13 @@ function AdminArticlesContent() {
 
                         <div className="mt-5 grid gap-4 md:grid-cols-2">
                             <TextField
-                                label="Original import note"
+                                label="Migration note"
                                 value={articleForm.legacySourcePath}
                                 disabled={!canEdit || isSavingArticle || isLoading}
                                 onChange={(value) => updateArticleField('legacySourcePath', value)}
                             />
                             <TextField
-                                label="Original import link"
+                                label="Migration source link"
                                 value={articleForm.legacySourceUrl}
                                 disabled={!canEdit || isSavingArticle || isLoading}
                                 onChange={(value) => updateArticleField('legacySourceUrl', value)}
@@ -1666,8 +1666,8 @@ function validateArticleForm(form: ArticleFormState) {
 function validateBlockForm(form: BlockFormState) {
     const sortOrder = requiredInteger(form.sortOrder, 'Sort order');
     const mediaAssetId = optionalPositiveInteger(form.mediaAssetId, 'Section image');
-    const linkedProjectId = optionalPositiveInteger(form.linkedProjectId, 'Linked project ID');
-    const linkedStoneGroupId = optionalPositiveInteger(form.linkedStoneGroupId, 'Linked stone group ID');
+    const linkedProjectId = optionalPositiveInteger(form.linkedProjectId, 'Linked project');
+    const linkedStoneGroupId = optionalPositiveInteger(form.linkedStoneGroupId, 'Linked stone');
     if (sortOrder.error) return validationFailure(sortOrder.error);
     if (mediaAssetId.error) return validationFailure(mediaAssetId.error);
     if (linkedProjectId.error) return validationFailure(linkedProjectId.error);

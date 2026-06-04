@@ -2,6 +2,40 @@
 
 Last updated: 2026-06-04
 
+## Entry - 2026-06-04 (Admin Articles Migration Language UX)
+
+### Scope
+- Continued the `/admin` CMS editor-handoff goal with a focused Articles language cleanup.
+- Replaced the article list secondary line with `URL: <key> / Date not set` so editors understand the route key and the missing-date task.
+- Replaced Original import note/link labels with Migration note and Migration source link.
+- Removed ID terminology from linked project/stone validation labels for Article sections.
+- Expanded admin CRUD coverage so Articles cannot drift back to Original import note/link, Date needs review, or linked project/stone ID wording in visible editing UI.
+
+### Changed Files
+- `src/pages/admin/AdminArticlesPage.tsx`
+- `scripts/check-admin-crud-coverage.mjs`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass. Coverage now guards Articles Migration note/link, URL/date list labels, and non-ID linked record validation labels.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npx tsc -b`: pass.
+- `npm run lint`: pass.
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run agent:smoke`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions.
+- `npm run agent:admin-config-gate`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions; 11 admin routes passed the no-config gate.
+
+### Risks and Gaps
+- This is a local source/docs UX pass. The latest local CMS UX commits still need push/deploy approval plus a final production editor walkthrough before the CMS handoff goal can be considered complete.
+
+### Next Handoff
+- Continue with push/deploy approval and final production walkthrough.
+
 ## Entry - 2026-06-04 (Admin Products URL-Key Language UX)
 
 ### Scope
