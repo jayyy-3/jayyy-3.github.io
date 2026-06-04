@@ -226,6 +226,11 @@ function AdminArticlesContent() {
         () => findMediaOption(mediaOptions, blockForm.mediaAssetId),
         [blockForm.mediaAssetId, mediaOptions],
     );
+    const publishChecklist = useMemo(
+        () => getArticlePublishChecklist(articleForm, blocks),
+        [articleForm, blocks],
+    );
+    const canPublishArticle = publishChecklist.every((item) => item.ready);
     const filteredArticles = useMemo(
         () =>
             articles.filter((article) => {
@@ -416,6 +421,11 @@ function AdminArticlesContent() {
 
     async function saveArticle(nextStatus: ArticleStatus) {
         if (!supabase || !canEdit || !user) return;
+
+        if (nextStatus === 'published' && !canPublishArticle) {
+            setError('Complete the Article publish checklist before publishing this article.');
+            return;
+        }
 
         const validation = validateArticleForm({ ...articleForm, status: nextStatus });
         if (validation.error !== null) {
@@ -825,6 +835,8 @@ function AdminArticlesContent() {
                             </p>
                         </div>
 
+                        <ArticlePublishChecklist items={publishChecklist} />
+
                         <div className="mt-6 flex flex-wrap gap-2">
                             <ActionButton
                                 disabled={!canEdit || isSavingArticle || isLoading}
@@ -832,8 +844,9 @@ function AdminArticlesContent() {
                             />
                             <button
                                 type="button"
-                                disabled={!canEdit || isSavingArticle || isLoading}
+                                disabled={!canEdit || isSavingArticle || isLoading || !canPublishArticle}
                                 onClick={() => void saveArticle('published')}
+                                title={canPublishArticle ? 'Publish article' : 'Complete the Article publish checklist first.'}
                                 className="inline-flex min-h-11 items-center justify-center gap-2 rounded bg-[var(--urblo-lime)] px-4 text-xs font-bold uppercase tracking-[0.14em] text-black transition hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:bg-black/20 disabled:text-black/35"
                             >
                                 <CheckCircle2 className="h-4 w-4" />
@@ -978,9 +991,9 @@ function AdminArticlesContent() {
                         <ShieldAlert className="h-5 w-5 text-black" />
                         <h2 className="mt-5 text-xl font-semibold text-black">Publication guardrails</h2>
                         <ul className="mt-4 space-y-3 text-sm leading-6 text-black/62">
-                            <li>Published articles require title, slug, date, and excerpt.</li>
+                            <li>Complete the Article publish checklist before publishing.</li>
                             <li>Article bodies should use typed blocks; do not paste newsletter HTML as normal authoring.</li>
-                            <li>Block forms save structured editor content in the background for future public rendering.</li>
+                            <li>Publish at least one structured block so the public article body can appear.</li>
                             <li>Physical deletes remain hidden; archive is the safe operational path.</li>
                         </ul>
                     </section>
@@ -1434,6 +1447,56 @@ function ActionButton({ disabled, label }: { disabled?: boolean; label: string }
     );
 }
 
+function ArticlePublishChecklist({ items }: { items: Array<{ label: string; ready: boolean; detail: string }> }) {
+    const readyCount = items.filter((item) => item.ready).length;
+    const allReady = readyCount === items.length;
+
+    return (
+        <section className="mt-5 border border-black/10 bg-white p-4">
+            <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+                <div>
+                    <p className="text-xs font-bold uppercase tracking-[0.14em] text-black/45">Article publish checklist</p>
+                    <h3 className="mt-2 text-lg font-semibold text-black">
+                        {allReady ? 'Ready to publish' : `${items.length - readyCount} item${items.length - readyCount === 1 ? '' : 's'} need review`}
+                    </h3>
+                    <p className="mt-2 text-sm leading-6 text-black/58">
+                        Published articles can appear on the public Articles page and article detail route.
+                    </p>
+                </div>
+                <span
+                    className={[
+                        'inline-flex min-h-8 items-center rounded border px-3 text-[11px] font-bold uppercase tracking-[0.12em]',
+                        allReady
+                            ? 'border-[var(--urblo-lime)] bg-[rgba(0,255,25,0.12)] text-black'
+                            : 'border-amber-300 bg-amber-50 text-amber-800',
+                    ].join(' ')}
+                >
+                    {readyCount}/{items.length} ready
+                </span>
+            </div>
+            <div className="mt-4 grid gap-2">
+                {items.map((item) => (
+                    <div
+                        key={item.label}
+                        className={[
+                            'border p-3',
+                            item.ready ? 'border-[var(--urblo-lime)] bg-[rgba(0,255,25,0.08)]' : 'border-amber-200 bg-amber-50',
+                        ].join(' ')}
+                    >
+                        <div className="flex items-start justify-between gap-3">
+                            <p className="text-sm font-semibold text-black">{item.label}</p>
+                            <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-black/45">
+                                {item.ready ? 'Ready' : 'Fix'}
+                            </span>
+                        </div>
+                        <p className="mt-1 text-sm leading-6 text-black/58">{item.detail}</p>
+                    </div>
+                ))}
+            </div>
+        </section>
+    );
+}
+
 function SubrecordEditor({
     title,
     eyebrow,
@@ -1738,6 +1801,58 @@ function hasPublishReadyBlockContent(blockType: ArticleBlockType, content: unkno
         default:
             return hasAnyText && !isEmptyObject(record);
     }
+}
+
+function getArticlePublishChecklist(form: ArticleFormState, blocks: ArticleBlockRow[]) {
+    const publishedBlocks = blocks.filter((block) => block.status === 'published');
+    const readyPublishedBlocks = publishedBlocks.filter((block) =>
+        hasPublishReadyBlockContent(block.block_type, block.content, block.media_asset_id),
+    );
+
+    return [
+        {
+            label: 'Article title',
+            ready: Boolean(form.title.trim()),
+            detail: form.title.trim()
+                ? 'The public article title is filled in.'
+                : 'Add the article title readers will see.',
+        },
+        {
+            label: 'Website URL',
+            ready: /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(form.slug.trim()),
+            detail: 'Use lowercase words separated by hyphens, for example modular-mastery-primeblock.',
+        },
+        {
+            label: 'Published date',
+            ready: Boolean(form.publishedOn),
+            detail: form.publishedOn
+                ? 'The article has a publication date.'
+                : 'Choose the date that should appear on the public article.',
+        },
+        {
+            label: 'Excerpt',
+            ready: Boolean(form.excerpt.trim()),
+            detail: form.excerpt.trim()
+                ? 'The article has summary copy for cards and search previews.'
+                : 'Add a short excerpt before publishing.',
+        },
+        {
+            label: 'Published content block',
+            ready: publishedBlocks.length > 0,
+            detail:
+                publishedBlocks.length > 0
+                    ? 'At least one structured block is marked Published.'
+                    : 'Publish at least one structured content block so the article body can appear.',
+        },
+        {
+            label: 'Block content ready',
+            ready: publishedBlocks.length > 0 && readyPublishedBlocks.length === publishedBlocks.length,
+            detail:
+                publishedBlocks.length > 0 && readyPublishedBlocks.length === publishedBlocks.length
+                    ? 'Published blocks have the required copy, links, or media.'
+                    : 'Open each Published block and fill the required copy, link, or media field.',
+        },
+    ];
 }
 
 function summarizeArticles(articles: ArticleRow[]) {

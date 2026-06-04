@@ -88,7 +88,7 @@ Before publishing:
 - Stone Library families need name, URL key, website stone type, public summary, at least one variant, and reviewed finish availability before Publish is available. Variants need a URL key, editor-facing label, and at least one Available or Needs confirmation finish.
 - Stone Library finish images need a selected media record that is already Published in Media.
 - Products need name, URL, short description, hero image, at least one published model with image, material defaults, and specs before Publish is available.
-- Articles should have title, slug, date, excerpt, cover image where needed, search preview fields where needed, and structured blocks with the required copy/link/media fields filled in.
+- Articles should clear the Article publish checklist: title, URL, date, excerpt, at least one Published structured block, and required copy/link/media fields filled in for every Published block.
 - Media should pass the on-screen checklist: source recorded, uploaded files moved to the Public website library, image alt text filled in, usage notes filled in, and Published status before public reuse.
 
 If Publish is blocked, use the on-screen checklist or validation message to fix the named field, then save/publish again.

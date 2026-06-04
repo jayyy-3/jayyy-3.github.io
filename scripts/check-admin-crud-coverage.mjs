@@ -253,7 +253,15 @@ const pageChecks = [
       'article_block.publish',
       'article_block.archive',
     ],
-    requiredText: ['Current role is read-only for Articles', 'legacy', 'Physical deletes remain hidden', 'CmsPublicPageLink'],
+    requiredText: [
+      'Current role is read-only for Articles',
+      'legacy',
+      'Physical deletes remain hidden',
+      'CmsPublicPageLink',
+      'Article publish checklist',
+      'Complete the Article publish checklist before publishing this article.',
+      'getArticlePublishChecklist',
+    ],
   },
   {
     label: 'Leads',
@@ -737,7 +745,7 @@ function checkArticleStructuredAuthoring() {
 
   requireIncludes(text, 'BlockContentEditor', 'src/pages/admin/AdminArticlesPage.tsx');
   requireIncludes(text, 'Published ${formatBlockTypeLabel(form.blockType)} blocks need editor content', 'src/pages/admin/AdminArticlesPage.tsx');
-  requireIncludes(text, 'Block forms save structured editor content in the background', 'src/pages/admin/AdminArticlesPage.tsx');
+  requireIncludes(text, 'Publish at least one structured block so the public article body can appear', 'src/pages/admin/AdminArticlesPage.tsx');
   requireIncludes(text, 'do not paste newsletter HTML as normal authoring', 'src/pages/admin/AdminArticlesPage.tsx');
 }
 
