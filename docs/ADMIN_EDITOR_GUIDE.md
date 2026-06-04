@@ -61,7 +61,7 @@ Physical delete is not part of the launch CMS workflow.
 |---|---|---|
 | Dashboard | Choose the next editing job, inspect live/draft counts, and open health-queue fixes. | Editor start page with lead/content/media quick actions and correct Stone Library status routing. |
 | Projects | Edit case studies, facts, materials, images, maps, and hotspots. | CMS-ready with publish checklist and media selectors. |
-| Stone Library | Edit stone families, variants, finish availability, and finish imagery. | CMS-ready for listing data with family/variant publish checklists; detail page still uses static-backed detail adapter. |
+| Stone Library | Edit stone families, variants, finish availability, and finish imagery. | CMS-ready with family/variant publish checklists; public listing and detail prefer Published CMS rows with static fallback. |
 | Products | Edit product families, models, images, search title/description, materials, and specs. | CMS-ready with media selectors, publish checklist, and Stone Library link feedback. |
 | Articles | Edit article metadata, search title/description, and structured article blocks through block-type forms. | CMS-ready for metadata/block rows; public detail prefers Published structured blocks and keeps sanitized legacy HTML as fallback. |
 | Media | Upload/manage media, metadata, status, and manifest export. | CMS-ready with editor-facing private/public library labels and a publish checklist. |
@@ -77,8 +77,7 @@ The public site currently behaves as follows:
 - Products list/detail: uses Published Supabase products when available; otherwise falls back to static product data.
 - Articles listing/metadata: uses Published Supabase articles when available; otherwise falls back to static article metadata.
 - Article detail body: uses Published Supabase structured blocks when available; otherwise falls back to sanitized legacy HTML from the legacy source path.
-- Stone Library listing: uses Published Supabase stone cards when available; otherwise falls back to static Stone Library data.
-- Stone Library detail: still uses the static-backed detail service.
+- Stone Library listing/detail: uses Published Supabase stone data when available; otherwise falls back to static Stone Library data.
 - Leads and form submissions: Supabase-backed production form persistence and SMTP2GO notification proof are complete.
 
 ## Publishing Checks
@@ -97,6 +96,6 @@ If Publish is blocked, use the on-screen checklist or validation message to fix 
 
 The CMS is much closer to editor-handoff state, but these are still open:
 - Add a browser-safe invite/create-user flow if non-technical owners should create login accounts without outside help.
-- Finish Stone Library public detail adapter so published Supabase variant/finish detail data drives the detail page.
+- Run a final Stone Library publish walkthrough in production so editors can confirm family, variant, finish, and finish-image changes read correctly after review.
 - Run a final Article publish walkthrough in production so editors can confirm the imported structured blocks read correctly after review.
 - Run a final editor walkthrough on production after the local CMS UX commits are pushed and deployed.

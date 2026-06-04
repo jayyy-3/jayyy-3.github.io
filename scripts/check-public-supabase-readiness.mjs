@@ -496,6 +496,14 @@ function checkPublicRuntimeBoundary() {
 
   requireIncludes(readRequired('src/service/ProductService.ts'), 'return publishedProducts.length ? publishedProducts : products', 'ProductService static fallback');
   requireIncludes(readRequired('src/service/ProjectService.ts'), 'return publishedProjects.length ? publishedProjects : staticProjects', 'ProjectService static fallback');
+  const stoneService = readRequired('src/service/StoneLibraryService.ts');
+  const stoneDetailPage = readRequired('src/pages/StoneLibraryDetailPage.tsx');
+  requireIncludes(stoneService, 'getPublishedStoneDetail', 'StoneLibraryService public detail adapter');
+  requireIncludes(stoneService, ".from('stone_finish_capabilities')", 'StoneLibraryService public detail adapter');
+  requireIncludes(stoneService, ".from('stone_finish_images')", 'StoneLibraryService public detail adapter');
+  requireIncludes(stoneService, ".eq('status', 'published')", 'StoneLibraryService published-only public detail reads');
+  requireIncludes(stoneDetailPage, 'StoneLibraryService.getPublishedStoneDetail', 'StoneLibraryDetailPage published-first adapter');
+  requireIncludes(stoneDetailPage, 'StoneLibraryService.getStoneDetail', 'StoneLibraryDetailPage static fallback');
   const articleService = readRequired('src/service/ArticleService.ts');
   const articlePage = readRequired('src/pages/ArticlePage.tsx');
   requireIncludes(articleService, 'publishedArticles.length ? publishedArticles : await getStaticArticles()', 'ArticleService static fallback');

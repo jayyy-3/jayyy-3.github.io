@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 import FinishAccordion from '../components/stone-library/FinishAccordion';
 import FinishLightbox from '../components/stone-library/FinishLightbox';
@@ -6,7 +6,9 @@ import ImageStage from '../components/stone-library/ImageStage';
 import SpecsPanel from '../components/stone-library/SpecsPanel';
 import StatusPill from '../components/stone-library/StatusPill';
 import VariantSwitch from '../components/stone-library/VariantSwitch';
+import RouteState from '../components/RouteState';
 import StoneLibraryService from '../service/StoneLibraryService';
+import type { StoneDetailVM } from '../types/stone-library';
 
 function statusLabel(status: 'active' | 'tbc'): string {
   return status === 'tbc' ? 'Upcoming' : 'Available';
@@ -20,11 +22,60 @@ export default function StoneLibraryDetailPage() {
   const [centerRequestToken, setCenterRequestToken] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [lightboxFrameIndex, setLightboxFrameIndex] = useState(0);
+  const [detail, setDetail] = useState<StoneDetailVM | null>(null);
+  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
 
-  const detail = useMemo(
-    () => StoneLibraryService.getStoneDetail(stoneGroupId, selectedVariantId || undefined),
-    [stoneGroupId, selectedVariantId],
-  );
+  useEffect(() => {
+    let isCurrent = true;
+    setStatus('loading');
+    setDetail(null);
+
+    StoneLibraryService.getPublishedStoneDetail(stoneGroupId, selectedVariantId || undefined)
+      .then((publishedDetail) => {
+        if (!isCurrent) return;
+        const fallbackDetail =
+          publishedDetail ||
+          StoneLibraryService.getStoneDetail(stoneGroupId, selectedVariantId || undefined);
+        setDetail(fallbackDetail);
+        setStatus('ready');
+      })
+      .catch(() => {
+        if (!isCurrent) return;
+        const fallbackDetail = StoneLibraryService.getStoneDetail(stoneGroupId, selectedVariantId || undefined);
+        setDetail(fallbackDetail);
+        setStatus(fallbackDetail ? 'ready' : 'error');
+      });
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [stoneGroupId, selectedVariantId]);
+
+  if (status === 'loading') {
+    return (
+      <RouteState
+        eyebrow="Loading"
+        title="Preparing stone detail"
+        copy="The stone detail is loading. This should only take a moment."
+        headerOffset
+      />
+    );
+  }
+
+  if (status === 'error') {
+    return (
+      <RouteState
+        eyebrow="Stone Library Error"
+        title="Stone detail could not load"
+        copy="The stone detail could not be loaded right now. Return to the Stone Library or contact Urblo if this keeps happening."
+        headerOffset
+        actions={[
+          { label: 'Stone Library', to: '/stone-library' },
+          { label: 'Contact Us', to: '/contact', variant: 'secondary' },
+        ]}
+      />
+    );
+  }
 
   if (!detail) {
     return <Navigate to="/stone-library" replace />;

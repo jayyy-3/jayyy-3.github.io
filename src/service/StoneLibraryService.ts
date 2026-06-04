@@ -12,12 +12,13 @@ import type {
     FinishVM,
     StoneCardFilters,
     StoneCardVM,
+    StoneCutOptionRaw,
     StoneDetailVM,
+    StoneFinishImageRole,
     StoneFilterFacets,
     StoneFinishCapabilityRaw,
     StoneFinishRaw,
     StoneGroupRaw,
-    StoneFinishImageRole,
     StoneLibraryRaw,
     StonePriceTierLabel,
     StonePriceTierLevel,
@@ -35,22 +36,38 @@ type PublishedStoneGroupRow = {
     stone_type_display: string | null;
     origin_region: string | null;
     origin_country: string | null;
+    source_name?: string | null;
+    stone_type_source?: string | null;
+    price_source?: string | null;
+    price_tier?: number | null;
+    raw_block_length_mm?: number | null;
+    raw_block_width_mm?: number | null;
+    raw_block_height_mm?: number | null;
 };
 
 type PublishedVariantRow = {
     id: number;
     stone_group_id: number;
     variant_key: string;
+    display_name?: string | null;
+    source_variant?: string | null;
+    variant_type?: string | null;
+    status?: 'published' | 'tbc';
+    sort_order?: number;
 };
 
 type PublishedCapabilityRow = {
     stone_variant_id: number;
     capability: 'yes' | 'no' | 'tbc';
+    sources?: string[];
+    behavior_note?: string | null;
     finish_definitions?: {
+        id?: number;
         finish_key: string;
         display_name: string;
         sort_order: number;
     } | {
+        id?: number;
         finish_key: string;
         display_name: string;
         sort_order: number;
@@ -61,6 +78,7 @@ type PublishedImageRow = {
     stone_group_id: number | null;
     stone_variant_id: number | null;
     finish_definition_id: number | null;
+    image_role?: 'primary' | 'secondary' | 'detail' | 'swatch';
     sort_order: number;
     media_assets?: {
         source_url: string | null;
@@ -313,6 +331,56 @@ function pickCoverImage(stone: StoneGroupRaw): {
     }
 
     return {};
+}
+
+function splitFinishKey(finishKey: string): {
+    finishId: string;
+    finishVariantId: string | null;
+} {
+    const [finishId, finishVariantId] = finishKey.split('__');
+    return {
+        finishId,
+        finishVariantId: finishVariantId || null,
+    };
+}
+
+function toPublishedOriginLabel(group: PublishedStoneGroupRow): string {
+    return [group.origin_region, group.origin_country].filter(Boolean).join(', ') || 'Origin TBC';
+}
+
+function toPublishedRawBlockLabel(group: PublishedStoneGroupRow): string {
+    const { raw_block_length_mm, raw_block_width_mm, raw_block_height_mm } = group;
+    if (raw_block_length_mm && raw_block_width_mm && raw_block_height_mm) {
+        return `${raw_block_length_mm} x ${raw_block_width_mm} x ${raw_block_height_mm} mm`;
+    }
+
+    return 'Raw block size on request';
+}
+
+function toPublishedPricePresentation(group: PublishedStoneGroupRow): {
+    priceRange: string;
+    priceTierLevel: StonePriceTierLevel | null;
+    priceTierLabel: StonePriceTierLabel | null;
+    pricePrimaryLabel: string;
+} {
+    const priceRange = group.price_source?.trim() || 'Price on request';
+    const tier = group.price_tier;
+
+    if (tier !== 1 && tier !== 2 && tier !== 3) {
+        return {
+            priceRange,
+            priceTierLevel: null,
+            priceTierLabel: null,
+            pricePrimaryLabel: 'Price on request',
+        };
+    }
+
+    return {
+        priceRange,
+        priceTierLevel: tier,
+        priceTierLabel: priceTierLabelByLevel[tier],
+        pricePrimaryLabel: priceTierLabelByLevel[tier],
+    };
 }
 
 function mapStoneCard(stone: StoneGroupRaw): StoneCardVM {
@@ -585,6 +653,239 @@ class StoneLibraryService {
                     count,
                 }))
                 .sort(compareByLabel),
+        };
+    }
+
+    static async getPublishedStoneDetail(
+        stoneGroupId: string,
+        variantId?: string,
+    ): Promise<StoneDetailVM | null> {
+        const supabase = getPublicContentClient();
+        if (!supabase) {
+            return null;
+        }
+
+        const { data: group, error: groupError } = await supabase
+            .from('stone_groups')
+            .select(`
+                id,
+                stone_group_key,
+                display_name,
+                source_name,
+                status,
+                stone_type_source,
+                stone_type_display,
+                origin_region,
+                origin_country,
+                price_source,
+                price_tier,
+                raw_block_length_mm,
+                raw_block_width_mm,
+                raw_block_height_mm
+            `)
+            .eq('stone_group_key', stoneGroupId)
+            .eq('status', 'published')
+            .maybeSingle<PublishedStoneGroupRow>();
+
+        if (groupError || !group) {
+            return null;
+        }
+
+        const { data: variants, error: variantError } = await supabase
+            .from('stone_variants')
+            .select('id, stone_group_id, variant_key, display_name, source_variant, variant_type, status, sort_order')
+            .eq('stone_group_id', group.id)
+            .eq('status', 'published')
+            .order('sort_order', { ascending: true });
+
+        if (variantError || !variants?.length) {
+            return null;
+        }
+
+        const variantRows = variants as PublishedVariantRow[];
+        const activeVariant =
+            variantRows.find((variant) => variant.variant_key === variantId) ||
+            variantRows[0];
+        if (!activeVariant) {
+            return null;
+        }
+
+        const variantIds = variantRows.map((variant) => variant.id);
+        const { data: capabilities } = await supabase
+            .from('stone_finish_capabilities')
+            .select(`
+                stone_variant_id,
+                capability,
+                sources,
+                behavior_note,
+                finish_definitions!stone_finish_capabilities_finish_definition_id_fkey (
+                    id,
+                    finish_key,
+                    display_name,
+                    sort_order
+                )
+            `)
+            .in('stone_variant_id', variantIds);
+
+        const { data: images } = await supabase
+            .from('stone_finish_images')
+            .select(`
+                stone_group_id,
+                stone_variant_id,
+                finish_definition_id,
+                image_role,
+                sort_order,
+                media_assets!stone_finish_images_media_asset_id_fkey (
+                    source_url,
+                    alt
+                )
+            `)
+            .eq('stone_group_id', group.id)
+            .eq('status', 'published')
+            .order('sort_order', { ascending: true });
+
+        const capabilitiesByVariant = new Map<number, PublishedCapabilityRow[]>();
+        for (const capability of (capabilities ?? []) as unknown as PublishedCapabilityRow[]) {
+            capabilitiesByVariant.set(capability.stone_variant_id, [
+                ...(capabilitiesByVariant.get(capability.stone_variant_id) ?? []),
+                capability,
+            ]);
+        }
+
+        const imageRows = ((images ?? []) as unknown as PublishedImageRow[])
+            .filter((image) => firstRelation(image.media_assets)?.source_url)
+            .sort((a, b) => a.sort_order - b.sort_order);
+        const activeCapabilities = capabilitiesByVariant.get(activeVariant.id) ?? [];
+        const sortedCapabilities = [...activeCapabilities].sort((a, b) => {
+            const finishA = firstRelation(a.finish_definitions);
+            const finishB = firstRelation(b.finish_definitions);
+            return (finishA?.sort_order ?? 999) - (finishB?.sort_order ?? 999);
+        });
+
+        const finishCapabilities: FinishCapabilityVM[] = sortedCapabilities
+            .map((capability) => {
+                const finish = firstRelation(capability.finish_definitions);
+                if (!finish) return null;
+                return {
+                    finishKey: finish.finish_key,
+                    label: finish.display_name,
+                    capability: capability.capability,
+                };
+            })
+            .filter((capability): capability is FinishCapabilityVM => Boolean(capability));
+
+        const availableFinishes = sortedCapabilities
+            .filter((capability) => capability.capability !== 'no')
+            .map((capability): FinishVM | null => {
+                const finish = firstRelation(capability.finish_definitions);
+                if (!finish) return null;
+
+                const { finishId, finishVariantId } = splitFinishKey(finish.finish_key);
+                const matchingImages = imageRows.filter((image) => {
+                    const matchesFinish =
+                        image.finish_definition_id === finish.id ||
+                        image.finish_definition_id === null;
+                    const matchesVariant =
+                        image.stone_variant_id === activeVariant.id ||
+                        image.stone_variant_id === null;
+                    return matchesFinish && matchesVariant;
+                });
+                const primaryImage =
+                    matchingImages.find((image) => image.finish_definition_id === finish.id && image.image_role === 'primary') ||
+                    matchingImages.find((image) => image.finish_definition_id === finish.id) ||
+                    matchingImages[0];
+                const primaryMedia = firstRelation(primaryImage?.media_assets);
+                const secondaryImages = matchingImages
+                    .filter((image) => image !== primaryImage)
+                    .filter((image) => image.image_role !== 'swatch')
+                    .map((image, index) => {
+                        const media = firstRelation(image.media_assets);
+                        return {
+                            imageUrl: media?.source_url || '',
+                            imageAlt: media?.alt || `${group.display_name} ${finish.display_name} frame`,
+                            label: image.image_role === 'detail' ? 'Detail frame' : `Secondary frame ${index + 1}`,
+                        };
+                    })
+                    .filter((image) => image.imageUrl);
+
+                const staticFallback = getStoneFinishImageResolution(activeVariant.variant_key, finish.finish_key);
+                const defaultFallback = getStoneDefaultImage(activeVariant.variant_key);
+                const fallbackImage = staticFallback.asset || defaultFallback;
+                const hasFinishSpecificImage = Boolean(
+                    primaryMedia?.source_url && primaryImage?.finish_definition_id === finish.id,
+                );
+                const imageRole: StoneFinishImageRole = hasFinishSpecificImage
+                    ? 'finish-specific'
+                    : primaryMedia?.source_url || fallbackImage?.imageUrl
+                      ? 'reference'
+                      : 'placeholder';
+                const behavior = getFinishBehaviorMeta(finish.finish_key, finishId);
+
+                return {
+                    finishKey: finish.finish_key,
+                    finishId,
+                    finishVariantId,
+                    label: finish.display_name,
+                    sortOrder: finish.sort_order,
+                    capability: capability.capability === 'tbc' ? 'tbc' : 'yes',
+                    sources: capability.sources ?? [],
+                    behavior: capability.behavior_note
+                        ? { ...behavior, summary: capability.behavior_note }
+                        : behavior,
+                    imageUrl:
+                        primaryMedia?.source_url ||
+                        fallbackImage?.imageUrl ||
+                        placeholderStoneImage(group.display_name),
+                    thumbUrl: fallbackImage?.thumbUrl,
+                    imageAlt:
+                        primaryMedia?.alt ||
+                        fallbackImage?.alt ||
+                        `${group.display_name} ${finish.display_name} finish preview`,
+                    imageRole,
+                    secondaryImages,
+                };
+            })
+            .filter((finish): finish is FinishVM => Boolean(finish))
+            .sort(compareBySortOrder);
+
+        if (!availableFinishes.length) {
+            return null;
+        }
+
+        const pricePresentation = toPublishedPricePresentation(group);
+        const cutOptions: StoneCutOptionRaw[] = [
+            {
+                cutOrientation: 'on_request',
+                available: true,
+                sources: ['CMS'],
+            },
+        ];
+
+        return {
+            stoneGroupId: group.stone_group_key,
+            name: group.display_name,
+            status: 'active',
+            stoneType: group.stone_type_display || group.stone_type_source || 'Stone',
+            originLabel: toPublishedOriginLabel(group),
+            rawBlockLabel: toPublishedRawBlockLabel(group),
+            dlName: group.source_name || null,
+            priceRange: pricePresentation.priceRange,
+            priceTierLevel: pricePresentation.priceTierLevel,
+            priceTierLabel: pricePresentation.priceTierLabel,
+            pricePrimaryLabel: pricePresentation.pricePrimaryLabel,
+            availabilityLabel: toAvailabilityLabel('active'),
+            cutOptions,
+            variants: variantRows.map((variant) => ({
+                stoneVariantId: variant.variant_key,
+                label: variant.display_name || 'Standard',
+                variantType: variant.variant_type || 'none',
+                status: 'active',
+                sortOrder: variant.sort_order ?? 0,
+            })),
+            activeVariantId: activeVariant.variant_key,
+            finishes: availableFinishes,
+            finishCapabilities,
+            defaultFinishKey: availableFinishes[0]?.finishKey || null,
         };
     }
 

@@ -2,6 +2,45 @@
 
 Last updated: 2026-06-04
 
+## Entry - 2026-06-04 (Public Stone Library Detail CMS Adapter)
+
+### Scope
+- Continued the `/admin` CMS editor-handoff goal by closing the Stone Library detail public-read gap.
+- Added a public Stone Library detail adapter that reads Published Supabase stone families, variants, finish capabilities, and finish images before falling back to static Stone Library data.
+- Updated `/stone-library/:stoneGroupId` to load detail data asynchronously, show a deliberate loading/error state, and avoid redirecting before the published-first lookup completes.
+- Expanded `npm run agent:public-supabase-readiness` so it fails if Stone Library detail loses the published-first adapter or static fallback.
+- Updated the editor guide, handoff, roadmap, and task queue to reflect that Stone Library listing/detail can now reflect Published CMS rows.
+
+### Changed Files
+- `src/service/StoneLibraryService.ts`
+- `src/pages/StoneLibraryDetailPage.tsx`
+- `scripts/check-public-supabase-readiness.mjs`
+- `docs/ADMIN_EDITOR_GUIDE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npx tsc -b`: pass.
+- `npm run lint`: pass.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:public-supabase-readiness`: pass. Verified published-only public Supabase read boundaries, Stone Library detail published-first adapter guard, and static fallback contract.
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run agent:check`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `git diff --check`: pass.
+- `npm run agent:smoke`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions; `/stone-library/alpine-white` route passed.
+- `npm run agent:admin-config-gate`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions; 11 admin routes passed the no-config gate.
+
+### Risks and Gaps
+- Imported Stone Library rows remain `draft` by design; an editor still needs to review and publish real family/variant/finish/image rows before the public site shows CMS-authored detail content.
+- The CMS detail adapter maps cut options to a conservative on-request public row because the current Supabase Stone Library schema does not yet store cut-option rows separately.
+- A final signed-in production editor walkthrough is still required after local commits are pushed and deployed.
+
+### Next Handoff
+- Continue the CMS goal with a signed-in production walkthrough and editor review/publish proof.
+
 ## Entry - 2026-06-04 (Public Article Structured Block Rendering)
 
 ### Scope
@@ -35,11 +74,11 @@ Last updated: 2026-06-04
 
 ### Risks and Gaps
 - Imported article rows and blocks remain `draft` by design; an editor still needs to review and publish real Article content before the public site shows those CMS-authored bodies.
-- Stone Library detail still needs the deeper Supabase variant/finish detail adapter.
+- Stone Library detail now has a published-first Supabase adapter in the following worklog entry; production editor walkthrough remains.
 - A final signed-in production editor walkthrough is still required after local commits are pushed and deployed.
 
 ### Next Handoff
-- Continue the CMS goal with a signed-in production walkthrough and Stone Library detail public adapter work.
+- Continue the CMS goal with a signed-in production walkthrough and editor review/publish proof.
 
 ## Entry - 2026-06-04 (Admin Settings Access Handoff UX)
 
