@@ -8332,6 +8332,41 @@ Last updated: 2026-06-04
 - `NOW-ADMIN-MEDIA-LEADS-001`
 - `NOW-ADMIN-CMS-001`
 
+## Entry - 2026-06-04 (Admin Articles Media Authoring UX)
+
+### Scope
+- Continued the CMS productization pass on `/admin/articles`.
+- Replaced article cover and structured-block media ID entry with media selectors and previews.
+- Added block-type-specific content guidance before the structured JSON field, so editors can understand the expected shape without treating raw newsletter HTML as the authoring model.
+- Kept existing draft/publish/archive lifecycle, audit behavior, schema, and public-read contracts unchanged.
+
+### Changed Files
+- `src/pages/admin/AdminArticlesPage.tsx`
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run agent:smoke`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions.
+- `npm run agent:admin-config-gate`: pass after rerun outside the sandbox because local Vite preview/browser checks were blocked by sandbox permissions; 11 admin routes passed the no-config gate.
+
+### Risks and Gaps
+- Articles still need structured public block rendering; public detail pages continue using sanitized legacy HTML fallback until that adapter is built.
+- The content JSON field is now guided but still technical; a future batch should add form-native editors for common block types.
+
+### Next Handoff
+- `NOW-ADMIN-CONTENT-CRUD-001`
+- `NOW-ADMIN-CMS-001`
+
 ## Entry Template (Use for Every Future Session)
 
 ### Date

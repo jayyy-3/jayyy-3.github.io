@@ -6,6 +6,7 @@ import {
     BookOpenText,
     Braces,
     CheckCircle2,
+    Image as ImageIcon,
     Plus,
     Save,
     Search,
@@ -158,6 +159,21 @@ const blockTypeOptions: Array<[string, string]> = [
     ['callout', 'Callout'],
 ];
 
+const blockContentHints: Record<ArticleBlockType, string> = {
+    rich_text: 'Use { "body": "Paragraph copy" } for normal editorial paragraphs.',
+    image: 'Select a media record below, then use content for caption or layout notes.',
+    gallery: 'Select the lead media record here; add the ordered gallery notes in content.',
+    quote: 'Use { "quote": "...", "attribution": "..." } for pull quotes.',
+    faq: 'Use { "items": [{ "question": "...", "answer": "..." }] } for Q&A blocks.',
+    cta: 'Use { "label": "...", "href": "..." } for editorial calls to action.',
+    project_spotlight: 'Choose a linked project below and add short supporting copy in content.',
+    stone_reference: 'Choose a linked stone below and add why it matters in content.',
+    comparison_table: 'Use structured rows and columns; avoid pasting newsletter table HTML.',
+    proof_metric: 'Use { "label": "...", "value": "...", "note": "..." } for proof points.',
+    video_embed: 'Use content for the approved video URL/embed metadata.',
+    callout: 'Use { "heading": "...", "body": "..." } for highlighted notes.',
+};
+
 const fieldClass =
     'mt-2 min-h-11 w-full rounded border border-black/15 bg-white px-3 text-sm font-medium outline-none transition focus:border-black disabled:bg-black/[0.04] disabled:text-black/45';
 
@@ -198,6 +214,14 @@ function AdminArticlesContent() {
         [blocks, selectedBlockId],
     );
     const articleCounts = useMemo(() => summarizeArticles(articles), [articles]);
+    const selectedCoverMedia = useMemo(
+        () => findMediaOption(mediaOptions, articleForm.coverMediaId),
+        [articleForm.coverMediaId, mediaOptions],
+    );
+    const selectedBlockMedia = useMemo(
+        () => findMediaOption(mediaOptions, blockForm.mediaAssetId),
+        [blockForm.mediaAssetId, mediaOptions],
+    );
     const filteredArticles = useMemo(
         () =>
             articles.filter((article) => {
@@ -711,11 +735,13 @@ function AdminArticlesContent() {
                                 disabled={!canEdit || isSavingArticle || isLoading}
                                 onChange={(value) => updateArticleField('author', value)}
                             />
-                            <TextField
-                                label="Cover media ID"
+                            <MediaSelect
+                                label="Cover image"
                                 value={articleForm.coverMediaId}
                                 disabled={!canEdit || isSavingArticle || isLoading}
-                                inputMode="numeric"
+                                mediaOptions={mediaOptions}
+                                selectedMedia={selectedCoverMedia}
+                                emptyLabel="No cover image"
                                 onChange={(value) => updateArticleField('coverMediaId', value)}
                             />
                             <TextField
@@ -829,11 +855,13 @@ function AdminArticlesContent() {
                                 onChange={(value) => updateBlockField('blockType', value as ArticleBlockType)}
                                 options={blockTypeOptions}
                             />
-                            <TextField
-                                label="Media asset ID"
+                            <MediaSelect
+                                label="Block image"
                                 value={blockForm.mediaAssetId}
                                 disabled={!canEdit || isSavingBlock || !selectedArticle}
-                                inputMode="numeric"
+                                mediaOptions={mediaOptions}
+                                selectedMedia={selectedBlockMedia}
+                                emptyLabel="No block image"
                                 onChange={(value) => updateBlockField('mediaAssetId', value)}
                             />
                             <TextField
@@ -863,6 +891,10 @@ function AdminArticlesContent() {
                                     ...stoneOptions.map((stone) => [String(stone.id), stone.display_name] as [string, string]),
                                 ]}
                             />
+                        </div>
+                        <div className="border border-black/10 bg-[#f8f9f5] p-4 text-sm leading-6 text-black/62">
+                            <p className="font-semibold text-black">{formatBlockTypeLabel(blockForm.blockType)}</p>
+                            <p className="mt-1">{blockContentHints[blockForm.blockType]}</p>
                         </div>
                         <label className="block text-xs font-bold uppercase tracking-[0.14em] text-black/55">
                             Content JSON
@@ -912,7 +944,7 @@ function AdminArticlesContent() {
                         <h2 className="mt-5 text-xl font-semibold">Block health</h2>
                         <div className="mt-5 grid gap-3 text-sm leading-6 text-white/72">
                             <p>{blocks.length} structured blocks on the selected article.</p>
-                            <p>{mediaOptions.length} media records available for ID linking.</p>
+                            <p>{mediaOptions.length} media records available for image selection.</p>
                             <p>{projectOptions.length} project links and {stoneOptions.length} stone links available.</p>
                         </div>
                     </section>
@@ -1012,6 +1044,88 @@ function SelectField({
                 ))}
             </select>
         </label>
+    );
+}
+
+function findMediaOption(mediaOptions: MediaOptionRow[], value: string) {
+    const mediaId = Number(value);
+    if (!Number.isFinite(mediaId)) return null;
+    return mediaOptions.find((media) => media.id === mediaId) ?? null;
+}
+
+function getMediaUrl(asset: MediaOptionRow | null) {
+    if (!asset) return null;
+    return asset.source_url || asset.object_path;
+}
+
+function formatMediaOption(media: MediaOptionRow) {
+    const label = media.alt || media.caption || media.object_path || media.source_url || `Asset ${media.id}`;
+    return `#${media.id} / ${label}`;
+}
+
+function MediaSelect({
+    label,
+    value,
+    disabled,
+    mediaOptions,
+    selectedMedia,
+    emptyLabel,
+    onChange,
+}: {
+    label: string;
+    value: string;
+    disabled?: boolean;
+    mediaOptions: MediaOptionRow[];
+    selectedMedia: MediaOptionRow | null;
+    emptyLabel: string;
+    onChange: (value: string) => void;
+}) {
+    const previewUrl = getMediaUrl(selectedMedia);
+
+    return (
+        <div className="space-y-2">
+            <SelectField
+                label={label}
+                value={value}
+                disabled={disabled}
+                onChange={onChange}
+                options={[
+                    ['', emptyLabel],
+                    ...mediaOptions.map((media) => [String(media.id), formatMediaOption(media)] as [string, string]),
+                ]}
+            />
+            {selectedMedia ? (
+                <div className="flex gap-3 border border-black/10 bg-[#f8f9f5] p-3">
+                    <div className="flex h-20 w-24 shrink-0 items-center justify-center overflow-hidden bg-white">
+                        {previewUrl && selectedMedia.media_type === 'image' ? (
+                            <img
+                                src={previewUrl}
+                                alt={selectedMedia.alt || selectedMedia.caption || label}
+                                className="h-full w-full object-cover"
+                                loading="lazy"
+                            />
+                        ) : (
+                            <ImageIcon className="h-5 w-5 text-black/35" />
+                        )}
+                    </div>
+                    <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-black">
+                            {selectedMedia.alt || selectedMedia.caption || selectedMedia.object_path || `Asset ${selectedMedia.id}`}
+                        </p>
+                        <p className="mt-1 text-xs font-bold uppercase tracking-[0.12em] text-black/45">
+                            {selectedMedia.media_type} / {selectedMedia.status} / #{selectedMedia.id}
+                        </p>
+                        <p className="mt-2 line-clamp-2 text-xs leading-5 text-black/52">
+                            {selectedMedia.source_url || selectedMedia.object_path || 'No source path recorded.'}
+                        </p>
+                    </div>
+                </div>
+            ) : value ? (
+                <p className="border border-amber-200 bg-amber-50 p-3 text-sm font-semibold leading-6 text-amber-800">
+                    Selected media is not in the available media list.
+                </p>
+            ) : null}
+        </div>
     );
 }
 
@@ -1130,6 +1244,10 @@ function rowToBlockForm(row: ArticleBlockRow | null): BlockFormState {
         linkedStoneGroupId: row.linked_stone_group_id === null ? '' : String(row.linked_stone_group_id),
         sortOrder: String(row.sort_order),
     };
+}
+
+function formatBlockTypeLabel(blockType: ArticleBlockType) {
+    return blockTypeOptions.find(([value]) => value === blockType)?.[1] ?? blockType;
 }
 
 function validateArticleForm(form: ArticleFormState) {
