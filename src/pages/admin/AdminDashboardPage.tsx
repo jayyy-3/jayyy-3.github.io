@@ -102,22 +102,6 @@ export default function AdminDashboardPage() {
     );
 }
 
-function editorDependencyLabel(dependency: string) {
-    const labels: Record<string, string> = {
-        'Supabase Auth + admin_profiles': 'Private CMS access',
-        'Forms live-write verification': 'Customer inbox',
-        'Supabase Storage + media_assets RLS': 'Media library',
-        'Stone Library tables + admin_profiles RLS': 'Stone data',
-        'Media and Stone Library references': 'Uses Media and Stone Library',
-        'Stable Stone Library references': 'Uses Stone Library materials',
-        'Article block migration': 'Structured story content',
-        'Owner/admin role verification': 'Owner/admin only',
-        'Admin mutation helpers': 'Audit history',
-    };
-
-    return labels[dependency] ?? dependency;
-}
-
 function AdminDashboardContent() {
     const { profile } = useAdminAuth();
     const [dashboard, setDashboard] = useState<DashboardState>({
@@ -543,7 +527,7 @@ function AdminDashboardContent() {
                             <h2 className="mt-2 text-2xl font-semibold text-black">Where each editing job lives</h2>
                         </div>
                         <div className="divide-y divide-black/10">
-                            {activeModules.map(({ key, label, path, summary, dependency, Icon }) => (
+                            {activeModules.map(({ key, label, path, summary, handoffLabel, Icon }) => (
                                 <Link
                                     key={key}
                                     to={path}
@@ -554,7 +538,7 @@ function AdminDashboardContent() {
                                         <span className="block text-base font-semibold text-black">{label}</span>
                                         <span className="mt-1 block text-sm leading-6 text-black/60">{summary}</span>
                                         <span className="mt-2 block text-xs font-semibold uppercase tracking-[0.14em] text-black/38">
-                                            {editorDependencyLabel(dependency)}
+                                            {handoffLabel}
                                         </span>
                                     </span>
                                     <span

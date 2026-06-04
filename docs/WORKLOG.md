@@ -2,6 +2,41 @@
 
 Last updated: 2026-06-04
 
+## Entry - 2026-06-04 (Admin Dashboard Module Card Language UX)
+
+### Scope
+- Continued the `/admin` CMS editor-handoff goal by removing technical dependency language from global admin module cards.
+- Replaced the `dependency` module-card field with `handoffLabel`, so Dashboard renders editor-facing labels directly instead of mapping Supabase/RLS strings to friendlier copy.
+- Rewrote module summaries for Dashboard, Media, Stone Library, Projects, Products, Articles, Settings, and Activity log around editing jobs and handoff meaning.
+- Expanded admin CRUD coverage so module cards keep editor-facing handoff labels and cannot reintroduce visible Supabase/RLS dependency copy.
+
+### Changed Files
+- `src/pages/admin/adminContent.ts`
+- `src/pages/admin/AdminDashboardPage.tsx`
+- `scripts/check-admin-crud-coverage.mjs`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npx tsc -b`: pass.
+- `npm run lint`: pass.
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass. Coverage now guards Dashboard module-card handoff labels and rejects technical dependency copy in `adminContent.ts`.
+- `npm run agent:check`: pass.
+- `npm run agent:public-supabase-readiness`: pass.
+- `git diff --check`: pass.
+- `npm run agent:smoke`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions.
+- `npm run agent:admin-config-gate`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions; 11 admin routes passed the no-config gate.
+
+### Risks and Gaps
+- This is a source-level IA/language improvement; final proof still needs production editor walkthrough after deployment.
+
+### Next Handoff
+- Continue the CMS goal with remaining page-level language cleanup and production editor walkthrough proof.
+
 ## Entry - 2026-06-04 (Admin Activity Log Language UX)
 
 ### Scope

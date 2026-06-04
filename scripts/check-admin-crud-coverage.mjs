@@ -63,6 +63,8 @@ const pageChecks = [
       'Before handing to an editor',
       'Open public page link',
       'Open editor',
+      'handoffLabel',
+      'Where each editing job lives',
     ],
     mutates: false,
   },
@@ -771,6 +773,31 @@ function checkProductEditorAuthoring() {
   requireNotIncludes(text, 'seoJson', 'src/pages/admin/AdminProductsPage.tsx product editor authoring');
 }
 
+function checkDashboardEditorLanguage() {
+  const content = readRequired('src/pages/admin/adminContent.ts');
+  const dashboard = readRequired('src/pages/admin/AdminDashboardPage.tsx');
+
+  requireIncludes(content, 'handoffLabel', 'src/pages/admin/adminContent.ts');
+  requireIncludes(content, 'Private CMS access', 'src/pages/admin/adminContent.ts');
+  requireIncludes(content, 'Customer inbox', 'src/pages/admin/adminContent.ts');
+  requireIncludes(content, 'Activity history', 'src/pages/admin/adminContent.ts');
+  requireIncludes(dashboard, 'handoffLabel', 'src/pages/admin/AdminDashboardPage.tsx');
+  requireNotIncludes(content, 'dependency:', 'src/pages/admin/adminContent.ts editor module cards');
+
+  for (const technicalPhrase of [
+    'Supabase Auth',
+    'admin_profiles',
+    'media_assets RLS',
+    'Stone Library tables',
+    'Admin mutation helpers',
+    'Article block migration',
+    'Storage-backed',
+    'claim-safe',
+  ]) {
+    requireNotIncludes(content, technicalPhrase, 'src/pages/admin/adminContent.ts editor module cards');
+  }
+}
+
 function checkAdminLiveVerifierBoundaries() {
   const text = readRequired('scripts/check-admin-crud-live.mjs');
   requireIncludes(text, 'assertNotPubliclyVisible', 'scripts/check-admin-crud-live.mjs');
@@ -913,6 +940,7 @@ checkAdminDestructiveBoundaries();
 pageChecks.forEach(checkPage);
 checkArticleStructuredAuthoring();
 checkProductEditorAuthoring();
+checkDashboardEditorLanguage();
 checkAdminLiveVerifierBoundaries();
 checkAdminRemovalContract();
 
