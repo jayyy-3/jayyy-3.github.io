@@ -8,6 +8,7 @@ import {
     Layers3,
     Plus,
     Save,
+    Search,
     ShieldAlert,
 } from 'lucide-react';
 import { recordAdminAuditEvent, withAuditNotice } from '../../lib/adminAudit';
@@ -15,8 +16,10 @@ import { supabase } from '../../lib/supabaseClient';
 import { useAdminAuth } from '../../lib/adminAuthHooks';
 import AdminShell from './AdminShell';
 import RequireAdmin from './RequireAdmin';
+import { CmsLiveRuleCard, CmsStatusCounts, CmsStatusMeaning, CmsStatusPill } from './AdminCmsPrimitives';
 
 type ProductStatus = 'draft' | 'published' | 'archived';
+type ProductListFilter = ProductStatus | 'all';
 type MaterialCategory = 'body' | 'frame' | 'battens';
 
 interface ProductRow {
@@ -170,6 +173,8 @@ function AdminProductsContent() {
     const [selectedMaterialDefaultId, setSelectedMaterialDefaultId] = useState<number | null>(null);
     const [selectedSpecId, setSelectedSpecId] = useState<number | null>(null);
     const [productForm, setProductForm] = useState<ProductFormState>(emptyProductForm);
+    const [productSearch, setProductSearch] = useState('');
+    const [productStatusFilter, setProductStatusFilter] = useState<ProductListFilter>('all');
     const [modelForm, setModelForm] = useState<ModelFormState>(emptyModelForm);
     const [materialDefaultForm, setMaterialDefaultForm] =
         useState<MaterialDefaultFormState>(emptyMaterialDefaultForm);
@@ -191,6 +196,20 @@ function AdminProductsContent() {
         [models, selectedModelId],
     );
     const productCounts = useMemo(() => summarizeProducts(products), [products]);
+    const filteredProducts = useMemo(
+        () =>
+            products.filter((product) => {
+                const matchesStatus = productStatusFilter === 'all' || product.status === productStatusFilter;
+                const search = productSearch.trim().toLowerCase();
+                const matchesSearch =
+                    !search ||
+                    [product.name, product.slug, product.short_description]
+                        .filter(Boolean)
+                        .some((value) => String(value).toLowerCase().includes(search));
+                return matchesStatus && matchesSearch;
+            }),
+        [productSearch, productStatusFilter, products],
+    );
 
     const loadProductBundle = useCallback(
         async (client: SupabaseClient, productId: number, preferredModelId: number | null = null) => {
@@ -663,6 +682,39 @@ function AdminProductsContent() {
                             {productCounts.published} published, {productCounts.draft} draft,{' '}
                             {productCounts.archived} archived.
                         </p>
+                        <div className="mt-4">
+                            <CmsStatusCounts
+                                draft={productCounts.draft}
+                                published={productCounts.published}
+                                archived={productCounts.archived}
+                            />
+                        </div>
+                        <label className="mt-4 flex min-h-11 items-center gap-2 border border-black/10 bg-[#f8f9f5] px-3 text-sm text-black">
+                            <Search className="h-4 w-4 shrink-0 text-black/42" />
+                            <input
+                                value={productSearch}
+                                onChange={(event) => setProductSearch(event.target.value)}
+                                placeholder="Search product, slug, description"
+                                className="min-w-0 flex-1 bg-transparent text-sm font-medium outline-none placeholder:text-black/36"
+                            />
+                        </label>
+                        <div className="mt-3 grid grid-cols-4 gap-1">
+                            {(['all', 'published', 'draft', 'archived'] as const).map((filter) => (
+                                <button
+                                    key={filter}
+                                    type="button"
+                                    onClick={() => setProductStatusFilter(filter)}
+                                    className={[
+                                        'min-h-9 rounded border px-2 text-[11px] font-bold uppercase tracking-[0.1em] transition',
+                                        productStatusFilter === filter
+                                            ? 'border-black bg-black text-white'
+                                            : 'border-black/10 bg-white text-black/55 hover:border-black',
+                                    ].join(' ')}
+                                >
+                                    {filter}
+                                </button>
+                            ))}
+                        </div>
                     </div>
                     <div className="max-h-[760px] overflow-auto">
                         {isLoading ? (
@@ -674,9 +726,9 @@ function AdminProductsContent() {
                                     />
                                 ))}
                             </div>
-                        ) : products.length ? (
+                        ) : filteredProducts.length ? (
                             <div className="divide-y divide-black/10">
-                                {products.map((product) => (
+                                {filteredProducts.map((product) => (
                                     <button
                                         key={product.id}
                                         type="button"
@@ -695,7 +747,7 @@ function AdminProductsContent() {
                                                     {product.slug}
                                                 </span>
                                             </span>
-                                            <StatusPill status={product.status} />
+                                            <CmsStatusPill status={product.status} />
                                         </div>
                                         <p className="mt-3 truncate text-xs text-black/45">
                                             {product.short_description ?? 'Description pending'}
@@ -706,10 +758,13 @@ function AdminProductsContent() {
                         ) : (
                             <div className="p-5">
                                 <Boxes className="h-5 w-5 text-black" />
-                                <h2 className="mt-5 text-xl font-semibold text-black">No product records yet</h2>
+                                <h2 className="mt-5 text-xl font-semibold text-black">
+                                    {products.length ? 'No matching products' : 'No product records yet'}
+                                </h2>
                                 <p className="mt-3 text-sm leading-6 text-black/58">
-                                    Create a product family, then add models, material defaults, and specifications.
-                                    Public product pages remain static until the migration is switched on.
+                                    {products.length
+                                        ? 'Clear the search or choose another status filter.'
+                                        : 'Create a product family, then add models, material defaults, and specifications.'}
                                 </p>
                             </div>
                         )}
@@ -734,7 +789,13 @@ function AdminProductsContent() {
                                     from static data without losing route contracts.
                                 </p>
                             </div>
-                            <StatusPill status={productForm.status} />
+                            <CmsStatusPill status={productForm.status} />
+                        </div>
+
+                        <div className="mt-5">
+                            <CmsLiveRuleCard>
+                                <CmsStatusMeaning compact />
+                            </CmsLiveRuleCard>
                         </div>
 
                         <div className="mt-7 grid gap-4 md:grid-cols-2">
@@ -1227,23 +1288,6 @@ function RecordChips<T extends { id: number }>({
                 </button>
             ))}
         </div>
-    );
-}
-
-function StatusPill({ status }: { status: ProductStatus }) {
-    return (
-        <span
-            className={[
-                'inline-flex h-8 shrink-0 items-center rounded border px-3 text-[11px] font-bold uppercase tracking-[0.14em]',
-                status === 'published'
-                    ? 'border-[var(--urblo-lime)] bg-[rgba(0,255,25,0.12)] text-black'
-                    : status === 'archived'
-                      ? 'border-black/15 bg-black text-white'
-                      : 'border-black/15 bg-white text-black/50',
-            ].join(' ')}
-        >
-            {status}
-        </span>
     );
 }
 

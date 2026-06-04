@@ -8125,6 +8125,41 @@ Last updated: 2026-06-04
 - `NOW-ADMIN-MEDIA-LEADS-001`
 - `NOW-ADMIN-CMS-001`
 
+## Entry - 2026-06-04 (Admin Products and Articles UX Baseline)
+
+### Scope
+- Extended the shared CMS status/list baseline to Products and Articles.
+- Updated `/admin/products` with shared Draft/Published/Archived status language, status counts, product search, status filtering, and a website-visibility rule in the product editor.
+- Updated `/admin/articles` with shared Draft/Published/Archived status language, status counts, article search, status filtering, and a website-visibility rule in the article editor.
+
+### Changed Files
+- `src/pages/admin/AdminProductsPage.tsx`
+- `src/pages/admin/AdminArticlesPage.tsx`
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:check`: pass.
+- `npm run agent:smoke`: pass after approved local preview-server permission; sandbox-only run failed with `Vite preview did not respond at http://127.0.0.1:4173`.
+- `npm run agent:admin-config-gate`: pass for 11 admin routes after approved local preview/browser permission.
+- `jq empty docs/agent/tasks.json`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- Products and Articles now have better list/status orientation, but their nested model/spec/block editors still need a deeper simplification pass.
+- Leads and Settings still need the shared UX/status/list treatment, and a final non-technical editor usage guide remains outstanding.
+
+### Next Handoff
+- `NOW-ADMIN-CONTENT-CRUD-001`
+- `NOW-ADMIN-CMS-001`
+
 ## Entry Template (Use for Every Future Session)
 
 ### Date

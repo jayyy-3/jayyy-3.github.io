@@ -8,6 +8,7 @@ import {
     CheckCircle2,
     Plus,
     Save,
+    Search,
     ShieldAlert,
 } from 'lucide-react';
 import { recordAdminAuditEvent, withAuditNotice } from '../../lib/adminAudit';
@@ -15,8 +16,10 @@ import { supabase } from '../../lib/supabaseClient';
 import { useAdminAuth } from '../../lib/adminAuthHooks';
 import AdminShell from './AdminShell';
 import RequireAdmin from './RequireAdmin';
+import { CmsLiveRuleCard, CmsStatusCounts, CmsStatusMeaning, CmsStatusPill } from './AdminCmsPrimitives';
 
 type ArticleStatus = 'draft' | 'published' | 'archived';
+type ArticleListFilter = ArticleStatus | 'all';
 type ArticleBlockType =
     | 'rich_text'
     | 'image'
@@ -177,6 +180,8 @@ function AdminArticlesContent() {
     const [selectedArticleId, setSelectedArticleId] = useState<number | null>(null);
     const [selectedBlockId, setSelectedBlockId] = useState<number | null>(null);
     const [articleForm, setArticleForm] = useState<ArticleFormState>(emptyArticleForm);
+    const [articleSearch, setArticleSearch] = useState('');
+    const [articleStatusFilter, setArticleStatusFilter] = useState<ArticleListFilter>('all');
     const [blockForm, setBlockForm] = useState<BlockFormState>(emptyBlockForm);
     const [isLoading, setIsLoading] = useState(true);
     const [isSavingArticle, setIsSavingArticle] = useState(false);
@@ -193,6 +198,27 @@ function AdminArticlesContent() {
         [blocks, selectedBlockId],
     );
     const articleCounts = useMemo(() => summarizeArticles(articles), [articles]);
+    const filteredArticles = useMemo(
+        () =>
+            articles.filter((article) => {
+                const matchesStatus = articleStatusFilter === 'all' || article.status === articleStatusFilter;
+                const search = articleSearch.trim().toLowerCase();
+                const matchesSearch =
+                    !search ||
+                    [
+                        article.title,
+                        article.slug,
+                        article.excerpt,
+                        article.author,
+                        article.published_on,
+                        ...(article.tags ?? []),
+                    ]
+                        .filter(Boolean)
+                        .some((value) => String(value).toLowerCase().includes(search));
+                return matchesStatus && matchesSearch;
+            }),
+        [articleSearch, articleStatusFilter, articles],
+    );
 
     const loadArticleBlocks = useCallback(
         async (client: SupabaseClient, articleId: number, preferredBlockId: number | null = null) => {
@@ -534,6 +560,39 @@ function AdminArticlesContent() {
                             {articleCounts.published} published, {articleCounts.draft} draft,{' '}
                             {articleCounts.archived} archived.
                         </p>
+                        <div className="mt-4">
+                            <CmsStatusCounts
+                                draft={articleCounts.draft}
+                                published={articleCounts.published}
+                                archived={articleCounts.archived}
+                            />
+                        </div>
+                        <label className="mt-4 flex min-h-11 items-center gap-2 border border-black/10 bg-[#f8f9f5] px-3 text-sm text-black">
+                            <Search className="h-4 w-4 shrink-0 text-black/42" />
+                            <input
+                                value={articleSearch}
+                                onChange={(event) => setArticleSearch(event.target.value)}
+                                placeholder="Search title, slug, tag, author"
+                                className="min-w-0 flex-1 bg-transparent text-sm font-medium outline-none placeholder:text-black/36"
+                            />
+                        </label>
+                        <div className="mt-3 grid grid-cols-4 gap-1">
+                            {(['all', 'published', 'draft', 'archived'] as const).map((filter) => (
+                                <button
+                                    key={filter}
+                                    type="button"
+                                    onClick={() => setArticleStatusFilter(filter)}
+                                    className={[
+                                        'min-h-9 rounded border px-2 text-[11px] font-bold uppercase tracking-[0.1em] transition',
+                                        articleStatusFilter === filter
+                                            ? 'border-black bg-black text-white'
+                                            : 'border-black/10 bg-white text-black/55 hover:border-black',
+                                    ].join(' ')}
+                                >
+                                    {filter}
+                                </button>
+                            ))}
+                        </div>
                     </div>
                     <div className="max-h-[760px] overflow-auto">
                         {isLoading ? (
@@ -545,9 +604,9 @@ function AdminArticlesContent() {
                                     />
                                 ))}
                             </div>
-                        ) : articles.length ? (
+                        ) : filteredArticles.length ? (
                             <div className="divide-y divide-black/10">
-                                {articles.map((article) => (
+                                {filteredArticles.map((article) => (
                                     <button
                                         key={article.id}
                                         type="button"
@@ -566,7 +625,7 @@ function AdminArticlesContent() {
                                                     {article.slug} / {article.published_on ?? 'date TBC'}
                                                 </span>
                                             </span>
-                                            <StatusPill status={article.status} />
+                                            <CmsStatusPill status={article.status} />
                                         </div>
                                         <p className="mt-3 truncate text-xs text-black/45">
                                             {(article.tags ?? []).join(', ') || 'Tags pending'}
@@ -577,10 +636,13 @@ function AdminArticlesContent() {
                         ) : (
                             <div className="p-5">
                                 <BookOpenText className="h-5 w-5 text-black" />
-                                <h2 className="mt-5 text-xl font-semibold text-black">No article records yet</h2>
+                                <h2 className="mt-5 text-xl font-semibold text-black">
+                                    {articles.length ? 'No matching articles' : 'No article records yet'}
+                                </h2>
                                 <p className="mt-3 text-sm leading-6 text-black/58">
-                                    Create an article record, then add structured blocks. Raw newsletter HTML should
-                                    stay migration source, not the authoring model.
+                                    {articles.length
+                                        ? 'Clear the search or choose another status filter.'
+                                        : 'Create an article record, then add structured blocks. Raw newsletter HTML should stay migration source, not the authoring model.'}
                                 </p>
                             </div>
                         )}
@@ -605,7 +667,13 @@ function AdminArticlesContent() {
                                     migration provenance.
                                 </p>
                             </div>
-                            <StatusPill status={articleForm.status} />
+                            <CmsStatusPill status={articleForm.status} />
+                        </div>
+
+                        <div className="mt-5">
+                            <CmsLiveRuleCard>
+                                <CmsStatusMeaning compact />
+                            </CmsLiveRuleCard>
                         </div>
 
                         <div className="mt-7 grid gap-4 md:grid-cols-2">
@@ -1028,23 +1096,6 @@ function RecordChips<T extends { id: number }>({
                 </button>
             ))}
         </div>
-    );
-}
-
-function StatusPill({ status }: { status: ArticleStatus }) {
-    return (
-        <span
-            className={[
-                'inline-flex h-8 shrink-0 items-center rounded border px-3 text-[11px] font-bold uppercase tracking-[0.14em]',
-                status === 'published'
-                    ? 'border-[var(--urblo-lime)] bg-[rgba(0,255,25,0.12)] text-black'
-                    : status === 'archived'
-                      ? 'border-black/15 bg-black text-white'
-                      : 'border-black/15 bg-white text-black/50',
-            ].join(' ')}
-        >
-            {status}
-        </span>
     );
 }
 
