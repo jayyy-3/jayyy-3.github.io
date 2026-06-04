@@ -5,6 +5,7 @@ import {
     Archive,
     Boxes,
     CheckCircle2,
+    Image as ImageIcon,
     Layers3,
     Plus,
     Save,
@@ -196,6 +197,18 @@ function AdminProductsContent() {
         [models, selectedModelId],
     );
     const productCounts = useMemo(() => summarizeProducts(products), [products]);
+    const selectedHeroMedia = useMemo(
+        () => findMediaOption(mediaOptions, productForm.heroMediaId),
+        [mediaOptions, productForm.heroMediaId],
+    );
+    const selectedModelImage = useMemo(
+        () => findMediaOption(mediaOptions, modelForm.imageMediaId),
+        [mediaOptions, modelForm.imageMediaId],
+    );
+    const selectedDefaultStone = useMemo(
+        () => findStoneOption(stoneOptions, materialDefaultForm.stoneGroupId),
+        [materialDefaultForm.stoneGroupId, stoneOptions],
+    );
     const filteredProducts = useMemo(
         () =>
             products.filter((product) => {
@@ -827,11 +840,13 @@ function AdminProductsContent() {
                                 inputMode="numeric"
                                 onChange={(value) => updateProductField('sortOrder', value)}
                             />
-                            <TextField
-                                label="Hero media ID"
+                            <MediaSelect
+                                label="Hero image"
                                 value={productForm.heroMediaId}
                                 disabled={!canEdit || isSavingProduct || isLoading}
-                                inputMode="numeric"
+                                mediaOptions={mediaOptions}
+                                selectedMedia={selectedHeroMedia}
+                                emptyLabel="No hero image"
                                 onChange={(value) => updateProductField('heroMediaId', value)}
                             />
                         </div>
@@ -922,11 +937,13 @@ function AdminProductsContent() {
                                 disabled={!canEdit || isSavingModel || !selectedProduct}
                                 onChange={(value) => updateModelField('label', value)}
                             />
-                            <TextField
-                                label="Image media ID"
+                            <MediaSelect
+                                label="Model image"
                                 value={modelForm.imageMediaId}
                                 disabled={!canEdit || isSavingModel || !selectedProduct}
-                                inputMode="numeric"
+                                mediaOptions={mediaOptions}
+                                selectedMedia={selectedModelImage}
+                                emptyLabel="No model image"
                                 onChange={(value) => updateModelField('imageMediaId', value)}
                             />
                             <TextField
@@ -1086,6 +1103,20 @@ function AdminProductsContent() {
                                 ...stoneOptions.map((stone) => [String(stone.id), stone.display_name] as [string, string]),
                             ]}
                         />
+                        {selectedDefaultStone ? (
+                            <div className="border border-black/10 bg-[#f8f9f5] p-3">
+                                <p className="text-sm font-semibold text-black">{selectedDefaultStone.display_name}</p>
+                                <p className="mt-1 text-xs font-bold uppercase tracking-[0.12em] text-black/45">
+                                    Stone Library status: {selectedDefaultStone.status}
+                                </p>
+                                {selectedDefaultStone.status !== 'published' ? (
+                                    <p className="mt-2 text-sm font-semibold leading-6 text-amber-800">
+                                        This Stone Library row is not Published yet. Public product pages may keep using
+                                        fallback/default material text until the stone is published.
+                                    </p>
+                                ) : null}
+                            </div>
+                        ) : null}
                         <TextField
                             label="Material slug"
                             value={materialDefaultForm.materialSlug}
@@ -1204,6 +1235,94 @@ function SelectField({
                 ))}
             </select>
         </label>
+    );
+}
+
+function findMediaOption(mediaOptions: MediaOptionRow[], value: string) {
+    const mediaId = Number(value);
+    if (!Number.isFinite(mediaId)) return null;
+    return mediaOptions.find((media) => media.id === mediaId) ?? null;
+}
+
+function findStoneOption(stoneOptions: StoneOptionRow[], value: string) {
+    const stoneId = Number(value);
+    if (!Number.isFinite(stoneId)) return null;
+    return stoneOptions.find((stone) => stone.id === stoneId) ?? null;
+}
+
+function getMediaUrl(asset: MediaOptionRow | null) {
+    if (!asset) return null;
+    return asset.source_url || asset.object_path;
+}
+
+function formatMediaOption(media: MediaOptionRow) {
+    const label = media.alt || media.caption || media.object_path || media.source_url || `Asset ${media.id}`;
+    return `#${media.id} / ${label}`;
+}
+
+function MediaSelect({
+    label,
+    value,
+    disabled,
+    mediaOptions,
+    selectedMedia,
+    emptyLabel,
+    onChange,
+}: {
+    label: string;
+    value: string;
+    disabled?: boolean;
+    mediaOptions: MediaOptionRow[];
+    selectedMedia: MediaOptionRow | null;
+    emptyLabel: string;
+    onChange: (value: string) => void;
+}) {
+    const previewUrl = getMediaUrl(selectedMedia);
+
+    return (
+        <div className="space-y-2">
+            <SelectField
+                label={label}
+                value={value}
+                disabled={disabled}
+                onChange={onChange}
+                options={[
+                    ['', emptyLabel],
+                    ...mediaOptions.map((media) => [String(media.id), formatMediaOption(media)] as [string, string]),
+                ]}
+            />
+            {selectedMedia ? (
+                <div className="flex gap-3 border border-black/10 bg-[#f8f9f5] p-3">
+                    <div className="flex h-20 w-24 shrink-0 items-center justify-center overflow-hidden bg-white">
+                        {previewUrl && selectedMedia.media_type === 'image' ? (
+                            <img
+                                src={previewUrl}
+                                alt={selectedMedia.alt || selectedMedia.caption || label}
+                                className="h-full w-full object-cover"
+                                loading="lazy"
+                            />
+                        ) : (
+                            <ImageIcon className="h-5 w-5 text-black/35" />
+                        )}
+                    </div>
+                    <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-black">
+                            {selectedMedia.alt || selectedMedia.caption || selectedMedia.object_path || `Asset ${selectedMedia.id}`}
+                        </p>
+                        <p className="mt-1 text-xs font-bold uppercase tracking-[0.12em] text-black/45">
+                            {selectedMedia.media_type} / {selectedMedia.status} / #{selectedMedia.id}
+                        </p>
+                        <p className="mt-2 line-clamp-2 text-xs leading-5 text-black/52">
+                            {selectedMedia.source_url || selectedMedia.object_path || 'No source path recorded.'}
+                        </p>
+                    </div>
+                </div>
+            ) : value ? (
+                <p className="border border-amber-200 bg-amber-50 p-3 text-sm font-semibold leading-6 text-amber-800">
+                    Selected media is not in the available media list.
+                </p>
+            ) : null}
+        </div>
     );
 }
 
@@ -1345,7 +1464,7 @@ function validateProductForm(form: ProductFormState) {
     }
 
     const sortOrder = requiredInteger(form.sortOrder, 'Sort order');
-    const heroMediaId = optionalPositiveInteger(form.heroMediaId, 'Hero media ID');
+    const heroMediaId = optionalPositiveInteger(form.heroMediaId, 'Hero image');
     if (sortOrder.error) return validationFailure(sortOrder.error);
     if (heroMediaId.error) return validationFailure(heroMediaId.error);
 
@@ -1373,19 +1492,19 @@ function validateModelForm(form: ModelFormState) {
     if (!form.label.trim()) return validationFailure('Model label is required.');
 
     const sortOrder = requiredInteger(form.sortOrder, 'Sort order');
-    const imageMediaId = optionalPositiveInteger(form.imageMediaId, 'Image media ID');
+    const imageMediaId = optionalPositiveInteger(form.imageMediaId, 'Model image');
     if (sortOrder.error) return validationFailure(sortOrder.error);
     if (imageMediaId.error) return validationFailure(imageMediaId.error);
 
     if (form.status === 'published' && imageMediaId.value === null) {
-        return validationFailure('Published models require image media.');
+        return validationFailure('Cannot publish model yet. Choose a model image first.');
     }
 
     return { error: null, sortOrder: sortOrder.value, imageMediaId: imageMediaId.value };
 }
 
 function validateMaterialDefaultForm(form: MaterialDefaultFormState) {
-    const stoneGroupId = optionalPositiveInteger(form.stoneGroupId, 'Stone group ID');
+    const stoneGroupId = optionalPositiveInteger(form.stoneGroupId, 'Stone Library link');
     if (stoneGroupId.error) return validationFailure(stoneGroupId.error);
 
     if (stoneGroupId.value === null && !form.materialSlug.trim() && !form.displayLabel.trim()) {

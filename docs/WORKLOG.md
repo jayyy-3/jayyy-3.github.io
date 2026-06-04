@@ -2,6 +2,40 @@
 
 Last updated: 2026-06-04
 
+## Entry - 2026-06-04 (Admin Products Media Selector UX)
+
+### Scope
+- Continued the `/admin` CMS editor-experience productization goal with a focused Products media/default-material pass.
+- Replaced raw Product hero media ID and Model image media ID entry with editor-facing media selectors and previews.
+- Added Stone Library status feedback to Product material defaults so editors can see whether the linked stone is public-ready.
+- Updated validation labels so Product media errors refer to selected images/media rather than database IDs.
+
+### Changed Files
+- `src/pages/admin/AdminProductsPage.tsx`
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run build`: pass.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run agent:smoke`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions.
+- `npm run agent:admin-config-gate`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions; 11 admin routes passed the no-config gate.
+
+### Risks and Gaps
+- Products no longer requires hand-entering media IDs for hero/model images, but SEO JSON remains a technical field that still needs a friendlier editor layer.
+- Product model publish readiness is still less explicit than Projects; a future pass should add a compact checklist for published model image/label/key readiness.
+
+### Next Handoff
+- Continue the CMS goal by simplifying Article block editing or replacing Products SEO JSON with editor-facing SEO fields.
+
 ## Entry - 2026-06-04 (Admin Stone Library Finish Image UX)
 
 ### Scope
