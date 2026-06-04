@@ -90,6 +90,7 @@ const pageChecks = [
       'Copy the full login setup code',
       'Invite and grant access',
       'Grant existing login',
+      'Invite new CMS users, manage existing access',
       'Login setup code copied.',
       '/api/admin/invite-user',
       'Invite and grant access sends the login email from the secure server endpoint',
@@ -708,6 +709,13 @@ function checkRoutes() {
   requireIncludes(adminInviteFunction, 'inviteUserByEmail', 'functions/_lib/admin-invite.js');
   requireIncludes(adminInviteFunction, 'getBearerToken', 'functions/_lib/admin-invite.js');
   requireIncludes(adminInviteFunction, 'requireManagingAdmin', 'functions/_lib/admin-invite.js');
+  requireIncludes(adminInviteFunction, 'assertNoExistingCmsAccess', 'functions/_lib/admin-invite.js');
+  requireIncludes(adminInviteFunction, 'existing_cms_access', 'functions/_lib/admin-invite.js');
+  requireIncludes(
+    adminInviteFunction,
+    'Edit the existing person instead of sending another invite.',
+    'functions/_lib/admin-invite.js',
+  );
   requireIncludes(adminInviteFunction, ".from('admin_profiles')", 'functions/_lib/admin-invite.js');
   requireIncludes(adminInviteFunction, ".from('admin_audit_events')", 'functions/_lib/admin-invite.js');
   requireIncludes(adminInviteFunction, 'Only a Website owner can invite another Website owner.', 'functions/_lib/admin-invite.js');

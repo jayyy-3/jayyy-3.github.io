@@ -2,6 +2,43 @@
 
 Last updated: 2026-06-04
 
+## Entry - 2026-06-04 (Admin Invite Duplicate Guard UX)
+
+### Scope
+- Continued the `/admin` CMS editor-handoff goal by hardening the new Settings invite flow.
+- Changed the protected invite Function so it checks existing CMS access before sending a Supabase Auth invite, avoiding duplicate invite emails when the email already has access.
+- Updated the People and access intro copy so Settings now clearly starts from Invite and grant access rather than the older setup-code-only sequence.
+- Expanded admin CRUD and Cloudflare readiness coverage so the server-side existing-access guard cannot silently drift.
+
+### Changed Files
+- `functions/_lib/admin-invite.js`
+- `src/pages/admin/AdminSettingsPage.tsx`
+- `scripts/check-admin-crud-coverage.mjs`
+- `scripts/check-cloudflare-pages-readiness.mjs`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `node --check functions/_lib/admin-invite.js`: pass.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass. Coverage now guards the server-side existing CMS access preflight before invite email send.
+- `npm run agent:cloudflare-readiness`: pass. Cloudflare readiness now guards the protected invite Function's existing-access preflight.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npx tsc -b`: pass.
+- `npm run lint`: pass.
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run agent:smoke`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions.
+- `npm run agent:admin-config-gate`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions; 11 admin routes passed the no-config gate.
+
+### Risks and Gaps
+- This is a local source/docs UX pass. The latest local CMS UX commits still need push/deploy approval plus live invite QA before production editors rely on browser-side account creation.
+
+### Next Handoff
+- Continue with full gates, then push/deploy approval and a live invite walkthrough.
+
 ## Entry - 2026-06-04 (Admin Settings Invite Flow UX)
 
 ### Scope

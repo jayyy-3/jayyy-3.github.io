@@ -29,6 +29,7 @@ export async function handleAdminInviteUserRequest(request, env) {
     const input = await parseInviteInput(request);
     const supabase = createServiceClient(config);
     const actor = await requireManagingAdmin(supabase, accessToken, input.role);
+    await assertNoExistingCmsAccess(supabase, input.email);
     const redirectTo = input.redirectTo || `${new URL(request.url).origin}/admin/login`;
 
     const { data: inviteData, error: inviteError } = await supabase.auth.admin.inviteUserByEmail(
@@ -191,6 +192,32 @@ async function requireManagingAdmin(supabase, accessToken, requestedRole) {
   }
 
   return { user, profile };
+}
+
+async function assertNoExistingCmsAccess(supabase, email) {
+  const { data: profiles, error } = await supabase
+    .from('admin_profiles')
+    .select('user_id,email,is_active');
+
+  if (error) {
+    throw new AdminInviteError(
+      502,
+      'profile_lookup_failed',
+      'Existing CMS access could not be checked. Try again before sending an invite.',
+    );
+  }
+
+  const existingProfile = (profiles || []).find(
+    (profile) => normalizeEmail(profile.email || '') === email,
+  );
+
+  if (existingProfile) {
+    throw new AdminInviteError(
+      409,
+      'existing_cms_access',
+      'This email already has CMS access. Edit the existing person instead of sending another invite.',
+    );
+  }
 }
 
 function jsonResponse(body, init = {}) {

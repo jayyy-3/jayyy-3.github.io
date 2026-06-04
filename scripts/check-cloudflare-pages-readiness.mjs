@@ -179,6 +179,8 @@ function checkFunctions() {
   requireIncludes(adminInvite, 'inviteUserByEmail', 'functions/_lib/admin-invite.js');
   requireIncludes(adminInvite, 'getBearerToken', 'functions/_lib/admin-invite.js');
   requireIncludes(adminInvite, 'requireManagingAdmin', 'functions/_lib/admin-invite.js');
+  requireIncludes(adminInvite, 'assertNoExistingCmsAccess', 'functions/_lib/admin-invite.js');
+  requireIncludes(adminInvite, 'existing_cms_access', 'functions/_lib/admin-invite.js');
   requireIncludes(adminInvite, "['owner', 'admin'].includes(profile.role)", 'functions/_lib/admin-invite.js');
   requireIncludes(adminInvite, ".from('admin_profiles')", 'functions/_lib/admin-invite.js');
   requireIncludes(adminInvite, ".from('admin_audit_events')", 'functions/_lib/admin-invite.js');

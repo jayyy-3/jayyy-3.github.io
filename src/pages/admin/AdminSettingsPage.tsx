@@ -793,8 +793,8 @@ function AdminProfilesManager({
                         </p>
                         <h2 className="mt-2 text-2xl font-semibold text-black">People and access</h2>
                         <p className="mt-2 max-w-2xl text-sm leading-6 text-black/58">
-                            Grant CMS access to people who already have a login account. Create or invite the login
-                            account first, then add the setup code here with the role they should have.
+                            Invite new CMS users, manage existing access, and keep each person on the lowest role they
+                            need.
                         </p>
                     </div>
                     <span className="inline-flex h-8 items-center rounded border border-black/10 bg-black/[0.04] px-3 text-[11px] font-bold uppercase tracking-[0.14em] text-black/58">
