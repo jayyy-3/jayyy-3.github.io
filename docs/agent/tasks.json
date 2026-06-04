@@ -656,11 +656,12 @@
       ],
       "notes": [
         "Run after the admin auth shell source exists, but before broader content CRUD, because site settings are first in the goal's CRUD order.",
-        "2026-05-28: Added /admin/settings source for default site_settings read/create/update with status, contact, social, SEO, and footer JSON fields.",
+        "2026-05-28: Added /admin/settings source for default site_settings read/create/update with status, contact, social, SEO, and footer content fields.",
         "2026-05-28: Applied and verified admin_settings_role_hardening on Supabase project npkidywzwddbnfrnxlmo. site_settings SELECT remains active viewer/editor/admin/owner, while INSERT/UPDATE/DELETE require owner/admin.",
         "2026-05-28: Settings saves now call the shared admin audit writer after successful primary save. Live audit row creation remains pending browser-safe Supabase config and active owner/admin profile.",
         "2026-05-28: Added /admin/settings source for non-destructive admin profile management of existing Supabase Auth users, with owner/admin create/update controls, owner-role guardrails, self-lockout prevention, and profile audit attempts.",
         "2026-06-04: `/admin/settings` now uses shared CMS status language for the default settings row and explains which fields affect public site identity versus admin team access.",
+        "2026-06-04: `/admin/settings` now replaces raw footer JSON editing with form controls for footer columns, labels, text values, internal links, and external links while preserving the existing `footer_columns` JSONB contract.",
         "2026-05-28: Applied and verified admin_profile_owner_hardening and security_definer_function_grants on Supabase project npkidywzwddbnfrnxlmo. Admins can maintain non-owner profiles, owner-role changes require owner, anon helper execution is revoked, and rls_auto_enable is not directly executable by anon/authenticated.",
         "2026-05-29: Applied and verified security_definer_private_helpers on Supabase project npkidywzwddbnfrnxlmo. RLS and Storage policies now call private.has_admin_role(...), zero policies call public.has_admin_role(...), public helper execution is revoked from authenticated, anon/authenticated public reads still work, and the Supabase security advisor reports zero security lints.",
         "2026-05-29: Applied and verified admin_profile_email_uniqueness on Supabase project npkidywzwddbnfrnxlmo. `admin_profiles_email_ci_unique_idx` prevents duplicate normalized profile emails so admin team and first-admin readiness lookups stay unambiguous.",

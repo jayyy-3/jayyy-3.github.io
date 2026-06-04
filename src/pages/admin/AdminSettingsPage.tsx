@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { CheckCircle2, Pencil, Save, ShieldCheck, UserPlus, Users } from 'lucide-react';
+import { CheckCircle2, Pencil, Plus, Save, ShieldCheck, UserPlus, Users, X } from 'lucide-react';
 import { recordAdminAuditEvent, withAuditNotice } from '../../lib/adminAudit';
 import { supabase } from '../../lib/supabaseClient';
 import { useAdminAuth } from '../../lib/adminAuthHooks';
@@ -37,7 +37,20 @@ interface SettingsFormState {
     seoTitle: string;
     seoDescription: string;
     defaultShareImage: string;
-    footerColumnsJson: string;
+    footerColumns: FooterColumnForm[];
+}
+
+type FooterDestinationKind = 'text' | 'internal' | 'external';
+
+interface FooterItemForm {
+    label: string;
+    destinationKind: FooterDestinationKind;
+    destination: string;
+}
+
+interface FooterColumnForm {
+    title: string;
+    items: FooterItemForm[];
 }
 
 interface AdminProfileRow {
@@ -68,7 +81,12 @@ const emptyForm: SettingsFormState = {
     seoTitle: '',
     seoDescription: '',
     defaultShareImage: '',
-    footerColumnsJson: '[]',
+    footerColumns: [
+        {
+            title: 'Contact',
+            items: [{ label: 'Email', destinationKind: 'text', destination: 'info@urblo.com.au' }],
+        },
+    ],
 };
 
 const emptyProfileForm: AdminProfileFormState = {
@@ -152,6 +170,32 @@ function AdminSettingsContent() {
 
     function updateField<Key extends keyof SettingsFormState>(key: Key, value: SettingsFormState[Key]) {
         setForm((current) => ({ ...current, [key]: value }));
+        setNotice(null);
+    }
+
+    function updateFooterColumn(index: number, nextColumn: FooterColumnForm) {
+        setForm((current) => ({
+            ...current,
+            footerColumns: current.footerColumns.map((column, columnIndex) =>
+                columnIndex === index ? nextColumn : column,
+            ),
+        }));
+        setNotice(null);
+    }
+
+    function addFooterColumn() {
+        setForm((current) => ({
+            ...current,
+            footerColumns: [...current.footerColumns, { title: 'New column', items: [] }],
+        }));
+        setNotice(null);
+    }
+
+    function hideFooterColumn(index: number) {
+        setForm((current) => ({
+            ...current,
+            footerColumns: current.footerColumns.filter((_, columnIndex) => columnIndex !== index),
+        }));
         setNotice(null);
     }
 
@@ -380,19 +424,31 @@ function AdminSettingsContent() {
                     </div>
 
                     <div className="border border-black/10 bg-white p-5 md:p-6">
-                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-black/45">
-                            Footer columns JSON
-                        </p>
-                        <p className="mt-2 text-sm leading-6 text-black/58">
-                            Structured footer data stays editable while preserving the current field contract.
-                        </p>
-                        <textarea
-                            value={form.footerColumnsJson}
-                            onChange={(event) => updateField('footerColumnsJson', event.target.value)}
+                        <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                            <div>
+                                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-black/45">
+                                    Footer content
+                                </p>
+                                <p className="mt-2 text-sm leading-6 text-black/58">
+                                    Edit footer columns as labels and links. Internal pages start with `/`; external
+                                    links should use `https://`.
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={addFooterColumn}
+                                disabled={!canEdit || isSaving || isLoading}
+                                className="inline-flex min-h-10 items-center justify-center gap-2 rounded border border-black/15 px-3 text-[11px] font-bold uppercase tracking-[0.14em] text-black transition hover:border-black disabled:cursor-not-allowed disabled:text-black/35"
+                            >
+                                <Plus className="h-4 w-4" />
+                                Add column
+                            </button>
+                        </div>
+                        <FooterColumnsEditor
+                            columns={form.footerColumns}
                             disabled={!canEdit || isSaving || isLoading}
-                            rows={10}
-                            spellCheck={false}
-                            className={`${fieldClass} mt-5 font-mono text-xs leading-6`}
+                            onChange={updateFooterColumn}
+                            onHideColumn={hideFooterColumn}
                         />
                     </div>
                 </section>
@@ -411,7 +467,7 @@ function AdminSettingsContent() {
                         <ShieldCheck className="h-5 w-5 text-black" />
                         <h2 className="mt-5 text-xl font-semibold text-black">What this changes</h2>
                         <ul className="mt-4 space-y-3 text-sm leading-6 text-black/62">
-                            <li>Company, email, phone, social links, footer data, and default SEO are site-wide.</li>
+                            <li>Company, email, phone, social links, footer content, and default SEO are site-wide.</li>
                             <li>Published settings are the public-ready default row.</li>
                             <li>Admin team changes affect who can edit the CMS, not public website content.</li>
                             <li>Existing Supabase Auth users must exist before their admin profile is added here.</li>
@@ -821,7 +877,7 @@ function rowToForm(row: SiteSettingsRow | null): SettingsFormState {
         seoTitle: stringFromRecord(row.seo, 'title'),
         seoDescription: stringFromRecord(row.seo, 'description'),
         defaultShareImage: stringFromRecord(row.seo, 'defaultShareImage'),
-        footerColumnsJson: JSON.stringify(row.footer_columns ?? [], null, 2),
+        footerColumns: normalizeFooterColumns(row.footer_columns ?? []),
     };
 }
 
@@ -854,22 +910,251 @@ function StatusPill({ active }: { active: boolean }) {
     );
 }
 
+function FooterColumnsEditor({
+    columns,
+    disabled,
+    onChange,
+    onHideColumn,
+}: {
+    columns: FooterColumnForm[];
+    disabled?: boolean;
+    onChange: (index: number, column: FooterColumnForm) => void;
+    onHideColumn: (index: number) => void;
+}) {
+    if (!columns.length) {
+        return (
+            <div className="mt-5 border border-black/10 bg-black/[0.03] p-4 text-sm leading-6 text-black/58">
+                No footer columns are configured. Add a column to show footer contact or navigation links.
+            </div>
+        );
+    }
+
+    return (
+        <div className="mt-5 space-y-4">
+            {columns.map((column, columnIndex) => (
+                <div key={columnIndex} className="border border-black/10 bg-[#f8f9f5] p-4">
+                    <div className="grid gap-3 md:grid-cols-[1fr_auto] md:items-end">
+                        <label className="block text-xs font-bold uppercase tracking-[0.14em] text-black/55">
+                            Column title
+                            <input
+                                value={column.title}
+                                onChange={(event) =>
+                                    onChange(columnIndex, { ...column, title: event.target.value })
+                                }
+                                disabled={disabled}
+                                className={fieldClass}
+                            />
+                        </label>
+                        <button
+                            type="button"
+                            onClick={() => onHideColumn(columnIndex)}
+                            disabled={disabled}
+                            className="inline-flex min-h-10 items-center justify-center gap-2 rounded border border-black/15 bg-white px-3 text-[11px] font-bold uppercase tracking-[0.14em] text-black transition hover:border-black disabled:cursor-not-allowed disabled:text-black/35"
+                        >
+                            <X className="h-4 w-4" />
+                            Hide column
+                        </button>
+                    </div>
+
+                    <div className="mt-4 space-y-3">
+                        {column.items.map((item, itemIndex) => (
+                            <FooterItemRow
+                                key={itemIndex}
+                                item={item}
+                                disabled={disabled}
+                                onChange={(nextItem) => {
+                                    const nextItems = column.items.map((currentItem, currentIndex) =>
+                                        currentIndex === itemIndex ? nextItem : currentItem,
+                                    );
+                                    onChange(columnIndex, { ...column, items: nextItems });
+                                }}
+                                onHide={() => {
+                                    onChange(columnIndex, {
+                                        ...column,
+                                        items: column.items.filter((_, currentIndex) => currentIndex !== itemIndex),
+                                    });
+                                }}
+                            />
+                        ))}
+                    </div>
+
+                    <button
+                        type="button"
+                        onClick={() =>
+                            onChange(columnIndex, {
+                                ...column,
+                                items: [
+                                    ...column.items,
+                                    { label: 'New item', destinationKind: 'internal', destination: '/' },
+                                ],
+                            })
+                        }
+                        disabled={disabled}
+                        className="mt-4 inline-flex min-h-10 items-center justify-center gap-2 rounded border border-black/15 bg-white px-3 text-[11px] font-bold uppercase tracking-[0.14em] text-black transition hover:border-black disabled:cursor-not-allowed disabled:text-black/35"
+                    >
+                        <Plus className="h-4 w-4" />
+                        Add item
+                    </button>
+                </div>
+            ))}
+        </div>
+    );
+}
+
+function FooterItemRow({
+    item,
+    disabled,
+    onChange,
+    onHide,
+}: {
+    item: FooterItemForm;
+    disabled?: boolean;
+    onChange: (item: FooterItemForm) => void;
+    onHide: () => void;
+}) {
+    return (
+        <div className="grid gap-3 border border-black/10 bg-white p-3 md:grid-cols-[1fr_150px_1.2fr_auto] md:items-end">
+            <label className="block text-xs font-bold uppercase tracking-[0.14em] text-black/55">
+                Item label
+                <input
+                    value={item.label}
+                    onChange={(event) => onChange({ ...item, label: event.target.value })}
+                    disabled={disabled}
+                    className={fieldClass}
+                />
+            </label>
+            <label className="block text-xs font-bold uppercase tracking-[0.14em] text-black/55">
+                Type
+                <select
+                    value={item.destinationKind}
+                    onChange={(event) =>
+                        onChange({
+                            ...item,
+                            destinationKind: event.target.value as FooterDestinationKind,
+                        })
+                    }
+                    disabled={disabled}
+                    className={fieldClass}
+                >
+                    <option value="text">Text</option>
+                    <option value="internal">Internal page</option>
+                    <option value="external">External link</option>
+                </select>
+            </label>
+            <label className="block text-xs font-bold uppercase tracking-[0.14em] text-black/55">
+                {item.destinationKind === 'text' ? 'Text value' : 'Destination'}
+                <input
+                    value={item.destination}
+                    onChange={(event) => onChange({ ...item, destination: event.target.value })}
+                    disabled={disabled}
+                    placeholder={getFooterItemPlaceholder(item.destinationKind)}
+                    className={fieldClass}
+                />
+            </label>
+            <button
+                type="button"
+                onClick={onHide}
+                disabled={disabled}
+                className="inline-flex min-h-10 items-center justify-center gap-2 rounded border border-black/15 px-3 text-[11px] font-bold uppercase tracking-[0.14em] text-black transition hover:border-black disabled:cursor-not-allowed disabled:text-black/35"
+            >
+                <X className="h-4 w-4" />
+                Hide item
+            </button>
+        </div>
+    );
+}
+
 function validateSettings(form: SettingsFormState): { error: string | null; footerColumns: unknown[] } {
     if (!form.companyName.trim()) {
         return { error: 'Company name is required.', footerColumns: [] };
     }
 
-    try {
-        const parsed = JSON.parse(form.footerColumnsJson) as unknown;
+    const footerColumns = serializeFooterColumns(form.footerColumns);
+    if (footerColumns.error) {
+        return { error: footerColumns.error, footerColumns: [] };
+    }
 
-        if (!Array.isArray(parsed)) {
-            return { error: 'Footer columns JSON must be an array.', footerColumns: [] };
+    return { error: null, footerColumns: footerColumns.value };
+}
+
+function normalizeFooterColumns(columns: unknown[]): FooterColumnForm[] {
+    return columns
+        .map((column) => {
+            if (!isRecord(column)) return null;
+            const title = typeof column.title === 'string' ? column.title : '';
+            const rawItems = Array.isArray(column.items) ? column.items : [];
+            const items = rawItems
+                .map((item) => {
+                    if (!isRecord(item)) return null;
+                    const label = typeof item.label === 'string' ? item.label : '';
+                    if (typeof item.to === 'string') {
+                        return { label, destinationKind: 'internal' as const, destination: item.to };
+                    }
+                    if (typeof item.href === 'string') {
+                        return { label, destinationKind: 'external' as const, destination: item.href };
+                    }
+                    if (typeof item.value === 'string') {
+                        return { label, destinationKind: 'text' as const, destination: item.value };
+                    }
+                    return { label, destinationKind: 'text' as const, destination: '' };
+                })
+                .filter((item): item is FooterItemForm => item !== null);
+
+            return { title, items };
+        })
+        .filter((column): column is FooterColumnForm => column !== null);
+}
+
+function serializeFooterColumns(columns: FooterColumnForm[]): { error: string | null; value: unknown[] } {
+    const serialized = [];
+
+    for (const column of columns) {
+        const title = column.title.trim();
+        if (!title) {
+            return { error: 'Every footer column needs a title.', value: [] };
         }
 
-        return { error: null, footerColumns: parsed };
-    } catch {
-        return { error: 'Footer columns JSON is not valid.', footerColumns: [] };
+        const items = [];
+        for (const item of column.items) {
+            const label = item.label.trim();
+            const destination = item.destination.trim();
+            if (!label || !destination) {
+                return { error: 'Every footer item needs a label and text or link destination.', value: [] };
+            }
+
+            if (item.destinationKind === 'internal') {
+                if (!destination.startsWith('/')) {
+                    return { error: 'Internal footer links must start with `/`.', value: [] };
+                }
+                items.push({ label, to: destination });
+                continue;
+            }
+
+            if (item.destinationKind === 'external') {
+                if (!/^https?:\/\//i.test(destination)) {
+                    return { error: 'External footer links must start with `https://` or `http://`.', value: [] };
+                }
+                items.push({ label, href: destination });
+                continue;
+            }
+
+            items.push({ label, value: destination });
+        }
+
+        serialized.push({ title, items });
     }
+
+    return { error: null, value: serialized };
+}
+
+function getFooterItemPlaceholder(kind: FooterDestinationKind) {
+    if (kind === 'internal') return '/projects';
+    if (kind === 'external') return 'https://example.com';
+    return 'Displayed text';
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
 function validateAdminProfileForm(

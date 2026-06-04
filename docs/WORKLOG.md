@@ -8367,6 +8367,41 @@ Last updated: 2026-06-04
 - `NOW-ADMIN-CONTENT-CRUD-001`
 - `NOW-ADMIN-CMS-001`
 
+## Entry - 2026-06-04 (Admin Settings Footer UX)
+
+### Scope
+- Continued the Settings productization pass for non-technical editors.
+- Replaced raw footer JSON editing with a footer column/item editor for text values, internal links, and external links.
+- Preserved the existing `site_settings.footer_columns` JSONB storage contract by serializing the form back into the current column/item shape on save.
+- Added validation for blank footer titles/items, internal links that do not start with `/`, and external links that do not start with `http://` or `https://`.
+
+### Changed Files
+- `src/pages/admin/AdminSettingsPage.tsx`
+- `docs/ADMIN_IA_ACCESS.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run agent:smoke`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions.
+- `npm run agent:admin-config-gate`: pass after rerun outside the sandbox because local Vite preview/browser checks were blocked by sandbox permissions; 11 admin routes passed the no-config gate.
+
+### Risks and Gaps
+- Settings no longer exposes footer JSON, but admin profile creation still requires an existing Supabase Auth user ID. That remains the most technical Settings handoff step until an invite/user-create flow is added.
+- Footer form editing covers the current column/item contract. If future footer data gains richer fields, this editor should be extended before those fields are handed to non-technical users.
+
+### Next Handoff
+- `NOW-ADMIN-SETTINGS-CRUD-001`
+- `NOW-ADMIN-CMS-001`
+
 ## Entry Template (Use for Every Future Session)
 
 ### Date
