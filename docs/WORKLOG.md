@@ -2,6 +2,39 @@
 
 Last updated: 2026-06-04
 
+## Entry - 2026-06-04 (Admin Stone Library Media Language UX)
+
+### Scope
+- Continued the `/admin` CMS editor-handoff goal with a focused Stone Library language cleanup.
+- Replaced visible Stone Library Admin/Editor, Library records, No stone records yet, media record, selected media record, Media #, and mutate wording with Editor access, Stone families, Media from library, Media library item, and save-changes language.
+- Updated finish-image empty states, publish blocker copy, publishing rules, media picker label, picker options, preview status, and validation copy so editors understand they are choosing from the Media library.
+- Expanded admin CRUD coverage so Stone Library cannot drift back to those technical labels in visible editing UI.
+
+### Changed Files
+- `src/pages/admin/AdminStoneLibraryPage.tsx`
+- `scripts/check-admin-crud-coverage.mjs`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass. Coverage now guards Stone Library Stone families / Media library item language and rejects Admin/Editor, Library records, media-record, Media #, and mutate wording.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npx tsc -b`: pass after removing the obsolete `mediaLabel` id parameter.
+- `npm run lint`: pass after removing the obsolete `mediaLabel` id parameter.
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run agent:smoke`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions.
+- `npm run agent:admin-config-gate`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions; 11 admin routes passed the no-config gate.
+
+### Risks and Gaps
+- This is a local source/docs UX pass. The latest local CMS UX commits still need push/deploy approval plus a final production editor walkthrough before the CMS handoff goal can be considered complete.
+
+### Next Handoff
+- Continue with push/deploy approval and final production editor walkthrough.
+
 ## Entry - 2026-06-04 (Admin Projects Media Selection Language UX)
 
 ### Scope

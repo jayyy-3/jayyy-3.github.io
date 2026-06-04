@@ -855,7 +855,7 @@ function AdminStoneLibraryContent() {
         const linkedMedia = mediaById.get(validation.mediaAssetId);
         if (nextStatus === 'published' && linkedMedia?.status !== 'published') {
             setError(
-                'Publish is locked. Open Media and publish the selected media record before publishing this finish image.',
+                'Publish is locked. Open Media and publish the selected Media library item before publishing this finish image.',
             );
             return;
         }
@@ -936,7 +936,7 @@ function AdminStoneLibraryContent() {
     return (
         <AdminShell
             title="Stone Library"
-            eyebrow={canEdit ? 'Admin/Editor' : 'Read only'}
+            eyebrow={canEdit ? 'Editor access' : 'Read only'}
             actions={
                 <button
                     type="button"
@@ -953,7 +953,7 @@ function AdminStoneLibraryContent() {
                 <section className="border border-black/10 bg-white">
                     <div className="border-b border-black/10 p-4">
                         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-black/45">
-                            Library records
+                            Stone families
                         </p>
                         <h2 className="mt-2 text-2xl font-semibold text-black">{groups.length} stone groups</h2>
                         <p className="mt-2 text-sm leading-6 text-black/55">
@@ -1042,7 +1042,7 @@ function AdminStoneLibraryContent() {
                             <div className="p-5">
                                 <Archive className="h-5 w-5 text-black" />
                                 <h2 className="mt-5 text-xl font-semibold text-black">
-                                    {groups.length ? 'No matching stones' : 'No stone records yet'}
+                                    {groups.length ? 'No matching stones' : 'No stone families yet'}
                                 </h2>
                                 <p className="mt-3 text-sm leading-6 text-black/58">
                                     {groups.length
@@ -1445,8 +1445,8 @@ function AdminStoneLibraryContent() {
                                     {selectedImageId ? 'Edit image link' : 'New image link'}
                                 </h2>
                                 <p className="mt-2 text-sm leading-6 text-black/58">
-                                    Link approved media records to a variant and finish so texture evidence remains
-                                    explicit before public migration.
+                                    Choose approved Media library items for each variant and finish so texture evidence
+                                    is clear before anything goes public.
                                 </p>
                             </div>
                             <button
@@ -1493,16 +1493,15 @@ function AdminStoneLibraryContent() {
                                                 <StatusPill status={image.status} />
                                             </div>
                                             <p className="mt-3 truncate text-xs text-black/50">
-                                                {mediaLabel(media, image.media_asset_id)}
+                                                {mediaLabel(media)}
                                             </p>
                                         </button>
                                     );
                                 })
                             ) : (
                                 <div className="rounded border border-black/10 bg-[#f8f9f5] p-4 text-sm leading-6 text-black/58 md:col-span-2">
-                                    No finish image links for this selected variant yet. Add media records in
-                                    `/admin/media`, then attach them here as primary, secondary, detail, or swatch
-                                    evidence.
+                                    No finish images for this selected variant yet. Add images in `/admin/media`, then
+                                    attach them here as primary, secondary, detail, or swatch evidence.
                                 </div>
                             )}
                         </div>
@@ -1599,7 +1598,7 @@ function AdminStoneLibraryContent() {
                                     onClick={() => void saveFinishImage('published')}
                                     title={
                                         finishImagePublishBlocked
-                                            ? 'Publish the selected media record in Media before publishing this finish image.'
+                                            ? 'Publish the selected Media library item before publishing this finish image.'
                                             : 'Publish this finish image link.'
                                     }
                                     className="inline-flex min-h-11 items-center justify-center gap-2 rounded bg-[var(--urblo-lime)] px-4 text-xs font-bold uppercase tracking-[0.14em] text-black transition hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:bg-black/20 disabled:text-black/35"
@@ -1619,7 +1618,7 @@ function AdminStoneLibraryContent() {
                             </div>
                             {finishImagePublishBlocked ? (
                                 <p className="mt-3 border border-amber-200 bg-amber-50 p-3 text-sm font-semibold leading-6 text-amber-800">
-                                    Publish is locked because the selected media record is not Published in Media.
+                                    Publish is locked because the selected Media library item is not Published in Media.
                                 </p>
                             ) : null}
                         </form>
@@ -1638,7 +1637,7 @@ function AdminStoneLibraryContent() {
                             </p>
                             <p>{visibleFinishImages.length} finish image links visible for the selected variant.</p>
                             <p>{finishDefinitions.length} finish options available for this stone.</p>
-                            <p>{mediaAssets.length} image/video media records available for linking.</p>
+                            <p>{mediaAssets.length} Media library items available for finish images.</p>
                         </div>
                     </section>
 
@@ -1651,9 +1650,9 @@ function AdminStoneLibraryContent() {
                         <ul className="mt-4 space-y-3 text-sm leading-6 text-black/62">
                             <li>Published groups require a name, key, type display, summary, and at least one variant.</li>
                             <li>Published variants require a variant key and at least one Available or Needs confirmation finish.</li>
-                            <li>Published finish images require a selected finish and a media record that is Published in Media.</li>
+                            <li>Published finish images require a selected finish and a Media library item that is Published in Media.</li>
                             <li>Needs confirmation stays visible to editors until the stone or finish is ready for the website.</li>
-                            <li>Viewer roles can inspect but not mutate Stone Library records.</li>
+                            <li>Viewers can inspect the Stone Library but cannot save changes.</li>
                             <li>Use Archive to remove a stone from the website while keeping its editing history.</li>
                         </ul>
                     </section>
@@ -1868,7 +1867,7 @@ function StonePublishChecklist({
                         {allReady ? 'Ready for public review' : `${items.length - readyCount} item${items.length - readyCount === 1 ? '' : 's'} need review`}
                     </h3>
                     <p className="mt-2 text-sm leading-6 text-black/58">
-                        Published Stone Library records can appear in public stone listings and product material links.
+                        Published Stone Library content can appear in public stone listings and product material links.
                     </p>
                 </div>
                 <span
@@ -2086,8 +2085,8 @@ function validateFinishImageForm(form: FinishImageFormState): {
     const finishDefinitionId = requiredPositiveInteger(form.finishDefinitionId, 'Finish');
     if (finishDefinitionId.error) return finishImageValidationFailure('Finish image links require a finish.');
 
-    const mediaAssetId = requiredPositiveInteger(form.mediaAssetId, 'Media record');
-    if (mediaAssetId.error) return finishImageValidationFailure('Finish image links require a media record.');
+    const mediaAssetId = requiredPositiveInteger(form.mediaAssetId, 'Media library item');
+    if (mediaAssetId.error) return finishImageValidationFailure('Finish image links require a Media library item.');
 
     const sortOrder = requiredInteger(form.sortOrder, 'Sort order');
     if (sortOrder.error) return finishImageValidationFailure(sortOrder.error);
@@ -2268,12 +2267,12 @@ function getMediaAssetUrl(asset: MediaAssetOption | null) {
     return asset.object_path;
 }
 
-function mediaLabel(asset: MediaAssetOption | undefined, id: number) {
+function mediaLabel(asset: MediaAssetOption | undefined) {
     if (!asset) {
-        return `Media #${id}`;
+        return 'Media item unavailable';
     }
 
-    const label = asset.alt || asset.usage_notes || `Media #${id}`;
+    const label = asset.alt || asset.usage_notes || 'Untitled media';
     return `${label} - ${asset.status === 'published' ? 'Published' : 'Not published yet'}`;
 }
 
@@ -2295,7 +2294,7 @@ function FinishImageMediaSelect({
     return (
         <div className="space-y-2 md:col-span-2">
             <label className="block text-xs font-bold uppercase tracking-[0.14em] text-black/55">
-                Media record
+                Media from library
                 <select
                     value={value}
                     onChange={(event) => onChange(event.target.value)}
@@ -2306,7 +2305,7 @@ function FinishImageMediaSelect({
                     <option value="">Select media</option>
                     {mediaAssets.map((asset) => (
                         <option key={asset.id} value={asset.id}>
-                            {mediaLabel(asset, asset.id)}
+                            {mediaLabel(asset)}
                         </option>
                     ))}
                 </select>
@@ -2329,19 +2328,19 @@ function FinishImageMediaSelect({
                         <p className="truncate text-sm font-semibold text-black">
                             {selectedMedia.alt ||
                                 selectedMedia.usage_notes ||
-                                `Media #${selectedMedia.id}`}
+                                'Untitled media'}
                         </p>
                         <p className="mt-1 text-xs font-bold uppercase tracking-[0.12em] text-black/45">
-                            {selectedMedia.status === 'published' ? 'Published in Media' : 'Not published in Media'} / #{selectedMedia.id}
+                            {selectedMedia.status === 'published' ? 'Published in Media' : 'Not published in Media'}
                         </p>
                         <p className="mt-2 line-clamp-2 text-xs leading-5 text-black/52">
                             {selectedMedia.status === 'published'
-                                ? 'This media record can support a public finish image.'
+                                ? 'This Media library item can support a public finish image.'
                                 : 'Open Media, review the asset, then publish it before this finish image goes public.'}
                         </p>
                         {selectedMedia.status !== 'published' ? (
                             <p className="mt-2 text-xs font-bold uppercase tracking-[0.12em] text-amber-800">
-                                Publish this media record in Media before making this finish image public.
+                                Publish this Media library item before making this finish image public.
                             </p>
                         ) : null}
                     </div>
