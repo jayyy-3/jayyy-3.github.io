@@ -128,6 +128,7 @@ const adminEditorGuideForbiddenText = [
   '| Owner |',
   '| Admin |',
   'reviewed project claim status',
+  'clean model key',
 ]
 
 try {

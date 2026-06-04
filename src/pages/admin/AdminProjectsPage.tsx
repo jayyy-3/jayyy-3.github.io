@@ -1206,7 +1206,7 @@ function AdminProjectsContent() {
                             <input
                                 value={projectSearch}
                                 onChange={(event) => setProjectSearch(event.target.value)}
-                                placeholder="Search projects, slug, location, client"
+                                placeholder="Search project, URL key, location, client"
                                 className="min-w-0 flex-1 bg-transparent text-sm font-medium outline-none placeholder:text-black/36"
                             />
                         </label>
@@ -1258,7 +1258,7 @@ function AdminProjectsContent() {
                                                     {project.title}
                                                 </span>
                                                 <span className="mt-1 block truncate text-xs font-semibold uppercase tracking-[0.12em] text-black/40">
-                                                    {project.slug} / {project.location ?? 'Location TBC'}
+                                                    URL: {project.slug} / {project.location ?? 'Location not set'}
                                                 </span>
                                             </span>
                                             <CmsStatusPill status={project.status} />
@@ -1342,7 +1342,7 @@ function AdminProjectsContent() {
                                 onChange={(value) => updateProjectField('title', value)}
                             />
                             <TextField
-                                label="Slug"
+                                label="Website URL key"
                                 value={projectForm.slug}
                                 disabled={!canEdit || isSavingProject || isLoading || Boolean(selectedProject)}
                                 required
@@ -1460,7 +1460,7 @@ function AdminProjectsContent() {
                                     ['yes', 'Yes'],
                                     ['no', 'No'],
                                     ['not_available', 'Not available'],
-                                    ['tbc', 'TBC'],
+                                    ['tbc', 'Needs confirmation'],
                                 ]}
                             />
                             <MediaSelect
@@ -1560,7 +1560,7 @@ function AdminProjectsContent() {
                                 onChange={(value) => updateFactField('factValue', value)}
                             />
                             <label className="block text-xs font-bold uppercase tracking-[0.14em] text-black/55">
-                                JSON value
+                                Structured detail
                                 <textarea
                                     value={factForm.factValueJson}
                                     onChange={(event) => updateFactField('factValueJson', event.target.value)}
@@ -1568,6 +1568,10 @@ function AdminProjectsContent() {
                                     rows={2}
                                     className={`${fieldClass} py-3 leading-6`}
                                 />
+                                <span className="mt-2 block text-xs font-medium normal-case leading-5 tracking-normal text-black/45">
+                                    Optional advanced detail for structured project facts. Most facts only need the
+                                    Fact value field above.
+                                </span>
                             </label>
                             <SelectField
                                 label="Proof review"
@@ -2282,7 +2286,7 @@ function getProjectPublishBlockers(
             area: 'project',
             field: 'slug',
             label: 'Project website URL',
-            detail: 'Add the lowercase URL slug for this project, for example moon-gate-woolley-street.',
+            detail: 'Add the website URL key for this project, for example moon-gate-woolley-street.',
         });
     } else if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(projectForm.slug.trim())) {
         blockers.push({
@@ -2837,7 +2841,7 @@ function rowToHotspotForm(row: ProjectHotspotRow | null): HotspotFormState {
 function validateProjectForm(form: ProjectFormState) {
     if (!form.title.trim()) return validationFailure('Project title is required.');
     if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(form.slug.trim())) {
-        return validationFailure('Project slug must be lowercase kebab-case.');
+        return validationFailure('Website URL key must use lowercase words separated by hyphens.');
     }
 
     const sortOrder = requiredInteger(form.sortOrder, 'Sort order');
@@ -2875,7 +2879,7 @@ function validateFactForm(form: FactFormState) {
         try {
             factValueJson = JSON.parse(form.factValueJson);
         } catch {
-            return validationFailure('Fact JSON value is not valid JSON.');
+            return validationFailure('Structured detail is not valid. Leave it blank unless this fact needs advanced structured data.');
         }
     }
 

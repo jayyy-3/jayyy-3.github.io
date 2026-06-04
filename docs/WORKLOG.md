@@ -2,6 +2,43 @@
 
 Last updated: 2026-06-04
 
+## Entry - 2026-06-04 (Admin Projects URL-Key Language UX)
+
+### Scope
+- Continued the `/admin` CMS editor-handoff goal with a focused Projects language cleanup.
+- Replaced visible Projects `Slug` wording with Website URL key language in the project editor, list search placeholder, publish checklist detail, and validation messages.
+- Replaced the project list fallback `Location TBC` with `Location not set` so incomplete location data reads as an editor task rather than a domain status.
+- Replaced the Facts `JSON value` label and invalid-JSON error with Structured detail language and help text, making the advanced field optional and less alarming for normal fact editing.
+- Updated guide/harness wording so product model publishing uses model website key rather than clean model key.
+- Expanded admin CRUD coverage so Projects cannot drift back to slug/JSON/TBC labels in visible editing UI.
+
+### Changed Files
+- `src/pages/admin/AdminProjectsPage.tsx`
+- `scripts/check-admin-crud-coverage.mjs`
+- `scripts/check-harness.mjs`
+- `docs/ADMIN_EDITOR_GUIDE.md`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass. Coverage now guards Projects Website URL key / Structured detail language and rejects visible slug/JSON/TBC regressions.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npx tsc -b`: pass.
+- `npm run lint`: pass.
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run agent:smoke`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions.
+- `npm run agent:admin-config-gate`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions; 11 admin routes passed the no-config gate.
+
+### Risks and Gaps
+- This is a local source/docs UX pass. The latest local CMS UX commits still need push/deploy approval plus a final production editor walkthrough before the CMS handoff goal can be considered complete.
+
+### Next Handoff
+- Continue with push/deploy approval and final production walkthrough.
+
 ## Entry - 2026-06-04 (Admin Change History UX)
 
 ### Scope
