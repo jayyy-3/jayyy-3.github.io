@@ -1703,7 +1703,9 @@ function AdminProjectsContent() {
                             <RecordChips
                                 rows={mediaBlocks}
                                 selectedId={selectedMediaBlockId}
-                                getLabel={(row) => `${getProjectMediaRoleLabel(row.media_role)} ${row.sort_order}`}
+                                getLabel={(row) =>
+                                    `${getProjectMediaRoleLabel(row.media_role)} ${row.sort_order} - ${getProjectStatusLabel(row.status)}`
+                                }
                                 onSelect={(row) => {
                                     setSelectedMediaBlockId(row.id);
                                     setMediaBlockForm(rowToMediaBlockForm(row));
@@ -1779,6 +1781,7 @@ function AdminProjectsContent() {
                                 value={mediaBlockForm.status}
                                 disabled={!canEdit || isSavingMediaBlock || !selectedProject}
                                 onChange={(value) => updateMediaBlockField('status', value as ProjectStatus)}
+                                help="Published blocks can appear on the public project page. Draft blocks stay hidden while you edit."
                                 options={statusOptions}
                             />
                             <TextField
@@ -1862,7 +1865,7 @@ function AdminProjectsContent() {
                         <RecordChips
                             rows={maps}
                             selectedId={selectedMapId}
-                            getLabel={(row) => row.title || `Map ${row.id}`}
+                            getLabel={(row) => `${row.title || `Map ${row.id}`} - ${getProjectStatusLabel(row.status)}`}
                             onSelect={(row) => {
                                 setSelectedMapId(row.id);
                                 setMapForm(rowToMapForm(row));
@@ -1874,6 +1877,7 @@ function AdminProjectsContent() {
                             value={mapForm.status}
                             disabled={!canEdit || isSavingMap || !selectedProject}
                             onChange={(value) => updateMapField('status', value as ProjectStatus)}
+                            help="Published maps can appear on the public project page when used by a media block. Draft maps stay hidden."
                             options={statusOptions}
                         />
                         <MediaSelect
@@ -1965,7 +1969,7 @@ function AdminProjectsContent() {
                         <RecordChips
                             rows={hotspots}
                             selectedId={selectedHotspotId}
-                            getLabel={(row) => row.label || row.hotspot_key}
+                            getLabel={(row) => `${row.label || row.hotspot_key} - ${getProjectStatusLabel(row.status)}`}
                             onSelect={(row) => {
                                 setSelectedHotspotId(row.id);
                                 setHotspotForm(rowToHotspotForm(row));
@@ -1976,6 +1980,7 @@ function AdminProjectsContent() {
                             value={hotspotForm.status}
                             disabled={!canEdit || isSavingHotspot || !selectedMap}
                             onChange={(value) => updateHotspotField('status', value as ProjectStatus)}
+                            help="Published hotspots can appear on a published material map. Draft hotspots stay hidden."
                             options={statusOptions}
                         />
                         <TextField
@@ -2197,6 +2202,10 @@ function formatMediaOption(media: MediaOptionRow) {
 function getMediaStatusLabel(status: string) {
     const match = statusOptions.find(([value]) => value === status);
     return match?.[1] ?? 'Unknown status';
+}
+
+function getProjectStatusLabel(status: ProjectStatus) {
+    return statusOptions.find(([value]) => value === status)?.[1] ?? 'Draft';
 }
 
 function findMediaOption(mediaOptions: MediaOptionRow[], value: string) {

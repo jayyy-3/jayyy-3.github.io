@@ -2,6 +2,39 @@
 
 Last updated: 2026-06-04
 
+## Entry - 2026-06-04 (Admin Projects Subcontent Visibility UX)
+
+### Scope
+- Continued the `/admin` CMS editor-handoff goal by clarifying Projects subcontent visibility.
+- Added Draft/Published/Archived labels to Media block, Material map, and Hotspot selection chips so editors can see which saved child items can appear publicly.
+- Added Status helper copy for Media blocks, Material maps, and Hotspots explaining when Published child content can appear on the public project page and when Draft content stays hidden.
+- Added a project status label helper and expanded admin CRUD coverage so child-content status labels and visibility explanations remain guarded.
+
+### Changed Files
+- `src/pages/admin/AdminProjectsPage.tsx`
+- `scripts/check-admin-crud-coverage.mjs`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass. Coverage now guards Projects child-content Draft/Published/Archived chip labels and subcontent visibility helper copy.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npx tsc -b`: pass.
+- `npm run lint`: pass.
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run agent:smoke`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions.
+- `npm run agent:admin-config-gate`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions; 11 admin routes passed the no-config gate.
+
+### Risks and Gaps
+- This is a local source/docs UX pass. The latest local CMS UX commits still need push/deploy approval plus production editor walkthrough before the CMS handoff goal can be considered complete.
+
+### Next Handoff
+- Continue with push/deploy approval and production editor walkthrough.
+
 ## Entry - 2026-06-04 (Admin Projects Proof Review Repair UX)
 
 ### Scope
