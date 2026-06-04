@@ -20,16 +20,17 @@ The harness has two separate creative authorities:
 8. Read technical facts and contracts: `docs/ARCHITECTURE.md`.
 9. Read human roadmap: `docs/NEXT_STEPS.md`.
 10. Read admin IA/access contract when working on `/admin`: `docs/ADMIN_IA_ACCESS.md`.
-11. Read latest session evidence when needed: `docs/WORKLOG.md`.
-12. For docs/harness changes, run:
+11. Read admin editor handoff guide when preparing CMS handoff or customer-facing admin instructions: `docs/ADMIN_EDITOR_GUIDE.md`.
+12. Read latest session evidence when needed: `docs/WORKLOG.md`.
+13. For docs/harness changes, run:
    - `npm run agent:check`
    - `git diff --check`
-13. For runtime changes, run quality gates from repo root in this order:
+14. For runtime changes, run quality gates from repo root in this order:
    - `npm run build`
    - `npm run lint`
    - `npx tsc -b`
    - `npm run agent:smoke`
-14. Treat any runtime gate failure as blocking unless `docs/agent/tasks.json` explicitly defines a temporary exception.
+15. Treat any runtime gate failure as blocking unless `docs/agent/tasks.json` explicitly defines a temporary exception.
 
 ## Canonical Conflict Precedence
 - Code reality wins over stale docs. If docs conflict with implemented behavior, verify code reality, update docs, then add remediation tasks if the behavior itself is wrong.

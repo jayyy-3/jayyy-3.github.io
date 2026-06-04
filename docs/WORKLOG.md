@@ -8438,6 +8438,39 @@ Last updated: 2026-06-04
 - `NOW-ADMIN-SETTINGS-CRUD-001`
 - `NOW-ADMIN-CMS-001`
 
+## Entry - 2026-06-04 (Admin Editor Handoff Guide)
+
+### Scope
+- Added the first customer-facing `/admin` editor guide.
+- Documented the production admin URL, roles, account setup path, Draft/Published/Archived rules, editing flow, module coverage, publish checks, public fallback boundaries, and remaining handoff gaps.
+- Connected the guide to the harness startup checklist, handoff entry points, roadmap, and machine task queue so future CMS changes keep the guide current.
+
+### Changed Files
+- `AGENTS.md`
+- `docs/ADMIN_EDITOR_GUIDE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run build`: pass. Browserslist staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run agent:smoke`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions.
+- `npm run agent:admin-config-gate`: pass after rerun outside the sandbox because local Vite preview/browser checks were blocked by sandbox permissions; 11 admin routes passed the no-config gate.
+
+### Risks and Gaps
+- This is a written handoff guide, not a substitute for final production editor walkthrough after the local CMS UX commits are pushed and deployed.
+- The guide intentionally records current gaps: login account creation still happens outside `/admin/settings`, Stone Library detail remains static-backed, and public Article bodies still use sanitized legacy HTML.
+
+### Next Handoff
+- `NOW-ADMIN-CMS-001`
+
 ## Entry Template (Use for Every Future Session)
 
 ### Date
