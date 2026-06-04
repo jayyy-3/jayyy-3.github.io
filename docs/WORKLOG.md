@@ -2,6 +2,41 @@
 
 Last updated: 2026-06-04
 
+## Entry - 2026-06-04 (Admin Dashboard Status Count Clarity UX)
+
+### Scope
+- Continued the `/admin` CMS editor-handoff goal by strengthening the Dashboard content-status summary.
+- Changed the Dashboard content-status heading to ask what the website can show now.
+- Added per-status count meanings in the shared status count cards: Published can appear on website, Draft is safe to edit, and Archived is hidden but kept.
+- Updated Dashboard status-row guidance so editors understand Published is website-eligible while Draft remains the safe workspace.
+- Expanded admin CRUD coverage so the status-count meaning language is guarded source-side.
+
+### Changed Files
+- `src/pages/admin/AdminDashboardPage.tsx`
+- `src/pages/admin/AdminCmsPrimitives.tsx`
+- `scripts/check-admin-crud-coverage.mjs`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass. Coverage now guards the Dashboard status-section heading and per-status count meanings.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npx tsc -b`: pass.
+- `npm run lint`: pass.
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run agent:smoke`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions.
+- `npm run agent:admin-config-gate`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions; 11 admin routes passed the no-config gate.
+
+### Risks and Gaps
+- This is a local source/docs UX pass. The latest local CMS UX commits still need push/deploy approval plus production editor walkthrough before the CMS handoff goal can be considered complete.
+
+### Next Handoff
+- Continue with push/deploy approval and production editor walkthrough.
+
 ## Entry - 2026-06-04 (Admin Dashboard Visibility Language UX)
 
 ### Scope

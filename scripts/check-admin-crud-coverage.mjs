@@ -66,6 +66,8 @@ const pageChecks = [
       'handoffLabel',
       'Where each editing job lives',
       'Live on website',
+      'What the website can show now',
+      'Published items can appear on the website. Draft is still your safe workspace.',
       'No review tasks are visible yet.',
       'customer enquiries exist',
       'New contact and sample request submissions will appear here',
@@ -1051,6 +1053,9 @@ function checkDashboardEditorLanguage() {
   requireNotIncludes(content, 'dependency:', 'src/pages/admin/adminContent.ts editor module cards');
   requireIncludes(shell, 'Published content can appear on the website. Draft and Archived stay hidden.', 'src/pages/admin/AdminShell.tsx');
   requireIncludes(primitives, 'Draft content is safe to edit. Archived content stays hidden.', 'src/pages/admin/AdminCmsPrimitives.tsx');
+  requireIncludes(primitives, 'Can appear on website', 'src/pages/admin/AdminCmsPrimitives.tsx');
+  requireIncludes(primitives, 'Safe to edit', 'src/pages/admin/AdminCmsPrimitives.tsx');
+  requireIncludes(primitives, 'Hidden but kept', 'src/pages/admin/AdminCmsPrimitives.tsx');
   requireIncludes(primitives, 'Change copy, media, facts, and page sections without affecting the website.', 'src/pages/admin/AdminCmsPrimitives.tsx');
   requireNotIncludes(shell, 'Published content can go live', 'src/pages/admin/AdminShell.tsx');
   requireNotIncludes(primitives, 'Draft rows are safe to edit', 'src/pages/admin/AdminCmsPrimitives.tsx');

@@ -406,7 +406,7 @@ function AdminDashboardContent() {
                             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-black/45">
                                 Content status
                             </p>
-                            <h2 className="mt-2 text-2xl font-semibold text-black">What is live vs still in draft</h2>
+                            <h2 className="mt-2 text-2xl font-semibold text-black">What the website can show now</h2>
                         </div>
                         <div className="divide-y divide-black/10">
                             {dashboard.isLoading ? (
@@ -423,7 +423,7 @@ function AdminDashboardContent() {
                                         <div>
                                             <p className="text-base font-semibold text-black">{snapshot.label}</p>
                                             <p className="mt-1 text-sm leading-6 text-black/55">
-                                                Open {snapshot.moduleLabel}. Published can appear on the website; Draft is safe to edit.
+                                                Published items can appear on the website. Draft is still your safe workspace.
                                             </p>
                                         </div>
                                         <CmsStatusCounts

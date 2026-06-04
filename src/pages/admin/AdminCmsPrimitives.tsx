@@ -8,6 +8,7 @@ interface CmsStatusMeta {
     label: string;
     editorLabel: string;
     publicMeaning: string;
+    countMeaning: string;
     tone: CmsStatusTone;
     Icon: ComponentType<{ className?: string }>;
 }
@@ -17,6 +18,7 @@ const cmsStatusMeta: Record<CmsPublishStatus, CmsStatusMeta> = {
         label: 'Draft',
         editorLabel: 'Draft only',
         publicMeaning: 'Hidden from the public website until published.',
+        countMeaning: 'Safe to edit',
         tone: 'draft',
         Icon: CircleDashed,
     },
@@ -24,6 +26,7 @@ const cmsStatusMeta: Record<CmsPublishStatus, CmsStatusMeta> = {
         label: 'Published',
         editorLabel: 'Live on website',
         publicMeaning: 'Visible on public pages that read CMS content.',
+        countMeaning: 'Can appear on website',
         tone: 'published',
         Icon: Eye,
     },
@@ -31,6 +34,7 @@ const cmsStatusMeta: Record<CmsPublishStatus, CmsStatusMeta> = {
         label: 'Archived',
         editorLabel: 'Archived',
         publicMeaning: 'Hidden from the public website and kept for record history.',
+        countMeaning: 'Hidden but kept',
         tone: 'archived',
         Icon: Archive,
     },
@@ -117,6 +121,7 @@ export function CmsStatusCounts({
                             {meta.label}
                         </p>
                         <p className="mt-2 text-2xl font-light leading-none text-black">{value}</p>
+                        <p className="mt-2 text-xs font-semibold leading-4 text-black/52">{meta.countMeaning}</p>
                     </div>
                 );
             })}
