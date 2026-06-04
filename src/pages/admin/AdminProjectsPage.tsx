@@ -1728,7 +1728,7 @@ function AdminProjectsContent() {
                             ) : null}
                             {mediaBlockForm.mediaRole !== 'youtube_video' ? (
                                 <MediaSelect
-                                    label="Media asset"
+                                    label="Media from library"
                                     value={mediaBlockForm.mediaAssetId}
                                     disabled={!canEdit || isSavingMediaBlock || !selectedProject}
                                     mediaOptions={mediaOptions}
@@ -1738,7 +1738,7 @@ function AdminProjectsContent() {
                                 />
                             ) : (
                                 <TextField
-                                    label="YouTube URL or ID"
+                                    label="YouTube link"
                                     value={mediaBlockForm.youtubeUrl}
                                     disabled={!canEdit || isSavingMediaBlock || !selectedProject}
                                     onChange={(value) => updateMediaBlockField('youtubeUrl', value)}
@@ -1821,7 +1821,7 @@ function AdminProjectsContent() {
                             <p>{mediaBlocks.length} detail media blocks on the selected project.</p>
                             <p>{maps.length} material maps on the selected project.</p>
                             <p>{hotspots.length} hotspots on the selected map.</p>
-                            <p>{mediaOptions.length} media records available for ID linking.</p>
+                            <p>{mediaOptions.length} Media library records available for project images and video blocks.</p>
                         </div>
                     </section>
 
@@ -2173,8 +2173,13 @@ function ProofReviewHelp({ value }: { value: ClaimStatus }) {
 }
 
 function formatMediaOption(media: MediaOptionRow) {
-    const label = media.alt || media.caption || media.object_path || media.source_url || `Asset ${media.id}`;
-    return `#${media.id} / ${label}`;
+    const label = media.alt || media.caption || media.object_path || media.source_url || 'Untitled media';
+    return `${label} (${getMediaStatusLabel(media.status)} in Media)`;
+}
+
+function getMediaStatusLabel(status: string) {
+    const match = statusOptions.find(([value]) => value === status);
+    return match?.[1] ?? 'Unknown status';
 }
 
 function findMediaOption(mediaOptions: MediaOptionRow[], value: string) {
@@ -2242,10 +2247,10 @@ function MediaSelect({
                     </div>
                     <div className="min-w-0">
                         <p className="truncate text-sm font-semibold text-black">
-                            {selectedMedia.alt || selectedMedia.caption || selectedMedia.object_path || `Asset ${selectedMedia.id}`}
+                            {selectedMedia.alt || selectedMedia.caption || selectedMedia.object_path || 'Untitled media'}
                         </p>
                         <p className="mt-1 text-xs font-bold uppercase tracking-[0.12em] text-black/45">
-                            {selectedMedia.media_type} / {selectedMedia.status} / #{selectedMedia.id}
+                            {selectedMedia.media_type} / {getMediaStatusLabel(selectedMedia.status)} in Media
                         </p>
                         <p className="mt-2 line-clamp-2 text-xs leading-5 text-black/52">
                             {selectedMedia.source_kind === 'storage'
@@ -2889,8 +2894,8 @@ function validateFactForm(form: FactFormState) {
 function validateMaterialForm(form: MaterialFormState) {
     if (!form.application.trim()) return validationFailure('Material application is required.');
     const sortOrder = requiredInteger(form.sortOrder, 'Sort order');
-    const stoneGroupId = optionalPositiveInteger(form.stoneGroupId, 'Stone group ID');
-    const finishDefinitionId = optionalPositiveInteger(form.finishDefinitionId, 'Finish definition ID');
+    const stoneGroupId = optionalPositiveInteger(form.stoneGroupId, 'Stone selection');
+    const finishDefinitionId = optionalPositiveInteger(form.finishDefinitionId, 'Finish selection');
     const mediaAssetId = optionalPositiveInteger(form.mediaAssetId, 'Material image');
     if (sortOrder.error) return validationFailure(sortOrder.error);
     if (stoneGroupId.error) return validationFailure(stoneGroupId.error);
@@ -2925,7 +2930,7 @@ function validateMediaBlockForm(form: MediaBlockFormState, maps: ProjectMaterial
 
     if (form.mediaRole === 'youtube_video') {
         const youtubeUrl = normalizeYouTubeInput(form.youtubeUrl);
-        if (!youtubeUrl) return validationFailure('YouTube blocks require a valid YouTube URL or video ID.');
+        if (!youtubeUrl) return validationFailure('YouTube blocks require a valid YouTube link.');
         if (form.status === 'published' && !form.blockTitle.trim()) {
             return validationFailure('Published YouTube blocks require a block title.');
         }
@@ -2939,10 +2944,10 @@ function validateMediaBlockForm(form: MediaBlockFormState, maps: ProjectMaterial
         };
     }
 
-    const projectMaterialMapId = optionalPositiveInteger(form.projectMaterialMapId, 'Hotspot map ID');
+    const projectMaterialMapId = optionalPositiveInteger(form.projectMaterialMapId, 'Hotspot map selection');
     if (projectMaterialMapId.error) return validationFailure(projectMaterialMapId.error);
 
-    let mediaAssetId = optionalPositiveInteger(form.mediaAssetId, 'Media asset');
+    let mediaAssetId = optionalPositiveInteger(form.mediaAssetId, 'Media selection');
     if (mediaAssetId.error) return validationFailure(mediaAssetId.error);
 
     if (form.mediaRole === 'hotspot_image') {
@@ -2981,7 +2986,7 @@ function validateHotspotForm(form: HotspotFormState) {
     const sortOrder = requiredInteger(form.sortOrder, 'Sort order');
     const xPercent = percentNumber(form.xPercent, 'X percent');
     const yPercent = percentNumber(form.yPercent, 'Y percent');
-    const projectMaterialId = optionalPositiveInteger(form.projectMaterialId, 'Project material ID');
+    const projectMaterialId = optionalPositiveInteger(form.projectMaterialId, 'Project material selection');
     const previewMediaId = optionalPositiveInteger(form.previewMediaId, 'Preview image');
     if (sortOrder.error) return validationFailure(sortOrder.error);
     if (xPercent.error) return validationFailure(xPercent.error);
