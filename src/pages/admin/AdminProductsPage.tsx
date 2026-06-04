@@ -728,7 +728,7 @@ function AdminProductsContent() {
                             <input
                                 value={productSearch}
                                 onChange={(event) => setProductSearch(event.target.value)}
-                                placeholder="Search product, slug, description"
+                                placeholder="Search product, URL key, description"
                                 className="min-w-0 flex-1 bg-transparent text-sm font-medium outline-none placeholder:text-black/36"
                             />
                         </label>
@@ -778,7 +778,7 @@ function AdminProductsContent() {
                                                     {product.name}
                                                 </span>
                                                 <span className="mt-1 block truncate text-xs font-semibold uppercase tracking-[0.12em] text-black/40">
-                                                    {product.slug}
+                                                    URL: {product.slug}
                                                 </span>
                                             </span>
                                             <CmsStatusPill status={product.status} />
@@ -1002,7 +1002,7 @@ function AdminProductsContent() {
                                 items={modelPublishChecklist}
                                 className="mt-0"
                                 eyebrow="Model publish checklist"
-                                description="A published model can satisfy the product-level Published model requirement when it has a clean key, label, and image."
+                                description="A published model can satisfy the product-level Published model requirement when it has a website key, label, and image."
                             />
                             <div className="grid gap-2">
                                 <button
@@ -1170,7 +1170,7 @@ function AdminProductsContent() {
                             </div>
                         ) : null}
                         <TextField
-                            label="Material slug"
+                            label="Material reference"
                             value={materialDefaultForm.materialSlug}
                             disabled={!canEdit || isSavingMaterialDefault || !selectedProduct}
                             onChange={(value) => updateMaterialDefaultField('materialSlug', value)}
@@ -1197,7 +1197,7 @@ function AdminProductsContent() {
                         <h2 className="mt-5 text-xl font-semibold text-black">Publishing rules</h2>
                         <ul className="mt-4 space-y-3 text-sm leading-6 text-black/62">
                             <li>Published products require a website URL key, short description, hero image, model, material default, and spec.</li>
-                            <li>Published models need a website key, label, and selected image from Media.</li>
+                            <li>Published models need a model website key, label, and selected image from Media.</li>
                             <li>Material defaults can reference Stone Library rows or keep clear non-stone labels.</li>
                             <li>Use Archive to remove a product from the website while keeping its editing history.</li>
                         </ul>
@@ -1593,7 +1593,7 @@ function rowToSpecForm(row: ProductSpecRow | null): SpecFormState {
 function validateProductForm(form: ProductFormState) {
     if (!form.name.trim()) return validationFailure('Product name is required.');
     if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(form.slug.trim())) {
-        return validationFailure('Product slug must be lowercase kebab-case.');
+        return validationFailure('Website URL key must use lowercase words separated by hyphens.');
     }
 
     const sortOrder = requiredInteger(form.sortOrder, 'Sort order');
@@ -1648,7 +1648,7 @@ function validateMaterialDefaultForm(form: MaterialDefaultFormState) {
     if (stoneGroupId.error) return validationFailure(stoneGroupId.error);
 
     if (stoneGroupId.value === null && !form.materialSlug.trim() && !form.displayLabel.trim()) {
-        return validationFailure('Material defaults need a Stone Library link, material slug, or display label.');
+        return validationFailure('Material defaults need a Stone Library link, material reference, or display label.');
     }
 
     return { error: null, stoneGroupId: stoneGroupId.value };

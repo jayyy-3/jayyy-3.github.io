@@ -2,6 +2,41 @@
 
 Last updated: 2026-06-04
 
+## Entry - 2026-06-04 (Admin Products URL-Key Language UX)
+
+### Scope
+- Continued the `/admin` CMS editor-handoff goal with a focused Products language cleanup.
+- Replaced visible Products `slug` wording in list search and validation with Website URL key language.
+- Replaced the product list secondary label with `URL: <key>` so editors understand the field is the public route key.
+- Replaced model publish guidance from clean key to model website key.
+- Replaced Material slug with Material reference and updated validation so editors can provide a Stone Library link, material reference, or display label without learning internal field names.
+- Expanded admin CRUD coverage so Products cannot drift back to slug/material-slug/clean-key wording in visible editing UI.
+
+### Changed Files
+- `src/pages/admin/AdminProductsPage.tsx`
+- `scripts/check-admin-crud-coverage.mjs`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass. Coverage now guards Products URL key / Material reference language and rejects visible slug/material-slug/clean-key regressions.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npx tsc -b`: pass.
+- `npm run lint`: pass.
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run agent:smoke`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions.
+- `npm run agent:admin-config-gate`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions; 11 admin routes passed the no-config gate.
+
+### Risks and Gaps
+- This is a local source/docs UX pass. The latest local CMS UX commits still need push/deploy approval plus a final production editor walkthrough before the CMS handoff goal can be considered complete.
+
+### Next Handoff
+- Continue with push/deploy approval and final production walkthrough.
+
 ## Entry - 2026-06-04 (Admin Projects URL-Key Language UX)
 
 ### Scope
