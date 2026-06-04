@@ -284,6 +284,16 @@ function AdminStoneLibraryContent() {
     );
     const finishImagePublishBlocked =
         Boolean(finishImageForm.mediaAssetId) && selectedFinishImageMedia?.status !== 'published';
+    const groupPublishChecklist = useMemo(
+        () => getStoneGroupPublishChecklist(groupForm, variants.length, capabilityForms),
+        [capabilityForms, groupForm, variants.length],
+    );
+    const variantPublishChecklist = useMemo(
+        () => getStoneVariantPublishChecklist(variantForm, capabilityForms, selectedGroup),
+        [capabilityForms, selectedGroup, variantForm],
+    );
+    const canPublishGroup = groupPublishChecklist.every((item) => item.ready);
+    const canPublishVariant = variantPublishChecklist.every((item) => item.ready);
 
     const loadFinishImages = useCallback(async (client: SupabaseClient, groupId: number, preferredImageId?: number) => {
         const { data, error: imageError } = await client
@@ -601,6 +611,11 @@ function AdminStoneLibraryContent() {
             return;
         }
 
+        if (nextStatus === 'published' && !canPublishGroup) {
+            setError('Complete the Stone Library publish checklist before publishing this stone family.');
+            return;
+        }
+
         const validation = validateGroupForm({ ...groupForm, status: nextStatus }, variants.length);
         if (validation.error) {
             setError(validation.error);
@@ -608,7 +623,7 @@ function AdminStoneLibraryContent() {
         }
 
         if (nextStatus === 'published' && !hasAvailableCapability(capabilityForms)) {
-            setError('Published variants require at least one yes or TBC finish capability.');
+            setError('Published stone families need at least one finish marked Available or Needs confirmation.');
             return;
         }
 
@@ -688,6 +703,11 @@ function AdminStoneLibraryContent() {
 
     async function saveVariant(nextStatus: StoneStatus) {
         if (!supabase || !canEdit || !user || !selectedGroup) {
+            return;
+        }
+
+        if (nextStatus === 'published' && !canPublishVariant) {
+            setError('Complete the variant publish checklist before publishing this variant.');
             return;
         }
 
@@ -1045,7 +1065,7 @@ function AdminStoneLibraryContent() {
                                     {selectedGroup ? selectedGroup.display_name : 'New stone group'}
                                 </h2>
                                 <p className="mt-2 text-sm leading-6 text-black/58">
-                                    Maintain the public family record and keep TBC information explicit before
+                                    Maintain the public stone family record and keep confirmation gaps visible before
                                     publishing.
                                 </p>
                             </div>
@@ -1064,7 +1084,7 @@ function AdminStoneLibraryContent() {
                                 />
                             </label>
                             <label className="text-xs font-bold uppercase tracking-[0.14em] text-black/55">
-                                Stone key
+                                Website URL key
                                 <input
                                     value={groupForm.stoneGroupKey}
                                     onChange={(event) => updateGroupField('stoneGroupKey', event.target.value)}
@@ -1088,7 +1108,7 @@ function AdminStoneLibraryContent() {
                                 </select>
                             </label>
                             <label className="text-xs font-bold uppercase tracking-[0.14em] text-black/55">
-                                Source name
+                                Supplier/source label
                                 <input
                                     value={groupForm.sourceName}
                                     onChange={(event) => updateGroupField('sourceName', event.target.value)}
@@ -1107,7 +1127,7 @@ function AdminStoneLibraryContent() {
                                 />
                             </label>
                             <label className="text-xs font-bold uppercase tracking-[0.14em] text-black/55">
-                                Type display
+                                Stone type shown on website
                                 <input
                                     value={groupForm.stoneTypeDisplay}
                                     onChange={(event) => updateGroupField('stoneTypeDisplay', event.target.value)}
@@ -1116,7 +1136,7 @@ function AdminStoneLibraryContent() {
                                 />
                             </label>
                             <label className="text-xs font-bold uppercase tracking-[0.14em] text-black/55">
-                                Type source
+                                Source type note
                                 <input
                                     value={groupForm.stoneTypeSource}
                                     onChange={(event) => updateGroupField('stoneTypeSource', event.target.value)}
@@ -1201,7 +1221,7 @@ function AdminStoneLibraryContent() {
                         </div>
 
                         <label className="mt-5 block text-xs font-bold uppercase tracking-[0.14em] text-black/55">
-                            Summary
+                            Public summary
                             <textarea
                                 value={groupForm.summary}
                                 onChange={(event) => updateGroupField('summary', event.target.value)}
@@ -1211,7 +1231,7 @@ function AdminStoneLibraryContent() {
                             />
                         </label>
                         <label className="mt-5 block text-xs font-bold uppercase tracking-[0.14em] text-black/55">
-                            Admin notes
+                            Internal notes
                             <textarea
                                 value={groupForm.notes}
                                 onChange={(event) => updateGroupField('notes', event.target.value)}
@@ -1220,6 +1240,8 @@ function AdminStoneLibraryContent() {
                                 className={`${fieldClass} py-3 leading-6`}
                             />
                         </label>
+
+                        <StonePublishChecklist items={groupPublishChecklist} />
 
                         <div className="mt-6 flex flex-wrap gap-2">
                             <button
@@ -1232,12 +1254,17 @@ function AdminStoneLibraryContent() {
                             </button>
                             <button
                                 type="button"
-                                disabled={!canEdit || isSavingGroup || isLoading}
+                                disabled={!canEdit || isSavingGroup || isLoading || !canPublishGroup}
                                 onClick={() => void saveGroup('published')}
+                                title={
+                                    canPublishGroup
+                                        ? 'Publish stone family'
+                                        : 'Complete the Stone Library publish checklist first.'
+                                }
                                 className="inline-flex min-h-11 items-center justify-center gap-2 rounded bg-[var(--urblo-lime)] px-4 text-xs font-bold uppercase tracking-[0.14em] text-black transition hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:bg-black/20 disabled:text-black/35"
                             >
                                 <CheckCircle2 className="h-4 w-4" />
-                                Publish group
+                                Publish family
                             </button>
                             <button
                                 type="button"
@@ -1261,8 +1288,7 @@ function AdminStoneLibraryContent() {
                                     {selectedVariant ? selectedVariant.variant_key : 'New variant'}
                                 </h2>
                                 <p className="mt-2 text-sm leading-6 text-black/58">
-                                    Keep source variants visible so product defaults and finish availability stay
-                                    traceable.
+                                    Keep each product-facing variant clear so finish availability stays traceable.
                                 </p>
                             </div>
                             <button
@@ -1339,7 +1365,7 @@ function AdminStoneLibraryContent() {
                                 />
                             </label>
                             <label className="text-xs font-bold uppercase tracking-[0.14em] text-black/55">
-                                Source variant
+                                Supplier/source variant
                                 <input
                                     value={variantForm.sourceVariant}
                                     onChange={(event) => updateVariantField('sourceVariant', event.target.value)}
@@ -1348,7 +1374,7 @@ function AdminStoneLibraryContent() {
                                 />
                             </label>
                             <label className="text-xs font-bold uppercase tracking-[0.14em] text-black/55">
-                                Variant type
+                                Variant category
                                 <input
                                     value={variantForm.variantType}
                                     onChange={(event) => updateVariantField('variantType', event.target.value)}
@@ -1357,6 +1383,8 @@ function AdminStoneLibraryContent() {
                                 />
                             </label>
                         </div>
+
+                        <StonePublishChecklist items={variantPublishChecklist} title="Variant publish checklist" />
 
                         <div className="mt-6 flex flex-wrap gap-2">
                             <button
@@ -1369,8 +1397,13 @@ function AdminStoneLibraryContent() {
                             </button>
                             <button
                                 type="button"
-                                disabled={!canEdit || isSavingVariant || isLoading || !selectedGroup}
+                                disabled={!canEdit || isSavingVariant || isLoading || !selectedGroup || !canPublishVariant}
                                 onClick={() => void saveVariant('published')}
+                                title={
+                                    canPublishVariant
+                                        ? 'Publish variant'
+                                        : 'Complete the variant publish checklist first.'
+                                }
                                 className="inline-flex min-h-11 items-center justify-center gap-2 rounded bg-[var(--urblo-lime)] px-4 text-xs font-bold uppercase tracking-[0.14em] text-black transition hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:bg-black/20 disabled:text-black/35"
                             >
                                 <CheckCircle2 className="h-4 w-4" />
@@ -1586,8 +1619,8 @@ function AdminStoneLibraryContent() {
                         <div className="mt-5 grid gap-3 text-sm leading-6 text-white/72">
                             <p>{variants.length} variants attached to the selected stone group.</p>
                             <p>
-                                {capabilityCounts.yes} yes, {capabilityCounts.tbc} TBC, {capabilityCounts.no} no finish
-                                capability rows for the selected variant.
+                                {capabilityCounts.yes} available, {capabilityCounts.tbc} need confirmation,{' '}
+                                {capabilityCounts.no} not available finish options for the selected variant.
                             </p>
                             <p>{visibleFinishImages.length} finish image links visible for the selected variant.</p>
                             <p>{finishDefinitions.length} canonical finish definitions loaded from Supabase.</p>
@@ -1603,7 +1636,7 @@ function AdminStoneLibraryContent() {
                         <h2 className="mt-5 text-xl font-semibold text-black">Publication guardrails</h2>
                         <ul className="mt-4 space-y-3 text-sm leading-6 text-black/62">
                             <li>Published groups require a name, key, type display, summary, and at least one variant.</li>
-                            <li>Published variants require a variant key and at least one yes or TBC finish capability.</li>
+                            <li>Published variants require a variant key and at least one Available or Needs confirmation finish.</li>
                             <li>Published finish images require a selected finish and media record.</li>
                             <li>TBC records stay explicit and admin-visible instead of being hidden in notes.</li>
                             <li>Viewer roles can inspect but not mutate Stone Library records.</li>
@@ -1653,9 +1686,9 @@ function AdminStoneLibraryContent() {
                                                 disabled={!canEdit || !selectedVariant || savingCapabilityId === finish.id}
                                                 className={fieldClass}
                                             >
-                                                <option value="yes">Yes</option>
-                                                <option value="tbc">TBC</option>
-                                                <option value="no">No</option>
+                                                <option value="yes">Available</option>
+                                                <option value="tbc">Needs confirmation</option>
+                                                <option value="no">Not available</option>
                                             </select>
                                         </label>
                                         <label className="mt-3 block text-xs font-bold uppercase tracking-[0.14em] text-black/55">
@@ -1753,6 +1786,12 @@ function StatusPill({ status }: { status: StoneStatus }) {
 }
 
 function CapabilityPill({ capability }: { capability: Capability }) {
+    const labels: Record<Capability, string> = {
+        yes: 'Available',
+        tbc: 'Needs confirmation',
+        no: 'Not available',
+    };
+
     return (
         <span
             className={[
@@ -1764,8 +1803,68 @@ function CapabilityPill({ capability }: { capability: Capability }) {
                       : 'border-black/15 bg-white text-black/40',
             ].join(' ')}
         >
-            {capability}
+            {labels[capability]}
         </span>
+    );
+}
+
+function StonePublishChecklist({
+    items,
+    title = 'Stone Library publish checklist',
+}: {
+    items: Array<{ label: string; ready: boolean; detail: string }>;
+    title?: string;
+}) {
+    const readyCount = items.filter((item) => item.ready).length;
+    const allReady = readyCount === items.length;
+
+    return (
+        <section className="mt-5 border border-black/10 bg-[#f8f9f5] p-4">
+            <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+                <div>
+                    <p className="text-xs font-bold uppercase tracking-[0.14em] text-black/45">{title}</p>
+                    <h3 className="mt-2 text-lg font-semibold text-black">
+                        {allReady ? 'Ready for public review' : `${items.length - readyCount} item${items.length - readyCount === 1 ? '' : 's'} need review`}
+                    </h3>
+                    <p className="mt-2 text-sm leading-6 text-black/58">
+                        Published Stone Library records can appear in public stone listings and product material links.
+                    </p>
+                </div>
+                <span
+                    className={[
+                        'inline-flex min-h-8 items-center rounded border px-3 text-[11px] font-bold uppercase tracking-[0.12em]',
+                        allReady
+                            ? 'border-[var(--urblo-lime)] bg-[rgba(0,255,25,0.12)] text-black'
+                            : 'border-amber-300 bg-amber-50 text-amber-800',
+                    ].join(' ')}
+                >
+                    {readyCount}/{items.length} ready
+                </span>
+            </div>
+            <div className="mt-4 grid gap-2">
+                {items.map((item) => (
+                    <div
+                        key={item.label}
+                        className={[
+                            'border p-3',
+                            item.ready ? 'border-[var(--urblo-lime)] bg-white' : 'border-amber-200 bg-amber-50',
+                        ].join(' ')}
+                    >
+                        <div className="flex items-start gap-2">
+                            {item.ready ? (
+                                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-black" />
+                            ) : (
+                                <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-800" />
+                            )}
+                            <div>
+                                <p className="text-sm font-semibold text-black">{item.label}</p>
+                                <p className="mt-1 text-sm leading-5 text-black/58">{item.detail}</p>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </section>
     );
 }
 
@@ -1873,7 +1972,7 @@ function validateGroupForm(
     }
 
     if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(form.stoneGroupKey.trim())) {
-        return groupValidationFailure('Stone key must be lowercase kebab-case.');
+        return groupValidationFailure('Website URL key must be lowercase kebab-case.');
     }
 
     const sortOrder = requiredInteger(form.sortOrder, 'Sort order');
@@ -2045,6 +2144,69 @@ function summarizeCapabilities(forms: CapabilityFormState[]) {
 
 function hasAvailableCapability(forms: Record<number, CapabilityFormState>) {
     return Object.values(forms).some((form) => form.capability === 'yes' || form.capability === 'tbc');
+}
+
+function getStoneGroupPublishChecklist(
+    form: StoneGroupFormState,
+    variantCount: number,
+    capabilityForms: Record<number, CapabilityFormState>,
+) {
+    return [
+        {
+            label: 'Name and website URL key',
+            ready: Boolean(form.displayName.trim()) && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(form.stoneGroupKey.trim()),
+            detail: 'Add the public stone name and a lowercase URL key such as alpine-white.',
+        },
+        {
+            label: 'Website stone type',
+            ready: Boolean(form.stoneTypeDisplay.trim()),
+            detail: 'Show editors and visitors the plain-language stone type, for example granite or limestone.',
+        },
+        {
+            label: 'Public summary',
+            ready: Boolean(form.summary.trim()),
+            detail: 'Add a short visitor-facing description before this stone family can be published.',
+        },
+        {
+            label: 'At least one variant',
+            ready: variantCount > 0,
+            detail: 'Add a variant so product defaults and finish availability have something to attach to.',
+        },
+        {
+            label: 'Finish availability reviewed',
+            ready: hasAvailableCapability(capabilityForms),
+            detail: 'Mark at least one finish as Available or Needs confirmation for the selected variant.',
+        },
+    ];
+}
+
+function getStoneVariantPublishChecklist(
+    form: StoneVariantFormState,
+    capabilityForms: Record<number, CapabilityFormState>,
+    selectedGroup: StoneGroupRow | null,
+) {
+    return [
+        {
+            label: 'Stone family selected',
+            ready: Boolean(selectedGroup),
+            detail: 'Choose the parent stone family before publishing a variant.',
+        },
+        {
+            label: 'Variant URL key',
+            ready: /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(form.variantKey.trim()),
+            detail: 'Use a lowercase key so this variant can be referenced consistently.',
+        },
+        {
+            label: 'Editor-facing label',
+            ready: Boolean(form.displayName.trim() || form.sourceVariant.trim() || form.variantKey.trim()),
+            detail: 'Give editors a recognizable variant label, source variant, or clear key.',
+        },
+        {
+            label: 'Finish availability reviewed',
+            ready: hasAvailableCapability(capabilityForms),
+            detail: 'Mark at least one finish as Available or Needs confirmation before publishing this variant.',
+        },
+    ];
 }
 
 function findMediaAsset(mediaAssets: MediaAssetOption[], value: string) {

@@ -137,6 +137,12 @@ const pageChecks = [
     requiredText: [
       'Current role is read-only for Stone Library',
       'TBC records stay explicit',
+      'Stone Library publish checklist',
+      'Variant publish checklist',
+      'Complete the Stone Library publish checklist before publishing this stone family.',
+      'Complete the variant publish checklist before publishing this variant.',
+      'Website URL key',
+      'Available',
       'Published finish images require a published media record',
       'Physical deletes remain hidden',
     ],

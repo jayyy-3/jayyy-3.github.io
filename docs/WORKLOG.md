@@ -2,6 +2,44 @@
 
 Last updated: 2026-06-04
 
+## Entry - 2026-06-04 (Admin Stone Library Publish Checklist UX)
+
+### Scope
+- Continued the `/admin` CMS editor-experience productization goal with a focused Stone Library publish-readiness pass.
+- Added Stone Library family and variant Publish checklists so editors can see missing URL key, public summary, variant, and finish availability requirements before publication.
+- Locked Stone family and Variant Publish actions while checklist blockers remain, replacing late validation surprises with visible readiness guidance.
+- Replaced several technical/internal labels with editor-facing language such as Website URL key, Supplier/source label, Stone type shown on website, Public summary, Internal notes, Supplier/source variant, and Variant category.
+- Reworded finish capability states from yes/TBC/no into Available, Needs confirmation, and Not available in the editor UI.
+- Expanded the admin CRUD coverage guard, CMS handoff docs, roadmap, task queue, and editor guide to reflect Stone Library checklist/finish-availability authoring.
+
+### Changed Files
+- `src/pages/admin/AdminStoneLibraryPage.tsx`
+- `scripts/check-admin-crud-coverage.mjs`
+- `docs/ADMIN_EDITOR_GUIDE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npx tsc -b`: pass.
+- `npm run lint`: pass.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run agent:smoke`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions.
+- `npm run agent:admin-config-gate`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions; 11 admin routes passed the no-config gate.
+- Visual sanity check: reviewed `.tmp/admin-config-gate/screenshots/admin-stone-library.png`; `/admin/stone-library` still renders the no-config protected shell without private content exposure.
+
+### Risks and Gaps
+- The checklist is source-verified locally but still needs signed-in production editor walkthrough after these local commits are pushed and deployed.
+- Stone Library detail remains static-backed until the deeper public variant/finish detail mapper is completed.
+
+### Next Handoff
+- Continue the CMS goal with a signed-in production editor walkthrough after deployment, or the remaining Stone Library detail/public Article rendering gaps.
+
 ## Entry - 2026-06-04 (Admin Media Publish Checklist UX)
 
 ### Scope

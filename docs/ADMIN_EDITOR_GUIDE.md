@@ -60,7 +60,7 @@ Physical delete is not part of the launch CMS workflow.
 |---|---|---|
 | Dashboard | See work queue, status counts, and content health warnings. | Source-ready and verified. |
 | Projects | Edit case studies, facts, materials, images, maps, and hotspots. | CMS-ready with publish checklist and media selectors. |
-| Stone Library | Edit stone groups, variants, finish capabilities, and finish imagery. | CMS-ready for listing data; detail page still uses static-backed detail adapter. |
+| Stone Library | Edit stone families, variants, finish availability, and finish imagery. | CMS-ready for listing data with family/variant publish checklists; detail page still uses static-backed detail adapter. |
 | Products | Edit product families, models, images, search title/description, materials, and specs. | CMS-ready with media selectors, publish checklist, and Stone Library link feedback. |
 | Articles | Edit article metadata, search title/description, and structured article blocks through block-type forms. | CMS-ready for metadata/block rows; public detail still renders sanitized legacy HTML until structured public block rendering is built. |
 | Media | Upload/manage media, metadata, status, and manifest export. | CMS-ready with editor-facing private/public library labels and a publish checklist. |
@@ -84,6 +84,7 @@ The public site currently behaves as follows:
 
 Before publishing:
 - Projects need title, URL, public copy, reviewed project claim status, reviewed facts, and reviewed materials.
+- Stone Library families need name, URL key, website stone type, public summary, at least one variant, and reviewed finish availability before Publish is available. Variants need a URL key, editor-facing label, and at least one Available or Needs confirmation finish.
 - Stone Library finish images need a selected media record that is already Published in Media.
 - Products need name, URL, short description, hero image, at least one published model with image, material defaults, and specs before Publish is available.
 - Articles should have title, slug, date, excerpt, cover image where needed, search preview fields where needed, and structured blocks with the required copy/link/media fields filled in.
