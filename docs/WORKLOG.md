@@ -2,6 +2,43 @@
 
 Last updated: 2026-06-04
 
+## Entry - 2026-06-04 (Admin Leads Workflow Guidance UX)
+
+### Scope
+- Continued the `/admin` CMS editor-experience productization goal with a focused Leads workflow pass.
+- Replaced technical lead detail language with editor-facing labels: `Source route` became Website page, notification states became Email pending/sent/failed/not required, and Turnstile state became Spam check passed/failed/not recorded.
+- Added status-specific Recommended next step guidance in the workflow editor for enquiries and sample requests, so owner/admin users know what action each status implies before saving.
+- Renamed the export action to Export visible queue while preserving the existing audit-gated CSV export behavior.
+- Updated the admin CRUD coverage guard, CMS handoff docs, roadmap, task queue, and editor guide to reflect lead workflow guidance.
+
+### Changed Files
+- `src/pages/admin/AdminLeadsPage.tsx`
+- `scripts/check-admin-crud-coverage.mjs`
+- `docs/ADMIN_EDITOR_GUIDE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npx tsc -b`: pass.
+- `npm run lint`: pass.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run agent:smoke`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions.
+- `npm run agent:admin-config-gate`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions; 11 admin routes passed the no-config gate.
+- Visual sanity check: reviewed `.tmp/admin-config-gate/screenshots/admin-leads.png`; `/admin/leads` still renders the no-config protected shell without private content exposure.
+
+### Risks and Gaps
+- The workflow guidance is source-verified locally, but a signed-in production editor walkthrough is still needed after local CMS UX commits are pushed and deployed.
+- Final Turnstile form proof remains separate; this pass only improves how stored anti-spam state is explained in the admin.
+
+### Next Handoff
+- Continue with a signed-in production editor walkthrough after deployment, or remaining public rendering/detail gaps.
+
 ## Entry - 2026-06-04 (Admin Products Publish Checklist UX)
 
 ### Scope

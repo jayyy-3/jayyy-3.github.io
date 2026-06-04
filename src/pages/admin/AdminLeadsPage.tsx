@@ -424,7 +424,7 @@ function AdminLeadsContent() {
                         className="inline-flex min-h-10 items-center justify-center gap-2 rounded border border-black/15 bg-white px-3 text-xs font-bold uppercase tracking-[0.12em] text-black transition hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:bg-black/[0.04] disabled:text-black/35"
                     >
                         <Download className="h-4 w-4" />
-                        {isExporting ? 'Auditing export' : 'Export CSV'}
+                        {isExporting ? 'Recording export' : 'Export visible queue'}
                     </button>
                     <div className="inline-flex min-h-10 items-center gap-2 rounded border border-black/15 bg-white px-3 text-xs font-bold uppercase tracking-[0.12em] text-black/58">
                         <Inbox className="h-4 w-4" />
@@ -558,7 +558,7 @@ function AdminLeadsContent() {
                                     {selectedLead?.name ?? 'No lead selected'}
                                 </h2>
                                 <p className="mt-2 text-sm leading-6 text-black/58">
-                                    Contact details, source, notification state, and internal workflow notes.
+                                    Contact details, website source, form delivery, and internal workflow notes.
                                 </p>
                             </div>
                             {selectedLead ? <StatusPill status={selectedLead.status} /> : null}
@@ -570,7 +570,7 @@ function AdminLeadsContent() {
                                     <InfoBlock label="Email" value={selectedLead.email} href={`mailto:${selectedLead.email}`} />
                                     <InfoBlock label="Phone" value={selectedLead.phone ?? 'Not supplied'} href={selectedLead.phone ? `tel:${selectedLead.phone}` : undefined} />
                                     <InfoBlock label="Company" value={selectedLead.company ?? 'Not supplied'} />
-                                    <InfoBlock label="Source route" value={selectedLead.source_route ?? 'Unknown'} />
+                                    <InfoBlock label="Website page" value={formatSourceRoute(selectedLead.source_route)} />
                                     {selectedKind === 'enquiry' ? (
                                         <InfoBlock
                                             label="Project type"
@@ -627,9 +627,14 @@ function AdminLeadsContent() {
                                     Workflow
                                 </p>
                                 <h2 className="mt-2 text-xl font-semibold text-black">Status and notes</h2>
+                                <p className="mt-2 text-sm leading-6 text-black/58">
+                                    Move the lead through one clear next action, then leave internal notes for the team.
+                                </p>
                             </div>
                             <PackageCheck className="h-5 w-5 text-black" />
                         </div>
+
+                        {selectedLead ? <WorkflowGuidance kind={selectedKind} status={form.status} /> : null}
 
                         <div className="mt-5 grid gap-4 md:grid-cols-2">
                             <SelectField
@@ -696,24 +701,26 @@ function AdminLeadsContent() {
                         <ShieldAlert className="h-5 w-5 text-black" />
                         <h2 className="mt-5 text-xl font-semibold text-black">Lead guardrails</h2>
                         <ul className="mt-4 space-y-3 text-sm leading-6 text-black/62">
-                            <li>Lead rows are created only through server-side form endpoints.</li>
+                            <li>New leads enter this inbox from the public Contact and Sample Request forms.</li>
                             <li>Owner/admin roles can update workflow status, assignment, and internal notes.</li>
                             <li>Owner/admin CSV exports are audit-gated and limited to the currently loaded queue.</li>
                             <li>Physical deletes stay hidden until privacy policy and retention rules are confirmed.</li>
-                            <li>Live usefulness still depends on verified Supabase form persistence.</li>
+                            <li>Use Spam only for junk submissions; use Closed when the conversation is intentionally finished.</li>
                         </ul>
                     </section>
 
                     {selectedLead ? (
                         <section className="border border-black/10 bg-white p-5">
                             <Mail className="h-5 w-5 text-black" />
-                            <h2 className="mt-5 text-xl font-semibold text-black">Delivery state</h2>
+                            <h2 className="mt-5 text-xl font-semibold text-black">Form delivery</h2>
                             <div className="mt-4 flex flex-wrap gap-2">
                                 <NotificationPill status={selectedLead.notification_status} />
-                                <span className="inline-flex h-8 items-center rounded border border-black/15 px-3 text-[11px] font-bold uppercase tracking-[0.14em] text-black/50">
-                                    Turnstile {selectedLead.turnstile_success === false ? 'failed' : selectedLead.turnstile_success === true ? 'passed' : 'not recorded'}
-                                </span>
+                                <SpamCheckPill value={selectedLead.turnstile_success} />
                             </div>
+                            <p className="mt-4 text-sm leading-6 text-black/58">
+                                These badges explain whether the form notification email was accepted and whether the
+                                anti-spam check passed when the lead was submitted.
+                            </p>
                         </section>
                     ) : null}
 
@@ -823,6 +830,18 @@ function SampleItems({
     );
 }
 
+function WorkflowGuidance({ kind, status }: { kind: LeadKind | null; status: string }) {
+    const guidance = getWorkflowGuidance(kind, status);
+
+    return (
+        <section className="mt-5 border border-black/10 bg-[#f8f9f5] p-4">
+            <p className="text-xs font-bold uppercase tracking-[0.14em] text-black/45">Recommended next step</p>
+            <h3 className="mt-2 text-lg font-semibold text-black">{guidance.title}</h3>
+            <p className="mt-2 text-sm leading-6 text-black/62">{guidance.detail}</p>
+        </section>
+    );
+}
+
 function StatusPill({ status }: { status: string }) {
     const isActive = ['new', 'contacted', 'confirmed', 'packed', 'sent', 'quoted'].includes(status);
     const isDone = ['won', 'closed'].includes(status);
@@ -844,6 +863,13 @@ function StatusPill({ status }: { status: string }) {
 }
 
 function NotificationPill({ status }: { status: NotificationStatus }) {
+    const labels: Record<NotificationStatus, string> = {
+        pending: 'Email pending',
+        sent: 'Email sent',
+        failed: 'Email failed',
+        not_required: 'Email not required',
+    };
+
     return (
         <span
             className={[
@@ -855,7 +881,22 @@ function NotificationPill({ status }: { status: NotificationStatus }) {
                       : 'border-black/15 bg-white text-black/50',
             ].join(' ')}
         >
-            Notification {status.replace('_', ' ')}
+            {labels[status]}
+        </span>
+    );
+}
+
+function SpamCheckPill({ value }: { value: boolean | null }) {
+    const label = value === true ? 'Spam check passed' : value === false ? 'Spam check failed' : 'Spam check not recorded';
+
+    return (
+        <span
+            className={[
+                'inline-flex h-8 items-center rounded border px-3 text-[11px] font-bold uppercase tracking-[0.14em]',
+                value === false ? 'border-amber-300 bg-amber-50 text-amber-800' : 'border-black/15 bg-white text-black/50',
+            ].join(' ')}
+        >
+            {label}
         </span>
     );
 }
@@ -891,6 +932,66 @@ function leadToForm(
     return emptyForm;
 }
 
+function getWorkflowGuidance(kind: LeadKind | null, status: string) {
+    if (status === 'spam') {
+        return {
+            title: 'No customer follow-up',
+            detail: 'Keep the record marked Spam unless it was misclassified. Add a note if the team should ignore future similar submissions.',
+        };
+    }
+
+    if (status === 'closed') {
+        return {
+            title: 'Conversation closed',
+            detail: 'Use internal notes to record why it closed, especially if the customer may return later.',
+        };
+    }
+
+    if (kind === 'sample') {
+        const sampleGuidance: Record<string, { title: string; detail: string }> = {
+            new: {
+                title: 'Confirm details with the customer',
+                detail: 'Check requested samples, shipping address, and project name before moving this request to Confirmed.',
+            },
+            confirmed: {
+                title: 'Prepare the sample pack',
+                detail: 'Assign an owner, confirm stock internally, then move to Packed when the sample set is ready.',
+            },
+            packed: {
+                title: 'Dispatch and record the handoff',
+                detail: 'Send the samples, add courier or handoff notes, then move to Sent.',
+            },
+            sent: {
+                title: 'Follow up after delivery',
+                detail: 'Add follow-up notes and close the request once the sample conversation is complete.',
+            },
+        };
+
+        return sampleGuidance[status] ?? sampleGuidance.new;
+    }
+
+    const enquiryGuidance: Record<string, { title: string; detail: string }> = {
+        new: {
+            title: 'Make first contact',
+            detail: 'Assign an owner, reply to the customer, then move the enquiry to Contacted.',
+        },
+        contacted: {
+            title: 'Qualify the project',
+            detail: 'Capture scope, timing, location, and material interest before preparing pricing or samples.',
+        },
+        quoted: {
+            title: 'Track quote outcome',
+            detail: 'Keep notes current while the customer reviews the quote, then move to Won or Closed.',
+        },
+        won: {
+            title: 'Hand over to delivery',
+            detail: 'Record the handoff details and keep the lead linked to the active project workflow outside the inbox.',
+        },
+    };
+
+    return enquiryGuidance[status] ?? enquiryGuidance.new;
+}
+
 function summarizeInbox(enquiries: EnquiryRow[], samples: SampleRequestRow[]) {
     return {
         total: enquiries.length + samples.length,
@@ -904,6 +1005,26 @@ function summarizeInbox(enquiries: EnquiryRow[], samples: SampleRequestRow[]) {
             enquiries.filter((lead) => lead.notification_status === 'failed').length +
             samples.filter((lead) => lead.notification_status === 'failed').length,
     };
+}
+
+function formatSourceRoute(route: string | null) {
+    if (!route) return 'Unknown page';
+
+    const [path, query = ''] = route.split('?');
+    const routeLabels: Record<string, string> = {
+        '/contact': 'Contact page',
+        '/capabilities': 'Capabilities page',
+        '/products': 'Products page',
+        '/projects': 'Projects page',
+        '/stone-library': 'Stone Library',
+    };
+
+    const label = routeLabels[path] ?? path;
+    if (query.includes('intent=sample-request')) {
+        return `${label} / Sample request`;
+    }
+
+    return label;
 }
 
 function buildLeadExportCsv(

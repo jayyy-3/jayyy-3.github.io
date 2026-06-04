@@ -64,7 +64,7 @@ Physical delete is not part of the launch CMS workflow.
 | Products | Edit product families, models, images, search title/description, materials, and specs. | CMS-ready with media selectors, publish checklist, and Stone Library link feedback. |
 | Articles | Edit article metadata, search title/description, and structured article blocks through block-type forms. | CMS-ready for metadata/block rows; public detail still renders sanitized legacy HTML until structured public block rendering is built. |
 | Media | Upload/manage media, metadata, status, and manifest export. | CMS-ready; publish media before using it publicly. |
-| Leads | Triage enquiries and sample requests, assign, add internal notes, export with audit logging. | Workflow-ready for owner/admin. |
+| Leads | Triage enquiries and sample requests, follow recommended next steps, assign owners, add internal notes, and export with audit logging. | Workflow-ready for owner/admin. |
 | Settings | Edit global identity, footer content, SEO defaults, and CMS access. | CMS-ready; creating/inviting the login account still happens outside this screen. |
 | Audit | Inspect admin mutation history. | Read-only visibility for owner/admin. |
 
