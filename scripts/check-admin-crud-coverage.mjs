@@ -754,7 +754,10 @@ function checkProductEditorAuthoring() {
   requireIncludes(text, 'Search title', 'src/pages/admin/AdminProductsPage.tsx');
   requireIncludes(text, 'Search description', 'src/pages/admin/AdminProductsPage.tsx');
   requireIncludes(text, 'getProductPublishChecklist', 'src/pages/admin/AdminProductsPage.tsx');
+  requireIncludes(text, 'getProductModelPublishChecklist', 'src/pages/admin/AdminProductsPage.tsx');
   requireIncludes(text, 'Complete the publish checklist before publishing this product.', 'src/pages/admin/AdminProductsPage.tsx');
+  requireIncludes(text, 'Model publish checklist', 'src/pages/admin/AdminProductsPage.tsx');
+  requireIncludes(text, 'Complete the Model publish checklist before publishing this model.', 'src/pages/admin/AdminProductsPage.tsx');
   requireNotIncludes(text, 'SEO JSON', 'src/pages/admin/AdminProductsPage.tsx product editor authoring');
   requireNotIncludes(text, 'seoJson', 'src/pages/admin/AdminProductsPage.tsx product editor authoring');
 }

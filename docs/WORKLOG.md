@@ -2,6 +2,42 @@
 
 Last updated: 2026-06-04
 
+## Entry - 2026-06-04 (Admin Product Model Publish Checklist UX)
+
+### Scope
+- Continued the `/admin` CMS editor-handoff goal by making Product Model publishing readable before editors click Publish.
+- Added a Model publish checklist for model key, model label, and model image readiness inside `/admin/products`.
+- Locked the Model Publish button until that checklist is clear, and added the same guard in the save path so an editor cannot publish a model that cannot satisfy the Product publish checklist.
+- Generalized the existing Product publish checklist component so product-level and model-level readiness can share the same visual pattern with clearer module-specific copy.
+- Expanded admin CRUD coverage so the Product Model publish checklist and locked-publish source contract are guarded.
+
+### Changed Files
+- `src/pages/admin/AdminProductsPage.tsx`
+- `scripts/check-admin-crud-coverage.mjs`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/ADMIN_EDITOR_GUIDE.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npx tsc -b`: pass.
+- `npm run lint`: pass.
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass. Coverage now requires the Product Model publish checklist and locked-publish source contract.
+- `npm run agent:check`: pass.
+- `npm run agent:public-supabase-readiness`: pass.
+- `git diff --check`: pass.
+- `npm run agent:smoke`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions.
+- `npm run agent:admin-config-gate`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions; 11 admin routes passed the no-config gate.
+
+### Risks and Gaps
+- This is source-verified locally until the final production signed-in editor walkthrough confirms the flow with imported product rows after deployment.
+
+### Next Handoff
+- Continue the CMS goal with production walkthrough proof and any remaining editor confusion found during real-content use.
+
 ## Entry - 2026-06-04 (Admin Articles Publish Checklist UX)
 
 ### Scope

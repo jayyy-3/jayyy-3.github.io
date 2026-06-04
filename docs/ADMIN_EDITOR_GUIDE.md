@@ -63,7 +63,7 @@ Physical delete is not part of the launch CMS workflow.
 | Dashboard | Choose the next editing job, inspect live/draft counts, and open health-queue fixes. | Editor start page with lead/content/media quick actions and correct Stone Library status routing. |
 | Projects | Edit case studies, facts, materials, images, maps, and hotspots. | CMS-ready with publish checklist and media selectors. |
 | Stone Library | Edit stone families, variants, finish availability, and finish imagery. | CMS-ready with family/variant publish checklists; public listing and detail prefer Published CMS rows with static fallback. |
-| Products | Edit product families, models, images, search title/description, materials, and specs. | CMS-ready with media selectors, publish checklist, and Stone Library link feedback. |
+| Products | Edit product families, models, images, search title/description, materials, and specs. | CMS-ready with media selectors, product/model publish checklists, and Stone Library link feedback. |
 | Articles | Edit article metadata, search title/description, and structured article blocks through block-type forms. | CMS-ready for metadata/block rows; public detail prefers Published structured blocks and keeps sanitized legacy HTML as fallback. |
 | Media | Upload/manage media, metadata, status, and manifest export. | CMS-ready with editor-facing private/public library labels and a publish checklist. |
 | Leads | Triage enquiries and sample requests, follow recommended next steps, assign owners, add internal notes, and export with audit logging. | Workflow-ready for owner/admin. |
@@ -87,7 +87,7 @@ Before publishing:
 - Projects need title, URL, public copy, reviewed project claim status, reviewed facts, and reviewed materials.
 - Stone Library families need name, URL key, website stone type, public summary, at least one variant, and reviewed finish availability before Publish is available. Variants need a URL key, editor-facing label, and at least one Available or Needs confirmation finish.
 - Stone Library finish images need a selected media record that is already Published in Media.
-- Products need name, URL, short description, hero image, at least one published model with image, material defaults, and specs before Publish is available.
+- Products need name, URL, short description, hero image, at least one published model with image, material defaults, and specs before Publish is available. Models have their own checklist and need a clean model key, label, and image before Model Publish is available.
 - Articles should clear the Article publish checklist: title, URL, date, excerpt, at least one Published structured block, and required copy/link/media fields filled in for every Published block.
 - Media should pass the on-screen checklist: source recorded, uploaded files moved to the Public website library, image alt text filled in, usage notes filled in, and Published status before public reuse.
 

@@ -218,6 +218,8 @@ function AdminProductsContent() {
         [materialDefaults, models, productForm, specs],
     );
     const canPublishProduct = publishChecklist.every((item) => item.ready);
+    const modelPublishChecklist = useMemo(() => getProductModelPublishChecklist(modelForm), [modelForm]);
+    const canPublishModel = modelPublishChecklist.every((item) => item.ready);
     const filteredProducts = useMemo(
         () =>
             products.filter((product) => {
@@ -505,6 +507,11 @@ function AdminProductsContent() {
 
     async function saveModel(nextStatus: ProductStatus) {
         if (!supabase || !canEdit || !user || !selectedProduct) return;
+
+        if (nextStatus === 'published' && !canPublishModel) {
+            setError('Complete the Model publish checklist before publishing this model.');
+            return;
+        }
 
         const validation = validateModelForm({ ...modelForm, status: nextStatus });
         if (validation.error !== null) {
@@ -986,6 +993,12 @@ function AdminProductsContent() {
                                 inputMode="numeric"
                                 onChange={(value) => updateModelField('sortOrder', value)}
                             />
+                            <PublishChecklist
+                                items={modelPublishChecklist}
+                                className="mt-0"
+                                eyebrow="Model publish checklist"
+                                description="A published model can satisfy the product-level Published model requirement when it has a clean key, label, and image."
+                            />
                             <div className="grid gap-2">
                                 <button
                                     type="button"
@@ -999,7 +1012,8 @@ function AdminProductsContent() {
                                 <button
                                     type="button"
                                     onClick={() => void saveModel('published')}
-                                    disabled={!canEdit || isSavingModel || !selectedProduct}
+                                    disabled={!canEdit || isSavingModel || !selectedProduct || !canPublishModel}
+                                    title={canPublishModel ? 'Publish model' : 'Complete the Model publish checklist first.'}
                                     className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded bg-[var(--urblo-lime)] px-3 text-xs font-bold uppercase tracking-[0.14em] text-black transition hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:bg-black/20 disabled:text-black/35"
                                 >
                                     <CheckCircle2 className="h-4 w-4" />
@@ -1359,21 +1373,29 @@ function MediaSelect({
     );
 }
 
-function PublishChecklist({ items }: { items: Array<{ label: string; ready: boolean; detail: string }> }) {
+function PublishChecklist({
+    items,
+    eyebrow = 'Publish checklist',
+    description = 'Published products can appear on public product pages where CMS cutover is active.',
+    className = 'mt-5',
+}: {
+    items: Array<{ label: string; ready: boolean; detail: string }>;
+    eyebrow?: string;
+    description?: string;
+    className?: string;
+}) {
     const readyCount = items.filter((item) => item.ready).length;
     const allReady = readyCount === items.length;
 
     return (
-        <section className="mt-5 border border-black/10 bg-white p-4">
+        <section className={`${className} border border-black/10 bg-white p-4`}>
             <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
                 <div>
-                    <p className="text-xs font-bold uppercase tracking-[0.14em] text-black/45">Publish checklist</p>
+                    <p className="text-xs font-bold uppercase tracking-[0.14em] text-black/45">{eyebrow}</p>
                     <h3 className="mt-2 text-lg font-semibold text-black">
                         {allReady ? 'Ready to publish' : `${items.length - readyCount} item${items.length - readyCount === 1 ? '' : 's'} need review`}
                     </h3>
-                    <p className="mt-2 text-sm leading-6 text-black/58">
-                        Published products can appear on public product pages where CMS cutover is active.
-                    </p>
+                    <p className="mt-2 text-sm leading-6 text-black/58">{description}</p>
                 </div>
                 <span
                     className={[
@@ -1676,6 +1698,34 @@ function getProductPublishChecklist(
             label: 'Specifications',
             ready: hasSpecs,
             detail: hasSpecs ? 'At least one product spec is filled in.' : 'Add at least one useful specification row.',
+        },
+    ];
+}
+
+function getProductModelPublishChecklist(form: ModelFormState) {
+    const modelKeyIsReady = /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(form.modelKey.trim());
+
+    return [
+        {
+            label: 'Model key',
+            ready: modelKeyIsReady,
+            detail: modelKeyIsReady
+                ? 'The internal model key is URL-safe and ready for structured product data.'
+                : 'Use lowercase words separated by hyphens, for example square-seat.',
+        },
+        {
+            label: 'Model label',
+            ready: Boolean(form.label.trim()),
+            detail: form.label.trim()
+                ? 'The public model label is filled in.'
+                : 'Add the label editors and customers will recognize.',
+        },
+        {
+            label: 'Model image',
+            ready: Boolean(form.imageMediaId.trim()),
+            detail: form.imageMediaId.trim()
+                ? 'A model image is selected from Media.'
+                : 'Choose a model image so this model can satisfy the product publish checklist.',
         },
     ];
 }
