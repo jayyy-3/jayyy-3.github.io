@@ -2,6 +2,42 @@
 
 Last updated: 2026-06-04
 
+## Entry - 2026-06-04 (Admin Settings Team Access UX)
+
+### Scope
+- Continued the `/admin` CMS editor-handoff goal by clarifying Settings public-site and team-access language.
+- Replaced visible Owner/Admin framing with Website settings, CMS manager, and Website owner language.
+- Renamed Global contact and SEO / SEO defaults to Global contact and search defaults / Search defaults.
+- Rewrote the What this changes guidance so editors see public website settings, CMS team access, and login-account prerequisites without Supabase Auth or default-row terminology.
+- Reframed Admin team / Profiles and access / Active profile as CMS team / People and access / Active access.
+- Updated team-access notices and validation errors so they refer to CMS access, CMS manager access, and Website owner access instead of admin profile rows or owner-role internals.
+- Expanded admin CRUD coverage so Settings keeps the editor-facing website-settings/CMS-team/search-default/access language and rejects older Owner/Admin, Supabase Auth, admin-profile-row, owner-role, and default SEO/default-row wording.
+
+### Changed Files
+- `src/pages/admin/AdminSettingsPage.tsx`
+- `scripts/check-admin-crud-coverage.mjs`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass. Coverage now guards Settings' Website settings / CMS manager / Website owner / search defaults / CMS team / People and access / Active access language and rejects older Owner/Admin, Supabase Auth, admin-profile-row, owner-role, default SEO, and default-row visible wording.
+- `npx tsc -b`: pass.
+- `npm run lint`: pass.
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run agent:smoke`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions.
+- `npm run agent:admin-config-gate`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions; 11 admin routes passed the no-config gate.
+
+### Risks and Gaps
+- This is a targeted Settings language pass. The final CMS handoff guide still needs a post-polish refresh before declaring the overall CMS goal complete.
+
+### Next Handoff
+- Continue the CMS goal with the final editor handoff guide and an end-to-end admin walkthrough check.
+
 ## Entry - 2026-06-04 (Admin Leads Workflow Language UX)
 
 ### Scope

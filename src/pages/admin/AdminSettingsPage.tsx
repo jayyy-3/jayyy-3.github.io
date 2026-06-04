@@ -107,14 +107,14 @@ const roleRank: Record<AdminRole, number> = {
 };
 
 const roleLabels: Record<AdminRole, string> = {
-    owner: 'Owner',
-    admin: 'Admin',
+    owner: 'Website owner',
+    admin: 'CMS manager',
     editor: 'Editor',
     viewer: 'Viewer',
 };
 
 const roleDescriptions: Record<AdminRole, string> = {
-    owner: 'Full account control, including owner access.',
+    owner: 'Full CMS control, including website settings and team access.',
     admin: 'Can manage settings, team access, content, media, and leads.',
     editor: 'Can edit content and media, but cannot manage settings or leads export.',
     viewer: 'Can inspect CMS content without saving changes.',
@@ -176,7 +176,7 @@ function AdminSettingsContent() {
 
     const statusNote = useMemo(() => {
         if (!row) {
-            return 'Site settings have not been created yet. Owner/admin can save this screen to create the first settings profile.';
+            return 'Site settings have not been created yet. A CMS manager can save this screen to create the first public settings draft.';
         }
 
         return `Site settings loaded. Last saved ${new Date(row.updated_at).toLocaleString()}.`;
@@ -291,7 +291,7 @@ function AdminSettingsContent() {
     }
 
     return (
-        <AdminShell title="Site Settings" eyebrow={canEdit ? 'Owner/Admin' : 'Read only'}>
+        <AdminShell title="Site Settings" eyebrow={canEdit ? 'Website settings' : 'Read only'}>
             <div className="space-y-6">
                 <form onSubmit={(event) => void handleSubmit(event)} className="grid gap-5 xl:grid-cols-[1fr_360px]">
                 <section className="space-y-5">
@@ -301,7 +301,7 @@ function AdminSettingsContent() {
                                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-black/45">
                                     Default site identity
                                 </p>
-                                <h2 className="mt-2 text-2xl font-semibold text-black">Global contact and SEO</h2>
+                                <h2 className="mt-2 text-2xl font-semibold text-black">Global contact and search defaults</h2>
                                 <p className="mt-2 text-sm leading-6 text-black/58">{statusNote}</p>
                             </div>
                             <CmsStatusPill status={form.status} />
@@ -403,7 +403,7 @@ function AdminSettingsContent() {
 
                     <div className="border border-black/10 bg-white p-5 md:p-6">
                         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-black/45">
-                            SEO defaults
+                            Search defaults
                         </p>
                         <div className="mt-5 grid gap-4">
                             <label className="text-xs font-bold uppercase tracking-[0.14em] text-black/55">
@@ -470,10 +470,10 @@ function AdminSettingsContent() {
                 <aside className="space-y-5">
                     <section className="border border-black/10 bg-black p-5 text-white">
                         <CheckCircle2 className="h-5 w-5 text-[var(--urblo-lime)]" />
-                        <h2 className="mt-5 text-xl font-semibold">Owner/admin only</h2>
+                        <h2 className="mt-5 text-xl font-semibold">CMS manager only</h2>
                         <p className="mt-3 text-sm leading-6 text-white/68">
-                            Viewer/editor roles can inspect this screen. Owner/admin roles are required for site
-                            settings, team access, publishing, and archive actions.
+                            Viewers and editors can inspect this screen. CMS managers and website owners are required
+                            for site settings, team access, publishing, and archive actions.
                         </p>
                     </section>
 
@@ -481,10 +481,10 @@ function AdminSettingsContent() {
                         <ShieldCheck className="h-5 w-5 text-black" />
                         <h2 className="mt-5 text-xl font-semibold text-black">What this changes</h2>
                         <ul className="mt-4 space-y-3 text-sm leading-6 text-black/62">
-                            <li>Company, email, phone, social links, footer content, and default SEO are site-wide.</li>
-                            <li>Published settings are the public-ready default row.</li>
-                            <li>Admin team changes affect who can edit the CMS, not public website content.</li>
-                            <li>Existing Supabase Auth users must exist before their admin profile is added here.</li>
+                            <li>Company, email, phone, social links, footer content, and search defaults are site-wide.</li>
+                            <li>Published settings are the public-ready website settings.</li>
+                            <li>CMS team changes affect who can edit the CMS, not public website content.</li>
+                            <li>A login account must exist before CMS access is granted here.</li>
                         </ul>
                     </section>
 
@@ -502,8 +502,8 @@ function AdminSettingsContent() {
 
                     {!canEdit ? (
                         <section className="border border-black/10 bg-white p-5 text-sm leading-6 text-black/62">
-                            Current role is read-only for Settings. Ask an owner/admin to make global site
-                            identity changes.
+                            Current role is read-only for Settings. Ask a CMS manager to make global site identity
+                            changes.
                         </section>
                     ) : null}
 
@@ -683,7 +683,7 @@ function AdminProfilesManager({
             },
         });
 
-        setNotice(withAuditNotice(editingUserId ? 'Admin profile updated.' : 'Admin profile added.', auditError));
+        setNotice(withAuditNotice(editingUserId ? 'CMS access updated.' : 'CMS access granted.', auditError));
         setEditingUserId(null);
         setForm(emptyProfileForm);
         await loadProfiles();
@@ -697,9 +697,9 @@ function AdminProfilesManager({
                 <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                     <div>
                         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-black/45">
-                            Admin team
+                            CMS team
                         </p>
-                        <h2 className="mt-2 text-2xl font-semibold text-black">Profiles and access</h2>
+                        <h2 className="mt-2 text-2xl font-semibold text-black">People and access</h2>
                         <p className="mt-2 max-w-2xl text-sm leading-6 text-black/58">
                             Grant CMS access to people who already have a login account. Create or invite the login
                             account first, then add the account ID here with the role they should have.
@@ -712,7 +712,7 @@ function AdminProfilesManager({
 
                 {!canManage ? (
                     <div className="mt-6 border border-black/10 bg-black/[0.03] p-4 text-sm leading-6 text-black/62">
-                        Admin profile management is restricted to owner/admin roles.
+                        CMS team access is restricted to CMS managers and website owners.
                     </div>
                 ) : null}
 
@@ -726,7 +726,7 @@ function AdminProfilesManager({
 
                 {canManage && !isLoading && profiles.length === 0 ? (
                     <div className="mt-6 border border-black/10 bg-black/[0.03] p-4 text-sm leading-6 text-black/62">
-                        No admin profile rows were returned for this account.
+                        No CMS access records were returned for this account.
                     </div>
                 ) : null}
 
@@ -788,8 +788,8 @@ function AdminProfilesManager({
                     <Users className="h-5 w-5 text-[var(--urblo-lime)]" />
                     <h2 className="mt-5 text-xl font-semibold">Team access rules</h2>
                     <p className="mt-3 text-sm leading-6 text-white/68">
-                        Owner changes are owner-only. Admins can maintain non-owner roles. Editors can edit content.
-                        Viewers can inspect the CMS without mutating records.
+                        Website owner access can only be changed by another website owner. CMS managers can maintain
+                        non-owner access. Editors can edit content. Viewers can inspect the CMS without saving changes.
                     </p>
                 </section>
 
@@ -799,7 +799,7 @@ function AdminProfilesManager({
                     <ol className="mt-4 space-y-3 text-sm leading-6 text-black/62">
                         <li>1. Create or invite the person's login account before using this form.</li>
                         <li>2. Copy the full login account ID into Existing login account ID.</li>
-                        <li>3. Choose the lowest role they need and keep Active profile enabled.</li>
+                        <li>3. Choose the lowest role they need and keep Active access enabled.</li>
                         <li>4. Save, then ask them to sign in at `/admin`.</li>
                     </ol>
                     <p className="mt-4 text-xs leading-5 text-black/45">
@@ -907,7 +907,7 @@ function AdminProfilesManager({
                             disabled={!canManage || isSaving}
                             className="h-4 w-4 accent-[var(--urblo-lime)]"
                         />
-                        Active profile
+                        Active access
                     </label>
 
                     <div className="mt-5 flex flex-col gap-3">
@@ -932,7 +932,7 @@ function AdminProfilesManager({
                     </div>
 
                     <p className="mt-4 text-xs leading-5 text-black/48">
-                        Active owner profiles: {activeOwnerCount}. After saving, the person can sign in at `/admin`
+                        Active website owners: {activeOwnerCount}. After saving, the person can sign in at `/admin`
                         with their existing login account.
                     </p>
                 </form>
@@ -1261,7 +1261,7 @@ function validateAdminProfileForm(
         : null;
 
     if (!editingUserId && !isUuid(userId)) {
-        return 'Paste a valid login account ID before saving this profile.';
+        return 'Paste a valid login account ID before granting CMS access.';
     }
 
     if (!isEmail(email)) {
@@ -1277,21 +1277,21 @@ function validateAdminProfileForm(
             profile.user_id !== editingUserId && profile.email.trim().toLowerCase() === email.toLowerCase(),
     );
     if (duplicateEmailProfile) {
-        return 'Admin profile email is already assigned to another user.';
+        return 'This email is already assigned to another CMS user.';
     }
 
     if (currentRole !== 'owner') {
         if (form.role === 'owner') {
-            return 'Only an owner can assign the owner role.';
+            return 'Only a website owner can assign the Website owner role.';
         }
 
         if (editingProfile?.role === 'owner') {
-            return 'Only an owner can change an owner profile.';
+            return 'Only a website owner can change Website owner access.';
         }
     }
 
     if (editingUserId === currentUserId && (!form.isActive || (form.role !== 'owner' && form.role !== 'admin'))) {
-        return 'Do not remove your own active admin access from this screen.';
+        return 'Do not remove your own active CMS manager access from this screen.';
     }
 
     const activeOwnerCount = existingProfiles.filter((profile) => profile.role === 'owner' && profile.is_active).length;
@@ -1299,7 +1299,7 @@ function validateAdminProfileForm(
         editingProfile?.role === 'owner' && editingProfile.is_active && activeOwnerCount <= 1;
 
     if (editingLastActiveOwner && (!form.isActive || form.role !== 'owner')) {
-        return 'At least one active owner profile must remain.';
+        return 'At least one active website owner must remain.';
     }
 
     return null;
