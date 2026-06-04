@@ -2,6 +2,44 @@
 
 Last updated: 2026-06-04
 
+## Entry - 2026-06-04 (Admin Articles Form Authoring UX)
+
+### Scope
+- Continued the `/admin` CMS editor-experience productization goal with a focused Articles authoring pass.
+- Replaced article-level `SEO JSON` editing with editor-facing Search title and Search description fields while preserving the existing `articles.seo` JSON contract behind the form.
+- Replaced direct Article block content JSON entry with block-type-specific editor forms for rich text, image/gallery notes, quotes, FAQ, CTA, project/stone references, comparison notes, proof metrics, video embeds, and callouts.
+- Updated block publish validation so Published blocks require meaningful editor content for the selected block type instead of only requiring a non-empty JSON object.
+- Updated the admin CRUD coverage guard, CMS handoff docs, roadmap, task queue, and editor guide to reflect form-based Article authoring.
+
+### Changed Files
+- `src/pages/admin/AdminArticlesPage.tsx`
+- `scripts/check-admin-crud-coverage.mjs`
+- `docs/ADMIN_EDITOR_GUIDE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run agent:smoke`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions.
+- `npm run agent:admin-config-gate`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions; 11 admin routes passed the no-config gate.
+- Browser/IAB DOM check for `http://127.0.0.1:5173/admin/articles`: pass for page identity, nonblank config-required shell, no Vite overlay, and zero console warnings/errors. Browser screenshot capture timed out twice, so the visual sanity check used the generated Playwright gate screenshot at `.tmp/admin-config-gate/screenshots/admin-articles.png`.
+
+### Risks and Gaps
+- Local no-config browser validation can prove the route shell and guard state, but not the signed-in live Article editor form; that still needs production or local browser-safe Supabase config plus an active editor/admin session.
+- Public Article detail still renders sanitized legacy HTML until structured public block rendering is implemented.
+- Products still has a separate SEO JSON field that should receive the same editor-facing treatment in a later batch.
+
+### Next Handoff
+- Continue the CMS goal by replacing Products SEO JSON with editor-facing SEO fields or by adding a final production Article editor walkthrough after deployment.
+
 ## Entry - 2026-06-04 (Admin Products Media Selector UX)
 
 ### Scope

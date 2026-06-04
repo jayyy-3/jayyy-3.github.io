@@ -704,8 +704,9 @@ function checkArticleStructuredAuthoring() {
     requireNotIncludes(text, forbidden, 'src/pages/admin/AdminArticlesPage.tsx structured article authoring');
   }
 
-  requireIncludes(text, 'Published blocks require structured content.', 'src/pages/admin/AdminArticlesPage.tsx');
-  requireIncludes(text, 'Block content JSON is not valid JSON.', 'src/pages/admin/AdminArticlesPage.tsx');
+  requireIncludes(text, 'BlockContentEditor', 'src/pages/admin/AdminArticlesPage.tsx');
+  requireIncludes(text, 'Published ${formatBlockTypeLabel(form.blockType)} blocks need editor content', 'src/pages/admin/AdminArticlesPage.tsx');
+  requireIncludes(text, 'Block forms save structured editor content in the background', 'src/pages/admin/AdminArticlesPage.tsx');
   requireIncludes(text, 'do not paste newsletter HTML as normal authoring', 'src/pages/admin/AdminArticlesPage.tsx');
 }
 

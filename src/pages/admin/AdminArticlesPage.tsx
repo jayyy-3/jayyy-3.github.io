@@ -103,7 +103,9 @@ interface ArticleFormState {
     excerpt: string;
     coverMediaId: string;
     tagsText: string;
-    seoJson: string;
+    seoBaseJson: string;
+    seoTitle: string;
+    seoDescription: string;
     legacySourcePath: string;
     legacySourceUrl: string;
     sortOrder: string;
@@ -128,7 +130,9 @@ const emptyArticleForm: ArticleFormState = {
     excerpt: '',
     coverMediaId: '',
     tagsText: '',
-    seoJson: '',
+    seoBaseJson: '{}',
+    seoTitle: '',
+    seoDescription: '',
     legacySourcePath: '',
     legacySourceUrl: '',
     sortOrder: '0',
@@ -137,7 +141,7 @@ const emptyArticleForm: ArticleFormState = {
 const emptyBlockForm: BlockFormState = {
     status: 'draft',
     blockType: 'rich_text',
-    contentJson: '{\n  "body": ""\n}',
+    contentJson: JSON.stringify(defaultContentForBlockType('rich_text'), null, 2),
     mediaAssetId: '',
     linkedProjectId: '',
     linkedStoneGroupId: '',
@@ -160,18 +164,18 @@ const blockTypeOptions: Array<[string, string]> = [
 ];
 
 const blockContentHints: Record<ArticleBlockType, string> = {
-    rich_text: 'Use { "body": "Paragraph copy" } for normal editorial paragraphs.',
-    image: 'Select a media record below, then use content for caption or layout notes.',
-    gallery: 'Select the lead media record here; add the ordered gallery notes in content.',
-    quote: 'Use { "quote": "...", "attribution": "..." } for pull quotes.',
-    faq: 'Use { "items": [{ "question": "...", "answer": "..." }] } for Q&A blocks.',
-    cta: 'Use { "label": "...", "href": "..." } for editorial calls to action.',
-    project_spotlight: 'Choose a linked project below and add short supporting copy in content.',
-    stone_reference: 'Choose a linked stone below and add why it matters in content.',
-    comparison_table: 'Use structured rows and columns; avoid pasting newsletter table HTML.',
-    proof_metric: 'Use { "label": "...", "value": "...", "note": "..." } for proof points.',
-    video_embed: 'Use content for the approved video URL/embed metadata.',
-    callout: 'Use { "heading": "...", "body": "..." } for highlighted notes.',
+    rich_text: 'Normal article copy. Add one clear idea per block so the article can be rearranged later.',
+    image: 'Pair a selected media record with caption and placement notes.',
+    gallery: 'Use the selected media as the lead image, then describe the gallery sequence for review.',
+    quote: 'A pull quote with optional attribution.',
+    faq: 'Question and answer rows for practical reader objections.',
+    cta: 'A button-style reader action with label, link, and optional supporting copy.',
+    project_spotlight: 'Choose a linked project and add why the project supports this article.',
+    stone_reference: 'Choose a linked stone and add why the material matters here.',
+    comparison_table: 'A table planning block. Add column labels and row notes in plain language.',
+    proof_metric: 'A short metric or proof point with supporting note.',
+    video_embed: 'Approved video URL and caption.',
+    callout: 'A highlighted note with heading and body copy.',
 };
 
 const fieldClass =
@@ -398,6 +402,15 @@ function AdminArticlesContent() {
 
     function updateBlockField<Key extends keyof BlockFormState>(key: Key, value: BlockFormState[Key]) {
         setBlockForm((current) => ({ ...current, [key]: value }));
+        setNotice(null);
+    }
+
+    function updateBlockType(value: ArticleBlockType) {
+        setBlockForm((current) => ({
+            ...current,
+            blockType: value,
+            contentJson: JSON.stringify(defaultContentForBlockType(value), null, 2),
+        }));
         setNotice(null);
     }
 
@@ -785,16 +798,26 @@ function AdminArticlesContent() {
                             />
                         </div>
 
-                        <label className="mt-5 block text-xs font-bold uppercase tracking-[0.14em] text-black/55">
-                            SEO JSON
-                            <textarea
-                                value={articleForm.seoJson}
-                                onChange={(event) => updateArticleField('seoJson', event.target.value)}
-                                disabled={!canEdit || isSavingArticle || isLoading}
-                                rows={4}
-                                className={`${fieldClass} py-3 font-mono text-xs leading-6 normal-case tracking-normal`}
-                            />
-                        </label>
+                        <div className="mt-5 border border-black/10 bg-[#f8f9f5] p-4">
+                            <p className="text-xs font-bold uppercase tracking-[0.14em] text-black/45">Search preview</p>
+                            <div className="mt-4 grid gap-4 md:grid-cols-2">
+                                <TextField
+                                    label="Search title"
+                                    value={articleForm.seoTitle}
+                                    disabled={!canEdit || isSavingArticle || isLoading}
+                                    onChange={(value) => updateArticleField('seoTitle', value)}
+                                />
+                                <TextField
+                                    label="Search description"
+                                    value={articleForm.seoDescription}
+                                    disabled={!canEdit || isSavingArticle || isLoading}
+                                    onChange={(value) => updateArticleField('seoDescription', value)}
+                                />
+                            </div>
+                            <p className="mt-3 text-sm leading-6 text-black/58">
+                                Leave these blank to let the public site reuse the article title and excerpt.
+                            </p>
+                        </div>
 
                         <div className="mt-6 flex flex-wrap gap-2">
                             <ActionButton
@@ -852,7 +875,7 @@ function AdminArticlesContent() {
                                 label="Block type"
                                 value={blockForm.blockType}
                                 disabled={!canEdit || isSavingBlock || !selectedArticle}
-                                onChange={(value) => updateBlockField('blockType', value as ArticleBlockType)}
+                                onChange={(value) => updateBlockType(value as ArticleBlockType)}
                                 options={blockTypeOptions}
                             />
                             <MediaSelect
@@ -896,16 +919,12 @@ function AdminArticlesContent() {
                             <p className="font-semibold text-black">{formatBlockTypeLabel(blockForm.blockType)}</p>
                             <p className="mt-1">{blockContentHints[blockForm.blockType]}</p>
                         </div>
-                        <label className="block text-xs font-bold uppercase tracking-[0.14em] text-black/55">
-                            Content JSON
-                            <textarea
-                                value={blockForm.contentJson}
-                                onChange={(event) => updateBlockField('contentJson', event.target.value)}
-                                disabled={!canEdit || isSavingBlock || !selectedArticle}
-                                rows={10}
-                                className={`${fieldClass} py-3 font-mono text-xs leading-6 normal-case tracking-normal`}
-                            />
-                        </label>
+                        <BlockContentEditor
+                            blockType={blockForm.blockType}
+                            contentJson={blockForm.contentJson}
+                            disabled={!canEdit || isSavingBlock || !selectedArticle}
+                            onChange={(value) => updateBlockField('contentJson', value)}
+                        />
                         <div className="grid gap-2 md:grid-cols-3">
                             <button
                                 type="button"
@@ -955,7 +974,7 @@ function AdminArticlesContent() {
                         <ul className="mt-4 space-y-3 text-sm leading-6 text-black/62">
                             <li>Published articles require title, slug, date, and excerpt.</li>
                             <li>Article bodies should use typed blocks; do not paste newsletter HTML as normal authoring.</li>
-                            <li>Blocks use JSON content so claim and media checks can be added later.</li>
+                            <li>Block forms save structured editor content in the background for future public rendering.</li>
                             <li>Physical deletes remain hidden; archive is the safe operational path.</li>
                         </ul>
                     </section>
@@ -1129,6 +1148,273 @@ function MediaSelect({
     );
 }
 
+function BlockContentEditor({
+    blockType,
+    contentJson,
+    disabled,
+    onChange,
+}: {
+    blockType: ArticleBlockType;
+    contentJson: string;
+    disabled?: boolean;
+    onChange: (value: string) => void;
+}) {
+    const content = parseContentRecord(contentJson);
+
+    function updateTextField(key: string, value: string) {
+        onChange(JSON.stringify({ ...content, [key]: value }, null, 2));
+    }
+
+    function updateFaqText(value: string) {
+        const items = value
+            .split('\n')
+            .map((line) => line.trim())
+            .filter(Boolean)
+            .map((line) => {
+                const [question, ...answerParts] = line.split('|');
+                return {
+                    question: question?.trim() ?? '',
+                    answer: answerParts.join('|').trim(),
+                };
+            })
+            .filter((item) => item.question || item.answer);
+
+        onChange(JSON.stringify({ ...content, items }, null, 2));
+    }
+
+    const commonProps = { disabled };
+
+    if (blockType === 'rich_text') {
+        return (
+            <TextareaField
+                label="Article copy"
+                value={contentString(content, 'body')}
+                rows={8}
+                onChange={(value) => updateTextField('body', value)}
+                {...commonProps}
+            />
+        );
+    }
+
+    if (blockType === 'quote') {
+        return (
+            <div className="grid gap-4">
+                <TextareaField
+                    label="Quote"
+                    value={contentString(content, 'quote')}
+                    rows={4}
+                    onChange={(value) => updateTextField('quote', value)}
+                    {...commonProps}
+                />
+                <TextField
+                    label="Attribution"
+                    value={contentString(content, 'attribution')}
+                    onChange={(value) => updateTextField('attribution', value)}
+                    {...commonProps}
+                />
+            </div>
+        );
+    }
+
+    if (blockType === 'callout') {
+        return (
+            <div className="grid gap-4">
+                <TextField
+                    label="Callout heading"
+                    value={contentString(content, 'heading')}
+                    onChange={(value) => updateTextField('heading', value)}
+                    {...commonProps}
+                />
+                <TextareaField
+                    label="Callout body"
+                    value={contentString(content, 'body')}
+                    rows={5}
+                    onChange={(value) => updateTextField('body', value)}
+                    {...commonProps}
+                />
+            </div>
+        );
+    }
+
+    if (blockType === 'cta') {
+        return (
+            <div className="grid gap-4 md:grid-cols-2">
+                <TextField
+                    label="Button label"
+                    value={contentString(content, 'label')}
+                    onChange={(value) => updateTextField('label', value)}
+                    {...commonProps}
+                />
+                <TextField
+                    label="Button link"
+                    value={contentString(content, 'href')}
+                    onChange={(value) => updateTextField('href', value)}
+                    {...commonProps}
+                />
+                <div className="md:col-span-2">
+                    <TextareaField
+                        label="Supporting copy"
+                        value={contentString(content, 'body')}
+                        rows={4}
+                        onChange={(value) => updateTextField('body', value)}
+                        {...commonProps}
+                    />
+                </div>
+            </div>
+        );
+    }
+
+    if (blockType === 'faq') {
+        return (
+            <div className="grid gap-3">
+                <TextareaField
+                    label="Questions and answers"
+                    value={faqItemsText(content)}
+                    rows={8}
+                    onChange={updateFaqText}
+                    {...commonProps}
+                />
+                <p className="text-sm leading-6 text-black/52">
+                    Put one question per line. Use a vertical bar between question and answer, for example:
+                    What is the lead time? | Usually 6-8 weeks after approval.
+                </p>
+            </div>
+        );
+    }
+
+    if (blockType === 'proof_metric') {
+        return (
+            <div className="grid gap-4 md:grid-cols-2">
+                <TextField
+                    label="Metric value"
+                    value={contentString(content, 'value')}
+                    onChange={(value) => updateTextField('value', value)}
+                    {...commonProps}
+                />
+                <TextField
+                    label="Metric label"
+                    value={contentString(content, 'label')}
+                    onChange={(value) => updateTextField('label', value)}
+                    {...commonProps}
+                />
+                <div className="md:col-span-2">
+                    <TextareaField
+                        label="Proof note"
+                        value={contentString(content, 'note')}
+                        rows={4}
+                        onChange={(value) => updateTextField('note', value)}
+                        {...commonProps}
+                    />
+                </div>
+            </div>
+        );
+    }
+
+    if (blockType === 'video_embed') {
+        return (
+            <div className="grid gap-4">
+                <TextField
+                    label="Approved video URL"
+                    value={contentString(content, 'url')}
+                    onChange={(value) => updateTextField('url', value)}
+                    {...commonProps}
+                />
+                <TextareaField
+                    label="Video caption"
+                    value={contentString(content, 'caption')}
+                    rows={4}
+                    onChange={(value) => updateTextField('caption', value)}
+                    {...commonProps}
+                />
+            </div>
+        );
+    }
+
+    if (blockType === 'comparison_table') {
+        return (
+            <div className="grid gap-4">
+                <TextField
+                    label="Table heading"
+                    value={contentString(content, 'heading')}
+                    onChange={(value) => updateTextField('heading', value)}
+                    {...commonProps}
+                />
+                <TextareaField
+                    label="Column labels"
+                    value={contentString(content, 'columnsText')}
+                    rows={3}
+                    onChange={(value) => updateTextField('columnsText', value)}
+                    {...commonProps}
+                />
+                <TextareaField
+                    label="Row notes"
+                    value={contentString(content, 'rowsText')}
+                    rows={6}
+                    onChange={(value) => updateTextField('rowsText', value)}
+                    {...commonProps}
+                />
+            </div>
+        );
+    }
+
+    return (
+        <div className="grid gap-4">
+            <TextareaField
+                label={
+                    blockType === 'image'
+                        ? 'Image caption'
+                        : blockType === 'gallery'
+                          ? 'Gallery notes'
+                          : blockType === 'project_spotlight'
+                            ? 'Project supporting copy'
+                            : blockType === 'stone_reference'
+                              ? 'Stone supporting copy'
+                              : 'Block copy'
+                }
+                value={contentString(content, 'body') || contentString(content, 'caption') || contentString(content, 'summary')}
+                rows={6}
+                onChange={(value) => updateTextField(blockType === 'image' ? 'caption' : 'body', value)}
+                {...commonProps}
+            />
+            {blockType === 'image' || blockType === 'gallery' ? (
+                <TextField
+                    label="Layout note"
+                    value={contentString(content, 'layout')}
+                    onChange={(value) => updateTextField('layout', value)}
+                    {...commonProps}
+                />
+            ) : null}
+        </div>
+    );
+}
+
+function TextareaField({
+    label,
+    value,
+    disabled,
+    rows = 4,
+    onChange,
+}: {
+    label: string;
+    value: string;
+    disabled?: boolean;
+    rows?: number;
+    onChange: (value: string) => void;
+}) {
+    return (
+        <label className="block text-xs font-bold uppercase tracking-[0.14em] text-black/55">
+            {label}
+            <textarea
+                value={value}
+                onChange={(event) => onChange(event.target.value)}
+                disabled={disabled}
+                rows={rows}
+                className={`${fieldClass} py-3 leading-6`}
+            />
+        </label>
+    );
+}
+
 function ActionButton({ disabled, label }: { disabled?: boolean; label: string }) {
     return (
         <button
@@ -1215,6 +1501,7 @@ function RecordChips<T extends { id: number }>({
 
 function rowToArticleForm(row: ArticleRow | null): ArticleFormState {
     if (!row) return emptyArticleForm;
+    const seo = objectRecord(row.seo);
 
     return {
         status: row.status,
@@ -1225,7 +1512,9 @@ function rowToArticleForm(row: ArticleRow | null): ArticleFormState {
         excerpt: row.excerpt ?? '',
         coverMediaId: row.cover_media_id === null ? '' : String(row.cover_media_id),
         tagsText: row.tags.join(', '),
-        seoJson: row.seo ? JSON.stringify(row.seo, null, 2) : '',
+        seoBaseJson: JSON.stringify(seo, null, 2),
+        seoTitle: contentString(seo, 'title'),
+        seoDescription: contentString(seo, 'description'),
         legacySourcePath: row.legacy_source_path ?? '',
         legacySourceUrl: row.legacy_source_url ?? '',
         sortOrder: String(row.sort_order),
@@ -1261,13 +1550,16 @@ function validateArticleForm(form: ArticleFormState) {
     if (sortOrder.error) return validationFailure(sortOrder.error);
     if (coverMediaId.error) return validationFailure(coverMediaId.error);
 
-    let seo: unknown = {};
-    if (form.seoJson.trim()) {
-        try {
-            seo = JSON.parse(form.seoJson);
-        } catch {
-            return validationFailure('SEO JSON is not valid JSON.');
-        }
+    const seo = parseContentRecord(form.seoBaseJson);
+    if (form.seoTitle.trim()) {
+        seo.title = form.seoTitle.trim();
+    } else {
+        delete seo.title;
+    }
+    if (form.seoDescription.trim()) {
+        seo.description = form.seoDescription.trim();
+    } else {
+        delete seo.description;
     }
 
     const tags = form.tagsText
@@ -1298,12 +1590,12 @@ function validateBlockForm(form: BlockFormState) {
         try {
             content = JSON.parse(form.contentJson);
         } catch {
-            return validationFailure('Block content JSON is not valid JSON.');
+            return validationFailure('Block content could not be read. Re-open the block and try again.');
         }
     }
 
-    if (form.status === 'published' && isEmptyObject(content)) {
-        return validationFailure('Published blocks require structured content.');
+    if (form.status === 'published' && !hasPublishReadyBlockContent(form.blockType, content, mediaAssetId.value)) {
+        return validationFailure(`Published ${formatBlockTypeLabel(form.blockType)} blocks need editor content before they can go live.`);
     }
 
     return {
@@ -1348,6 +1640,98 @@ function isEmptyObject(value: unknown) {
         !Array.isArray(value) &&
         Object.keys(value as Record<string, unknown>).length === 0
     );
+}
+
+function defaultContentForBlockType(blockType: ArticleBlockType): Record<string, unknown> {
+    switch (blockType) {
+        case 'rich_text':
+            return { body: '' };
+        case 'image':
+            return { caption: '', layout: '' };
+        case 'gallery':
+            return { body: '', layout: '' };
+        case 'quote':
+            return { quote: '', attribution: '' };
+        case 'faq':
+            return { items: [] };
+        case 'cta':
+            return { label: '', href: '', body: '' };
+        case 'project_spotlight':
+        case 'stone_reference':
+            return { body: '' };
+        case 'comparison_table':
+            return { heading: '', columnsText: '', rowsText: '' };
+        case 'proof_metric':
+            return { value: '', label: '', note: '' };
+        case 'video_embed':
+            return { url: '', caption: '' };
+        case 'callout':
+            return { heading: '', body: '' };
+        default:
+            return {};
+    }
+}
+
+function parseContentRecord(value: string): Record<string, unknown> {
+    try {
+        return objectRecord(JSON.parse(value || '{}'));
+    } catch {
+        return {};
+    }
+}
+
+function objectRecord(value: unknown): Record<string, unknown> {
+    if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+        return value as Record<string, unknown>;
+    }
+
+    return {};
+}
+
+function contentString(content: Record<string, unknown>, key: string) {
+    const value = content[key];
+    return typeof value === 'string' ? value : '';
+}
+
+function faqItemsText(content: Record<string, unknown>) {
+    const items = Array.isArray(content.items) ? content.items : [];
+    return items
+        .map((item) => {
+            if (typeof item !== 'object' || item === null || Array.isArray(item)) return '';
+            const record = item as Record<string, unknown>;
+            const question = typeof record.question === 'string' ? record.question : '';
+            const answer = typeof record.answer === 'string' ? record.answer : '';
+            return [question, answer].filter(Boolean).join(' | ');
+        })
+        .filter(Boolean)
+        .join('\n');
+}
+
+function hasPublishReadyBlockContent(blockType: ArticleBlockType, content: unknown, mediaAssetId: number | null) {
+    const record = objectRecord(content);
+    const hasAnyText = Object.values(record).some((value) => {
+        if (typeof value === 'string') return value.trim().length > 0;
+        if (Array.isArray(value)) return value.length > 0;
+        return false;
+    });
+
+    switch (blockType) {
+        case 'image':
+        case 'gallery':
+            return mediaAssetId !== null || hasAnyText;
+        case 'quote':
+            return contentString(record, 'quote').trim().length > 0;
+        case 'faq':
+            return Array.isArray(record.items) && record.items.length > 0;
+        case 'cta':
+            return contentString(record, 'label').trim().length > 0 && contentString(record, 'href').trim().length > 0;
+        case 'proof_metric':
+            return contentString(record, 'value').trim().length > 0 && contentString(record, 'label').trim().length > 0;
+        case 'video_embed':
+            return contentString(record, 'url').trim().length > 0;
+        default:
+            return hasAnyText && !isEmptyObject(record);
+    }
 }
 
 function summarizeArticles(articles: ArticleRow[]) {

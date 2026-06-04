@@ -62,7 +62,7 @@ Physical delete is not part of the launch CMS workflow.
 | Projects | Edit case studies, facts, materials, images, maps, and hotspots. | CMS-ready with publish checklist and media selectors. |
 | Stone Library | Edit stone groups, variants, finish capabilities, and finish imagery. | CMS-ready for listing data; detail page still uses static-backed detail adapter. |
 | Products | Edit product families, models, images, materials, and specs. | CMS-ready with media selectors and Stone Library link feedback. |
-| Articles | Edit article metadata and structured blocks. | CMS-ready for metadata/block rows; public detail still renders sanitized legacy HTML until structured public block rendering is built. |
+| Articles | Edit article metadata, search title/description, and structured article blocks through block-type forms. | CMS-ready for metadata/block rows; public detail still renders sanitized legacy HTML until structured public block rendering is built. |
 | Media | Upload/manage media, metadata, status, and manifest export. | CMS-ready; publish media before using it publicly. |
 | Leads | Triage enquiries and sample requests, assign, add internal notes, export with audit logging. | Workflow-ready for owner/admin. |
 | Settings | Edit global identity, footer content, SEO defaults, and CMS access. | CMS-ready; creating/inviting the login account still happens outside this screen. |
@@ -86,7 +86,7 @@ Before publishing:
 - Projects need title, URL, public copy, reviewed project claim status, reviewed facts, and reviewed materials.
 - Stone Library finish images need a selected media record that is already Published in Media.
 - Products should have public-ready product/model media and confirmed Stone Library material defaults.
-- Articles should have title, slug, date, excerpt, cover image where needed, and structured blocks.
+- Articles should have title, slug, date, excerpt, cover image where needed, search preview fields where needed, and structured blocks with the required copy/link/media fields filled in.
 - Media should have useful alt text, caption/credit where relevant, usage notes, and Published status before it is used publicly.
 
 If Publish is blocked, use the on-screen checklist or validation message to fix the named field, then save/publish again.
