@@ -110,7 +110,7 @@ function AdminAuditContent() {
 
     return (
         <AdminShell
-            title="Audit"
+            title="Activity log"
             eyebrow={canViewAudit ? 'Owner/Admin review' : 'Restricted'}
             actions={
                 <div className="inline-flex min-h-10 items-center gap-2 rounded border border-black/15 bg-white px-3 text-xs font-bold uppercase tracking-[0.12em] text-black/58">
@@ -126,11 +126,11 @@ function AdminAuditContent() {
                         Owner/Admin only
                     </p>
                     <h2 className="mt-3 text-[32px] font-light leading-tight text-black md:text-[48px]">
-                        Audit visibility is restricted
+                        Activity log visibility is restricted
                     </h2>
                     <p className="mt-5 max-w-[48rem] text-lg font-medium leading-8 text-[#33363f]">
                         Mutation history can expose private operational details. Viewers and editors should use the
-                        content modules instead of the audit log.
+                        content modules instead of the activity log.
                     </p>
                 </section>
             ) : (
@@ -138,24 +138,24 @@ function AdminAuditContent() {
                     <section className="border border-black/10 bg-white">
                         <div className="border-b border-black/10 p-4">
                             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-black/45">
-                                Audit events
+                                Activity log
                             </p>
                             <h2 className="mt-2 text-2xl font-semibold text-black">{filteredEvents.length} shown</h2>
                             <p className="mt-2 text-sm leading-6 text-black/55">
-                                Latest {events.length} mutation events available to owner/admin roles.
+                                Latest {events.length} saved changes and sensitive operations available to owner/admin roles.
                             </p>
                             <div className="mt-4 grid gap-3 md:grid-cols-2">
                                 <label className="block text-xs font-bold uppercase tracking-[0.14em] text-black/55">
-                                    Entity
+                                    Area
                                     <select
                                         value={entityFilter}
                                         onChange={(event) => setEntityFilter(event.target.value)}
                                         className={fieldClass}
                                     >
-                                        <option value="">All entities</option>
+                                        <option value="">All areas</option>
                                         {entityTypes.map((entityType) => (
                                             <option key={entityType} value={entityType}>
-                                                {entityType}
+                                                {formatEntityType(entityType)}
                                             </option>
                                         ))}
                                     </select>
@@ -195,10 +195,10 @@ function AdminAuditContent() {
                                             <div className="flex items-start justify-between gap-3">
                                                 <span className="min-w-0">
                                                     <span className="block truncate text-sm font-semibold text-black">
-                                                        {event.action}
+                                                        {formatActionLabel(event.action)}
                                                     </span>
                                                     <span className="mt-1 block truncate text-xs font-semibold uppercase tracking-[0.12em] text-black/40">
-                                                        {event.entity_type}
+                                                        {formatEntityType(event.entity_type)}
                                                         {event.entity_id ? ` #${event.entity_id}` : ''}
                                                     </span>
                                                 </span>
@@ -215,10 +215,10 @@ function AdminAuditContent() {
                             ) : (
                                 <div className="p-5">
                                     <Activity className="h-5 w-5 text-black" />
-                                    <h2 className="mt-5 text-xl font-semibold text-black">No audit events yet</h2>
+                                    <h2 className="mt-5 text-xl font-semibold text-black">No activity yet</h2>
                                     <p className="mt-3 text-sm leading-6 text-black/58">
-                                        Audit visibility is ready, but mutation helpers still need to write events from
-                                        admin CRUD workflows.
+                                        Activity log visibility is ready. Saves, exports, and publish actions will
+                                        appear here after the CMS records them.
                                     </p>
                                 </div>
                             )}
@@ -232,10 +232,10 @@ function AdminAuditContent() {
                                     Event detail
                                 </p>
                                 <h2 className="mt-2 text-2xl font-semibold text-black">
-                                    {selectedEvent?.action ?? 'No event selected'}
+                                    {selectedEvent ? formatActionLabel(selectedEvent.action) : 'No activity selected'}
                                 </h2>
                                 <p className="mt-2 text-sm leading-6 text-black/58">
-                                    Audit rows are read-only. Use module records for operational edits.
+                                    Activity log entries are read-only. Use module records for operational edits.
                                 </p>
                             </div>
                             <Database className="h-5 w-5 text-black" />
@@ -246,11 +246,11 @@ function AdminAuditContent() {
                                 <div className="mt-7 grid gap-3 md:grid-cols-2">
                                     <InfoBlock label="Actor" value={actorName(selectedEvent.actor_user_id, adminProfiles)} />
                                     <InfoBlock label="Created" value={formatDateTime(selectedEvent.created_at)} />
-                                    <InfoBlock label="Entity type" value={selectedEvent.entity_type} />
-                                    <InfoBlock label="Entity ID" value={selectedEvent.entity_id ? String(selectedEvent.entity_id) : 'Not recorded'} />
+                                    <InfoBlock label="Area" value={formatEntityType(selectedEvent.entity_type)} />
+                                    <InfoBlock label="Record" value={selectedEvent.entity_id ? `#${selectedEvent.entity_id}` : 'Not recorded'} />
                                 </div>
                                 <label className="mt-5 block text-xs font-bold uppercase tracking-[0.14em] text-black/55">
-                                    Metadata
+                                    Details
                                     <textarea
                                         value={JSON.stringify(selectedEvent.metadata ?? {}, null, 2)}
                                         readOnly
@@ -261,7 +261,7 @@ function AdminAuditContent() {
                             </>
                         ) : (
                             <p className="mt-7 text-sm leading-6 text-black/58">
-                                Select an audit event after mutation helpers begin writing records.
+                                Select an activity log entry after saves or exports begin writing records.
                             </p>
                         )}
                     </section>
@@ -269,9 +269,9 @@ function AdminAuditContent() {
                     <aside className="space-y-5">
                         <section className="border border-black/10 bg-black p-5 text-white">
                             <Activity className="h-5 w-5 text-[var(--urblo-lime)]" />
-                            <h2 className="mt-5 text-xl font-semibold">Audit health</h2>
+                            <h2 className="mt-5 text-xl font-semibold">Activity health</h2>
                             <div className="mt-5 grid gap-3 text-sm leading-6 text-white/72">
-                                <p>{summary.total} total events in the latest visible window.</p>
+                                <p>{summary.total} total entries in the latest visible window.</p>
                                 <p>{summary.withActor} events have an actor user recorded.</p>
                                 <p>{summary.entityTypes} entity types appear in the log.</p>
                             </div>
@@ -279,11 +279,11 @@ function AdminAuditContent() {
 
                         <section className="border border-black/10 bg-white p-5">
                             <ShieldAlert className="h-5 w-5 text-black" />
-                            <h2 className="mt-5 text-xl font-semibold text-black">Audit guardrails</h2>
+                            <h2 className="mt-5 text-xl font-semibold text-black">Activity log guardrails</h2>
                             <ul className="mt-4 space-y-3 text-sm leading-6 text-black/62">
-                                <li>Audit events are visible only to owner/admin roles.</li>
-                                <li>This screen does not mutate audit rows or expose delete controls.</li>
-                                <li>Current CRUD screens still need shared mutation helpers to write event rows.</li>
+                                <li>Activity log entries are visible only to owner/admin roles.</li>
+                                <li>This screen does not change activity log entries or expose delete controls.</li>
+                                <li>Save, publish, archive, and export actions write activity entries after the primary action succeeds.</li>
                                 <li>Server-side lead/form events should be added after live persistence is verified.</li>
                             </ul>
                         </section>
@@ -313,6 +313,27 @@ function actorName(userId: string | null, admins: AdminProfileRow[]) {
     if (!userId) return 'System or unknown actor';
     const profile = admins.find((admin) => admin.user_id === userId);
     return profile?.display_name || profile?.email || userId;
+}
+
+function formatActionLabel(action: string) {
+    return action
+        .split('.')
+        .map((part) =>
+            part
+                .split('_')
+                .filter(Boolean)
+                .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' '),
+        )
+        .join(' / ');
+}
+
+function formatEntityType(entityType: string) {
+    return entityType
+        .split('_')
+        .filter(Boolean)
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
 }
 
 function summarizeAudit(events: AuditEventRow[]) {

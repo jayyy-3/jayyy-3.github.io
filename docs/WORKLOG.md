@@ -2,6 +2,49 @@
 
 Last updated: 2026-06-04
 
+## Entry - 2026-06-04 (Admin Activity Log Language UX)
+
+### Scope
+- Continued the `/admin` CMS editor-handoff goal by replacing user-facing audit-event language with Activity log language.
+- Changed shared save notices so activity-log failures read as an owner/admin follow-up, not a technical `Audit event failed` message.
+- Changed Media and Leads export messages from audit-event wording to activity-log wording.
+- Changed Settings status copy so editors no longer see database row IDs for site settings.
+- Renamed the `/admin/audit` navigation/page presentation to Activity log while keeping the existing route and table contracts intact.
+- Added Activity log formatting so action/entity values render as readable labels instead of raw dotted or underscored keys.
+- Expanded admin CRUD coverage so the Activity log language and readable formatting source contract is guarded.
+
+### Changed Files
+- `src/lib/adminAudit.ts`
+- `src/pages/admin/AdminAuditPage.tsx`
+- `src/pages/admin/AdminLeadsPage.tsx`
+- `src/pages/admin/AdminMediaPage.tsx`
+- `src/pages/admin/AdminSettingsPage.tsx`
+- `src/pages/admin/adminContent.ts`
+- `scripts/check-admin-crud-coverage.mjs`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/ADMIN_EDITOR_GUIDE.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npx tsc -b`: pass.
+- `npm run lint`: pass.
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass. Coverage now reports Activity log and guards the readable Activity log source contract.
+- `npm run agent:check`: pass.
+- `npm run agent:public-supabase-readiness`: pass.
+- `git diff --check`: pass.
+- `npm run agent:smoke`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions.
+- `npm run agent:admin-config-gate`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions; 11 admin routes passed the no-config gate.
+
+### Risks and Gaps
+- The underlying route remains `/admin/audit` for compatibility; the visible CMS language now says Activity log.
+
+### Next Handoff
+- Continue the CMS goal with final production editor walkthrough proof and any remaining page-level language gaps.
+
 ## Entry - 2026-06-04 (Admin Settings Access Grant UX)
 
 ### Scope

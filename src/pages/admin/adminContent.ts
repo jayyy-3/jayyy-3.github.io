@@ -107,9 +107,9 @@ export const adminModules: AdminModuleDefinition[] = [
     },
     {
         key: 'audit',
-        label: 'Audit',
+        label: 'Activity log',
         path: '/admin/audit',
-        summary: 'Mutation history, publish events, and sensitive operation review.',
+        summary: 'Saved changes, publish events, exports, and sensitive operation review.',
         dependency: 'Admin mutation helpers',
         group: 'operations',
         Icon: ShieldCheck,

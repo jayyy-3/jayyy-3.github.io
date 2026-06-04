@@ -415,14 +415,14 @@ function AdminMediaContent() {
 
         if (auditError) {
             setIsExporting(false);
-            setError(`Media export was blocked because the audit event could not be recorded: ${auditError}`);
+            setError(`Media export was blocked because the activity log could not be recorded: ${auditError}`);
             return;
         }
 
         const csv = buildMediaExportCsv(assets);
         downloadTextFile(csv, `urblo-media-manifest-${new Date().toISOString().slice(0, 10)}.csv`);
         setIsExporting(false);
-        setNotice(`Exported ${assets.length} visible media records. Audit event recorded.`);
+        setNotice(`Exported ${assets.length} visible media records. Activity log recorded.`);
     }
 
     const previewUrl = getMediaUrl(selectedAsset);
@@ -825,7 +825,7 @@ function AdminMediaContent() {
                             <li>Published uploaded files must live in the Public website library.</li>
                             <li>Published media needs usage notes so editors know where it is safe to reuse.</li>
                             <li>Published images need alt text before they can support public pages.</li>
-                            <li>CSV manifest exports are audit-gated and limited to visible records.</li>
+                            <li>CSV manifest exports are activity-logged and limited to visible records.</li>
                             <li>Viewer roles can inspect but not mutate media records.</li>
                         </ul>
                     </section>

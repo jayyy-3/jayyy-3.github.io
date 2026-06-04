@@ -176,10 +176,10 @@ function AdminSettingsContent() {
 
     const statusNote = useMemo(() => {
         if (!row) {
-            return 'No default settings row was returned. Owner/admin can create it from this screen.';
+            return 'Site settings have not been created yet. Owner/admin can save this screen to create the first settings profile.';
         }
 
-        return `Default settings row ${row.id}; last updated ${new Date(row.updated_at).toLocaleString()}.`;
+        return `Site settings loaded. Last saved ${new Date(row.updated_at).toLocaleString()}.`;
     }, [row]);
 
     function updateField<Key extends keyof SettingsFormState>(key: Key, value: SettingsFormState[Key]) {

@@ -413,7 +413,7 @@ function AdminLeadsContent() {
 
         if (auditError) {
             setIsExporting(false);
-            setError(`Lead export was blocked because the audit event could not be recorded: ${auditError}`);
+            setError(`Lead export was blocked because the activity log could not be recorded: ${auditError}`);
             return;
         }
 
@@ -427,7 +427,7 @@ function AdminLeadsContent() {
         );
         downloadTextFile(csv, `urblo-leads-${new Date().toISOString().slice(0, 10)}.csv`);
         setIsExporting(false);
-        setNotice(`Exported ${filteredLeads.length} visible lead records. Audit event recorded.`);
+        setNotice(`Exported ${filteredLeads.length} visible lead records. Activity log recorded.`);
     }
 
     const statusOptions = selectedKind === 'sample' ? sampleStatusOptions : enquiryStatusOptions;
@@ -733,7 +733,7 @@ function AdminLeadsContent() {
                         <ul className="mt-4 space-y-3 text-sm leading-6 text-black/62">
                             <li>New leads enter this inbox from the public Contact and Sample Request forms.</li>
                             <li>Owner/admin roles can update workflow status, assignment, and internal notes.</li>
-                            <li>Owner/admin CSV exports are audit-gated and limited to the currently visible filtered queue.</li>
+                            <li>Owner/admin CSV exports are activity-logged and limited to the currently visible filtered queue.</li>
                             <li>Physical deletes stay hidden until privacy policy and retention rules are confirmed.</li>
                             <li>Use Spam only for junk submissions; use Closed when the conversation is intentionally finished.</li>
                         </ul>

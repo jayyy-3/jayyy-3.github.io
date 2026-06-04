@@ -113,7 +113,7 @@ const pageChecks = [
       'Public website library',
       'Complete the media publish checklist before publishing this asset.',
       'Search description, source, location, type',
-      'Media export was blocked because the audit event could not be recorded',
+      'Media export was blocked because the activity log could not be recorded',
       'Current role is read-only for Media',
     ],
     exportGate: 'media_assets.export_manifest',
@@ -279,9 +279,9 @@ const pageChecks = [
     ],
     actions: ['enquiry.workflow_update', 'sample_request.workflow_update', 'leads.export_csv'],
     requiredText: [
-      'Lead export was blocked because the audit event could not be recorded',
+      'Lead export was blocked because the activity log could not be recorded',
       'Current role is read-only for Leads',
-      'Owner/admin CSV exports are audit-gated',
+      'Owner/admin CSV exports are activity-logged',
       'currently visible filtered queue',
       'Export uses the current search and filters',
       'totalLoadedRows',
@@ -293,13 +293,15 @@ const pageChecks = [
     exportGate: 'leads.export_csv',
   },
   {
-    label: 'Audit',
+    label: 'Activity log',
     file: 'src/pages/admin/AdminAuditPage.tsx',
     tables: ['admin_audit_events', 'admin_profiles'],
     requiredText: [
       'canViewAudit',
-      'Mutation history can expose private operational details',
-      'Audit events are visible only to owner/admin roles',
+      'Activity log visibility is restricted',
+      'Activity log entries are visible only to owner/admin roles',
+      'formatActionLabel',
+      'formatEntityType',
       'readOnly',
     ],
     mutates: false,
@@ -519,6 +521,7 @@ function checkRoutes() {
   requireIncludes(unauthorized, "auth.status === 'config-missing'", 'src/pages/admin/AdminUnauthorizedPage.tsx');
 
   requireIncludes(audit, ".from('admin_audit_events')", 'src/lib/adminAudit.ts');
+  requireIncludes(audit, 'Activity log was not recorded', 'src/lib/adminAudit.ts');
   requireIncludes(adminAuthBrowser, '--expect-unauthorized', 'scripts/check-admin-auth-browser.mjs');
   requireIncludes(adminAuthBrowser, 'URBLO_UNPROFILED_EMAIL', 'scripts/check-admin-auth-browser.mjs');
   requireIncludes(adminAuthBrowser, 'URBLO_UNPROFILED_PASSWORD', 'scripts/check-admin-auth-browser.mjs');
@@ -700,7 +703,7 @@ function checkPage(page) {
 
   if (page.exportGate) {
     const actionIndex = text.indexOf(page.exportGate);
-    const blockedIndex = text.indexOf('blocked because the audit event could not be recorded');
+    const blockedIndex = text.indexOf('blocked because the activity log could not be recorded');
     const downloadIndex = text.indexOf('downloadTextFile');
 
     if (actionIndex === -1 || blockedIndex === -1 || downloadIndex === -1) {
