@@ -320,10 +320,17 @@ function AdminSettingsContent() {
                         </div>
 
                         <div className="mt-5">
+                            <WebsiteSettingsStatusCard status={form.status} />
                             <CmsLiveRuleCard>
                                 <CmsStatusMeaning compact />
                             </CmsLiveRuleCard>
                         </div>
+                        <SiteSettingsActionBar
+                            status={form.status}
+                            canEdit={canEdit}
+                            isSaving={isSaving}
+                            isLoading={isLoading}
+                        />
 
                         {isLoading ? (
                             <div className="mt-7 grid gap-4 md:grid-cols-2">
@@ -807,6 +814,7 @@ function AdminProfilesManager({
                         CMS team access is restricted to CMS managers and website owners.
                     </div>
                 ) : null}
+                <CmsAccessHandoffActions canManage={canManage} />
 
                 {isLoading ? (
                     <div className="mt-6 grid gap-3">
@@ -818,7 +826,8 @@ function AdminProfilesManager({
 
                 {canManage && !isLoading && profiles.length === 0 ? (
                     <div className="mt-6 border border-black/10 bg-black/[0.03] p-4 text-sm leading-6 text-black/62">
-                        No CMS access records were returned for this account.
+                        No CMS team access is ready for this account yet. Use Invite and grant access to add the first
+                        editor.
                     </div>
                 ) : null}
 
@@ -895,8 +904,8 @@ function AdminProfilesManager({
                         <li>4. Use Grant existing login only when the person already has a login account.</li>
                     </ol>
                     <p className="mt-4 text-xs leading-5 text-black/45">
-                        Invite and grant access sends the login email from the secure server endpoint; the browser never
-                        sees the private Supabase service key.
+                        Invite and grant access sends the login email from the secure server endpoint; private login
+                        setup stays out of the browser.
                     </p>
                 </section>
 
@@ -1115,6 +1124,139 @@ function rowToForm(row: SiteSettingsRow | null): SettingsFormState {
 function stringFromRecord(record: Record<string, unknown> | null | undefined, key: string) {
     const value = record?.[key];
     return typeof value === 'string' ? value : '';
+}
+
+function WebsiteSettingsStatusCard({ status }: { status: SiteSettingsStatus }) {
+    const summary =
+        status === 'published'
+            ? {
+                  title: 'Public website can use these settings',
+                  detail: 'Published contact details, footer links, and search defaults are the public-ready version.',
+                  badge: 'Live settings',
+                  tone: 'ready' as const,
+              }
+            : status === 'archived'
+              ? {
+                    title: 'Hidden from public settings',
+                    detail: 'Archived settings stay saved in the CMS but should not be used as the current website defaults.',
+                    badge: 'Hidden',
+                    tone: 'hidden' as const,
+                }
+              : {
+                    title: 'Safe to edit before public use',
+                    detail: 'Draft settings can be prepared without making them the public-ready website defaults.',
+                    badge: 'Draft settings',
+                    tone: 'draft' as const,
+                };
+
+    return (
+        <section className="mb-4 border border-black/10 bg-[#f8f9f5] p-4">
+            <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                <div>
+                    <p className="text-xs font-bold uppercase tracking-[0.14em] text-black/45">
+                        Website settings status
+                    </p>
+                    <h3 className="mt-2 text-lg font-semibold text-black">{summary.title}</h3>
+                    <p className="mt-2 text-sm leading-6 text-black/62">{summary.detail}</p>
+                </div>
+                <span
+                    className={[
+                        'inline-flex h-8 shrink-0 items-center rounded border px-3 text-[11px] font-bold uppercase tracking-[0.14em]',
+                        summary.tone === 'ready'
+                            ? 'border-[var(--urblo-lime)] bg-[rgba(0,255,25,0.12)] text-black'
+                            : summary.tone === 'hidden'
+                              ? 'border-black/15 bg-black text-white'
+                              : 'border-black/15 bg-white text-black/50',
+                    ].join(' ')}
+                >
+                    {summary.badge}
+                </span>
+            </div>
+        </section>
+    );
+}
+
+function SiteSettingsActionBar({
+    status,
+    canEdit,
+    isSaving,
+    isLoading,
+}: {
+    status: SiteSettingsStatus;
+    canEdit: boolean;
+    isSaving: boolean;
+    isLoading: boolean;
+}) {
+    const statusNote =
+        status === 'published'
+            ? 'Published settings can appear across the public website after you save.'
+            : status === 'archived'
+              ? 'Archived settings stay hidden. Save only if you are retiring this settings draft.'
+              : 'Draft settings are safe to prepare before they become public.';
+    const actionNote = canEdit
+        ? `${statusNote} Save settings when contact, footer, and search defaults are ready.`
+        : 'This role can review site settings, but only CMS managers can save global website settings.';
+
+    return (
+        <section className="mt-5 border border-black/10 bg-white p-4">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div>
+                    <p className="text-xs font-bold uppercase tracking-[0.14em] text-black/45">
+                        Site settings actions
+                    </p>
+                    <p className="mt-2 text-sm leading-6 text-black/62">{actionNote}</p>
+                </div>
+                <button
+                    type="submit"
+                    disabled={!canEdit || isLoading || isSaving}
+                    className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded bg-black px-4 text-xs font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#33363f] disabled:cursor-not-allowed disabled:bg-black/30"
+                >
+                    <Save className="h-4 w-4" />
+                    {isSaving ? 'Saving' : 'Save settings'}
+                </button>
+            </div>
+            <div className="mt-4 grid gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-black/42 md:grid-cols-3">
+                <p>1. Confirm contact details</p>
+                <p>2. Review footer links</p>
+                <p>3. Save website settings</p>
+            </div>
+        </section>
+    );
+}
+
+function CmsAccessHandoffActions({ canManage }: { canManage: boolean }) {
+    const actionNote = canManage
+        ? 'Use Invite and grant access for a new editor. Use Grant existing login only when the person already has a login setup code.'
+        : 'This role can review the CMS team list, but only CMS managers can invite people or change access.';
+
+    return (
+        <section className="mt-6 border border-black/10 bg-[#f8f9f5] p-4">
+            <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                <div>
+                    <p className="text-xs font-bold uppercase tracking-[0.14em] text-black/45">
+                        CMS access handoff actions
+                    </p>
+                    <h3 className="mt-2 text-lg font-semibold text-black">Give someone the right CMS access</h3>
+                    <p className="mt-2 text-sm leading-6 text-black/62">{actionNote}</p>
+                </div>
+                <span
+                    className={[
+                        'inline-flex h-8 shrink-0 items-center rounded border px-3 text-[11px] font-bold uppercase tracking-[0.14em]',
+                        canManage
+                            ? 'border-[var(--urblo-lime)] bg-[rgba(0,255,25,0.12)] text-black'
+                            : 'border-black/15 bg-white text-black/45',
+                    ].join(' ')}
+                >
+                    {canManage ? 'Ready to invite' : 'Read only'}
+                </span>
+            </div>
+            <div className="mt-4 grid gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-black/42 md:grid-cols-3">
+                <p>1. Choose the person</p>
+                <p>2. Choose the lowest role</p>
+                <p>3. Send invite or grant access</p>
+            </div>
+        </section>
+    );
 }
 
 function profileRowToForm(row: AdminProfileRow): AdminProfileFormState {

@@ -25,7 +25,7 @@ const routeChecks = [
 
 const forbiddenAuthenticatedText = [
   'Configuration required',
-  'Admin auth is not connected yet',
+  'CMS access is not connected yet',
   'This account is not an active Urblo admin',
   'Admin login',
 ];
@@ -396,7 +396,7 @@ async function waitForUnauthorizedRoute(page) {
     const visibleFailure = await firstVisibleText(page, [
       'Invalid login credentials',
       'Configuration required',
-      'Admin auth is not connected yet',
+      'CMS access is not connected yet',
       'Admin access could not be verified',
       'Media Library',
       'Dashboard',
@@ -434,7 +434,7 @@ async function waitForAuthenticatedRoute(page, expectedText) {
       'This account is not an active Urblo admin',
       'Invalid login credentials',
       'Configuration required',
-      'Admin auth is not connected yet',
+      'CMS access is not connected yet',
       'Admin access could not be verified',
     ]);
     throw new Error(

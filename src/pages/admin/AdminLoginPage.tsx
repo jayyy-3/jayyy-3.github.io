@@ -63,8 +63,8 @@ export default function AdminLoginPage() {
                             Protected operating console
                         </h1>
                         <p className="mt-6 max-w-[520px] text-lg font-medium leading-8 text-white/68">
-                            Sign in with a Supabase Auth account that has an active row in
-                            `admin_profiles`. Private content is not loaded until that profile gate passes.
+                            Sign in with an approved Urblo CMS login. Private content is not loaded until this
+                            account has active CMS access.
                         </p>
                     </div>
 
@@ -77,8 +77,8 @@ export default function AdminLoginPage() {
                         </div>
                         <h2 className="mt-7 text-2xl font-semibold">Admin login</h2>
                         <p className="mt-2 text-sm leading-6 text-black/58">
-                            Email/password authentication is handled by Supabase Auth. Access still requires
-                            an active admin profile.
+                            Email/password sign-in is required. Access also depends on the CMS role assigned in
+                            Settings.
                         </p>
 
                         <label className="mt-7 block text-xs font-bold uppercase tracking-[0.14em] text-black/55">

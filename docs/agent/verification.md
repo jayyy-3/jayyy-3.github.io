@@ -169,6 +169,7 @@ Run:
 - `npm run lint`
 - `npx tsc -b`
 - `npm run agent:smoke`
+- `npm run agent:admin-cms-predeploy` when preparing the current CMS UX stack for deployment; it runs the non-preview local admin/content/deployment gates and finishes with report-only handoff readiness. Run `npm run agent:smoke` and `npm run agent:admin-config-gate` separately for preview/browser gates.
 - `npm run agent:admin-crud-coverage` when changing admin routes, module screens, table coverage, audit writers, export controls, role gates, or launch-critical removal/archive behavior.
 - `npm run agent:admin-config-gate` when changing admin route protection, config-missing behavior, or no-config browser QA coverage.
 - `npm run agent:admin-auth-browser` in plan-only mode when changing admin browser auth QA tooling; run `npm run agent:admin-auth-browser -- --allow-login --strict` only after browser-safe Supabase config and a real active admin email/password are available.
@@ -177,6 +178,8 @@ Run:
 - `npm run agent:admin-crud-live` in plan-only mode when changing live admin verification contracts; run `npm run agent:admin-crud-live -- --allow-writes` only after browser-safe Supabase config and a real owner/admin session are available and Jay has approved tagged QA writes.
 - `npm run agent:admin-crud-live -- --allow-writes --include-storage` for final media upload policy proof after the same credentials/session/approval gate is satisfied.
 - Browser or Playwright checks for authenticated and unauthenticated admin routes when possible.
+- `docs/ADMIN_PRODUCTION_WALKTHROUGH.md` after the current CMS UX stack is deployed and before final non-technical editor handoff.
+- `npm run agent:admin-handoff-readiness -- --base-url https://urblo.com.au --admin-email info@urblo.com.au --strict` after the production walkthrough Results Template has been copied into `docs/WORKLOG.md` and filled with evidence.
 
 Evidence to record:
 - Admin routes touched.
@@ -185,6 +188,8 @@ Evidence to record:
 - Draft/published visibility behavior.
 - Auth/RLS assumptions.
 - Any content type still requiring code edits.
+- Production walkthrough results for the Handoff Evidence Matrix, Dashboard orientation, Settings invite/access, Stone Library publish path, Article publish path, and Open public page confirmation when claiming editor-handoff readiness.
+- Final handoff readiness audit result, including whether the strict command passed or which production evidence is still missing.
 
 ## Output Rule
 Every completed task should leave a short verification note in `docs/WORKLOG.md` and should keep `docs/HANDOFF.md` current if it changes the next recommended action.

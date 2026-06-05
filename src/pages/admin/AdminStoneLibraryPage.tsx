@@ -855,7 +855,7 @@ function AdminStoneLibraryContent() {
         const linkedMedia = mediaById.get(validation.mediaAssetId);
         if (nextStatus === 'published' && linkedMedia?.status !== 'published') {
             setError(
-                'Publish is locked. Open Media and publish the selected Media library item before publishing this finish image.',
+                formatFinishImagePublishError(linkedMedia),
             );
             return;
         }
@@ -1065,7 +1065,7 @@ function AdminStoneLibraryContent() {
                                     {selectedGroup ? selectedGroup.display_name : 'New stone group'}
                                 </h2>
                                 <p className="mt-2 text-sm leading-6 text-black/58">
-                                    Maintain the public stone family record and keep confirmation gaps visible before
+                                    Maintain the public stone family detail and keep confirmation gaps visible before
                                     publishing.
                                 </p>
                             </div>
@@ -1253,39 +1253,19 @@ function AdminStoneLibraryContent() {
 
                         <StonePublishChecklist items={groupPublishChecklist} />
 
-                        <div className="mt-6 flex flex-wrap gap-2">
-                            <button
-                                type="submit"
-                                disabled={!canEdit || isSavingGroup || isLoading}
-                                className="inline-flex min-h-11 items-center justify-center gap-2 rounded border border-black/15 bg-white px-4 text-xs font-bold uppercase tracking-[0.14em] text-black transition hover:border-black disabled:cursor-not-allowed disabled:text-black/35"
-                            >
-                                <Save className="h-4 w-4" />
-                                {isSavingGroup ? 'Saving' : 'Save group'}
-                            </button>
-                            <button
-                                type="button"
-                                disabled={!canEdit || isSavingGroup || isLoading || !canPublishGroup}
-                                onClick={() => void saveGroup('published')}
-                                title={
-                                    canPublishGroup
-                                        ? 'Publish stone family'
-                                        : 'Complete the Stone Library publish checklist first.'
-                                }
-                                className="inline-flex min-h-11 items-center justify-center gap-2 rounded bg-[var(--urblo-lime)] px-4 text-xs font-bold uppercase tracking-[0.14em] text-black transition hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:bg-black/20 disabled:text-black/35"
-                            >
-                                <CheckCircle2 className="h-4 w-4" />
-                                Publish family
-                            </button>
-                            <button
-                                type="button"
-                                disabled={!canEdit || isSavingGroup || isLoading}
-                                onClick={() => void saveGroup('archived')}
-                                className="inline-flex min-h-11 items-center justify-center gap-2 rounded bg-black px-4 text-xs font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#33363f] disabled:cursor-not-allowed disabled:bg-black/25"
-                            >
-                                <Archive className="h-4 w-4" />
-                                Archive group
-                            </button>
-                        </div>
+                        <StoneActionBar
+                            label="Stone family actions"
+                            status={groupForm.status}
+                            isSaving={isSavingGroup}
+                            disabled={!canEdit || isLoading}
+                            canPublish={canPublishGroup}
+                            publishLockedLabel="Complete the Stone Library publish checklist first."
+                            saveLabel={isSavingGroup ? 'Saving' : 'Save family'}
+                            publishLabel="Publish family"
+                            archiveLabel="Archive family"
+                            onPublish={() => void saveGroup('published')}
+                            onArchive={() => void saveGroup('archived')}
+                        />
                     </form>
 
                     <form onSubmit={(event) => void handleVariantSubmit(event)} className="border border-black/10 bg-white p-5 md:p-6">
@@ -1400,39 +1380,19 @@ function AdminStoneLibraryContent() {
 
                         <StonePublishChecklist items={variantPublishChecklist} title="Variant publish checklist" />
 
-                        <div className="mt-6 flex flex-wrap gap-2">
-                            <button
-                                type="submit"
-                                disabled={!canEdit || isSavingVariant || isLoading || !selectedGroup}
-                                className="inline-flex min-h-11 items-center justify-center gap-2 rounded border border-black/15 bg-white px-4 text-xs font-bold uppercase tracking-[0.14em] text-black transition hover:border-black disabled:cursor-not-allowed disabled:text-black/35"
-                            >
-                                <Save className="h-4 w-4" />
-                                {isSavingVariant ? 'Saving' : 'Save variant'}
-                            </button>
-                            <button
-                                type="button"
-                                disabled={!canEdit || isSavingVariant || isLoading || !selectedGroup || !canPublishVariant}
-                                onClick={() => void saveVariant('published')}
-                                title={
-                                    canPublishVariant
-                                        ? 'Publish variant'
-                                        : 'Complete the variant publish checklist first.'
-                                }
-                                className="inline-flex min-h-11 items-center justify-center gap-2 rounded bg-[var(--urblo-lime)] px-4 text-xs font-bold uppercase tracking-[0.14em] text-black transition hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:bg-black/20 disabled:text-black/35"
-                            >
-                                <CheckCircle2 className="h-4 w-4" />
-                                Publish variant
-                            </button>
-                            <button
-                                type="button"
-                                disabled={!canEdit || isSavingVariant || isLoading || !selectedGroup}
-                                onClick={() => void saveVariant('archived')}
-                                className="inline-flex min-h-11 items-center justify-center gap-2 rounded bg-black px-4 text-xs font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#33363f] disabled:cursor-not-allowed disabled:bg-black/25"
-                            >
-                                <Archive className="h-4 w-4" />
-                                Archive variant
-                            </button>
-                        </div>
+                        <StoneActionBar
+                            label="Variant actions"
+                            status={variantForm.status}
+                            isSaving={isSavingVariant}
+                            disabled={!canEdit || isLoading || !selectedGroup}
+                            canPublish={canPublishVariant}
+                            publishLockedLabel="Complete the variant publish checklist first."
+                            saveLabel={isSavingVariant ? 'Saving' : 'Save variant'}
+                            publishLabel="Publish variant"
+                            archiveLabel="Archive variant"
+                            onPublish={() => void saveVariant('published')}
+                            onArchive={() => void saveVariant('archived')}
+                        />
                     </form>
 
                     <section className="border border-black/10 bg-white p-5 md:p-6">
@@ -1534,6 +1494,12 @@ function AdminStoneLibraryContent() {
                                     selectedMedia={selectedFinishImageMedia}
                                     onChange={(value) => updateFinishImageField('mediaAssetId', value)}
                                 />
+                                <FinishImagePublicStatus
+                                    status={finishImageForm.status}
+                                    hasFinish={Boolean(finishImageForm.finishDefinitionId)}
+                                    hasMedia={Boolean(finishImageForm.mediaAssetId)}
+                                    selectedMedia={selectedFinishImageMedia}
+                                />
                                 <label className="text-xs font-bold uppercase tracking-[0.14em] text-black/55">
                                     Role
                                     <select
@@ -1618,7 +1584,7 @@ function AdminStoneLibraryContent() {
                             </div>
                             {finishImagePublishBlocked ? (
                                 <p className="mt-3 border border-amber-200 bg-amber-50 p-3 text-sm font-semibold leading-6 text-amber-800">
-                                    Publish is locked because the selected Media library item is not Published in Media.
+                                    Publish is locked because the selected Media library item is not Published in Media. Open Media first, publish the media item, then return here to publish this finish image.
                                 </p>
                             ) : null}
                         </form>
@@ -1769,7 +1735,7 @@ function AdminStoneLibraryContent() {
 
                     {!canEdit ? (
                         <section className="border border-black/10 bg-white p-5 text-sm leading-6 text-black/62">
-                            Current role is read-only for Stone Library. Ask an editor/admin to update material records.
+                            Current role is read-only for Stone Library. Ask a CMS editor to update stone content.
                         </section>
                     ) : null}
                 </aside>
@@ -1822,6 +1788,87 @@ function StoneStatusHelp({ status }: { status: StoneStatus }) {
         <p className="rounded border border-black/10 bg-[#f8f9f5] px-3 py-2 text-xs font-semibold leading-5 text-black/58">
             {messages[status]}
         </p>
+    );
+}
+
+function StoneActionBar({
+    label,
+    status,
+    isSaving,
+    disabled,
+    canPublish,
+    publishLockedLabel,
+    saveLabel,
+    publishLabel,
+    archiveLabel,
+    onPublish,
+    onArchive,
+}: {
+    label: string;
+    status: StoneStatus;
+    isSaving: boolean;
+    disabled?: boolean;
+    canPublish: boolean;
+    publishLockedLabel: string;
+    saveLabel: string;
+    publishLabel: string;
+    archiveLabel: string;
+    onPublish: () => void;
+    onArchive: () => void;
+}) {
+    const isDisabled = disabled || isSaving;
+    const actionNote =
+        status === 'published'
+            ? 'Published changes can appear in the public Stone Library after you save.'
+            : status === 'tbc'
+              ? 'Needs confirmation stays private. Save the review notes, then publish only when the checklist is clear.'
+              : status === 'archived'
+                ? 'Archived content stays hidden. Save changes if you are keeping notes for future reuse.'
+                : 'Save keeps changes in the CMS. Publish only when the checklist is clear.';
+
+    return (
+        <section className="mt-5 border border-black/10 bg-[#f8f9f5] p-4">
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <div className="min-w-0">
+                    <p className="text-xs font-bold uppercase tracking-[0.14em] text-black/45">{label}</p>
+                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                        <StatusPill status={status} />
+                        <p className="text-sm font-semibold leading-6 text-black/62">
+                            {canPublish ? actionNote : `Publish locked: ${publishLockedLabel}`}
+                        </p>
+                    </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                    <button
+                        type="submit"
+                        disabled={isDisabled}
+                        className="inline-flex min-h-11 items-center justify-center gap-2 rounded border border-black/15 bg-white px-4 text-xs font-bold uppercase tracking-[0.14em] text-black transition hover:border-black disabled:cursor-not-allowed disabled:text-black/35"
+                    >
+                        <Save className="h-4 w-4" />
+                        {saveLabel}
+                    </button>
+                    <button
+                        type="button"
+                        disabled={isDisabled || !canPublish}
+                        onClick={onPublish}
+                        title={canPublish ? publishLabel : publishLockedLabel}
+                        className="inline-flex min-h-11 items-center justify-center gap-2 rounded bg-[var(--urblo-lime)] px-4 text-xs font-bold uppercase tracking-[0.14em] text-black transition hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:bg-black/20 disabled:text-black/35"
+                    >
+                        <CheckCircle2 className="h-4 w-4" />
+                        {publishLabel}
+                    </button>
+                    <button
+                        type="button"
+                        disabled={isDisabled}
+                        onClick={onArchive}
+                        className="inline-flex min-h-11 items-center justify-center gap-2 rounded bg-black px-4 text-xs font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#33363f] disabled:cursor-not-allowed disabled:bg-black/25"
+                    >
+                        <Archive className="h-4 w-4" />
+                        {archiveLabel}
+                    </button>
+                </div>
+            </div>
+        </section>
     );
 }
 
@@ -2274,6 +2321,86 @@ function mediaLabel(asset: MediaAssetOption | undefined) {
 
     const label = asset.alt || asset.usage_notes || 'Untitled media';
     return `${label} - ${asset.status === 'published' ? 'Published' : 'Not published yet'}`;
+}
+
+function FinishImagePublicStatus({
+    status,
+    hasFinish,
+    hasMedia,
+    selectedMedia,
+}: {
+    status: FinishImageStatus;
+    hasFinish: boolean;
+    hasMedia: boolean;
+    selectedMedia: MediaAssetOption | null;
+}) {
+    const mediaReady = Boolean(selectedMedia && selectedMedia.status === 'published');
+    const readyToPublish = hasFinish && hasMedia && mediaReady;
+    const isPublished = status === 'published';
+    const missingReason = !hasFinish
+        ? 'Choose a finish first.'
+        : !hasMedia
+          ? 'Choose a Media library item first.'
+          : !selectedMedia
+            ? 'The selected Media library item is not available in this picker.'
+            : selectedMedia.status !== 'published'
+              ? 'Open Media first and publish the selected Media library item.'
+              : '';
+    const stateLabel = isPublished
+        ? 'Finish image can appear on website'
+        : readyToPublish
+          ? 'Ready, not published yet'
+          : 'Not ready for website';
+    const detail = isPublished
+        ? 'This finish image link is Published and its Media library item is Published in Media.'
+        : readyToPublish
+          ? 'The finish and Media dependency are ready. Publish this image link when the stone variant is ready.'
+          : `${missingReason} Finish images need a selected finish and Media library item that is Published in Media.`;
+
+    return (
+        <section
+            className={[
+                'border p-4 md:col-span-2',
+                isPublished || readyToPublish
+                    ? 'border-[var(--urblo-lime)] bg-[rgba(0,255,25,0.08)]'
+                    : 'border-amber-200 bg-amber-50',
+            ].join(' ')}
+        >
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div className="flex items-start gap-3">
+                    {isPublished || readyToPublish ? (
+                        <CheckCircle2 className="mt-1 h-5 w-5 shrink-0 text-black" />
+                    ) : (
+                        <ShieldAlert className="mt-1 h-5 w-5 shrink-0 text-amber-800" />
+                    )}
+                    <div>
+                        <p className="text-xs font-bold uppercase tracking-[0.14em] text-black/45">
+                            Finish image public status
+                        </p>
+                        <h3 className="mt-2 text-lg font-semibold text-black">{stateLabel}</h3>
+                        <p className="mt-2 text-sm leading-6 text-black/62">{detail}</p>
+                    </div>
+                </div>
+                <StatusPill status={status} />
+            </div>
+            {selectedMedia && selectedMedia.status !== 'published' ? (
+                <a
+                    href="/admin/media"
+                    className="mt-4 inline-flex min-h-10 items-center justify-center rounded border border-amber-300 bg-white px-3 text-xs font-bold uppercase tracking-[0.12em] text-amber-900 transition hover:border-black hover:text-black"
+                >
+                    Open Media first
+                </a>
+            ) : null}
+        </section>
+    );
+}
+
+function formatFinishImagePublishError(linkedMedia: MediaAssetOption | undefined) {
+    if (!linkedMedia) {
+        return 'Publish is locked. Choose an available Media library item before publishing this finish image.';
+    }
+
+    return 'Publish is locked. Open Media and publish the selected Media library item before publishing this finish image. Open Media first, publish the media item, then return here.';
 }
 
 function FinishImageMediaSelect({

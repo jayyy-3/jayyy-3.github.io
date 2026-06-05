@@ -427,7 +427,7 @@ function AdminLeadsContent() {
         );
         downloadTextFile(csv, `urblo-leads-${new Date().toISOString().slice(0, 10)}.csv`);
         setIsExporting(false);
-        setNotice(`Exported ${filteredLeads.length} visible lead records. Change history recorded.`);
+        setNotice(`Exported ${filteredLeads.length} visible lead entries. Change history recorded.`);
     }
 
     const statusOptions = selectedKind === 'sample' ? sampleStatusOptions : enquiryStatusOptions;
@@ -570,7 +570,7 @@ function AdminLeadsContent() {
                                 <p className="mt-3 text-sm leading-6 text-black/58">
                                     {combinedLeads.length
                                         ? 'Clear the search or choose another filter.'
-                                        : 'This inbox will populate after live form persistence creates contact and sample request rows.'}
+                                        : 'This inbox will populate after production forms create contact and sample request entries.'}
                                 </p>
                             </div>
                         )}
@@ -664,7 +664,25 @@ function AdminLeadsContent() {
                             <PackageCheck className="h-5 w-5 text-black" />
                         </div>
 
-                        {selectedLead ? <WorkflowGuidance kind={selectedKind} status={form.status} /> : null}
+                        {selectedLead ? (
+                            <>
+                                <LeadWorkflowStatusCard
+                                    kind={selectedKind}
+                                    status={form.status}
+                                    assignedTo={form.assignedTo}
+                                    internalNotes={form.internalNotes}
+                                    admins={adminProfiles}
+                                />
+                                <WorkflowGuidance kind={selectedKind} status={form.status} />
+                            </>
+                        ) : null}
+                        <LeadWorkflowActionBar
+                            kind={selectedKind}
+                            status={form.status}
+                            canManageLeads={canManageLeads}
+                            isSaving={isSaving}
+                            hasSelectedLead={Boolean(selectedLead)}
+                        />
 
                         <div className="mt-5 grid gap-4 md:grid-cols-2">
                             <SelectField
@@ -703,16 +721,9 @@ function AdminLeadsContent() {
                             />
                         </label>
 
-                        <div className="mt-6 flex flex-wrap gap-2">
-                            <button
-                                type="submit"
-                                disabled={!canManageLeads || isSaving || !selectedLead}
-                                className="inline-flex min-h-11 items-center justify-center gap-2 rounded bg-[var(--urblo-lime)] px-4 text-xs font-bold uppercase tracking-[0.14em] text-black transition hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:bg-black/20 disabled:text-black/35"
-                            >
-                                <Save className="h-4 w-4" />
-                                {isSaving ? 'Saving' : 'Save workflow'}
-                            </button>
-                        </div>
+                        <p className="mt-4 text-xs font-semibold uppercase tracking-[0.12em] text-black/42">
+                            Saving writes this status, assigned owner, and internal note to the Leads workflow history.
+                        </p>
                     </form>
                 </section>
 
@@ -723,7 +734,7 @@ function AdminLeadsContent() {
                         <div className="mt-5 grid gap-3 text-sm leading-6 text-white/72">
                             <p>{inboxSummary.newCount} new leads need first response.</p>
                             <p>{inboxSummary.failedNotifications} leads need email-delivery review.</p>
-                            <p>{inboxSummary.spamCount} records are marked spam.</p>
+                            <p>{inboxSummary.spamCount} leads are marked spam.</p>
                         </div>
                     </section>
 
@@ -856,7 +867,7 @@ function SampleItems({
                     ))}
                 </div>
             ) : (
-                <p className="p-4 text-sm leading-6 text-black/58">No item rows recorded for this request.</p>
+                <p className="p-4 text-sm leading-6 text-black/58">No sample items recorded for this request.</p>
             )}
         </section>
     );
@@ -870,6 +881,101 @@ function WorkflowGuidance({ kind, status }: { kind: LeadKind | null; status: str
             <p className="text-xs font-bold uppercase tracking-[0.14em] text-black/45">Recommended next step</p>
             <h3 className="mt-2 text-lg font-semibold text-black">{guidance.title}</h3>
             <p className="mt-2 text-sm leading-6 text-black/62">{guidance.detail}</p>
+        </section>
+    );
+}
+
+function LeadWorkflowStatusCard({
+    kind,
+    status,
+    assignedTo,
+    internalNotes,
+    admins,
+}: {
+    kind: LeadKind | null;
+    status: string;
+    assignedTo: string;
+    internalNotes: string;
+    admins: AdminProfileRow[];
+}) {
+    const summary = getLeadWorkflowStatusSummary(kind, status, Boolean(assignedTo), Boolean(internalNotes.trim()));
+
+    return (
+        <section className="mt-5 border border-black/10 bg-[#f8f9f5] p-4">
+            <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                <div>
+                    <p className="text-xs font-bold uppercase tracking-[0.14em] text-black/45">
+                        Lead workflow status
+                    </p>
+                    <h3 className="mt-2 text-lg font-semibold text-black">{summary.title}</h3>
+                    <p className="mt-2 text-sm leading-6 text-black/62">{summary.detail}</p>
+                </div>
+                <span
+                    className={[
+                        'inline-flex h-8 shrink-0 items-center rounded border px-3 text-[11px] font-bold uppercase tracking-[0.14em]',
+                        summary.tone === 'ready'
+                            ? 'border-[var(--urblo-lime)] bg-[rgba(0,255,25,0.12)] text-black'
+                            : summary.tone === 'done'
+                              ? 'border-black/15 bg-white text-black/50'
+                              : 'border-amber-300 bg-amber-50 text-amber-800',
+                    ].join(' ')}
+                >
+                    {summary.badge}
+                </span>
+            </div>
+            <div className="mt-4 grid gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-black/42 md:grid-cols-3">
+                <p>Lead type: {kind === 'sample' ? 'Sample request' : 'Enquiry'}</p>
+                <p>Owner: {assigneeName(assignedTo || null, admins)}</p>
+                <p>Notes: {internalNotes.trim() ? 'Recorded' : 'Needed for handoff'}</p>
+            </div>
+        </section>
+    );
+}
+
+function LeadWorkflowActionBar({
+    kind,
+    status,
+    canManageLeads,
+    isSaving,
+    hasSelectedLead,
+}: {
+    kind: LeadKind | null;
+    status: string;
+    canManageLeads: boolean;
+    isSaving: boolean;
+    hasSelectedLead: boolean;
+}) {
+    const guidance = getWorkflowGuidance(kind, status);
+    const saveDisabled = !canManageLeads || isSaving || !hasSelectedLead;
+    const actionNote = !hasSelectedLead
+        ? 'Select a lead before changing workflow status or internal notes.'
+        : !canManageLeads
+          ? 'This role can review Leads, but only lead managers can save workflow changes.'
+          : `${guidance.title}. Save after you have updated the status, owner, and internal notes.`;
+
+    return (
+        <section className="mt-5 border border-black/10 bg-white p-4">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div>
+                    <p className="text-xs font-bold uppercase tracking-[0.14em] text-black/45">
+                        Lead workflow actions
+                    </p>
+                    <p className="mt-2 text-sm leading-6 text-black/62">{actionNote}</p>
+                </div>
+                <button
+                    type="submit"
+                    disabled={saveDisabled}
+                    className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded bg-[var(--urblo-lime)] px-4 text-xs font-bold uppercase tracking-[0.14em] text-black transition hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:bg-black/20 disabled:text-black/35"
+                >
+                    <Save className="h-4 w-4" />
+                    {isSaving ? 'Saving' : 'Save workflow'}
+                </button>
+            </div>
+            <div className="mt-4 grid gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-black/42 md:grid-cols-3">
+                <p>1. Set workflow status</p>
+                <p>2. Assign an owner</p>
+                <p>3. Record internal notes</p>
+            </div>
         </section>
     );
 }
@@ -968,7 +1074,7 @@ function getWorkflowGuidance(kind: LeadKind | null, status: string) {
     if (status === 'spam') {
         return {
             title: 'No customer follow-up',
-            detail: 'Keep the record marked Spam unless it was misclassified. Add a note if the team should ignore future similar submissions.',
+            detail: 'Keep this lead marked Spam unless it was misclassified. Add a note if the team should ignore future similar submissions.',
         };
     }
 
@@ -1024,6 +1130,58 @@ function getWorkflowGuidance(kind: LeadKind | null, status: string) {
     return enquiryGuidance[status] ?? enquiryGuidance.new;
 }
 
+function getLeadWorkflowStatusSummary(
+    kind: LeadKind | null,
+    status: string,
+    hasOwner: boolean,
+    hasInternalNotes: boolean,
+) {
+    if (status === 'spam') {
+        return {
+            title: 'Not an active customer conversation',
+            detail: 'This lead is hidden from the active follow-up queue. Add a short note if the team may need to recognize similar spam later.',
+            badge: 'Not active',
+            tone: 'done' as const,
+        };
+    }
+
+    if (status === 'closed' || status === 'won') {
+        return {
+            title: hasInternalNotes ? 'Handled with history recorded' : 'Handled, but needs closing notes',
+            detail: hasInternalNotes
+                ? 'The customer conversation is no longer active and the team has notes about what happened.'
+                : 'Add a closing note so the team knows why this conversation is finished.',
+            badge: hasInternalNotes ? 'Handled' : 'Add notes',
+            tone: hasInternalNotes ? ('done' as const) : ('attention' as const),
+        };
+    }
+
+    if (!hasOwner) {
+        return {
+            title: 'Needs an owner before handoff',
+            detail: 'Assign a CMS manager or lead owner so the next response is clear to the team.',
+            badge: 'Assign owner',
+            tone: 'attention' as const,
+        };
+    }
+
+    if (!hasInternalNotes) {
+        return {
+            title: 'Owner set, notes still needed',
+            detail: 'Record the latest customer context before saving so another team member can pick up the conversation.',
+            badge: 'Add notes',
+            tone: 'attention' as const,
+        };
+    }
+
+    return {
+        title: kind === 'sample' ? 'Sample request is ready for the next step' : 'Enquiry is ready for the next step',
+        detail: 'Owner, workflow status, and internal notes are set. Save workflow after making the next customer update.',
+        badge: 'Ready to save',
+        tone: 'ready' as const,
+    };
+}
+
 function summarizeInbox(enquiries: EnquiryRow[], samples: SampleRequestRow[]) {
     return {
         total: enquiries.length + samples.length,
@@ -1040,7 +1198,7 @@ function summarizeInbox(enquiries: EnquiryRow[], samples: SampleRequestRow[]) {
 }
 
 function formatSourceRoute(route: string | null) {
-    if (!route) return 'Unknown page';
+    if (!route) return 'Page not recorded';
 
     const [path, query = ''] = route.split('?');
     const routeLabels: Record<string, string> = {
@@ -1203,7 +1361,7 @@ function downloadTextFile(content: string, filename: string) {
 function assigneeName(userId: string | null, admins: AdminProfileRow[]) {
     if (!userId) return 'Unassigned';
     const admin = admins.find((profile) => profile.user_id === userId);
-    return admin?.display_name || admin?.email || 'Unknown team member';
+    return admin?.display_name || admin?.email || 'Team member not found';
 }
 
 function formatTeamRole(role: string) {

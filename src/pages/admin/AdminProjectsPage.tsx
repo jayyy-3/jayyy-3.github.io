@@ -1312,7 +1312,7 @@ function AdminProjectsContent() {
                                     {selectedProject ? selectedProject.title : 'New project'}
                                 </h2>
                                 <p className="mt-2 text-sm leading-6 text-black/58">
-                                    Edit the public case study, review proof-sensitive rows, then publish when the
+                                    Edit the public case study, review proof-sensitive details, then publish when the
                                     checklist is clear.
                                 </p>
                             </div>
@@ -1332,6 +1332,15 @@ function AdminProjectsContent() {
                         </div>
 
                         <div className="mt-5">
+                            <ProjectPublishStatusSummary
+                                status={projectForm.status}
+                                blockers={publishBlockers}
+                                disabled={!selectedProject && !projectForm.title.trim() && !projectForm.slug.trim()}
+                                onSelectFirst={selectPublishBlocker}
+                            />
+                        </div>
+
+                        <div className="mt-5">
                             <PublishReadinessPanel
                                 blockers={publishBlockers}
                                 disabled={!selectedProject && !projectForm.title.trim() && !projectForm.slug.trim()}
@@ -1339,6 +1348,16 @@ function AdminProjectsContent() {
                                 onSelect={selectPublishBlocker}
                             />
                         </div>
+
+                        <ProjectActionBar
+                            status={projectForm.status}
+                            isSaving={isSavingProject}
+                            disabled={!canEdit || isLoading}
+                            blockerCount={publishBlockers.length}
+                            firstBlockerLabel={publishBlockers[0]?.label}
+                            onPublish={() => void saveProject('published')}
+                            onArchive={() => void saveProject('archived')}
+                        />
 
                         <div className="mt-7 grid gap-4 md:grid-cols-2">
                             <TextField
@@ -1502,37 +1521,16 @@ function AdminProjectsContent() {
                             />
                         </label>
 
-                        <div className="mt-6 flex flex-wrap gap-2">
-                            <ActionButton disabled={!canEdit || isSavingProject || isLoading} label={isSavingProject ? 'Saving' : 'Save changes'} icon="save" />
-                            <button
-                                type="button"
-                                disabled={!canEdit || isSavingProject || isLoading || publishBlockers.length > 0}
-                                onClick={() => void saveProject('published')}
-                                title={
-                                    publishBlockers.length
-                                        ? 'Open the Publish checklist to clear blockers before publishing.'
-                                        : 'Publish this project to the public website.'
-                                }
-                                className="inline-flex min-h-11 items-center justify-center gap-2 rounded bg-[var(--urblo-lime)] px-4 text-xs font-bold uppercase tracking-[0.14em] text-black transition hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:bg-black/20 disabled:text-black/35"
-                            >
-                                <CheckCircle2 className="h-4 w-4" />
-                                Publish project
-                            </button>
-                            <button
-                                type="button"
-                                disabled={!canEdit || isSavingProject || isLoading}
-                                onClick={() => void saveProject('archived')}
-                                className="inline-flex min-h-11 items-center justify-center gap-2 rounded bg-black px-4 text-xs font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#33363f] disabled:cursor-not-allowed disabled:bg-black/25"
-                            >
-                                <Archive className="h-4 w-4" />
-                                Archive project
-                            </button>
-                        </div>
-                        {publishBlockers.length ? (
-                            <p className="mt-3 text-sm font-semibold leading-6 text-amber-800">
-                                Publish is locked until the checklist above is clear.
-                            </p>
-                        ) : null}
+                        <ProjectActionBar
+                            status={projectForm.status}
+                            isSaving={isSavingProject}
+                            disabled={!canEdit || isLoading}
+                            blockerCount={publishBlockers.length}
+                            firstBlockerLabel={publishBlockers[0]?.label}
+                            onPublish={() => void saveProject('published')}
+                            onArchive={() => void saveProject('archived')}
+                            compact
+                        />
                     </form>
 
                     <section className="grid gap-5 lg:grid-cols-2">
@@ -2153,7 +2151,7 @@ const proofReviewOptions: ProofReviewOption[] = [
     {
         value: 'deferred',
         label: 'Deferred / keep private',
-        detail: 'Keep the row saved, but do not treat it as approved public proof.',
+        detail: 'Keep this note saved, but do not treat it as approved public proof.',
     },
 ];
 
@@ -2378,8 +2376,8 @@ function getProjectPublishBlockers(
 
 function formatPublishBlockerError(blockers: PublishBlocker[]) {
     const first = blockers[0];
-    const remaining = blockers.length > 1 ? ` ${blockers.length - 1} more item(s) remain after that.` : '';
-    return `Publish is locked for now. Start with the highlighted checklist item: ${first.label}. ${first.detail}${remaining}`;
+    const remaining = blockers.length > 1 ? ` ${blockers.length - 1} more checklist item(s) remain after that.` : '';
+    return `Publish is locked for now. Start with ${first.label}: ${first.detail}${remaining} The first repair item is highlighted in the checklist below.`;
 }
 
 function parsePercentValue(value: string) {
@@ -2389,6 +2387,76 @@ function parsePercentValue(value: string) {
 
 function clampPercent(value: number) {
     return Math.min(100, Math.max(0, value));
+}
+
+function ProjectPublishStatusSummary({
+    status,
+    blockers,
+    disabled,
+    onSelectFirst,
+}: {
+    status: ProjectStatus;
+    blockers: PublishBlocker[];
+    disabled?: boolean;
+    onSelectFirst: (blocker: PublishBlocker) => void;
+}) {
+    const firstBlocker = blockers[0] ?? null;
+    const isPublished = status === 'published';
+    const readyToPublish = !disabled && blockers.length === 0;
+    const stateLabel = disabled
+        ? 'Choose a project'
+        : isPublished
+          ? 'Live on website'
+          : readyToPublish
+            ? 'Ready, not live yet'
+            : 'Not ready to publish';
+    const detail = disabled
+        ? 'Select a project or start a new one to see whether it can appear on the website.'
+        : isPublished
+          ? 'This project is Published, so its approved content can appear on the public project page.'
+          : readyToPublish
+            ? 'The checklist is clear. Publish when the editor has made the final content decision.'
+            : `${blockers.length} item${blockers.length === 1 ? '' : 's'} must be fixed before this project can appear on the website.`;
+
+    return (
+        <section
+            className={[
+                'border p-4',
+                isPublished
+                    ? 'border-[var(--urblo-lime)] bg-[rgba(0,255,25,0.08)]'
+                    : readyToPublish
+                      ? 'border-black/10 bg-[#f8f9f5]'
+                      : 'border-amber-200 bg-amber-50',
+            ].join(' ')}
+        >
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div className="flex items-start gap-3">
+                    {isPublished || readyToPublish ? (
+                        <CheckCircle2 className="mt-1 h-5 w-5 shrink-0 text-black" />
+                    ) : (
+                        <ShieldAlert className="mt-1 h-5 w-5 shrink-0 text-amber-700" />
+                    )}
+                    <div>
+                        <p className="text-xs font-bold uppercase tracking-[0.14em] text-black/45">
+                            Website publish status
+                        </p>
+                        <h3 className="mt-2 text-lg font-semibold text-black">{stateLabel}</h3>
+                        <p className="mt-2 text-sm leading-6 text-black/62">{detail}</p>
+                    </div>
+                </div>
+                <CmsStatusPill status={status} />
+            </div>
+            {!disabled && firstBlocker ? (
+                <button
+                    type="button"
+                    onClick={() => onSelectFirst(firstBlocker)}
+                    className="mt-4 inline-flex min-h-10 items-center justify-center rounded border border-amber-300 bg-white px-3 text-xs font-bold uppercase tracking-[0.12em] text-amber-900 transition hover:border-black hover:text-black"
+                >
+                    Start with: {firstBlocker.label}
+                </button>
+            ) : null}
+        </section>
+    );
 }
 
 function PublishReadinessPanel({
@@ -2714,6 +2782,79 @@ function ActionButton({ disabled, label }: { disabled?: boolean; label: string; 
             <Save className="h-4 w-4" />
             {label}
         </button>
+    );
+}
+
+function ProjectActionBar({
+    status,
+    isSaving,
+    disabled,
+    blockerCount,
+    firstBlockerLabel,
+    onPublish,
+    onArchive,
+    compact = false,
+}: {
+    status: ProjectStatus;
+    isSaving: boolean;
+    disabled?: boolean;
+    blockerCount: number;
+    firstBlockerLabel?: string;
+    onPublish: () => void;
+    onArchive: () => void;
+    compact?: boolean;
+}) {
+    const isDisabled = disabled || isSaving;
+    const publishLocked = blockerCount > 0;
+    const actionNote = publishLocked
+        ? `Publish locked: clear ${firstBlockerLabel ?? 'the first checklist item'} first.`
+        : status === 'published'
+          ? 'Published changes can appear on the website after you save.'
+          : 'Save keeps changes in the CMS. Publish only when the checklist is clear.';
+
+    return (
+        <section
+            className={[
+                'border border-black/10 bg-[#f8f9f5] p-4',
+                compact ? 'mt-6' : 'mt-5',
+            ].join(' ')}
+        >
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <div className="min-w-0">
+                    <p className="text-xs font-bold uppercase tracking-[0.14em] text-black/45">Project actions</p>
+                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                        <CmsStatusPill status={status} />
+                        <p className="text-sm font-semibold leading-6 text-black/62">{actionNote}</p>
+                    </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                    <ActionButton disabled={isDisabled} label={isSaving ? 'Saving' : 'Save changes'} icon="save" />
+                    <button
+                        type="button"
+                        disabled={isDisabled || publishLocked}
+                        onClick={onPublish}
+                        title={
+                            publishLocked
+                                ? 'Open the Publish checklist to clear blockers before publishing.'
+                                : 'Publish this project to the public website.'
+                        }
+                        className="inline-flex min-h-11 items-center justify-center gap-2 rounded bg-[var(--urblo-lime)] px-4 text-xs font-bold uppercase tracking-[0.14em] text-black transition hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:bg-black/20 disabled:text-black/35"
+                    >
+                        <CheckCircle2 className="h-4 w-4" />
+                        Publish project
+                    </button>
+                    <button
+                        type="button"
+                        disabled={isDisabled}
+                        onClick={onArchive}
+                        className="inline-flex min-h-11 items-center justify-center gap-2 rounded bg-black px-4 text-xs font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#33363f] disabled:cursor-not-allowed disabled:bg-black/25"
+                    >
+                        <Archive className="h-4 w-4" />
+                        Archive project
+                    </button>
+                </div>
+            </div>
+        </section>
     );
 }
 

@@ -427,7 +427,7 @@ function AdminProductsContent() {
         if (!supabase || !canEdit || !user) return;
 
         if (nextStatus === 'published' && !canPublishProduct) {
-            setError('Complete the publish checklist before publishing this product.');
+            setError(formatPublishChecklistError('product', publishChecklist));
             return;
         }
 
@@ -509,7 +509,7 @@ function AdminProductsContent() {
         if (!supabase || !canEdit || !user || !selectedProduct) return;
 
         if (nextStatus === 'published' && !canPublishModel) {
-            setError('Complete the Model publish checklist before publishing this model.');
+            setError(formatPublishChecklistError('model', modelPublishChecklist));
             return;
         }
 
@@ -692,7 +692,7 @@ function AdminProductsContent() {
     return (
         <AdminShell
             title="Products"
-            eyebrow={canEdit ? 'Admin/Editor' : 'Read only'}
+            eyebrow={canEdit ? 'CMS editor' : 'Read only'}
             actions={
                 <button
                     type="button"
@@ -793,7 +793,7 @@ function AdminProductsContent() {
                             <div className="p-5">
                                 <Boxes className="h-5 w-5 text-black" />
                                 <h2 className="mt-5 text-xl font-semibold text-black">
-                                    {products.length ? 'No matching products' : 'No product records yet'}
+                                    {products.length ? 'No matching products' : 'No products yet'}
                                 </h2>
                                 <p className="mt-3 text-sm leading-6 text-black/58">
                                     {products.length
@@ -836,6 +836,21 @@ function AdminProductsContent() {
                             <CmsLiveRuleCard>
                                 <CmsStatusMeaning compact />
                             </CmsLiveRuleCard>
+                        </div>
+
+                        <div className="mt-5">
+                            <PublishStatusSummary
+                                eyebrow="Product website status"
+                                status={productForm.status}
+                                items={publishChecklist}
+                                disabled={!selectedProduct && !productForm.name.trim() && !productForm.slug.trim()}
+                                liveLabel="Live on website"
+                                readyLabel="Ready, not live yet"
+                                blockedLabel="Not ready to publish"
+                                liveDetail="This product is Published, so its approved content can appear on public product pages where CMS content is active."
+                                readyDetail="The product checklist is clear. Publish when the editor has made the final content decision."
+                                blockedDetail="Fix the first missing item before publishing this product."
+                            />
                         </div>
 
                         <div className="mt-7 grid gap-4 md:grid-cols-2">
@@ -916,31 +931,19 @@ function AdminProductsContent() {
 
                         <PublishChecklist items={publishChecklist} />
 
-                        <div className="mt-6 flex flex-wrap gap-2">
-                            <ActionButton
-                                disabled={!canEdit || isSavingProduct || isLoading}
-                                label={isSavingProduct ? 'Saving' : 'Save product'}
-                            />
-                            <button
-                                type="button"
-                                disabled={!canEdit || isSavingProduct || isLoading || !canPublishProduct}
-                                onClick={() => void saveProduct('published')}
-                                className="inline-flex min-h-11 items-center justify-center gap-2 rounded bg-[var(--urblo-lime)] px-4 text-xs font-bold uppercase tracking-[0.14em] text-black transition hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:bg-black/20 disabled:text-black/35"
-                                title={canPublishProduct ? 'Publish product' : 'Complete the publish checklist first.'}
-                            >
-                                <CheckCircle2 className="h-4 w-4" />
-                                Publish product
-                            </button>
-                            <button
-                                type="button"
-                                disabled={!canEdit || isSavingProduct || isLoading}
-                                onClick={() => void saveProduct('archived')}
-                                className="inline-flex min-h-11 items-center justify-center gap-2 rounded bg-black px-4 text-xs font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#33363f] disabled:cursor-not-allowed disabled:bg-black/25"
-                            >
-                                <Archive className="h-4 w-4" />
-                                Archive product
-                            </button>
-                        </div>
+                        <ProductActionBar
+                            label="Product actions"
+                            status={productForm.status}
+                            isSaving={isSavingProduct}
+                            disabled={!canEdit || isLoading}
+                            canPublish={canPublishProduct}
+                            publishLockedLabel="Complete the product publish checklist first."
+                            saveLabel={isSavingProduct ? 'Saving' : 'Save product'}
+                            publishLabel="Publish product"
+                            archiveLabel="Archive product"
+                            onPublish={() => void saveProduct('published')}
+                            onArchive={() => void saveProduct('archived')}
+                        />
                     </form>
 
                     <section className="grid gap-5 lg:grid-cols-2">
@@ -998,42 +1001,39 @@ function AdminProductsContent() {
                                 onChange={(value) => updateModelField('sortOrder', value)}
                             />
                             <ProductStatusHelp status={modelForm.status} />
+                            <PublishStatusSummary
+                                eyebrow="Model publish status"
+                                status={modelForm.status}
+                                items={modelPublishChecklist}
+                                disabled={!selectedProduct && !modelForm.modelKey.trim() && !modelForm.label.trim()}
+                                liveLabel="Model supports published product"
+                                readyLabel="Ready, not published yet"
+                                blockedLabel="Not ready to publish"
+                                liveDetail="This model is Published and can satisfy the product-level Published model requirement."
+                                readyDetail="The model checklist is clear. Publish it when this model should support the public product page."
+                                blockedDetail="Fix the first missing item before publishing this model."
+                            />
                             <PublishChecklist
                                 items={modelPublishChecklist}
                                 className="mt-0"
                                 eyebrow="Model publish checklist"
                                 description="A published model can satisfy the product-level Published model requirement when it has a website key, label, and image."
                             />
-                            <div className="grid gap-2">
-                                <button
-                                    type="button"
-                                    onClick={() => void saveModel(modelForm.status)}
-                                    disabled={!canEdit || isSavingModel || !selectedProduct}
-                                    className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded border border-black/15 bg-white px-3 text-xs font-bold uppercase tracking-[0.14em] text-black transition hover:border-black disabled:cursor-not-allowed disabled:text-black/35"
-                                >
-                                    <Save className="h-4 w-4" />
-                                    {isSavingModel ? 'Saving' : 'Save model'}
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => void saveModel('published')}
-                                    disabled={!canEdit || isSavingModel || !selectedProduct || !canPublishModel}
-                                    title={canPublishModel ? 'Publish model' : 'Complete the Model publish checklist first.'}
-                                    className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded bg-[var(--urblo-lime)] px-3 text-xs font-bold uppercase tracking-[0.14em] text-black transition hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:bg-black/20 disabled:text-black/35"
-                                >
-                                    <CheckCircle2 className="h-4 w-4" />
-                                    Publish model
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => void saveModel('archived')}
-                                    disabled={!canEdit || isSavingModel || !selectedProduct}
-                                    className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded bg-black px-3 text-xs font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#33363f] disabled:cursor-not-allowed disabled:bg-black/25"
-                                >
-                                    <Archive className="h-4 w-4" />
-                                    Archive model
-                                </button>
-                            </div>
+                            <ProductActionBar
+                                label="Model actions"
+                                status={modelForm.status}
+                                isSaving={isSavingModel}
+                                disabled={!canEdit || !selectedProduct}
+                                canPublish={canPublishModel}
+                                publishLockedLabel="Complete the Model publish checklist first."
+                                saveLabel={isSavingModel ? 'Saving' : 'Save model'}
+                                publishLabel="Publish model"
+                                archiveLabel="Archive model"
+                                onSave={() => void saveModel(modelForm.status)}
+                                onPublish={() => void saveModel('published')}
+                                onArchive={() => void saveModel('archived')}
+                                compact
+                            />
                         </SubrecordEditor>
 
                         <SubrecordEditor
@@ -1198,7 +1198,7 @@ function AdminProductsContent() {
                         <ul className="mt-4 space-y-3 text-sm leading-6 text-black/62">
                             <li>Published products require a website URL key, short description, hero image, model, material default, and spec.</li>
                             <li>Published models need a model website key, label, and selected Media library image.</li>
-                            <li>Material defaults can reference Stone Library rows or keep clear non-stone labels.</li>
+                            <li>Material defaults can reference Stone Library items or keep clear non-stone labels.</li>
                             <li>Use Archive to remove a product from the website while keeping its editing history.</li>
                         </ul>
                     </section>
@@ -1215,7 +1215,7 @@ function AdminProductsContent() {
                     ) : null}
                     {!canEdit ? (
                         <section className="border border-black/10 bg-white p-5 text-sm leading-6 text-black/62">
-                            Current role is read-only for Products. Ask an editor/admin to update product records.
+                            Current role is read-only for Products. Ask a CMS editor to update product content.
                         </section>
                     ) : null}
                 </aside>
@@ -1456,16 +1456,176 @@ function PublishChecklist({
     );
 }
 
-function ActionButton({ disabled, label }: { disabled?: boolean; label: string }) {
+function PublishStatusSummary({
+    eyebrow,
+    status,
+    items,
+    disabled,
+    liveLabel,
+    readyLabel,
+    blockedLabel,
+    liveDetail,
+    readyDetail,
+    blockedDetail,
+}: {
+    eyebrow: string;
+    status: ProductStatus;
+    items: Array<{ label: string; ready: boolean; detail: string }>;
+    disabled?: boolean;
+    liveLabel: string;
+    readyLabel: string;
+    blockedLabel: string;
+    liveDetail: string;
+    readyDetail: string;
+    blockedDetail: string;
+}) {
+    const missingItems = items.filter((item) => !item.ready);
+    const readyToPublish = !disabled && missingItems.length === 0;
+    const isPublished = status === 'published';
+    const stateLabel = disabled
+        ? 'Choose or create content'
+        : isPublished
+          ? liveLabel
+          : readyToPublish
+            ? readyLabel
+            : blockedLabel;
+    const detail = disabled
+        ? 'Select an item or start a new one to see whether it can appear on the website.'
+        : isPublished
+          ? liveDetail
+          : readyToPublish
+            ? readyDetail
+            : `${blockedDetail} ${missingItems.length} item${missingItems.length === 1 ? '' : 's'} still need review.`;
+
     return (
-        <button
-            type="submit"
-            disabled={disabled}
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded border border-black/15 bg-white px-4 text-xs font-bold uppercase tracking-[0.14em] text-black transition hover:border-black disabled:cursor-not-allowed disabled:text-black/35"
+        <section
+            className={[
+                'border p-4',
+                isPublished
+                    ? 'border-[var(--urblo-lime)] bg-[rgba(0,255,25,0.08)]'
+                    : readyToPublish
+                      ? 'border-black/10 bg-[#f8f9f5]'
+                      : 'border-amber-200 bg-amber-50',
+            ].join(' ')}
         >
-            <Save className="h-4 w-4" />
-            {label}
-        </button>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div className="flex items-start gap-3">
+                    {isPublished || readyToPublish ? (
+                        <CheckCircle2 className="mt-1 h-5 w-5 shrink-0 text-black" />
+                    ) : (
+                        <ShieldAlert className="mt-1 h-5 w-5 shrink-0 text-amber-800" />
+                    )}
+                    <div>
+                        <p className="text-xs font-bold uppercase tracking-[0.14em] text-black/45">{eyebrow}</p>
+                        <h3 className="mt-2 text-lg font-semibold text-black">{stateLabel}</h3>
+                        <p className="mt-2 text-sm leading-6 text-black/62">{detail}</p>
+                    </div>
+                </div>
+                <CmsStatusPill status={status} />
+            </div>
+            {!disabled && missingItems[0] ? (
+                <p className="mt-4 inline-flex min-h-10 items-center rounded border border-amber-300 bg-white px-3 text-xs font-bold uppercase tracking-[0.12em] text-amber-900">
+                    Start with: {missingItems[0].label}
+                </p>
+            ) : null}
+        </section>
+    );
+}
+
+function formatPublishChecklistError(kind: 'product' | 'model', items: Array<{ label: string; ready: boolean; detail: string }>) {
+    const firstMissing = items.find((item) => !item.ready);
+    const checklistName = kind === 'product' ? 'product publish checklist' : 'Model publish checklist';
+    const lockedPrefix =
+        kind === 'product'
+            ? 'Complete the publish checklist before publishing this product.'
+            : 'Complete the Model publish checklist before publishing this model.';
+    if (!firstMissing) {
+        return lockedPrefix;
+    }
+
+    return `${lockedPrefix} Publish is locked for now. Start with: ${firstMissing.label}. ${firstMissing.detail} The ${checklistName} and publish status show what to fix before this ${kind} can appear on the website.`;
+}
+
+function ProductActionBar({
+    label,
+    status,
+    isSaving,
+    disabled,
+    canPublish,
+    publishLockedLabel,
+    saveLabel,
+    publishLabel,
+    archiveLabel,
+    onSave,
+    onPublish,
+    onArchive,
+    compact = false,
+}: {
+    label: string;
+    status: ProductStatus;
+    isSaving: boolean;
+    disabled?: boolean;
+    canPublish: boolean;
+    publishLockedLabel: string;
+    saveLabel: string;
+    publishLabel: string;
+    archiveLabel: string;
+    onSave?: () => void;
+    onPublish: () => void;
+    onArchive: () => void;
+    compact?: boolean;
+}) {
+    const isDisabled = disabled || isSaving;
+    const actionNote = canPublish
+        ? status === 'published'
+            ? 'Published product content can appear on the website after you save.'
+            : status === 'archived'
+              ? 'Archived product content stays hidden. Save if you are preparing it for future reuse.'
+              : 'Save keeps changes in the CMS. Publish only when the checklist is clear.'
+        : `Publish locked: ${publishLockedLabel}`;
+
+    return (
+        <section className={compact ? 'border border-black/10 bg-white p-4' : 'mt-5 border border-black/10 bg-[#f8f9f5] p-4'}>
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <div className="min-w-0">
+                    <p className="text-xs font-bold uppercase tracking-[0.14em] text-black/45">{label}</p>
+                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                        <CmsStatusPill status={status} />
+                        <p className="text-sm font-semibold leading-6 text-black/62">{actionNote}</p>
+                    </div>
+                </div>
+                <div className={compact ? 'grid gap-2' : 'flex flex-wrap gap-2'}>
+                    <button
+                        type={onSave ? 'button' : 'submit'}
+                        onClick={onSave}
+                        disabled={isDisabled}
+                        className="inline-flex min-h-11 items-center justify-center gap-2 rounded border border-black/15 bg-white px-4 text-xs font-bold uppercase tracking-[0.14em] text-black transition hover:border-black disabled:cursor-not-allowed disabled:text-black/35"
+                    >
+                        <Save className="h-4 w-4" />
+                        {saveLabel}
+                    </button>
+                    <button
+                        type="button"
+                        disabled={isDisabled || !canPublish}
+                        onClick={onPublish}
+                        title={canPublish ? publishLabel : publishLockedLabel}
+                        className="inline-flex min-h-11 items-center justify-center gap-2 rounded bg-[var(--urblo-lime)] px-4 text-xs font-bold uppercase tracking-[0.14em] text-black transition hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:bg-black/20 disabled:text-black/35"
+                    >
+                        <CheckCircle2 className="h-4 w-4" />
+                        {publishLabel}
+                    </button>
+                    <button
+                        type="button"
+                        disabled={isDisabled}
+                        onClick={onArchive}
+                        className="inline-flex min-h-11 items-center justify-center gap-2 rounded bg-black px-4 text-xs font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#33363f] disabled:cursor-not-allowed disabled:bg-black/25"
+                    >
+                        <Archive className="h-4 w-4" />
+                        {archiveLabel}
+                    </button>
+                </div>
+            </div>
+        </section>
     );
 }
 
@@ -1713,12 +1873,12 @@ function getProductPublishChecklist(
             ready: hasMaterialDefault,
             detail: hasMaterialDefault
                 ? 'Default material guidance exists for this product.'
-                : 'Add at least one default material row or display label.',
+                : 'Add at least one default material choice or display label.',
         },
         {
             label: 'Specifications',
             ready: hasSpecs,
-            detail: hasSpecs ? 'At least one product spec is filled in.' : 'Add at least one useful specification row.',
+            detail: hasSpecs ? 'At least one product spec is filled in.' : 'Add at least one useful specification.',
         },
     ];
 }

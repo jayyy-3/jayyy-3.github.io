@@ -219,7 +219,7 @@ function AdminAuditContent() {
                                     <h2 className="mt-5 text-xl font-semibold text-black">No change history yet</h2>
                                     <p className="mt-3 text-sm leading-6 text-black/58">
                                         Change history visibility is ready. Saves, exports, and publish actions will
-                                        appear here after the CMS records them.
+                                        appear here after the CMS saves them.
                                     </p>
                                 </div>
                             )}
@@ -249,7 +249,7 @@ function AdminAuditContent() {
                                     <InfoBlock label="Actor" value={actorName(selectedEvent.actor_user_id, adminProfiles)} />
                                     <InfoBlock label="Created" value={formatDateTime(selectedEvent.created_at)} />
                                     <InfoBlock label="Area" value={formatEntityType(selectedEvent.entity_type)} />
-                                    <InfoBlock label="Record" value={selectedEvent.entity_id ? `#${selectedEvent.entity_id}` : 'Not recorded'} />
+                                    <InfoBlock label="Change reference" value={selectedEvent.entity_id ? `#${selectedEvent.entity_id}` : 'Not recorded'} />
                                 </div>
                                 <label className="mt-5 block text-xs font-bold uppercase tracking-[0.14em] text-black/55">
                                     Details
@@ -263,7 +263,7 @@ function AdminAuditContent() {
                             </>
                         ) : (
                             <p className="mt-7 text-sm leading-6 text-black/58">
-                                Select a change-history entry after saves or exports begin writing records.
+                                Select a change-history entry after saves or exports begin writing history.
                             </p>
                         )}
                     </section>

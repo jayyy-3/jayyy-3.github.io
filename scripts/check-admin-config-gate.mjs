@@ -210,8 +210,10 @@ test.describe('admin no-config gate', () => {
 
       await page.goto(new URL(route.path, baseUrl).toString(), { waitUntil: 'networkidle' });
       await expect(page.getByText('Configuration required')).toBeVisible();
-      await expect(page.getByText('Admin auth is not connected yet')).toBeVisible();
-      await expect(page.getByText('browser-safe Supabase key')).toBeVisible();
+      await expect(page.getByText('CMS access is not connected yet')).toBeVisible();
+      await expect(page.getByText('finish the login connection')).toBeVisible();
+      await expect(page.getByText('Admin auth is not connected yet')).toHaveCount(0);
+      await expect(page.getByText('browser-safe Supabase key')).toHaveCount(0);
 
       for (const text of forbiddenText) {
         await expect(page.getByText(text, { exact: false })).toHaveCount(0);

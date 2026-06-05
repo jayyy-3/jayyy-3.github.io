@@ -30,7 +30,7 @@ export default function AdminUnauthorizedPage() {
         <AdminState
             eyebrow="Unauthorized"
             title="This account is not an active Urblo admin"
-            copy="The Supabase session is valid, but no active admin profile was found for this user. Ask an owner or admin to create an active admin_profiles row before trying again."
+            copy="This login is valid, but it has not been given CMS access. Ask a Website owner or CMS manager to add this person in Settings before trying again."
             variant="warning"
             action={
                 <>

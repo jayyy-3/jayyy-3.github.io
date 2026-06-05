@@ -50,7 +50,12 @@ const pageChecks = [
     requiredText: [
       'Content health queue',
       'Start here',
-      'Choose the next editing job',
+      'Recommended next action',
+      'customer leads, publish blockers, and hidden draft content',
+      'Respond to ${newLeadCount} new',
+      'Review ${draftContent} draft',
+      'Needs attention before publishing',
+      'All clear checks',
       '/admin/stone-library',
       'Stone families',
       'Published media missing alt or usage notes',
@@ -68,11 +73,12 @@ const pageChecks = [
       'Live on website',
       'What the website can show now',
       'Published items can appear on the website. Draft is still your safe workspace.',
-      'No review tasks are visible yet.',
-      'customer enquiries exist',
+      'No review tasks are visible. Published content checks are clear',
       'New contact and sample request submissions will appear here',
     ],
     forbiddenText: [
+      'Choose the next editing job',
+      'No review tasks are visible yet.',
       'Published rows',
       'live Supabase content',
       'lead rows exist',
@@ -106,8 +112,21 @@ const pageChecks = [
       'Login setup code copied.',
       '/api/admin/invite-user',
       'Invite and grant access sends the login email from the secure server endpoint',
+      'private login',
+      'setup stays out of the browser',
+      'No CMS team access is ready for this account yet.',
       'Role guide',
       'CMS manager only',
+      'Website settings status',
+      'Public website can use these settings',
+      'Safe to edit before public use',
+      'Hidden from public settings',
+      'Site settings actions',
+      'Published settings can appear across the public website after you save.',
+      'Draft settings are safe to prepare before they become public.',
+      'CMS access handoff actions',
+      'Use Invite and grant access for a new editor. Use Grant existing login only when the person already has a login setup code.',
+      'Choose the lowest role',
       'Global contact and search defaults',
       'Search defaults',
       'People and access',
@@ -119,8 +138,10 @@ const pageChecks = [
       'Supabase Auth users',
       'Admin profile management is restricted',
       'No admin profile rows',
+      'No CMS access records were returned',
       'does not create the login account',
       'Admin profile email is already assigned',
+      'private Supabase service key',
       'Only an owner can assign the owner role.',
       'At least one active owner profile must remain.',
       'Do not remove your own active admin access from this screen.',
@@ -153,10 +174,18 @@ const pageChecks = [
       'Publish checklist',
       'Public website library',
       'Complete the media publish checklist before publishing this asset.',
+      'Website media status',
+      'Available to public pages',
+      'Ready, not published yet',
+      'Not ready for public pages',
+      'Start with:',
+      'The Website media status and Publish checklist show what to fix before public pages can use this media.',
       'Search description, source, location, type',
       'Media export was blocked because change history could not be recorded',
       'Change history recorded.',
       'Current role is read-only for Media',
+      'Ask a CMS editor to upload or publish media.',
+      'CMS editor',
       'File or link type',
       'Website visibility location',
       'Uploaded file location',
@@ -169,6 +198,17 @@ const pageChecks = [
       'No media library items yet',
       'New media item',
       'visible media library items',
+      'Untitled uploaded',
+      'Untitled ${formatSourceKind(asset.source_kind).toLowerCase()} media',
+      'Uploads create a draft media item.',
+      'CSV manifest exports are recorded in Change history and include only visible media items.',
+      'Viewer roles can inspect but not change media items.',
+      'Media actions',
+      'Save keeps changes in the Media Library. Publish only when the checklist is clear.',
+      'Publish locked: complete the Media publish checklist first.',
+      'Published media can be selected on public CMS-backed pages after you save.',
+      'Publish media',
+      'Archive media',
     ],
     forbiddenText: [
       'Storage file path',
@@ -181,6 +221,13 @@ const pageChecks = [
       'New media record',
       'visible media records',
       'uploaded-file record',
+      'Uploaded ${asset.media_type} #${asset.id}',
+      "${formatSourceKind(asset.source_kind)} #${asset.id}",
+      'Uploads create a draft media record.',
+      'CSV manifest exports are activity-logged and limited to visible records.',
+      'Viewer roles can inspect but not mutate media records.',
+      'Admin/Editor',
+      'admin/editor',
     ],
     exportGate: 'media_assets.export_manifest',
   },
@@ -217,6 +264,12 @@ const pageChecks = [
       'Needs confirmation is counted with Draft because it is not public-ready.',
       'Stone Library publish checklist',
       'Variant publish checklist',
+      'Stone family actions',
+      'Variant actions',
+      'Save keeps changes in the CMS. Publish only when the checklist is clear.',
+      'Needs confirmation stays private. Save the review notes, then publish only when the checklist is clear.',
+      'Published changes can appear in the public Stone Library after you save.',
+      'Publish locked:',
       'Complete the Stone Library publish checklist before publishing this stone family.',
       'Complete the variant publish checklist before publishing this variant.',
       'Website URL key',
@@ -229,7 +282,14 @@ const pageChecks = [
       'Media library items available for finish images.',
       'Published finish images require a selected finish and a Media library item that is Published in Media.',
       'Publish is locked. Open Media and publish the selected Media library item before publishing this finish image.',
+      'Finish image public status',
+      'Finish image can appear on website',
+      'Ready, not published yet',
+      'Not ready for website',
+      'Open Media first',
+      'Finish images need a selected finish and Media library item that is Published in Media.',
       'Viewers can inspect the Stone Library but cannot save changes.',
+      'Ask a CMS editor to update stone content.',
       'Stone type proof note',
       'Pricing note',
       'Use Archive to remove a stone from the website while keeping its editing history.',
@@ -245,12 +305,16 @@ const pageChecks = [
       'Physical deletes remain hidden',
       'Published finish images require a published media record',
       'Admin/Editor',
+      'editor/admin',
+      'material records',
       'Library records',
       'No stone records yet',
       'approved media records',
       'media records available for linking',
       'selected media record',
       'media record that is Published in Media',
+      'public stone family record',
+      'family record',
       'mutate Stone Library records',
       'Media record',
       'Media #',
@@ -317,8 +381,17 @@ const pageChecks = [
       'YouTube link',
       'in Media',
       'Publish is locked for now',
-      'Start with the highlighted checklist item',
+      'The first repair item is highlighted in the checklist below.',
       'Start here',
+      'Website publish status',
+      'Live on website',
+      'Ready, not live yet',
+      'Not ready to publish',
+      'Start with:',
+      'Project actions',
+      'Save keeps changes in the CMS. Publish only when the checklist is clear.',
+      'Publish locked: clear',
+      'Published changes can appear on the website after you save.',
       'highlightedPublishBlockerId',
       'Published is allowed only after the Publish checklist is clear. Use Draft while editing.',
       'getProofReviewLabel(row.claim_status)',
@@ -345,6 +418,7 @@ const pageChecks = [
       'YouTube URL or ID',
       'media records available for ID linking',
       'Stone group ID',
+      'proof-sensitive rows',
       'Finish definition ID',
       'Hotspot map ID',
       'Project material ID',
@@ -356,6 +430,8 @@ const pageChecks = [
       'Media library records available for project images and video blocks.',
       'Ask an editor/admin to update project records.',
       'Create or select a project record',
+      'Start with the highlighted checklist item below.',
+      'The checklist below has highlighted the first repair item.',
       '${facts.length} rows',
       '${materials.length} rows',
     ],
@@ -395,14 +471,34 @@ const pageChecks = [
     ],
     requiredText: [
       'Current role is read-only for Products',
+      'CMS editor',
       'Publish checklist',
       'CmsPublicPageLink',
       'Search preview',
+      'Ask a CMS editor to update product content.',
+      'Product actions',
+      'Model actions',
+      'Product website status',
+      'Live on website',
+      'Ready, not live yet',
+      'Not ready to publish',
+      'Model publish status',
+      'Model supports published product',
+      'Ready, not published yet',
+      'Start with:',
+      'publish status show what to fix',
+      'Save keeps changes in the CMS. Publish only when the checklist is clear.',
+      'Publish locked:',
+      'Published product content can appear on the website after you save.',
       'Complete the publish checklist before publishing this product.',
       'Website URL key',
       'Model website key',
       'Search product, URL key, description',
       'Material reference',
+      'No products yet',
+      'Stone Library items',
+      'Add at least one default material choice or display label.',
+      'Add at least one useful specification.',
       'Media library items available for product images.',
       'model website key, label, and selected Media library image',
       'This Media library item can support a public product image.',
@@ -430,6 +526,12 @@ const pageChecks = [
       'This media record can support a public product image.',
       'review the asset',
       'No records yet.',
+      'No product records yet',
+      'Stone Library rows',
+      'default material row',
+      'specification row',
+      'Ask an editor/admin to update product records.',
+      'Admin/Editor',
     ],
   },
   {
@@ -449,8 +551,27 @@ const pageChecks = [
     ],
     requiredText: [
       'Current role is read-only for Articles',
+      'CMS editor',
+      'No articles yet',
+      'Ask a CMS editor to update article content.',
+      'Table body notes',
       'CmsPublicPageLink',
       'Article publish checklist',
+      'Article actions',
+      'Section actions',
+      'Article website status',
+      'Live on website',
+      'Ready, not live yet',
+      'Not ready to publish',
+      'Section publish status',
+      'Section can appear in article',
+      'Ready, not published yet',
+      'Start with:',
+      'shows what to fix before this article can appear on the website.',
+      'shows what to fix before this section can appear on the website.',
+      'Save keeps changes in the CMS. Publish only when the checklist is clear.',
+      'Publish locked:',
+      'Published article content can appear on the website after you save.',
       'Publish is locked. Complete the Article publish checklist before publishing this article.',
       'getArticlePublishChecklist',
       'Website URL key',
@@ -477,6 +598,8 @@ const pageChecks = [
       'migration provenance',
       'Original import note',
       'Original import link',
+      'Question and answer rows',
+      'row notes',
       'Date needs review',
       'Linked project ID',
       'Linked stone group ID',
@@ -487,6 +610,11 @@ const pageChecks = [
       'This media record can support a public article image.',
       'review the asset',
       'No records yet.',
+      'Article records',
+      'No article records yet',
+      'Ask an editor/admin to update article records.',
+      'Row notes',
+      'Admin/Editor',
     ],
   },
   {
@@ -509,6 +637,15 @@ const pageChecks = [
       'Export uses the current search and filters',
       'totalLoadedRows',
       'Recommended next step',
+      'Lead workflow status',
+      'Needs an owner before handoff',
+      'Owner set, notes still needed',
+      'Ready to save',
+      'Handled with history recorded',
+      'Lead workflow actions',
+      'Save after you have updated the status, owner, and internal notes.',
+      'Saving writes this status, assigned owner, and internal note to the Leads workflow history.',
+      'Select a lead before changing workflow status or internal notes.',
       'Export visible queue',
       'Spam check passed',
       'Email sent',
@@ -522,6 +659,10 @@ const pageChecks = [
       'Spam check',
       'Stone not selected',
       'Finish not selected',
+      'leads are marked spam',
+      'No sample items recorded for this request.',
+      'Page not recorded',
+      'Team member not found',
     ],
     forbiddenText: [
       'Lead guardrails',
@@ -534,8 +675,16 @@ const pageChecks = [
       'Stone TBC',
       'Finish TBC',
       'Lead export was blocked because the activity log could not be recorded',
+      'visible lead records',
+      'sample request rows',
       'Export is locked because the activity log could not be recorded',
       'Lead ID',
+      'records are marked spam',
+      'No item rows recorded for this request.',
+      'Unknown page',
+      'Unknown team member',
+      'Keep the record marked Spam',
+      'This record is hidden from the active follow-up queue',
     ],
     exportGate: 'leads.export_csv',
   },
@@ -551,6 +700,8 @@ const pageChecks = [
       'friendlyEntityLabels',
       'CMS team access',
       'Published project',
+      'Change reference',
+      'begin writing history',
       'formatActionLabel',
       'formatEntityType',
       'readOnly',
@@ -560,6 +711,9 @@ const pageChecks = [
       'Owner/Admin only',
       'owner/admin roles',
       'Activity log entries are visible only to owner/admin roles',
+      'InfoBlock label="Record"',
+      'begin writing records',
+      'the CMS records them',
     ],
     mutates: false,
   },
@@ -786,15 +940,29 @@ function checkRoutes() {
   const adminState = readRequired('src/pages/admin/AdminState.tsx');
   requireIncludes(adminState, 'AdminConfigMissingState', 'src/pages/admin/AdminState.tsx');
   requireIncludes(adminState, 'Configuration required', 'src/pages/admin/AdminState.tsx');
-  requireIncludes(adminState, 'browser-safe Supabase key', 'src/pages/admin/AdminState.tsx');
+  requireIncludes(adminState, 'CMS access is not connected yet', 'src/pages/admin/AdminState.tsx');
+  requireIncludes(adminState, 'finish the login connection', 'src/pages/admin/AdminState.tsx');
+  requireIncludes(adminState, 'Your login and CMS access are being checked', 'src/pages/admin/AdminState.tsx');
+  requireIncludes(adminState, 'The CMS returned an unexpected error while checking this account.', 'src/pages/admin/AdminState.tsx');
   requireIncludes(adminState, 'Return to site', 'src/pages/admin/AdminState.tsx');
-  requireIncludes(adminState, 'getAdminConfigStatus', 'src/pages/admin/AdminState.tsx');
+  requireNotIncludes(adminState, 'Supabase Auth and the admin profile gate', 'src/pages/admin/AdminState.tsx');
+  requireNotIncludes(adminState, 'Supabase returned an unexpected error while checking the admin profile.', 'src/pages/admin/AdminState.tsx');
+  requireNotIncludes(adminState, 'Admin auth is not connected yet', 'src/pages/admin/AdminState.tsx');
+  requireNotIncludes(adminState, 'browser-safe project key', 'src/pages/admin/AdminState.tsx');
+  requireNotIncludes(adminState, 'Current project URL', 'src/pages/admin/AdminState.tsx');
   requireIncludes(login, 'AdminConfigMissingState', 'src/pages/admin/AdminLoginPage.tsx');
   requireIncludes(login, "auth.status === 'config-missing'", 'src/pages/admin/AdminLoginPage.tsx');
+  requireIncludes(login, 'Sign in with an approved Urblo CMS login.', 'src/pages/admin/AdminLoginPage.tsx');
+  requireIncludes(login, 'Access also depends on the CMS role assigned in', 'src/pages/admin/AdminLoginPage.tsx');
+  requireNotIncludes(login, 'Supabase Auth account', 'src/pages/admin/AdminLoginPage.tsx');
+  requireNotIncludes(login, 'admin_profiles', 'src/pages/admin/AdminLoginPage.tsx');
+  requireNotIncludes(login, 'active admin profile', 'src/pages/admin/AdminLoginPage.tsx');
 
   const unauthorized = readRequired('src/pages/admin/AdminUnauthorizedPage.tsx');
   requireIncludes(unauthorized, 'AdminConfigMissingState', 'src/pages/admin/AdminUnauthorizedPage.tsx');
   requireIncludes(unauthorized, "auth.status === 'config-missing'", 'src/pages/admin/AdminUnauthorizedPage.tsx');
+  requireIncludes(unauthorized, 'This login is valid, but it has not been given CMS access.', 'src/pages/admin/AdminUnauthorizedPage.tsx');
+  requireNotIncludes(unauthorized, 'admin_profiles row', 'src/pages/admin/AdminUnauthorizedPage.tsx');
 
   requireIncludes(audit, ".from('admin_audit_events')", 'src/lib/adminAudit.ts');
   requireIncludes(audit, 'Change history was not recorded', 'src/lib/adminAudit.ts');
@@ -1069,7 +1237,8 @@ function checkDashboardEditorLanguage() {
   requireIncludes(content, 'Article sections', 'src/pages/admin/adminContent.ts');
   requireIncludes(content, 'Website owner / CMS manager', 'src/pages/admin/adminContent.ts');
   requireIncludes(content, 'Change history', 'src/pages/admin/adminContent.ts');
-  requireIncludes(content, 'Read-only record', 'src/pages/admin/adminContent.ts');
+  requireIncludes(content, 'Read-only history', 'src/pages/admin/adminContent.ts');
+  requireNotIncludes(content, 'Read-only record', 'src/pages/admin/adminContent.ts audit labels');
   requireNotIncludes(content, 'Owner/admin only', 'src/pages/admin/adminContent.ts operations labels');
   requireNotIncludes(content, 'Structured story content', 'src/pages/admin/adminContent.ts article labels');
   requireNotIncludes(content, 'Activity history', 'src/pages/admin/adminContent.ts audit labels');
@@ -1082,11 +1251,15 @@ function checkDashboardEditorLanguage() {
   requireIncludes(primitives, 'Can appear on website', 'src/pages/admin/AdminCmsPrimitives.tsx');
   requireIncludes(primitives, 'Safe to edit', 'src/pages/admin/AdminCmsPrimitives.tsx');
   requireIncludes(primitives, 'Hidden but kept', 'src/pages/admin/AdminCmsPrimitives.tsx');
+  requireIncludes(primitives, 'editing history', 'src/pages/admin/AdminCmsPrimitives.tsx');
+  requireIncludes(primitives, 'This item is still Draft/Needs confirmation', 'src/pages/admin/AdminCmsPrimitives.tsx');
   requireIncludes(primitives, 'Change copy, media, facts, and page sections without affecting the website.', 'src/pages/admin/AdminCmsPrimitives.tsx');
   requireNotIncludes(shell, 'Published content can go live', 'src/pages/admin/AdminShell.tsx');
   requireNotIncludes(primitives, 'Draft rows are safe to edit', 'src/pages/admin/AdminCmsPrimitives.tsx');
   requireNotIncludes(primitives, 'published CMS rows', 'src/pages/admin/AdminCmsPrimitives.tsx');
   requireNotIncludes(primitives, 'structured rows', 'src/pages/admin/AdminCmsPrimitives.tsx');
+  requireNotIncludes(primitives, 'record history', 'src/pages/admin/AdminCmsPrimitives.tsx');
+  requireNotIncludes(primitives, 'This record', 'src/pages/admin/AdminCmsPrimitives.tsx');
 
   for (const technicalPhrase of [
     'Supabase Auth',

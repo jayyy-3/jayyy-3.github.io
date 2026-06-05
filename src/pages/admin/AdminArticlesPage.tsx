@@ -168,11 +168,11 @@ const blockContentHints: Record<ArticleBlockType, string> = {
     image: 'Pair a selected Media library item with caption and placement notes.',
     gallery: 'Use the selected media as the lead image, then describe the gallery sequence for review.',
     quote: 'A pull quote with optional attribution.',
-    faq: 'Question and answer rows for practical reader objections.',
+    faq: 'Question and answer items for practical reader objections.',
     cta: 'A button-style reader action with label, link, and optional supporting copy.',
     project_spotlight: 'Choose a linked project and add why the project supports this article.',
     stone_reference: 'Choose a linked stone and add why the material matters here.',
-    comparison_table: 'A table planning section. Add column labels and row notes in plain language.',
+    comparison_table: 'A table planning section. Add column labels and line notes in plain language.',
     proof_metric: 'A short metric or proof point with supporting note.',
     video_embed: 'Approved video URL and caption.',
     callout: 'A highlighted note with heading and body copy.',
@@ -231,6 +231,11 @@ function AdminArticlesContent() {
         [articleForm, blocks],
     );
     const canPublishArticle = publishChecklist.every((item) => item.ready);
+    const blockPublishChecklist = useMemo(
+        () => getArticleSectionPublishChecklist(blockForm),
+        [blockForm],
+    );
+    const canPublishBlock = blockPublishChecklist.every((item) => item.ready);
     const filteredArticles = useMemo(
         () =>
             articles.filter((article) => {
@@ -423,7 +428,7 @@ function AdminArticlesContent() {
         if (!supabase || !canEdit || !user) return;
 
         if (nextStatus === 'published' && !canPublishArticle) {
-            setError('Publish is locked. Complete the Article publish checklist before publishing this article.');
+            setError(formatArticlePublishError('article', publishChecklist));
             return;
         }
 
@@ -510,6 +515,11 @@ function AdminArticlesContent() {
     async function saveBlock(nextStatus: ArticleStatus) {
         if (!supabase || !canEdit || !user || !selectedArticle) return;
 
+        if (nextStatus === 'published' && !canPublishBlock) {
+            setError(formatArticlePublishError('section', blockPublishChecklist));
+            return;
+        }
+
         const validation = validateBlockForm({ ...blockForm, status: nextStatus });
         if (validation.error !== null) {
             setError(validation.error);
@@ -583,7 +593,7 @@ function AdminArticlesContent() {
     return (
         <AdminShell
             title="Articles"
-            eyebrow={canEdit ? 'Admin/Editor' : 'Read only'}
+            eyebrow={canEdit ? 'CMS editor' : 'Read only'}
             actions={
                 <button
                     type="button"
@@ -600,7 +610,7 @@ function AdminArticlesContent() {
                 <section className="border border-black/10 bg-white">
                     <div className="border-b border-black/10 p-4">
                         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-black/45">
-                            Article records
+                            Articles
                         </p>
                         <h2 className="mt-2 text-2xl font-semibold text-black">{articles.length} articles</h2>
                         <p className="mt-2 text-sm leading-6 text-black/55">
@@ -684,7 +694,7 @@ function AdminArticlesContent() {
                             <div className="p-5">
                                 <BookOpenText className="h-5 w-5 text-black" />
                                 <h2 className="mt-5 text-xl font-semibold text-black">
-                                    {articles.length ? 'No matching articles' : 'No article records yet'}
+                                    {articles.length ? 'No matching articles' : 'No articles yet'}
                                 </h2>
                                 <p className="mt-3 text-sm leading-6 text-black/58">
                                     {articles.length
@@ -726,6 +736,21 @@ function AdminArticlesContent() {
                             <CmsLiveRuleCard>
                                 <CmsStatusMeaning compact />
                             </CmsLiveRuleCard>
+                        </div>
+
+                        <div className="mt-5">
+                            <ArticlePublishStatusSummary
+                                eyebrow="Article website status"
+                                status={articleForm.status}
+                                items={publishChecklist}
+                                disabled={!selectedArticle && !articleForm.title.trim() && !articleForm.slug.trim()}
+                                liveLabel="Live on website"
+                                readyLabel="Ready, not live yet"
+                                blockedLabel="Not ready to publish"
+                                liveDetail="This article is Published, so its published sections can appear on the public article detail page."
+                                readyDetail="The article checklist is clear. Publish when the editor has made the final content decision."
+                                blockedDetail="Fix the first missing item before publishing this article."
+                            />
                         </div>
 
                         <div className="mt-7 grid gap-4 md:grid-cols-2">
@@ -840,31 +865,19 @@ function AdminArticlesContent() {
 
                         <ArticlePublishChecklist items={publishChecklist} />
 
-                        <div className="mt-6 flex flex-wrap gap-2">
-                            <ActionButton
-                                disabled={!canEdit || isSavingArticle || isLoading}
-                                label={isSavingArticle ? 'Saving' : 'Save article'}
-                            />
-                            <button
-                                type="button"
-                                disabled={!canEdit || isSavingArticle || isLoading || !canPublishArticle}
-                                onClick={() => void saveArticle('published')}
-                                title={canPublishArticle ? 'Publish article' : 'Complete the Article publish checklist first.'}
-                                className="inline-flex min-h-11 items-center justify-center gap-2 rounded bg-[var(--urblo-lime)] px-4 text-xs font-bold uppercase tracking-[0.14em] text-black transition hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:bg-black/20 disabled:text-black/35"
-                            >
-                                <CheckCircle2 className="h-4 w-4" />
-                                Publish article
-                            </button>
-                            <button
-                                type="button"
-                                disabled={!canEdit || isSavingArticle || isLoading}
-                                onClick={() => void saveArticle('archived')}
-                                className="inline-flex min-h-11 items-center justify-center gap-2 rounded bg-black px-4 text-xs font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#33363f] disabled:cursor-not-allowed disabled:bg-black/25"
-                            >
-                                <Archive className="h-4 w-4" />
-                                Archive article
-                            </button>
-                        </div>
+                        <ArticleActionBar
+                            label="Article actions"
+                            status={articleForm.status}
+                            isSaving={isSavingArticle}
+                            disabled={!canEdit || isLoading}
+                            canPublish={canPublishArticle}
+                            publishLockedLabel="Complete the Article publish checklist first."
+                            saveLabel={isSavingArticle ? 'Saving' : 'Save article'}
+                            publishLabel="Publish article"
+                            archiveLabel="Archive article"
+                            onPublish={() => void saveArticle('published')}
+                            onArchive={() => void saveArticle('archived')}
+                        />
                     </form>
 
                     <SubrecordEditor
@@ -941,41 +954,39 @@ function AdminArticlesContent() {
                             <p className="font-semibold text-black">{formatBlockTypeLabel(blockForm.blockType)}</p>
                             <p className="mt-1">{blockContentHints[blockForm.blockType]}</p>
                         </div>
+                        <ArticlePublishStatusSummary
+                            eyebrow="Section publish status"
+                            status={blockForm.status}
+                            items={blockPublishChecklist}
+                            disabled={!selectedArticle && !blockForm.contentJson.trim()}
+                            liveLabel="Section can appear in article"
+                            readyLabel="Ready, not published yet"
+                            blockedLabel="Not ready to publish"
+                            liveDetail="This section is Published and can appear when the article is Published."
+                            readyDetail="The selected section has enough content to publish."
+                            blockedDetail="Fix the first missing item before publishing this section."
+                        />
                         <BlockContentEditor
                             blockType={blockForm.blockType}
                             contentJson={blockForm.contentJson}
                             disabled={!canEdit || isSavingBlock || !selectedArticle}
                             onChange={(value) => updateBlockField('contentJson', value)}
                         />
-                        <div className="grid gap-2 md:grid-cols-3">
-                            <button
-                                type="button"
-                                onClick={() => void saveBlock(blockForm.status)}
-                                disabled={!canEdit || isSavingBlock || !selectedArticle}
-                                className="inline-flex min-h-10 items-center justify-center gap-2 rounded border border-black/15 bg-white px-3 text-xs font-bold uppercase tracking-[0.14em] text-black transition hover:border-black disabled:cursor-not-allowed disabled:text-black/35"
-                            >
-                                <Save className="h-4 w-4" />
-                                {isSavingBlock ? 'Saving' : 'Save section'}
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => void saveBlock('published')}
-                                disabled={!canEdit || isSavingBlock || !selectedArticle}
-                                className="inline-flex min-h-10 items-center justify-center gap-2 rounded bg-[var(--urblo-lime)] px-3 text-xs font-bold uppercase tracking-[0.14em] text-black transition hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:bg-black/20 disabled:text-black/35"
-                            >
-                                <CheckCircle2 className="h-4 w-4" />
-                                Publish section
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => void saveBlock('archived')}
-                                disabled={!canEdit || isSavingBlock || !selectedArticle}
-                                className="inline-flex min-h-10 items-center justify-center gap-2 rounded bg-black px-3 text-xs font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#33363f] disabled:cursor-not-allowed disabled:bg-black/25"
-                            >
-                                <Archive className="h-4 w-4" />
-                                Archive section
-                            </button>
-                        </div>
+                        <ArticleActionBar
+                            label="Section actions"
+                            status={blockForm.status}
+                            isSaving={isSavingBlock}
+                            disabled={!canEdit || !selectedArticle}
+                            canPublish={canPublishBlock}
+                            publishLockedLabel="Fill the selected section content before publishing."
+                            saveLabel={isSavingBlock ? 'Saving' : 'Save section'}
+                            publishLabel="Publish section"
+                            archiveLabel="Archive section"
+                            onSave={() => void saveBlock(blockForm.status)}
+                            onPublish={() => void saveBlock('published')}
+                            onArchive={() => void saveBlock('archived')}
+                            compact
+                        />
                     </SubrecordEditor>
                 </section>
 
@@ -1013,7 +1024,7 @@ function AdminArticlesContent() {
                     ) : null}
                     {!canEdit ? (
                         <section className="border border-black/10 bg-white p-5 text-sm leading-6 text-black/62">
-                            Current role is read-only for Articles. Ask an editor/admin to update article records.
+                            Current role is read-only for Articles. Ask a CMS editor to update article content.
                         </section>
                     ) : null}
                 </aside>
@@ -1385,7 +1396,7 @@ function BlockContentEditor({
                     {...commonProps}
                 />
                 <TextareaField
-                    label="Row notes"
+                    label="Table body notes"
                     value={contentString(content, 'rowsText')}
                     rows={6}
                     onChange={(value) => updateTextField('rowsText', value)}
@@ -1453,19 +1464,6 @@ function TextareaField({
     );
 }
 
-function ActionButton({ disabled, label }: { disabled?: boolean; label: string }) {
-    return (
-        <button
-            type="submit"
-            disabled={disabled}
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded border border-black/15 bg-white px-4 text-xs font-bold uppercase tracking-[0.14em] text-black transition hover:border-black disabled:cursor-not-allowed disabled:text-black/35"
-        >
-            <Save className="h-4 w-4" />
-            {label}
-        </button>
-    );
-}
-
 function ArticlePublishChecklist({ items }: { items: Array<{ label: string; ready: boolean; detail: string }> }) {
     const readyCount = items.filter((item) => item.ready).length;
     const allReady = readyCount === items.length;
@@ -1511,6 +1509,165 @@ function ArticlePublishChecklist({ items }: { items: Array<{ label: string; read
                         <p className="mt-1 text-sm leading-6 text-black/58">{item.detail}</p>
                     </div>
                 ))}
+            </div>
+        </section>
+    );
+}
+
+function ArticlePublishStatusSummary({
+    eyebrow,
+    status,
+    items,
+    disabled,
+    liveLabel,
+    readyLabel,
+    blockedLabel,
+    liveDetail,
+    readyDetail,
+    blockedDetail,
+}: {
+    eyebrow: string;
+    status: ArticleStatus;
+    items: Array<{ label: string; ready: boolean; detail: string }>;
+    disabled?: boolean;
+    liveLabel: string;
+    readyLabel: string;
+    blockedLabel: string;
+    liveDetail: string;
+    readyDetail: string;
+    blockedDetail: string;
+}) {
+    const missingItems = items.filter((item) => !item.ready);
+    const readyToPublish = !disabled && missingItems.length === 0;
+    const isPublished = status === 'published';
+    const stateLabel = disabled
+        ? 'Choose or create content'
+        : isPublished
+          ? liveLabel
+          : readyToPublish
+            ? readyLabel
+            : blockedLabel;
+    const detail = disabled
+        ? 'Select an item or start a new one to see whether it can appear on the website.'
+        : isPublished
+          ? liveDetail
+          : readyToPublish
+            ? readyDetail
+            : `${blockedDetail} ${missingItems.length} item${missingItems.length === 1 ? '' : 's'} still need review.`;
+
+    return (
+        <section
+            className={[
+                'border p-4',
+                isPublished
+                    ? 'border-[var(--urblo-lime)] bg-[rgba(0,255,25,0.08)]'
+                    : readyToPublish
+                      ? 'border-black/10 bg-[#f8f9f5]'
+                      : 'border-amber-200 bg-amber-50',
+            ].join(' ')}
+        >
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div className="flex items-start gap-3">
+                    {isPublished || readyToPublish ? (
+                        <CheckCircle2 className="mt-1 h-5 w-5 shrink-0 text-black" />
+                    ) : (
+                        <ShieldAlert className="mt-1 h-5 w-5 shrink-0 text-amber-800" />
+                    )}
+                    <div>
+                        <p className="text-xs font-bold uppercase tracking-[0.14em] text-black/45">{eyebrow}</p>
+                        <h3 className="mt-2 text-lg font-semibold text-black">{stateLabel}</h3>
+                        <p className="mt-2 text-sm leading-6 text-black/62">{detail}</p>
+                    </div>
+                </div>
+                <CmsStatusPill status={status} />
+            </div>
+            {!disabled && missingItems[0] ? (
+                <p className="mt-4 inline-flex min-h-10 items-center rounded border border-amber-300 bg-white px-3 text-xs font-bold uppercase tracking-[0.12em] text-amber-900">
+                    Start with: {missingItems[0].label}
+                </p>
+            ) : null}
+        </section>
+    );
+}
+
+function ArticleActionBar({
+    label,
+    status,
+    isSaving,
+    disabled,
+    canPublish,
+    publishLockedLabel,
+    saveLabel,
+    publishLabel,
+    archiveLabel,
+    onSave,
+    onPublish,
+    onArchive,
+    compact = false,
+}: {
+    label: string;
+    status: ArticleStatus;
+    isSaving: boolean;
+    disabled?: boolean;
+    canPublish: boolean;
+    publishLockedLabel: string;
+    saveLabel: string;
+    publishLabel: string;
+    archiveLabel: string;
+    onSave?: () => void;
+    onPublish: () => void;
+    onArchive: () => void;
+    compact?: boolean;
+}) {
+    const isDisabled = disabled || isSaving;
+    const actionNote = canPublish
+        ? status === 'published'
+            ? 'Published article content can appear on the website after you save.'
+            : status === 'archived'
+              ? 'Archived article content stays hidden. Save if you are preparing it for future reuse.'
+              : 'Save keeps changes in the CMS. Publish only when the checklist is clear.'
+        : `Publish locked: ${publishLockedLabel}`;
+
+    return (
+        <section className={compact ? 'border border-black/10 bg-white p-4' : 'mt-5 border border-black/10 bg-[#f8f9f5] p-4'}>
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <div className="min-w-0">
+                    <p className="text-xs font-bold uppercase tracking-[0.14em] text-black/45">{label}</p>
+                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                        <CmsStatusPill status={status} />
+                        <p className="text-sm font-semibold leading-6 text-black/62">{actionNote}</p>
+                    </div>
+                </div>
+                <div className={compact ? 'grid gap-2' : 'flex flex-wrap gap-2'}>
+                    <button
+                        type={onSave ? 'button' : 'submit'}
+                        onClick={onSave}
+                        disabled={isDisabled}
+                        className="inline-flex min-h-11 items-center justify-center gap-2 rounded border border-black/15 bg-white px-4 text-xs font-bold uppercase tracking-[0.14em] text-black transition hover:border-black disabled:cursor-not-allowed disabled:text-black/35"
+                    >
+                        <Save className="h-4 w-4" />
+                        {saveLabel}
+                    </button>
+                    <button
+                        type="button"
+                        disabled={isDisabled || !canPublish}
+                        onClick={onPublish}
+                        title={canPublish ? publishLabel : publishLockedLabel}
+                        className="inline-flex min-h-11 items-center justify-center gap-2 rounded bg-[var(--urblo-lime)] px-4 text-xs font-bold uppercase tracking-[0.14em] text-black transition hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:bg-black/20 disabled:text-black/35"
+                    >
+                        <CheckCircle2 className="h-4 w-4" />
+                        {publishLabel}
+                    </button>
+                    <button
+                        type="button"
+                        disabled={isDisabled}
+                        onClick={onArchive}
+                        className="inline-flex min-h-11 items-center justify-center gap-2 rounded bg-black px-4 text-xs font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#33363f] disabled:cursor-not-allowed disabled:bg-black/25"
+                    >
+                        <Archive className="h-4 w-4" />
+                        {archiveLabel}
+                    </button>
+                </div>
             </div>
         </section>
     );
@@ -1872,6 +2029,46 @@ function getArticlePublishChecklist(form: ArticleFormState, blocks: ArticleBlock
                     : 'Open each Published section and fill the required copy, link, or media field.',
         },
     ];
+}
+
+function getArticleSectionPublishChecklist(form: BlockFormState) {
+    const mediaAssetId = optionalPositiveInteger(form.mediaAssetId, 'Section image').value;
+    const content = parseContentRecord(form.contentJson);
+    const contentReady = hasPublishReadyBlockContent(form.blockType, content, mediaAssetId);
+
+    return [
+        {
+            label: 'Section type',
+            ready: Boolean(form.blockType),
+            detail: 'Choose the kind of article section this content should become.',
+        },
+        {
+            label: 'Section content',
+            ready: contentReady,
+            detail: contentReady
+                ? 'This section has the required copy, link, or media for its type.'
+                : 'Fill the required copy, link, or media field before publishing this section.',
+        },
+    ];
+}
+
+function formatArticlePublishError(kind: 'article' | 'section', items: Array<{ label: string; ready: boolean; detail: string }>) {
+    const firstMissing = items.find((item) => !item.ready);
+    const lockedPrefix =
+        kind === 'article'
+            ? 'Publish is locked. Complete the Article publish checklist before publishing this article.'
+            : 'Publish is locked. Fill the selected section content before publishing.';
+
+    if (!firstMissing) {
+        return lockedPrefix;
+    }
+
+    const ending =
+        kind === 'article'
+            ? 'The Article publish checklist shows what to fix before this article can appear on the website.'
+            : 'The Section publish status shows what to fix before this section can appear on the website.';
+
+    return `${lockedPrefix} Start with: ${firstMissing.label}. ${firstMissing.detail} ${ending}`;
 }
 
 function summarizeArticles(articles: ArticleRow[]) {

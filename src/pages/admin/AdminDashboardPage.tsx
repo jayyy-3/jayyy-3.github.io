@@ -31,6 +31,13 @@ interface DashboardHealthItem {
     severity: 'ready' | 'warning';
 }
 
+interface DashboardNextAction {
+    label: string;
+    note: string;
+    path: string;
+    tone: 'urgent' | 'warning' | 'steady';
+}
+
 interface ContentStatusSnapshot {
     label: string;
     path: string;
@@ -56,21 +63,24 @@ const contentTables = [
     { table: 'articles', label: 'Articles', moduleLabel: 'Articles', path: '/admin/articles' },
 ] as const;
 
-const editorStartActions = [
+const editorStartActions: DashboardNextAction[] = [
     {
         label: 'Review new leads',
         note: 'Start here when a customer enquiry or sample request arrives.',
         path: '/admin/leads',
+        tone: 'urgent',
     },
     {
         label: 'Publish content',
         note: 'Open Projects, Products, Articles, or Stone Library and clear the publish checklist.',
         path: '/admin/projects',
+        tone: 'warning',
     },
     {
         label: 'Prepare media',
         note: 'Publish images only after source, public location, alt text, and usage notes are ready.',
         path: '/admin/media',
+        tone: 'steady',
     },
 ];
 
@@ -92,6 +102,14 @@ function healthItem(label: string, value: number, action: string, path: string):
         path,
         severity: value > 0 ? 'warning' : 'ready',
     };
+}
+
+function pluralize(value: number, singular: string, plural = `${singular}s`) {
+    return value === 1 ? singular : plural;
+}
+
+function getMetricValue(metrics: DashboardMetric[], label: string) {
+    return metrics.find((metric) => metric.label === label)?.value ?? 0;
 }
 
 export default function AdminDashboardPage() {
@@ -327,6 +345,65 @@ function AdminDashboardContent() {
     }, [loadDashboard]);
 
     const activeModules = useMemo(() => adminModules.filter((module) => module.key !== 'dashboard'), []);
+    const warningHealthItems = useMemo(
+        () => dashboard.healthItems.filter((item) => item.severity === 'warning'),
+        [dashboard.healthItems],
+    );
+    const clearHealthItems = useMemo(
+        () => dashboard.healthItems.filter((item) => item.severity === 'ready'),
+        [dashboard.healthItems],
+    );
+    const recommendedActions = useMemo<DashboardNextAction[]>(() => {
+        if (dashboard.isLoading) {
+            return editorStartActions;
+        }
+
+        const newLeadCount =
+            getMetricValue(dashboard.metrics, 'New enquiries') +
+            getMetricValue(dashboard.metrics, 'New sample requests');
+        const draftContent = dashboard.contentStatus.reduce((total, snapshot) => total + snapshot.draft, 0);
+        const firstDraftModule = dashboard.contentStatus.find((snapshot) => snapshot.draft > 0);
+        const actions: DashboardNextAction[] = [];
+
+        if (newLeadCount > 0) {
+            actions.push({
+                label: `Respond to ${newLeadCount} new ${pluralize(newLeadCount, 'lead')}`,
+                note: 'Customer messages should be handled before planned content edits.',
+                path: '/admin/leads',
+                tone: 'urgent',
+            });
+        }
+
+        const firstWarning = warningHealthItems[0];
+        if (firstWarning) {
+            actions.push({
+                label: firstWarning.action,
+                note: `${firstWarning.value} ${pluralize(firstWarning.value, 'item')} ${firstWarning.value === 1 ? 'needs' : 'need'} attention: ${firstWarning.label}.`,
+                path: firstWarning.path,
+                tone: 'warning',
+            });
+        }
+
+        if (draftContent > 0 && firstDraftModule) {
+            actions.push({
+                label: `Review ${draftContent} draft ${pluralize(draftContent, 'content item')}`,
+                note: `${firstDraftModule.moduleLabel} has hidden draft content. Open it, clear the checklist, then publish only when ready.`,
+                path: firstDraftModule.path,
+                tone: 'steady',
+            });
+        }
+
+        if (!actions.length) {
+            actions.push({
+                label: 'Continue planned editing',
+                note: 'No urgent queue items are visible. Open the content library and keep routine edits in Draft until reviewed.',
+                path: '/admin/projects',
+                tone: 'steady',
+            });
+        }
+
+        return actions.slice(0, 3);
+    }, [dashboard.contentStatus, dashboard.isLoading, dashboard.metrics, warningHealthItems]);
 
     return (
         <AdminShell
@@ -355,25 +432,40 @@ function AdminDashboardContent() {
                                     Start here
                                 </p>
                                 <h2 className="mt-2 text-2xl font-semibold text-black">
-                                    Choose the next editing job
+                                    Recommended next action
                                 </h2>
                             </div>
                             <p className="max-w-xl text-sm leading-6 text-black/58">
-                                Use this dashboard to decide what needs attention before opening a detail editor.
+                                The dashboard now prioritizes customer leads, publish blockers, and hidden draft content
+                                before routine editing.
                             </p>
                         </div>
                         <div className="mt-4 grid gap-3 md:grid-cols-3">
-                            {editorStartActions.map((action) => (
+                            {recommendedActions.map((action) => (
                                 <Link
                                     key={action.label}
                                     to={action.path}
-                                    className="flex min-h-[132px] flex-col justify-between border border-black/10 bg-[#f8f9f5] p-4 transition hover:border-black hover:bg-white"
+                                    className={[
+                                        'group flex min-h-[132px] flex-col justify-between border p-4 transition hover:border-black hover:bg-white',
+                                        action.tone === 'urgent'
+                                            ? 'border-black bg-black text-white hover:text-black'
+                                            : action.tone === 'warning'
+                                              ? 'border-amber-300 bg-amber-50 text-black'
+                                              : 'border-black/10 bg-[#f8f9f5] text-black',
+                                    ].join(' ')}
                                 >
                                     <span>
-                                        <span className="block text-base font-semibold text-black">{action.label}</span>
-                                        <span className="mt-2 block text-sm leading-6 text-black/58">{action.note}</span>
+                                        <span className="block text-base font-semibold">{action.label}</span>
+                                        <span
+                                            className={[
+                                                'mt-2 block text-sm leading-6',
+                                                action.tone === 'urgent' ? 'text-white/70 group-hover:text-black/58' : 'text-black/58',
+                                            ].join(' ')}
+                                        >
+                                            {action.note}
+                                        </span>
                                     </span>
-                                    <span className="mt-4 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.12em] text-black">
+                                    <span className="mt-4 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.12em]">
                                         Open
                                         <ArrowUpRight className="h-4 w-4" />
                                     </span>
@@ -474,7 +566,7 @@ function AdminDashboardContent() {
                                 Content health queue
                             </p>
                             <h2 className="mt-2 text-2xl font-semibold text-black">
-                                Items to clear before public cutover
+                                Needs attention before publishing
                             </h2>
                         </div>
                         <div className="divide-y divide-black/10">
@@ -482,8 +574,8 @@ function AdminDashboardContent() {
                                 Array.from({ length: 5 }).map((_, index) => (
                                     <div key={index} className="min-h-[76px] animate-pulse bg-[#f8f9f5] p-4" />
                                 ))
-                            ) : dashboard.healthItems.length ? (
-                                dashboard.healthItems.map((item) => (
+                            ) : warningHealthItems.length ? (
+                                warningHealthItems.map((item) => (
                                     <Link
                                         key={item.label}
                                         to={item.path}
@@ -512,11 +604,28 @@ function AdminDashboardContent() {
                                 ))
                             ) : (
                                 <div className="p-4 text-sm leading-6 text-black/58">
-                                    No review tasks are visible yet. The queue will populate after live content and
-                                    customer enquiries exist.
+                                    No review tasks are visible. Published content checks are clear, and new issues will
+                                    appear here when they need editor attention.
                                 </div>
                             )}
                         </div>
+                        {!dashboard.isLoading && clearHealthItems.length ? (
+                            <div className="border-t border-black/10 bg-[#f8f9f5] p-4">
+                                <p className="text-xs font-bold uppercase tracking-[0.14em] text-black/40">
+                                    All clear checks
+                                </p>
+                                <div className="mt-3 flex flex-wrap gap-2">
+                                    {clearHealthItems.map((item) => (
+                                        <span
+                                            key={item.label}
+                                            className="inline-flex min-h-8 items-center rounded border border-black/10 bg-white px-3 text-xs font-semibold text-black/55"
+                                        >
+                                            {item.label}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : null}
                     </section>
 
                     <section className="border border-black/10 bg-white">

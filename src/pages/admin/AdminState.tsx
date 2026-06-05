@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { AlertCircle, RefreshCw, ShieldAlert } from 'lucide-react';
-import { getAdminConfigStatus, useAdminAuth } from '../../lib/adminAuthHooks';
+import { useAdminAuth } from '../../lib/adminAuthHooks';
 
 interface AdminStateProps {
     eyebrow: string;
@@ -38,19 +38,17 @@ export function AdminLoadingState() {
         <AdminState
             eyebrow="Checking session"
             title="Preparing admin access"
-            copy="Supabase Auth and the admin profile gate are being checked before any private content is shown."
+            copy="Your login and CMS access are being checked before any private content is shown."
         />
     );
 }
 
 export function AdminConfigMissingState() {
-    const config = getAdminConfigStatus();
-
     return (
         <AdminState
             eyebrow="Configuration required"
-            title="Admin auth is not connected yet"
-            copy={`The admin shell is protected, but it needs a browser-safe Supabase key before login can run. Current Supabase URL: ${config.url}.`}
+            title="CMS access is not connected yet"
+            copy="The private editor is protected. A CMS manager needs to finish the login connection before editors can sign in."
             variant="warning"
             action={
                 <Link to="/" className="urblo-button-inverse">
@@ -68,7 +66,7 @@ export function AdminErrorState() {
         <AdminState
             eyebrow="Access check failed"
             title="Admin access could not be verified"
-            copy={error ?? 'Supabase returned an unexpected error while checking the admin profile.'}
+            copy={error ?? 'The CMS returned an unexpected error while checking this account.'}
             variant="warning"
             action={
                 <button

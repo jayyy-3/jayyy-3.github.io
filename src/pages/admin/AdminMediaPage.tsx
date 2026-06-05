@@ -105,7 +105,7 @@ const mediaBucketOptions: Array<{ value: MediaBucket; label: string; detail: str
     {
         value: 'urblo-public-media',
         label: 'Public website library',
-        detail: 'Ready for public pages to use after the media record is Published.',
+        detail: 'Ready for public pages to use after this media item is Published.',
     },
 ];
 
@@ -221,7 +221,7 @@ function AdminMediaContent() {
             sourceKind: 'external_legacy',
             bucket: 'urblo-public-media',
         });
-        setNotice('New external media record started.');
+        setNotice('New external media item started.');
         setError(null);
     }
 
@@ -333,7 +333,7 @@ function AdminMediaContent() {
         }
 
         if (nextStatus === 'published' && !canPublishMedia) {
-            setError('Complete the media publish checklist before publishing this asset.');
+            setError(formatMediaPublishError(publishChecklist));
             return;
         }
 
@@ -492,7 +492,7 @@ function AdminMediaContent() {
     return (
         <AdminShell
             title="Media Library"
-            eyebrow={canEdit ? 'Admin/Editor' : 'Read only'}
+            eyebrow={canEdit ? 'CMS editor' : 'Read only'}
             actions={
                 <div className="flex flex-wrap items-center gap-2">
                     <button
@@ -640,6 +640,14 @@ function AdminMediaContent() {
                             </CmsLiveRuleCard>
                         </div>
 
+                        <div className="mt-5">
+                            <MediaWebsiteStatusSummary
+                                status={form.status}
+                                checklist={publishChecklist}
+                                disabled={!selectedId && !form.objectPath.trim() && !form.sourceUrl.trim()}
+                            />
+                        </div>
+
                         <div className="mt-7 grid gap-4 md:grid-cols-2">
                             <label className="text-xs font-bold uppercase tracking-[0.14em] text-black/55">
                                 Status
@@ -736,6 +744,15 @@ function AdminMediaContent() {
                         </label>
 
                         <MediaPublishChecklist items={publishChecklist} />
+                        <MediaActionBar
+                            status={form.status}
+                            isSaving={isSaving}
+                            disabled={!canEdit || isLoading}
+                            canPublish={canPublishMedia}
+                            onSaveDraft={() => void saveAsset('draft')}
+                            onPublish={() => void saveAsset('published')}
+                            onArchive={() => void saveAsset('archived')}
+                        />
                     </section>
 
                     <section className="border border-black/10 bg-white p-5 md:p-6">
@@ -836,7 +853,7 @@ function AdminMediaContent() {
                         <FileUp className="h-5 w-5 text-[var(--urblo-lime)]" />
                         <h2 className="mt-5 text-xl font-semibold">Upload draft media</h2>
                         <p className="mt-3 text-sm leading-6 text-white/68">
-                            Uploads create a draft media record. Public publishing still requires alt text, usage
+                            Uploads create a draft media item. Public publishing still requires alt text, usage
                             notes, and the Public website library.
                         </p>
                         <label className="mt-5 block text-xs font-bold uppercase tracking-[0.14em] text-white/65">
@@ -880,8 +897,8 @@ function AdminMediaContent() {
                             <li>Published uploaded files must live in the Public website library.</li>
                             <li>Published media needs usage notes so editors know where it is safe to reuse.</li>
                             <li>Published images need alt text before they can support public pages.</li>
-                            <li>CSV manifest exports are activity-logged and limited to visible records.</li>
-                            <li>Viewer roles can inspect but not mutate media records.</li>
+                            <li>CSV manifest exports are recorded in Change history and include only visible media items.</li>
+                            <li>Viewer roles can inspect but not change media items.</li>
                         </ul>
                     </section>
 
@@ -923,40 +940,20 @@ function AdminMediaContent() {
 
                     {!canEdit ? (
                         <section className="border border-black/10 bg-white p-5 text-sm leading-6 text-black/62">
-                            Current role is read-only for Media. Ask an admin/editor to upload or publish media.
+                            Current role is read-only for Media. Ask a CMS editor to upload or publish media.
                         </section>
                     ) : null}
 
-                    <div className="grid gap-2">
-                        <button
-                            type="button"
-                            disabled={!canEdit || isSaving || isLoading}
-                            onClick={() => void saveAsset('draft')}
-                            className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded border border-black/15 bg-white px-4 text-xs font-bold uppercase tracking-[0.14em] text-black transition hover:border-black disabled:cursor-not-allowed disabled:text-black/35"
-                        >
-                            <Save className="h-4 w-4" />
-                            {isSaving ? 'Saving' : 'Save draft'}
-                        </button>
-                        <button
-                            type="button"
-                            disabled={!canEdit || isSaving || isLoading || !canPublishMedia}
-                            onClick={() => void saveAsset('published')}
-                            className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded bg-[var(--urblo-lime)] px-4 text-xs font-bold uppercase tracking-[0.14em] text-black transition hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:bg-black/20 disabled:text-black/35"
-                            title={canPublishMedia ? 'Publish media' : 'Complete the publish checklist first.'}
-                        >
-                            <CheckCircle2 className="h-4 w-4" />
-                            Publish
-                        </button>
-                        <button
-                            type="button"
-                            disabled={!canEdit || isSaving || isLoading}
-                            onClick={() => void saveAsset('archived')}
-                            className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded bg-black px-4 text-xs font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#33363f] disabled:cursor-not-allowed disabled:bg-black/25"
-                        >
-                            <Archive className="h-4 w-4" />
-                            Archive
-                        </button>
-                    </div>
+                    <MediaActionBar
+                        status={form.status}
+                        isSaving={isSaving}
+                        disabled={!canEdit || isLoading}
+                        canPublish={canPublishMedia}
+                        onSaveDraft={() => void saveAsset('draft')}
+                        onPublish={() => void saveAsset('published')}
+                        onArchive={() => void saveAsset('archived')}
+                        compact
+                    />
                 </aside>
             </div>
         </AdminShell>
@@ -1012,6 +1009,143 @@ function MediaPublishChecklist({ items }: { items: Array<{ label: string; ready:
                         </div>
                     </div>
                 ))}
+            </div>
+        </section>
+    );
+}
+
+function MediaWebsiteStatusSummary({
+    status,
+    checklist,
+    disabled,
+}: {
+    status: MediaStatus;
+    checklist: Array<{ label: string; ready: boolean; detail: string }>;
+    disabled?: boolean;
+}) {
+    const missingItems = checklist.filter((item) => !item.ready);
+    const readyToPublish = !disabled && missingItems.length === 0;
+    const isPublished = status === 'published';
+    const stateLabel = disabled
+        ? 'Choose or create media'
+        : isPublished
+          ? 'Available to public pages'
+          : readyToPublish
+            ? 'Ready, not published yet'
+            : 'Not ready for public pages';
+    const detail = disabled
+        ? 'Select a media item or upload a draft file to see whether website pages can use it.'
+        : isPublished
+          ? 'This media is Published, so CMS-backed Projects, Products, Articles, and Stone Library pages can use it on the website.'
+          : readyToPublish
+            ? 'The checklist is clear. Publish this media before linking it to public content.'
+            : `${missingItems.length} item${missingItems.length === 1 ? '' : 's'} must be fixed before public pages can use this media.`;
+
+    return (
+        <section
+            className={[
+                'border p-4',
+                isPublished
+                    ? 'border-[var(--urblo-lime)] bg-[rgba(0,255,25,0.08)]'
+                    : readyToPublish
+                      ? 'border-black/10 bg-[#f8f9f5]'
+                      : 'border-amber-200 bg-amber-50',
+            ].join(' ')}
+        >
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div className="flex items-start gap-3">
+                    {isPublished || readyToPublish ? (
+                        <CheckCircle2 className="mt-1 h-5 w-5 shrink-0 text-black" />
+                    ) : (
+                        <ShieldCheck className="mt-1 h-5 w-5 shrink-0 text-amber-800" />
+                    )}
+                    <div>
+                        <p className="text-xs font-bold uppercase tracking-[0.14em] text-black/45">
+                            Website media status
+                        </p>
+                        <h3 className="mt-2 text-lg font-semibold text-black">{stateLabel}</h3>
+                        <p className="mt-2 text-sm leading-6 text-black/62">{detail}</p>
+                    </div>
+                </div>
+                <CmsStatusPill status={status} />
+            </div>
+            {!disabled && missingItems[0] ? (
+                <p className="mt-4 inline-flex min-h-10 items-center rounded border border-amber-300 bg-white px-3 text-xs font-bold uppercase tracking-[0.12em] text-amber-900">
+                    Start with: {missingItems[0].label}
+                </p>
+            ) : null}
+        </section>
+    );
+}
+
+function MediaActionBar({
+    status,
+    isSaving,
+    disabled,
+    canPublish,
+    onSaveDraft,
+    onPublish,
+    onArchive,
+    compact = false,
+}: {
+    status: MediaStatus;
+    isSaving: boolean;
+    disabled?: boolean;
+    canPublish: boolean;
+    onSaveDraft: () => void;
+    onPublish: () => void;
+    onArchive: () => void;
+    compact?: boolean;
+}) {
+    const isDisabled = disabled || isSaving;
+    const actionNote = canPublish
+        ? status === 'published'
+            ? 'Published media can be selected on public CMS-backed pages after you save.'
+            : status === 'archived'
+              ? 'Archived media stays hidden from public pickers. Save draft if you are preparing it again.'
+              : 'Save keeps changes in the Media Library. Publish only when the checklist is clear.'
+        : 'Publish locked: complete the Media publish checklist first.';
+
+    return (
+        <section className={compact ? 'border border-black/10 bg-white p-4' : 'mt-5 border border-black/10 bg-[#f8f9f5] p-4'}>
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <div className="min-w-0">
+                    <p className="text-xs font-bold uppercase tracking-[0.14em] text-black/45">Media actions</p>
+                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                        <CmsStatusPill status={status} />
+                        <p className="text-sm font-semibold leading-6 text-black/62">{actionNote}</p>
+                    </div>
+                </div>
+                <div className={compact ? 'grid gap-2' : 'flex flex-wrap gap-2'}>
+                    <button
+                        type="button"
+                        disabled={isDisabled}
+                        onClick={onSaveDraft}
+                        className="inline-flex min-h-11 items-center justify-center gap-2 rounded border border-black/15 bg-white px-4 text-xs font-bold uppercase tracking-[0.14em] text-black transition hover:border-black disabled:cursor-not-allowed disabled:text-black/35"
+                    >
+                        <Save className="h-4 w-4" />
+                        {isSaving ? 'Saving' : 'Save draft'}
+                    </button>
+                    <button
+                        type="button"
+                        disabled={isDisabled || !canPublish}
+                        onClick={onPublish}
+                        className="inline-flex min-h-11 items-center justify-center gap-2 rounded bg-[var(--urblo-lime)] px-4 text-xs font-bold uppercase tracking-[0.14em] text-black transition hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:bg-black/20 disabled:text-black/35"
+                        title={canPublish ? 'Publish media' : 'Complete the Media publish checklist first.'}
+                    >
+                        <CheckCircle2 className="h-4 w-4" />
+                        Publish media
+                    </button>
+                    <button
+                        type="button"
+                        disabled={isDisabled}
+                        onClick={onArchive}
+                        className="inline-flex min-h-11 items-center justify-center gap-2 rounded bg-black px-4 text-xs font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#33363f] disabled:cursor-not-allowed disabled:bg-black/25"
+                    >
+                        <Archive className="h-4 w-4" />
+                        Archive media
+                    </button>
+                </div>
             </div>
         </section>
     );
@@ -1143,6 +1277,15 @@ function getMediaPublishChecklist(form: MediaFormState) {
                 : 'Explain where this media can be used, for example product hero, project detail, or Stone finish.',
         },
     ];
+}
+
+function formatMediaPublishError(items: Array<{ label: string; ready: boolean; detail: string }>) {
+    const firstMissing = items.find((item) => !item.ready);
+    if (!firstMissing) {
+        return 'Complete the media publish checklist before publishing this asset.';
+    }
+
+    return `Publish is locked for now. Start with: ${firstMissing.label}. ${firstMissing.detail} The Website media status and Publish checklist show what to fix before public pages can use this media.`;
 }
 
 function validationFailure(error: string): ReturnType<typeof validateMediaForm> {
@@ -1323,10 +1466,10 @@ function formatAssetTitle(asset: MediaAssetRow) {
     }
 
     if (asset.source_kind === 'storage') {
-        return `Uploaded ${asset.media_type} #${asset.id}`;
+        return `Untitled uploaded ${asset.media_type}`;
     }
 
-    return `${formatSourceKind(asset.source_kind)} #${asset.id}`;
+    return `Untitled ${formatSourceKind(asset.source_kind).toLowerCase()} media`;
 }
 
 function formatBucketLabel(bucket: MediaBucket) {

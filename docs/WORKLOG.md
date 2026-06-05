@@ -1,6 +1,1433 @@
 # WORKLOG - Urblo Execution Log
 
-Last updated: 2026-06-04
+Last updated: 2026-06-05
+
+## Entry - 2026-06-05 (Stone Library Public Read Contract Alignment)
+
+### Scope
+- Rechecked `src/service/StoneLibraryService.ts` against the handoff docs before final CMS delivery.
+- Confirmed Stone Library detail already has a Published CMS/Supabase detail adapter for families, variants, finish capabilities, and finish images, with static detail data kept as fallback.
+- Updated stale harness/architecture/task wording that still described Stone Library detail as static-only.
+
+### Changed Files
+- `AGENTS.md`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- This is a contract/documentation alignment pass only. It does not deploy the current CMS UX stack or prove the production editor walkthrough.
+
+### Next Handoff
+- `NOW-ADMIN-CMS-001`
+
+## Entry - 2026-06-05 (Admin CMS Predeploy Gate Runner)
+
+### Scope
+- Added `npm run agent:admin-cms-predeploy` as a no-secret non-preview local gate runner for the current CMS UX stack.
+- The runner chains admin CRUD coverage, build, lint, TypeScript, Supabase foundation readiness, public Supabase readiness, Cloudflare readiness, harness checks, `git diff --check`, and report-only admin handoff readiness.
+- Preview/browser gates remain separate required deployment checks: `npm run agent:smoke` and `npm run agent:admin-config-gate`.
+- Updated the root harness entry so future agents see the CMS predeploy gates and final strict handoff audit before claiming production handoff complete.
+- The runner does not deploy, log into production, write Supabase, or mutate live content.
+
+### Changed Files
+- `AGENTS.md`
+- `scripts/admin-cms-predeploy.sh`
+- `package.json`
+- `scripts/check-harness.mjs`
+- `docs/ADMIN_PRODUCTION_WALKTHROUGH.md`
+- `docs/agent/verification.md`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `bash -n scripts/admin-cms-predeploy.sh`: pass.
+- `jq empty docs/agent/tasks.json`: pass.
+- Initial Node-based predeploy runner attempt: failed at embedded `npm run agent:smoke` because Vite preview returned `listen EPERM` while binding local preview ports from inside the nested runner. Standalone `npm run agent:smoke` passed immediately after, so this was treated as a runner false failure rather than an application failure.
+- Replaced the Node aggregation runner with `scripts/admin-cms-predeploy.sh` and kept preview/browser gates separate.
+- `npm run agent:admin-cms-predeploy`: pass. It ran admin CRUD coverage, build, lint, TypeScript, Supabase foundation readiness, public Supabase readiness, Cloudflare readiness, harness checks, `git diff --check`, and report-only admin handoff readiness. Build still shows the existing Browserslist staleness notice and AdminApp chunk-size warning. Handoff readiness correctly reports production walkthrough evidence missing.
+- `npm run agent:smoke`: pass as the separate preview route/API/UI source gate.
+- `npm run agent:admin-config-gate`: pass for 11 no-browser-key admin routes; screenshots written under `.tmp/admin-config-gate/screenshots`.
+
+### Risks and Gaps
+- Passing this predeploy gate plus the separate preview/browser gates proves local readiness only. The CMS is still not handoff-complete until the current stack is deployed and the production walkthrough Results Template passes.
+
+### Next Handoff
+- `NOW-ADMIN-CMS-001`
+
+## Entry - 2026-06-05 (Admin Handoff Readiness Audit Runner)
+
+### Scope
+- Added `npm run agent:admin-handoff-readiness` as a no-write final CMS handoff audit.
+- The runner checks the editor guide, production walkthrough, Results Template, production origin input, first-admin email input, and whether `docs/WORKLOG.md` contains production walkthrough results with Final editor handoff marked Pass.
+- Default mode is report-only; `--strict` fails until production walkthrough evidence exists, preventing the CMS goal from being marked complete based on local readiness alone.
+
+### Changed Files
+- `scripts/check-admin-handoff-readiness.mjs`
+- `package.json`
+- `scripts/check-harness.mjs`
+- `docs/ADMIN_PRODUCTION_WALKTHROUGH.md`
+- `docs/agent/verification.md`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `node --check scripts/check-admin-handoff-readiness.mjs`: pass.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-handoff-readiness -- --base-url https://urblo.com.au --admin-email info@urblo.com.au`: pass in report-only mode, with production walkthrough evidence correctly reported missing.
+- `npm run agent:admin-handoff-readiness -- --base-url https://urblo.com.au --admin-email info@urblo.com.au --strict`: expected fail because production walkthrough evidence is not recorded yet.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- The runner intentionally reports missing production walkthrough evidence until the current CMS UX stack is deployed and the Results Template is filled in `docs/WORKLOG.md`.
+
+### Next Handoff
+- `NOW-ADMIN-CMS-001`
+
+## Entry - 2026-06-05 (Current Roadmap Terminology Alignment)
+
+### Scope
+- Cleaned current roadmap/task wording so active CMS handoff status uses editor-facing items/content language.
+- Updated the current content-CRUD roadmap note from draft rows / published reads to production CMS Draft items and Published CMS content.
+- Updated the CMS task acceptance from Stone Library/media records to Stone Library/media items.
+
+### Changed Files
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+- `docs/WORKLOG.md`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- Historical worklog evidence still contains older database terms where it records past implementation state. Current handoff, roadmap, guide, walkthrough, and task acceptance should use editor-facing language.
+
+### Next Handoff
+- `NOW-ADMIN-CMS-001`
+
+## Entry - 2026-06-05 (One-Page Editor Handoff)
+
+### Scope
+- Added a concise One-Page Editor Handoff to `docs/ADMIN_EDITOR_GUIDE.md`.
+- The one-page version covers admin address, account setup, Dashboard start screen, search/status filtering, Draft/Pubished/Archived behavior, Save/Publish/Open public page, CMS coverage, imported Draft content, static fallback, and escalation paths.
+- Updated harness checks so the one-page editor handoff cannot be removed silently.
+
+### Changed Files
+- `docs/ADMIN_EDITOR_GUIDE.md`
+- `scripts/check-harness.mjs`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- This improves the customer-facing handoff artifact. It does not deploy the current CMS UX stack or run the production active-admin walkthrough.
+
+### Next Handoff
+- `NOW-ADMIN-CMS-001`
+
+## Entry - 2026-06-05 (Production Walkthrough Results Template)
+
+### Scope
+- Added a reusable Results Template to `docs/ADMIN_PRODUCTION_WALKTHROUGH.md` so production CMS handoff proof can be recorded consistently after deployment.
+- The template captures deployment, deployed smoke, active-admin browser QA, each admin module walkthrough, public URLs/screenshots, changes made, deferrals, failures, and final editor handoff readiness.
+- Updated harness checks so the results template and deferral language cannot be removed silently.
+
+### Changed Files
+- `docs/ADMIN_PRODUCTION_WALKTHROUGH.md`
+- `scripts/check-harness.mjs`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- This improves production evidence capture. It does not deploy the current CMS UX stack or run the active-admin production walkthrough.
+
+### Next Handoff
+- `NOW-ADMIN-CMS-001`
+
+## Entry - 2026-06-05 (CMS Terminology Regression Guards)
+
+### Scope
+- Added regression guards for the latest visible terminology cleanup so editor-facing copy does not drift back to backend-shaped wording.
+- `npm run agent:admin-crud-coverage` now rejects the old visible Leads, Articles, Stone Library, and Projects terms cleaned in the previous pass.
+- `npm run agent:check` now rejects old production walkthrough terms such as Draft rows, Supabase Auth, profile rows, `claim_status`, raw imported HTML/JSON, and database rows.
+
+### Changed Files
+- `scripts/check-admin-crud-coverage.mjs`
+- `scripts/check-harness.mjs`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:check`: pass.
+
+### Risks and Gaps
+- This is a regression-guard improvement for source and handoff language. It does not deploy the current CMS UX stack or replace production walkthrough proof.
+
+### Next Handoff
+- `NOW-ADMIN-CMS-001`
+
+## Entry - 2026-06-05 (CMS Visible Terminology Hardening)
+
+### Scope
+- Ran a targeted scan for visible/editor-facing backend wording across admin source and handoff walkthrough docs.
+- Replaced remaining visible lead export/inbox, Article block hint, Stone Library group, and Project editor copy that used records, rows, or other storage-shaped wording.
+- Cleaned the production walkthrough so its pass conditions use editor-facing proof-review, structured-content, Change history, Draft item, and CMS content language.
+
+### Changed Files
+- `src/pages/admin/AdminLeadsPage.tsx`
+- `src/pages/admin/AdminArticlesPage.tsx`
+- `src/pages/admin/AdminStoneLibraryPage.tsx`
+- `src/pages/admin/AdminProjectsPage.tsx`
+- `docs/ADMIN_PRODUCTION_WALKTHROUGH.md`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- Targeted visible terminology scan: pass. Remaining `claim_status` matches are internal Projects/Dashboard source fields, queries, and proof-review label mapping only.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run build`: pass. Existing Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- This reduces editor-facing technical language in the current local CMS UX stack. It still does not deploy the stack or replace production active-admin walkthrough proof.
+
+### Next Handoff
+- `NOW-ADMIN-CMS-001`
+
+## Entry - 2026-06-05 (CMS UX Full Pre-Deploy Gate Refresh)
+
+### Scope
+- Re-ran the full local CMS/runtime verification stack for the current `/admin` UX and handoff changes.
+- Verified source coverage, build, lint, TypeScript, public/admin smoke, Supabase foundation/public-readiness, no-config admin browser gate, Cloudflare Pages readiness, and plan-only live admin/content runners.
+- Refreshed the live-input audit for `https://urblo.com.au` with `info@urblo.com.au` as the known first admin.
+
+### Changed Files
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run build`: pass. Existing Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:supabase-foundation-readiness`: pass.
+- `npm run agent:public-supabase-readiness`: pass.
+- `npm run agent:admin-crud-live`: pass in plan-only mode; no Supabase writes, Storage uploads, or deletes attempted.
+- `npm run agent:content-import:live`: pass in plan-only mode; no Supabase login and no row changes attempted.
+- `npm run agent:cloudflare-readiness`: pass.
+- `npm run agent:admin-config-gate`: pass for 11 no-browser-key admin routes; screenshots written under `.tmp/admin-config-gate/screenshots`.
+- `npm run agent:live-readiness -- --base-url https://urblo.com.au --admin-email info@urblo.com.au`: pass in report-only mode. It reports Cloudflare deployed-preview smoke and static-to-Supabase draft import artifacts as ready, while the current shell still lacks live Supabase/admin/browser credentials and write approvals for production walkthrough proof.
+
+### Risks and Gaps
+- These checks prove the current local CMS UX stack is pre-deploy ready, but they do not deploy it.
+- Final handoff still requires pushing/deploying this stack, deployed smoke, active-admin browser QA, and completing `docs/ADMIN_PRODUCTION_WALKTHROUGH.md` with production evidence.
+
+### Next Handoff
+- `NOW-ADMIN-CMS-001`
+
+## Entry - 2026-06-05 (Editor Guide Customer-Language Cleanup)
+
+### Scope
+- Cleaned the customer-facing editor guide so handoff language stays in CMS/editor terms instead of backend terms.
+- Replaced the remaining imported-content, public-read, and CSV language around rows/records/Supabase with Draft items, CMS content, entries, and Change history wording.
+- Updated the harness guide check to require the new CMS Draft item phrasing.
+
+### Changed Files
+- `docs/ADMIN_EDITOR_GUIDE.md`
+- `scripts/check-harness.mjs`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- Targeted editor-guide technical-term scan: pass. The only remaining Supabase mention is the explicit reassurance that day-to-day editing does not require Supabase, code, table names, or developer help.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- This is a customer-language/harness cleanup. It does not deploy the current CMS UX stack or replace the production walkthrough.
+
+### Next Handoff
+- `NOW-ADMIN-CMS-001`
+
+## Entry - 2026-06-05 (CMS UX Pre-Deploy Readiness Refresh)
+
+### Scope
+- Re-ran the no-secret deployment and live-input readiness checks for the current CMS UX/handoff stack.
+- Confirmed the repository-side Cloudflare Pages deployment contract remains healthy.
+- Confirmed production origin `https://urblo.com.au` is ready as the deployed-preview smoke input.
+- Confirmed the current local shell still lacks live Supabase/admin/browser secrets required for production CMS walkthrough proof.
+
+### Changed Files
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run agent:cloudflare-readiness`: pass. Verified build contract, SPA fallback, Function routing scope, headers, API handlers, env placeholders, and deployment runbook.
+- `npm run agent:live-readiness -- --base-url https://urblo.com.au --admin-email info@urblo.com.au`: pass in report-only mode with no writes and no secret output. Ready inputs: Cloudflare deployed-preview route/API smoke and static-to-Supabase draft import artifacts. Missing in the current local shell: service-role key, browser-safe Supabase key, admin login credentials/token, unprofiled QA credentials, form/email/Turnstile secrets, and live-write approvals.
+
+### Risks and Gaps
+- This confirms the local stack is ready for the next deployment step, but it does not deploy it.
+- Production CMS handoff still requires deployed smoke, active-admin browser QA, and `docs/ADMIN_PRODUCTION_WALKTHROUGH.md` evidence after push/deploy approval.
+
+### Next Handoff
+- `NOW-ADMIN-CMS-001`
+
+## Entry - 2026-06-05 (Editor First Handoff Walkthrough Guide)
+
+### Scope
+- Strengthened the editor handoff guide with a short first-session walkthrough for a new non-technical CMS editor.
+- The walkthrough covers signing in, using Dashboard, filtering to Draft, making a reversible edit, reading Publish blockers, confirming Open public page after approved publish, and explaining static fallback.
+- Updated harness checks so the first handoff walkthrough cannot disappear from the editor guide.
+
+### Changed Files
+- `docs/ADMIN_EDITOR_GUIDE.md`
+- `scripts/check-harness.mjs`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- This is a docs/handoff improvement. It does not replace deployment or the production walkthrough proof.
+
+### Next Handoff
+- `NOW-ADMIN-CMS-001`
+
+## Entry - 2026-06-05 (Project Publish Blocker Error Copy Cleanup)
+
+### Scope
+- Revisited the Projects publish blocker experience because this was the first real editor pain point reported.
+- Simplified the blocked Publish error so it names the first checklist item once, includes the repair detail, reports remaining checklist items, and tells editors the first repair item is highlighted below.
+- Removed the previous duplicated `Start with` guidance from runtime source and added coverage guards so the repeated sentence cannot return.
+
+### Changed Files
+- `src/pages/admin/AdminProjectsPage.tsx`
+- `scripts/check-admin-crud-coverage.mjs`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- Targeted duplicate-copy scan: pass for runtime source.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run build`: pass. Existing Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:check`: pass.
+
+### Risks and Gaps
+- This improves source/runtime error clarity; production authenticated edit/publish walkthrough still needs deployment and real-session evidence.
+
+### Next Handoff
+- `NOW-ADMIN-CMS-001`
+
+## Entry - 2026-06-05 (Admin Role Copy Normalization)
+
+### Scope
+- Audited remaining admin module headers and read-only notices for inconsistent role wording.
+- Replaced visible `Admin/Editor` labels in Media, Products, and Articles with `CMS editor`.
+- Replaced Media and Stone Library read-only notices that used `admin/editor`, `editor/admin`, or material-record language with CMS editor wording.
+- Updated admin CRUD coverage to require the normalized role labels and reject the older technical role wording.
+
+### Changed Files
+- `src/pages/admin/AdminMediaPage.tsx`
+- `src/pages/admin/AdminProductsPage.tsx`
+- `src/pages/admin/AdminArticlesPage.tsx`
+- `src/pages/admin/AdminStoneLibraryPage.tsx`
+- `scripts/check-admin-crud-coverage.mjs`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- Targeted role-term scan: pass for runtime source.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run build`: pass. Existing Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:check`: pass.
+
+### Risks and Gaps
+- This was a source/runtime copy normalization pass; production authenticated walkthrough remains pending after deployment.
+
+### Next Handoff
+- `NOW-ADMIN-CMS-001`
+
+## Entry - 2026-06-05 (Settings and Media Handoff Copy Cleanup)
+
+### Scope
+- Continued the admin editor-facing copy audit after Browser QA.
+- Replaced the remaining Settings empty-state wording that referred to CMS access records.
+- Replaced the Settings invite-security note that exposed the private Supabase service key concept with plain secure-server wording.
+- Replaced Media library fallback titles that could show raw `#id` values with untitled media labels.
+- Extended admin CRUD coverage to guard the new Settings and Media wording and reject the older technical copy.
+
+### Changed Files
+- `src/pages/admin/AdminSettingsPage.tsx`
+- `src/pages/admin/AdminMediaPage.tsx`
+- `scripts/check-admin-crud-coverage.mjs`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- Targeted old-term scan: pass for runtime source.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run build`: pass. Existing Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+
+### Risks and Gaps
+- This was a source/runtime copy cleanup, not a production authenticated walkthrough.
+- Final CMS handoff still needs deployment plus `docs/ADMIN_PRODUCTION_WALKTHROUGH.md` evidence.
+
+### Next Handoff
+- `NOW-ADMIN-CMS-001`
+
+## Entry - 2026-06-05 (Admin No-Config Entry Copy QA)
+
+### Scope
+- Used the in-app Browser against local `/admin` to inspect the no-config admin entry state.
+- Found the configuration-required screen still used technical `Admin auth`, browser-safe key, and project URL language.
+- Replaced that visible copy with CMS-access language that tells a CMS manager what needs to happen without exposing Supabase/project-key terminology.
+- Updated admin config/auth/coverage verifiers so the new wording is expected and the old technical wording cannot return.
+
+### Changed Files
+- `src/pages/admin/AdminState.tsx`
+- `scripts/check-admin-config-gate.mjs`
+- `scripts/check-admin-crud-coverage.mjs`
+- `scripts/check-admin-auth-browser.mjs`
+- `docs/WORKLOG.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Browser QA
+- Flow under test: `/admin` no-config entry state -> configuration-required CMS access message -> safe return link.
+- Desktop Browser check: `http://127.0.0.1:5173/admin` rendered `CMS access is not connected yet`, no framework overlay, and no console warnings/errors.
+- Mobile Browser check at 390x844: the same state wrapped cleanly, with readable copy and visible `Return to site` action.
+
+### Verification Results
+- Browser page identity: pass (`Admin | Urblo` at `http://127.0.0.1:5173/admin`).
+- Browser not-blank / no-overlay / console health: pass.
+- Targeted old-term scan: pass for runtime source; old technical terms remain only in verifier rejection strings.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run build`: pass. Existing Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run agent:admin-config-gate`: pass for 11 no-config admin routes after rebuild. An earlier pre-rebuild run failed against stale `dist` output and was corrected by rebuilding before rerun.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- This only verifies the no-config entry state; authenticated production CMS walkthrough remains pending after deployment.
+- Screenshots were captured through the Browser session for visual inspection and were not added to the repo.
+
+### Next Handoff
+- `NOW-ADMIN-CMS-001`
+
+## Entry - 2026-06-05 (CMS Handoff Live Readiness Audit)
+
+### Scope
+- Re-ran the no-write live-input readiness audit for the CMS handoff path using the production admin origin and first admin email.
+- Confirmed the current production origin is ready for the deployed-preview route/API smoke input.
+- Confirmed the reviewed static-to-Supabase draft import artifacts remain represented in readiness output.
+- Kept final CMS handoff blocked on deployment of the current local UX stack plus production walkthrough evidence, not on source-only readiness.
+
+### Changed Files
+- `docs/WORKLOG.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run agent:live-readiness -- --base-url https://urblo.com.au --admin-email info@urblo.com.au`: pass in report-only mode. No writes were made and no secrets were printed.
+- Ready in the audit: Cloudflare deployed-preview route/API smoke input for `https://urblo.com.au`, and static-to-Supabase draft import artifacts.
+- Missing in the current local shell: service-role key, browser-safe Supabase key, admin login credentials or token, form/email/Turnstile secrets, active-admin browser QA inputs, unprofiled unauthorized browser QA inputs, Settings invite live proof inputs, admin CRUD/live-write inputs, media Storage live-write inputs, and final Turnstile proof inputs.
+
+### Risks and Gaps
+- This audit does not deploy the current local CMS UX stack.
+- This audit does not replace active-admin browser QA, Settings invite proof, admin live-write QA, final form/email proof, or Turnstile proof.
+- Production editor handoff still requires the deployment sequence and module walkthrough in `docs/ADMIN_PRODUCTION_WALKTHROUGH.md`.
+
+### Next Handoff
+- `NOW-ADMIN-CMS-001`
+
+## Entry - 2026-06-05 (Admin Auth and Module Copy Terminology Sweep)
+
+### Scope
+- Continued the editor-facing terminology sweep across the remaining admin modules.
+- Replaced visible Supabase/Auth/profile-row wording in the login, unauthorized, loading, and access-error states with approved CMS login/access language.
+- Replaced remaining visible `record`/`row` wording in shared CMS public-page status copy, Media, Products, Projects, and the Change history module card.
+- Extended admin CRUD coverage so those older technical phrases cannot return.
+
+### Changed Files
+- `src/pages/admin/AdminCmsPrimitives.tsx`
+- `src/pages/admin/AdminLoginPage.tsx`
+- `src/pages/admin/AdminMediaPage.tsx`
+- `src/pages/admin/AdminProductsPage.tsx`
+- `src/pages/admin/AdminProjectsPage.tsx`
+- `src/pages/admin/AdminState.tsx`
+- `src/pages/admin/AdminUnauthorizedPage.tsx`
+- `src/pages/admin/adminContent.ts`
+- `scripts/check-admin-crud-coverage.mjs`
+- `docs/WORKLOG.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- Targeted old-term scan: pass. Removed visible phrases no longer appear in `src/pages/admin`.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run build`: pass. Existing Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+
+### Risks and Gaps
+- This was a source/local runtime pass; it does not replace the production walkthrough.
+- Internal database/table terms remain in non-UI source code where needed for Supabase queries and verification.
+
+### Next Handoff
+- `NOW-ADMIN-CMS-001`
+
+## Entry - 2026-06-05 (Admin Editor-Facing Terminology Sweep)
+
+### Scope
+- Scanned `/admin` source for remaining user-visible technical wording.
+- Replaced residual editor-facing `record`, `row`, and `Unknown` language in Leads, Articles, and Change history with clearer CMS/customer wording.
+- Updated admin CRUD coverage so those old terms cannot silently return.
+
+### Changed Files
+- `src/pages/admin/AdminArticlesPage.tsx`
+- `src/pages/admin/AdminAuditPage.tsx`
+- `src/pages/admin/AdminLeadsPage.tsx`
+- `scripts/check-admin-crud-coverage.mjs`
+- `docs/WORKLOG.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- Targeted old-term scan: pass. The removed visible phrases no longer appear in the edited admin pages.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run build`: pass. Existing Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+
+### Risks and Gaps
+- This was a source terminology pass, not a signed-in production walkthrough.
+- Some internal variable/type names still use `row`/`record`; those are not editor-facing and were left intact.
+
+### Next Handoff
+- `NOW-ADMIN-CMS-001`
+
+## Entry - 2026-06-05 (Admin CMS Handoff Evidence Matrix)
+
+### Scope
+- Added a Handoff Evidence Matrix to the production walkthrough.
+- The matrix maps the CMS goal requirements to current evidence and final proof still needed before claiming non-technical editor handoff.
+- Covered login/orientation, Draft/Published/Archived clarity, Publish readiness, list/filter/save/publish/archive/public confirmation, technical-copy hiding, account handoff, and CMS/fallback explanation.
+- Updated harness and verification docs so final handoff readiness must include this matrix.
+
+### Changed Files
+- `docs/ADMIN_PRODUCTION_WALKTHROUGH.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `docs/agent/verification.md`
+- `scripts/check-harness.mjs`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- This matrix proves the remaining evidence boundary, not production completion.
+- The goal remains active until the current CMS UX stack is deployed and the production walkthrough evidence is recorded.
+
+### Next Handoff
+- `NOW-ADMIN-CMS-001`
+
+## Entry - 2026-06-05 (Admin Editor Handoff Summary)
+
+### Scope
+- Added a concise Customer Handoff Summary to the admin editor guide.
+- The summary now gives non-technical editors the admin address, account/role framing, daily editing path, publish confirmation rule, CMS coverage, imported Draft-row behavior, and static fallback boundary before the longer detailed guide.
+- Tightened `npm run agent:check` so the handoff summary cannot silently disappear.
+
+### Changed Files
+- `docs/ADMIN_EDITOR_GUIDE.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `scripts/check-harness.mjs`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- This improves the customer-facing handoff guide, but production editors still need the current CMS UX stack deployed before they can use the latest interface language.
+- Final handoff still requires production walkthrough evidence.
+
+### Next Handoff
+- `NOW-ADMIN-CMS-001`
+
+## Entry - 2026-06-05 (CMS UX Pre-Deploy Readiness Gates)
+
+### Scope
+- Ran the remaining no-secret pre-deploy gates for the current local CMS UX stack.
+- Verified the Cloudflare Pages repository-side deployment contract still passes after the CMS UX changes.
+- Verified the built admin shell still shows the configuration-required gate across all launch-critical admin routes when browser-safe Supabase config is absent.
+- Kept production deployment and production walkthrough explicitly pending.
+
+### Changed Files
+- `docs/WORKLOG.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run agent:cloudflare-readiness`: pass. Verified build contract, SPA fallback, Function routing scope, headers, API handlers, env placeholders, and deployment runbook.
+- `npm run agent:admin-config-gate`: pass. Firefox no-config gate passed for 11 admin routes; screenshots were written to `.tmp/admin-config-gate/screenshots`.
+
+### Risks and Gaps
+- These are pre-deploy source/built-site gates only; they do not deploy the current CMS UX stack.
+- Production editor handoff still requires push/deploy approval, deployed smoke, active-admin browser QA, and the production walkthrough.
+
+### Next Handoff
+- `NOW-ADMIN-CMS-001`
+
+## Entry - 2026-06-05 (Admin Production Walkthrough Status Alignment)
+
+### Scope
+- Aligned the production walkthrough with the latest local CMS UX status language.
+- Updated `docs/ADMIN_PRODUCTION_WALKTHROUGH.md` to require Lead workflow status and Website settings status during the deployed module walkthrough.
+- Tightened `npm run agent:check` so both the editor guide and production walkthrough must keep those handoff terms.
+- Removed a redundant production-walkthrough handoff gap from the editor guide so the final open-item list stays cleaner.
+- Recorded the walkthrough/guide alignment in the machine task queue without changing task status.
+
+### Changed Files
+- `docs/ADMIN_EDITOR_GUIDE.md`
+- `docs/ADMIN_PRODUCTION_WALKTHROUGH.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+- `scripts/check-harness.mjs`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- This is documentation/harness alignment only; it does not replace the production walkthrough.
+- The current CMS UX stack still needs push/deploy approval before production editors can see the latest interface language.
+
+### Next Handoff
+- `NOW-ADMIN-CMS-001`
+
+## Entry - 2026-06-05 (Admin Leads and Settings Status Clarity)
+
+### Scope
+- Continued the `/admin` CMS editor-handoff goal by tightening the final Leads/Settings UX consistency pass.
+- Added Lead workflow status before Recommended next step so lead managers can immediately see whether the selected lead needs an owner, needs internal notes, is ready to save, is handled, or is no longer active.
+- Added Website settings status before the shared CMS status rules in Settings so CMS managers can distinguish Live settings, Draft settings, and Hidden settings before saving global contact/footer/search defaults.
+- Expanded `npm run agent:admin-crud-coverage` so the new Leads and Settings status language cannot silently regress.
+- Updated the editor guide, handoff, roadmap, and task queue to reflect the current local CMS UX state.
+
+### Changed Files
+- `src/pages/admin/AdminLeadsPage.tsx`
+- `src/pages/admin/AdminSettingsPage.tsx`
+- `scripts/check-admin-crud-coverage.mjs`
+- `docs/ADMIN_EDITOR_GUIDE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run build`: pass. Existing Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+
+### Risks and Gaps
+- This batch is local source/docs work and has not been deployed to `https://urblo.com.au`.
+- Final editor handoff still requires deploying the CMS UX changes and running `docs/ADMIN_PRODUCTION_WALKTHROUGH.md` against production with a real active admin session.
+- Settings invite flow still needs deployed live invite proof before it is used for production editor onboarding.
+
+### Next Handoff
+- `NOW-ADMIN-CMS-001`
+- `NOW-ADMIN-SETTINGS-CRUD-001`
+- `NOW-ADMIN-MEDIA-LEADS-001`
+
+## Entry - 2026-06-04 (Articles Publish Status Summary)
+
+### Scope
+- Continued the `/admin` CMS editor-handoff goal by aligning Articles with the newer publish-status pattern.
+- Added Article website status before the Article publish checklist so editors can see whether the article is Live on website, Ready not live yet, or Not ready to publish.
+- Added Section publish status before Section actions so editors can see whether the selected section can appear in the article, is ready but unpublished, or is blocked.
+- Locked section Publish when the selected section content is not ready, and updated locked Article/Section Publish errors to point editors to the first missing checklist item.
+- Expanded `npm run agent:admin-crud-coverage` so Articles must keep the article/section publish-status and first-missing-item language.
+
+### Changed Files
+- `src/pages/admin/AdminArticlesPage.tsx`
+- `scripts/check-admin-crud-coverage.mjs`
+- `docs/ADMIN_EDITOR_GUIDE.md`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass. Articles coverage now guards Article website status, Section publish status, and first-missing-item publish-blocker language.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run build`: pass. Existing Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+
+### Risks and Gaps
+- This is local source/docs work. It does not deploy the latest CMS UX stack or prove production editor behavior.
+- Leads and Settings still need final consistency passes before production handoff.
+
+### Next Handoff
+- Continue with Leads and Settings consistency after the current Articles gates pass.
+
+## Entry - 2026-06-04 (Products Publish Status Summary)
+
+### Scope
+- Continued the `/admin` CMS editor-handoff goal by aligning Products with the newer Projects/Media/Stone publish-status pattern.
+- Added Product website status before the product Publish checklist so editors can see whether the product is Live on website, Ready not live yet, or Not ready to publish.
+- Added Model publish status before the model Publish checklist so editors can see whether a model already supports a published product, is ready but unpublished, or is blocked.
+- Updated locked Product/Model Publish errors to point editors to the first missing checklist item.
+- Expanded `npm run agent:admin-crud-coverage` so Products must keep the publish-status and first-missing-item language.
+
+### Changed Files
+- `src/pages/admin/AdminProductsPage.tsx`
+- `scripts/check-admin-crud-coverage.mjs`
+- `docs/ADMIN_EDITOR_GUIDE.md`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass. Products coverage now guards Product website status, Model publish status, and first-missing-item publish-blocker language.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run build`: pass. Existing Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+
+### Risks and Gaps
+- This is local source/docs work. It does not deploy the latest CMS UX stack or prove production editor behavior.
+- Articles, Leads, and Settings still need final consistency passes before production handoff.
+
+### Next Handoff
+- Continue with Articles publish-status consistency after the current Products gates pass.
+
+## Entry - 2026-06-04 (Stone Finish Image Media Dependency)
+
+### Scope
+- Continued the `/admin` CMS editor-handoff goal by making the Stone Library finish-image publishing dependency on Media clearer.
+- Added Finish image public status inside the Stone Library finish-image editor so editors can see whether a finish image can appear on the website, is ready but unpublished, or is blocked.
+- Added Open Media first guidance when the selected Media library item is not Published in Media, including clearer save/publish error copy.
+- Expanded `npm run agent:admin-crud-coverage` so Stone Library must keep the finish-image public-status and Media dependency language.
+
+### Changed Files
+- `src/pages/admin/AdminStoneLibraryPage.tsx`
+- `scripts/check-admin-crud-coverage.mjs`
+- `docs/ADMIN_EDITOR_GUIDE.md`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass. Stone Library coverage now guards Finish image public status and Open Media first dependency language.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run build`: pass. Existing Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+
+### Risks and Gaps
+- This is local source/docs work. It does not deploy the latest CMS UX stack or prove production editor behavior.
+- Broader Stone Library production walkthrough still needs to run after deployment approval.
+
+### Next Handoff
+- Continue toward production handoff by either running rendered local admin QA or moving to Products/Articles/Leads/Settings consistency once Stone Library gates pass.
+
+## Entry - 2026-06-04 (Media Public-Use Status Summary)
+
+### Scope
+- Continued the `/admin` CMS editor-handoff goal by tightening Media publish clarity before moving deeper into Stone Library finish-image dependencies.
+- Added Website media status above the Media Publish checklist so editors can see whether the selected media item is Available to public pages, Ready not published yet, or Not ready for public pages.
+- Added first-missing-item guidance when Media Publish is locked, so editors know whether to fix source, public location, alt text, or usage notes first.
+- Expanded `npm run agent:admin-crud-coverage` so the Media page must keep the public-use status summary and first-missing-item language.
+
+### Changed Files
+- `src/pages/admin/AdminMediaPage.tsx`
+- `scripts/check-admin-crud-coverage.mjs`
+- `docs/ADMIN_EDITOR_GUIDE.md`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass. Media coverage now guards Website media status and first-missing-item publish-blocker language.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run build`: pass. Existing Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+
+### Risks and Gaps
+- This is local source/docs work. It does not deploy the latest CMS UX stack or prove production editor behavior.
+- Stone Library finish-image UX still needs a follow-up pass to make the Media dependency even more direct from the Stone editor.
+
+### Next Handoff
+- Continue with Stone Library finish-image dependency clarity after the current Media gates pass.
+
+## Entry - 2026-06-04 (Projects Publish Status Summary)
+
+### Scope
+- Continued the `/admin` CMS editor-handoff goal by tightening the Projects publish-blocker experience after the real editor confusion around Publish.
+- Added a Website publish status summary above the Project Publish checklist so editors can see whether the selected project is Live on website, Ready not live yet, or Not ready to publish.
+- Added a Start with action that jumps to the first repair item when Publish is locked, and adjusted the Publish failure message to tell editors that the checklist has highlighted the first repair item.
+- Expanded `npm run agent:admin-crud-coverage` so the Projects page must keep the publish-status summary and first-repair language.
+
+### Changed Files
+- `src/pages/admin/AdminProjectsPage.tsx`
+- `scripts/check-admin-crud-coverage.mjs`
+- `docs/ADMIN_EDITOR_GUIDE.md`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass. Projects coverage now guards Website publish status and first-repair publish-blocker language.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run build`: pass. Existing Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+
+### Risks and Gaps
+- This is local source/docs work. It is not deployed, and production editor walkthrough proof still has to run after deployment approval.
+
+### Next Handoff
+- Continue Projects production-readiness QA, then move to the next priority area: Media and Stone Library publish clarity.
+
+## Entry - 2026-06-04 (Admin Editor Quick Start)
+
+### Scope
+- Added a Quick Start For Editors section to `docs/ADMIN_EDITOR_GUIDE.md` so non-technical editors get a short first-run path before the longer role/status/module details.
+- The quick start tells editors to sign in, start from Dashboard Recommended next action, use list/search/status filters, save through the visible actions bar, check the publish checklist, confirm with Open public page, and ask a CMS manager for Settings, export, account access, or Change history work.
+- Expanded `npm run agent:check` so the editor guide must keep that quick-start language and the no-Supabase/no-code handoff principle.
+
+### Changed Files
+- `docs/ADMIN_EDITOR_GUIDE.md`
+- `scripts/check-harness.mjs`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:check`: pass. Harness now guards the Quick Start For Editors handoff terms.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- This is editor guidance and harness protection only. It does not deploy the latest CMS UX stack or prove production editor behavior.
+
+### Next Handoff
+- Proceed to push/deploy approval for the current CMS UX stack, then run `docs/ADMIN_PRODUCTION_WALKTHROUGH.md` against production.
+
+## Entry - 2026-06-04 (Admin CMS Deploy Approval Scope)
+
+### Scope
+- Added a Current CMS UX Stack Scope section to `docs/ADMIN_PRODUCTION_WALKTHROUGH.md` so deployment approval has a clear module-by-module scope.
+- The scope lists included Dashboard, Projects, Media, Stone Library, Products, Articles, Leads, Settings, and handoff-doc improvements.
+- The scope also names what deployment approval does not cover: final Turnstile proof, destructive deletes, bulk publishing imported Draft content, removing static fallback behavior, or sending real Settings invite emails without separate approval.
+- Expanded `npm run agent:check` so this approval-scope language stays present.
+
+### Changed Files
+- `docs/ADMIN_PRODUCTION_WALKTHROUGH.md`
+- `scripts/check-harness.mjs`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:check`: pass. Harness now guards the deployment approval scope terms.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- This is approval-scope documentation only. It does not push/deploy the CMS UX stack.
+
+### Next Handoff
+- Proceed to push/deploy approval for the current CMS UX stack.
+
+## Entry - 2026-06-04 (Admin Production Walkthrough Deploy Sequence)
+
+### Scope
+- Added a Deploy Sequence to `docs/ADMIN_PRODUCTION_WALKTHROUGH.md` so the approved CMS UX stack has a concrete push/deploy/proof order.
+- The sequence now requires local pre-deploy gates, Cloudflare deployment identifier recording, deployed smoke, active-admin browser QA when credentials are present, module walkthrough evidence, and final handoff doc updates only after the walkthrough passes.
+- Expanded `npm run agent:check` so the deploy sequence and production smoke/auth commands stay guarded.
+
+### Changed Files
+- `docs/ADMIN_PRODUCTION_WALKTHROUGH.md`
+- `scripts/check-harness.mjs`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:check`: pass. Harness now guards the walkthrough Deploy Sequence terms.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- This is still pre-deploy documentation. It does not push, deploy, or run production editor walkthrough proof.
+
+### Next Handoff
+- Proceed to push/deploy approval for the current CMS UX stack.
+
+## Entry - 2026-06-04 (Cloudflare Repo Readiness Before CMS UX Deploy)
+
+### Scope
+- Ran the no-write repo-side Cloudflare Pages readiness gate for the current local CMS UX stack.
+- Verified the local repository still has the expected Pages build contract, SPA fallback, Function routing scope, launch headers, API handler files, environment placeholders, and deployment runbook before push/deploy approval.
+
+### Changed Files
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+
+### Verification Results
+- `npm run agent:cloudflare-readiness`: pass.
+- Pending after docs update: `npm run agent:check` and `git diff --check`.
+
+### Risks and Gaps
+- This is repo-side deployment readiness only. It does not deploy the current CMS UX stack.
+- Production handoff still requires push/deploy approval and `docs/ADMIN_PRODUCTION_WALKTHROUGH.md`.
+
+### Next Handoff
+- Proceed to push/deploy approval for the current CMS UX stack.
+
+## Entry - 2026-06-04 (Production Cloudflare Smoke Before CMS UX Deploy)
+
+### Scope
+- Ran the no-write Cloudflare deployed smoke against `https://urblo.com.au` before deploying the current local CMS UX stack.
+- Verified the current production deployment still serves public route shells, admin route shells, discovered assets, legacy redirects, admin bundle config/secret boundary markers, and safe-failure behavior for `/api/enquiries` and `/api/sample-requests`.
+
+### Changed Files
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+
+### Verification Results
+- `npm run agent:cloudflare-preview-smoke -- --base-url https://urblo.com.au`: first sandboxed attempt failed with `fetch failed`.
+- `npm run agent:cloudflare-preview-smoke -- --base-url https://urblo.com.au`: pass after approved non-sandbox rerun. Routes, assets, redirects, admin bundle contract, and API safe-failure checks passed.
+- Pending after docs update: `npm run agent:check` and `git diff --check`.
+
+### Risks and Gaps
+- This proves the current production deployment is healthy; it does not prove the local CMS UX stack is deployed.
+- Production editor handoff still requires deploying the current local CMS UX stack and running `docs/ADMIN_PRODUCTION_WALKTHROUGH.md`.
+
+### Next Handoff
+- Proceed to push/deploy approval for the current CMS UX stack.
+
+## Entry - 2026-06-04 (Admin CMS Production Handoff Live-Input Audit)
+
+### Scope
+- Ran the no-write live readiness input audit for production CMS handoff using `https://urblo.com.au` and `info@urblo.com.au` as non-secret inputs.
+- Confirmed Cloudflare deployed-preview route/API smoke is ready with the supplied base URL.
+- Confirmed current local shell has no live Supabase/admin/browser credentials loaded, so live form proofs, admin auth browser QA, admin CRUD/live-write QA, and Settings invite/live proofs remain missing/manual-gated in this local environment.
+
+### Changed Files
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run agent:live-readiness -- --base-url https://urblo.com.au --admin-email info@urblo.com.au`: pass in report-only mode. No writes were attempted.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run agent:admin-crud-coverage`: pass. Admin source coverage still passes after documenting the live-input audit.
+
+### Risks and Gaps
+- This does not contradict previous production proofs; it only shows the current local environment does not have the secret inputs needed to rerun them.
+- Production CMS handoff still needs push/deploy approval, active-admin browser QA against the deployed stack, and `docs/ADMIN_PRODUCTION_WALKTHROUGH.md` evidence.
+
+### Next Handoff
+- Supply/approve the required live inputs only when ready to run production proof commands; otherwise continue with push/deploy approval and no-write deployed smoke.
+
+## Entry - 2026-06-04 (Admin CMS Verification Matrix Walkthrough Contract)
+
+### Scope
+- Wired `docs/ADMIN_PRODUCTION_WALKTHROUGH.md` into `docs/agent/verification.md` so Admin CMS production handoff now has an explicit verification source.
+- The Admin CMS verification profile now names the walkthrough as required after deployment and before final non-technical editor handoff.
+- Added evidence requirements for Dashboard orientation, Settings invite/access, Stone Library publish path, Article publish path, and Open public page confirmation.
+
+### Changed Files
+- `docs/agent/verification.md`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:check`: pass. Verification matrix and walkthrough docs are both covered by harness checks.
+- `git diff --check`: pass.
+- `npm run agent:admin-crud-coverage`: pass. Admin source coverage still passes after the verification-doc update.
+
+### Risks and Gaps
+- This is verification-contract documentation, not production proof. The production walkthrough still needs to run after deploy.
+
+### Next Handoff
+- Proceed to push/deploy approval and execute the production walkthrough.
+
+## Entry - 2026-06-04 (Admin Production Walkthrough Checklist)
+
+### Scope
+- Added `docs/ADMIN_PRODUCTION_WALKTHROUGH.md` as the production checklist for proving the CMS is ready for non-technical editor handoff after deployment.
+- The checklist covers admin login/orientation, Settings account handoff, Media readiness, Projects publish path, Stone Library publish path, Products publish path, Articles publish path, Leads workflow, Change history, and final handoff decision criteria.
+- Updated `npm run agent:check` so the walkthrough file is required and guarded for the current action-bar and production proof language.
+
+### Changed Files
+- `docs/ADMIN_PRODUCTION_WALKTHROUGH.md`
+- `scripts/check-harness.mjs`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:check`: pass. Harness now requires `docs/ADMIN_PRODUCTION_WALKTHROUGH.md` and guards the production walkthrough terms.
+- `npm run agent:admin-crud-coverage`: pass. Admin source coverage still passes after the walkthrough docs update.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- This is a production QA checklist, not production proof. The walkthrough still needs to run after the local CMS UX stack is deployed.
+
+### Next Handoff
+- Proceed to push/deploy approval and execute `docs/ADMIN_PRODUCTION_WALKTHROUGH.md` on production.
+
+## Entry - 2026-06-04 (Admin CMS UX Stack Full Gate and Handoff Audit)
+
+### Scope
+- Ran the full current-stack verification set after the Dashboard, Projects, Media, Stone Library, Products, Articles, Leads, Settings, and editor-guide UX passes.
+- Audited the active CMS handoff goal against current source and docs evidence.
+- Confirmed local source/docs now cover editor start flow, Draft / Published / Archived state meaning, module action bars, publish checklists, visible public-page confirmation, Settings account handoff, current CMS coverage, and static fallback boundaries.
+
+### Changed Files
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:check`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `git diff --check`: pass.
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:admin-config-gate`: pass. All 11 no-config admin route checks passed.
+
+### Completion Audit
+- Proven locally: non-technical editor orientation through Dashboard Recommended next action; module lists/search/status filters; Draft / Published / Archived visibility language; clear action bars for Projects, Stone Library, Products, Articles, Media, Leads, and Settings; publish checklists and blocker language; Open public page guidance; editor-facing Settings account handoff; and `docs/ADMIN_EDITOR_GUIDE.md` usage guidance.
+- Not yet proven in production: the local CMS UX stack has not been pushed/deployed, Settings invite still needs live invite QA, and final signed-in editor walkthroughs for Stone Library and Articles still need to run against production content.
+
+### Risks and Gaps
+- Do not mark the CMS handoff goal complete until the current uncommitted stack is deployed and production editor walkthrough evidence exists.
+- The build still reports the existing AdminApp chunk-size warning; it is not a functional failure but remains worth monitoring as admin grows.
+
+### Next Handoff
+- Get push/deploy approval for the current CMS UX stack, then run production active-admin walkthroughs covering Dashboard, Settings invite/access, a Stone Library publish path, an Article publish path, and a public-page confirmation after publishing.
+
+## Entry - 2026-06-04 (Admin Editor Guide Handoff Refresh)
+
+### Scope
+- Continued the `/admin` CMS editor-handoff goal by refreshing `docs/ADMIN_EDITOR_GUIDE.md` after the Dashboard, content, Leads, and Settings UX action-bar passes.
+- Added Where Editors Start guidance so non-technical editors know to begin with Recommended next action, content status counts, Content health queue, and All clear checks.
+- Added Account Handoff Flow guidance for Settings so CMS managers can distinguish Site settings actions from CMS access handoff actions.
+- Updated module notes to include Project actions, Stone family actions, Variant actions, Product actions, Model actions, Article actions, Section actions, Media actions, Lead workflow actions, and Site settings actions.
+- Expanded harness checks so the editor guide cannot silently drift away from the current CMS UX language.
+
+### Changed Files
+- `docs/ADMIN_EDITOR_GUIDE.md`
+- `scripts/check-harness.mjs`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:check`: pass. Harness now guards the refreshed editor guide handoff/action-bar terms.
+- `npm run agent:admin-crud-coverage`: pass. Admin source coverage still passes after the guide refresh.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- This is a local docs/harness pass. The customer-facing guide still depends on the current CMS UX stack being pushed and deployed before production editors see the described interface.
+
+### Next Handoff
+- Continue with final production walkthrough/deploy readiness for the current CMS UX stack.
+
+## Entry - 2026-06-04 (Admin Settings Handoff Actions UX)
+
+### Scope
+- Continued the `/admin` CMS editor-handoff goal by making Settings clearer for website settings saves and CMS account handoff.
+- Added a Site settings actions bar near the top of the settings editor so Save settings sits beside Draft / Published / Archived website-visibility meaning.
+- Added a CMS access handoff actions panel in People and access so CMS managers can choose between Invite and grant access for new editors and Grant existing login for people who already have a login setup code.
+- Expanded admin CRUD coverage so Settings keeps the action bars and editor-facing save/invite guidance.
+
+### Changed Files
+- `src/pages/admin/AdminSettingsPage.tsx`
+- `scripts/check-admin-crud-coverage.mjs`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass. Coverage now guards the Settings handoff action bars and editor-facing save/invite guidance.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass after approved non-sandbox rerun. The first sandboxed run did not get a response from Vite preview at `http://127.0.0.1:4173`.
+- `npm run agent:admin-config-gate`: pass after approved non-sandbox rerun. The first sandboxed run hit `listen EPERM` on `127.0.0.1:4192`.
+
+### Risks and Gaps
+- This is a local source/docs UX pass. Settings account handoff still needs production invite QA after deploy approval.
+
+### Next Handoff
+- Continue the CMS editor-handoff UX pass with production walkthrough/readiness notes, then deploy after Jay approves the current uncommitted CMS UX stack.
+
+## Entry - 2026-06-04 (Admin Leads Workflow Actions UX)
+
+### Scope
+- Continued the `/admin` CMS editor-handoff goal by making Leads workflow saving more visible and less form-like for non-technical lead managers.
+- Added a Lead workflow actions bar beside the status guidance so Save workflow sits with the current next-step meaning.
+- Added editor-facing action notes for selected, unselected, and read-only states, including the expected sequence: set workflow status, assign an owner, and record internal notes.
+- Expanded admin CRUD coverage so Leads keeps the workflow action bar and editor-facing save/history language.
+
+### Changed Files
+- `src/pages/admin/AdminLeadsPage.tsx`
+- `scripts/check-admin-crud-coverage.mjs`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass. Coverage now guards the Leads workflow action bar and editor-facing save/history language.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass after approved non-sandbox rerun. The first sandboxed run did not get a response from Vite preview at `http://127.0.0.1:4173`.
+- `npm run agent:admin-config-gate`: pass after approved non-sandbox rerun. The first sandboxed run hit `listen EPERM` on `127.0.0.1:4192`.
+
+### Risks and Gaps
+- This is a local source/docs UX pass. The Leads workflow actions still need production editor walkthrough after push/deploy approval.
+
+### Next Handoff
+- Continue the CMS editor-handoff UX pass with Settings, then run the same source/runtime gates before deploy or handoff.
+
+## Entry - 2026-06-04 (Admin Articles Action Bar UX)
+
+### Scope
+- Continued the `/admin` CMS editor-handoff goal by making Articles save/publish/archive actions visible beside the article and section editing flow.
+- Replaced separate Article and Article section button rows with Article actions and Section actions bars.
+- Added editor-facing action notes that explain Draft saves, Published website visibility, Archived hiding, and why article Publish is locked until the Article publish checklist is clear.
+- Expanded admin CRUD coverage so Articles keeps the action bars and editor-facing save/publish lock language.
+
+### Changed Files
+- `src/pages/admin/AdminArticlesPage.tsx`
+- `scripts/check-admin-crud-coverage.mjs`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass. Coverage now guards the Articles action bars and editor-facing save/publish lock language.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npx tsc -b`: pass.
+- `npm run lint`: pass.
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run agent:smoke`: blocked in this environment. Sandboxed run started Vite preview but `http://127.0.0.1:4173` did not respond.
+- `npm run agent:admin-config-gate`: blocked in this environment. Sandboxed run failed with `listen EPERM` on `127.0.0.1:4192`.
+
+### Risks and Gaps
+- This is a local source/docs UX pass. The Articles action bars still need production editor walkthrough after push/deploy approval.
+
+### Next Handoff
+- Rerun `npm run agent:smoke` and `npm run agent:admin-config-gate` once localhost preview escalation is available, then stage/commit after `.git` index writes are allowed.
+
+## Entry - 2026-06-04 (Admin Products Action Bar UX)
+
+### Scope
+- Continued the `/admin` CMS editor-handoff goal by making Products save/publish/archive actions visible beside the product and model publish checklists.
+- Replaced separate Product and Model button rows with Product actions and Model actions bars.
+- Added editor-facing action notes that explain Draft saves, Published website visibility, Archived hiding, and why Publish is locked until the relevant checklist is clear.
+- Expanded admin CRUD coverage so Products keeps the action bars and editor-facing save/publish lock language.
+
+### Changed Files
+- `src/pages/admin/AdminProductsPage.tsx`
+- `scripts/check-admin-crud-coverage.mjs`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass. Coverage now guards the Products action bars and editor-facing save/publish lock language.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npx tsc -b`: pass.
+- `npm run lint`: pass.
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run agent:smoke`: blocked in this environment. Sandboxed run started Vite preview but `http://127.0.0.1:4173` did not respond.
+- `npm run agent:admin-config-gate`: blocked in this environment. Sandboxed run failed with `listen EPERM` on `127.0.0.1:4192`.
+
+### Risks and Gaps
+- This is a local source/docs UX pass. The Products action bars still need production editor walkthrough after push/deploy approval.
+
+### Next Handoff
+- Rerun `npm run agent:smoke` and `npm run agent:admin-config-gate` once localhost preview escalation is available, then stage/commit after `.git` index writes are allowed.
+
+## Entry - 2026-06-04 (Admin Media Action Bar UX)
+
+### Scope
+- Continued the `/admin` CMS editor-handoff goal by making Media save/publish/archive actions visible beside the metadata publish checklist.
+- Added a Media actions bar below the Media publish checklist and reused the same action language in the right-side utility column.
+- Added editor-facing action notes that explain Draft saves, Published media visibility, Archived media hiding, and why Publish is locked until the Media publish checklist is clear.
+- Expanded admin CRUD coverage so Media keeps the action bar and editor-facing save/publish lock language.
+
+### Changed Files
+- `src/pages/admin/AdminMediaPage.tsx`
+- `scripts/check-admin-crud-coverage.mjs`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass. Coverage now guards the Media action bar and editor-facing save/publish lock language.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npx tsc -b`: pass.
+- `npm run lint`: pass.
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run agent:smoke`: blocked in this environment. Sandboxed run started Vite preview but `http://127.0.0.1:4173` did not respond.
+- `npm run agent:admin-config-gate`: blocked in this environment. Sandboxed run failed with `listen EPERM` on `127.0.0.1:4192`.
+
+### Risks and Gaps
+- This is a local source/docs UX pass. The Media action bar still needs production editor walkthrough after push/deploy approval.
+
+### Next Handoff
+- Rerun `npm run agent:smoke` and `npm run agent:admin-config-gate` once localhost preview escalation is available, then stage/commit after `.git` index writes are allowed.
+
+## Entry - 2026-06-04 (Admin Stone Library Action Bar UX)
+
+### Scope
+- Continued the `/admin` CMS editor-handoff goal by making Stone Library family and variant actions easier to find.
+- Replaced the separate Stone family and Variant button rows with editor-facing action bars that pair Save / Publish / Archive with the current visibility state.
+- Added action notes that explain Draft, Published, Archived, and Needs confirmation behavior beside the controls, including that Needs confirmation stays private until the checklist is clear.
+- Expanded admin CRUD coverage so Stone Library keeps the action bars and editor-facing save/publish lock language.
+
+### Changed Files
+- `src/pages/admin/AdminStoneLibraryPage.tsx`
+- `scripts/check-admin-crud-coverage.mjs`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass. Coverage now guards the Stone Library action bars and editor-facing save/publish lock language.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npx tsc -b`: pass.
+- `npm run lint`: pass.
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run agent:smoke`: blocked in this environment. Sandboxed run started Vite preview but `http://127.0.0.1:4173` did not respond.
+- `npm run agent:admin-config-gate`: blocked in this environment. Sandboxed run failed with `listen EPERM` on `127.0.0.1:4192`.
+
+### Risks and Gaps
+- This is a local source/docs UX pass. The Stone Library action bars still need production editor walkthrough after push/deploy approval.
+
+### Next Handoff
+- Rerun `npm run agent:smoke` and `npm run agent:admin-config-gate` once localhost preview escalation is available, then stage/commit after `.git` index writes are allowed.
+
+## Entry - 2026-06-04 (Admin Projects Action Bar UX)
+
+### Scope
+- Continued the `/admin` CMS editor-handoff goal by making Projects save/publish/archive actions easier to find.
+- Added a Project actions bar immediately below the Publish checklist so editors can save, publish, or archive without hunting at the bottom of the long project form.
+- Reused the same action bar near the bottom of the editor and added inline action notes that explain whether Publish is locked, whether changes stay in the CMS, and when Published changes can appear on the website.
+- Expanded admin CRUD coverage so the Projects editor keeps the visible action bar and editor-facing save/publish lock language.
+
+### Changed Files
+- `src/pages/admin/AdminProjectsPage.tsx`
+- `scripts/check-admin-crud-coverage.mjs`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass. Coverage now guards the Projects action bar and editor-facing save/publish lock language.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npx tsc -b`: pass.
+- `npm run lint`: pass.
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run agent:smoke`: blocked in this environment. Escalated local preview run was rejected by policy; sandboxed run started Vite preview but `http://127.0.0.1:4173` did not respond.
+- `npm run agent:admin-config-gate`: blocked in this environment. Escalated local preview run was rejected by policy; sandboxed run failed with `listen EPERM` on `127.0.0.1:4192`.
+
+### Risks and Gaps
+- This is a local source/docs UX pass. The Projects action bar still needs production editor walkthrough after push/deploy approval.
+
+### Next Handoff
+- Rerun `npm run agent:smoke` and `npm run agent:admin-config-gate` once localhost preview escalation is available, then stage/commit after `.git` index writes are allowed.
+
+## Entry - 2026-06-04 (Admin Dashboard Priority Queue UX)
+
+### Scope
+- Continued the `/admin` CMS editor-handoff goal by making Dashboard behave more like an editor workbench.
+- Replaced the static Start here cards with Recommended next action cards derived from new leads, publish blockers, and hidden draft content.
+- Changed the Content health queue so it shows only items that need attention before publishing, with clear checks grouped separately under All clear checks.
+- Expanded admin CRUD coverage so the Dashboard cannot drift back to a static next-job prompt or a noisy health queue that lists clear checks as primary work.
+
+### Changed Files
+- `src/pages/admin/AdminDashboardPage.tsx`
+- `scripts/check-admin-crud-coverage.mjs`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- Browser DOM check on local `/admin`: pass for no-config admin gate after Vite dev server was started outside the sandbox; page reached the configuration-required state with no framework overlay or relevant console errors. Screenshot/locator click proof was attempted, but the browser runtime timed out during capture/locator evaluation, so the stable packaged browser gate below remains the authoritative rendered route proof.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:admin-crud-coverage`: pass. Coverage now guards the Dashboard priority queue language and rejects the older static next-job/noisy clear-check queue.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- `npx tsc -b`: pass.
+- `npm run lint`: pass.
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run agent:smoke`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions.
+- `npm run agent:admin-config-gate`: pass after rerun outside the sandbox because local Vite preview listening was blocked by sandbox permissions; 11 admin routes passed the no-config gate.
+
+### Risks and Gaps
+- This is a local source/docs UX pass. Browser DOM verification confirmed the local no-config admin gate renders without framework overlay or relevant console errors, but authenticated Dashboard data-state walkthrough still needs push/deploy plus production editor session.
+
+### Next Handoff
+- Continue with push/deploy approval and production editor walkthrough.
 
 ## Entry - 2026-06-04 (Admin Media Library Item Language UX)
 

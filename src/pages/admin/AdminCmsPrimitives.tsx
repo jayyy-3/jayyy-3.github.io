@@ -33,7 +33,7 @@ const cmsStatusMeta: Record<CmsPublishStatus, CmsStatusMeta> = {
     archived: {
         label: 'Archived',
         editorLabel: 'Archived',
-        publicMeaning: 'Hidden from the public website and kept for record history.',
+        publicMeaning: 'Hidden from the public website and kept for editing history.',
         countMeaning: 'Hidden but kept',
         tone: 'archived',
         Icon: Archive,
@@ -186,10 +186,10 @@ export function CmsPublicPageLink({
     const isPublished = status === 'published';
     const reason =
         status === 'draft' || status === 'tbc'
-            ? 'This record is still Draft/Needs confirmation, so public pages will not show it yet.'
+            ? 'This item is still Draft/Needs confirmation, so public pages will not show it yet.'
             : status === 'archived'
-              ? 'This record is Archived, so public pages will keep it hidden.'
-              : 'This record can appear on public CMS-backed pages.';
+              ? 'This item is Archived, so public pages will keep it hidden.'
+              : 'This item can appear on public CMS-backed pages.';
 
     if (isPublished && href) {
         return (

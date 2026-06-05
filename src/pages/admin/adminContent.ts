@@ -110,7 +110,7 @@ export const adminModules: AdminModuleDefinition[] = [
         label: 'Change history',
         path: '/admin/audit',
         summary: 'Saved changes, publish events, exports, and sensitive operation review.',
-        handoffLabel: 'Read-only record',
+        handoffLabel: 'Read-only history',
         group: 'operations',
         Icon: ShieldCheck,
     },
