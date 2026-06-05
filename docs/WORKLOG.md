@@ -2,6 +2,37 @@
 
 Last updated: 2026-06-05
 
+## Entry - 2026-06-05 (Production Admin Browser QA Heading Fix)
+
+### Scope
+- Pushed the CMS UX/handoff stack to `origin/main` at commit `43a1750`.
+- Ran deployed Cloudflare smoke against `https://urblo.com.au`; route, asset, redirect, and safe API checks passed.
+- Ran production active-admin browser QA with `info@urblo.com.au`; login reached the authenticated shell, but the verifier still expected the old `/admin/audit` heading `Audit`.
+- Updated `scripts/check-admin-auth-browser.mjs` to expect the current editor-facing `/admin/audit` heading `Change history` and to keep that private module text out of signed-out/unauthorized checks.
+
+### Changed Files
+- `scripts/check-admin-auth-browser.mjs`
+- `docs/WORKLOG.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `git push origin main`: pass, `7c89ea7..43a1750`.
+- `npm run agent:cloudflare-preview-smoke -- --base-url https://urblo.com.au`: pass.
+- Production active-admin browser QA before this fix: failed at `/admin/audit` because the verifier expected heading `Audit` while the deployed editor-facing heading is `Change history`.
+- `node --check scripts/check-admin-auth-browser.mjs`: pass.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- Pending after this fix: commit/push, redeployed smoke, and rerun production active-admin browser QA.
+
+### Risks and Gaps
+- The failure was in the QA script's old expected heading, not in the production login flow. Final editor handoff still requires the corrected verifier to pass after redeploy and the production walkthrough Results Template to be filled.
+
+### Next Handoff
+- `NOW-ADMIN-CMS-001`
+
 ## Entry - 2026-06-05 (Stone Library Public Read Contract Alignment)
 
 ### Scope

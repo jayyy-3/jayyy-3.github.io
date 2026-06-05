@@ -20,7 +20,7 @@ const routeChecks = [
   { path: '/admin/projects', slug: 'admin-projects', expectedHeading: 'Projects' },
   { path: '/admin/products', slug: 'admin-products', expectedHeading: 'Products' },
   { path: '/admin/articles', slug: 'admin-articles', expectedHeading: 'Articles' },
-  { path: '/admin/audit', slug: 'admin-audit', expectedHeading: 'Audit' },
+  { path: '/admin/audit', slug: 'admin-audit', expectedHeading: 'Change history' },
 ];
 
 const forbiddenAuthenticatedText = [
@@ -39,7 +39,7 @@ const forbiddenUnauthorizedText = [
   'Projects',
   'Products',
   'Articles',
-  'Audit',
+  'Change history',
 ];
 
 const unauthorizedRouteProbes = routeChecks.map((route) => {
@@ -378,7 +378,7 @@ async function runBrowserCheck({ baseUrl, expectUnauthorized, screenshotsDir, em
 
     await page.getByRole('button', { name: /sign out/i }).click();
     await waitForSignedOutRoute(page, '/admin/audit');
-    await assertNoText(page, 'Audit events');
+    await assertNoText(page, 'Change history');
     await page.screenshot({ path: `${screenshotsDir}/signed-out.png`, fullPage: true });
 
     if (consoleErrors.length > 0) {
@@ -455,7 +455,7 @@ async function waitForSignedOutRoute(page, expectedNext) {
       'Configuration required',
       'This account is not an active Urblo admin',
       'Admin access could not be verified',
-      'Audit',
+      'Change history',
       'Dashboard',
     ]);
     throw new Error(
