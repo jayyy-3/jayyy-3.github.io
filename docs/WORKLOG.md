@@ -2,6 +2,33 @@
 
 Last updated: 2026-06-05
 
+## Entry - 2026-06-05 (Harness GC Queue Cleanup)
+
+### Scope
+- Reduced the active `now` queue to the two genuinely executable follow-ups: final Turnstile proof and real Settings invite proof.
+- Marked the completed CMS umbrella/auth/content/media/leads/form-backend work as done or deferred where current evidence supports it.
+- Moved paused article claim cleanup from `now` to `next`.
+- Reworded historical done-task notes that used current-blocker language.
+- Replaced `docs/HANDOFF.md` with a compact current-state handoff under the Harness GC line target.
+- Replaced `docs/NEXT_STEPS.md` with a concise roadmap and agent command index.
+- Updated `docs/agent/status.json` so future agents can distinguish active execution work from umbrella or decision-gated follow-ups.
+
+### Verification Results
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:harness-gc`: pass with zero failures and one warning.
+- `npm run agent:harness-gc:review`: pass; wrote `.tmp/harness-gc-review.md` with Harness architecture score 96/100.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- Remaining GC warning: `docs/WORKLOG.md` has 11628 lines against the configured 8000-line review target.
+
+### Risks and Gaps
+- `docs/WORKLOG.md` intentionally remains above the Harness GC review-size target because it is the historical evidence archive.
+- Live Turnstile proof and real Settings invite proof still require their own credentials, target inputs, and approval before execution.
+
+### Next Handoff
+- `NOW-FORMS-SUPABASE-001`
+- `NOW-ADMIN-SETTINGS-CRUD-001`
+
 ## Entry - 2026-06-05 (Harness GC First Pass)
 
 ### Scope

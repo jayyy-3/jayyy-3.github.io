@@ -33,12 +33,11 @@
     "Decide whether final Turnstile proof is required before the next public launch checkpoint.",
     "Choose a target editor email before running a real Settings invite proof.",
     "Have a customer or editor review imported Draft CMS content before publishing items publicly.",
-    "Reduce docs/agent/tasks.json now-count by separating active executable tasks from completed/deferred follow-ups."
+    "Decide whether and when to resume paused article claim cleanup."
   ],
   "activeExecutableTasks": [
     "NOW-FORMS-SUPABASE-001",
-    "NOW-ADMIN-SETTINGS-CRUD-001",
-    "NOW-ARTICLE-STRUCTURE-CLAIMS-001"
+    "NOW-ADMIN-SETTINGS-CRUD-001"
   ],
   "umbrellaTasks": [
     "NOW-ADMIN-CMS-001"
@@ -52,6 +51,8 @@
   "lastVerified": {
     "agentCheck": "2026-06-05",
     "gitDiffCheck": "2026-06-05",
+    "harnessGc": "2026-06-05",
+    "harnessGcReview": "2026-06-05",
     "cloudflarePreviewSmokeProduction": "2026-06-05",
     "adminAuthBrowserProduction": "2026-06-05",
     "adminHandoffReadinessStrict": "2026-06-05"

@@ -173,7 +173,7 @@
     },
     {
       "id": "NOW-FORMS-BACKEND-001",
-      "status": "now",
+      "status": "done",
       "priority": 4.1,
       "summary": "Implement Cloudflare Pages Functions for Contact and Sample Request Supabase writes.",
       "files": [
@@ -209,7 +209,7 @@
       ],
       "notes": [
         "Run after Supabase foundation and baseline seed work. Turnstile and email notification can be staged: database insert comes first, notification can remain pending until the email provider secret exists.",
-        "The main public submit source now posts to Pages Functions; basic deployed persistence and server-side audit creation are verified. Remaining completion proof is browser-key privacy boundary, notification behavior, Turnstile behavior, and admin-visible lead workflow verification.",
+        "The main public submit source now posts to Pages Functions; deployed persistence, server-side audit creation, browser-key privacy boundary, and notification behavior are verified. Final Turnstile behavior stays tracked in NOW-FORMS-SUPABASE-001.",
         "2026-05-27: Added Pages Function source for /api/enquiries and /api/sample-requests. Contact page now posts enquiries to /api/enquiries; Sample Request mode posts to /api/sample-requests and creates a sample item payload. Footer/sample CTAs now route to /contact?intent=sample-request.",
         "2026-05-27: Mock API checks pass for valid enquiry, invalid enquiry, valid sample request with item row, and configured Turnstile failure. Live Supabase insert verification remains pending server-side SUPABASE_SERVICE_ROLE_KEY configuration.",
         "2026-05-28: Form handlers now attempt server-side admin_audit_events writes after successful enquiry/sample request inserts. Mock API checks verify audit calls, audit-failure resilience after lead storage, missing service-role fail-closed behavior before Supabase calls, and configured Turnstile failure.",
@@ -233,7 +233,8 @@
         "2026-05-29: `scripts/check-forms-api-live.mjs` HTTP mode now rejects copied placeholders and non-origin `--base-url` values before service-role Supabase reads/writes can start, using the shared live input validation helper.",
         "2026-06-02: After Cloudflare Pages production env vars were configured and deployment `17588cfa-2204-4b95-b6e0-4e3531e366bb` succeeded, approved tagged QA writes against `https://urblo.pages.dev` verified base persistence. Valid enquiry returned 201 and created `enquiries.id = 1`; valid sample request returned 201 and created `sample_requests.id = 1` plus `sample_request_items.id = 1`; matching server-side audit rows `admin_audit_events.id = 1/2` include source-route metadata. Invalid tagged enquiry/sample payloads returned 400 and Supabase readback confirmed zero matching lead or audit rows. Stored notification_status is `not_required` because no email provider is configured, and turnstile_success is null because Turnstile is not configured.",
         "2026-06-03: Approved SMTP2GO notification proof against `https://urblo.com.au` created `enquiries.id = 3`, `sample_requests.id = 2`, `sample_request_items.id = 2`, and `admin_audit_events.id = 4/5`; both valid responses returned `notificationStatus = sent`, and Supabase readback confirmed both stored lead rows have `notification_status = sent`.",
-        "2026-06-03: After browser-safe Supabase publishable key configuration and production redeploy `7d10ba13-5b9f-4d6e-86b9-e28218978189`, approved browser-key private-row boundary proof created `enquiries.id = 4`, `sample_requests.id = 3`, `sample_request_items.id = 3`, and `admin_audit_events.id = 6/7`; anonymous REST reads through the deployed publishable key returned HTTP 401 for all three private tables."
+        "2026-06-03: After browser-safe Supabase publishable key configuration and production redeploy `7d10ba13-5b9f-4d6e-86b9-e28218978189`, approved browser-key private-row boundary proof created `enquiries.id = 4`, `sample_requests.id = 3`, `sample_request_items.id = 3`, and `admin_audit_events.id = 6/7`; anonymous REST reads through the deployed publishable key returned HTTP 401 for all three private tables.",
+        "2026-06-05 Harness GC cleanup: marked done because the Pages Functions implementation, deployed persistence/audit proof, SMTP2GO notification proof, and browser-key private-row proof are complete. Turnstile remains the active forms follow-up in NOW-FORMS-SUPABASE-001."
       ],
       "acceptance": [
         "Valid enquiry submissions create Supabase enquiry rows through a server-side endpoint.",
@@ -324,7 +325,7 @@
         "npm run agent:cloudflare-preview-smoke -- --base-url https://<preview>.pages.dev (after Cloudflare preview deployment exists)"
       ],
       "notes": [
-        "2026-05-28: Added `npm run agent:cloudflare-readiness` as a no-secret repo-side verifier for Cloudflare Pages. It checks the build script, Vite root base, SPA fallback, Function routing scope, headers, API handler files, environment placeholders, and deployment runbook. Account-level Pages project creation, production env vars, preview URL, custom domain, DNS, and rollback remain blocked on Cloudflare account access.",
+        "2026-05-28: Added `npm run agent:cloudflare-readiness` as a no-secret repo-side verifier for Cloudflare Pages. It checks the build script, Vite root base, SPA fallback, Function routing scope, headers, API handler files, environment placeholders, and deployment runbook. At that checkpoint, account-level Pages project creation, production env vars, preview URL, custom domain, DNS, and rollback were waiting on Cloudflare account access; later notes supersede that state.",
         "2026-05-28: Added `npm run agent:cloudflare-preview-smoke` as a no-secret deployed-preview verifier. It requires `--base-url`, checks direct-refresh public/admin route shells and deployed assets, verifies Cloudflare-applied legacy redirects, and verifies `/api/enquiries` and `/api/sample-requests` reject GET/invalid POST safely. Local preview URLs skip redirect/Function checks so the script can be validated before a Pages preview exists.",
         "2026-05-28: Added `npm run agent:live-readiness` reporting for the optional `CLOUDFLARE_PAGES_PREVIEW_URL` / `PAGES_PREVIEW_URL` helper variables, plus a non-secret `--base-url` override, before running deployed preview smoke.",
         "2026-05-29: `npm run agent:live-readiness` now requires preview URL readiness inputs to be real `http`/`https` origins; copied placeholders and URLs with path/query/hash are reported as missing instead of present.",
@@ -409,11 +410,12 @@
         "2026-05-25: Contact now blocks empty local email drafts unless the visitor provides project notes plus either email or phone. This is a runtime guardrail, not a substitute for Supabase-backed lead persistence.",
         "2026-05-26: Execute through NOW-SUPABASE-FOUNDATION-001, NOW-SUPABASE-SEED-BASELINE-001, and NOW-FORMS-BACKEND-001 so database safety is verified before public submit behavior changes.",
         "2026-05-27: Main Contact and Sample Request submit source no longer depends on mailto.",
-        "2026-06-02: Basic deployed Contact and Sample Request persistence is verified on `https://urblo.pages.dev`; valid tagged submissions created lead/sample/audit rows and invalid tagged submissions created none. Turnstile and admin-visible lead workflow remain pending.",
+        "2026-06-02: Basic deployed Contact and Sample Request persistence is verified on `https://urblo.pages.dev`; valid tagged submissions created lead/sample/audit rows and invalid tagged submissions created none. Turnstile remains the final forms proof.",
         "2026-06-03: SMTP2GO notification acceptance is verified on `https://urblo.com.au`; tagged Contact and Sample Request submissions returned and stored `notification_status = sent`.",
         "2026-06-03: Browser-key private-row denial is verified on `https://urblo.com.au`; tagged private lead rows exist, while anonymous REST reads through the deployed publishable key returned HTTP 401.",
         "2026-05-29: Final notification and Turnstile acceptance are now guarded by explicit live verifier flags: `--allow-email --require-email` for sent notification_status, and `--require-turnstile --turnstile-token <token>` for a configured public Turnstile site key plus turnstile_success = true.",
-        "2026-05-29: The public Contact form has an optional Cloudflare Turnstile widget behind `VITE_TURNSTILE_SITE_KEY`; production Turnstile still requires the server-side secret and final live proof token."
+        "2026-05-29: The public Contact form has an optional Cloudflare Turnstile widget behind `VITE_TURNSTILE_SITE_KEY`; production Turnstile still requires the server-side secret and final live proof token.",
+        "2026-06-05 Harness GC cleanup: kept as a `now` task only for the final Turnstile proof. Persistence, SMTP2GO delivery, browser-key private-row denial, and admin-visible lead workflow are already verified elsewhere."
       ],
       "acceptance": [
         "Public form submissions are validated server-side, protected by Turnstile, stored in Supabase, and notify Urblo by email.",
@@ -431,7 +433,7 @@
     },
     {
       "id": "NOW-ADMIN-CMS-001",
-      "status": "now",
+      "status": "done",
       "priority": 5,
       "summary": "Build the Urblo admin CMS for customer-maintained Projects, Stone Library, Products, Articles, media, and leads.",
       "files": [
@@ -522,7 +524,8 @@
     "2026-06-05: Stone Library public-read contract wording was realigned with `src/service/StoneLibraryService.ts`: listing and detail both prefer Published CMS/Supabase content with static fallback, so the old detail-static-only adapter gap is retired.",
     "2026-06-05: Pushed the CMS UX/handoff stack to `origin/main` at `43a1750`; deployed smoke passed on `https://urblo.com.au`. The first production active-admin browser QA reached authenticated route checks but found the verifier still expected `/admin/audit` heading `Audit`; `scripts/check-admin-auth-browser.mjs` now expects `Change history` and needs redeploy plus rerun.",
     "2026-06-05: Pushed the admin browser QA heading fix at `a59fa01`; the next strict active-admin browser QA reached authenticated route checks but exposed a static article image decode warning for `02-stone-finishes.webp`. That image was re-encoded at 2500x1875 and needs deploy plus rerun.",
-    "2026-06-05: Pushed the WebP re-encode at `3db6690`; deployed smoke and strict active-admin browser QA now pass on `https://urblo.com.au`. `docs/WORKLOG.md` includes Admin CMS Production Walkthrough Results with Final editor handoff marked Pass; real Settings invite proof and customer content review/publish decisions remain optional/deferred follow-ups.",
+        "2026-06-05: Pushed the WebP re-encode at `3db6690`; deployed smoke and strict active-admin browser QA now pass on `https://urblo.com.au`. `docs/WORKLOG.md` includes Admin CMS Production Walkthrough Results with Final editor handoff marked Pass; real Settings invite proof and customer content review/publish decisions remain optional/deferred follow-ups.",
+        "2026-06-05 Harness GC cleanup: marked done as an umbrella after CMS production walkthrough and strict handoff readiness passed. Future CMS work should use child tasks rather than treating this umbrella as executable `now` work.",
         "2026-06-04: `/admin/projects` now presents project/fact/material proof review in editor language, explains Needs review / Approved for public use / Deferred or keep private, rewrites publish-lock messages around the Project editor checklist, and admin CRUD coverage rejects old Claims checked / Claim status / Cannot publish wording.",
         "2026-06-04: `/admin/projects` now uses Website URL key instead of visible slug wording, Structured detail instead of JSON value for advanced fact data, Location not set instead of Location TBC list fallback, and admin CRUD coverage rejects those older labels.",
         "2026-06-04: `/admin/projects` now shows a Project actions bar directly below the Publish checklist and again near the bottom of the long editor, with Save / Publish / Archive controls plus editor-facing notes for Publish locked, CMS-saved changes, and website-visible Published changes; admin CRUD coverage guards the action bar language.",
@@ -549,9 +552,9 @@
     "2026-06-04: `docs/ADMIN_EDITOR_GUIDE.md` now opens with Quick Start For Editors so handoff starts from sign-in, Dashboard Recommended next action, list/search/status filters, visible actions bars, publish checklist, Open public page confirmation, and CMS manager escalation for Settings/export/account/history tasks; `npm run agent:check` guards the no-Supabase/no-code handoff principle.",
     "2026-06-04: `/admin/projects` now shows Website publish status before the project Publish checklist, distinguishing Live on website / Ready not live yet / Not ready to publish and giving editors a Start with action for the first repair item when Publish is locked; `npm run agent:admin-crud-coverage` guards this publish-blocker clarity language.",
     "2026-06-04: `/admin/media` now shows Website media status before the Media Publish checklist, distinguishing Available to public pages / Ready not published yet / Not ready for public pages and pointing editors to the first missing checklist item when media cannot be published; `npm run agent:admin-crud-coverage` guards this media public-use clarity language.",
-    "2026-06-04: `/admin/stone-library` finish-image editing now shows Finish image public status and routes blocked image publishing to Open Media first when the selected Media library item is not Published in Media; `npm run agent:admin-crud-coverage` guards this cross-module dependency language.",
-    "2026-06-04: `/admin/products` now shows Product website status and Model publish status before the product/model Publish checklists, distinguishing live/published content from ready-but-unpublished and blocked content; locked product/model Publish attempts point editors to the first missing checklist item.",
-    "2026-06-04: `/admin/articles` now shows Article website status and Section publish status before the article/section Publish controls, distinguishing live/published content from ready-but-unpublished and blocked content; locked article/section Publish attempts point editors to the first missing checklist item."
+    "2026-06-04: `/admin/stone-library` finish-image editing now shows Finish image public status and routes not-ready image publishing to Open Media first when the selected Media library item is not Published in Media; `npm run agent:admin-crud-coverage` guards this cross-module dependency language.",
+    "2026-06-04: `/admin/products` now shows Product website status and Model publish status before the product/model Publish checklists, distinguishing live/published content from ready-but-unpublished and not-ready content; locked product/model Publish attempts point editors to the first missing checklist item.",
+    "2026-06-04: `/admin/articles` now shows Article website status and Section publish status before the article/section Publish controls, distinguishing live/published content from ready-but-unpublished and not-ready content; locked article/section Publish attempts point editors to the first missing checklist item."
   ],
       "acceptance": [
     "Authenticated admin users can create, read, update, draft, publish, and archive Projects, Stone Library items, Products, Articles, and media items without code edits.",
@@ -616,7 +619,7 @@
         "Admin route map is explicit, including unauthenticated, authenticated, unauthorized, loading, and draft/published states.",
         "Module rollout sequence is recorded for leads, media, Stone Library, Projects, Products, and Articles.",
         "Each content type has a first-pass field ownership model: editable by customer, computed by system, or developer-only until migration.",
-        "Follow-up implementation tasks remain blocked wherever Supabase project credentials, RLS, Storage, Turnstile, or email secrets are required."
+        "Follow-up implementation tasks identify credential, RLS, Storage, Turnstile, or email-secret dependencies without treating IA definition as the blocker."
       ],
       "verification": [
         "npm run agent:check",
@@ -625,7 +628,7 @@
     },
     {
       "id": "NOW-ADMIN-AUTH-RLS-001",
-      "status": "now",
+      "status": "done",
       "priority": 5.2,
       "summary": "Implement Supabase Auth, RLS, and the protected Urblo admin shell.",
       "files": [
@@ -689,7 +692,8 @@
         "2026-05-29: Active-admin `npm run agent:admin-auth-browser -- --allow-login --strict` now also verifies the Sign out control returns the last protected admin route to `/admin/login?next=...` without content writes.",
         "2026-05-29: `npm run agent:admin-auth-browser -- --base-url <origin>` and `npm run agent:admin-config-gate -- --base-url <origin>` now reject copied placeholders and non-origin URLs before browser navigation; `npm run agent:admin-auth-browser` also requires real email-shaped active-admin/unprofiled login inputs, and `npm run agent:admin-live-readiness -- --admin-email <email>` requires a real first-admin email shape before read-only Supabase checks.",
         "2026-06-03: First-admin data-layer bootstrap is complete for `info@urblo.com.au`: Supabase Auth user `74b9e1d1-5f29-482c-836e-4feec8cd0087` is confirmed, one active `owner` `admin_profiles` row is linked to that user, bootstrap audit row `admin_audit_events.id = 8` exists, public seed rows are readable through the deployed publishable key, and anonymous `admin_profiles` reads are denied.",
-        "2026-06-04: `npm run agent:admin-auth-browser -- --allow-login --strict --base-url https://urblo.com.au` passed for `info@urblo.com.au`, verifying all 9 authenticated admin route shells plus Sign out with no content rows, Storage objects, or audit events created. Screenshots were written to ignored `.tmp/admin-auth-browser/screenshots`."
+        "2026-06-04: `npm run agent:admin-auth-browser -- --allow-login --strict --base-url https://urblo.com.au` passed for `info@urblo.com.au`, verifying all 9 authenticated admin route shells plus Sign out with no content rows, Storage objects, or audit events created. Screenshots were written to ignored `.tmp/admin-auth-browser/screenshots`.",
+        "2026-06-05 Harness GC cleanup: marked done because first-admin bootstrap, browser-safe config, RLS/source gates, no-config admin gate, and production active-admin browser QA are complete. Unprofiled unauthorized browser QA stays available as an optional future boundary check."
       ],
       "acceptance": [
         "Admin shell route is protected by Supabase Auth.",
@@ -776,9 +780,10 @@
         "2026-06-04: `/admin/settings` now uses Website settings, CMS manager, Website owner, Global contact and search defaults, Search defaults, CMS team, People and access, Active access, and CMS-access validation language; admin CRUD coverage rejects older Owner/Admin, Supabase Auth, admin-profile-row, owner-role, default SEO, and default-row visible wording.",
         "2026-06-04: `/admin/settings` now shows Site settings actions and CMS access handoff actions, keeping Save settings beside Draft/Published/Archived website visibility meaning and explaining when to use Invite and grant access versus Grant existing login; admin CRUD coverage guards the action language.",
         "2026-06-05: `/admin/settings` now shows Website settings status before the shared status rules, distinguishing Live settings, Draft settings, and Hidden settings so CMS managers know whether global contact/footer/search defaults are public-ready.",
-        "Live settings/profile save verification still requires browser-safe Supabase key configuration and an active owner/admin profile.",
+        "Live settings/profile save verification is covered by the approved admin CRUD live runs; the real invite-email proof remains separately gated by a target editor email and Jay approval.",
         "2026-05-28: Admin CRUD coverage verifier now checks settings/admin profile table references, owner/self-lockout guardrail copy, mutation paths, and site_settings/admin_profile audit actions.",
-        "2026-05-28: Admin CRUD live verifier now includes a tagged site_settings create/update/publish/archive path through owner/admin RLS, but it does not create or mutate first-admin profile rows."
+        "2026-05-28: Admin CRUD live verifier now includes a tagged site_settings create/update/publish/archive path through owner/admin RLS, but it does not create or mutate first-admin profile rows.",
+        "2026-06-05 Harness GC cleanup: kept as a `now` task only for a real Settings invite proof with an approved target editor email. Settings source, status UX, site_settings save path, CMS access UI, RLS, and tagged admin live QA are otherwise complete."
       ],
       "acceptance": [
         "CMS managers can inspect and save the default site settings through /admin/settings.",
@@ -812,7 +817,7 @@
     },
     {
       "id": "NOW-ADMIN-CONTENT-CRUD-001",
-      "status": "now",
+      "status": "done",
       "priority": 5.3,
       "summary": "Implement admin CRUD modules for Projects, Stone Library, Products, and Articles.",
       "files": [
@@ -854,7 +859,7 @@
         "supabase/migrations/20260603142359_project_media_blocks.sql"
       ],
       "notes": [
-        "Live save verification remains blocked until browser-safe Supabase key configuration and active admin/editor profiles exist. Source-only CRUD can continue behind the existing config/auth gate.",
+        "Approved live CRUD and Storage verification later covered the save, publish/archive, audit, dashboard-health, and privacy paths; source-only CRUD remains behind the existing config/auth gate.",
         "Use docs/ADMIN_IA_ACCESS.md for module sequencing and field ownership when implementing Projects, Stone Library, Products, and Articles CRUD.",
         "2026-05-28: Added `/admin/stone-library` source CRUD behind the auth/config gate. It loads Stone Library groups, variants, finish definitions, and finish capabilities from Supabase; supports group and variant create/update/publish/archive flows; supports per-finish capability editing; includes loading, empty, validation, save, publish/archive, read-only, and error states.",
         "2026-05-29: Expanded `/admin/stone-library` source CRUD to load `stone_finish_images` and `media_assets`, link finish imagery to selected stone variants/finishes, publish/archive image links, require published image links to reference published media records, and record `stone_finish_image.create/update/publish/archive` audit actions after successful saves.",
@@ -869,7 +874,7 @@
     "2026-06-04: `/admin/projects` now exposes Publish readiness blockers before Publish is attempted, including project claim review, missing public copy, project facts still marked `needs_review`, and project materials still marked `needs_review`; clicking a blocker selects the affected fact or material row where applicable.",
     "2026-06-04: `/admin/projects` now includes editor-facing list search, status filtering, shared Draft/Published/Archived status language, and readiness labels that explain claim review in plain editing terms.",
     "2026-06-04: `/admin/projects` now places the Publish checklist inside the Project editor, includes title and URL checks before validation errors, locks the Publish button while blockers remain, and scrolls checklist actions to Project/Facts/Materials editors.",
-    "2026-06-04: `/admin/projects` now highlights the first Start here checklist item when Publish or Save with Published is blocked, keeps the highlighted blocker selected, and explains beside Status that Published is allowed only after the Publish checklist is clear; admin CRUD coverage guards this repair path.",
+    "2026-06-04: `/admin/projects` now highlights the first Start here checklist item when Publish or Save with Published is locked, keeps the highlighted repair item selected, and explains beside Status that Published is allowed only after the Publish checklist is clear; admin CRUD coverage guards this repair path.",
     "2026-06-04: `/admin/projects` Facts and Materials chips now include each item's proof-review label, and Needs review help tells editors that the item keeps Project Publish locked until Approved for public use or Deferred / keep private is chosen; admin CRUD coverage guards this repair context.",
     "2026-06-04: `/admin/projects` now replaces raw media ID entry with media selectors and previews for project cover/hero, material image, media block asset, material map image, and hotspot preview image fields.",
     "2026-06-04: `/admin/projects` now uses Project case studies, Editing access, detail/material counts, Media library items, and Nothing added yet language in visible list, health, read-only, checklist, and empty states; admin CRUD coverage rejects older project-record, row, and media-record wording.",
@@ -923,7 +928,8 @@
     "2026-06-04: `npm run agent:admin-crud-live -- --allow-writes --include-storage` passed for marker `admin-live-1780497462544-23b1d5e3`, including private Storage upload/readback and anonymous denial proof.",
     "2026-06-02: Content import dry-run now prefers structured project `mediaBlocks`, generating 15 project media rows including the Moon Gate hotspot media block with 0 warnings and 0 blockers.",
     "2026-06-04: Added `npm run agent:content-import:live`; the approved run imported/upserted 115 media assets, 13 stone groups, 15 variants, 153 finish capabilities, 53 finish images, 6 products, 28 product models, 18 material defaults, 18 specs, 5 projects, 41 project facts, 2 project materials, 1 project material map, 15 project media rows, 2 hotspots, 4 articles, and 95 article blocks as draft content, then verified anonymous browser-key reads expose zero imported draft parent rows.",
-    "2026-06-04: `/admin/projects` media selectors now use Media from library / YouTube link language, show Published/Draft/Archived in Media in picker previews, replace media-record ID-linking copy in Map health, and admin CRUD coverage rejects Project ID-linking / YouTube ID / raw selection-ID wording."
+    "2026-06-04: `/admin/projects` media selectors now use Media from library / YouTube link language, show Published/Draft/Archived in Media in picker previews, replace media-record ID-linking copy in Map health, and admin CRUD coverage rejects Project ID-linking / YouTube ID / raw selection-ID wording.",
+    "2026-06-05 Harness GC cleanup: marked done because source CRUD, import dry run/live draft import, published-read public adapters, project media migration, admin CRUD coverage, live CRUD QA, and production CMS handoff proof are complete. Customer/editor review and item-by-item publishing remain content decisions, not an executable CMS implementation blocker."
       ],
       "acceptance": [
         "Admin users can draft, publish, edit, and archive Projects, Stone Library records including finish image links, Products, and Articles through the non-destructive launch lifecycle.",
@@ -975,7 +981,7 @@
     },
     {
       "id": "NOW-ADMIN-MEDIA-LEADS-001",
-      "status": "now",
+      "status": "done",
       "priority": 5.4,
       "summary": "Implement admin media library and lead-management workflow.",
       "files": [
@@ -1025,13 +1031,14 @@
     "2026-06-04: `/admin/leads` now has a Lead workflow actions bar beside Recommended next step guidance, keeping Save workflow next to the status, owner, and internal-note sequence; admin CRUD coverage guards the action bar and save/history language.",
     "2026-06-05: `/admin/leads` now shows Lead workflow status before Recommended next step so lead managers can see whether the selected lead needs an owner, needs internal notes, is ready to save, is handled, or is no longer active.",
     "Live lead workflow save/export verification is complete for tagged QA writes through the approved admin CRUD live runs. Basic live lead row creation is verified through deployed Contact/Sample Request submissions; Turnstile verification remains a separate final form check.",
-        "2026-05-28: Media and Leads save flows now call the shared admin audit writer after successful primary saves. Live audit row creation remains pending browser-safe Supabase config and active profiles.",
+        "2026-05-28: Media and Leads save flows now call the shared admin audit writer after successful primary saves. Approved live CRUD runs later verified the tagged media/lead audit paths.",
         "2026-05-28: Leads now includes an owner/admin CSV export action for the currently loaded queue. Export first records a leads.export_csv audit event and blocks the download if audit logging fails.",
         "2026-05-28: Admin CRUD coverage verifier now checks Media and Leads table references, Storage upload source, read-only states, shared audit writer coverage, and audit-gated CSV/manifest exports before live credential QA.",
         "2026-05-28: Admin CRUD live verifier now includes tagged media metadata writes, private lead workflow writes, media manifest export audit, and leads CSV export audit through authenticated RLS. Optional `--include-storage` verifies a tiny private `urblo-admin-media` upload.",
         "2026-05-29: Live readiness now reports the `npm run agent:admin-crud-live -- --allow-writes --include-storage` command as the final media upload policy proof so Storage verification is not hidden behind the general CRUD live check.",
     "2026-05-29: `npm run agent:admin-crud-live -- --allow-writes --include-storage` now checks that the tagged private `urblo-admin-media` upload can be read back by the signed-in admin and is denied to anonymous browser-key reads through both private and public Storage object endpoints.",
-    "2026-06-04: The approved Storage proof passed with marker `admin-live-1780497462544-23b1d5e3`, 48 audit rows, signed-in Storage readback, and anonymous private/public Storage object denial."
+    "2026-06-04: The approved Storage proof passed with marker `admin-live-1780497462544-23b1d5e3`, 48 audit rows, signed-in Storage readback, and anonymous private/public Storage object denial.",
+    "2026-06-05 Harness GC cleanup: marked done because Media publish/archive/export, Leads workflow/export, Storage upload/readback/privacy, and Change history audit coverage are verified through source gates and approved live admin QA."
       ],
       "acceptance": [
         "Admin users can manage uploaded media records with source, alt text, usage, and publish status.",
@@ -1147,7 +1154,7 @@
     },
     {
       "id": "NOW-ARTICLE-STRUCTURE-CLAIMS-001",
-      "status": "now",
+      "status": "next",
       "priority": 6.2,
       "summary": "Move article details from raw newsletter HTML to mobile-safe, claim-reviewed structured article templates.",
       "files": [
@@ -1166,7 +1173,8 @@
       "notes": [
         "2026-05-22 full-site QA found newsletter HTML can overflow on mobile and still contains source-level carbon/speed/guarantee wording. A runtime stopgap now constrains article tables/media, unwraps dead links, and rewrites additional high-risk phrases, but structured blocks remain the launch-quality solution.",
         "2026-05-25: Article detail route banner duplication was removed, previous/next article buttons were shortened for mobile, and mobile CSS blockifies legacy newsletter tables/media. Browser QA verified the cost-myth article at 320px with zero horizontal overflow.",
-        "2026-05-25: Article claim cleanup remains paused by user direction; do not satisfy this task's claim-review acceptance criteria until explicitly resumed."
+        "2026-05-25: Article claim cleanup remains paused by user direction; do not satisfy this task's claim-review acceptance criteria until explicitly resumed.",
+        "2026-06-05 Harness GC cleanup: moved from `now` to `next` because article claim cleanup is paused until Jay explicitly resumes it."
       ],
       "acceptance": [
         "All article details render without horizontal overflow at 390px and desktop widths.",
@@ -1801,7 +1809,7 @@
         "2026-05-25: Secondary frames are implemented as support media for the active finish, not as separate finish states.",
         "2026-05-25: Juparana and Zen Grey approved _2 source frames are mapped in src/data/stoneFinishImages.ts and exposed through FinishVM.secondaryImages.",
         "2026-05-25: ImageStage shows secondary thumbnails only when approved secondary images exist; clicking one opens FinishLightbox on that frame while preserving active finish state.",
-        "2026-05-25: Browser visual QA was blocked by unavailable in-app Browser pane and missing local Chrome/Playwright fallback, so runtime gates are the verified acceptance evidence for this pass."
+        "2026-05-25: Browser visual QA was unavailable in that session because the in-app Browser pane and local Chrome/Playwright fallback were unavailable, so runtime gates are the verified acceptance evidence for this pass."
       ],
       "acceptance": [
         "Secondary image behavior is documented and implemented with clear trigger rules.",
