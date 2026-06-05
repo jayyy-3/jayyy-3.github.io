@@ -9,9 +9,12 @@ Last updated: 2026-06-05
 - Ran deployed Cloudflare smoke against `https://urblo.com.au`; route, asset, redirect, and safe API checks passed.
 - Ran production active-admin browser QA with `info@urblo.com.au`; login reached the authenticated shell, but the verifier still expected the old `/admin/audit` heading `Audit`.
 - Updated `scripts/check-admin-auth-browser.mjs` to expect the current editor-facing `/admin/audit` heading `Change history` and to keep that private module text out of signed-out/unauthorized checks.
+- Reran active-admin browser QA against the current deployed bundle after the verifier fix; authenticated route checks passed, then strict console checking exposed a static article image decode error for `/media/launch/articles/stone-transformed/02-stone-finishes.webp`.
+- Re-encoded that WebP image at the same 2500x1875 dimensions so Firefox no longer has to decode the suspect source file.
 
 ### Changed Files
 - `scripts/check-admin-auth-browser.mjs`
+- `public/media/launch/articles/stone-transformed/02-stone-finishes.webp`
 - `docs/WORKLOG.md`
 - `docs/HANDOFF.md`
 - `docs/NEXT_STEPS.md`
@@ -21,7 +24,10 @@ Last updated: 2026-06-05
 - `git push origin main`: pass, `7c89ea7..43a1750`.
 - `npm run agent:cloudflare-preview-smoke -- --base-url https://urblo.com.au`: pass.
 - Production active-admin browser QA before this fix: failed at `/admin/audit` because the verifier expected heading `Audit` while the deployed editor-facing heading is `Change history`.
+- `git push origin main`: pass, `43a1750..a59fa01`.
+- Production active-admin browser QA after verifier fix but before image re-encode: authenticated route checks passed, then failed strict console checking on `Image corrupt or truncated` for `/media/launch/articles/stone-transformed/02-stone-finishes.webp`.
 - `node --check scripts/check-admin-auth-browser.mjs`: pass.
+- `sips -g pixelWidth -g pixelHeight public/media/launch/articles/stone-transformed/02-stone-finishes.webp`: pass, 2500x1875.
 - `jq empty docs/agent/tasks.json`: pass.
 - `npm run agent:check`: pass.
 - `git diff --check`: pass.
