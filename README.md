@@ -4,10 +4,11 @@ Urblo web communicates a design-led, engineering-backed natural stone system for
 
 ## Current Status
 
-- Current implementation: static React frontend with file-backed content.
-- Launch direction: Cloudflare Pages, Supabase, and an Urblo-owned `/admin` CMS.
-- Current backend status: no production API, Supabase integration, or admin CMS is implemented yet.
-- Planning and handoff live in the AI Harness docs under `docs/`.
+- Current implementation: React public site on Cloudflare Pages with Supabase-backed forms, public CMS reads, and an Urblo-owned `/admin` CMS.
+- Production status: `https://urblo.com.au` and `https://www.urblo.com.au` are live on Cloudflare Pages, with deployed route/API smoke passing.
+- Backend status: Pages Functions handle Contact, Sample Request, and admin invite paths; Supabase provides data, auth, storage, RLS, and CMS content.
+- Admin CMS status: production active-admin browser QA and final editor handoff readiness have passed. Optional follow-ups remain for real Settings invite proof, customer content review/publish decisions, and final Turnstile proof.
+- Planning, current state, and handoff evidence live in the AI Harness docs under `docs/`.
 
 ## Agent Entry Points
 
@@ -21,6 +22,7 @@ Then read:
 
 - `AGENTS.md`
 - `docs/HANDOFF.md`
+- `docs/agent/status.json`
 - `docs/agent/tasks.json`
 - `docs/agent/verification.md`
 - `docs/ARCHITECTURE.md`
@@ -49,6 +51,13 @@ Docs and harness changes should pass:
 ```sh
 npm run agent:check
 git diff --check
+```
+
+Harness GC can be run when agent-facing state feels stale or noisy:
+
+```sh
+npm run agent:harness-gc
+npm run agent:harness-gc:review
 ```
 
 ## Deployment Direction

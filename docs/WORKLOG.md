@@ -2,6 +2,46 @@
 
 Last updated: 2026-06-05
 
+## Entry - 2026-06-05 (Harness GC First Pass)
+
+### Scope
+- Added `docs/agent/status.json` as a compact current-state API for agents.
+- Added `docs/agent/harness-gc.md` as the Harness GC operating guide.
+- Added `scripts/check-harness-gc.mjs` plus package scripts for read-only GC, conservative fix mode, and review artifact generation.
+- Updated README current status so it no longer claims production API, Supabase integration, or admin CMS are absent.
+- Updated `AGENTS.md`, `docs/agent/verification.md`, `scripts/check-harness.mjs`, and `docs/agent/tasks.json` so the new GC capability is part of the official harness.
+
+### Changed Files
+- `docs/agent/status.json`
+- `docs/agent/harness-gc.md`
+- `scripts/check-harness-gc.mjs`
+- `package.json`
+- `scripts/check-harness.mjs`
+- `README.md`
+- `AGENTS.md`
+- `docs/agent/verification.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `node --check scripts/check-harness-gc.mjs`: pass.
+- `jq empty docs/agent/tasks.json`: pass.
+- `npm run agent:harness-gc`: pass with zero failures and five warnings.
+- `npm run agent:harness-gc:review`: pass; wrote `.tmp/harness-gc-review.md`.
+- Reported warnings: eight `now` tasks exceed target three, `NOW-ADMIN-CMS-001` remains an umbrella task in `now`, three done tasks contain active-blocker wording, `docs/HANDOFF.md` exceeds its review target, and `docs/WORKLOG.md` exceeds its review target.
+- Current task status counts reported by GC: `{"done":30,"now":8,"next":3,"later":3}`.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- Harness GC is not yet wired into `npm run agent:check`; keep it separate until the warning profile has been reviewed for false positives.
+- The first report intentionally does not mutate task status. Reducing the eight `now` tasks requires Jay/agent judgment in a follow-up cleanup pass.
+
+### Next Handoff
+- `NOW-HARNESS-GC-001`
+
 ## Entry - 2026-06-05 (Admin CMS Production Walkthrough Results)
 
 ### Scope

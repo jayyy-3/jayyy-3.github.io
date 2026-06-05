@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "lastUpdated": "2026-06-05",
+  "sourceOfTruth": {
+    "currentState": "docs/HANDOFF.md",
+    "taskQueue": "docs/agent/tasks.json",
+    "verification": "docs/agent/verification.md",
+    "historicalEvidence": "docs/WORKLOG.md",
+    "harnessGc": "docs/agent/harness-gc.md"
+  },
+  "production": {
+    "cloudflarePages": "verified",
+    "productionDomains": "verified",
+    "formsPersistence": "verified",
+    "smtp2go": "verified",
+    "turnstile": "not_configured",
+    "adminAuthBrowserQa": "verified",
+    "adminCmsHandoff": "verified",
+    "adminCrudLive": "verified",
+    "adminStorageProof": "verified",
+    "contentImport": "draft_imported",
+    "publicContentCutover": "published_reads_with_static_fallback",
+    "settingsInviteProof": "deferred_until_target_editor_approval"
+  },
+  "localReproducibility": {
+    "sourceHarness": "passing",
+    "adminSourceCoverage": "passing",
+    "runtimeGates": "passing_for_latest_cms_handoff_stack",
+    "liveSecretsPresent": false,
+    "liveReadiness": "manual_inputs_required_for_future_live_write_proofs"
+  },
+  "nextDecisions": [
+    "Decide whether final Turnstile proof is required before the next public launch checkpoint.",
+    "Choose a target editor email before running a real Settings invite proof.",
+    "Have a customer or editor review imported Draft CMS content before publishing items publicly.",
+    "Reduce docs/agent/tasks.json now-count by separating active executable tasks from completed/deferred follow-ups."
+  ],
+  "activeExecutableTasks": [
+    "NOW-FORMS-SUPABASE-001",
+    "NOW-ADMIN-SETTINGS-CRUD-001",
+    "NOW-ARTICLE-STRUCTURE-CLAIMS-001"
+  ],
+  "umbrellaTasks": [
+    "NOW-ADMIN-CMS-001"
+  ],
+  "harnessGc": {
+    "maxNowTasks": 3,
+    "agentsMdTargetLines": 180,
+    "handoffTargetLines": 220,
+    "worklogReviewWarningLines": 8000
+  },
+  "lastVerified": {
+    "agentCheck": "2026-06-05",
+    "gitDiffCheck": "2026-06-05",
+    "cloudflarePreviewSmokeProduction": "2026-06-05",
+    "adminAuthBrowserProduction": "2026-06-05",
+    "adminHandoffReadinessStrict": "2026-06-05"
+  }
+}

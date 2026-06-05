@@ -1,6 +1,6 @@
 # Agent Verification Matrix
 
-Last updated: 2026-06-01
+Last updated: 2026-06-05
 
 ## Purpose
 Use this matrix to choose the smallest verification set that proves a change is safe. Runtime changes still need the full build/lint/typecheck gate unless a task explicitly defines a temporary exception.
@@ -24,12 +24,29 @@ Use when changing Markdown, JSON task state, or harness instructions without tou
 
 Run:
 - `npm run agent:check`
+- `npm run agent:harness-gc` when current-state, task-state, README, AGENTS, or verification docs change.
 - `git diff --check`
 
 Evidence to record:
 - Which docs changed.
 - Whether any repo-path or harness checks failed.
 - Whether runtime gates were intentionally skipped.
+
+### Harness GC
+Use when Jay asks to run Harness GC, when current-state docs feel noisy, after a major production proof, or before a new agent should rely on the Harness.
+
+Run:
+- `npm run agent:harness-gc`
+- `npm run agent:harness-gc:review`
+- `npm run agent:check`
+- `git diff --check`
+
+Evidence to record:
+- Whether `docs/agent/status.json` still matches current production/local state.
+- Task status counts and whether `now` tasks are too broad.
+- Any stale README/HANDOFF/AGENTS/NEXT_STEPS wording found.
+- Location of `.tmp/harness-gc-review.md` when review mode is run.
+- Which suggested cleanups require Jay's judgment rather than automatic mutation.
 
 ### Runtime UI
 Use when changing `src/**`, `public/**`, route behavior, visual layout, user-facing copy, or CTA behavior.

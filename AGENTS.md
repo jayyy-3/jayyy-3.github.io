@@ -1,6 +1,6 @@
 # AGENTS - Urblo AI Harness Entry
 
-Last updated: 2026-06-02
+Last updated: 2026-06-05
 
 ## Project Mission
 Urblo web exists to communicate a design-led, engineering-backed, proof-driven natural stone solution system for streetscapes and civil landscapes.
@@ -13,30 +13,34 @@ The harness has two separate creative authorities:
 1. Run `npm run agent:init` when you need a quick repo/status briefing.
 2. Read this file first: `AGENTS.md`.
 3. Read current handoff: `docs/HANDOFF.md`.
-4. Read machine task queue: `docs/agent/tasks.json`.
-5. Read verification matrix: `docs/agent/verification.md`.
-6. Read brand rubric: `docs/brand-baseline.md`.
-7. Read design contract: `docs/DESIGN.md`.
-8. Read technical facts and contracts: `docs/ARCHITECTURE.md`.
-9. Read human roadmap: `docs/NEXT_STEPS.md`.
-10. Read admin IA/access contract when working on `/admin`: `docs/ADMIN_IA_ACCESS.md`.
-11. Read admin editor handoff guide when preparing CMS handoff or customer-facing admin instructions: `docs/ADMIN_EDITOR_GUIDE.md`.
-12. Read latest session evidence when needed: `docs/WORKLOG.md`.
-13. For docs/harness changes, run:
+4. Read compact current status: `docs/agent/status.json`.
+5. Read machine task queue: `docs/agent/tasks.json`.
+6. Read verification matrix: `docs/agent/verification.md`.
+7. Read brand rubric: `docs/brand-baseline.md`.
+8. Read design contract: `docs/DESIGN.md`.
+9. Read technical facts and contracts: `docs/ARCHITECTURE.md`.
+10. Read human roadmap: `docs/NEXT_STEPS.md`.
+11. Read admin IA/access contract when working on `/admin`: `docs/ADMIN_IA_ACCESS.md`.
+12. Read admin editor handoff guide when preparing CMS handoff or customer-facing admin instructions: `docs/ADMIN_EDITOR_GUIDE.md`.
+13. Read latest session evidence when needed: `docs/WORKLOG.md`.
+14. For docs/harness changes, run:
    - `npm run agent:check`
    - `git diff --check`
-14. For runtime changes, run quality gates from repo root in this order:
+15. For runtime changes, run quality gates from repo root in this order:
    - `npm run build`
    - `npm run lint`
    - `npx tsc -b`
    - `npm run agent:smoke`
-15. Treat any runtime gate failure as blocking unless `docs/agent/tasks.json` explicitly defines a temporary exception.
-16. Before deploying the current `/admin` CMS UX stack, run:
+16. Treat any runtime gate failure as blocking unless `docs/agent/tasks.json` explicitly defines a temporary exception.
+17. Before deploying the current `/admin` CMS UX stack, run:
    - `npm run agent:admin-cms-predeploy`
    - `npm run agent:smoke`
    - `npm run agent:admin-config-gate`
-17. Before claiming CMS handoff complete, production walkthrough evidence must exist in `docs/WORKLOG.md` and this strict audit must pass:
+18. Before claiming CMS handoff complete, production walkthrough evidence must exist in `docs/WORKLOG.md` and this strict audit must pass:
    - `npm run agent:admin-handoff-readiness -- --base-url https://urblo.com.au --admin-email info@urblo.com.au --strict`
+19. When Jay asks to run Harness GC, run:
+   - `npm run agent:harness-gc`
+   - `npm run agent:harness-gc:review`
 
 ## Canonical Conflict Precedence
 - Code reality wins over stale docs. If docs conflict with implemented behavior, verify code reality, update docs, then add remediation tasks if the behavior itself is wrong.
@@ -82,6 +86,7 @@ Before declaring implementation complete, verify all checks below:
 
 ## Current Critical Risk Snapshot
 - Root harness entry is `AGENTS.md`; the old `docs/README_AGENT.md` path is retired.
+- Compact machine-readable current state now lives in `docs/agent/status.json`; Harness GC policy and command behavior live in `docs/agent/harness-gc.md`.
 - Current-state handoff is `docs/HANDOFF.md`; machine task state is `docs/agent/tasks.json`.
 - Launch target is now Cloudflare Pages + Supabase + Urblo-owned `/admin`; the long-form plan is `docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md`.
 - Supabase foundation migrations are applied and verified for project `Urblo` (`npkidywzwddbnfrnxlmo`): 24 launch tables, RLS, policies, FK indexes, private lead/admin protection, and read-only anonymous public-content grants.

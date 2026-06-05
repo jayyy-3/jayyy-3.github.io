@@ -4,6 +4,7 @@ Last updated: 2026-06-05
 
 ## Current Focus
 The launch direction is now Cloudflare Pages + Supabase + an Urblo-owned admin CMS:
+- Harness GC first pass is now available for periodic agent-facing reality calibration. Use `npm run agent:harness-gc` for the read-only report and `npm run agent:harness-gc:review` to write `.tmp/harness-gc-review.md`; compact current state lives in `docs/agent/status.json`, and operating rules live in `docs/agent/harness-gc.md`.
 - Public website hosting is now on Cloudflare Pages for production domains; remaining launch work is Supabase/admin/form operational proof rather than hosting cutover.
 - Contact and Sample Request source now uses Supabase-backed Pages Function submissions instead of mailto/local-only main submit behavior; basic deployed production persistence and source-route audit rows are verified on `https://urblo.pages.dev`.
 - `/capabilities` now renders a service-style web version of Natalie Ma's 2026 Capability Statement with a concrete capability hub, selected-project proof ledger, shared CTA data, Founder-sourced imagery, and an email-gated PDF download flow that posts to `/api/enquiries` as `Capability statement download`; live lead capture depends on the same server-side form credentials as Contact.

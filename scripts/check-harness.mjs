@@ -14,6 +14,8 @@ const requiredFiles = [
   'docs/ADMIN_PRODUCTION_WALKTHROUGH.md',
   'docs/NEXT_STEPS.md',
   'docs/WORKLOG.md',
+  'docs/agent/status.json',
+  'docs/agent/harness-gc.md',
   'docs/agent/tasks.json',
   'docs/agent/verification.md',
   'scripts/agent-init.sh',
@@ -26,6 +28,7 @@ const requiredFiles = [
   'scripts/check-contact-form-ui-source.mjs',
   'scripts/check-doc-paths.mjs',
   'scripts/check-harness.mjs',
+  'scripts/check-harness-gc.mjs',
   'scripts/check-supabase-foundation-readiness.mjs',
 ]
 const requiredPackageScripts = {
@@ -45,6 +48,9 @@ const requiredPackageScripts = {
   'agent:forms-live': 'node scripts/check-forms-api-live.mjs',
   'agent:forms-ui': 'node scripts/check-contact-form-ui-source.mjs',
   'agent:capabilities-ui': 'node scripts/check-capabilities-page-source.mjs',
+  'agent:harness-gc': 'node scripts/check-harness-gc.mjs',
+  'agent:harness-gc:fix': 'node scripts/check-harness-gc.mjs --fix',
+  'agent:harness-gc:review': 'node scripts/check-harness-gc.mjs --review',
   'agent:init': 'bash scripts/agent-init.sh',
   'agent:live-readiness': 'node scripts/check-live-readiness.mjs',
   'agent:public-supabase-readiness': 'node scripts/check-public-supabase-readiness.mjs',

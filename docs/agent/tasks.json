@@ -27,6 +27,48 @@
       ]
     },
     {
+      "id": "NOW-HARNESS-GC-001",
+      "status": "done",
+      "priority": 1.5,
+      "summary": "Add the first conservative Harness GC pass for agent-facing reality calibration.",
+      "files": [
+        "docs/agent/status.json",
+        "docs/agent/harness-gc.md",
+        "scripts/check-harness-gc.mjs",
+        "package.json",
+        "scripts/check-harness.mjs",
+        "README.md",
+        "AGENTS.md",
+        "docs/agent/verification.md",
+        "docs/HANDOFF.md",
+        "docs/NEXT_STEPS.md",
+        "docs/WORKLOG.md",
+        "docs/agent/tasks.json"
+      ],
+      "notes": [
+        "2026-06-05: Added compact `docs/agent/status.json` as the current-state API for agents, separating production/local/decision state from long historical evidence.",
+        "2026-06-05: Added `docs/agent/harness-gc.md` to define Harness GC purpose, policy/state/evidence/knowledge boundaries, command behavior, check categories, and current agent script coverage.",
+        "2026-06-05: Added `npm run agent:harness-gc`, `npm run agent:harness-gc:fix`, and `npm run agent:harness-gc:review`. Default mode is read-only; review mode writes `.tmp/harness-gc-review.md`; fix mode is limited to low-risk top-level date refreshes.",
+        "2026-06-05: First GC run reports zero failures and five warnings: too many `now` tasks, `NOW-ADMIN-CMS-001` still marked as an umbrella in `now`, three done tasks with active-blocker wording, and HANDOFF/WORKLOG size thresholds.",
+        "2026-06-05: README current status was updated so it no longer claims there is no production API, Supabase integration, or admin CMS."
+      ],
+      "acceptance": [
+        "`npm run agent:harness-gc` exists and is read-only by default.",
+        "`docs/agent/status.json` captures compact production, local, next-decision, executable-task, and umbrella-task state.",
+        "`npm run agent:harness-gc` reports task status counts and flags too many `now` tasks.",
+        "`npm run agent:harness-gc` detects configured stale README production-status phrases.",
+        "`npm run agent:harness-gc` detects missing exact documentation coverage for `agent:*` package scripts.",
+        "`npm run agent:harness-gc:review` writes `.tmp/harness-gc-review.md` with architecture score, drift risks, shortening/splitting suggestions, guardrails, questions for Jay, and suggested task updates.",
+        "`npm run agent:check` still passes after the Harness GC files are added."
+      ],
+      "verification": [
+        "npm run agent:harness-gc",
+        "npm run agent:harness-gc:review",
+        "npm run agent:check",
+        "git diff --check"
+      ]
+    },
+    {
       "id": "NOW-SUPABASE-SCHEMA-001",
       "status": "done",
       "priority": 2,
