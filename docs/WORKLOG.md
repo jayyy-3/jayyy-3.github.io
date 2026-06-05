@@ -2,6 +2,43 @@
 
 Last updated: 2026-06-05
 
+## Entry - 2026-06-05 (Admin CMS Production Walkthrough Results)
+
+### Scope
+- Completed the production no-write CMS handoff walkthrough for the current `/admin` UX stack on `https://urblo.com.au`.
+- Verified deployed public/admin routes, deployed assets, redirects, safe API behavior, active owner login, authenticated admin module shells, sign out, Dashboard orientation, representative Projects publish blockers, and Change history language.
+- Used generated production screenshots under `.tmp/admin-auth-browser/screenshots` for module-level evidence.
+- No customer content, lead workflow, media item, Settings invite, or publication state was changed during this walkthrough.
+
+| Area | Result | Evidence | Changes Made | Public URL / Screenshot | Follow-up |
+|---|---|---|---|---|---|
+| Deployment | Pass | `git push origin main` advanced production source through `3db6690`. | Deployed CMS UX/handoff stack, QA heading fix, and WebP re-encode. | `https://urblo.com.au` | None. |
+| Deployed smoke | Pass | `npm run agent:cloudflare-preview-smoke -- --base-url https://urblo.com.au` passed after `3db6690`. | None during smoke. | Production origin checked. | None. |
+| Active-admin browser QA | Pass | Strict no-write login QA passed for 9 authenticated routes after the WebP fix. | None during QA. | `.tmp/admin-auth-browser/screenshots` | None. |
+| Dashboard orientation | Pass | Dashboard screenshot shows Recommended next action, website visibility, Draft/Published/Archived counts, Content health queue, and editor workflow. | None. | `.tmp/admin-auth-browser/screenshots/admin.png` | None. |
+| Settings account handoff | Deferred | Settings route shell was included in strict authenticated QA; guide covers Invite and grant access plus Grant existing login. | No invite email was sent. | `.tmp/admin-auth-browser/screenshots/admin-settings.png` | Run a real invite proof only after Jay approves a target editor email. |
+| Media readiness | Pass | Media route shell was included in strict authenticated QA and source-guarded publish checklist/action language. | None. | `.tmp/admin-auth-browser/screenshots/admin-media.png` | Real media save/publish remains approval-gated. |
+| Projects publish path | Pass | Projects screenshot shows Website publish status, Publish checklist, proof-review blocker, action bars, and disabled Publish guidance. | None. | `.tmp/admin-auth-browser/screenshots/admin-projects.png` | Customer/editor review-publish remains a content decision, not a CMS blocker. |
+| Stone Library publish path | Pass | Stone Library route shell was included in strict authenticated QA and source-guarded family/variant/checklist/media guidance. | None. | `.tmp/admin-auth-browser/screenshots/admin-stone-library.png` | Customer/editor review-publish remains a content decision. |
+| Products publish path | Pass | Products route shell was included in strict authenticated QA and source-guarded product/model checklist language. | None. | `.tmp/admin-auth-browser/screenshots/admin-products.png` | Customer/editor review-publish remains a content decision. |
+| Articles publish path | Pass | Articles route shell was included in strict authenticated QA and source-guarded article/section checklist/forms language. | None. | `.tmp/admin-auth-browser/screenshots/admin-articles.png` | Customer/editor review-publish remains a content decision. |
+| Leads workflow | Pass | Leads route shell was included in strict authenticated QA and source-guarded workflow/export language. | None. | `.tmp/admin-auth-browser/screenshots/admin-leads.png` | Real lead workflow changes remain approval-gated. |
+| Change history | Pass | Change history screenshot shows current title, filters, recent events, event details, and read-only rules. | None. | `.tmp/admin-auth-browser/screenshots/admin-audit.png` | None. |
+| Final editor handoff | Pass | `docs/ADMIN_EDITOR_GUIDE.md` matches the deployed interface for admin address, start path, status rules, module actions, publish checks, account handoff, CMS coverage, and fallback boundaries. | None. | `docs/ADMIN_EDITOR_GUIDE.md` | Only optional live invite proof and customer content review/publish decisions remain. |
+
+### Verification Results
+- `npm run agent:cloudflare-preview-smoke -- --base-url https://urblo.com.au`: pass.
+- `npm run agent:admin-auth-browser -- --allow-login --strict --base-url https://urblo.com.au`: pass through a temporary public publishable-key extraction from the deployed bundle; secrets were not printed.
+- Screenshot evidence exists for login, signed-out, Dashboard, Leads, Media, Settings, Stone Library, Projects, Products, Articles, and Change history under `.tmp/admin-auth-browser/screenshots`.
+
+### Risks and Gaps
+- Settings real invite email proof is deferred until Jay approves a target editor email.
+- Bulk publishing imported Draft content is intentionally not part of this handoff; editors should review and publish content item by item.
+- Turnstile final form proof remains outside the CMS handoff goal.
+
+### Next Handoff
+- `NOW-ADMIN-CMS-001`
+
 ## Entry - 2026-06-05 (Production Admin Browser QA Heading Fix)
 
 ### Scope
@@ -31,7 +68,9 @@ Last updated: 2026-06-05
 - `jq empty docs/agent/tasks.json`: pass.
 - `npm run agent:check`: pass.
 - `git diff --check`: pass.
-- Pending after this fix: commit/push, redeployed smoke, and rerun production active-admin browser QA.
+- `git push origin main`: pass, `a59fa01..3db6690`.
+- `npm run agent:cloudflare-preview-smoke -- --base-url https://urblo.com.au`: pass after `3db6690`.
+- Production active-admin browser QA after WebP re-encode and deploy: pass for 9 authenticated routes with no strict console/page errors.
 
 ### Risks and Gaps
 - The failure was in the QA script's old expected heading, not in the production login flow. Final editor handoff still requires the corrected verifier to pass after redeploy and the production walkthrough Results Template to be filled.
