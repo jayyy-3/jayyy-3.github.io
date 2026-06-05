@@ -2,6 +2,63 @@
 
 Last updated: 2026-06-05
 
+## Entry - 2026-06-05 (WeChat Mobile Hero Video Playback)
+
+### Scope
+- Investigated the homepage hero video not playing inside WeChat on mobile.
+- Local mobile browser verification showed the React hero video source selection works outside WeChat: the 390x844 mobile viewport selected `/media/launch/home/urblo-hero-mobile.mp4`, reached `readyState = 4`, and was not paused.
+- Production resource headers for the mobile MP4 were healthy: `video/mp4`, byte ranges enabled, Cloudflare cache hit, and about 1.17MB before the fix.
+- MP4 box inspection found the previous mobile and desktop files were H.264 High Profile level 3.1. That is web-playable, but less reliable for WeChat/X5 autoplay background video than Baseline/Main profile.
+- Re-encoded `public/media/launch/home/urblo-hero-mobile.mp4` as H.264 Constrained Baseline level 3.1, yuv420p, 540x960, 30fps, no-audio, fast-start media at about 1.8MB.
+- Added Tencent X5 / WeChat inline playback attributes to the hero video element and added playback retries for media readiness, user gesture, page visibility, page show, and `WeixinJSBridgeReady`.
+
+### Changed Files
+- `src/components/homepage/HomepageSections.tsx`
+- `public/media/launch/home/urblo-hero-mobile.mp4`
+- `docs/ARCHITECTURE.md`
+- `docs/ASSET_MIGRATION_AUDIT.md`
+- `docs/WORKLOG.md`
+
+### Verification Results
+- MP4 inspection: mobile file now has `AVCProfileIndication = 66` (`0x42`, Baseline), level 3.1, `moov` before `mdat`, and no audio track.
+- Local Browser mobile 390x844: pass. Hero video selected `/media/launch/home/urblo-hero-mobile.mp4`, `readyState = 4`, `paused = false`, intrinsic size 540x960, and `x5-playsinline` / `x5-video-player-type` / `x5-video-player-fullscreen` / `x5-video-orientation` attributes were present.
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+
+### Risks and Gaps
+- This cannot fully prove WeChat playback until the change is deployed and tested in the real WeChat in-app browser on iOS/Android.
+- If WeChat still refuses autoplay after deployment, the next fallback should be a tap-to-play overlay or Cloudflare Stream/R2 adaptive delivery review.
+
+### Next Handoff
+- Deploy and test `https://urblo.com.au` in the real WeChat in-app browser.
+
+## Entry - 2026-06-05 (Project Overview Audit)
+
+### Scope
+- Reviewed current project state across `AGENTS.md`, `docs/HANDOFF.md`, `docs/agent/status.json`, `docs/agent/tasks.json`, `docs/ARCHITECTURE.md`, `docs/agent/verification.md`, code routes, admin modules, Supabase clients, and Cloudflare Functions.
+- Found one docs contract drift introduced by recent handoff compression: public Supabase readiness expected exact cutover/static-fallback language in `docs/ARCHITECTURE.md` and `docs/HANDOFF.md`.
+- Restored the public content import/public-read cutover wording and the canonical Published Supabase content with static fallback wording.
+
+### Verification Results
+- `npm run build`: pass; build still reports the known Browserslist staleness notice and `AdminApp` chunk-size warning.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:admin-crud-coverage`: pass.
+- `npm run agent:public-supabase-readiness`: pass after the docs wording repair.
+- `npm run agent:check`: pass.
+- `npm run agent:harness-gc`: pass with zero failures and one warning for `docs/WORKLOG.md` size.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- Local shell has no live secrets loaded, so live-readiness remains report-only for future Turnstile, invite, admin browser, and tagged live-write checks.
+- Repository is ahead of `origin/main`; latest local Harness GC commits are not pushed from this session.
+
+### Next Handoff
+- `NOW-FORMS-SUPABASE-001`
+- `NOW-ADMIN-SETTINGS-CRUD-001`
+
 ## Entry - 2026-06-05 (Harness GC Queue Cleanup)
 
 ### Scope

@@ -34,6 +34,7 @@ Forms:
 Supabase:
 - Project `Urblo` (`npkidywzwddbnfrnxlmo`, `ap-southeast-2`) has launch schema, RLS, policies, Storage buckets, baseline seeds, admin helper hardening, and admin profile email uniqueness applied and verified.
 - Public Projects, Products, Articles, and Stone Library listing/detail prefer Published CMS content with static fallback.
+- Public content import/public-read cutover remains guarded: imported production content stays Draft until reviewed, public reads expose Published CMS content only, and static fallback stays explicit.
 - Imported production content is intentionally in CMS Draft state until an editor reviews and publishes items.
 
 Admin CMS:

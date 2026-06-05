@@ -18,6 +18,14 @@ import {
 import { siteCtas } from '../../data/siteChrome';
 import AnimatedNumber from '../AnimatedNumber';
 
+const mobileInlineVideoAttributes = {
+  'webkit-playsinline': 'true',
+  'x5-playsinline': 'true',
+  'x5-video-player-type': 'h5-page',
+  'x5-video-player-fullscreen': 'false',
+  'x5-video-orientation': 'portrait',
+} as const;
+
 function Reveal({
   children,
   delay = 0,
@@ -335,9 +343,15 @@ function HeroSection() {
       video.muted = true;
       video.defaultMuted = true;
       video.playsInline = true;
+      video.autoplay = true;
       video.setAttribute('muted', '');
+      video.setAttribute('autoplay', '');
       video.setAttribute('playsinline', '');
       video.setAttribute('webkit-playsinline', '');
+      video.setAttribute('x5-playsinline', 'true');
+      video.setAttribute('x5-video-player-type', 'h5-page');
+      video.setAttribute('x5-video-player-fullscreen', 'false');
+      video.setAttribute('x5-video-orientation', 'portrait');
     };
 
     const playVideo = () => {
@@ -360,19 +374,28 @@ function HeroSection() {
     primeMobileVideo();
     playVideo();
 
+    const retryTimers = [250, 900, 1800].map((delay) => window.setTimeout(playVideo, delay));
+
     video.addEventListener('loadeddata', playVideo, { once: true });
+    video.addEventListener('loadedmetadata', playVideo, { once: true });
+    video.addEventListener('canplay', playVideo, { once: true });
     window.addEventListener('pointerdown', playVideo, { capture: true, passive: true });
     window.addEventListener('touchstart', playVideo, { capture: true, passive: true });
     window.addEventListener('pageshow', playVideo);
     document.addEventListener('visibilitychange', playWhenVisible);
+    document.addEventListener('WeixinJSBridgeReady', playVideo);
 
     return () => {
       disposed = true;
+      retryTimers.forEach((timer) => window.clearTimeout(timer));
       video.removeEventListener('loadeddata', playVideo);
+      video.removeEventListener('loadedmetadata', playVideo);
+      video.removeEventListener('canplay', playVideo);
       window.removeEventListener('pointerdown', playVideo, { capture: true });
       window.removeEventListener('touchstart', playVideo, { capture: true });
       window.removeEventListener('pageshow', playVideo);
       document.removeEventListener('visibilitychange', playWhenVisible);
+      document.removeEventListener('WeixinJSBridgeReady', playVideo);
     };
   }, []);
 
@@ -391,6 +414,7 @@ function HeroSection() {
         preload="auto"
         poster={homepageData.hero.posterUrl}
         aria-label="Urblo stone streetscape project video"
+        {...mobileInlineVideoAttributes}
       >
         <source src={homepageData.hero.mobileVideoUrl} type="video/mp4" media="(max-width: 767px)" />
         <source src={homepageData.hero.videoUrl} type="video/mp4" media="(min-width: 768px)" />
