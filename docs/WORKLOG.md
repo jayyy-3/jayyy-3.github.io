@@ -2,6 +2,35 @@
 
 Last updated: 2026-06-07
 
+## Entry - 2026-06-07 (Stone Library Public DL Name Removal)
+
+### Scope
+- Removed the public Stone Library detail Specs card that displayed `DL Name` / `TBC`.
+- Kept CMS/source fields intact for internal editing and import traceability; this change only removes the public website presentation.
+- Updated the task queue acceptance wording so future harness passes treat internal DL/source naming as non-public content.
+
+### Changed Files
+- `src/components/stone-library/SpecsPanel.tsx`
+- `src/pages/StoneLibraryDetailPage.tsx`
+- `docs/WORKLOG.md`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `rg -n "DL Name|DL Name TBC|dlName=|dlName\\b" src/components src/pages docs/agent/tasks.json -S`: pass; only the updated harness acceptance wording mentions the removed public label.
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- Local Browser QA against `http://127.0.0.1:5173/stone-library/alpine-white`: pass. Public detail text did not include `DL Name`, `DL Name TBC`, or the admin `Supplier/source label`; visible Specs labels were `Type`, `Origin`, `Availability`, `Raw Block`, and `Price Range`; horizontal overflow was false; console error/warning logs were empty.
+
+### Risks and Gaps
+- Internal CMS `source_name` / static `dlName` data still exists by design; it is not displayed by the public Specs panel.
+
+### Next Handoff
+- Verify and push the public Stone Library DL Name removal.
+
 ## Entry - 2026-06-07 (Homepage Project Rail Affordance)
 
 ### Scope

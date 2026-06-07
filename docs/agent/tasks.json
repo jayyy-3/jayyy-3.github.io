@@ -1629,7 +1629,7 @@
         "Available outside image overlays uses a lightweight Urblo lime outline/wash rather than a black block or full lime pill.",
         "Upcoming and No states are visually distinct but muted, so they do not imply approved availability.",
         "Detail header, variant switch, finish selector, Specs availability summary, Finish Capability rows, Cut Options rows, and Stone Library card badges use one coherent status language.",
-        "Missing-data copy such as DL Name TBC and empty-state messages remains plain text, not status chrome."
+        "Public Stone Library detail specs do not render internal DL Name/source-name fields or DL Name TBC fallback copy."
       ],
       "verification": [
         "npm run build",

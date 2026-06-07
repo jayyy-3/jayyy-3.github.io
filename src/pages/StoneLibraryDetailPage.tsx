@@ -165,7 +165,6 @@ export default function StoneLibraryDetailPage() {
               stoneType={detail.stoneType}
               originLabel={detail.originLabel}
               rawBlockLabel={detail.rawBlockLabel}
-              dlName={detail.dlName}
               availabilityStatus={detail.status}
               availabilityLabel={detail.availabilityLabel}
               priceRange={detail.priceRange}

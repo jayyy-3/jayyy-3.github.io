@@ -12,7 +12,6 @@ interface SpecsPanelProps {
     stoneType: string;
     originLabel: string;
     rawBlockLabel: string;
-    dlName: string | null;
     availabilityStatus: StoneStatus;
     availabilityLabel: string;
     priceRange: string;
@@ -57,7 +56,6 @@ export default function SpecsPanel({
     stoneType,
     originLabel,
     rawBlockLabel,
-    dlName,
     availabilityStatus,
     availabilityLabel,
     priceRange,
@@ -98,12 +96,6 @@ export default function SpecsPanel({
                         Raw Block
                     </p>
                     <p className="mt-2 text-base text-black">{rawBlockLabel}</p>
-                </div>
-                <div className="rounded-[4px] border border-black/10 bg-white p-4 shadow-none">
-                    <p className="urblo-meta text-black/55">
-                        DL Name
-                    </p>
-                    <p className="mt-2 text-base text-black">{dlName || 'TBC'}</p>
                 </div>
                 <div className="rounded-[4px] border border-black/10 bg-white p-4 shadow-none">
                     <p className="urblo-meta text-black/55">
