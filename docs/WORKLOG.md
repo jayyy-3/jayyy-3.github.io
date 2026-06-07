@@ -1,6 +1,36 @@
 # WORKLOG - Urblo Execution Log
 
-Last updated: 2026-06-05
+Last updated: 2026-06-07
+
+## Entry - 2026-06-07 (Homepage Project Rail Affordance)
+
+### Scope
+- Improved the homepage `The work speaks.` project rail so the draggable interaction is easier to discover on desktop and mobile.
+- Added restrained previous/next arrow controls, a horizontal-move icon, rail progress feedback, and a right-edge continuation treatment for hidden project cards.
+- Tuned pointer drag threshold/speed and prevented hover selection from firing while drag suppression is active.
+- Updated the design contract to keep visible rail affordance as part of the Latest Projects interaction pattern.
+
+### Changed Files
+- `src/components/homepage/HomepageSections.tsx`
+- `src/index.css`
+- `docs/DESIGN.md`
+- `docs/WORKLOG.md`
+
+### Verification Results
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- Local Browser desktop 1440x900 against `http://127.0.0.1:5174/`: pass. Latest Projects stayed one viewport high, the next arrow was visible/enabled, clicking it selected `moon-gate-woolley-street`, scrolled the rail from `0` to `319`, and enabled the previous arrow.
+- Local Browser mobile 390x844 against `http://127.0.0.1:5174/`: pass. Latest Projects stayed `844px` high, body horizontal overflow was false, the next arrow was visible/enabled, clicking it selected `moon-gate-woolley-street`, and rail scroll moved to `157.5`.
+- Local Browser console checks: pass, with no desktop or mobile error/warning logs during the rail QA.
+
+### Risks and Gaps
+- The rail still uses static homepage project data until the public content cutover is approved.
+- Real WeChat validation was not repeated for this rail interaction; local mobile browser QA covered layout and interaction only.
+
+### Next Handoff
+- Deploy and verify `The work speaks.` rail affordance on production after the next push.
 
 ## Entry - 2026-06-05 (WeChat Mobile Hero Video Playback)
 

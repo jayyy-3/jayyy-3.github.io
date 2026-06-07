@@ -1,5 +1,14 @@
-import { Fragment, useEffect, useRef, useState, type PointerEvent, type ReactNode } from 'react';
+import {
+  Fragment,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type PointerEvent,
+  type ReactNode,
+} from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { ChevronLeft, ChevronRight, MoveHorizontal } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Autoplay, Navigation, Pagination } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -1088,8 +1097,55 @@ function LatestProjectsSection() {
   });
   const suppressClickRef = useRef(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [railState, setRailState] = useState({ canScrollPrev: false, canScrollNext: false });
   const reduceMotion = useReducedMotion() ?? false;
   const [sectionRef, loadProjectMedia] = useNearViewport<HTMLElement>('700px');
+
+  const updateRailState = useCallback(() => {
+    const rail = railRef.current;
+    if (!rail) return;
+
+    const maxScrollLeft = rail.scrollWidth - rail.clientWidth;
+    const canScrollPrev = rail.scrollLeft > 2;
+    const canScrollNext = rail.scrollLeft < maxScrollLeft - 2;
+
+    setRailState((current) =>
+      current.canScrollPrev === canScrollPrev && current.canScrollNext === canScrollNext
+        ? current
+        : { canScrollPrev, canScrollNext },
+    );
+  }, []);
+
+  useEffect(() => {
+    const rail = railRef.current;
+    if (!rail) return undefined;
+
+    updateRailState();
+    rail.addEventListener('scroll', updateRailState, { passive: true });
+    window.addEventListener('resize', updateRailState);
+
+    return () => {
+      rail.removeEventListener('scroll', updateRailState);
+      window.removeEventListener('resize', updateRailState);
+    };
+  }, [updateRailState, loadProjectMedia]);
+
+  const scrollProjectIntoView = useCallback(
+    (index: number, behavior: ScrollBehavior = reduceMotion ? 'auto' : 'smooth') => {
+      const rail = railRef.current;
+      const projectThumb = rail?.querySelector<HTMLElement>(`[data-project-thumb-index="${index}"]`);
+      if (!rail || !projectThumb) return;
+
+      projectThumb.scrollIntoView({
+        block: 'nearest',
+        inline: 'start',
+        behavior,
+      });
+
+      window.setTimeout(updateRailState, reduceMotion ? 0 : 260);
+    },
+    [reduceMotion, updateRailState],
+  );
 
   const finishDrag = (event: PointerEvent<HTMLDivElement>) => {
     const rail = railRef.current;
@@ -1106,10 +1162,20 @@ function LatestProjectsSection() {
 
     dragStateRef.current.isDown = false;
     setIsDragging(false);
+    updateRailState();
   };
 
-  const selectProject = (index: number) => {
+  const selectProject = (index: number, shouldScroll = false) => {
     setActiveProjectIndex(index);
+    if (shouldScroll) {
+      scrollProjectIntoView(index);
+    }
+  };
+
+  const moveProject = (direction: -1 | 1) => {
+    const nextProjectIndex = Math.min(Math.max(activeProjectIndex + direction, 0), projects.length - 1);
+    if (nextProjectIndex === activeProjectIndex) return;
+    selectProject(nextProjectIndex, true);
   };
 
   return (
@@ -1225,7 +1291,49 @@ function LatestProjectsSection() {
             </div>
           </Reveal>
 
-          <Reveal delay={0.08} className="homepage-project-rail min-h-0">
+          <Reveal
+            delay={0.08}
+            className={`homepage-project-rail min-h-0 ${
+              railState.canScrollNext ? 'homepage-project-rail--can-next' : ''
+            } ${railState.canScrollPrev ? 'homepage-project-rail--can-prev' : ''}`}
+          >
+            <div className="homepage-project-rail-controls pointer-events-none absolute inset-x-0 top-0 z-20 flex items-center justify-between gap-3 px-2 pt-2 md:px-3 md:pt-3">
+              <div className="flex items-center gap-2 text-black/42">
+                <MoveHorizontal className="h-4 w-4" aria-hidden="true" />
+                <div
+                  className="homepage-project-rail-progress h-px w-16 overflow-hidden bg-black/18 sm:w-20"
+                  aria-hidden="true"
+                >
+                  <span
+                    className="block h-full bg-black transition-transform duration-300"
+                    style={{
+                      width: `${100 / projects.length}%`,
+                      transform: `translateX(${activeProjectIndex * 100}%)`,
+                    }}
+                  />
+                </div>
+              </div>
+              <div className="pointer-events-auto flex items-center gap-2">
+                <button
+                  type="button"
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-black/18 bg-white/82 text-black shadow-sm backdrop-blur-sm transition duration-200 hover:border-black/34 hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--urblo-lime)] disabled:pointer-events-none disabled:opacity-35"
+                  aria-label="Previous project"
+                  disabled={activeProjectIndex === 0}
+                  onClick={() => moveProject(-1)}
+                >
+                  <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-black/18 bg-white/82 text-black shadow-sm backdrop-blur-sm transition duration-200 hover:border-black/34 hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--urblo-lime)] disabled:pointer-events-none disabled:opacity-35"
+                  aria-label="Next project"
+                  disabled={activeProjectIndex === projects.length - 1}
+                  onClick={() => moveProject(1)}
+                >
+                  <ChevronRight className="h-4 w-4" aria-hidden="true" />
+                </button>
+              </div>
+            </div>
             <div
               ref={railRef}
               data-project-rail="homepage-latest-projects"
@@ -1253,10 +1361,10 @@ function LatestProjectsSection() {
                 if (!rail || !dragState.isDown) return;
 
                 const delta = event.clientX - dragState.startX;
-                if (Math.abs(delta) > 4) {
+                if (Math.abs(delta) > 8) {
                   dragState.moved = true;
                 }
-                rail.scrollLeft = dragState.scrollLeft - delta;
+                rail.scrollLeft = dragState.scrollLeft - delta * 1.08;
               }}
               onPointerUp={finishDrag}
               onPointerCancel={finishDrag}
@@ -1273,16 +1381,17 @@ function LatestProjectsSection() {
                     key={project.slug}
                     type="button"
                     data-project-thumb={project.slug}
+                    data-project-thumb-index={index}
                     aria-pressed={isActive}
                     aria-label={`Show ${project.title}`}
                     className="group h-full w-[42%] flex-none snap-start text-left outline-none sm:w-[calc(50%_-_8px)] md:w-[calc(25%_-_12px)] xl:w-[calc(25%_-_18px)]"
                     onMouseEnter={() => {
-                      if (!dragStateRef.current.isDown) selectProject(index);
+                      if (!dragStateRef.current.isDown && !suppressClickRef.current) selectProject(index);
                     }}
-                    onFocus={() => selectProject(index)}
+                    onFocus={() => selectProject(index, true)}
                     onClick={() => {
                       if (suppressClickRef.current) return;
-                      selectProject(index);
+                      selectProject(index, true);
                     }}
                   >
                     <span className="homepage-project-thumb-media relative block h-full overflow-hidden bg-black/10">
