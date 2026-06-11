@@ -145,17 +145,10 @@ function toDisplayFinishLabel(capability: StoneFinishCapabilityRaw): string {
 }
 
 function toOriginLabel(stone: StoneGroupRaw): string {
-    const region = stone.origin.regionDisplay;
     const country = stone.origin.countryDisplay;
 
-    if (region && country) {
-        return `${region}, ${country}`;
-    }
     if (country) {
         return country;
-    }
-    if (stone.origin.source) {
-        return stone.origin.source;
     }
 
     return 'Origin TBC';
@@ -345,7 +338,7 @@ function splitFinishKey(finishKey: string): {
 }
 
 function toPublishedOriginLabel(group: PublishedStoneGroupRow): string {
-    return [group.origin_region, group.origin_country].filter(Boolean).join(', ') || 'Origin TBC';
+    return group.origin_country || 'Origin TBC';
 }
 
 function toPublishedRawBlockLabel(group: PublishedStoneGroupRow): string {
@@ -603,7 +596,7 @@ class StoneLibraryService {
                     ),
                 );
                 const cover = imagesByGroup.get(group.id)?.find((image) => firstRelation(image.media_assets)?.source_url);
-                const originLabel = [group.origin_region, group.origin_country].filter(Boolean).join(', ') || 'Origin TBC';
+                const originLabel = toPublishedOriginLabel(group);
 
                 return {
                     stoneGroupId: group.stone_group_key,

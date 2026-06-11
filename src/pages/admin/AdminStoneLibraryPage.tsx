@@ -1032,8 +1032,7 @@ function AdminStoneLibraryContent() {
                                             <StatusPill status={group.status} />
                                         </div>
                                         <p className="mt-3 truncate text-xs text-black/45">
-                                            {[group.origin_region, group.origin_country].filter(Boolean).join(', ') ||
-                                                'Origin needs confirmation'}
+                                            {group.origin_country || 'Origin needs confirmation'}
                                         </p>
                                     </button>
                                 ))}

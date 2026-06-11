@@ -2,6 +2,35 @@
 
 Last updated: 2026-06-07
 
+## Entry - 2026-06-11 (Stone Library Country-Only Origin)
+
+### Scope
+- Updated public Stone Library origin presentation so listing cards and detail Specs show country only.
+- Kept `origin_region` in Supabase, import data, and admin edit forms for internal/editorial traceability.
+- Updated the `/admin/stone-library` group list preview to show country only, matching public presentation.
+
+### Changed Files
+- `src/service/StoneLibraryService.ts`
+- `src/pages/admin/AdminStoneLibraryPage.tsx`
+- `docs/WORKLOG.md`
+
+### Verification Results
+- `rg -n "\\$\\{region\\}, \\$\\{country\\}|origin_region.*join|origin_region.*origin_country.*join|regionDisplay.*countryDisplay|origin\\.source" src/service/StoneLibraryService.ts src/pages/admin/AdminStoneLibraryPage.tsx -S`: pass; no old region-plus-country presentation pattern remains.
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass. npm reported an available major-version notice after the run.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- Local Browser QA against `http://127.0.0.1:5173/stone-library`: pass. Listing cards showed country-only origins such as `China` and `Angola`, had no `region, country` pattern, no horizontal overflow, and no console error/warning logs.
+- Local Browser QA against `http://127.0.0.1:5173/stone-library/alpine-white`: pass. Detail Specs `Origin` value was `China`, with no `region, country` pattern, no horizontal overflow, and no console error/warning logs.
+
+### Risks and Gaps
+- Existing data can still store region/province internally; the public and admin-list presentation intentionally ignores it.
+
+### Next Handoff
+- Deploy and verify country-only Stone Library origins on production after the next push.
+
 ## Entry - 2026-06-07 (Stone Library Public DL Name Removal)
 
 ### Scope
