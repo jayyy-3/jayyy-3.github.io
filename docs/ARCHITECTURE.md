@@ -289,12 +289,12 @@ Route state contract:
 - Shared site logo path: `public/media/launch/identity/urblo-logo.png`, referenced by `src/data/siteChrome.ts` and `src/data/homepage.ts`.
 - Homepage hero poster path: `public/media/launch/home/hero-poster.jpg`.
 - Homepage hero video path: `public/media/launch/home/urblo-hero.mp4`.
-- Homepage mobile hero video path: `public/media/launch/home/urblo-hero-mobile.mp4`; the mobile MP4 is encoded as H.264 Constrained Baseline, level 3.1, yuv420p, 540x960, no-audio, fast-start media for better WeChat/X5 compatibility.
-- Current homepage video asset is a web-ready H.264 1280x720, 30fps, no-audio, fast-start export from the user-provided `Urblo_Homepage.mp4`; the original HEVC source was not committed.
+- Homepage mobile hero video path: `public/media/launch/home/urblo-hero-mobile.mp4`; the mobile MP4 is encoded as H.264, 540x960, 30fps, no-audio, fast-start media for better mobile/WeChat/X5 compatibility.
+- Current homepage video asset is a web-ready H.264 1280x720, 30fps, no-audio, fast-start export from the client-provided `Lark20260611-213730.mp4`; the 74MB source file was not committed.
 - Homepage hero uses `100svh` so the first viewport reads as a full-screen hero across desktop and mobile.
 - Homepage hero preloads the poster from `index.html`, uses the poster as the section background fallback, uses the 540x960 mobile MP4 for `media="(max-width: 767px)"`, and uses `preload="auto"` for the desktop/tablet MP4 constrained through `media="(min-width: 768px)"`. The hero video element keeps `playsinline`, `webkit-playsinline`, and Tencent X5 inline playback attributes, and retries playback on media readiness, user gesture, page visibility, page show, and `WeixinJSBridgeReady`.
 - Homepage below-the-fold heavy media, including the partner banner, Product Showcase background, Latest Projects imagery, Manifesto background, and Video CTA image, must stay deferred until the relevant section is near the viewport so those assets do not compete with first-viewport video loading.
-- The desktop MP4 was re-encoded from about 16MB to about 3MB for launch. Cloudflare Stream/R2 remains optional if the client later wants adaptive delivery, analytics, or non-repo video management.
+- The current desktop MP4 is about 4.6MB and the current mobile MP4 is about 2.3MB. Cloudflare Stream/R2 remains optional if the client later wants adaptive delivery, analytics, or non-repo video management.
 - Route banners are local launch media referenced from `src/App.tsx` through the `ROUTE_BANNERS` map. `/capabilities` now owns a full-bleed page hero sourced from the 2026 Capability Statement PDF instead of using a shared route banner.
 - Capability Statement PDF download path: `public/downloads/urblo-capability-statement-2026.pdf`.
 - Capability Statement web imagery path: `public/media/launch/capabilities`; these assets must be visually audited for orientation and crop quality before use.

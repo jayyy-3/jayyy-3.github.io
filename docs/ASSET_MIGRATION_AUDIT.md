@@ -48,9 +48,9 @@ The launch-critical first-viewport dependency risk has a local stopgap in place:
 
 | Area | Current controlled path | Status | Follow-up |
 |---|---|---|---|
-| Homepage hero video | `public/media/launch/home/urblo-hero.mp4` | Controlled local H.264 720p export from the user-provided `Urblo_Homepage.mp4`, about 16 MB. Desktop selects this source. | Review whether final delivery should move to Cloudflare R2 or Stream before production scale. |
-| Homepage hero poster | `public/media/launch/home/hero-poster.jpg` | Controlled local poster. | Replace only if Nat/Hunter approve a different first-frame or campaign image. |
-| Mobile hero fallback | `src/components/homepage/HomepageSections.tsx` | Mobile viewport does not select the MP4 source; it shows the poster instead. | Keep this policy unless a compressed mobile video is intentionally produced. |
+| Homepage hero video | `public/media/launch/home/urblo-hero.mp4` | Controlled local H.264 1280x720, 30fps, no-audio export from client-provided `Lark20260611-213730.mp4`, about 4.6 MB. Desktop selects this source. | Review whether final delivery should move to Cloudflare R2 or Stream before production scale. |
+| Homepage hero poster | `public/media/launch/home/hero-poster.jpg` | Controlled local poster generated from the current homepage hero video source, about 411 KB. | Replace only if Nat/Hunter approve a different first-frame or campaign image. |
+| Mobile hero video | `public/media/launch/home/urblo-hero-mobile.mp4` | Controlled local H.264 540x960, 30fps, no-audio export from the current homepage hero video source, about 2.3 MB. Mobile selects this source. | Keep a mobile-specific compressed source for WeChat/X5 compatibility. |
 | Site logo | `public/media/launch/identity/urblo-logo.png` | Controlled local logo, resized for web use. | Move to CMS site settings/media record during Supabase migration. |
 | Default layout banners | `public/media/launch/banners/*.jpg` | Controlled local route banners. The old banner URLs tested as 404 on 2026-05-22. | Treat these as launch-safe placeholders until CMS-managed page banners are approved. |
 | Contact page image | `public/media/launch/contact/project-contact.jpg` | Controlled local image used by the Contact page and reused on homepage proof cards where the same old URL appeared. | Move to CMS media record during Supabase migration. |
@@ -265,6 +265,7 @@ Verified on 2026-05-22:
 - 2026-05-25 launch UI hardening QA: homepage hero renders as a full viewport on desktop/mobile, desktop selects the controlled MP4 with `preload="none"`, mobile still selects no MP4 source, and fresh console checks show no React Helmet strict-mode warning after removing that dependency.
 - 2026-05-25 video optimization QA: desktop homepage MP4 was re-encoded from about 16MB to about 3MB as H.264 1280x720, 30fps, no-audio, fast-start media. Browser QA confirmed 1280x720 playback, `readyState=4`, no horizontal overflow, and mobile still selects no MP4 source.
 - 2026-06-05 WeChat mobile playback hardening: mobile homepage MP4 is now H.264 Constrained Baseline level 3.1, yuv420p, 540x960, no-audio, fast-start media at about 1.8MB, and the hero video element includes Tencent X5 / WeChat inline playback attributes plus `WeixinJSBridgeReady` playback retry.
+- 2026-06-11 homepage hero video replacement: desktop and mobile homepage hero MP4s plus poster were regenerated from client-provided `Lark20260611-213730.mp4`; the committed assets are 1280x720 desktop at about 4.6MB, 540x960 mobile at about 2.3MB, and a 1280x720 poster at about 411KB.
 
 Before declaring asset migration complete:
 - `rg "urblo.com.au/wp-content/uploads" src public/articles data`

@@ -1,6 +1,45 @@
 # WORKLOG - Urblo Execution Log
 
-Last updated: 2026-06-07
+Last updated: 2026-06-11
+
+## Entry - 2026-06-11 (Homepage Hero Video Replacement)
+
+### Scope
+- Replaced the homepage hero video source using the client-provided local file `Lark20260611-213730.mp4`.
+- Did not commit the 74MB source file; generated controlled web assets at the existing public paths so homepage runtime data did not need to change.
+- Regenerated the desktop MP4 as H.264 1280x720, 30fps, no-audio, fast-start media at about 4.6MB.
+- Regenerated the mobile MP4 as H.264 540x960, 30fps, no-audio, fast-start media at about 2.3MB.
+- Regenerated the homepage hero poster as a 1280x720 JPEG at about 411KB.
+- Updated media contract docs for the new source and sizes.
+
+### Changed Files
+- `public/media/launch/home/urblo-hero.mp4`
+- `public/media/launch/home/urblo-hero-mobile.mp4`
+- `public/media/launch/home/hero-poster.jpg`
+- `docs/ARCHITECTURE.md`
+- `docs/ASSET_MIGRATION_AUDIT.md`
+- `docs/WORKLOG.md`
+
+### Verification Results
+- AVFoundation source inspection: `Lark20260611-213730.mp4` is 1920x1080, 60fps, 27s, with one audio track before conversion.
+- Generated asset inspection: desktop MP4 is `avc1`, 1280x720, 30fps, 27s, no audio, about 4.6MB; mobile MP4 is `avc1`, 540x960, 30fps, 27s, no audio, about 2.3MB; poster is 1280x720 JPEG, about 411KB.
+- Fast-start check: both committed MP4s have `moov` before `mdat`.
+- Local HTTP check against `http://127.0.0.1:5175/media/launch/home/urblo-hero.mp4`: pass. Response used `Content-Type: video/mp4`, `Content-Length: 4820594`, and byte-range reads returned data.
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+- Local Google Chrome / Playwright desktop QA at 1440x900: pass. Homepage selected `/media/launch/home/urblo-hero.mp4`, reached `readyState = 4`, played unpaused, reported 1280x720 intrinsic size, 27s duration, hero height 900px, no horizontal overflow, and no media error.
+- Local Google Chrome / Playwright mobile QA at 390x844: pass. Homepage selected `/media/launch/home/urblo-hero-mobile.mp4`, reached `readyState = 4`, played unpaused, reported 540x960 intrinsic size, 27s duration, hero height 844px, no horizontal overflow, and retained Tencent X5 inline attributes.
+
+### Risks and Gaps
+- Real WeChat playback still needs production-device confirmation after deployment.
+- Cloudflare Stream/R2 remains optional if future production metrics show static MP4 delivery is not enough.
+
+### Next Handoff
+- Deploy and verify the new homepage hero video on production, including real WeChat playback.
 
 ## Entry - 2026-06-11 (Stone Library Country-Only Origin)
 
