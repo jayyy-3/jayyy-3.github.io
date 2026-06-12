@@ -108,6 +108,11 @@ function checkRouting() {
   for (const redirect of [
     '/products/primeBlock /products/prime-block 301',
     '/articles/Modular-Mastery-How-PrimeBlock-Core-Transformed-Aitken-College /articles/modular-mastery-how-primeblock-core-transformed-aitken-college 301',
+    '/contact-us /contact 301',
+    '/our-capacity /capabilities 301',
+    '/product/creama /stone-library 301',
+    '/stone-product/bollard /capabilities 301',
+    '/article/discover-the-art-of-surface-finishes /articles/stone-transformed-8-ways-to-redefine-bluestones-look-feel 301',
   ]) {
     requireIncludes(redirects, redirect, 'public/_redirects');
   }

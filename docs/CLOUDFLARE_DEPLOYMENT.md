@@ -154,7 +154,7 @@ This runner does not require secrets. It checks:
 - direct refresh for public routes, unknown-route fallback, and `/admin/*` route shells;
 - deployed `/assets/*` JavaScript/CSS availability, including recursively discovered route chunks referenced by deployed bundles;
 - deployed admin bundle markers for the configuration-required state and `admin_profiles` profile gate, while rejecting browser-side service-role env access patterns;
-- legacy product/article 301 redirects from `_redirects`;
+- legacy product/article and GSC-recovered SEO 301 redirects from `_redirects`;
 - `/api/enquiries` and `/api/sample-requests` GET/OPTIONS/malformed JSON/invalid POST safe-failure behavior, including CORS preflight headers. Malformed and invalid POST checks are deliberately no-write and do not replace the credential-gated live form persistence command.
 
 If `CLOUDFLARE_PAGES_PREVIEW_URL` or `PAGES_PREVIEW_URL` is set in a local untracked env file, or if `npm run agent:live-readiness -- --base-url <preview-origin>` is used with a real `http`/`https` origin, the readiness runner reports that the preview smoke input is available; copied placeholders and URLs with path/query/hash remain missing. The preview smoke runner still expects `--base-url` explicitly.

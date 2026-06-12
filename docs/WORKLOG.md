@@ -2,6 +2,55 @@
 
 Last updated: 2026-06-12
 
+## Entry - 2026-06-12 (SEO Phase 2 Legacy URL Cleanup)
+
+### Scope
+- Implemented the Phase 2 GSC legacy URL cleanup in source.
+- Added selective 301 rules in `public/_redirects` for old contact, capacity, product, product-category, stone-product, article, and selected trailing-slash public detail URLs.
+- Left junk WordPress/admin/plugin/feed/search/upload paths unrescued and out of the sitemap.
+- Extended SEO readiness, local smoke, Cloudflare readiness, and deployed preview smoke checks so representative old-to-new redirects are guarded.
+- Moved the next SEO work to a Phase 3 content-growth task focused on non-brand specifier search intent.
+
+### Redirect Groups
+- Recovered to current pages: `/contact-us` to `/contact`, `/our-capacity` to `/capabilities`, `/product` to `/products`, `/article` to `/articles`.
+- Recovered to closest content: `/article/discover-the-art-of-surface-finishes` to the current bluestone finish article, `/product/creama` and `/product-category/limestone` to `/stone-library`, and old bollard/planter/engraved-inlay URLs to `/capabilities`.
+- Canonical cleanup: selected indexed trailing-slash project/product/article detail URLs now redirect to their no-trailing-slash canonical paths.
+
+### Changed Files
+- `public/_redirects`
+- `scripts/agent-smoke.sh`
+- `scripts/check-cloudflare-preview-smoke.mjs`
+- `scripts/check-cloudflare-pages-readiness.mjs`
+- `scripts/check-seo-readiness.mjs`
+- `docs/SEO_PHASE_2_PLAN.md`
+- `docs/ARCHITECTURE.md`
+- `docs/CLOUDFLARE_DEPLOYMENT.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/status.json`
+- `docs/agent/tasks.json`
+
+### Verification Results
+- `npm run agent:seo-readiness`: pass. Verified 36 approved sitemap URLs plus representative GSC legacy redirect rules.
+- `npm run agent:cloudflare-readiness`: pass. Verified repo-side Cloudflare Pages contract and representative redirect rules.
+- `npm run build`: pass. Existing Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass. Verified public/admin route shells, assets, CTA contracts, and representative redirect rules including `/contact-us`, `/our-capacity`, `/product/creama`, `/product-category/limestone`, `/stone-product/bollard`, `/article/discover-the-art-of-surface-finishes`, and `/projects/xavier-college/`.
+- `npm run agent:check`: pass.
+- `npm run agent:harness-gc`: pass with zero failures and the three existing warnings for `AGENTS.md` date, `docs/agent/harness-gc.md` date, and long `docs/WORKLOG.md`.
+- `npm run agent:harness-gc:review`: pass and wrote `.tmp/harness-gc-review.md`.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- This does not create new keyword-rich content. Phase 3 content growth remains the next SEO work.
+- Production redirect behavior requires Cloudflare Pages deployment of this commit before deployed smoke can prove live 301 responses.
+
+### Next Handoff
+- Run full runtime/harness gates, push the redirect cleanup, then verify production redirects after Cloudflare deploys the new commit.
+- After Google recrawls, monitor whether old WordPress/old-site issues decay and whether canonical sitemap discovery improves.
+
 ## Entry - 2026-06-12 (GSC Review and Phase 2 SEO Plan)
 
 ### Scope

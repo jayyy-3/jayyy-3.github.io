@@ -161,9 +161,43 @@ if (packageJson.scripts?.['agent:seo-readiness'] !== 'node scripts/check-seo-rea
   fail('package.json is missing the agent:seo-readiness script.');
 }
 
+const redirects = readText('public/_redirects');
+const expectedLegacyRedirects = [
+  ['/contact-us', '/contact'],
+  ['/contact-us/', '/contact'],
+  ['/our-capacity', '/capabilities'],
+  ['/our-capacity/', '/capabilities'],
+  ['/product', '/products'],
+  ['/product/', '/products'],
+  ['/article', '/articles'],
+  ['/article/', '/articles'],
+  ['/article/discover-the-art-of-surface-finishes', '/articles/stone-transformed-8-ways-to-redefine-bluestones-look-feel'],
+  ['/article/discover-the-art-of-surface-finishes/', '/articles/stone-transformed-8-ways-to-redefine-bluestones-look-feel'],
+  ['/product/creama', '/stone-library'],
+  ['/product/creama/', '/stone-library'],
+  ['/product-category/limestone', '/stone-library'],
+  ['/product-category/limestone/', '/stone-library'],
+  ['/stone-product/bollard', '/capabilities'],
+  ['/stone-product/bollard/', '/capabilities'],
+  ['/stone-product/planter', '/capabilities'],
+  ['/stone-product/planter/', '/capabilities'],
+  ['/stone-product/engraved-stone-inlays', '/capabilities'],
+  ['/stone-product/engraved-stone-inlays/', '/capabilities'],
+  ['/projects/xavier-college/', '/projects/xavier-college'],
+];
+
+for (const [from, to] of expectedLegacyRedirects) {
+  assertIncludes(redirects, `${from} ${to} 301`, 'public/_redirects');
+}
+
+for (const retiredPath of ['/wp-', '/wp/', '/wp-admin', '/wp-json', '/feed/', '/hello-world']) {
+  assertNotIncludes(sitemap, retiredPath, 'sitemap.xml');
+}
+
 note(`robots.txt points crawlers to ${SITE_URL}/sitemap.xml and excludes /admin and /api.`);
 note(`sitemap.xml contains ${sitemapUrls.length} approved public URLs.`);
 note(`Route metadata is centralized in src/data/seoRoutes.ts and wired into src/App.tsx.`);
+note(`public/_redirects contains ${expectedLegacyRedirects.length} GSC legacy/canonical cleanup rules.`);
 
 if (failures.length) {
   console.error('SEO readiness failed:');

@@ -1154,7 +1154,7 @@
     },
     {
       "id": "NOW-ARTICLE-STRUCTURE-CLAIMS-001",
-      "status": "next",
+      "status": "done",
       "priority": 6.2,
       "summary": "Move article details from raw newsletter HTML to mobile-safe, claim-reviewed structured article templates.",
       "files": [
@@ -1308,6 +1308,8 @@
         "2026-06-12: GSC review showed Page indexing data last updated 2026-06-05, before the Phase 1 sitemap/robots deployment, so current GSC counts still reflect old crawl state.",
         "2026-06-12: GSC showed stale submitted sitemap history and indexing examples dominated by old WordPress or old-site URLs rather than the current canonical route set.",
         "2026-06-12: `https://urblo.com.au/sitemap.xml` was submitted/refreshed in GSC. The submitted date changed to 12 Jun 2026 and GSC confirmed submission; `Last read` still showed 3 Aug 2023 immediately after submission, so actual Google processing remains a monitoring item.",
+        "2026-06-12: Implemented selective 301 redirects in `public/_redirects` for old contact, capacity, product, product-category, stone-product, article, and selected trailing-slash canonical URLs observed through GSC evidence.",
+        "2026-06-12: Extended `npm run agent:seo-readiness`, `npm run agent:smoke`, `npm run agent:cloudflare-readiness`, and `npm run agent:cloudflare-preview-smoke` so representative GSC legacy redirects cannot silently disappear.",
         "Phase 2 should map legacy URLs into recover, retire, and investigate groups before implementing redirects. Do not redirect junk WordPress feeds, search URLs, admin/plugin endpoints, or upload globs to unrelated pages.",
         "After legacy redirect cleanup, expand Product, Stone Library, Project, and Article pages around useful non-brand specifier queries. Decide on pre-render/static HTML only if indexing remains weak after Google recrawls the refreshed sitemap."
       ],
@@ -1328,6 +1330,46 @@
         "npm run agent:check",
         "git diff --check",
         "npm run agent:cloudflare-preview-smoke -- --base-url https://urblo.com.au"
+      ]
+    },
+    {
+      "id": "NEXT-SEO-CONTENT-GROWTH-001",
+      "status": "next",
+      "priority": 7.4,
+      "summary": "Run the Phase 3 SEO content-growth pass for non-brand specifier queries after the legacy URL cleanup has deployed.",
+      "files": [
+        "docs/SEO_PHASE_2_PLAN.md",
+        "docs/brand-baseline.md",
+        "docs/DESIGN.md",
+        "src/data/seoRoutes.ts",
+        "src/pages/StoneLibraryPage.tsx",
+        "src/pages/StoneLibraryDetailPage.tsx",
+        "src/pages/ProductsPage.tsx",
+        "src/pages/ProductDetailPage.tsx",
+        "src/pages/Projects.tsx",
+        "src/pages/ProjectDetails.tsx",
+        "public/articles/index.json",
+        "public/articles/*/content.html"
+      ],
+      "notes": [
+        "This is the content and conversion phase, not the redirect-cleanup phase.",
+        "Prioritize useful, evidence-backed long-tail specifier intent such as stone bollards, bluestone seating, natural stone streetscape furniture, urban landscape stone products, material/finish combinations, and project proof terms.",
+        "Do not add generic SEO filler, unsupported price/availability claims, or unqualified sustainability/cost/speed claims."
+      ],
+      "acceptance": [
+        "Priority Product, Stone Library, Project, and Article pages have clearer non-brand search intent coverage without weakening Urblo's brand voice.",
+        "Claims remain qualified and evidence-backed against docs/brand-baseline.md.",
+        "CTA paths remain focused on enquiry, sample request, and capability download flows.",
+        "Any decision to pre-render or server-render public detail pages is based on post-refresh GSC indexing evidence."
+      ],
+      "verification": [
+        "npm run agent:seo-readiness",
+        "npm run build",
+        "npm run lint",
+        "npx tsc -b",
+        "npm run agent:smoke",
+        "npm run agent:check",
+        "git diff --check"
       ]
     },
     {

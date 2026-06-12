@@ -41,6 +41,34 @@ const redirectContracts = [
     from: '/articles/Modular-Mastery-How-PrimeBlock-Core-Transformed-Aitken-College',
     to: '/articles/modular-mastery-how-primeblock-core-transformed-aitken-college',
   },
+  {
+    from: '/contact-us',
+    to: '/contact',
+  },
+  {
+    from: '/our-capacity',
+    to: '/capabilities',
+  },
+  {
+    from: '/product/creama',
+    to: '/stone-library',
+  },
+  {
+    from: '/product-category/limestone',
+    to: '/stone-library',
+  },
+  {
+    from: '/stone-product/bollard',
+    to: '/capabilities',
+  },
+  {
+    from: '/article/discover-the-art-of-surface-finishes',
+    to: '/articles/stone-transformed-8-ways-to-redefine-bluestones-look-feel',
+  },
+  {
+    from: '/projects/xavier-college/',
+    to: '/projects/xavier-college',
+  },
 ];
 
 const functionPaths = ['/api/enquiries', '/api/sample-requests'];

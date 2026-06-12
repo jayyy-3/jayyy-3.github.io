@@ -37,6 +37,7 @@ SEO:
 - Production readback after commit `4952e93` confirmed `https://urblo.com.au/robots.txt` returns static robots text and `https://urblo.com.au/sitemap.xml` returns static XML with 36 `<loc>` entries.
 - Google Search Console review on 2026-06-12 showed stale sitemap reads and mostly legacy WordPress/old-site URLs in indexing issues. Phase 2 SEO is documented in `docs/SEO_PHASE_2_PLAN.md`: refresh the sitemap, map valuable old URLs, add selective 301 redirects, then improve non-brand long-tail content.
 - `https://urblo.com.au/sitemap.xml` was submitted/refreshed in GSC on 2026-06-12. GSC showed the submitted date as 12 Jun 2026 and confirmed submission, but `Last read` still showed 3 Aug 2023 immediately after submission; monitor for Google's next processing pass.
+- Phase 2 legacy URL cleanup is implemented in source: selected old contact/capacity/product/category/stone-product/article URLs now have semantic 301 rules in `public/_redirects`, representative redirect checks are in smoke runners, and junk WordPress/admin/feed/upload paths remain intentionally unrescued.
 - Remaining SEO limitation: the current public site is still a Vite React SPA, so deep-link first HTML is the shared app shell until JavaScript runs. Pre-rendered or server-rendered public detail HTML is a Phase 2 technical SEO decision.
 
 Supabase:
@@ -111,7 +112,7 @@ For product launch work, choose one of:
 - Configure and prove Turnstile.
 - Provide a target editor email for the real Settings invite proof.
 - Have a customer/editor review Draft CMS content and decide what to publish first.
-- Follow `docs/SEO_PHASE_2_PLAN.md` for Phase 2 SEO: monitor the refreshed sitemap read in GSC, map valuable legacy URLs from Search Console, decide redirect scope, and then choose whether content expansion alone is enough or public route pre-rendering is worth the added implementation scope.
+- Monitor production/GSC after the Phase 2 redirect deployment, then plan the Phase 3 non-brand content pass for Product, Stone Library, Project, and Article pages.
 
 ## Guardrails
 - Code reality wins over stale docs; if docs and code disagree, verify code first, then update docs.

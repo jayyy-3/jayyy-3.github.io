@@ -20,6 +20,30 @@ Observed signals:
 - HTTPS and Breadcrumb enhancement status did not show a launch-blocking issue. Core Web Vitals had insufficient field data rather than a failing score.
 - GSC reported one unused verification token. That is a property-security cleanup item, not a ranking issue.
 
+## Implementation Checkpoint - 2026-06-12
+Phase 2 legacy URL cleanup is implemented in source. The work adds selective 301 redirects in `public/_redirects`, guards representative mappings in local and production smoke checks, and keeps junk WordPress artifacts out of the canonical sitemap.
+
+Recovered URL groups:
+
+| Old URL pattern | Current destination | Reason |
+|---|---|---|
+| `/contact-us` and `/contact-us/` | `/contact` | Old contact page with clear current equivalent. |
+| `/our-capacity` and `/our-capacity/` | `/capabilities` | Old capacity page maps to the current capability statement surface. |
+| `/product` and `/product/` | `/products` | Old product index maps to current Products listing. |
+| `/article` and `/article/` | `/articles` | Old article index maps to current Articles listing. |
+| `/article/discover-the-art-of-surface-finishes` | `/articles/stone-transformed-8-ways-to-redefine-bluestones-look-feel` | Old surface-finish article maps to current bluestone finish guide. |
+| `/product/creama` | `/stone-library` | Old material/product page has no exact current stone record, so it maps to the material library rather than a false specific stone. |
+| `/product-category/limestone` | `/stone-library` | Old material category maps to the current material library index. |
+| `/stone-product/bollard`, `/stone-product/planter`, `/stone-product/engraved-stone-inlays` | `/capabilities` | These old product-service pages map to current bespoke street-furniture/public-art capability copy. |
+| Selected trailing-slash public detail URLs | Matching no-trailing-slash canonical URLs | Reduces duplicate canonical signals for indexed project/product/article detail paths. |
+
+Retired URL groups:
+- Old WordPress admin/plugin/API paths such as `/wp-admin/admin-ajax.php` and `/wp-json/...`.
+- Old upload globs such as `/wp-content/uploads/*`.
+- Old feed/search/placeholder URLs such as `/hello-world/feed/`, `/hello-world/`, and `/?s={search_term_string}`.
+
+These retired groups are intentionally not added to `public/_redirects` because they do not have useful current public destinations.
+
 ## Phase 2 Priorities
 1. **Refresh Google's source of truth**
    - Monitor whether Google reads the 36 current canonical URLs from the refreshed sitemap.
@@ -37,11 +61,13 @@ Observed signals:
    - Add Cloudflare Pages 301 rules in `public/_redirects` for recoverable old URLs before the SPA fallback.
    - Add runtime alias handling only when local/SPA navigation also needs to resolve the old slug.
    - Likely first candidates from GSC include old contact, capability, product, stone-product, product-category, article, and project URLs that still receive impressions or clicks.
+   - Status: complete in source on 2026-06-12.
 
 4. **Strengthen non-brand long-tail landing pages**
    - Expand Stone Library, Product, Project, and Article pages around specifier search intent.
    - Prioritize practical queries such as stone bollards, bluestone seating, natural stone streetscape furniture, urban landscape stone products, material/finish combinations, and project proof terms.
    - Keep claims evidence-backed and aligned with `docs/brand-baseline.md`.
+   - Status: moved to the next content-growth cycle after legacy redirect cleanup.
 
 5. **Review the technical SEO ceiling after data comes back**
    - If Google still struggles to index important detail pages after sitemap refresh, redirects, and content improvements, decide whether public detail routes need pre-rendered/static HTML or another server-rendered approach.

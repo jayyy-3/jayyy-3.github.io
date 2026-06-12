@@ -21,6 +21,7 @@
     "contentImport": "draft_imported",
     "publicContentCutover": "published_reads_with_static_fallback",
     "seoIndexability": "production_verified",
+    "seoLegacyRedirects": "source_verified_pending_deploy_readback",
     "settingsInviteProof": "deferred_until_target_editor_approval"
   },
   "localReproducibility": {
@@ -35,7 +36,8 @@
     "Choose a target editor email before running a real Settings invite proof.",
     "Have a customer or editor review imported Draft CMS content before publishing items publicly.",
     "Decide whether and when to resume paused article claim cleanup.",
-    "Use docs/SEO_PHASE_2_PLAN.md for the next SEO cycle: sitemap refresh monitoring, GSC legacy URL mapping, selective 301 redirects, non-brand long-tail content, then a pre-render/SSR decision only if indexing remains weak."
+    "Monitor GSC after the refreshed sitemap and Phase 2 redirect deployment so Google processing, discovered pages, and old URL decay are visible.",
+    "Plan Phase 3 SEO content growth around non-brand Product, Stone Library, Project, and Article search intent."
   ],
   "activeExecutableTasks": [
     "NOW-FORMS-SUPABASE-001",
@@ -50,15 +52,21 @@
     "handoffTargetLines": 220,
     "worklogReviewWarningLines": 8000
   },
-  "lastVerified": {
+    "lastVerified": {
     "agentCheck": "2026-06-12",
+    "build": "2026-06-12",
+    "cloudflareReadiness": "2026-06-12",
     "gscSeoReview": "2026-06-12",
     "gscSitemapSubmission": "2026-06-12",
+    "harnessGc": "2026-06-12",
+    "harnessGcReview": "2026-06-12",
+    "lint": "2026-06-12",
+    "seoLegacyRedirectSource": "2026-06-12",
     "seoReadiness": "2026-06-12",
     "seoProductionReadback": "2026-06-12",
     "gitDiffCheck": "2026-06-12",
-    "harnessGc": "2026-06-05",
-    "harnessGcReview": "2026-06-05",
+    "smoke": "2026-06-12",
+    "typecheck": "2026-06-12",
     "cloudflarePreviewSmokeProduction": "2026-06-05",
     "adminAuthBrowserProduction": "2026-06-05",
     "adminHandoffReadinessStrict": "2026-06-05"
