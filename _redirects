@@ -1,5 +1,47 @@
 # Cloudflare Pages SPA fallback for React Router clean URLs.
 # API requests are handled by Pages Functions when the matching /functions/api routes exist.
+
+# GSC-recovered legacy public URLs. These old WordPress/previous-site paths had
+# search signal or indexing visibility and now point to the closest current
+# canonical page. Junk WP/admin/feed/upload paths are intentionally not rescued.
+/contact-us /contact 301
+/contact-us/ /contact 301
+/our-capacity /capabilities 301
+/our-capacity/ /capabilities 301
+/product /products 301
+/product/ /products 301
+/article /articles 301
+/article/ /articles 301
+/article/discover-the-art-of-surface-finishes /articles/stone-transformed-8-ways-to-redefine-bluestones-look-feel 301
+/article/discover-the-art-of-surface-finishes/ /articles/stone-transformed-8-ways-to-redefine-bluestones-look-feel 301
+/product/creama /stone-library 301
+/product/creama/ /stone-library 301
+/product-category/limestone /stone-library 301
+/product-category/limestone/ /stone-library 301
+/stone-product/bollard /capabilities 301
+/stone-product/bollard/ /capabilities 301
+/stone-product/planter /capabilities 301
+/stone-product/planter/ /capabilities 301
+/stone-product/engraved-stone-inlays /capabilities 301
+/stone-product/engraved-stone-inlays/ /capabilities 301
+
+# Canonical no-trailing-slash cleanup for indexed public URLs observed in GSC.
+/projects/australian-catholic-university/ /projects/australian-catholic-university 301
+/projects/artisan-park-yarrabend/ /projects/artisan-park-yarrabend 301
+/projects/west-side-place/ /projects/west-side-place 301
+/projects/xavier-college/ /projects/xavier-college 301
+/projects/moon-gate-woolley-street/ /projects/moon-gate-woolley-street 301
+/products/prime-block/ /products/prime-block 301
+/products/prime-lume/ /products/prime-lume 301
+/products/terra-line/ /products/terra-line 301
+/products/strata-bench/ /products/strata-bench 301
+/products/prime-curve/ /products/prime-curve 301
+/products/terra-arc/ /products/terra-arc 301
+/articles/curving-the-future-greening-the-pipelines-sustainable-legacy/ /articles/curving-the-future-greening-the-pipelines-sustainable-legacy 301
+/articles/debunking-the-cost-myth-by-urblo-bluestone-blocks/ /articles/debunking-the-cost-myth-by-urblo-bluestone-blocks 301
+/articles/modular-mastery-how-primeblock-core-transformed-aitken-college/ /articles/modular-mastery-how-primeblock-core-transformed-aitken-college 301
+/articles/stone-transformed-8-ways-to-redefine-bluestones-look-feel/ /articles/stone-transformed-8-ways-to-redefine-bluestones-look-feel 301
+
 /products/primeBlock /products/prime-block 301
 /products/primeLume /products/prime-lume 301
 /products/terraLine /products/terra-line 301
