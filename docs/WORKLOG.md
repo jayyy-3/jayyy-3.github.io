@@ -36,14 +36,14 @@ Last updated: 2026-06-12
 - `npm run agent:smoke`: pass.
 - `npm run agent:check`: pass.
 - `git diff --check`: pass.
+- Production readback after push: `https://urblo.com.au/robots.txt` returned static robots text, `https://urblo.com.au/sitemap.xml` returned XML, and production sitemap contained 36 `<loc>` entries.
 
 ### Risks and Gaps
 - Phase 1 does not make the Vite React app server-rendered or pre-rendered. Deep-link first HTML remains the shared app shell until JavaScript executes; this is documented as a Phase 2 technical SEO decision.
-- Production `robots.txt` and `sitemap.xml` still need deployed readback after Cloudflare Pages finishes the post-push deployment.
 - Google Search Console sitemap submission/indexing evidence is a manual follow-up outside the source-only local gate.
 
 ### Next Handoff
-- After deployment, verify `https://urblo.com.au/robots.txt` and `https://urblo.com.au/sitemap.xml` return static text/XML, then submit the sitemap in Google Search Console.
+- Submit `https://urblo.com.au/sitemap.xml` in Google Search Console and monitor indexed pages/query data after Google recrawls.
 - Decide Phase 2 SEO depth: content/CTA polish only, standard Stone/Product/Project landing-page expansion, or deeper public route pre-rendering.
 
 ## Entry - 2026-06-11 (Homepage Hero Video Replacement)

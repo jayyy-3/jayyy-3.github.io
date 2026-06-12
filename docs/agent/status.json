@@ -20,7 +20,7 @@
     "adminStorageProof": "verified",
     "contentImport": "draft_imported",
     "publicContentCutover": "published_reads_with_static_fallback",
-    "seoIndexability": "source_verified",
+    "seoIndexability": "production_verified",
     "settingsInviteProof": "deferred_until_target_editor_approval"
   },
   "localReproducibility": {
@@ -52,6 +52,7 @@
   "lastVerified": {
     "agentCheck": "2026-06-12",
     "seoReadiness": "2026-06-12",
+    "seoProductionReadback": "2026-06-12",
     "gitDiffCheck": "2026-06-12",
     "harnessGc": "2026-06-05",
     "harnessGcReview": "2026-06-05",
