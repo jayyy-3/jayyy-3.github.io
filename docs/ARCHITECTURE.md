@@ -1,6 +1,6 @@
 # Urblo Web - Architecture and Contracts
 
-Last updated: 2026-06-04
+Last updated: 2026-06-12
 
 ## System Boundary
 - Current implementation: frontend-only React application shipped as static assets.
@@ -284,6 +284,7 @@ Route state contract:
   - Client-side JSON-LD is intentionally conservative: Organization, WebSite, BreadcrumbList, and Article only. Product/Service schema remains deferred until pricing, availability, and claim scope can be represented safely.
   - `npm run agent:seo-readiness` verifies the source-side SEO contract: robots/sitemap are static files rather than SPA fallback HTML, sitemap URLs match current public data, admin/API/private paths are excluded, `src/App.tsx` is wired to the SEO registry, and detail routes do not regress to the old generic title source.
 - Important limitation: because the current public app is still a Vite React SPA, the first network response for route deep links is still the shared app shell. Phase 1 improves discoverability, canonical URL declaration after hydration, route metadata consistency, sitemap submission readiness, and structured data after JavaScript executes. Server-rendered or pre-rendered route HTML remains a separate Phase 2/technical SEO decision.
+- Phase 2 SEO follow-up is tracked in `docs/SEO_PHASE_2_PLAN.md`. Google Search Console review on 2026-06-12 showed stale sitemap history plus legacy WordPress/old-site URLs in indexing reports; redirect cleanup should be selective and should not promote junk legacy URLs into the sitemap.
 - Default share image asset: `public/og-default.png` at 1200 x 630. `public/og-default.svg` remains the editable source used to generate the PNG.
 - Favicon assets: old-site-matched WordPress site icon PNGs in `public/favicon-32x32.png`, `public/favicon-192x192.png`, `public/favicon.png`, `public/apple-touch-icon.png`, and `public/mstile-270x270.png`.
 - Web manifest: `public/site.webmanifest`, referencing PNG icon assets instead of the retired temporary SVG favicon.
@@ -294,6 +295,7 @@ Route state contract:
 - Product records in `src/data/productData.ts` may retain `legacySlugs` for pre-normalization camelCase links; `ProductService.getBySlug()` resolves both canonical and legacy slugs, and `ProductDetailPage` redirects legacy matches to the canonical URL.
 - Article records in `public/articles/index.json` may retain `sourceSlug` and `legacySlugs` while the legacy raw HTML folders remain title-case export folders. `ArticlePage` resolves those aliases, fetches from `sourceSlug`, and redirects legacy matches to the canonical URL.
 - `public/_redirects` contains explicit Cloudflare 301 rules for the old product and article URLs before the SPA catch-all rule.
+- Additional GSC-driven legacy redirects belong to Phase 2. Add only semantically useful 301 redirects for old URLs with search signal and a clear current equivalent; leave old WordPress feeds, search URLs, admin/plugin endpoints, and upload globs out of the sitemap and do not redirect them to unrelated pages.
 - Future `/admin` slug editing should enforce lowercase kebab-case and preserve old public URLs as redirect aliases before changing published content slugs.
 
 ## Current Static Media Contract

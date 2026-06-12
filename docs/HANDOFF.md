@@ -1,6 +1,6 @@
 # HANDOFF - Current Agent State
 
-Last updated: 2026-06-05
+Last updated: 2026-06-12
 
 ## Read First
 Use this file as the short current-state entry. Detailed evidence lives in `docs/WORKLOG.md`; task execution state lives in `docs/agent/tasks.json`; compact machine state lives in `docs/agent/status.json`.
@@ -35,6 +35,8 @@ SEO:
 - Phase 1 SEO indexability source is implemented: `public/robots.txt`, `public/sitemap.xml`, `src/data/seoRoutes.ts`, conservative client-side JSON-LD, and `npm run agent:seo-readiness`.
 - The sitemap currently covers 36 approved public canonical URLs: Home, public listing pages, 5 Projects, 13 Stone Library groups, 6 Products, and 4 Articles. `/admin` and `/api` are intentionally excluded.
 - Production readback after commit `4952e93` confirmed `https://urblo.com.au/robots.txt` returns static robots text and `https://urblo.com.au/sitemap.xml` returns static XML with 36 `<loc>` entries.
+- Google Search Console review on 2026-06-12 showed stale sitemap reads and mostly legacy WordPress/old-site URLs in indexing issues. Phase 2 SEO is documented in `docs/SEO_PHASE_2_PLAN.md`: refresh the sitemap, map valuable old URLs, add selective 301 redirects, then improve non-brand long-tail content.
+- `https://urblo.com.au/sitemap.xml` was submitted/refreshed in GSC on 2026-06-12. GSC showed the submitted date as 12 Jun 2026 and confirmed submission, but `Last read` still showed 3 Aug 2023 immediately after submission; monitor for Google's next processing pass.
 - Remaining SEO limitation: the current public site is still a Vite React SPA, so deep-link first HTML is the shared app shell until JavaScript runs. Pre-rendered or server-rendered public detail HTML is a Phase 2 technical SEO decision.
 
 Supabase:
@@ -109,7 +111,7 @@ For product launch work, choose one of:
 - Configure and prove Turnstile.
 - Provide a target editor email for the real Settings invite proof.
 - Have a customer/editor review Draft CMS content and decide what to publish first.
-- Choose the depth of Phase 2 SEO content/conversion work and whether public route pre-rendering is worth the added implementation scope.
+- Follow `docs/SEO_PHASE_2_PLAN.md` for Phase 2 SEO: monitor the refreshed sitemap read in GSC, map valuable legacy URLs from Search Console, decide redirect scope, and then choose whether content expansion alone is enough or public route pre-rendering is worth the added implementation scope.
 
 ## Guardrails
 - Code reality wins over stale docs; if docs and code disagree, verify code first, then update docs.

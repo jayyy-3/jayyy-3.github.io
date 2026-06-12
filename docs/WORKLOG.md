@@ -2,6 +2,43 @@
 
 Last updated: 2026-06-12
 
+## Entry - 2026-06-12 (GSC Review and Phase 2 SEO Plan)
+
+### Scope
+- Reviewed Google Search Console after the Phase 1 SEO indexability deployment.
+- Found that GSC's Page indexing data still reflected a 2026-06-05 crawl state, before the new 36-URL sitemap and crawler files were deployed.
+- Submitted/refreshed `https://urblo.com.au/sitemap.xml` in GSC on 2026-06-12.
+- Confirmed the next SEO work should not replace Phase 1; it should add a Phase 2 pass for stale sitemap refresh monitoring, legacy URL mapping, selective 301 redirects, and non-brand long-tail landing-page/content improvement.
+- Added `docs/SEO_PHASE_2_PLAN.md` as the executable planning document for the next SEO cycle.
+
+### GSC Observations
+- GSC showed 21 indexed pages and 29 not indexed pages, with many examples coming from old WordPress or old-site paths rather than the current canonical sitemap.
+- Stale submitted sitemap history was visible for `https://urblo.com.au/sitemap.xml` and `https://www.urblo.com.au/sitemap.xml`.
+- Search performance was mostly branded; non-brand product, material, and project discovery remains the Phase 2 opportunity.
+- HTTPS and Breadcrumb enhancement status did not show a launch-blocking issue; Core Web Vitals lacked enough field data rather than showing a failing score.
+
+### Changed Files
+- `docs/SEO_PHASE_2_PLAN.md`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/status.json`
+- `docs/agent/tasks.json`
+- `docs/agent/verification.md`
+
+### Verification Results
+- GSC submission: pass. Search Console showed "Sitemap submitted successfully" for `https://urblo.com.au/sitemap.xml`.
+- GSC table immediately after submission showed submitted date `12 Jun 2026`, status `Success`, discovered pages `11`, and old `Last read` `3 Aug 2023`; Google processing of the refreshed 36-URL sitemap remains a monitoring item.
+- `jq empty docs/agent/status.json docs/agent/tasks.json`: pass.
+- `npm run agent:check`: pass.
+- `npm run agent:harness-gc`: pass with zero failures and three existing warnings: `AGENTS.md` date older than status, `docs/agent/harness-gc.md` date older than status, and long `docs/WORKLOG.md`.
+- `git diff --check`: pass.
+
+### Next Handoff
+- Monitor GSC until Google actually reads the refreshed sitemap and updates discovered-page/indexing data.
+- Later Phase 2 work should follow `docs/SEO_PHASE_2_PLAN.md`.
+
 ## Entry - 2026-06-12 (SEO Indexability Foundation)
 
 ### Scope

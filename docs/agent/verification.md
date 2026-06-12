@@ -1,6 +1,6 @@
 # Agent Verification Matrix
 
-Last updated: 2026-06-05
+Last updated: 2026-06-12
 
 ## Purpose
 Use this matrix to choose the smallest verification set that proves a change is safe. Runtime changes still need the full build/lint/typecheck gate unless a task explicitly defines a temporary exception.
@@ -83,6 +83,7 @@ Evidence to record:
 - Structured data types added or changed.
 - Whether production `robots.txt` and `sitemap.xml` were verified after deployment, or why that remains pending.
 - Any remaining SPA, pre-render, or SSR limitation.
+- Any Google Search Console follow-up: sitemap read status, discovered URL count, legacy URL examples, and whether those legacy URLs should be redirected, retired, or investigated.
 
 ### Data or Content Contract
 Use when changing `data/**`, `public/articles/**`, service-layer view models, or typed data contracts.

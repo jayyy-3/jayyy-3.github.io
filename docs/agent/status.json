@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lastUpdated": "2026-06-05",
+  "lastUpdated": "2026-06-12",
   "sourceOfTruth": {
     "currentState": "docs/HANDOFF.md",
     "taskQueue": "docs/agent/tasks.json",
@@ -34,7 +34,8 @@
     "Decide whether final Turnstile proof is required before the next public launch checkpoint.",
     "Choose a target editor email before running a real Settings invite proof.",
     "Have a customer or editor review imported Draft CMS content before publishing items publicly.",
-    "Decide whether and when to resume paused article claim cleanup."
+    "Decide whether and when to resume paused article claim cleanup.",
+    "Use docs/SEO_PHASE_2_PLAN.md for the next SEO cycle: sitemap refresh monitoring, GSC legacy URL mapping, selective 301 redirects, non-brand long-tail content, then a pre-render/SSR decision only if indexing remains weak."
   ],
   "activeExecutableTasks": [
     "NOW-FORMS-SUPABASE-001",
@@ -51,6 +52,8 @@
   },
   "lastVerified": {
     "agentCheck": "2026-06-12",
+    "gscSeoReview": "2026-06-12",
+    "gscSitemapSubmission": "2026-06-12",
     "seoReadiness": "2026-06-12",
     "seoProductionReadback": "2026-06-12",
     "gitDiffCheck": "2026-06-12",

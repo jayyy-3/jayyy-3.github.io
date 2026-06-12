@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lastUpdated": "2026-06-05",
+  "lastUpdated": "2026-06-12",
   "sourceOfTruth": "Machine-readable task queue for active and upcoming agent work. Human-readable roadmap lives in docs/NEXT_STEPS.md.",
   "tasks": [
     {
@@ -1285,6 +1285,49 @@
         "npm run agent:smoke",
         "npm run agent:check",
         "git diff --check"
+      ]
+    },
+    {
+      "id": "NEXT-SEO-GSC-LEGACY-001",
+      "status": "next",
+      "priority": 7.3,
+      "summary": "Use Google Search Console evidence for Phase 2 SEO: sitemap refresh monitoring, legacy URL redirects, and non-brand long-tail content improvement.",
+      "files": [
+        "docs/SEO_PHASE_2_PLAN.md",
+        "docs/ARCHITECTURE.md",
+        "docs/HANDOFF.md",
+        "docs/NEXT_STEPS.md",
+        "docs/WORKLOG.md",
+        "docs/agent/tasks.json",
+        "docs/agent/status.json",
+        "public/_redirects",
+        "src/data/seoRoutes.ts",
+        "public/sitemap.xml"
+      ],
+      "notes": [
+        "2026-06-12: GSC review showed Page indexing data last updated 2026-06-05, before the Phase 1 sitemap/robots deployment, so current GSC counts still reflect old crawl state.",
+        "2026-06-12: GSC showed stale submitted sitemap history and indexing examples dominated by old WordPress or old-site URLs rather than the current canonical route set.",
+        "2026-06-12: `https://urblo.com.au/sitemap.xml` was submitted/refreshed in GSC. The submitted date changed to 12 Jun 2026 and GSC confirmed submission; `Last read` still showed 3 Aug 2023 immediately after submission, so actual Google processing remains a monitoring item.",
+        "Phase 2 should map legacy URLs into recover, retire, and investigate groups before implementing redirects. Do not redirect junk WordPress feeds, search URLs, admin/plugin endpoints, or upload globs to unrelated pages.",
+        "After legacy redirect cleanup, expand Product, Stone Library, Project, and Article pages around useful non-brand specifier queries. Decide on pre-render/static HTML only if indexing remains weak after Google recrawls the refreshed sitemap."
+      ],
+      "acceptance": [
+        "Google Search Console has a current successful read of https://urblo.com.au/sitemap.xml or the unresolved reason is recorded.",
+        "Legacy URLs with search signal are classified as recover, retire, or investigate before redirect implementation begins.",
+        "Recoverable legacy URLs have explicit semantically relevant 301 redirects in public/_redirects before the SPA fallback.",
+        "Retired WordPress/admin/plugin/feed/search/upload artifacts stay out of the sitemap and are not redirected to unrelated public pages.",
+        "Non-brand long-tail SEO copy improvements remain evidence-backed and aligned with docs/brand-baseline.md.",
+        "Any future pre-render/SSR work is justified by post-refresh GSC indexing evidence rather than assumed as a Phase 1 blocker."
+      ],
+      "verification": [
+        "npm run agent:seo-readiness",
+        "npm run build",
+        "npm run lint",
+        "npx tsc -b",
+        "npm run agent:smoke",
+        "npm run agent:check",
+        "git diff --check",
+        "npm run agent:cloudflare-preview-smoke -- --base-url https://urblo.com.au"
       ]
     },
     {
