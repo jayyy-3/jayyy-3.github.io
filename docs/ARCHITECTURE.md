@@ -107,7 +107,7 @@ Last updated: 2026-06-04
 - Verification matrix: `docs/agent/verification.md`
 - Harness checks:
   - `npm run agent:check` => `node scripts/check-harness.mjs`
-  - `scripts/check-harness.mjs` verifies required harness files, active operational `agent:*` package scripts, Contact form UI source-check smoke integration, and delegates doc path/task checks plus the Supabase foundation source-readiness gate. The guarded script map includes the form, admin, Cloudflare, first-admin, live-readiness, content-import, Supabase foundation readiness, and public Supabase readiness runners so launch verification commands cannot be silently removed from `package.json`.
+  - `scripts/check-harness.mjs` verifies required harness files, active operational `agent:*` package scripts, Contact form UI source-check smoke integration, and delegates doc path/task checks plus the Supabase foundation source-readiness gate. The guarded script map includes the form, admin, Cloudflare, first-admin, live-readiness, content-import, SEO readiness, Supabase foundation readiness, and public Supabase readiness runners so launch verification commands cannot be silently removed from `package.json`.
   - `scripts/check-doc-paths.mjs` rejects machine-specific paths and validates repo-relative path references in docs/task state.
 - Supabase foundation source readiness:
   - `npm run agent:supabase-foundation-readiness` => `node scripts/check-supabase-foundation-readiness.mjs`
@@ -143,6 +143,11 @@ Last updated: 2026-06-04
   - `npm run agent:capabilities-ui` => `node scripts/check-capabilities-page-source.mjs`
   - Verifies `/capabilities` keeps the Founder-sourced Capability Statement structure, the five concrete capability modules, selected-project proof ledger, shared CTA data, static PDF/media assets, email-gated `/api/enquiries` download lead capture, Turnstile widget/token reuse, and no-mailto/window-navigation submit contract.
   - This is a source-only verifier. It does not replace live Supabase lead persistence, final Turnstile proof, or browser-responsive QA.
+- SEO readiness:
+  - `npm run agent:seo-readiness` => `node scripts/check-seo-readiness.mjs`
+  - Verifies `public/robots.txt`, `public/sitemap.xml`, `src/data/seoRoutes.ts`, `src/App.tsx`, and the current static public data agree on the Phase 1 SEO indexability contract.
+  - Confirms sitemap URLs match the approved public route set, excludes `/admin` and `/api`, keeps clean canonical URLs only, and guards against the old generic detail-title source returning in `src/App.tsx`.
+  - This is a source/no-secret verifier. It does not query Google, submit the sitemap to Search Console, prove production deployment has completed, or replace a future pre-render/SSR decision.
 - Live form verification:
   - `npm run agent:forms-live -- --allow-writes` => `node scripts/check-forms-api-live.mjs --allow-writes`
   - Loads local environment values from `.env.local`, `.env`, `.dev.vars`, and the shell.
@@ -271,7 +276,14 @@ Route state contract:
 
 ## Metadata Contract
 - `index.html` contains Urblo-owned default title, description, favicon, manifest, canonical, Open Graph, and Twitter metadata.
-- `src/App.tsx` updates route-level title, description, canonical, Open Graph, and Twitter metadata through a small native document-head updater.
+- `src/data/seoRoutes.ts` is the source-side SEO route registry for public indexable URLs, including title, description, canonical path, sitemap priority/change frequency, breadcrumbs, and safe structured-data inputs.
+- `src/App.tsx` updates route-level title, description, robots, canonical, Open Graph, Twitter metadata, and client-side JSON-LD through a small native document-head updater driven by `src/data/seoRoutes.ts`.
+- Current Phase 1 SEO indexability foundation:
+  - `public/robots.txt` is a real static crawler file, allows the public site, disallows `/admin` and `/api`, and points to `https://urblo.com.au/sitemap.xml`.
+  - `public/sitemap.xml` is a real static XML sitemap with 36 approved public canonical URLs covering Home, core public listing pages, 5 Projects, 13 Stone Library groups, 6 Products, and 4 Articles.
+  - Client-side JSON-LD is intentionally conservative: Organization, WebSite, BreadcrumbList, and Article only. Product/Service schema remains deferred until pricing, availability, and claim scope can be represented safely.
+  - `npm run agent:seo-readiness` verifies the source-side SEO contract: robots/sitemap are static files rather than SPA fallback HTML, sitemap URLs match current public data, admin/API/private paths are excluded, `src/App.tsx` is wired to the SEO registry, and detail routes do not regress to the old generic title source.
+- Important limitation: because the current public app is still a Vite React SPA, the first network response for route deep links is still the shared app shell. Phase 1 improves discoverability, canonical URL declaration after hydration, route metadata consistency, sitemap submission readiness, and structured data after JavaScript executes. Server-rendered or pre-rendered route HTML remains a separate Phase 2/technical SEO decision.
 - Default share image asset: `public/og-default.png` at 1200 x 630. `public/og-default.svg` remains the editable source used to generate the PNG.
 - Favicon assets: old-site-matched WordPress site icon PNGs in `public/favicon-32x32.png`, `public/favicon-192x192.png`, `public/favicon.png`, `public/apple-touch-icon.png`, and `public/mstile-270x270.png`.
 - Web manifest: `public/site.webmanifest`, referencing PNG icon assets instead of the retired temporary SVG favicon.

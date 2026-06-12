@@ -57,11 +57,32 @@ Run:
 - `npx tsc -b`
 - `npm run agent:smoke`
 - `npm run agent:capabilities-ui` when changing `/capabilities`, shared CTA data, Capability Statement assets, or the email-gated PDF download form.
+- `npm run agent:seo-readiness` when changing public SEO metadata, `robots.txt`, `sitemap.xml`, structured data, public route slugs, or the SEO route registry.
 
 Evidence to record:
 - Affected routes.
 - Brand/design alignment note.
 - Residual visual or responsive risks.
+
+### SEO Indexability
+Use when changing public metadata, public route slugs, `robots.txt`, `sitemap.xml`, structured data, canonical URL behavior, or the source list of pages intended for search indexing.
+
+Run:
+- `npm run agent:seo-readiness`
+- `npm run build`
+- `npm run lint`
+- `npx tsc -b`
+- `npm run agent:smoke`
+- `npm run agent:check`
+- `git diff --check`
+
+Evidence to record:
+- Sitemap URL count and covered page families.
+- Whether `/admin`, `/api`, draft, or private content is excluded.
+- Metadata and canonical source file touched.
+- Structured data types added or changed.
+- Whether production `robots.txt` and `sitemap.xml` were verified after deployment, or why that remains pending.
+- Any remaining SPA, pre-render, or SSR limitation.
 
 ### Data or Content Contract
 Use when changing `data/**`, `public/articles/**`, service-layer view models, or typed data contracts.

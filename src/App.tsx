@@ -10,6 +10,7 @@ import {
 } from 'react-router-dom';
 import WelcomePopup from './components/WelcomePopup';
 import RouteState from './components/RouteState';
+import { getSeoMetaForPathname, getStructuredDataForPathname } from './data/seoRoutes';
 import DefaultLayout from './layouts/DefaultLayout';
 import HomepageLayout from './layouts/HomepageLayout';
 
@@ -28,8 +29,6 @@ const CapabilitiesPage = lazy(() => import('./pages/CapabilitiesPage'));
 const AdminApp = lazy(() => import('./pages/admin/AdminApp'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
-const SITE_URL = 'https://urblo.com.au';
-const DEFAULT_SHARE_IMAGE = `${SITE_URL}/og-default.png`;
 const ROUTE_BANNERS = {
     products: '/media/launch/banners/products.jpg',
     materials: '/media/launch/banners/materials.jpg',
@@ -39,146 +38,32 @@ const ROUTE_BANNERS = {
     articles: '/media/launch/banners/articles.jpg',
 } as const;
 
-interface RouteMeta {
-    title: string;
-    description: string;
-}
-
-function getRouteMeta(pathname: string): RouteMeta {
-    if (pathname === '/') {
-        return {
-            title: 'Urblo | Natural Stone Streetscape Systems',
-            description:
-                'Design-led, engineering-backed natural stone systems for streetscapes, public realm, and civic landscape projects.',
-        };
-    }
-
-    if (pathname.startsWith('/stone-library/')) {
-        return {
-            title: 'Stone Detail | Urblo',
-            description:
-                'Review natural stone options, finishes, and application notes for Urblo streetscape projects.',
-        };
-    }
-
-    if (pathname === '/stone-library') {
-        return {
-            title: 'Stone Library | Urblo',
-            description:
-                'Explore Urblo natural stone types, finishes, origins, and availability for public realm projects.',
-        };
-    }
-
-    if (pathname.startsWith('/products/')) {
-        return {
-            title: 'Product Detail | Urblo',
-            description:
-                'Explore Urblo product systems, material defaults, models, and specifications for civic landscapes.',
-        };
-    }
-
-    if (pathname === '/products') {
-        return {
-            title: 'Products | Urblo',
-            description:
-                'Browse Urblo modular stone product systems for streetscapes, seating, and civic landscape applications.',
-        };
-    }
-
-    if (pathname.startsWith('/projects/')) {
-        return {
-            title: 'Project Detail | Urblo',
-            description:
-                'See how Urblo stone systems are applied across public realm and civic landscape projects.',
-        };
-    }
-
-    if (pathname === '/projects') {
-        return {
-            title: 'Projects | Urblo',
-            description:
-                'Review Urblo project examples across streetscapes, civic landscapes, and commercial outdoor spaces.',
-        };
-    }
-
-    if (pathname === '/our-story') {
-        return {
-            title: 'Our Story | Urblo',
-            description:
-                'Learn about Urblo, its natural stone system approach, and its role in public realm projects.',
-        };
-    }
-
-    if (pathname === '/capabilities') {
-        return {
-            title: 'Capabilities | Urblo',
-            description:
-                'Review how Urblo supports design translation, specification, sourcing, fabrication, and delivery coordination for stone streetscape projects.',
-        };
-    }
-
-    if (pathname === '/contact') {
-        return {
-            title: 'Contact | Urblo',
-            description:
-                'Contact Urblo to discuss project briefs, stone intent, sample requests, and public realm applications.',
-        };
-    }
-
-    if (pathname.startsWith('/admin')) {
-        return {
-            title: 'Admin | Urblo',
-            description:
-                'Protected Urblo admin console for content, media, lead, and launch operations.',
-        };
-    }
-
-    if (pathname.startsWith('/articles/')) {
-        return {
-            title: 'Article | Urblo',
-            description:
-                'Read Urblo insights on natural stone, streetscape design, public realm projects, and material systems.',
-        };
-    }
-
-    if (pathname === '/articles') {
-        return {
-            title: 'Articles | Urblo',
-            description:
-                'Read Urblo articles on stone, surface finishes, sustainability, streetscapes, and landscape design.',
-        };
-    }
-
-    return {
-        title: 'Page Not Found | Urblo',
-        description:
-            'The requested Urblo page could not be found. Explore projects, products, Stone Library, or contact pathways.',
-    };
-}
-
 function TitleUpdater() {
     const location = useLocation();
-    const meta = getRouteMeta(location.pathname);
-    const canonicalUrl = new URL(location.pathname, SITE_URL).toString();
 
     useEffect(() => {
+        const meta = getSeoMetaForPathname(location.pathname);
+        const structuredData = getStructuredDataForPathname(location.pathname);
+
         document.title = meta.title;
         upsertMeta('name', 'description', meta.description);
-        upsertCanonical(canonicalUrl);
+        upsertMeta('name', 'robots', meta.robots);
+        upsertCanonical(meta.canonicalUrl);
         upsertMeta('property', 'og:site_name', 'Urblo');
-        upsertMeta('property', 'og:type', 'website');
+        upsertMeta('property', 'og:type', meta.ogType);
         upsertMeta('property', 'og:title', meta.title);
         upsertMeta('property', 'og:description', meta.description);
-        upsertMeta('property', 'og:url', canonicalUrl);
-        upsertMeta('property', 'og:image', DEFAULT_SHARE_IMAGE);
+        upsertMeta('property', 'og:url', meta.canonicalUrl);
+        upsertMeta('property', 'og:image', meta.image);
         upsertMeta('property', 'og:image:type', 'image/png');
         upsertMeta('property', 'og:image:width', '1200');
         upsertMeta('property', 'og:image:height', '630');
         upsertMeta('name', 'twitter:card', 'summary_large_image');
         upsertMeta('name', 'twitter:title', meta.title);
         upsertMeta('name', 'twitter:description', meta.description);
-        upsertMeta('name', 'twitter:image', DEFAULT_SHARE_IMAGE);
-    }, [canonicalUrl, meta.description, meta.title]);
+        upsertMeta('name', 'twitter:image', meta.image);
+        upsertJsonLd('urblo-structured-data', structuredData);
+    }, [location.pathname]);
 
     return null;
 }
@@ -206,6 +91,24 @@ function upsertCanonical(href: string) {
     }
 
     tag.href = href;
+}
+
+function upsertJsonLd(id: string, structuredData: Record<string, unknown>[]) {
+    let tag = document.head.querySelector<HTMLScriptElement>(`script#${id}`);
+
+    if (!structuredData.length) {
+        tag?.remove();
+        return;
+    }
+
+    if (!tag) {
+        tag = document.createElement('script');
+        tag.id = id;
+        tag.type = 'application/ld+json';
+        document.head.appendChild(tag);
+    }
+
+    tag.textContent = JSON.stringify(structuredData);
 }
 
 function ScrollRestoration() {

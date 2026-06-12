@@ -19,6 +19,7 @@ Urblo is now operating as a Cloudflare Pages + Supabase site with real forms and
 - Admin CRUD live QA, private Storage proof, deployed smoke, active-admin browser QA, and strict handoff readiness have passed.
 - Public Projects, Products, Articles, and Stone Library listing/detail prefer Published CMS content with static fallback.
 - Static production content has been imported into the CMS as Draft items for editor review.
+- Phase 1 SEO indexability foundation is implemented in source: real `robots.txt`, real `sitemap.xml` with 36 approved public URLs, centralized public route metadata in `src/data/seoRoutes.ts`, conservative client-side JSON-LD, and `npm run agent:seo-readiness`.
 - Harness GC first pass is implemented.
 
 ## Active Now
@@ -33,6 +34,7 @@ Only these task IDs should be treated as current executable work:
 - Ask a customer/editor to review imported Draft CMS content and decide what to publish first.
 - Decide whether to resume article claim cleanup, currently paused by user direction.
 - Decide whether physical delete controls are needed, and define retention/destructive-delete policy before adding them.
+- Decide how deep the Phase 2 SEO pass should go: light content/CTA polish, standard Stone/Product/Project landing-page expansion, or deeper pre-render/SSR-style static HTML output for public detail routes.
 
 ## Deferred Follow-Ups
 - `NOW-ADMIN-CMS-001` is complete as an umbrella. Future CMS work should use specific child/follow-up task IDs.
@@ -53,6 +55,7 @@ Docs and harness changes should pass:
 - `npm run agent:harness-gc`
 - `npm run agent:harness-gc:review`
 - `git diff --check`
+- `npm run agent:seo-readiness` when public SEO metadata, sitemap, robots, structured data, or public route slugs change.
 
 CMS handoff checks:
 - `npm run agent:admin-cms-predeploy`
@@ -89,6 +92,7 @@ These scripts are intentionally documented so harness GC can check command cover
 - `npm run agent:init`
 - `npm run agent:live-readiness`
 - `npm run agent:public-supabase-readiness`
+- `npm run agent:seo-readiness`
 - `npm run agent:smoke`
 - `npm run agent:supabase-foundation-readiness`
 
@@ -103,6 +107,7 @@ Latest relevant 2026-06-05 proof set:
 - `npm run agent:public-supabase-readiness`: pass
 - `npm run agent:cloudflare-readiness`: pass
 - `npm run agent:admin-config-gate`: pass
+- `npm run agent:seo-readiness`: pass
 - `npm run agent:cloudflare-preview-smoke -- --base-url https://urblo.com.au`: pass
 - `npm run agent:admin-auth-browser -- --allow-login --strict --base-url https://urblo.com.au`: pass
 - `npm run agent:admin-handoff-readiness -- --base-url https://urblo.com.au --admin-email info@urblo.com.au --strict`: pass

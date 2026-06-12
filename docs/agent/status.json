@@ -20,6 +20,7 @@
     "adminStorageProof": "verified",
     "contentImport": "draft_imported",
     "publicContentCutover": "published_reads_with_static_fallback",
+    "seoIndexability": "source_verified",
     "settingsInviteProof": "deferred_until_target_editor_approval"
   },
   "localReproducibility": {
@@ -49,8 +50,9 @@
     "worklogReviewWarningLines": 8000
   },
   "lastVerified": {
-    "agentCheck": "2026-06-05",
-    "gitDiffCheck": "2026-06-05",
+    "agentCheck": "2026-06-12",
+    "seoReadiness": "2026-06-12",
+    "gitDiffCheck": "2026-06-12",
     "harnessGc": "2026-06-05",
     "harnessGcReview": "2026-06-05",
     "cloudflarePreviewSmokeProduction": "2026-06-05",

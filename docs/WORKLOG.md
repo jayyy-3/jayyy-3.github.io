@@ -1,6 +1,50 @@
 # WORKLOG - Urblo Execution Log
 
-Last updated: 2026-06-11
+Last updated: 2026-06-12
+
+## Entry - 2026-06-12 (SEO Indexability Foundation)
+
+### Scope
+- Implemented Phase 1 SEO indexability foundation for the existing public site without changing visual layout.
+- Added `src/data/seoRoutes.ts` as the source-side public SEO route registry for title, description, canonical URL, sitemap priority/change frequency, breadcrumbs, and conservative structured-data inputs.
+- Updated `src/App.tsx` so the native head updater reads from the SEO registry, writes robots meta, canonical, Open Graph, Twitter metadata, and client-side JSON-LD.
+- Added real static `public/robots.txt` and `public/sitemap.xml`; the sitemap covers 36 approved public canonical URLs across Home, public listing pages, 5 Projects, 13 Stone Library groups, 6 Products, and 4 Articles.
+- Added `npm run agent:seo-readiness` and guarded it through `npm run agent:check`.
+- Updated Harness docs and task state for the Phase 1 SEO boundary.
+
+### Changed Files
+- `src/data/seoRoutes.ts`
+- `src/App.tsx`
+- `public/robots.txt`
+- `public/sitemap.xml`
+- `scripts/check-seo-readiness.mjs`
+- `scripts/check-harness.mjs`
+- `package.json`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/status.json`
+- `docs/agent/tasks.json`
+- `docs/agent/verification.md`
+
+### Verification Results
+- `npm run agent:seo-readiness`: pass. Verified real robots/sitemap files, 36 approved sitemap URLs, no `/admin` or `/api` sitemap exposure, and registry-driven App metadata wiring.
+- `npm run build`: pass. Browserslist staleness notice and AdminApp chunk-size warning remain.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass.
+- `npm run agent:check`: pass.
+- `git diff --check`: pass.
+
+### Risks and Gaps
+- Phase 1 does not make the Vite React app server-rendered or pre-rendered. Deep-link first HTML remains the shared app shell until JavaScript executes; this is documented as a Phase 2 technical SEO decision.
+- Production `robots.txt` and `sitemap.xml` still need deployed readback after Cloudflare Pages finishes the post-push deployment.
+- Google Search Console sitemap submission/indexing evidence is a manual follow-up outside the source-only local gate.
+
+### Next Handoff
+- After deployment, verify `https://urblo.com.au/robots.txt` and `https://urblo.com.au/sitemap.xml` return static text/XML, then submit the sitemap in Google Search Console.
+- Decide Phase 2 SEO depth: content/CTA polish only, standard Stone/Product/Project landing-page expansion, or deeper public route pre-rendering.
 
 ## Entry - 2026-06-11 (Homepage Hero Video Replacement)
 

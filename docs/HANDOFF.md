@@ -31,6 +31,11 @@ Forms:
 - Browser-key privacy boundary is verified: anonymous reads cannot see private lead rows.
 - Final Turnstile proof remains the only active forms follow-up.
 
+SEO:
+- Phase 1 SEO indexability source is implemented: `public/robots.txt`, `public/sitemap.xml`, `src/data/seoRoutes.ts`, conservative client-side JSON-LD, and `npm run agent:seo-readiness`.
+- The sitemap currently covers 36 approved public canonical URLs: Home, public listing pages, 5 Projects, 13 Stone Library groups, 6 Products, and 4 Articles. `/admin` and `/api` are intentionally excluded.
+- Remaining SEO limitation: the current public site is still a Vite React SPA, so deep-link first HTML is the shared app shell until JavaScript runs. Pre-rendered or server-rendered public detail HTML is a Phase 2 technical SEO decision.
+
 Supabase:
 - Project `Urblo` (`npkidywzwddbnfrnxlmo`, `ap-southeast-2`) has launch schema, RLS, policies, Storage buckets, baseline seeds, admin helper hardening, and admin profile email uniqueness applied and verified.
 - Public Projects, Products, Articles, and Stone Library listing/detail prefer Published CMS content with static fallback.
@@ -86,6 +91,7 @@ Runtime changes:
 - `npm run lint`
 - `npx tsc -b`
 - `npm run agent:smoke`
+- `npm run agent:seo-readiness` when public metadata, sitemap, robots, structured data, or indexable route slugs change
 
 CMS predeploy and handoff:
 - `npm run agent:admin-cms-predeploy`
@@ -102,6 +108,7 @@ For product launch work, choose one of:
 - Configure and prove Turnstile.
 - Provide a target editor email for the real Settings invite proof.
 - Have a customer/editor review Draft CMS content and decide what to publish first.
+- Choose the depth of Phase 2 SEO content/conversion work and whether public route pre-rendering is worth the added implementation scope.
 
 ## Guardrails
 - Code reality wins over stale docs; if docs and code disagree, verify code first, then update docs.

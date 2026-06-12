@@ -1243,6 +1243,51 @@
       ]
     },
     {
+      "id": "NOW-SEO-INDEXABILITY-001",
+      "status": "done",
+      "priority": 7.2,
+      "summary": "Implement the Phase 1 SEO indexability foundation for public route discovery and metadata consistency.",
+      "files": [
+        "src/data/seoRoutes.ts",
+        "src/App.tsx",
+        "public/robots.txt",
+        "public/sitemap.xml",
+        "scripts/check-seo-readiness.mjs",
+        "scripts/check-harness.mjs",
+        "package.json",
+        "docs/ARCHITECTURE.md",
+        "docs/HANDOFF.md",
+        "docs/NEXT_STEPS.md",
+        "docs/WORKLOG.md",
+        "docs/agent/tasks.json",
+        "docs/agent/verification.md"
+      ],
+      "notes": [
+        "2026-06-12: Added a source-side SEO route registry for public indexable routes, route-level metadata, canonical URLs, sitemap priority/change frequency, breadcrumbs, and conservative structured-data inputs.",
+        "2026-06-12: Added real static `public/robots.txt` and `public/sitemap.xml`; sitemap covers 36 approved public URLs and excludes `/admin`, `/api`, legacy redirect aliases, draft content, and private lead/admin surfaces.",
+        "2026-06-12: `src/App.tsx` now reads metadata from `src/data/seoRoutes.ts`, adds robots meta, and injects conservative client-side JSON-LD for Organization, WebSite, BreadcrumbList, and Article. Product/Service schema remains deferred until claim, price, and availability scope can be represented safely.",
+        "2026-06-12: Added `npm run agent:seo-readiness` and guarded it through `npm run agent:check` so robots/sitemap/registry drift is caught locally.",
+        "The remaining technical SEO limitation is intentional for Phase 1: the public app is still a Vite React SPA, so deep-link first HTML remains the shared app shell until JavaScript executes. Pre-rendered or server-rendered public route HTML belongs to a Phase 2 decision."
+      ],
+      "acceptance": [
+        "A real `robots.txt` exists, points to `https://urblo.com.au/sitemap.xml`, and excludes `/admin` and `/api`.",
+        "A real XML sitemap exists and includes the approved public route set for Home, listing pages, Projects, Stone Library groups, Products, Articles, Capabilities, Our Story, and Contact.",
+        "Sitemap URLs are clean canonical URLs and exclude admin, API, draft, private, and legacy alias paths.",
+        "Public route metadata is centralized in `src/data/seoRoutes.ts` and consumed by the app head updater.",
+        "Conservative JSON-LD is present for Organization, WebSite, BreadcrumbList, and Article without unsafe Product/price/availability claims.",
+        "`npm run agent:seo-readiness` passes and is guarded by the harness."
+      ],
+      "verification": [
+        "npm run agent:seo-readiness",
+        "npm run build",
+        "npm run lint",
+        "npx tsc -b",
+        "npm run agent:smoke",
+        "npm run agent:check",
+        "git diff --check"
+      ]
+    },
+    {
       "id": "NOW-STONELIB-IMG-FASTTRACK-001",
       "status": "done",
       "priority": 8,

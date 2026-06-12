@@ -56,6 +56,7 @@ echo "- npm run agent:forms-live -- --allow-writes --allow-email --require-email
 echo "- npm run agent:forms-live -- --allow-writes --require-turnstile --turnstile-token <token>"
 echo "- npm run agent:forms-ui"
 echo "- npm run agent:capabilities-ui"
+echo "- npm run agent:seo-readiness"
 echo "- npm run agent:live-readiness"
 echo "- npm run agent:public-supabase-readiness"
 echo "- npm run agent:supabase-foundation-readiness"

@@ -29,6 +29,7 @@ const requiredFiles = [
   'scripts/check-doc-paths.mjs',
   'scripts/check-harness.mjs',
   'scripts/check-harness-gc.mjs',
+  'scripts/check-seo-readiness.mjs',
   'scripts/check-supabase-foundation-readiness.mjs',
 ]
 const requiredPackageScripts = {
@@ -48,6 +49,7 @@ const requiredPackageScripts = {
   'agent:forms-live': 'node scripts/check-forms-api-live.mjs',
   'agent:forms-ui': 'node scripts/check-contact-form-ui-source.mjs',
   'agent:capabilities-ui': 'node scripts/check-capabilities-page-source.mjs',
+  'agent:seo-readiness': 'node scripts/check-seo-readiness.mjs',
   'agent:harness-gc': 'node scripts/check-harness-gc.mjs',
   'agent:harness-gc:fix': 'node scripts/check-harness-gc.mjs --fix',
   'agent:harness-gc:review': 'node scripts/check-harness-gc.mjs --review',
