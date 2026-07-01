@@ -1,0 +1,7 @@
+# Keep the gate build context lean and force a clean in-container build.
+.git
+node_modules
+dist
+.tmp
+.vite
+*.log

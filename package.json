@@ -33,6 +33,7 @@
     "agent:live-readiness": "node scripts/check-live-readiness.mjs",
     "agent:init": "bash scripts/agent-init.sh",
     "agent:smoke": "bash scripts/agent-smoke.sh",
+    "gate": "bash scripts/container-gate.sh",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",

@@ -1,0 +1,29 @@
+# Urblo local container gate.
+#
+# Building this image IS the test: every quality gate runs as a build step, so
+# `docker build` exits non-zero if build, lint, typecheck, or smoke fails.
+# Invoked by `npm run gate` (scripts/container-gate.sh) before any push.
+#
+# Base image tracks the host Node line (20.x). Bump deliberately if the project
+# adopts a newer Node and update docs/OPERATING_PROTOCOL.md to match.
+FROM node:20-bookworm-slim
+
+WORKDIR /app
+
+# Install dependencies as a cached layer (only re-runs when the lockfile changes).
+COPY package.json package-lock.json ./
+RUN npm ci
+
+# Bring in the rest of the source. A source change invalidates the gate steps
+# below — which is exactly what we want: the gates re-run on every real change.
+COPY . .
+
+# --- Quality gates, in the order documented in AGENTS.md ---
+RUN npm run build
+RUN npm run lint
+RUN npx tsc -b
+RUN npm run agent:smoke
+
+# Unambiguous success marker for a completed gate build.
+RUN echo "urblo gate passed" > /app/.gate-passed
+CMD ["cat", "/app/.gate-passed"]

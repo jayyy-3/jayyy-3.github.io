@@ -9,6 +9,11 @@ The harness has two separate creative authorities:
 - Brand strategy, positioning, copy claims, and audience framing live in `docs/brand-baseline.md`.
 - Visual design, UX rhythm, page composition, interaction tone, and UI quality live in `docs/DESIGN.md`.
 
+## Working Process
+Day-to-day delivery and design-consistency process is governed by `docs/OPERATING_PROTOCOL.md`. Read it at the start of a session.
+- No change reaches production untested: branch -> local container gate (`npm run gate`) -> Cloudflare preview smoke -> promote to `main`.
+- Every UI/claim/composition change runs the review -> implement -> remember design loop on top of `docs/DESIGN.md` and `docs/brand-baseline.md`.
+
 ## Startup Checklist
 1. Run `npm run agent:init` when you need a quick repo/status briefing.
 2. Read this file first: `AGENTS.md`.
