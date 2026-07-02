@@ -7,6 +7,8 @@ import { join } from 'node:path'
 const root = cwd()
 const requiredFiles = [
   'AGENTS.md',
+  'Dockerfile.gate',
+  'docs/OPERATING_PROTOCOL.md',
   'docs/HANDOFF.md',
   'docs/DESIGN.md',
   'docs/ARCHITECTURE.md',
@@ -21,6 +23,7 @@ const requiredFiles = [
   'scripts/agent-init.sh',
   'scripts/admin-cms-predeploy.sh',
   'scripts/agent-smoke.sh',
+  'scripts/container-gate.sh',
   'scripts/check-admin-auth-browser.mjs',
   'scripts/check-admin-config-gate.mjs',
   'scripts/check-admin-handoff-readiness.mjs',
@@ -58,6 +61,7 @@ const requiredPackageScripts = {
   'agent:public-supabase-readiness': 'node scripts/check-public-supabase-readiness.mjs',
   'agent:supabase-foundation-readiness': 'node scripts/check-supabase-foundation-readiness.mjs',
   'agent:smoke': 'bash scripts/agent-smoke.sh',
+  gate: 'bash scripts/container-gate.sh',
 }
 
 const failures = []

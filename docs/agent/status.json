@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lastUpdated": "2026-06-12",
+  "lastUpdated": "2026-06-30",
   "sourceOfTruth": {
     "currentState": "docs/HANDOFF.md",
     "taskQueue": "docs/agent/tasks.json",
@@ -53,20 +53,22 @@
     "worklogReviewWarningLines": 8000
   },
     "lastVerified": {
-    "agentCheck": "2026-06-12",
-    "build": "2026-06-12",
+    "agentCheck": "2026-06-30",
+    "build": "2026-06-30",
+    "containerGate": "2026-06-30",
+    "cloudflarePreviewSmokeBranchPreview": "2026-06-30",
     "cloudflareReadiness": "2026-06-12",
     "gscSeoReview": "2026-06-12",
     "gscSitemapSubmission": "2026-06-12",
-    "harnessGc": "2026-06-12",
-    "harnessGcReview": "2026-06-12",
-    "lint": "2026-06-12",
+    "harnessGc": "2026-06-30",
+    "harnessGcReview": "2026-06-30",
+    "lint": "2026-06-30",
     "seoLegacyRedirectSource": "2026-06-12",
     "seoReadiness": "2026-06-12",
     "seoProductionReadback": "2026-06-12",
-    "gitDiffCheck": "2026-06-12",
-    "smoke": "2026-06-12",
-    "typecheck": "2026-06-12",
+    "gitDiffCheck": "2026-06-30",
+    "smoke": "2026-06-30",
+    "typecheck": "2026-06-30",
     "cloudflarePreviewSmokeProduction": "2026-06-05",
     "adminAuthBrowserProduction": "2026-06-05",
     "adminHandoffReadinessStrict": "2026-06-05"

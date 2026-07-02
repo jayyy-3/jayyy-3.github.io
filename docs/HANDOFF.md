@@ -1,12 +1,13 @@
 # HANDOFF - Current Agent State
 
-Last updated: 2026-06-12
+Last updated: 2026-06-30
 
 ## Read First
 Use this file as the short current-state entry. Detailed evidence lives in `docs/WORKLOG.md`; task execution state lives in `docs/agent/tasks.json`; compact machine state lives in `docs/agent/status.json`.
 
 Recommended startup order:
 - `AGENTS.md`
+- `docs/OPERATING_PROTOCOL.md`
 - `docs/HANDOFF.md`
 - `docs/agent/status.json`
 - `docs/agent/tasks.json`
@@ -15,6 +16,8 @@ Recommended startup order:
 
 ## Current Production State
 Urblo is now running on Cloudflare Pages with Supabase-backed forms and an Urblo-owned `/admin` CMS.
+
+Working process is governed by `docs/OPERATING_PROTOCOL.md`: branch -> local container gate (`npm run gate`) -> Cloudflare preview smoke -> promote to `main`, plus the design review -> implement -> remember loop.
 
 Cloudflare:
 - Production domains `https://urblo.com.au` and `https://www.urblo.com.au` are attached to the Cloudflare Pages project `urblo`.
@@ -91,6 +94,7 @@ Docs/harness changes:
 - `git diff --check`
 
 Runtime changes:
+- `npm run gate` (containerized: `git diff --check` host-side, then build incl. `tsc -b`, lint, `agent:smoke`, `agent:check` in a clean Node 20 container — the preferred pre-push gate)
 - `npm run build`
 - `npm run lint`
 - `npx tsc -b`

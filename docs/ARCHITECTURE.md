@@ -1,6 +1,6 @@
 # Urblo Web - Architecture and Contracts
 
-Last updated: 2026-06-12
+Last updated: 2026-06-30
 
 ## System Boundary
 - Current implementation: frontend-only React application shipped as static assets.
@@ -50,6 +50,7 @@ Last updated: 2026-06-12
   - Pipeline: `npm ci` -> `npm run build` -> copy `dist/index.html` to `dist/404.html` -> deploy `dist/` to GitHub Pages
   - GitHub Pages does not read Cloudflare `_redirects`; `dist/404.html` is a short-term SPA fallback so direct clean-route visits can load the React app during the GitHub Pages preview period.
   - This fallback does not change the launch target and should not be treated as the final Cloudflare Pages routing mechanism.
+- Local pre-push gate: `npm run gate` (`scripts/container-gate.sh`) runs `git diff --check` host-side, then builds `Dockerfile.gate`, which runs `npm run build` (includes `tsc -b`), `npm run lint`, `npm run agent:smoke`, and `npm run agent:check` inside a clean Node 20 container. The gate is source-only: `.dockerignore` excludes `.env*`, `.dev.vars`, and `*.local` so no local secrets enter the image. The full delivery-flow contract is `docs/OPERATING_PROTOCOL.md`. Node 20 is the shared line for the gate image, `.github/workflows/deploy.yml`, and the host; Cloudflare Pages should pin `NODE_VERSION=20`.
 - Launch target deployment workflow:
   - Cloudflare Pages Git integration builds the repository.
   - Build command: `npm run build`
@@ -109,6 +110,9 @@ Last updated: 2026-06-12
   - `npm run agent:check` => `node scripts/check-harness.mjs`
   - `scripts/check-harness.mjs` verifies required harness files, active operational `agent:*` package scripts, Contact form UI source-check smoke integration, and delegates doc path/task checks plus the Supabase foundation source-readiness gate. The guarded script map includes the form, admin, Cloudflare, first-admin, live-readiness, content-import, SEO readiness, Supabase foundation readiness, and public Supabase readiness runners so launch verification commands cannot be silently removed from `package.json`.
   - `scripts/check-doc-paths.mjs` rejects machine-specific paths and validates repo-relative path references in docs/task state.
+- Local container gate:
+  - `npm run gate` => `bash scripts/container-gate.sh`
+  - Builds `Dockerfile.gate`; the runtime gates plus `agent:check` run as image build steps, so a red gate fails the build. Working-process contract: `docs/OPERATING_PROTOCOL.md`.
 - Supabase foundation source readiness:
   - `npm run agent:supabase-foundation-readiness` => `node scripts/check-supabase-foundation-readiness.mjs`
   - Verifies the source contract for the 12 expected launch migrations, 24 launch tables including `project_media`, RLS enablement, public-select policies, anonymous read-only grants, private-table anonymous revokes, 12 baseline finish rows, the default published site settings row, service-role-only Sample Request atomic RPC, Storage bucket/listing hardening, private SECURITY DEFINER helper posture, and normalized admin profile email uniqueness.
