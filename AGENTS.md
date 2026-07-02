@@ -1,6 +1,6 @@
 # AGENTS - Urblo AI Harness Entry
 
-Last updated: 2026-06-05
+Last updated: 2026-06-30
 
 ## Project Mission
 Urblo web exists to communicate a design-led, engineering-backed, proof-driven natural stone solution system for streetscapes and civil landscapes.
@@ -10,8 +10,8 @@ The harness has two separate creative authorities:
 - Visual design, UX rhythm, page composition, interaction tone, and UI quality live in `docs/DESIGN.md`.
 
 ## Working Process
-Day-to-day delivery and design-consistency process is governed by `docs/OPERATING_PROTOCOL.md`. Read it at the start of a session.
-- No change reaches production untested: branch -> local container gate (`npm run gate`) -> Cloudflare preview smoke -> promote to `main`.
+Day-to-day delivery and design-consistency process is governed by `docs/OPERATING_PROTOCOL.md`. Read it right after this file at session start.
+- No change reaches production untested: branch -> local container gate (`npm run gate`) -> Cloudflare preview smoke -> promote to `main`. The gate validates the working tree, so commit everything before pushing.
 - Every UI/claim/composition change runs the review -> implement -> remember design loop on top of `docs/DESIGN.md` and `docs/brand-baseline.md`.
 
 ## Startup Checklist
@@ -49,6 +49,7 @@ Day-to-day delivery and design-consistency process is governed by `docs/OPERATIN
 
 ## Canonical Conflict Precedence
 - Code reality wins over stale docs. If docs conflict with implemented behavior, verify code reality, update docs, then add remediation tasks if the behavior itself is wrong.
+- Working process (delivery gates, session kick-start, design loop): `docs/OPERATING_PROTOCOL.md` is authoritative. `AGENTS.md` remains the root entry point and wins on startup order.
 - Brand strategy, positioning, audience, voice, and claim safety: `docs/brand-baseline.md` is authoritative.
 - Visual design, UX rhythm, layout density, imagery treatment, page archetypes, and interaction tone: `docs/DESIGN.md` is authoritative.
 - Architecture, route, data, state, side-effect, and deployment contracts: `docs/ARCHITECTURE.md` is authoritative.

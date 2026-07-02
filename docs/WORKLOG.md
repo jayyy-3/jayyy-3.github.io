@@ -1,6 +1,43 @@
 # WORKLOG - Urblo Execution Log
 
-Last updated: 2026-06-12
+Last updated: 2026-06-30
+
+## Entry - 2026-06-30 (Operating Protocol + Container Gate)
+
+### Scope
+- Added `docs/OPERATING_PROTOCOL.md` as the session-level working agreement: container-first test-gated delivery (branch -> `npm run gate` -> Cloudflare preview smoke -> promote to `main`) plus the design review -> implement -> remember loop on top of `docs/DESIGN.md` and `docs/brand-baseline.md`.
+- Added the local container gate: `Dockerfile.gate` + `scripts/container-gate.sh` + `npm run gate`. Gates run as Docker build steps (build incl. `tsc -b`, lint, `agent:smoke`, `agent:check`), with `git diff --check` host-side.
+- Ran an 8-angle adversarial review of the setup (line-scan, removed-behavior, cross-file/harness tracer, reuse, simplification, efficiency, altitude, conventions); 19 confirmed findings were fixed in the same branch.
+- Review fixes: `.dockerignore` now excludes `.env*`/`.dev.vars`/`*.local` so secrets never enter the gate image and the build stays env-less; dropped the no-op separate `tsc -b` step; added `agent:check` to the gate; working-tree-vs-commit caveat plus dirty-tree warning; `.github/workflows/deploy.yml` bumped Node 18 -> 20 for parity with the gate; gate registered in `scripts/check-harness.mjs` required files/scripts; `docs/OPERATING_PROTOCOL.md` added to AGENTS.md Canonical Conflict Precedence; honest machine-local wording for the session kick-start hook; npm cache mount and label-scoped image pruning.
+
+### Changed Files
+- `docs/OPERATING_PROTOCOL.md`
+- `Dockerfile.gate`
+- `.dockerignore`
+- `scripts/container-gate.sh`
+- `package.json`
+- `AGENTS.md`
+- `.github/workflows/deploy.yml`
+- `scripts/check-harness.mjs`
+- `docs/ARCHITECTURE.md`
+- `docs/HANDOFF.md`
+- `docs/NEXT_STEPS.md`
+- `docs/WORKLOG.md`
+- `docs/agent/status.json`
+- `docs/agent/verification.md`
+- `docs/agent/harness-gc.md`
+
+### Verification Results
+- `npm run gate`: pass (container: build incl. `tsc -b`, lint, `agent:smoke` full route/asset/redirect/CTA set, `agent:check`).
+- `npm run agent:check`: pass.
+- `npm run agent:harness-gc`: pass with only the known `docs/WORKLOG.md` size warning.
+- `git diff --check`: clean.
+- `npm run agent:cloudflare-preview-smoke -- --base-url https://chore-operating-protocol.urblo.pages.dev`: pass against the branch preview (routes, assets, admin bundle contract, legacy redirects, API safe-failure).
+
+### Residual Risks / Follow-Ups
+- Cloudflare Pages build Node version should be pinned to `NODE_VERSION=20` in project settings (account-level change, not repo-side).
+- Gate enforcement is protocol-level; platform enforcement (CI + branch protection on `main`) is a decision-gated upgrade.
+- The session kick-start memory hook is machine-local to Hunter's machine; other agents rely on the `AGENTS.md` Working Process pointer.
 
 ## Entry - 2026-06-12 (SEO Phase 2 Legacy URL Cleanup)
 

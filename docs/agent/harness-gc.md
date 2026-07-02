@@ -1,6 +1,6 @@
 # Harness GC
 
-Last updated: 2026-06-05
+Last updated: 2026-06-30
 
 ## Purpose
 Harness GC is the self-maintenance layer for the Urblo AI Harness.
@@ -18,7 +18,7 @@ The expected response is a concise report: what is true, what is stale, what is 
 ## Mental Model
 Harness files are treated as four categories:
 
-- Policy: `AGENTS.md`, `docs/agent/verification.md`, and stable execution rules.
+- Policy: `AGENTS.md`, `docs/OPERATING_PROTOCOL.md`, `docs/agent/verification.md`, and stable execution rules. Note: `npm run gate` is not an `agent:*` script, so GC's agent-script coverage check does not track it; `scripts/check-harness.mjs` guards it instead.
 - State: `docs/agent/status.json`, `docs/HANDOFF.md`, and the active portion of `docs/agent/tasks.json`.
 - Evidence: `docs/WORKLOG.md` and ignored `.tmp/` artifacts.
 - Knowledge: `docs/ARCHITECTURE.md`, `docs/DESIGN.md`, `docs/brand-baseline.md`, `docs/ADMIN_IA_ACCESS.md`, and schema/runbook docs.

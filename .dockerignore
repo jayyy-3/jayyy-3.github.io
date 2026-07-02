@@ -5,3 +5,11 @@ dist
 .tmp
 .vite
 *.log
+
+# Never bake local env/secret files into the gate image; the gate is
+# source-only and must reproduce the env-less Cloudflare Pages build.
+.env
+.env.*
+!.env.example
+.dev.vars
+*.local

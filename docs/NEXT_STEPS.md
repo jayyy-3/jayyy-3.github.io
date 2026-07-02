@@ -1,6 +1,6 @@
 # NEXT_STEPS - Urblo Roadmap
 
-Last updated: 2026-06-12
+Last updated: 2026-06-30
 
 ## Purpose
 This is the human-readable roadmap. The machine-readable source of truth is `docs/agent/tasks.json`; the compact current-state snapshot is `docs/agent/status.json`; historical proof lives in `docs/WORKLOG.md`.
@@ -47,6 +47,7 @@ Only these task IDs should be treated as current executable work:
 
 ## Quality Gates
 Runtime changes must pass:
+- `npm run gate` (preferred: wraps the gates below plus `agent:check` and `git diff --check` in a clean Node 20 container; see `docs/OPERATING_PROTOCOL.md`)
 - `npm run build`
 - `npm run lint`
 - `npx tsc -b`
@@ -68,6 +69,7 @@ Live writes and invite emails require explicit approval for the specific target 
 
 ## Agent Command Index
 These scripts are intentionally documented so harness GC can check command coverage:
+- `npm run gate`
 - `npm run agent:admin-auth-browser`
 - `npm run agent:admin-cms-predeploy`
 - `npm run agent:admin-config-gate`

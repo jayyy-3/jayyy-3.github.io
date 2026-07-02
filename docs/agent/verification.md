@@ -1,9 +1,11 @@
 # Agent Verification Matrix
 
-Last updated: 2026-06-12
+Last updated: 2026-06-30
 
 ## Purpose
 Use this matrix to choose the smallest verification set that proves a change is safe. Runtime changes still need the full build/lint/typecheck gate unless a task explicitly defines a temporary exception.
+
+`npm run gate` is the preferred way to run the runtime gate set: it wraps build (incl. `tsc -b`), lint, `agent:smoke`, and `agent:check` in a clean Node 20 container and runs `git diff --check` host-side. It validates the working tree, not the last commit — commit everything before pushing. See `docs/OPERATING_PROTOCOL.md`.
 
 ## Startup Check
 Use when resuming work or handing off between agents.
