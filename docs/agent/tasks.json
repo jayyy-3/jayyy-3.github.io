@@ -2220,6 +2220,7 @@
       "priority": 0.5,
       "summary": "Reopen the production admin handoff, fix confirmed workflow failures, and redesign the CMS around editor tasks.",
       "files": [
+        ".gitignore",
         ".env.example",
         "AGENTS.md",
         "docs/ADMIN_EDITOR_GUIDE.md",
@@ -2309,7 +2310,8 @@
         "2026-07-13: Pending Storage migration source now preserves Editor writes to the private draft bucket while restricting public-bucket insert/update to owner/admin. It must be applied and live role-boundary tested before the Media fix is production-complete.",
         "2026-07-13: Added a default no-network/no-write Media role-boundary verifier plus a mandatory structured production prerequisite. Approved live mode uses distinct Editor and owner/admin browser-key sessions to prove Editor private insert/update success, Editor public insert/update denial, owner/admin public insert/update success, and tagged-object cleanup.",
         "2026-07-13: Closed content-editor loading races by making Articles, Projects, Products, and Stone Library inert while the selected parent bundle is incomplete, clearing stale child state before a new selection, and clearing loading only for the current selection generation. Articles validation now occurs before the save lock, and unexpected save failures always release it.",
-        "Production remains revalidation_required until the fixed deployment receives approved end-to-end browser evidence. `NOW-ADMIN-SETTINGS-CRUD-001` owns creation of the Settings public-readback and Auth email evidence; this P0 task aggregates those references into the full twelve-workflow handoff and must not close them independently. Do not turn this task done from source gates alone."
+        "2026-07-13: PR #3 deployed the repair through Cloudflare Pages. Branch-preview and production no-write smoke passed; production deployment `6d193af5-cf8e-4541-a1e2-c73164d1a290` corresponds to merge commit `46d46b4` and immutable URL `https://6d193af5.urblo.pages.dev`.",
+        "Production remains revalidation_required until the fixed deployment receives approved end-to-end browser evidence. `NOW-ADMIN-SETTINGS-CRUD-001` owns creation of the Settings public-readback and Auth email evidence; this P0 task aggregates those references into the full twelve-workflow handoff and must not close them independently. Do not turn this task done from source gates or deployment smoke alone."
       ],
       "acceptance": [
         "Admin sign-in does not hang and profile loading occurs outside the synchronous Supabase auth-state callback.",
@@ -2347,6 +2349,7 @@
         "npm run agent:admin-media-role-boundary-live (plan-only; no network or writes)",
         "npm run agent:admin-media-role-boundary-live -- --allow-writes --strict (only after migration apply/readback, distinct active Editor and owner/admin credentials, and Jay approval for tagged Storage writes)",
         "npm run agent:admin-handoff-readiness -- --base-url https://urblo.com.au --admin-email info@urblo.com.au --strict (must remain failing until approved production-prerequisite and golden-workflow evidence is recorded)",
+        "npm run agent:cloudflare-preview-smoke -- --base-url https://urblo.com.au (passed for repair deployment on 2026-07-13)",
         "Browser: complete the workflows listed in docs/agent/admin-handoff-evidence.json on the deployed SHA",
         "npm run agent:check",
         "git diff --check"
