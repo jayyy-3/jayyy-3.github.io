@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent, ReactNode } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import {
@@ -13,6 +13,7 @@ import {
     ShieldAlert,
 } from 'lucide-react';
 import { recordAdminAuditEvent, withAuditNotice } from '../../lib/adminAudit';
+import { validatePublicEntitySeoDraft } from '../../lib/publicEntitySeo';
 import { supabase } from '../../lib/supabaseClient';
 import { useAdminAuth } from '../../lib/adminAuthHooks';
 import AdminShell from './AdminShell';
@@ -120,6 +121,12 @@ interface SpecFormState {
     sortOrder: string;
 }
 
+interface ProductEditorSelection {
+    modelId: number | null;
+    materialDefaultId: number | null;
+    specId: number | null;
+}
+
 const emptyProductForm: ProductFormState = {
     status: 'draft',
     slug: '',
@@ -191,6 +198,13 @@ function AdminProductsContent() {
     const [isSavingSpec, setIsSavingSpec] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [notice, setNotice] = useState<string | null>(null);
+    const selectedProductIdRef = useRef<number | null>(null);
+    const selectedModelIdRef = useRef<number | null>(null);
+    const selectedMaterialDefaultIdRef = useRef<number | null>(null);
+    const selectedSpecIdRef = useRef<number | null>(null);
+    const productCatalogGenerationRef = useRef(0);
+    const productSelectionGenerationRef = useRef(0);
+    const activeSaveCountRef = useRef(0);
 
     const selectedProduct = useMemo(
         () => products.find((product) => product.id === selectedProductId) ?? null,
@@ -235,8 +249,92 @@ function AdminProductsContent() {
         [productSearch, productStatusFilter, products],
     );
 
+    const isAnySaving = isSavingProduct || isSavingModel || isSavingMaterialDefault || isSavingSpec;
+
+    const setCurrentProductId = useCallback((id: number | null) => {
+        selectedProductIdRef.current = id;
+        setSelectedProductId(id);
+    }, []);
+
+    const setCurrentModelId = useCallback((id: number | null) => {
+        selectedModelIdRef.current = id;
+        setSelectedModelId(id);
+    }, []);
+
+    const setCurrentMaterialDefaultId = useCallback((id: number | null) => {
+        selectedMaterialDefaultIdRef.current = id;
+        setSelectedMaterialDefaultId(id);
+    }, []);
+
+    const setCurrentSpecId = useCallback((id: number | null) => {
+        selectedSpecIdRef.current = id;
+        setSelectedSpecId(id);
+    }, []);
+
+    function getCurrentEditorSelection(): ProductEditorSelection {
+        return {
+            modelId: selectedModelIdRef.current,
+            materialDefaultId: selectedMaterialDefaultIdRef.current,
+            specId: selectedSpecIdRef.current,
+        };
+    }
+
+    function isCurrentProductSelection(
+        productId: number,
+        selectionGeneration: number,
+        expectedEditors?: ProductEditorSelection,
+    ) {
+        return (
+            productSelectionGenerationRef.current === selectionGeneration &&
+            selectedProductIdRef.current === productId &&
+            (!expectedEditors ||
+                (selectedModelIdRef.current === expectedEditors.modelId &&
+                    selectedMaterialDefaultIdRef.current === expectedEditors.materialDefaultId &&
+                    selectedSpecIdRef.current === expectedEditors.specId))
+        );
+    }
+
+    function beginSaveOperation() {
+        if (activeSaveCountRef.current > 0) {
+            setError('Wait for the current save to finish before starting another change.');
+            return false;
+        }
+        activeSaveCountRef.current += 1;
+        return true;
+    }
+
+    function endSaveOperation() {
+        activeSaveCountRef.current = Math.max(0, activeSaveCountRef.current - 1);
+    }
+
+    function blockProductSwitchWhileSaving() {
+        if (activeSaveCountRef.current === 0) {
+            return false;
+        }
+        setError('Wait for the current save to finish before switching products.');
+        return true;
+    }
+
+    const resetChildState = useCallback(() => {
+        setModels([]);
+        setMaterialDefaults([]);
+        setSpecs([]);
+        setCurrentModelId(null);
+        setCurrentMaterialDefaultId(null);
+        setCurrentSpecId(null);
+        setModelForm(emptyModelForm);
+        setMaterialDefaultForm(emptyMaterialDefaultForm);
+        setSpecForm(emptySpecForm);
+    }, [setCurrentMaterialDefaultId, setCurrentModelId, setCurrentSpecId]);
+
     const loadProductBundle = useCallback(
-        async (client: SupabaseClient, productId: number, preferredModelId: number | null = null) => {
+        async (
+            client: SupabaseClient,
+            productId: number,
+            preferredModelId: number | null,
+            selectionGeneration: number,
+            expectedEditors?: ProductEditorSelection,
+        ) => {
             const [modelsResult, defaultsResult, specsResult] = await Promise.all([
                 client
                     .from('product_models')
@@ -271,17 +369,22 @@ function AdminProductsContent() {
             const nextDefault = defaultRows[0] ?? null;
             const nextSpec = specRows[0] ?? null;
 
+            if (!isCurrentProductSelection(productId, selectionGeneration, expectedEditors)) {
+                return false;
+            }
+
             setModels(modelRows);
-            setSelectedModelId(nextModel?.id ?? null);
+            setCurrentModelId(nextModel?.id ?? null);
             setModelForm(rowToModelForm(nextModel));
             setMaterialDefaults(defaultRows);
-            setSelectedMaterialDefaultId(nextDefault?.id ?? null);
+            setCurrentMaterialDefaultId(nextDefault?.id ?? null);
             setMaterialDefaultForm(rowToMaterialDefaultForm(nextDefault));
             setSpecs(specRows);
-            setSelectedSpecId(nextSpec?.id ?? null);
+            setCurrentSpecId(nextSpec?.id ?? null);
             setSpecForm(rowToSpecForm(nextSpec));
+            return true;
         },
-        [],
+        [setCurrentMaterialDefaultId, setCurrentModelId, setCurrentSpecId],
     );
 
     const loadProducts = useCallback(
@@ -291,6 +394,8 @@ function AdminProductsContent() {
             }
 
             const client: SupabaseClient = supabase;
+            const catalogGeneration = ++productCatalogGenerationRef.current;
+            const selectionGeneration = ++productSelectionGenerationRef.current;
             setIsLoading(true);
             setError(null);
 
@@ -316,6 +421,10 @@ function AdminProductsContent() {
                     .returns<MediaOptionRow[]>(),
             ]);
 
+            if (catalogGeneration !== productCatalogGenerationRef.current) {
+                return;
+            }
+
             if (productsResult.error) {
                 setError(productsResult.error.message);
                 setIsLoading(false);
@@ -339,7 +448,7 @@ function AdminProductsContent() {
             setProducts(rows);
             setStoneOptions(stonesResult.data ?? []);
             setMediaOptions(mediaResult.data ?? []);
-            setSelectedProductId(nextProduct?.id ?? null);
+            setCurrentProductId(nextProduct?.id ?? null);
             setProductForm(rowToProductForm(nextProduct));
 
             if (!nextProduct) {
@@ -349,51 +458,68 @@ function AdminProductsContent() {
             }
 
             try {
-                await loadProductBundle(client, nextProduct.id);
+                await loadProductBundle(client, nextProduct.id, null, selectionGeneration);
             } catch (loadError) {
-                setError(loadError instanceof Error ? loadError.message : 'Product detail load failed.');
+                if (isCurrentProductSelection(nextProduct.id, selectionGeneration)) {
+                    setError(loadError instanceof Error ? loadError.message : 'Product detail load failed.');
+                }
             }
 
-            setIsLoading(false);
+            if (catalogGeneration === productCatalogGenerationRef.current) {
+                setIsLoading(false);
+            }
         },
-        [loadProductBundle],
+        [loadProductBundle, resetChildState, setCurrentProductId],
     );
 
     useEffect(() => {
         void loadProducts();
+        return () => {
+            productCatalogGenerationRef.current += 1;
+            productSelectionGenerationRef.current += 1;
+        };
     }, [loadProducts]);
 
-    function resetChildState() {
-        setModels([]);
-        setMaterialDefaults([]);
-        setSpecs([]);
-        setSelectedModelId(null);
-        setSelectedMaterialDefaultId(null);
-        setSelectedSpecId(null);
-        setModelForm(emptyModelForm);
-        setMaterialDefaultForm(emptyMaterialDefaultForm);
-        setSpecForm(emptySpecForm);
-    }
-
     async function selectProduct(product: ProductRow) {
-        setSelectedProductId(product.id);
-        setProductForm(rowToProductForm(product));
-        setError(null);
-        setNotice(null);
-
+        if (blockProductSwitchWhileSaving()) {
+            return;
+        }
         if (!supabase) {
             return;
         }
 
+        const selectionGeneration = ++productSelectionGenerationRef.current;
+        setIsLoading(true);
+        setCurrentProductId(product.id);
+        setProductForm(rowToProductForm(product));
+        resetChildState();
+        setError(null);
+        setNotice(null);
+
         try {
-            await loadProductBundle(supabase, product.id);
+            await loadProductBundle(supabase, product.id, null, selectionGeneration);
         } catch (loadError) {
-            setError(loadError instanceof Error ? loadError.message : 'Product detail load failed.');
+            if (isCurrentProductSelection(product.id, selectionGeneration)) {
+                setError(loadError instanceof Error ? loadError.message : 'Product detail load failed.');
+            }
+        } finally {
+            if (isCurrentProductSelection(product.id, selectionGeneration)) {
+                setIsLoading(false);
+            }
         }
     }
 
     function startNewProduct() {
-        setSelectedProductId(null);
+        if (isLoading) {
+            setNotice('Wait for the product library to finish loading before starting a new product.');
+            return;
+        }
+        if (blockProductSwitchWhileSaving()) {
+            return;
+        }
+
+        productSelectionGenerationRef.current += 1;
+        setCurrentProductId(null);
         setProductForm(emptyProductForm);
         resetChildState();
         setError(null);
@@ -437,6 +563,11 @@ function AdminProductsContent() {
             return;
         }
 
+        if (!beginSaveOperation()) return;
+
+        const client: SupabaseClient = supabase;
+        const operationProductId = selectedProductIdRef.current;
+
         const now = new Date().toISOString();
         const payload = {
             slug: productForm.slug.trim(),
@@ -456,48 +587,61 @@ function AdminProductsContent() {
         setError(null);
         setNotice(null);
 
-        const response = selectedProductId
-            ? await supabase
-                  .from('products')
-                  .update(payload)
-                  .eq('id', selectedProductId)
-                  .select(
-                      'id,slug,name,status,short_description,hero_media_id,seo,sort_order,published_at,archived_at,updated_at,created_at',
-                  )
-                  .single<ProductRow>()
-            : await supabase
-                  .from('products')
-                  .insert({ ...payload, created_by: user.id })
-                  .select(
-                      'id,slug,name,status,short_description,hero_media_id,seo,sort_order,published_at,archived_at,updated_at,created_at',
-                  )
-                  .single<ProductRow>();
+        try {
+            const response = operationProductId
+                ? await client
+                      .from('products')
+                      .update(payload)
+                      .eq('id', operationProductId)
+                      .select(
+                          'id,slug,name,status,short_description,hero_media_id,seo,sort_order,published_at,archived_at,updated_at,created_at',
+                      )
+                      .single<ProductRow>()
+                : await client
+                      .from('products')
+                      .insert({ ...payload, created_by: user.id })
+                      .select(
+                          'id,slug,name,status,short_description,hero_media_id,seo,sort_order,published_at,archived_at,updated_at,created_at',
+                      )
+                      .single<ProductRow>();
 
-        setIsSavingProduct(false);
+            if (response.error) {
+                if (selectedProductIdRef.current === operationProductId) {
+                    setError(response.error.message);
+                }
+                return;
+            }
 
-        if (response.error) {
-            setError(response.error.message);
-            return;
+            const auditError = await recordAdminAuditEvent(client, {
+                actorUserId: user.id,
+                action: operationProductId
+                    ? nextStatus === 'published'
+                        ? 'product.publish'
+                        : nextStatus === 'archived'
+                          ? 'product.archive'
+                          : 'product.update'
+                    : 'product.create',
+                entityType: 'products',
+                entityId: response.data.id,
+                metadata: {
+                    slug: response.data.slug,
+                    status: response.data.status,
+                },
+            });
+
+            if (selectedProductIdRef.current !== operationProductId) {
+                return;
+            }
+            setNotice(withAuditNotice(nextStatus === 'published' ? 'Product published.' : 'Product saved.', auditError));
+            await loadProducts(response.data.id);
+        } catch (saveError) {
+            if (selectedProductIdRef.current === operationProductId) {
+                setError(saveError instanceof Error ? saveError.message : 'Product save failed.');
+            }
+        } finally {
+            endSaveOperation();
+            setIsSavingProduct(false);
         }
-
-        const auditError = await recordAdminAuditEvent(supabase, {
-            actorUserId: user.id,
-            action: selectedProductId
-                ? nextStatus === 'published'
-                    ? 'product.publish'
-                    : nextStatus === 'archived'
-                      ? 'product.archive'
-                      : 'product.update'
-                : 'product.create',
-            entityType: 'products',
-            entityId: response.data.id,
-            metadata: {
-                slug: response.data.slug,
-                status: response.data.status,
-            },
-        });
-        setNotice(withAuditNotice(nextStatus === 'published' ? 'Product published.' : 'Product saved.', auditError));
-        await loadProducts(response.data.id);
     }
 
     async function handleProductSubmit(event: FormEvent<HTMLFormElement>) {
@@ -507,6 +651,13 @@ function AdminProductsContent() {
 
     async function saveModel(nextStatus: ProductStatus) {
         if (!supabase || !canEdit || !user || !selectedProduct) return;
+
+        const operation = {
+            productId: selectedProduct.id,
+            rowId: selectedModelIdRef.current,
+            editors: getCurrentEditorSelection(),
+        };
+        if (selectedProductIdRef.current !== operation.productId) return;
 
         if (nextStatus === 'published' && !canPublishModel) {
             setError(formatPublishChecklistError('model', modelPublishChecklist));
@@ -519,9 +670,13 @@ function AdminProductsContent() {
             return;
         }
 
+        if (!beginSaveOperation()) return;
+
+        const client: SupabaseClient = supabase;
+
         const now = new Date().toISOString();
         const payload = {
-            product_id: selectedProduct.id,
+            product_id: operation.productId,
             model_key: modelForm.modelKey.trim(),
             label: modelForm.label.trim(),
             image_media_id: validation.imageMediaId,
@@ -536,49 +691,85 @@ function AdminProductsContent() {
         setError(null);
         setNotice(null);
 
-        const response = selectedModelId
-            ? await supabase
-                  .from('product_models')
-                  .update(payload)
-                  .eq('id', selectedModelId)
-                  .select('id,product_id,model_key,label,image_media_id,status,sort_order,published_at,archived_at,updated_at')
-                  .single<ProductModelRow>()
-            : await supabase
-                  .from('product_models')
-                  .insert({ ...payload, created_by: user.id })
-                  .select('id,product_id,model_key,label,image_media_id,status,sort_order,published_at,archived_at,updated_at')
-                  .single<ProductModelRow>();
+        try {
+            const response = operation.rowId
+                ? await client
+                      .from('product_models')
+                      .update(payload)
+                      .eq('id', operation.rowId)
+                      .eq('product_id', operation.productId)
+                      .select('id,product_id,model_key,label,image_media_id,status,sort_order,published_at,archived_at,updated_at')
+                      .single<ProductModelRow>()
+                : await client
+                      .from('product_models')
+                      .insert({ ...payload, created_by: user.id })
+                      .select('id,product_id,model_key,label,image_media_id,status,sort_order,published_at,archived_at,updated_at')
+                      .single<ProductModelRow>();
 
-        setIsSavingModel(false);
+            if (response.error) {
+                if (
+                    selectedProductIdRef.current === operation.productId &&
+                    selectedModelIdRef.current === operation.rowId
+                ) {
+                    setError(response.error.message);
+                }
+                return;
+            }
 
-        if (response.error) {
-            setError(response.error.message);
-            return;
+            const auditError = await recordAdminAuditEvent(client, {
+                actorUserId: user.id,
+                action: operation.rowId
+                    ? nextStatus === 'published'
+                        ? 'product_model.publish'
+                        : nextStatus === 'archived'
+                          ? 'product_model.archive'
+                          : 'product_model.update'
+                    : 'product_model.create',
+                entityType: 'product_models',
+                entityId: response.data.id,
+                metadata: {
+                    productId: response.data.product_id,
+                    modelKey: response.data.model_key,
+                    status: response.data.status,
+                },
+            });
+
+            if (
+                selectedProductIdRef.current !== operation.productId ||
+                selectedModelIdRef.current !== operation.rowId
+            ) {
+                return;
+            }
+            setNotice(withAuditNotice(nextStatus === 'published' ? 'Model published.' : 'Model saved.', auditError));
+            await loadProductBundle(
+                client,
+                operation.productId,
+                response.data.id,
+                productSelectionGenerationRef.current,
+                operation.editors,
+            );
+        } catch (saveError) {
+            if (
+                selectedProductIdRef.current === operation.productId &&
+                selectedModelIdRef.current === operation.rowId
+            ) {
+                setError(saveError instanceof Error ? saveError.message : 'Model save failed.');
+            }
+        } finally {
+            endSaveOperation();
+            setIsSavingModel(false);
         }
-
-        const auditError = await recordAdminAuditEvent(supabase, {
-            actorUserId: user.id,
-            action: selectedModelId
-                ? nextStatus === 'published'
-                    ? 'product_model.publish'
-                    : nextStatus === 'archived'
-                      ? 'product_model.archive'
-                      : 'product_model.update'
-                : 'product_model.create',
-            entityType: 'product_models',
-            entityId: response.data.id,
-            metadata: {
-                productId: response.data.product_id,
-                modelKey: response.data.model_key,
-                status: response.data.status,
-            },
-        });
-        setNotice(withAuditNotice(nextStatus === 'published' ? 'Model published.' : 'Model saved.', auditError));
-        await loadProductBundle(supabase, selectedProduct.id, response.data.id);
     }
 
     async function saveMaterialDefault() {
         if (!supabase || !canEdit || !user || !selectedProduct) return;
+
+        const operation = {
+            productId: selectedProduct.id,
+            rowId: selectedMaterialDefaultIdRef.current,
+            editors: getCurrentEditorSelection(),
+        };
+        if (selectedProductIdRef.current !== operation.productId) return;
 
         const validation = validateMaterialDefaultForm(materialDefaultForm);
         if (validation.error !== null) {
@@ -586,8 +777,12 @@ function AdminProductsContent() {
             return;
         }
 
+        if (!beginSaveOperation()) return;
+
+        const client: SupabaseClient = supabase;
+
         const payload = {
-            product_id: selectedProduct.id,
+            product_id: operation.productId,
             material_category: materialDefaultForm.materialCategory,
             stone_group_id: validation.stoneGroupId,
             material_slug: materialDefaultForm.materialSlug.trim() || null,
@@ -599,43 +794,79 @@ function AdminProductsContent() {
         setError(null);
         setNotice(null);
 
-        const response = selectedMaterialDefaultId
-            ? await supabase
-                  .from('product_material_defaults')
-                  .update(payload)
-                  .eq('id', selectedMaterialDefaultId)
-                  .select('id,product_id,material_category,stone_group_id,material_slug,display_label,updated_at')
-                  .single<ProductMaterialDefaultRow>()
-            : await supabase
-                  .from('product_material_defaults')
-                  .insert({ ...payload, created_by: user.id })
-                  .select('id,product_id,material_category,stone_group_id,material_slug,display_label,updated_at')
-                  .single<ProductMaterialDefaultRow>();
+        try {
+            const response = operation.rowId
+                ? await client
+                      .from('product_material_defaults')
+                      .update(payload)
+                      .eq('id', operation.rowId)
+                      .eq('product_id', operation.productId)
+                      .select('id,product_id,material_category,stone_group_id,material_slug,display_label,updated_at')
+                      .single<ProductMaterialDefaultRow>()
+                : await client
+                      .from('product_material_defaults')
+                      .insert({ ...payload, created_by: user.id })
+                      .select('id,product_id,material_category,stone_group_id,material_slug,display_label,updated_at')
+                      .single<ProductMaterialDefaultRow>();
 
-        setIsSavingMaterialDefault(false);
+            if (response.error) {
+                if (
+                    selectedProductIdRef.current === operation.productId &&
+                    selectedMaterialDefaultIdRef.current === operation.rowId
+                ) {
+                    setError(response.error.message);
+                }
+                return;
+            }
 
-        if (response.error) {
-            setError(response.error.message);
-            return;
+            const auditError = await recordAdminAuditEvent(client, {
+                actorUserId: user.id,
+                action: operation.rowId ? 'product_material_default.update' : 'product_material_default.create',
+                entityType: 'product_material_defaults',
+                entityId: response.data.id,
+                metadata: {
+                    productId: response.data.product_id,
+                    materialCategory: response.data.material_category,
+                    stoneGroupId: response.data.stone_group_id,
+                },
+            });
+
+            if (
+                selectedProductIdRef.current !== operation.productId ||
+                selectedMaterialDefaultIdRef.current !== operation.rowId
+            ) {
+                return;
+            }
+            setNotice(withAuditNotice('Material default saved.', auditError));
+            await loadProductBundle(
+                client,
+                operation.productId,
+                operation.editors.modelId,
+                productSelectionGenerationRef.current,
+                operation.editors,
+            );
+        } catch (saveError) {
+            if (
+                selectedProductIdRef.current === operation.productId &&
+                selectedMaterialDefaultIdRef.current === operation.rowId
+            ) {
+                setError(saveError instanceof Error ? saveError.message : 'Material default save failed.');
+            }
+        } finally {
+            endSaveOperation();
+            setIsSavingMaterialDefault(false);
         }
-
-        const auditError = await recordAdminAuditEvent(supabase, {
-            actorUserId: user.id,
-            action: selectedMaterialDefaultId ? 'product_material_default.update' : 'product_material_default.create',
-            entityType: 'product_material_defaults',
-            entityId: response.data.id,
-            metadata: {
-                productId: response.data.product_id,
-                materialCategory: response.data.material_category,
-                stoneGroupId: response.data.stone_group_id,
-            },
-        });
-        setNotice(withAuditNotice('Material default saved.', auditError));
-        await loadProductBundle(supabase, selectedProduct.id, selectedModelId);
     }
 
     async function saveSpec() {
         if (!supabase || !canEdit || !user || !selectedProduct) return;
+
+        const operation = {
+            productId: selectedProduct.id,
+            rowId: selectedSpecIdRef.current,
+            editors: getCurrentEditorSelection(),
+        };
+        if (selectedProductIdRef.current !== operation.productId) return;
 
         const validation = validateSpecForm(specForm);
         if (validation.error !== null) {
@@ -643,8 +874,12 @@ function AdminProductsContent() {
             return;
         }
 
+        if (!beginSaveOperation()) return;
+
+        const client: SupabaseClient = supabase;
+
         const payload = {
-            product_id: selectedProduct.id,
+            product_id: operation.productId,
             spec_label: specForm.specLabel.trim(),
             spec_value: specForm.specValue.trim(),
             sort_order: validation.sortOrder,
@@ -655,38 +890,67 @@ function AdminProductsContent() {
         setError(null);
         setNotice(null);
 
-        const response = selectedSpecId
-            ? await supabase
-                  .from('product_specs')
-                  .update(payload)
-                  .eq('id', selectedSpecId)
-                  .select('id,product_id,spec_label,spec_value,sort_order,updated_at')
-                  .single<ProductSpecRow>()
-            : await supabase
-                  .from('product_specs')
-                  .insert({ ...payload, created_by: user.id })
-                  .select('id,product_id,spec_label,spec_value,sort_order,updated_at')
-                  .single<ProductSpecRow>();
+        try {
+            const response = operation.rowId
+                ? await client
+                      .from('product_specs')
+                      .update(payload)
+                      .eq('id', operation.rowId)
+                      .eq('product_id', operation.productId)
+                      .select('id,product_id,spec_label,spec_value,sort_order,updated_at')
+                      .single<ProductSpecRow>()
+                : await client
+                      .from('product_specs')
+                      .insert({ ...payload, created_by: user.id })
+                      .select('id,product_id,spec_label,spec_value,sort_order,updated_at')
+                      .single<ProductSpecRow>();
 
-        setIsSavingSpec(false);
+            if (response.error) {
+                if (
+                    selectedProductIdRef.current === operation.productId &&
+                    selectedSpecIdRef.current === operation.rowId
+                ) {
+                    setError(response.error.message);
+                }
+                return;
+            }
 
-        if (response.error) {
-            setError(response.error.message);
-            return;
+            const auditError = await recordAdminAuditEvent(client, {
+                actorUserId: user.id,
+                action: operation.rowId ? 'product_spec.update' : 'product_spec.create',
+                entityType: 'product_specs',
+                entityId: response.data.id,
+                metadata: {
+                    productId: response.data.product_id,
+                    label: response.data.spec_label,
+                },
+            });
+
+            if (
+                selectedProductIdRef.current !== operation.productId ||
+                selectedSpecIdRef.current !== operation.rowId
+            ) {
+                return;
+            }
+            setNotice(withAuditNotice('Specification saved.', auditError));
+            await loadProductBundle(
+                client,
+                operation.productId,
+                operation.editors.modelId,
+                productSelectionGenerationRef.current,
+                operation.editors,
+            );
+        } catch (saveError) {
+            if (
+                selectedProductIdRef.current === operation.productId &&
+                selectedSpecIdRef.current === operation.rowId
+            ) {
+                setError(saveError instanceof Error ? saveError.message : 'Specification save failed.');
+            }
+        } finally {
+            endSaveOperation();
+            setIsSavingSpec(false);
         }
-
-        const auditError = await recordAdminAuditEvent(supabase, {
-            actorUserId: user.id,
-            action: selectedSpecId ? 'product_spec.update' : 'product_spec.create',
-            entityType: 'product_specs',
-            entityId: response.data.id,
-            metadata: {
-                productId: response.data.product_id,
-                label: response.data.spec_label,
-            },
-        });
-        setNotice(withAuditNotice('Specification saved.', auditError));
-        await loadProductBundle(supabase, selectedProduct.id, selectedModelId);
     }
 
     return (
@@ -697,7 +961,7 @@ function AdminProductsContent() {
                 <button
                     type="button"
                     onClick={startNewProduct}
-                    disabled={!canEdit}
+                    disabled={!canEdit || isLoading || isAnySaving}
                     className="inline-flex min-h-10 items-center gap-2 rounded border border-black/15 bg-white px-3 text-xs font-bold uppercase tracking-[0.12em] text-black transition hover:border-black disabled:cursor-not-allowed disabled:text-black/35"
                 >
                     <Plus className="h-4 w-4" />
@@ -705,7 +969,14 @@ function AdminProductsContent() {
                 </button>
             }
         >
-            <div className="grid gap-5 xl:grid-cols-[minmax(280px,390px)_minmax(0,1fr)_380px]">
+            <div
+                className={[
+                    'grid gap-5 xl:grid-cols-[minmax(280px,390px)_minmax(0,1fr)_380px]',
+                    isLoading ? 'opacity-60' : '',
+                ].join(' ')}
+                aria-busy={isLoading}
+                inert={isLoading}
+            >
                 <section className="border border-black/10 bg-white">
                     <div className="border-b border-black/10 p-4">
                         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-black/45">
@@ -767,8 +1038,9 @@ function AdminProductsContent() {
                                         key={product.id}
                                         type="button"
                                         onClick={() => void selectProduct(product)}
+                                        disabled={isAnySaving}
                                         className={[
-                                            'block w-full p-4 text-left transition hover:bg-[#f8f9f5]',
+                                            'block w-full p-4 text-left transition hover:bg-[#f8f9f5] disabled:cursor-wait disabled:opacity-55',
                                             selectedProductId === product.id ? 'bg-[#f8f9f5]' : 'bg-white',
                                         ].join(' ')}
                                     >
@@ -925,7 +1197,7 @@ function AdminProductsContent() {
                                 />
                             </div>
                             <p className="mt-3 text-sm leading-6 text-black/58">
-                                Leave these blank to reuse the product name and short description.
+                                Leave these blank to reuse the product name and short description. A brand-new public URL also needs a release check before search engines can discover it.
                             </p>
                         </div>
 
@@ -951,7 +1223,7 @@ function AdminProductsContent() {
                             title="Models"
                             eyebrow={`${models.length} rows`}
                             onNew={() => {
-                                setSelectedModelId(null);
+                                setCurrentModelId(null);
                                 setModelForm(emptyModelForm);
                             }}
                             disabled={!canEdit || !selectedProduct}
@@ -961,7 +1233,7 @@ function AdminProductsContent() {
                                 selectedId={selectedModelId}
                                 getLabel={(row) => row.label}
                                 onSelect={(row) => {
-                                    setSelectedModelId(row.id);
+                                    setCurrentModelId(row.id);
                                     setModelForm(rowToModelForm(row));
                                 }}
                             />
@@ -1040,7 +1312,7 @@ function AdminProductsContent() {
                             title="Specifications"
                             eyebrow={`${specs.length} rows`}
                             onNew={() => {
-                                setSelectedSpecId(null);
+                                setCurrentSpecId(null);
                                 setSpecForm(emptySpecForm);
                             }}
                             disabled={!canEdit || !selectedProduct}
@@ -1050,7 +1322,7 @@ function AdminProductsContent() {
                                 selectedId={selectedSpecId}
                                 getLabel={(row) => row.spec_label}
                                 onSelect={(row) => {
-                                    setSelectedSpecId(row.id);
+                                    setCurrentSpecId(row.id);
                                     setSpecForm(rowToSpecForm(row));
                                 }}
                             />
@@ -1113,7 +1385,7 @@ function AdminProductsContent() {
                             <button
                                 type="button"
                                 onClick={() => {
-                                    setSelectedMaterialDefaultId(null);
+                                    setCurrentMaterialDefaultId(null);
                                     setMaterialDefaultForm(emptyMaterialDefaultForm);
                                 }}
                                 disabled={!canEdit || !selectedProduct}
@@ -1128,7 +1400,7 @@ function AdminProductsContent() {
                             selectedId={selectedMaterialDefaultId}
                             getLabel={(row) => `${row.material_category}: ${row.display_label ?? row.material_slug ?? 'Needs label'}`}
                             onSelect={(row) => {
-                                setSelectedMaterialDefaultId(row.id);
+                                setCurrentMaterialDefaultId(row.id);
                                 setMaterialDefaultForm(rowToMaterialDefaultForm(row));
                             }}
                         />
@@ -1199,7 +1471,7 @@ function AdminProductsContent() {
                             <li>Published products require a website URL key, short description, hero image, model, material default, and spec.</li>
                             <li>Published models need a model website key, label, and selected Media library image.</li>
                             <li>Material defaults can reference Stone Library items or keep clear non-stone labels.</li>
-                            <li>Use Archive to remove a product from the website while keeping its editing history.</li>
+                            <li>Archive hides the CMS version. A matching legacy product can remain visible during migration until CMS-only cutover.</li>
                         </ul>
                     </section>
 
@@ -1234,7 +1506,7 @@ function ProductStatusHelp({ status }: { status: ProductStatus }) {
     const messages: Record<ProductStatus, string> = {
         draft: 'Draft is safe to edit and will not appear on the public website.',
         published: 'Published can appear on public product pages where CMS content is active.',
-        archived: 'Archived is hidden from the public website and kept for editing history.',
+        archived: 'The Archived CMS version is hidden and kept for history; a matching legacy product may remain visible during migration.',
     };
 
     return (
@@ -1762,13 +2034,15 @@ function validateProductForm(form: ProductFormState) {
     if (heroMediaId.error) return validationFailure(heroMediaId.error);
 
     const seo = parseRecordJson(form.seoBaseJson);
-    if (form.seoTitle.trim()) {
-        seo.title = form.seoTitle.trim();
+    const seoValidation = validatePublicEntitySeoDraft(form.seoTitle, form.seoDescription);
+    if (seoValidation.error) return validationFailure(seoValidation.error);
+    if (seoValidation.title) {
+        seo.title = seoValidation.title;
     } else {
         delete seo.title;
     }
-    if (form.seoDescription.trim()) {
-        seo.description = form.seoDescription.trim();
+    if (seoValidation.description) {
+        seo.description = seoValidation.description;
     } else {
         delete seo.description;
     }

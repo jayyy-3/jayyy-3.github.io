@@ -148,6 +148,8 @@ export interface StoneDetailVM {
     finishes: FinishVM[];
     finishCapabilities: FinishCapabilityVM[];
     defaultFinishKey: FinishKey | null;
+    /** Present for Published CMS records; static fallback records omit it. */
+    contentSource?: 'cms';
 }
 
 export interface StoneCardFilters {

@@ -16,6 +16,7 @@ const requiredFiles = [
   'docs/ADMIN_PRODUCTION_WALKTHROUGH.md',
   'docs/NEXT_STEPS.md',
   'docs/WORKLOG.md',
+  'docs/agent/admin-handoff-evidence.json',
   'docs/agent/status.json',
   'docs/agent/harness-gc.md',
   'docs/agent/tasks.json',
@@ -27,11 +28,14 @@ const requiredFiles = [
   'scripts/check-admin-auth-browser.mjs',
   'scripts/check-admin-config-gate.mjs',
   'scripts/check-admin-handoff-readiness.mjs',
+  'scripts/check-admin-media-role-boundary-live.mjs',
   'scripts/check-capabilities-page-source.mjs',
   'scripts/check-contact-form-ui-source.mjs',
   'scripts/check-doc-paths.mjs',
   'scripts/check-harness.mjs',
   'scripts/check-harness-gc.mjs',
+  'scripts/check-live-readiness.mjs',
+  'scripts/check-public-content-overlay.mjs',
   'scripts/check-seo-readiness.mjs',
   'scripts/check-supabase-foundation-readiness.mjs',
 ]
@@ -42,6 +46,7 @@ const requiredPackageScripts = {
   'agent:admin-cms-predeploy': 'bash scripts/admin-cms-predeploy.sh',
   'agent:admin-auth-browser': 'node scripts/check-admin-auth-browser.mjs',
   'agent:admin-crud-live': 'node scripts/check-admin-crud-live.mjs',
+  'agent:admin-media-role-boundary-live': 'node scripts/check-admin-media-role-boundary-live.mjs',
   'agent:admin-handoff-readiness': 'node scripts/check-admin-handoff-readiness.mjs',
   'agent:admin-live-readiness': 'node scripts/check-admin-live-readiness.mjs',
   'agent:cloudflare-preview-smoke': 'node scripts/check-cloudflare-preview-smoke.mjs',
@@ -58,6 +63,7 @@ const requiredPackageScripts = {
   'agent:harness-gc:review': 'node scripts/check-harness-gc.mjs --review',
   'agent:init': 'bash scripts/agent-init.sh',
   'agent:live-readiness': 'node scripts/check-live-readiness.mjs',
+  'agent:public-content-overlay': 'node --experimental-strip-types scripts/check-public-content-overlay.mjs',
   'agent:public-supabase-readiness': 'node scripts/check-public-supabase-readiness.mjs',
   'agent:supabase-foundation-readiness': 'node scripts/check-supabase-foundation-readiness.mjs',
   'agent:smoke': 'bash scripts/agent-smoke.sh',
@@ -88,6 +94,53 @@ try {
 }
 
 try {
+  const evidence = JSON.parse(
+    readFileSync(join(root, 'docs/agent/admin-handoff-evidence.json'), 'utf8'),
+  )
+  const workflowKeys = [
+    'authenticatedSignIn',
+    'draftSaveRefresh',
+    'privateMediaPublish',
+    'publishedPublicReadback',
+    'archivePublicReadback',
+    'settingsPublicReadback',
+    'inviteSetPassword',
+    'passwordRecovery',
+    'responsiveAdminNavigation',
+    'projectsTaskWorkspace',
+    'dashboardOperationalQueue',
+    'editorGuideUsability',
+  ]
+
+  if (evidence.version !== 2) {
+    failures.push('docs/agent/admin-handoff-evidence.json version must remain 2.')
+  }
+  if (!['revalidation_required', 'verified'].includes(evidence.state)) {
+    failures.push('docs/agent/admin-handoff-evidence.json state must be revalidation_required or verified.')
+  }
+  if (!Object.hasOwn(evidence, 'deploymentSha') || !Object.hasOwn(evidence, 'deploymentUrl')) {
+    failures.push('docs/agent/admin-handoff-evidence.json must record deploymentSha and deploymentUrl fields.')
+  }
+  const mediaRolePrerequisite = evidence.productionPrerequisites?.mediaPublicBucketRoleBoundary
+  if (
+    !mediaRolePrerequisite ||
+    mediaRolePrerequisite.migration !== '20260713065628_media_public_bucket_role_hardening.sql' ||
+    !Array.isArray(mediaRolePrerequisite.evidenceRefs)
+  ) {
+    failures.push(
+      'docs/agent/admin-handoff-evidence.json must define the mediaPublicBucketRoleBoundary production prerequisite and migration.',
+    )
+  }
+  for (const key of workflowKeys) {
+    if (!evidence.workflows?.[key] || !Array.isArray(evidence.workflows[key].evidenceRefs)) {
+      failures.push(`docs/agent/admin-handoff-evidence.json must define workflow ${key} with evidenceRefs.`)
+    }
+  }
+} catch (error) {
+  failures.push(`Unable to parse docs/agent/admin-handoff-evidence.json: ${error.message}`)
+}
+
+try {
   const smoke = readFileSync(join(root, 'scripts/agent-smoke.sh'), 'utf8')
   if (!smoke.includes('node scripts/check-contact-form-ui-source.mjs')) {
     failures.push('scripts/agent-smoke.sh must run the Contact form UI source contract check.')
@@ -97,6 +150,46 @@ try {
   }
 } catch (error) {
   failures.push(`Unable to read scripts/agent-smoke.sh: ${error.message}`)
+}
+
+try {
+  const predeploy = readFileSync(join(root, 'scripts/admin-cms-predeploy.sh'), 'utf8')
+  if (!predeploy.includes('npm run agent:public-content-overlay')) {
+    failures.push('scripts/admin-cms-predeploy.sh must run the public content overlay behavior check.')
+  }
+  if (!predeploy.includes('npm run agent:admin-media-role-boundary-live')) {
+    failures.push('scripts/admin-cms-predeploy.sh must run the plan-only Media role-boundary verifier.')
+  }
+} catch (error) {
+  failures.push(`Unable to read scripts/admin-cms-predeploy.sh: ${error.message}`)
+}
+
+try {
+  const roleBoundaryVerifier = readFileSync(
+    join(root, 'scripts/check-admin-media-role-boundary-live.mjs'),
+    'utf8',
+  )
+  for (const phrase of [
+    'Live mode requires explicit --allow-writes.',
+    'Editor private-bucket insert',
+    'Editor private-bucket update',
+    'Editor public-bucket insert',
+    'Editor public-bucket update',
+    'Owner/admin public-bucket insert',
+    'Owner/admin public-bucket update',
+    'All tagged Storage objects were removed',
+  ]) {
+    if (!roleBoundaryVerifier.includes(phrase)) {
+      failures.push(`scripts/check-admin-media-role-boundary-live.mjs missing required contract: ${phrase}`)
+    }
+  }
+  for (const forbidden of ['SUPABASE_SERVICE_ROLE_KEY', 'SUPABASE_SERVICE_KEY']) {
+    if (roleBoundaryVerifier.includes(forbidden)) {
+      failures.push(`scripts/check-admin-media-role-boundary-live.mjs must not reference ${forbidden}.`)
+    }
+  }
+} catch (error) {
+  failures.push(`Unable to read scripts/check-admin-media-role-boundary-live.mjs: ${error.message}`)
 }
 
 const adminEditorGuideRequiredText = [
@@ -152,8 +245,9 @@ const adminEditorGuideRequiredText = [
   'static fallback',
   'sanitized original import HTML',
   'The approved import has already written production Projects, Stone Library, Products, Articles, and Media candidates into the CMS as Draft items.',
-  'Push and deploy the local CMS UX commits',
-  'final editor walkthrough',
+  'Current warning: this guide is the target operating flow, not proof that production is handoff-ready.',
+  '/admin/account-setup',
+  'golden workflow',
 ]
 const adminEditorGuideRequiredModules = [
   'Dashboard',
@@ -198,16 +292,24 @@ const adminProductionWalkthroughRequiredText = [
   'Lead workflow actions',
   'Website settings status',
   'Open public page',
-  'Settings invite/access',
+  'Settings account handoff',
   'Stone Library publish path',
-  'Article publish path',
+  'Articles publish path',
   'Final Handoff Decision',
   'Handoff Evidence Matrix',
   'Results Template',
   'Copy this table into `docs/WORKLOG.md` after the production walkthrough',
+  'Admin CMS Golden Workflow Evidence',
+  'Deployment URL: `https://<deployment>.urblo.pages.dev`',
+  '| responsiveAdminNavigation | Pending |',
+  '| projectsTaskWorkspace | Pending |',
+  '| dashboardOperationalQueue | Pending |',
+  '| editorGuideUsability | Pending |',
+  'Admin Navigation Widths',
+  'Editor Guide Usability',
   '| Area | Result | Evidence | Changes Made | Public URL / Screenshot | Follow-up |',
   'Result values:',
-  'Deferred: Jay explicitly chose not to run a live write, invite, or publish path during this walkthrough.',
+  'Deferred: Jay explicitly chose not to run a live action. Deferred is a blocker for final handoff, not a passing result.',
   'Editor can log in and know where to start.',
   'Publish readiness is visible before Publish.',
   'Technical terms are hidden from editor tasks.',
@@ -227,7 +329,6 @@ const adminProductionWalkthroughForbiddenText = [
   'saved rows',
   'imported Draft rows',
   'Published-only public reads',
-  'Supabase Auth',
   'admin profile rows',
   'profile rows',
   'claim_status',
@@ -278,11 +379,29 @@ const liveReadinessDocFlags = [
   '--form-writes-approved',
   '--first-admin-writes-approved',
   '--admin-writes-approved',
+  '--media-role-migration-verified',
+  '--media-role-writes-approved',
   '--content-import-approved',
   '--content-merge-approved',
   '--content-public-cutover-approved',
   '--turnstile-token-provided',
 ]
+
+try {
+  const liveReadiness = readFileSync(join(root, 'scripts/check-live-readiness.mjs'), 'utf8')
+  for (const phrase of [
+    '--media-role-migration-verified',
+    '--media-role-writes-approved',
+    'mediaRoleAccountsDistinct',
+    'URBLO_EDITOR_EMAIL must identify a different Auth user from URBLO_ADMIN_EMAIL',
+  ]) {
+    if (!liveReadiness.includes(phrase)) {
+      failures.push(`scripts/check-live-readiness.mjs missing Media role readiness contract: ${phrase}`)
+    }
+  }
+} catch (error) {
+  failures.push(`Unable to read scripts/check-live-readiness.mjs: ${error.message}`)
+}
 const liveReadinessDocFiles = [
   'docs/ARCHITECTURE.md',
   'docs/CLOUDFLARE_DEPLOYMENT.md',

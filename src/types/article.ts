@@ -1,6 +1,8 @@
 // ===========================
 // src/types/article.ts
 // ===========================
+import type { PublicEntitySeo } from '../lib/publicEntitySeo';
+
 export interface ArticleMeta {
     /** folder name under /src/articles/<slug> */
     slug: string;
@@ -20,4 +22,7 @@ export interface ArticleMeta {
     excerpt?: string;
     /** Simple tag array for future filtering */
     tags?: string[];
+    /** Present for Published CMS records; static fallback records omit it. */
+    contentSource?: 'cms';
+    seo?: PublicEntitySeo;
 }

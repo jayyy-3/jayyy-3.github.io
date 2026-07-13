@@ -10,6 +10,7 @@ const BROWSER_KEY_NAMES = ['VITE_SUPABASE_PUBLISHABLE_KEY', 'VITE_SUPABASE_ANON_
 const ADMIN_EMAIL_NAMES = ['URBLO_FIRST_ADMIN_EMAIL'];
 const ADMIN_SESSION_TOKEN_NAMES = ['URBLO_ADMIN_ACCESS_TOKEN'];
 const ADMIN_SESSION_PASSWORD_NAMES = ['URBLO_ADMIN_EMAIL', 'URBLO_ADMIN_PASSWORD'];
+const EDITOR_SESSION_PASSWORD_NAMES = ['URBLO_EDITOR_EMAIL', 'URBLO_EDITOR_PASSWORD'];
 const UNPROFILED_SESSION_PASSWORD_NAMES = ['URBLO_UNPROFILED_EMAIL', 'URBLO_UNPROFILED_PASSWORD'];
 const PREVIEW_URL_NAMES = ['CLOUDFLARE_PAGES_PREVIEW_URL', 'PAGES_PREVIEW_URL'];
 const TURNSTILE_NAMES = ['TURNSTILE_SECRET_KEY', 'CF_TURNSTILE_SECRET_KEY'];
@@ -36,6 +37,8 @@ function parseArgs(argv) {
     firstAdminWritesApproved: false,
     formWritesApproved: false,
     json: false,
+    mediaRoleMigrationVerified: false,
+    mediaRoleWritesApproved: false,
     strict: false,
     turnstileTokenProvided: false,
   };
@@ -77,6 +80,16 @@ function parseArgs(argv) {
 
     if (arg === '--admin-writes-approved') {
       options.adminWritesApproved = true;
+      continue;
+    }
+
+    if (arg === '--media-role-migration-verified') {
+      options.mediaRoleMigrationVerified = true;
+      continue;
+    }
+
+    if (arg === '--media-role-writes-approved') {
+      options.mediaRoleWritesApproved = true;
       continue;
     }
 
@@ -216,6 +229,13 @@ function buildChecks(env, sources, options) {
   const adminToken = firstPresent(env, ADMIN_SESSION_TOKEN_NAMES);
   const adminPasswordSession =
     isValidEmail(env.URBLO_ADMIN_EMAIL || '') && Boolean(env.URBLO_ADMIN_PASSWORD);
+  const editorPasswordSession =
+    isValidEmail(env[EDITOR_SESSION_PASSWORD_NAMES[0]] || '') &&
+    Boolean(env[EDITOR_SESSION_PASSWORD_NAMES[1]]);
+  const mediaRoleAccountsDistinct =
+    editorPasswordSession &&
+    adminPasswordSession &&
+    env.URBLO_EDITOR_EMAIL.trim().toLowerCase() !== env.URBLO_ADMIN_EMAIL.trim().toLowerCase();
   const unprofiledPasswordSession =
     isValidEmail(env.URBLO_UNPROFILED_EMAIL || '') && Boolean(env.URBLO_UNPROFILED_PASSWORD);
   const turnstile = firstPresent(env, TURNSTILE_NAMES);
@@ -468,7 +488,7 @@ function buildChecks(env, sources, options) {
     }),
     makeCheck({
       id: 'admin-crud-live-storage',
-      label: 'Tagged admin media Storage upload policy',
+      label: 'Owner/admin private Storage upload and anonymous boundary',
       command: 'npm run agent:admin-crud-live -- --allow-writes --include-storage',
       present: [
         describeSource(browserKey, sources),
@@ -486,7 +506,39 @@ function buildChecks(env, sources, options) {
         ? []
         : ['Jay approval for tagged live QA writes is required before running --allow-writes --include-storage'],
       optional: [
-        'Runs the admin CRUD live verifier, uploads a tiny private urblo-admin-media object, verifies signed-in admin readback, and verifies anonymous reads are denied.',
+        'Runs the admin CRUD live verifier, uploads a tiny private urblo-admin-media object, verifies signed-in admin readback, and verifies anonymous reads are denied. This does not prove the Editor-versus-public-bucket role boundary.',
+      ],
+    }),
+    makeCheck({
+      id: 'admin-media-role-boundary-live',
+      label: 'Editor versus public Media Storage role boundary',
+      command: 'npm run agent:admin-media-role-boundary-live -- --allow-writes --strict',
+      present: [
+        describeSource(browserKey, sources),
+        editorPasswordSession ? 'URBLO_EDITOR_EMAIL and URBLO_EDITOR_PASSWORD configured' : '',
+        adminPasswordSession ? 'URBLO_ADMIN_EMAIL and URBLO_ADMIN_PASSWORD configured' : '',
+        mediaRoleAccountsDistinct ? 'Editor and owner/admin identities are distinct' : '',
+        options.mediaRoleMigrationVerified ? 'Production migration/policy readback marked verified' : '',
+        options.mediaRoleWritesApproved ? 'Jay approval flag supplied for this tagged Storage role proof' : '',
+      ].filter(Boolean),
+      missing: [
+        browserKey ? '' : 'VITE_SUPABASE_PUBLISHABLE_KEY or VITE_SUPABASE_ANON_KEY',
+        editorPasswordSession ? '' : 'valid URBLO_EDITOR_EMAIL plus URBLO_EDITOR_PASSWORD',
+        adminPasswordSession ? '' : 'valid URBLO_ADMIN_EMAIL plus URBLO_ADMIN_PASSWORD',
+        editorPasswordSession && adminPasswordSession && !mediaRoleAccountsDistinct
+          ? 'URBLO_EDITOR_EMAIL must identify a different Auth user from URBLO_ADMIN_EMAIL'
+          : '',
+      ].filter(Boolean),
+      manual: [
+        options.mediaRoleMigrationVerified
+          ? ''
+          : 'Apply and read back 20260713065628_media_public_bucket_role_hardening.sql, then pass --media-role-migration-verified',
+        options.mediaRoleWritesApproved
+          ? ''
+          : 'Jay approval for this tagged Storage role proof is required before passing --media-role-writes-approved',
+      ].filter(Boolean),
+      optional: [
+        'Uses distinct active Editor and owner/admin browser-key sessions; proves Editor private insert/update success, Editor public insert/update denial, owner/admin public insert/update success, and cleanup.',
       ],
     }),
     makeCheck({

@@ -1,6 +1,7 @@
 import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent, PointerEvent as ReactPointerEvent, ReactNode } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
     Archive,
     CheckCircle2,
@@ -13,6 +14,7 @@ import {
     ShieldAlert,
 } from 'lucide-react';
 import { recordAdminAuditEvent, withAuditNotice } from '../../lib/adminAudit';
+import { parseProjectFactJsonDraft } from '../../lib/projectFactValue';
 import { supabase } from '../../lib/supabaseClient';
 import { useAdminAuth } from '../../lib/adminAuthHooks';
 import AdminShell from './AdminShell';
@@ -21,6 +23,7 @@ import { CmsLiveRuleCard, CmsPublicPageLink, CmsStatusCounts, CmsStatusMeaning, 
 
 type ProjectStatus = 'draft' | 'published' | 'archived';
 type ProjectListFilter = ProjectStatus | 'all';
+type ProjectWorkspace = 'overview' | 'facts' | 'materials' | 'media' | 'maps';
 type ClaimStatus = 'needs_review' | 'approved' | 'deferred';
 type CarbonStatus = '' | 'yes' | 'no' | 'not_available' | 'tbc';
 type ProjectMediaRole =
@@ -231,6 +234,15 @@ interface HotspotFormState {
     status: ProjectStatus;
 }
 
+interface ProjectDirtyEditors {
+    overview: boolean;
+    fact: boolean;
+    material: boolean;
+    media: boolean;
+    map: boolean;
+    hotspot: boolean;
+}
+
 interface PublishBlocker {
     id: string;
     area: 'project' | 'fact' | 'material';
@@ -332,6 +344,8 @@ export default function AdminProjectsPage() {
 
 function AdminProjectsContent() {
     const { profile, user } = useAdminAuth();
+    const navigate = useNavigate();
+    const { projectId: projectIdParam } = useParams<{ projectId?: string }>();
     const canEdit = profile?.role === 'owner' || profile?.role === 'admin' || profile?.role === 'editor';
     const [projects, setProjects] = useState<ProjectRow[]>([]);
     const [facts, setFacts] = useState<ProjectFactRow[]>([]);
@@ -349,13 +363,20 @@ function AdminProjectsContent() {
     const [selectedMediaBlockId, setSelectedMediaBlockId] = useState<number | null>(null);
     const [selectedHotspotId, setSelectedHotspotId] = useState<number | null>(null);
     const [projectForm, setProjectForm] = useState<ProjectFormState>(emptyProjectForm);
+    const [projectFormBaseline, setProjectFormBaseline] = useState<ProjectFormState>(emptyProjectForm);
+    const [activeWorkspace, setActiveWorkspace] = useState<ProjectWorkspace>('overview');
     const [projectSearch, setProjectSearch] = useState('');
     const [projectStatusFilter, setProjectStatusFilter] = useState<ProjectListFilter>('all');
     const [factForm, setFactForm] = useState<FactFormState>(emptyFactForm);
+    const [factFormBaseline, setFactFormBaseline] = useState<FactFormState>(emptyFactForm);
     const [materialForm, setMaterialForm] = useState<MaterialFormState>(emptyMaterialForm);
+    const [materialFormBaseline, setMaterialFormBaseline] = useState<MaterialFormState>(emptyMaterialForm);
     const [mapForm, setMapForm] = useState<MapFormState>(emptyMapForm);
+    const [mapFormBaseline, setMapFormBaseline] = useState<MapFormState>(emptyMapForm);
     const [mediaBlockForm, setMediaBlockForm] = useState<MediaBlockFormState>(emptyMediaBlockForm);
+    const [mediaBlockFormBaseline, setMediaBlockFormBaseline] = useState<MediaBlockFormState>(emptyMediaBlockForm);
     const [hotspotForm, setHotspotForm] = useState<HotspotFormState>(emptyHotspotForm);
+    const [hotspotFormBaseline, setHotspotFormBaseline] = useState<HotspotFormState>(emptyHotspotForm);
     const [isLoading, setIsLoading] = useState(true);
     const [isSavingProject, setIsSavingProject] = useState(false);
     const [isSavingFact, setIsSavingFact] = useState(false);
@@ -369,6 +390,28 @@ function AdminProjectsContent() {
     const projectEditorRef = useRef<HTMLFormElement | null>(null);
     const factsEditorRef = useRef<HTMLElement | null>(null);
     const materialsEditorRef = useRef<HTMLElement | null>(null);
+    const mediaEditorRef = useRef<HTMLElement | null>(null);
+    const mapsEditorRef = useRef<HTMLElement | null>(null);
+    const hasLoadedProjectsRef = useRef(false);
+    const skipNextRouteLoadRef = useRef(false);
+    const allowNextRouteDiscardRef = useRef(false);
+    const projectsLoadGenerationRef = useRef(0);
+    const projectBundleLoadGenerationRef = useRef(0);
+    const hotspotLoadGenerationRef = useRef(0);
+    const selectedProjectIdRef = useRef<number | null>(null);
+    const selectedFactIdRef = useRef<number | null>(null);
+    const selectedMaterialIdRef = useRef<number | null>(null);
+    const selectedMapIdRef = useRef<number | null>(null);
+    const selectedMediaBlockIdRef = useRef<number | null>(null);
+    const selectedHotspotIdRef = useRef<number | null>(null);
+    const isProjectDirtyRef = useRef(false);
+    const activeSaveCountRef = useRef(0);
+    const savingProjectRef = useRef(false);
+    const savingFactRef = useRef(false);
+    const savingMaterialRef = useRef(false);
+    const savingMapRef = useRef(false);
+    const savingMediaBlockRef = useRef(false);
+    const savingHotspotRef = useRef(false);
 
     const selectedProject = useMemo(
         () => projects.find((project) => project.id === selectedProjectId) ?? null,
@@ -434,15 +477,50 @@ function AdminProjectsContent() {
         () => getProjectPublishBlockers(projectForm, facts, materials),
         [facts, materials, projectForm],
     );
+    const dirtyEditors = useMemo(
+        () => ({
+            overview: !formStatesMatch(projectForm, projectFormBaseline),
+            fact: !formStatesMatch(factForm, factFormBaseline),
+            material: !formStatesMatch(materialForm, materialFormBaseline),
+            media: !formStatesMatch(mediaBlockForm, mediaBlockFormBaseline),
+            map: !formStatesMatch(mapForm, mapFormBaseline),
+            hotspot: !formStatesMatch(hotspotForm, hotspotFormBaseline),
+        }),
+        [
+            factForm,
+            factFormBaseline,
+            hotspotForm,
+            hotspotFormBaseline,
+            mapForm,
+            mapFormBaseline,
+            materialForm,
+            materialFormBaseline,
+            mediaBlockForm,
+            mediaBlockFormBaseline,
+            projectForm,
+            projectFormBaseline,
+        ],
+    );
+    const dirtyEditorLabels = useMemo(() => getDirtyEditorLabels(dirtyEditors), [dirtyEditors]);
+    const isProjectDirty = dirtyEditorLabels.length > 0;
+    const dirtyEditorSummary = formatEditorList(dirtyEditorLabels);
+    const isAnySaving =
+        isSavingProject ||
+        isSavingFact ||
+        isSavingMaterial ||
+        isSavingMap ||
+        isSavingMediaBlock ||
+        isSavingHotspot;
 
-    const loadHotspots = useCallback(async (client: SupabaseClient, mapId: number | null, preferredHotspotId: number | null) => {
-        if (!mapId) {
-            setHotspots([]);
-            setSelectedHotspotId(null);
-            setHotspotForm(emptyHotspotForm);
-            return;
-        }
+    selectedProjectIdRef.current = selectedProjectId;
+    selectedFactIdRef.current = selectedFactId;
+    selectedMaterialIdRef.current = selectedMaterialId;
+    selectedMapIdRef.current = selectedMapId;
+    selectedMediaBlockIdRef.current = selectedMediaBlockId;
+    selectedHotspotIdRef.current = selectedHotspotId;
+    isProjectDirtyRef.current = isProjectDirty;
 
+    const fetchHotspots = useCallback(async (client: SupabaseClient, mapId: number) => {
         const { data, error: hotspotError } = await client
             .from('project_hotspots')
             .select(
@@ -457,12 +535,48 @@ function AdminProjectsContent() {
             throw new Error(hotspotError.message);
         }
 
-        const rows = data ?? [];
+        return data ?? [];
+    }, []);
+
+    const loadHotspots = useCallback(async (
+        client: SupabaseClient,
+        projectId: number,
+        mapId: number | null,
+        preferredHotspotId: number | null,
+    ) => {
+        const generation = ++hotspotLoadGenerationRef.current;
+        if (!mapId) {
+            if (
+                generation !== hotspotLoadGenerationRef.current ||
+                selectedProjectIdRef.current !== projectId ||
+                selectedMapIdRef.current !== null
+            ) {
+                return false;
+            }
+            setHotspots([]);
+            setSelectedHotspotId(null);
+            setHotspotForm(emptyHotspotForm);
+            setHotspotFormBaseline(emptyHotspotForm);
+            return true;
+        }
+
+        const rows = await fetchHotspots(client, mapId);
+        if (
+            generation !== hotspotLoadGenerationRef.current ||
+            selectedProjectIdRef.current !== projectId ||
+            selectedMapIdRef.current !== mapId
+        ) {
+            return false;
+        }
+
         const nextHotspot = rows.find((hotspot) => hotspot.id === preferredHotspotId) ?? rows[0] ?? null;
+        const nextHotspotForm = rowToHotspotForm(nextHotspot);
         setHotspots(rows);
         setSelectedHotspotId(nextHotspot?.id ?? null);
-        setHotspotForm(rowToHotspotForm(nextHotspot));
-    }, []);
+        setHotspotForm(nextHotspotForm);
+        setHotspotFormBaseline(nextHotspotForm);
+        return true;
+    }, [fetchHotspots]);
 
     const loadProjectBundle = useCallback(
         async (
@@ -471,6 +585,8 @@ function AdminProjectsContent() {
             preferredMapId: number | null = null,
             preferredHotspotId: number | null = null,
         ) => {
+            const bundleGeneration = ++projectBundleLoadGenerationRef.current;
+            const hotspotGeneration = ++hotspotLoadGenerationRef.current;
             const [factsResult, materialsResult, mapsResult, mediaBlocksResult] = await Promise.all([
                 client
                     .from('project_facts')
@@ -518,30 +634,56 @@ function AdminProjectsContent() {
             const nextMaterial = materialRows[0] ?? null;
             const nextMap = mapRows.find((map) => map.id === preferredMapId) ?? mapRows[0] ?? null;
             const nextMediaBlock = mediaBlockRows[0] ?? null;
+            const nextFactForm = rowToFactForm(nextFact);
+            const nextMaterialForm = rowToMaterialForm(nextMaterial);
+            const nextMapForm = rowToMapForm(nextMap);
+            const nextMediaBlockForm = rowToMediaBlockForm(nextMediaBlock);
+            const hotspotRows = nextMap ? await fetchHotspots(client, nextMap.id) : [];
+
+            if (
+                bundleGeneration !== projectBundleLoadGenerationRef.current ||
+                hotspotGeneration !== hotspotLoadGenerationRef.current ||
+                selectedProjectIdRef.current !== projectId
+            ) {
+                return false;
+            }
+
+            const nextHotspot =
+                hotspotRows.find((hotspot) => hotspot.id === preferredHotspotId) ?? hotspotRows[0] ?? null;
+            const nextHotspotForm = rowToHotspotForm(nextHotspot);
 
             setFacts(factRows);
             setSelectedFactId(nextFact?.id ?? null);
-            setFactForm(rowToFactForm(nextFact));
+            setFactForm(nextFactForm);
+            setFactFormBaseline(nextFactForm);
             setMaterials(materialRows);
             setSelectedMaterialId(nextMaterial?.id ?? null);
-            setMaterialForm(rowToMaterialForm(nextMaterial));
+            setMaterialForm(nextMaterialForm);
+            setMaterialFormBaseline(nextMaterialForm);
             setMaps(mapRows);
             setSelectedMapId(nextMap?.id ?? null);
-            setMapForm(rowToMapForm(nextMap));
+            setMapForm(nextMapForm);
+            setMapFormBaseline(nextMapForm);
             setMediaBlocks(mediaBlockRows);
             setSelectedMediaBlockId(nextMediaBlock?.id ?? null);
-            setMediaBlockForm(rowToMediaBlockForm(nextMediaBlock));
-            await loadHotspots(client, nextMap?.id ?? null, preferredHotspotId);
+            setMediaBlockForm(nextMediaBlockForm);
+            setMediaBlockFormBaseline(nextMediaBlockForm);
+            setHotspots(hotspotRows);
+            setSelectedHotspotId(nextHotspot?.id ?? null);
+            setHotspotForm(nextHotspotForm);
+            setHotspotFormBaseline(nextHotspotForm);
+            return true;
         },
-        [loadHotspots],
+        [fetchHotspots],
     );
 
     const loadProjects = useCallback(
-        async (preferredProjectId?: number | null) => {
+        async (preferredProjectId?: number | null, requestedRouteId?: string) => {
             if (!supabase) {
                 return;
             }
 
+            const loadGeneration = ++projectsLoadGenerationRef.current;
             const client: SupabaseClient = supabase;
             setIsLoading(true);
             setError(null);
@@ -569,9 +711,13 @@ function AdminProjectsContent() {
                     .from('media_assets')
                     .select('id,bucket,alt,caption,object_path,source_url,source_kind,media_type,status')
                     .order('updated_at', { ascending: false })
-                    .limit(120)
+                    .limit(500)
                     .returns<MediaOptionRow[]>(),
             ]);
+
+            if (loadGeneration !== projectsLoadGenerationRef.current) {
+                return;
+            }
 
             if (projectsResult.error) {
                 setError(projectsResult.error.message);
@@ -598,36 +744,213 @@ function AdminProjectsContent() {
             }
 
             const rows = projectsResult.data ?? [];
-            const nextProject = rows.find((project) => project.id === preferredProjectId) ?? rows[0] ?? null;
+            const requestedProject = rows.find((project) => project.id === preferredProjectId) ?? null;
+            const nextProject = requestedProject ?? rows[0] ?? null;
+            const requestedRouteIsInvalid =
+                requestedRouteId !== undefined &&
+                (!preferredProjectId || !Number.isInteger(preferredProjectId) || requestedProject === null);
+            const nextProjectForm = rowToProjectForm(nextProject);
+            selectedProjectIdRef.current = nextProject?.id ?? null;
             setProjects(rows);
             setStoneOptions(stonesResult.data ?? []);
             setFinishOptions(finishesResult.data ?? []);
             setMediaOptions(mediaResult.data ?? []);
             setSelectedProjectId(nextProject?.id ?? null);
-            setProjectForm(rowToProjectForm(nextProject));
+            setProjectForm(nextProjectForm);
+            setProjectFormBaseline(nextProjectForm);
+            resetChildState();
+
+            if (requestedRouteIsInvalid) {
+                setNotice(
+                    nextProject
+                        ? `Project ${requestedRouteId} was not found. Showing ${nextProject.title} instead.`
+                        : `Project ${requestedRouteId} was not found. Create the first project to continue.`,
+                );
+            }
 
             if (!nextProject) {
-                resetChildState();
+                hasLoadedProjectsRef.current = true;
                 setIsLoading(false);
+                if (requestedRouteId !== undefined && window.location.pathname !== '/admin/projects') {
+                    skipNextRouteLoadRef.current = true;
+                    navigate('/admin/projects', { replace: true });
+                }
                 return;
             }
 
+            let bundleApplied = false;
             try {
-                await loadProjectBundle(client, nextProject.id);
+                bundleApplied = await loadProjectBundle(client, nextProject.id);
             } catch (loadError) {
-                setError(loadError instanceof Error ? loadError.message : 'Project detail load failed.');
+                if (
+                    loadGeneration === projectsLoadGenerationRef.current &&
+                    selectedProjectIdRef.current === nextProject.id
+                ) {
+                    setError(loadError instanceof Error ? loadError.message : 'Project detail load failed.');
+                }
             }
 
+            if (
+                loadGeneration !== projectsLoadGenerationRef.current ||
+                selectedProjectIdRef.current !== nextProject.id ||
+                !bundleApplied
+            ) {
+                return;
+            }
+
+            hasLoadedProjectsRef.current = true;
             setIsLoading(false);
+
+            const canonicalProjectPath = `/admin/projects/${nextProject.id}`;
+            if (window.location.pathname !== canonicalProjectPath) {
+                skipNextRouteLoadRef.current = true;
+                navigate(canonicalProjectPath, { replace: true });
+            }
         },
-        [loadProjectBundle],
+        [loadProjectBundle, navigate],
     );
 
     useEffect(() => {
-        void loadProjects();
-    }, [loadProjects]);
+        if (skipNextRouteLoadRef.current) {
+            skipNextRouteLoadRef.current = false;
+            return;
+        }
+
+        if (hasLoadedProjectsRef.current && activeSaveCountRef.current > 0) {
+            const currentProjectId = selectedProjectIdRef.current;
+            skipNextRouteLoadRef.current = true;
+            navigate(currentProjectId ? `/admin/projects/${currentProjectId}` : '/admin/projects', {
+                replace: true,
+            });
+            setNotice('A save is still finishing. Wait for it to complete before switching project records.');
+            return;
+        }
+
+        if (allowNextRouteDiscardRef.current) {
+            allowNextRouteDiscardRef.current = false;
+        } else if (hasLoadedProjectsRef.current && isProjectDirtyRef.current) {
+            const shouldDiscard = window.confirm(
+                'This project has unsaved changes. Leave this record and discard those changes?',
+            );
+            if (!shouldDiscard) {
+                const currentProjectId = selectedProjectIdRef.current;
+                skipNextRouteLoadRef.current = true;
+                navigate(currentProjectId ? `/admin/projects/${currentProjectId}` : '/admin/projects', {
+                    replace: true,
+                });
+                return;
+            }
+        }
+
+        void loadProjects(parseProjectRouteId(projectIdParam), projectIdParam);
+    }, [loadProjects, navigate, projectIdParam]);
+
+    useEffect(() => {
+        if (!isProjectDirty && !isAnySaving) return;
+
+        const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+            event.preventDefault();
+            event.returnValue = '';
+        };
+        const handleDocumentClick = (event: MouseEvent) => {
+            if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+                return;
+            }
+
+            const target = event.target;
+            const anchor = target instanceof Element ? target.closest<HTMLAnchorElement>('a[href]') : null;
+            const button = target instanceof Element ? target.closest<HTMLButtonElement>('button') : null;
+            const isSignOut = button?.textContent?.trim().toLowerCase() === 'sign out';
+            if (!anchor && !isSignOut) return;
+            if (anchor && (anchor.target === '_blank' || anchor.hasAttribute('download'))) return;
+
+            if (anchor) {
+                const destination = new URL(anchor.href, window.location.href);
+                if (destination.href === window.location.href) return;
+            }
+
+            if (activeSaveCountRef.current > 0) {
+                event.preventDefault();
+                event.stopPropagation();
+                setNotice('A save is still finishing. Wait for it to complete before leaving Projects.');
+                return;
+            }
+
+            const shouldLeave = window.confirm(
+                `Unsaved changes in ${dirtyEditorSummary}. Leave this page and discard those changes?`,
+            );
+            if (!shouldLeave) {
+                event.preventDefault();
+                event.stopPropagation();
+            } else {
+                allowNextRouteDiscardRef.current = true;
+            }
+        };
+        const handlePopState = () => {
+            if (activeSaveCountRef.current > 0) {
+                const currentProjectId = selectedProjectIdRef.current;
+                skipNextRouteLoadRef.current = true;
+                navigate(currentProjectId ? `/admin/projects/${currentProjectId}` : '/admin/projects', {
+                    replace: true,
+                });
+                setNotice('A save is still finishing. Wait for it to complete before switching project records.');
+                return;
+            }
+
+            const shouldLeave = window.confirm(
+                `Unsaved changes in ${dirtyEditorSummary}. Leave this record and discard those changes?`,
+            );
+            if (shouldLeave) {
+                allowNextRouteDiscardRef.current = true;
+                return;
+            }
+
+            const currentProjectId = selectedProjectIdRef.current;
+            skipNextRouteLoadRef.current = true;
+            navigate(currentProjectId ? `/admin/projects/${currentProjectId}` : '/admin/projects', {
+                replace: true,
+            });
+        };
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        window.addEventListener('popstate', handlePopState);
+        document.addEventListener('click', handleDocumentClick, true);
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+            window.removeEventListener('popstate', handlePopState);
+            document.removeEventListener('click', handleDocumentClick, true);
+        };
+    }, [dirtyEditorSummary, isAnySaving, isProjectDirty, navigate]);
+
+    function beginSave(saveRef: { current: boolean }, setSaving: (value: boolean) => void) {
+        if (saveRef.current) return false;
+        saveRef.current = true;
+        activeSaveCountRef.current += 1;
+        setSaving(true);
+        return true;
+    }
+
+    function endSave(saveRef: { current: boolean }, setSaving: (value: boolean) => void) {
+        if (!saveRef.current) return;
+        saveRef.current = false;
+        activeSaveCountRef.current = Math.max(0, activeSaveCountRef.current - 1);
+        setSaving(false);
+    }
+
+    function blockRecordChangeWhileSaving(action: string) {
+        if (activeSaveCountRef.current === 0) return false;
+        setNotice(`A save is still finishing. Wait for it to complete before ${action}.`);
+        return true;
+    }
 
     function resetChildState() {
+        projectBundleLoadGenerationRef.current += 1;
+        hotspotLoadGenerationRef.current += 1;
+        selectedFactIdRef.current = null;
+        selectedMaterialIdRef.current = null;
+        selectedMapIdRef.current = null;
+        selectedMediaBlockIdRef.current = null;
+        selectedHotspotIdRef.current = null;
         setFacts([]);
         setMaterials([]);
         setMaps([]);
@@ -639,18 +962,182 @@ function AdminProjectsContent() {
         setSelectedMediaBlockId(null);
         setSelectedHotspotId(null);
         setFactForm(emptyFactForm);
+        setFactFormBaseline(emptyFactForm);
         setMaterialForm(emptyMaterialForm);
+        setMaterialFormBaseline(emptyMaterialForm);
         setMapForm(emptyMapForm);
+        setMapFormBaseline(emptyMapForm);
         setMediaBlockForm(emptyMediaBlockForm);
+        setMediaBlockFormBaseline(emptyMediaBlockForm);
         setHotspotForm(emptyHotspotForm);
+        setHotspotFormBaseline(emptyHotspotForm);
+    }
+
+    function confirmDiscardDirtyEditors(action: string, labels: string[] = dirtyEditorLabels) {
+        if (!labels.length) return true;
+
+        return window.confirm(
+            `Unsaved changes in ${formatEditorList(labels)}. ${action} and discard those changes?`,
+        );
+    }
+
+    function selectFactEditor(fact: ProjectFactRow) {
+        if (fact.id === selectedFactId) return true;
+        if (blockRecordChangeWhileSaving('switching facts')) return false;
+        if (!confirmDiscardDirtyEditors('Switch facts', dirtyEditors.fact ? ['Fact'] : [])) return false;
+
+        const nextForm = rowToFactForm(fact);
+        selectedFactIdRef.current = fact.id;
+        setSelectedFactId(fact.id);
+        setFactForm(nextForm);
+        setFactFormBaseline(nextForm);
+        return true;
+    }
+
+    function startNewFact() {
+        if (blockRecordChangeWhileSaving('starting a new fact')) return;
+        if (!confirmDiscardDirtyEditors('Start a new fact', dirtyEditors.fact ? ['Fact'] : [])) return;
+        selectedFactIdRef.current = null;
+        setSelectedFactId(null);
+        setFactForm(emptyFactForm);
+        setFactFormBaseline(emptyFactForm);
+    }
+
+    function selectMaterialEditor(material: ProjectMaterialRow) {
+        if (material.id === selectedMaterialId) return true;
+        if (blockRecordChangeWhileSaving('switching materials')) return false;
+        if (!confirmDiscardDirtyEditors('Switch materials', dirtyEditors.material ? ['Material'] : [])) return false;
+
+        const nextForm = rowToMaterialForm(material);
+        selectedMaterialIdRef.current = material.id;
+        setSelectedMaterialId(material.id);
+        setMaterialForm(nextForm);
+        setMaterialFormBaseline(nextForm);
+        return true;
+    }
+
+    function startNewMaterial() {
+        if (blockRecordChangeWhileSaving('starting a new material')) return;
+        if (!confirmDiscardDirtyEditors('Start a new material', dirtyEditors.material ? ['Material'] : [])) return;
+        selectedMaterialIdRef.current = null;
+        setSelectedMaterialId(null);
+        setMaterialForm(emptyMaterialForm);
+        setMaterialFormBaseline(emptyMaterialForm);
+    }
+
+    function selectMediaBlockEditor(mediaBlock: ProjectMediaRow) {
+        if (mediaBlock.id === selectedMediaBlockId) return;
+        if (blockRecordChangeWhileSaving('switching media blocks')) return;
+        if (!confirmDiscardDirtyEditors('Switch media blocks', dirtyEditors.media ? ['Media block'] : [])) return;
+
+        const nextForm = rowToMediaBlockForm(mediaBlock);
+        selectedMediaBlockIdRef.current = mediaBlock.id;
+        setSelectedMediaBlockId(mediaBlock.id);
+        setMediaBlockForm(nextForm);
+        setMediaBlockFormBaseline(nextForm);
+    }
+
+    function startNewMediaBlock() {
+        if (blockRecordChangeWhileSaving('starting a new media block')) return;
+        if (!confirmDiscardDirtyEditors('Start a new media block', dirtyEditors.media ? ['Media block'] : [])) return;
+        selectedMediaBlockIdRef.current = null;
+        setSelectedMediaBlockId(null);
+        setMediaBlockForm(emptyMediaBlockForm);
+        setMediaBlockFormBaseline(emptyMediaBlockForm);
+    }
+
+    function selectHotspotEditor(hotspot: ProjectHotspotRow) {
+        if (hotspot.id === selectedHotspotId) return;
+        if (blockRecordChangeWhileSaving('switching hotspots')) return;
+        if (!confirmDiscardDirtyEditors('Switch hotspots', dirtyEditors.hotspot ? ['Hotspot'] : [])) return;
+
+        const nextForm = rowToHotspotForm(hotspot);
+        selectedHotspotIdRef.current = hotspot.id;
+        setSelectedHotspotId(hotspot.id);
+        setHotspotForm(nextForm);
+        setHotspotFormBaseline(nextForm);
+    }
+
+    function startNewHotspot() {
+        if (blockRecordChangeWhileSaving('starting a new hotspot')) return;
+        if (!confirmDiscardDirtyEditors('Start a new hotspot', dirtyEditors.hotspot ? ['Hotspot'] : [])) return;
+        selectedHotspotIdRef.current = null;
+        setSelectedHotspotId(null);
+        setHotspotForm(emptyHotspotForm);
+        setHotspotFormBaseline(emptyHotspotForm);
+    }
+
+    async function selectMapEditor(map: ProjectMaterialMapRow) {
+        if (map.id === selectedMapId) return;
+        if (blockRecordChangeWhileSaving('switching maps')) return;
+        const dirtyMapLabels = [
+            ...(dirtyEditors.map ? ['Map'] : []),
+            ...(dirtyEditors.hotspot ? ['Hotspot'] : []),
+        ];
+        if (!confirmDiscardDirtyEditors('Switch maps', dirtyMapLabels)) return;
+
+        const nextForm = rowToMapForm(map);
+        selectedMapIdRef.current = map.id;
+        selectedHotspotIdRef.current = null;
+        setSelectedMapId(map.id);
+        setMapForm(nextForm);
+        setMapFormBaseline(nextForm);
+        setHotspots([]);
+        setSelectedHotspotId(null);
+        setHotspotForm(emptyHotspotForm);
+        setHotspotFormBaseline(emptyHotspotForm);
+        if (supabase) {
+            try {
+                await loadHotspots(supabase, selectedProjectIdRef.current ?? 0, map.id, null);
+            } catch (loadError) {
+                if (selectedMapIdRef.current === map.id) {
+                    setError(loadError instanceof Error ? loadError.message : 'Project hotspots could not be loaded.');
+                }
+            }
+        }
+    }
+
+    function startNewMap() {
+        if (blockRecordChangeWhileSaving('starting a new map')) return;
+        const dirtyMapLabels = [
+            ...(dirtyEditors.map ? ['Map'] : []),
+            ...(dirtyEditors.hotspot ? ['Hotspot'] : []),
+        ];
+        if (!confirmDiscardDirtyEditors('Start a new map', dirtyMapLabels)) return;
+
+        projectBundleLoadGenerationRef.current += 1;
+        hotspotLoadGenerationRef.current += 1;
+        selectedMapIdRef.current = null;
+        selectedHotspotIdRef.current = null;
+        setSelectedMapId(null);
+        setMapForm(emptyMapForm);
+        setMapFormBaseline(emptyMapForm);
+        setHotspots([]);
+        setSelectedHotspotId(null);
+        setHotspotForm(emptyHotspotForm);
+        setHotspotFormBaseline(emptyHotspotForm);
     }
 
     async function selectProject(project: ProjectRow) {
+        if (project.id === selectedProjectId) return;
+        if (blockRecordChangeWhileSaving('switching projects')) return;
+        if (!confirmDiscardDirtyEditors('Switch projects')) {
+            return;
+        }
+
+        const nextProjectForm = rowToProjectForm(project);
+        selectedProjectIdRef.current = project.id;
         setSelectedProjectId(project.id);
-        setProjectForm(rowToProjectForm(project));
+        setProjectForm(nextProjectForm);
+        setProjectFormBaseline(nextProjectForm);
+        setActiveWorkspace('overview');
+        resetChildState();
         setError(null);
         setNotice(null);
         setHighlightedPublishBlockerId(null);
+        setIsLoading(true);
+        skipNextRouteLoadRef.current = true;
+        navigate(`/admin/projects/${project.id}`);
 
         if (!supabase) {
             return;
@@ -659,17 +1146,55 @@ function AdminProjectsContent() {
         try {
             await loadProjectBundle(supabase, project.id);
         } catch (loadError) {
-            setError(loadError instanceof Error ? loadError.message : 'Project detail load failed.');
+            if (selectedProjectIdRef.current === project.id) {
+                setError(loadError instanceof Error ? loadError.message : 'Project detail load failed.');
+            }
+        } finally {
+            if (selectedProjectIdRef.current === project.id) {
+                setIsLoading(false);
+            }
         }
     }
 
     function startNewProject() {
+        if (isLoading) {
+            setNotice('Wait for the project workspace to finish loading before starting a new project.');
+            return;
+        }
+        if (blockRecordChangeWhileSaving('starting a new project')) return;
+        if (!confirmDiscardDirtyEditors('Start a new project')) {
+            return;
+        }
+
+        projectsLoadGenerationRef.current += 1;
+        selectedProjectIdRef.current = null;
         setSelectedProjectId(null);
         setProjectForm(emptyProjectForm);
+        setProjectFormBaseline(emptyProjectForm);
+        setActiveWorkspace('overview');
         resetChildState();
         setError(null);
         setNotice('New project started.');
         setHighlightedPublishBlockerId(null);
+        if (window.location.pathname !== '/admin/projects') {
+            skipNextRouteLoadRef.current = true;
+            navigate('/admin/projects');
+        }
+    }
+
+    function selectWorkspace(workspace: ProjectWorkspace) {
+        if (workspace === activeWorkspace) return true;
+        const activeDirtyLabels = getWorkspaceDirtyEditorLabels(activeWorkspace, dirtyEditors);
+        if (
+            activeDirtyLabels.length > 0 &&
+            !window.confirm(
+                `Unsaved changes in ${formatEditorList(activeDirtyLabels)}. Continue to ${getProjectWorkspaceLabel(workspace)} with those changes still unsaved?`,
+            )
+        ) {
+            return false;
+        }
+        setActiveWorkspace(workspace);
+        return true;
     }
 
     function updateProjectField<Key extends keyof ProjectFormState>(key: Key, value: ProjectFormState[Key]) {
@@ -723,6 +1248,9 @@ function AdminProjectsContent() {
             return;
         }
 
+        if (!beginSave(savingProjectRef, setIsSavingProject)) return;
+        const projectId = selectedProjectIdRef.current;
+
         const now = new Date().toISOString();
         const payload = {
             slug: projectForm.slug.trim(),
@@ -750,15 +1278,14 @@ function AdminProjectsContent() {
             archived_at: nextStatus === 'archived' ? now : null,
         };
 
-        setIsSavingProject(true);
         setError(null);
         setNotice(null);
 
-        const response = selectedProjectId
+        const response = projectId
             ? await supabase
                   .from('projects')
                   .update(payload)
-                  .eq('id', selectedProjectId)
+                  .eq('id', projectId)
                   .select(
                       'id,slug,title,status,location,project_date_label,completed_on,summary,lead,client,landscape_architect,contractor,address,quantity_label,carbon_status,carbon_note,claim_review_status,hero_media_id,cover_media_id,sort_order,published_at,archived_at,updated_at,created_at',
                   )
@@ -771,16 +1298,15 @@ function AdminProjectsContent() {
                   )
                   .single<ProjectRow>();
 
-        setIsSavingProject(false);
-
         if (response.error) {
+            endSave(savingProjectRef, setIsSavingProject);
             setError(response.error.message);
             return;
         }
 
         const auditError = await recordAdminAuditEvent(supabase, {
             actorUserId: user.id,
-            action: selectedProjectId
+            action: projectId
                 ? nextStatus === 'published'
                     ? 'project.publish'
                     : nextStatus === 'archived'
@@ -795,28 +1321,48 @@ function AdminProjectsContent() {
                 claimReviewStatus: response.data.claim_review_status,
             },
         });
+        if (selectedProjectIdRef.current !== projectId) {
+            endSave(savingProjectRef, setIsSavingProject);
+            return;
+        }
+        const savedProjectForm = rowToProjectForm(response.data);
+        setProjects((current) =>
+            upsertRowById(current, response.data, (left, right) =>
+                left.sort_order - right.sort_order || left.title.localeCompare(right.title),
+            ),
+        );
+        selectedProjectIdRef.current = response.data.id;
+        setSelectedProjectId(response.data.id);
+        setProjectForm(savedProjectForm);
+        setProjectFormBaseline(savedProjectForm);
         setNotice(withAuditNotice(nextStatus === 'published' ? 'Project published.' : 'Project saved.', auditError));
-        await loadProjects(response.data.id);
+        const canonicalProjectPath = `/admin/projects/${response.data.id}`;
+        if (window.location.pathname !== canonicalProjectPath) {
+            skipNextRouteLoadRef.current = true;
+            navigate(canonicalProjectPath, { replace: true });
+        }
+        endSave(savingProjectRef, setIsSavingProject);
     }
 
     function selectPublishBlocker(blocker: PublishBlocker) {
         setHighlightedPublishBlockerId(blocker.id);
+        const targetWorkspace =
+            blocker.area === 'fact' ? 'facts' : blocker.area === 'material' ? 'materials' : 'overview';
+        if (!selectWorkspace(targetWorkspace)) return;
         const targetRef =
             blocker.area === 'fact' ? factsEditorRef : blocker.area === 'material' ? materialsEditorRef : projectEditorRef;
 
         if (blocker.area === 'fact' && blocker.rowId) {
             const fact = facts.find((row) => row.id === blocker.rowId);
             if (fact) {
-                setSelectedFactId(fact.id);
-                setFactForm(rowToFactForm(fact));
+                if (!selectFactEditor(fact)) return;
             }
         }
 
         if (blocker.area === 'material' && blocker.rowId) {
             const material = materials.find((row) => row.id === blocker.rowId);
             if (material) {
-                setSelectedMaterialId(material.id);
-                setMaterialForm(rowToMaterialForm(material));
+                if (!selectMaterialEditor(material)) return;
             }
         }
 
@@ -837,8 +1383,11 @@ function AdminProjectsContent() {
             return;
         }
 
+        if (!beginSave(savingFactRef, setIsSavingFact)) return;
+        const projectId = selectedProject.id;
+        const factId = selectedFactIdRef.current;
+
         const payload = {
-            project_id: selectedProject.id,
             fact_label: factForm.factLabel.trim(),
             fact_value: factForm.factValue.trim() || null,
             fact_value_json: validation.factValueJson,
@@ -847,33 +1396,32 @@ function AdminProjectsContent() {
             updated_by: user.id,
         };
 
-        setIsSavingFact(true);
         setError(null);
         setNotice(null);
 
-        const response = selectedFactId
+        const response = factId
             ? await supabase
                   .from('project_facts')
                   .update(payload)
-                  .eq('id', selectedFactId)
+                  .eq('id', factId)
+                  .eq('project_id', projectId)
                   .select('id,project_id,fact_label,fact_value,fact_value_json,claim_status,sort_order,updated_at')
                   .single<ProjectFactRow>()
             : await supabase
                   .from('project_facts')
-                  .insert({ ...payload, created_by: user.id })
+                  .insert({ ...payload, project_id: projectId, created_by: user.id })
                   .select('id,project_id,fact_label,fact_value,fact_value_json,claim_status,sort_order,updated_at')
                   .single<ProjectFactRow>();
 
-        setIsSavingFact(false);
-
         if (response.error) {
+            endSave(savingFactRef, setIsSavingFact);
             setError(response.error.message);
             return;
         }
 
         const auditError = await recordAdminAuditEvent(supabase, {
             actorUserId: user.id,
-            action: selectedFactId ? 'project_fact.update' : 'project_fact.create',
+            action: factId ? 'project_fact.update' : 'project_fact.create',
             entityType: 'project_facts',
             entityId: response.data.id,
             metadata: {
@@ -882,8 +1430,25 @@ function AdminProjectsContent() {
                 claimStatus: response.data.claim_status,
             },
         });
+        if (
+            selectedProjectIdRef.current !== projectId ||
+            selectedFactIdRef.current !== factId
+        ) {
+            endSave(savingFactRef, setIsSavingFact);
+            return;
+        }
+        const savedFactForm = rowToFactForm(response.data);
+        setFacts((current) =>
+            upsertRowById(current, response.data, (left, right) =>
+                left.sort_order - right.sort_order || left.fact_label.localeCompare(right.fact_label),
+            ),
+        );
+        selectedFactIdRef.current = response.data.id;
+        setSelectedFactId(response.data.id);
+        setFactForm(savedFactForm);
+        setFactFormBaseline(savedFactForm);
         setNotice(withAuditNotice('Project fact saved.', auditError));
-        await loadProjectBundle(supabase, selectedProject.id, selectedMapId, selectedHotspotId);
+        endSave(savingFactRef, setIsSavingFact);
     }
 
     async function saveMaterial() {
@@ -895,8 +1460,11 @@ function AdminProjectsContent() {
             return;
         }
 
+        if (!beginSave(savingMaterialRef, setIsSavingMaterial)) return;
+        const projectId = selectedProject.id;
+        const materialId = selectedMaterialIdRef.current;
+
         const payload = {
-            project_id: selectedProject.id,
             stone_group_id: validation.stoneGroupId,
             finish_definition_id: validation.finishDefinitionId,
             application: materialForm.application.trim(),
@@ -907,37 +1475,36 @@ function AdminProjectsContent() {
             updated_by: user.id,
         };
 
-        setIsSavingMaterial(true);
         setError(null);
         setNotice(null);
 
-        const response = selectedMaterialId
+        const response = materialId
             ? await supabase
                   .from('project_materials')
                   .update(payload)
-                  .eq('id', selectedMaterialId)
+                  .eq('id', materialId)
+                  .eq('project_id', projectId)
                   .select(
                       'id,project_id,stone_group_id,finish_definition_id,application,note,media_asset_id,claim_status,sort_order,updated_at',
                   )
                   .single<ProjectMaterialRow>()
             : await supabase
                   .from('project_materials')
-                  .insert({ ...payload, created_by: user.id })
+                  .insert({ ...payload, project_id: projectId, created_by: user.id })
                   .select(
                       'id,project_id,stone_group_id,finish_definition_id,application,note,media_asset_id,claim_status,sort_order,updated_at',
                   )
                   .single<ProjectMaterialRow>();
 
-        setIsSavingMaterial(false);
-
         if (response.error) {
+            endSave(savingMaterialRef, setIsSavingMaterial);
             setError(response.error.message);
             return;
         }
 
         const auditError = await recordAdminAuditEvent(supabase, {
             actorUserId: user.id,
-            action: selectedMaterialId ? 'project_material.update' : 'project_material.create',
+            action: materialId ? 'project_material.update' : 'project_material.create',
             entityType: 'project_materials',
             entityId: response.data.id,
             metadata: {
@@ -947,8 +1514,25 @@ function AdminProjectsContent() {
                 claimStatus: response.data.claim_status,
             },
         });
+        if (
+            selectedProjectIdRef.current !== projectId ||
+            selectedMaterialIdRef.current !== materialId
+        ) {
+            endSave(savingMaterialRef, setIsSavingMaterial);
+            return;
+        }
+        const savedMaterialForm = rowToMaterialForm(response.data);
+        setMaterials((current) =>
+            upsertRowById(current, response.data, (left, right) =>
+                left.sort_order - right.sort_order || left.application.localeCompare(right.application),
+            ),
+        );
+        selectedMaterialIdRef.current = response.data.id;
+        setSelectedMaterialId(response.data.id);
+        setMaterialForm(savedMaterialForm);
+        setMaterialFormBaseline(savedMaterialForm);
         setNotice(withAuditNotice('Project material saved.', auditError));
-        await loadProjectBundle(supabase, selectedProject.id, selectedMapId, selectedHotspotId);
+        endSave(savingMaterialRef, setIsSavingMaterial);
     }
 
     async function saveMap(nextStatus: ProjectStatus) {
@@ -960,9 +1544,12 @@ function AdminProjectsContent() {
             return;
         }
 
+        if (!beginSave(savingMapRef, setIsSavingMap)) return;
+        const projectId = selectedProject.id;
+        const mapId = selectedMapIdRef.current;
+
         const now = new Date().toISOString();
         const payload = {
-            project_id: selectedProject.id,
             media_asset_id: validation.mediaAssetId,
             title: mapForm.title.trim() || null,
             intro: mapForm.intro.trim() || null,
@@ -973,33 +1560,32 @@ function AdminProjectsContent() {
             archived_at: nextStatus === 'archived' ? now : null,
         };
 
-        setIsSavingMap(true);
         setError(null);
         setNotice(null);
 
-        const response = selectedMapId
+        const response = mapId
             ? await supabase
                   .from('project_material_maps')
                   .update(payload)
-                  .eq('id', selectedMapId)
+                  .eq('id', mapId)
+                  .eq('project_id', projectId)
                   .select('id,project_id,media_asset_id,title,intro,sort_order,status,published_at,archived_at,updated_at')
                   .single<ProjectMaterialMapRow>()
             : await supabase
                   .from('project_material_maps')
-                  .insert({ ...payload, created_by: user.id })
+                  .insert({ ...payload, project_id: projectId, created_by: user.id })
                   .select('id,project_id,media_asset_id,title,intro,sort_order,status,published_at,archived_at,updated_at')
                   .single<ProjectMaterialMapRow>();
 
-        setIsSavingMap(false);
-
         if (response.error) {
+            endSave(savingMapRef, setIsSavingMap);
             setError(response.error.message);
             return;
         }
 
         const auditError = await recordAdminAuditEvent(supabase, {
             actorUserId: user.id,
-            action: selectedMapId
+            action: mapId
                 ? nextStatus === 'published'
                     ? 'project_material_map.publish'
                     : nextStatus === 'archived'
@@ -1013,10 +1599,32 @@ function AdminProjectsContent() {
                 status: response.data.status,
             },
         });
+        if (
+            selectedProjectIdRef.current !== projectId ||
+            selectedMapIdRef.current !== mapId
+        ) {
+            endSave(savingMapRef, setIsSavingMap);
+            return;
+        }
+        const wasNewMap = mapId === null;
+        const savedMapForm = rowToMapForm(response.data);
+        setMaps((current) =>
+            upsertRowById(current, response.data, (left, right) => left.sort_order - right.sort_order),
+        );
+        selectedMapIdRef.current = response.data.id;
+        setSelectedMapId(response.data.id);
+        setMapForm(savedMapForm);
+        setMapFormBaseline(savedMapForm);
+        if (wasNewMap) {
+            setHotspots([]);
+            setSelectedHotspotId(null);
+            setHotspotForm(emptyHotspotForm);
+            setHotspotFormBaseline(emptyHotspotForm);
+        }
         setNotice(
             withAuditNotice(nextStatus === 'published' ? 'Material map published.' : 'Material map saved.', auditError),
         );
-        await loadProjectBundle(supabase, selectedProject.id, response.data.id, selectedHotspotId);
+        endSave(savingMapRef, setIsSavingMap);
     }
 
     async function saveMediaBlock(nextStatus: ProjectStatus) {
@@ -1028,9 +1636,12 @@ function AdminProjectsContent() {
             return;
         }
 
+        if (!beginSave(savingMediaBlockRef, setIsSavingMediaBlock)) return;
+        const projectId = selectedProject.id;
+        const mediaBlockId = selectedMediaBlockIdRef.current;
+
         const now = new Date().toISOString();
         const payload = {
-            project_id: selectedProject.id,
             media_role: mediaBlockForm.mediaRole,
             media_asset_id: validation.mediaAssetId,
             project_material_map_id: validation.projectMaterialMapId,
@@ -1046,37 +1657,36 @@ function AdminProjectsContent() {
             archived_at: nextStatus === 'archived' ? now : null,
         };
 
-        setIsSavingMediaBlock(true);
         setError(null);
         setNotice(null);
 
-        const response = selectedMediaBlockId
+        const response = mediaBlockId
             ? await supabase
                   .from('project_media')
                   .update(payload)
-                  .eq('id', selectedMediaBlockId)
+                  .eq('id', mediaBlockId)
+                  .eq('project_id', projectId)
                   .select(
                       'id,project_id,media_asset_id,project_material_map_id,media_role,block_title,youtube_url,label,caption,sort_order,status,published_at,archived_at,updated_at',
                   )
                   .single<ProjectMediaRow>()
             : await supabase
                   .from('project_media')
-                  .insert({ ...payload, created_by: user.id })
+                  .insert({ ...payload, project_id: projectId, created_by: user.id })
                   .select(
                       'id,project_id,media_asset_id,project_material_map_id,media_role,block_title,youtube_url,label,caption,sort_order,status,published_at,archived_at,updated_at',
                   )
                   .single<ProjectMediaRow>();
 
-        setIsSavingMediaBlock(false);
-
         if (response.error) {
+            endSave(savingMediaBlockRef, setIsSavingMediaBlock);
             setError(response.error.message);
             return;
         }
 
         const auditError = await recordAdminAuditEvent(supabase, {
             actorUserId: user.id,
-            action: selectedMediaBlockId
+            action: mediaBlockId
                 ? nextStatus === 'published'
                     ? 'project_media.publish'
                     : nextStatus === 'archived'
@@ -1091,8 +1701,25 @@ function AdminProjectsContent() {
                 status: response.data.status,
             },
         });
+        if (
+            selectedProjectIdRef.current !== projectId ||
+            selectedMediaBlockIdRef.current !== mediaBlockId
+        ) {
+            endSave(savingMediaBlockRef, setIsSavingMediaBlock);
+            return;
+        }
+        const savedMediaBlockForm = rowToMediaBlockForm(response.data);
+        setMediaBlocks((current) =>
+            upsertRowById(current, response.data, (left, right) =>
+                left.sort_order - right.sort_order || left.id - right.id,
+            ),
+        );
+        selectedMediaBlockIdRef.current = response.data.id;
+        setSelectedMediaBlockId(response.data.id);
+        setMediaBlockForm(savedMediaBlockForm);
+        setMediaBlockFormBaseline(savedMediaBlockForm);
         setNotice(withAuditNotice(nextStatus === 'published' ? 'Project media block published.' : 'Project media block saved.', auditError));
-        await loadProjectBundle(supabase, selectedProject.id, selectedMapId, selectedHotspotId);
+        endSave(savingMediaBlockRef, setIsSavingMediaBlock);
     }
 
     async function saveHotspot(nextStatus: ProjectStatus) {
@@ -1104,9 +1731,13 @@ function AdminProjectsContent() {
             return;
         }
 
+        if (!beginSave(savingHotspotRef, setIsSavingHotspot)) return;
+        const projectId = selectedProjectIdRef.current;
+        const mapId = selectedMap.id;
+        const hotspotId = selectedHotspotIdRef.current;
+
         const now = new Date().toISOString();
         const payload = {
-            project_material_map_id: selectedMap.id,
             project_material_id: validation.projectMaterialId,
             hotspot_key: hotspotForm.hotspotKey.trim(),
             x_percent: validation.xPercent,
@@ -1123,37 +1754,36 @@ function AdminProjectsContent() {
             archived_at: nextStatus === 'archived' ? now : null,
         };
 
-        setIsSavingHotspot(true);
         setError(null);
         setNotice(null);
 
-        const response = selectedHotspotId
+        const response = hotspotId
             ? await supabase
                   .from('project_hotspots')
                   .update(payload)
-                  .eq('id', selectedHotspotId)
+                  .eq('id', hotspotId)
+                  .eq('project_material_map_id', mapId)
                   .select(
                       'id,project_material_map_id,project_material_id,hotspot_key,x_percent,y_percent,label,application,note,preview_media_id,sort_order,status,published_at,archived_at,updated_at',
                   )
                   .single<ProjectHotspotRow>()
             : await supabase
                   .from('project_hotspots')
-                  .insert({ ...payload, created_by: user.id })
+                  .insert({ ...payload, project_material_map_id: mapId, created_by: user.id })
                   .select(
                       'id,project_material_map_id,project_material_id,hotspot_key,x_percent,y_percent,label,application,note,preview_media_id,sort_order,status,published_at,archived_at,updated_at',
                   )
                   .single<ProjectHotspotRow>();
 
-        setIsSavingHotspot(false);
-
         if (response.error) {
+            endSave(savingHotspotRef, setIsSavingHotspot);
             setError(response.error.message);
             return;
         }
 
         const auditError = await recordAdminAuditEvent(supabase, {
             actorUserId: user.id,
-            action: selectedHotspotId
+            action: hotspotId
                 ? nextStatus === 'published'
                     ? 'project_hotspot.publish'
                     : nextStatus === 'archived'
@@ -1169,8 +1799,26 @@ function AdminProjectsContent() {
                 status: response.data.status,
             },
         });
+        if (
+            selectedProjectIdRef.current !== projectId ||
+            selectedMapIdRef.current !== mapId ||
+            selectedHotspotIdRef.current !== hotspotId
+        ) {
+            endSave(savingHotspotRef, setIsSavingHotspot);
+            return;
+        }
+        const savedHotspotForm = rowToHotspotForm(response.data);
+        setHotspots((current) =>
+            upsertRowById(current, response.data, (left, right) =>
+                left.sort_order - right.sort_order || left.hotspot_key.localeCompare(right.hotspot_key),
+            ),
+        );
+        selectedHotspotIdRef.current = response.data.id;
+        setSelectedHotspotId(response.data.id);
+        setHotspotForm(savedHotspotForm);
+        setHotspotFormBaseline(savedHotspotForm);
         setNotice(withAuditNotice(nextStatus === 'published' ? 'Hotspot published.' : 'Hotspot saved.', auditError));
-        await loadHotspots(supabase, selectedMap.id, response.data.id);
+        endSave(savingHotspotRef, setIsSavingHotspot);
     }
 
     return (
@@ -1181,7 +1829,7 @@ function AdminProjectsContent() {
                 <button
                     type="button"
                     onClick={startNewProject}
-                    disabled={!canEdit}
+                    disabled={!canEdit || isLoading || isAnySaving}
                     className="inline-flex min-h-10 items-center gap-2 rounded border border-black/15 bg-white px-3 text-xs font-bold uppercase tracking-[0.12em] text-black transition hover:border-black disabled:cursor-not-allowed disabled:text-black/35"
                 >
                     <Plus className="h-4 w-4" />
@@ -1189,7 +1837,14 @@ function AdminProjectsContent() {
                 </button>
             }
         >
-            <div className="grid gap-5 xl:grid-cols-[minmax(280px,390px)_minmax(0,1fr)_380px]">
+            <div
+                className={[
+                    'grid items-start gap-5 xl:grid-cols-[minmax(280px,390px)_minmax(0,1fr)]',
+                    isLoading ? 'opacity-60' : '',
+                ].join(' ')}
+                aria-busy={isLoading}
+                inert={isLoading}
+            >
                 <section className="border border-black/10 bg-white">
                     <div className="border-b border-black/10 p-4">
                         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-black/45">
@@ -1297,8 +1952,83 @@ function AdminProjectsContent() {
                     </div>
                 </section>
 
-                <section className="space-y-5">
+                <section className="min-w-0 space-y-5">
+                    <nav
+                        aria-label="Project editing tasks"
+                        className="border border-black/10 bg-white p-2"
+                    >
+                        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5" role="tablist">
+                            {([
+                                ['overview', 'Overview', `${publishBlockers.length} blockers`],
+                                ['facts', 'Facts', `${facts.length} details`],
+                                ['materials', 'Materials', `${materials.length} materials`],
+                                ['media', 'Media', `${mediaBlocks.length} blocks`],
+                                ['maps', 'Maps & hotspots', `${maps.length} maps · ${hotspots.length} hotspots`],
+                            ] as Array<[ProjectWorkspace, string, string]>).map(([workspace, label, count]) => {
+                                const isActive = activeWorkspace === workspace;
+                                const isDisabled = workspace !== 'overview' && !selectedProject;
+                                return (
+                                    <button
+                                        key={workspace}
+                                        type="button"
+                                        role="tab"
+                                        aria-selected={isActive}
+                                        aria-controls={`project-workspace-${workspace}`}
+                                        disabled={isDisabled}
+                                        onClick={() => selectWorkspace(workspace)}
+                                        className={[
+                                            'flex min-h-14 flex-col items-start justify-center gap-1 rounded border px-3 text-left text-xs font-bold uppercase tracking-[0.1em] transition',
+                                            isActive
+                                                ? 'border-black bg-black text-white'
+                                                : 'border-black/10 bg-white text-black/58 hover:border-black hover:text-black',
+                                            isDisabled ? 'cursor-not-allowed opacity-35' : '',
+                                        ].join(' ')}
+                                    >
+                                        <span>{label}</span>
+                                        <span
+                                            className={[
+                                                'text-[10px] font-semibold normal-case tracking-normal',
+                                                isActive ? 'text-white/65' : 'text-black/42',
+                                            ].join(' ')}
+                                        >
+                                            {count}
+                                        </span>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </nav>
+
+                    {isProjectDirty ? (
+                        <section
+                            role="status"
+                            className="border border-amber-300 bg-amber-50 p-4 text-sm font-semibold leading-6 text-amber-900"
+                        >
+                            Unsaved changes in {dirtyEditorSummary}. Save the affected editor before switching records,
+                            refreshing, signing out, or leaving Admin.
+                        </section>
+                    ) : null}
+                    {error ? (
+                        <section
+                            role="alert"
+                            className="border border-red-200 bg-red-50 p-4 text-sm font-semibold leading-6 text-red-700"
+                        >
+                            {error}
+                        </section>
+                    ) : null}
+                    {notice ? (
+                        <section
+                            role="status"
+                            className="border border-[var(--urblo-lime)] bg-[rgba(0,255,25,0.10)] p-4 text-sm font-semibold leading-6 text-black"
+                        >
+                            {notice}
+                        </section>
+                    ) : null}
+
+                    {activeWorkspace === 'overview' ? (
                     <form
+                        id="project-workspace-overview"
+                        role="tabpanel"
                         ref={projectEditorRef}
                         onSubmit={(event) => void handleProjectSubmit(event)}
                         className="scroll-mt-5 border border-black/10 bg-white p-5 md:p-6"
@@ -1532,26 +2262,23 @@ function AdminProjectsContent() {
                             compact
                         />
                     </form>
+                    ) : null}
 
-                    <section className="grid gap-5 lg:grid-cols-2">
+                    <section className="grid gap-5">
+                        {activeWorkspace === 'facts' ? (
                         <SubrecordEditor
+                            id="project-workspace-facts"
                             ref={factsEditorRef}
                             title="Facts"
                             eyebrow={`${facts.length} details`}
-                            onNew={() => {
-                                setSelectedFactId(null);
-                                setFactForm(emptyFactForm);
-                            }}
+                            onNew={startNewFact}
                             disabled={!canEdit || !selectedProject}
                         >
                             <RecordChips
                                 rows={facts}
                                 selectedId={selectedFactId}
                                 getLabel={(row) => `${row.fact_label} - ${getProofReviewLabel(row.claim_status)}`}
-                                onSelect={(row) => {
-                                    setSelectedFactId(row.id);
-                                    setFactForm(rowToFactForm(row));
-                                }}
+                                onSelect={selectFactEditor}
                             />
                             <TextField
                                 label="Fact label"
@@ -1604,25 +2331,22 @@ function AdminProjectsContent() {
                                 {isSavingFact ? 'Saving' : 'Save fact'}
                             </button>
                         </SubrecordEditor>
+                        ) : null}
 
+                        {activeWorkspace === 'materials' ? (
                         <SubrecordEditor
+                            id="project-workspace-materials"
                             ref={materialsEditorRef}
                             title="Materials"
                             eyebrow={`${materials.length} materials`}
-                            onNew={() => {
-                                setSelectedMaterialId(null);
-                                setMaterialForm(emptyMaterialForm);
-                            }}
+                            onNew={startNewMaterial}
                             disabled={!canEdit || !selectedProject}
                         >
                             <RecordChips
                                 rows={materials}
                                 selectedId={selectedMaterialId}
                                 getLabel={(row) => `${row.application} - ${getProofReviewLabel(row.claim_status)}`}
-                                onSelect={(row) => {
-                                    setSelectedMaterialId(row.id);
-                                    setMaterialForm(rowToMaterialForm(row));
-                                }}
+                                onSelect={selectMaterialEditor}
                             />
                             <SelectField
                                 label="Stone group"
@@ -1688,14 +2412,15 @@ function AdminProjectsContent() {
                                 {isSavingMaterial ? 'Saving' : 'Save material'}
                             </button>
                         </SubrecordEditor>
+                        ) : null}
 
+                        {activeWorkspace === 'media' ? (
                         <SubrecordEditor
+                            id="project-workspace-media"
+                            ref={mediaEditorRef}
                             title="Media blocks"
                             eyebrow={`${mediaBlocks.length} blocks`}
-                            onNew={() => {
-                                setSelectedMediaBlockId(null);
-                                setMediaBlockForm(emptyMediaBlockForm);
-                            }}
+                            onNew={startNewMediaBlock}
                             disabled={!canEdit || !selectedProject}
                         >
                             <RecordChips
@@ -1704,10 +2429,7 @@ function AdminProjectsContent() {
                                 getLabel={(row) =>
                                     `${getProjectMediaRoleLabel(row.media_role)} ${row.sort_order} - ${getProjectStatusLabel(row.status)}`
                                 }
-                                onSelect={(row) => {
-                                    setSelectedMediaBlockId(row.id);
-                                    setMediaBlockForm(rowToMediaBlockForm(row));
-                                }}
+                                onSelect={selectMediaBlockEditor}
                             />
                             <SelectField
                                 label="Block type"
@@ -1819,10 +2541,16 @@ function AdminProjectsContent() {
                                 </button>
                             </div>
                         </SubrecordEditor>
+                        ) : null}
                     </section>
-                </section>
 
-                <aside className="space-y-5">
+                    {activeWorkspace === 'maps' ? (
+                <section
+                    id="project-workspace-maps"
+                    role="tabpanel"
+                    ref={mapsEditorRef}
+                    className="grid scroll-mt-5 items-start gap-5 lg:grid-cols-2"
+                >
                     <section className="border border-black/10 bg-black p-5 text-white">
                         <MapPin className="h-5 w-5 text-[var(--urblo-lime)]" />
                         <h2 className="mt-5 text-xl font-semibold">Map health</h2>
@@ -1846,13 +2574,7 @@ function AdminProjectsContent() {
                             </div>
                             <button
                                 type="button"
-                                onClick={() => {
-                                    setSelectedMapId(null);
-                                    setMapForm(emptyMapForm);
-                                    setHotspots([]);
-                                    setSelectedHotspotId(null);
-                                    setHotspotForm(emptyHotspotForm);
-                                }}
+                                onClick={startNewMap}
                                 disabled={!canEdit || !selectedProject}
                                 className="inline-flex min-h-9 items-center gap-2 rounded border border-black/15 px-3 text-[11px] font-bold uppercase tracking-[0.12em] text-black disabled:text-black/35"
                             >
@@ -1864,11 +2586,7 @@ function AdminProjectsContent() {
                             rows={maps}
                             selectedId={selectedMapId}
                             getLabel={(row) => `${row.title || `Map ${row.id}`} - ${getProjectStatusLabel(row.status)}`}
-                            onSelect={(row) => {
-                                setSelectedMapId(row.id);
-                                setMapForm(rowToMapForm(row));
-                                if (supabase) void loadHotspots(supabase, row.id, null);
-                            }}
+                            onSelect={(row) => void selectMapEditor(row)}
                         />
                         <SelectField
                             label="Status"
@@ -1953,10 +2671,7 @@ function AdminProjectsContent() {
                             </div>
                             <button
                                 type="button"
-                                onClick={() => {
-                                    setSelectedHotspotId(null);
-                                    setHotspotForm(emptyHotspotForm);
-                                }}
+                                onClick={startNewHotspot}
                                 disabled={!canEdit || !selectedMap}
                                 className="inline-flex min-h-9 items-center gap-2 rounded border border-black/15 px-3 text-[11px] font-bold uppercase tracking-[0.12em] text-black disabled:text-black/35"
                             >
@@ -1968,10 +2683,7 @@ function AdminProjectsContent() {
                             rows={hotspots}
                             selectedId={selectedHotspotId}
                             getLabel={(row) => `${row.label || row.hotspot_key} - ${getProjectStatusLabel(row.status)}`}
-                            onSelect={(row) => {
-                                setSelectedHotspotId(row.id);
-                                setHotspotForm(rowToHotspotForm(row));
-                            }}
+                            onSelect={selectHotspotEditor}
                         />
                         <SelectField
                             label="Status"
@@ -2011,10 +2723,7 @@ function AdminProjectsContent() {
                             xPercent={hotspotForm.xPercent}
                             yPercent={hotspotForm.yPercent}
                             disabled={!canEdit || isSavingHotspot || !selectedMap}
-                            onSelect={(hotspot) => {
-                                setSelectedHotspotId(hotspot.id);
-                                setHotspotForm(rowToHotspotForm(hotspot));
-                            }}
+                            onSelect={selectHotspotEditor}
                             onPositionChange={(nextPosition) => {
                                 updateHotspotField('xPercent', nextPosition.xPercent.toFixed(2));
                                 updateHotspotField('yPercent', nextPosition.yPercent.toFixed(2));
@@ -2106,29 +2815,28 @@ function AdminProjectsContent() {
                             <li>Publish is locked until project proof, fact proof, and material proof are reviewed.</li>
                             <li>Approved proof can show publicly; Deferred proof stays saved but is not treated as an approved public claim.</li>
                             <li>Published maps need an image; hotspots need saved positions inside the image.</li>
-                            <li>Use Archive to remove a project from the website while keeping its editing history.</li>
+                            <li>Archive hides the CMS version. A matching legacy project can remain visible during migration until CMS-only cutover.</li>
                         </ul>
                     </section>
 
-                    {error ? (
-                        <section className="border border-red-200 bg-red-50 p-4 text-sm font-semibold leading-6 text-red-700">
-                            {error}
-                        </section>
+                </section>
                     ) : null}
-                    {notice ? (
-                        <section className="border border-[var(--urblo-lime)] bg-[rgba(0,255,25,0.10)] p-4 text-sm font-semibold leading-6 text-black">
-                            {notice}
-                        </section>
-                    ) : null}
+
                     {!canEdit ? (
                         <section className="border border-black/10 bg-white p-5 text-sm leading-6 text-black/62">
                             Current role is read-only for Projects. Ask an editor or CMS manager to update projects.
                         </section>
                     ) : null}
-                </aside>
+                </section>
             </div>
         </AdminShell>
     );
+}
+
+function parseProjectRouteId(value: string | undefined) {
+    if (value === undefined) return null;
+    const projectId = Number(value);
+    return Number.isInteger(projectId) && projectId > 0 ? projectId : null;
 }
 
 const statusOptions: Array<[string, string]> = [
@@ -2241,10 +2949,44 @@ function MediaSelect({
     emptyLabel: string;
     onChange: (value: string) => void;
 }) {
+    const [search, setSearch] = useState('');
     const previewUrl = getMediaUrl(selectedMedia);
+    const filteredMediaOptions = useMemo(() => {
+        const query = search.trim().toLowerCase();
+        if (!query) return mediaOptions;
+
+        return mediaOptions.filter((media) =>
+            [media.alt, media.caption, media.object_path, media.source_url, media.source_kind, media.media_type, media.status]
+                .filter(Boolean)
+                .some((candidate) => String(candidate).toLowerCase().includes(query)),
+        );
+    }, [mediaOptions, search]);
+    const visibleMediaOptions = useMemo(() => {
+        if (!selectedMedia || filteredMediaOptions.some((media) => media.id === selectedMedia.id)) {
+            return filteredMediaOptions;
+        }
+        return [selectedMedia, ...filteredMediaOptions];
+    }, [filteredMediaOptions, selectedMedia]);
 
     return (
         <div className="space-y-2">
+            <label className="block text-xs font-bold uppercase tracking-[0.14em] text-black/55">
+                Search {label.toLowerCase()}
+                <span className="mt-2 flex min-h-11 items-center gap-2 rounded border border-black/15 bg-white px-3 focus-within:border-black">
+                    <Search className="h-4 w-4 shrink-0 text-black/40" />
+                    <input
+                        type="search"
+                        value={search}
+                        onChange={(event) => setSearch(event.target.value)}
+                        disabled={disabled}
+                        placeholder="Search by name, caption, path, or status"
+                        className="min-w-0 flex-1 bg-transparent text-sm font-medium normal-case tracking-normal outline-none placeholder:text-black/35 disabled:text-black/35"
+                    />
+                </span>
+                <span className="mt-2 block text-xs font-medium normal-case tracking-normal text-black/45">
+                    {filteredMediaOptions.length} of {mediaOptions.length} Media library items
+                </span>
+            </label>
             <SelectField
                 label={label}
                 value={value}
@@ -2252,7 +2994,7 @@ function MediaSelect({
                 onChange={onChange}
                 options={[
                     ['', emptyLabel],
-                    ...mediaOptions.map((media) => [String(media.id), formatMediaOption(media)] as [string, string]),
+                    ...visibleMediaOptions.map((media) => [String(media.id), formatMediaOption(media)] as [string, string]),
                 ]}
             />
             {selectedMedia ? (
@@ -2859,6 +3601,7 @@ function ProjectActionBar({
 }
 
 interface SubrecordEditorProps {
+    id: string;
     title: string;
     eyebrow: string;
     disabled?: boolean;
@@ -2867,11 +3610,16 @@ interface SubrecordEditorProps {
 }
 
 const SubrecordEditor = forwardRef<HTMLElement, SubrecordEditorProps>(function SubrecordEditor(
-    { title, eyebrow, disabled, onNew, children },
+    { id, title, eyebrow, disabled, onNew, children },
     ref,
 ) {
     return (
-        <section ref={ref} className="scroll-mt-5 border border-black/10 bg-white p-5">
+        <section
+            id={id}
+            role="tabpanel"
+            ref={ref}
+            className="scroll-mt-5 border border-black/10 bg-white p-5"
+        >
             <div className="flex items-start justify-between gap-3">
                 <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-black/45">{eyebrow}</p>
@@ -2926,6 +3674,51 @@ function RecordChips<T extends { id: number }>({
             ))}
         </div>
     );
+}
+
+function formStatesMatch<FormState>(current: FormState, baseline: FormState) {
+    return JSON.stringify(current) === JSON.stringify(baseline);
+}
+
+function getDirtyEditorLabels(dirtyEditors: ProjectDirtyEditors) {
+    return [
+        dirtyEditors.overview ? 'Overview' : null,
+        dirtyEditors.fact ? 'Fact' : null,
+        dirtyEditors.material ? 'Material' : null,
+        dirtyEditors.media ? 'Media block' : null,
+        dirtyEditors.map ? 'Map' : null,
+        dirtyEditors.hotspot ? 'Hotspot' : null,
+    ].filter((label): label is string => label !== null);
+}
+
+function getWorkspaceDirtyEditorLabels(workspace: ProjectWorkspace, dirtyEditors: ProjectDirtyEditors) {
+    if (workspace === 'overview') return dirtyEditors.overview ? ['Overview'] : [];
+    if (workspace === 'facts') return dirtyEditors.fact ? ['Fact'] : [];
+    if (workspace === 'materials') return dirtyEditors.material ? ['Material'] : [];
+    if (workspace === 'media') return dirtyEditors.media ? ['Media block'] : [];
+
+    return [dirtyEditors.map ? 'Map' : null, dirtyEditors.hotspot ? 'Hotspot' : null].filter(
+        (label): label is string => label !== null,
+    );
+}
+
+function getProjectWorkspaceLabel(workspace: ProjectWorkspace) {
+    if (workspace === 'overview') return 'Overview';
+    if (workspace === 'facts') return 'Facts';
+    if (workspace === 'materials') return 'Materials';
+    if (workspace === 'media') return 'Media';
+    return 'Maps and hotspots';
+}
+
+function formatEditorList(labels: string[]) {
+    if (labels.length === 0) return 'this project';
+    if (labels.length === 1) return labels[0];
+    if (labels.length === 2) return `${labels[0]} and ${labels[1]}`;
+    return `${labels.slice(0, -1).join(', ')}, and ${labels[labels.length - 1]}`;
+}
+
+function upsertRowById<Row extends { id: number }>(rows: Row[], savedRow: Row, compare: (left: Row, right: Row) => number) {
+    return [...rows.filter((row) => row.id !== savedRow.id), savedRow].sort(compare);
 }
 
 function rowToProjectForm(row: ProjectRow | null): ProjectFormState {
@@ -3061,16 +3854,10 @@ function validateFactForm(form: FactFormState) {
     const sortOrder = requiredInteger(form.sortOrder, 'Sort order');
     if (sortOrder.error) return validationFailure(sortOrder.error);
 
-    let factValueJson: unknown = null;
-    if (form.factValueJson.trim()) {
-        try {
-            factValueJson = JSON.parse(form.factValueJson);
-        } catch {
-            return validationFailure('Structured detail is not valid. Leave it blank unless this fact needs advanced structured data.');
-        }
-    }
+    const factJson = parseProjectFactJsonDraft(form.factValueJson);
+    if (factJson.error) return validationFailure(factJson.error);
 
-    return { error: null, sortOrder: sortOrder.value, factValueJson };
+    return { error: null, sortOrder: sortOrder.value, factValueJson: factJson.value };
 }
 
 function validateMaterialForm(form: MaterialFormState) {

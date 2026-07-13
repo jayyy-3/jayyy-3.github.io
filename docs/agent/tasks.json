@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lastUpdated": "2026-06-12",
+  "lastUpdated": "2026-07-13",
   "sourceOfTruth": "Machine-readable task queue for active and upcoming agent work. Human-readable roadmap lives in docs/NEXT_STEPS.md.",
   "tasks": [
     {
@@ -435,7 +435,7 @@
       "id": "NOW-ADMIN-CMS-001",
       "status": "done",
       "priority": 5,
-      "summary": "Build the Urblo admin CMS for customer-maintained Projects, Stone Library, Products, Articles, media, and leads.",
+      "summary": "Historical umbrella for the Urblo admin CMS source, schema, and child-task rollout; production editor handoff is owned by NOW-ADMIN-RELIABILITY-UX-001.",
       "files": [
         "docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md",
         "docs/ARCHITECTURE.md",
@@ -554,10 +554,11 @@
     "2026-06-04: `/admin/media` now shows Website media status before the Media Publish checklist, distinguishing Available to public pages / Ready not published yet / Not ready for public pages and pointing editors to the first missing checklist item when media cannot be published; `npm run agent:admin-crud-coverage` guards this media public-use clarity language.",
     "2026-06-04: `/admin/stone-library` finish-image editing now shows Finish image public status and routes not-ready image publishing to Open Media first when the selected Media library item is not Published in Media; `npm run agent:admin-crud-coverage` guards this cross-module dependency language.",
     "2026-06-04: `/admin/products` now shows Product website status and Model publish status before the product/model Publish checklists, distinguishing live/published content from ready-but-unpublished and not-ready content; locked product/model Publish attempts point editors to the first missing checklist item.",
-    "2026-06-04: `/admin/articles` now shows Article website status and Section publish status before the article/section Publish controls, distinguishing live/published content from ready-but-unpublished and not-ready content; locked article/section Publish attempts point editors to the first missing checklist item."
+    "2026-06-04: `/admin/articles` now shows Article website status and Section publish status before the article/section Publish controls, distinguishing live/published content from ready-but-unpublished and not-ready content; locked article/section Publish attempts point editors to the first missing checklist item.",
+    "2026-07-13: This umbrella remains done only for task decomposition, schema/RLS, source CRUD surfaces, and historical infrastructure checks. Its former production handoff conclusion is invalidated; NOW-ADMIN-RELIABILITY-UX-001 owns deployed editor workflow and usability proof."
   ],
       "acceptance": [
-    "Authenticated admin users can create, read, update, draft, publish, and archive Projects, Stone Library items, Products, Articles, and media items without code edits.",
+    "Launch-critical admin source contains create, read, update, draft, publish, and archive controls for Projects, Stone Library items, Products, Articles, and media items without requiring code edits; deployed editor outcomes are not asserted by this historical umbrella.",
         "Physical delete controls remain out of the launch-critical CMS path unless Jay approves a destructive-delete/retention policy; current live verification must use non-destructive archive flows.",
         "Article editing uses approved structured block types instead of arbitrary newsletter HTML.",
         "`npm run agent:admin-crud-live` must verify exact expected tagged audit actions and entity types for live QA writes and exports, not only a loose audit-row count.",
@@ -566,7 +567,7 @@
         "`npm run agent:admin-crud-coverage` must fail if launch-critical admin source or the live verifier introduces physical delete mutations, HTTP DELETE requests, destructive RPC names, or visible Delete/Remove controls.",
         "Unpublished content remains hidden from the public site, and unauthenticated users cannot access admin routes.",
         "The editor handoff guide stays current with the admin address, account setup path, Dashboard start flow, module action bars, edit/publish flow, Settings account handoff, module coverage, public fallback behavior, and open CMS handoff gaps.",
-        "The production walkthrough checklist must pass after deployment before the CMS is handed to non-technical editors."
+        "This historical umbrella must not be used as a production handoff assertion; NOW-ADMIN-RELIABILITY-UX-001 and version 2 of docs/agent/admin-handoff-evidence.json exclusively govern non-technical editor handoff."
       ],
       "verification": [
         "npm run build",
@@ -780,10 +781,10 @@
         "2026-06-04: `/admin/settings` now uses Website settings, CMS manager, Website owner, Global contact and search defaults, Search defaults, CMS team, People and access, Active access, and CMS-access validation language; admin CRUD coverage rejects older Owner/Admin, Supabase Auth, admin-profile-row, owner-role, default SEO, and default-row visible wording.",
         "2026-06-04: `/admin/settings` now shows Site settings actions and CMS access handoff actions, keeping Save settings beside Draft/Published/Archived website visibility meaning and explaining when to use Invite and grant access versus Grant existing login; admin CRUD coverage guards the action language.",
         "2026-06-05: `/admin/settings` now shows Website settings status before the shared status rules, distinguishing Live settings, Draft settings, and Hidden settings so CMS managers know whether global contact/footer/search defaults are public-ready.",
-        "Live settings/profile save verification is covered by the approved admin CRUD live runs; the real invite-email proof remains separately gated by a target editor email and Jay approval.",
+        "Live settings/profile API-level save verification is covered by the approved admin CRUD live runs; public settings UI readback, Auth email delivery, invite/password setup, and recovery remain separately gated by production configuration, a target editor email, and Jay approval.",
         "2026-05-28: Admin CRUD coverage verifier now checks settings/admin profile table references, owner/self-lockout guardrail copy, mutation paths, and site_settings/admin_profile audit actions.",
         "2026-05-28: Admin CRUD live verifier now includes a tagged site_settings create/update/publish/archive path through owner/admin RLS, but it does not create or mutate first-admin profile rows.",
-        "2026-06-05 Harness GC cleanup: kept as a `now` task only for a real Settings invite proof with an approved target editor email. Settings source, status UX, site_settings save path, CMS access UI, RLS, and tagged admin live QA are otherwise complete."
+        "2026-07-13: Kept as a `now` task for Published settings public readback plus real Auth SMTP invite/password setup and recovery proof with exact Redirect URL allowlist entries and an approved target editor. This task owns production evidence creation for those Settings/Auth workflows; `NOW-ADMIN-RELIABILITY-UX-001` references the same evidence only as part of the aggregate CMS handoff. Settings source, status UX, site_settings save path, CMS access UI, RLS, and tagged API-level QA are otherwise complete."
       ],
       "acceptance": [
         "CMS managers can inspect and save the default site settings through /admin/settings.",
@@ -796,7 +797,11 @@
         "Supabase admin_profiles enforces case-insensitive normalized email uniqueness.",
         "Anonymous users cannot directly execute admin SECURITY DEFINER helper functions.",
         "The form includes loading, empty, validation, save, success, read-only, and error states.",
-        "No service-role key is shipped to browser code."
+        "No service-role key is shipped to browser code.",
+        "A safe Published settings change made through /admin/settings persists after refresh and is read back through the supported public footer/contact/social/default SEO consumer, then is restored or otherwise documented.",
+        "Supabase Auth custom SMTP and the exact production invite/recovery account-setup Redirect URLs are configured and verified before account handoff is called available.",
+        "An approved new editor receives the Settings invite, sets a password, signs out, and signs back in with that password.",
+        "The approved editor receives a password-recovery email, sets a new password, verifies the old password fails, and signs in with the new password."
       ],
       "verification": [
         "Supabase MCP: list_migrations includes admin_settings_role_hardening, admin_profile_owner_hardening, security_definer_function_grants, security_definer_private_helpers, and admin_profile_email_uniqueness",
@@ -812,7 +817,10 @@
         "Playwright: /admin/settings shows configuration-required state when no browser key is configured",
         "npm run agent:admin-crud-coverage",
         "npm run agent:admin-crud-live (plan-only)",
-        "npm run agent:admin-crud-live -- --allow-writes (after browser-safe keys, real owner/admin session, and Jay approval for tagged QA writes; verifies dashboard-health predicate readback plus tagged public-content rows and private lead rows are not anonymously visible)"
+        "npm run agent:admin-crud-live -- --allow-writes (after browser-safe keys, real owner/admin session, and Jay approval for tagged QA writes; verifies dashboard-health predicate readback plus tagged public-content rows and private lead rows are not anonymously visible)",
+        "Browser: save and refresh a safe Published setting through /admin/settings, verify the supported public consumer on the immutable deployment, then restore or document the value",
+        "Browser: with Jay-approved recipient and configured Supabase Auth SMTP/Redirect URLs, complete invite delivery, password setup, logout/password login, recovery delivery, old-password failure, and new-password login",
+        "npm run agent:admin-handoff-readiness -- --base-url https://urblo.com.au --admin-email info@urblo.com.au --strict"
       ]
     },
     {
@@ -929,15 +937,15 @@
     "2026-06-02: Content import dry-run now prefers structured project `mediaBlocks`, generating 15 project media rows including the Moon Gate hotspot media block with 0 warnings and 0 blockers.",
     "2026-06-04: Added `npm run agent:content-import:live`; the approved run imported/upserted 115 media assets, 13 stone groups, 15 variants, 153 finish capabilities, 53 finish images, 6 products, 28 product models, 18 material defaults, 18 specs, 5 projects, 41 project facts, 2 project materials, 1 project material map, 15 project media rows, 2 hotspots, 4 articles, and 95 article blocks as draft content, then verified anonymous browser-key reads expose zero imported draft parent rows.",
     "2026-06-04: `/admin/projects` media selectors now use Media from library / YouTube link language, show Published/Draft/Archived in Media in picker previews, replace media-record ID-linking copy in Map health, and admin CRUD coverage rejects Project ID-linking / YouTube ID / raw selection-ID wording.",
-    "2026-06-05 Harness GC cleanup: marked done because source CRUD, import dry run/live draft import, published-read public adapters, project media migration, admin CRUD coverage, live CRUD QA, and production CMS handoff proof are complete. Customer/editor review and item-by-item publishing remain content decisions, not an executable CMS implementation blocker."
+    "2026-07-13: This task remains done for content schema/source CRUD, import dry run/live Draft import, public adapters, project media migration, and API-level CRUD QA. The former production CMS handoff claim is invalidated and is now owned by NOW-ADMIN-RELIABILITY-UX-001."
       ],
       "acceptance": [
-        "Admin users can draft, publish, edit, and archive Projects, Stone Library records including finish image links, Products, and Articles through the non-destructive launch lifecycle.",
+        "Admin source provides draft, publish, edit, and archive controls for Projects, Stone Library records including finish image links, Products, and Articles through the non-destructive launch lifecycle; deployed editor usability is owned by NOW-ADMIN-RELIABILITY-UX-001.",
         "Physical deletes for content records remain hidden and approval-gated until a destructive-delete/retention policy is confirmed.",
         "Public routes expose only published content and preserve current route contracts.",
         "Article CRUD uses approved structured blocks and strips newsletter artifacts from the authoring model.",
     "Static file-backed data sources have a documented migration or fallback path.",
-    "Public Projects, Products, Articles, and the Stone Library listing prefer published Supabase rows and fall back to static data when no published rows are available.",
+    "Published Projects, Products, and Articles replace only the matching static item by canonical slug, Published Stone Library cards replace only the matching static card by stoneGroupId, unmatched static items remain during migration, and new Published items append.",
         "The content import dry run can write a local ignored draft review artifact without applying production rows.",
         "The content import dry run can write a local ignored Markdown apply/rollback plan before any production import is approved.",
         "The content import dry run can write a local ignored guarded draft import SQL artifact before any production import is approved.",
@@ -967,6 +975,7 @@
     "npm run agent:content-import:apply-sql",
     "npm run agent:content-import:live",
     "npm run agent:public-supabase-readiness",
+    "npm run agent:public-content-overlay",
         "npm run agent:live-readiness",
         "Supabase MCP: execute_sql verifies seed/import target table counts, RLS state, and Data API role/sequence grants before any import apply",
         "Playwright: /admin/stone-library shows configuration-required state when no browser key is configured",
@@ -1154,7 +1163,7 @@
     },
     {
       "id": "NOW-ARTICLE-STRUCTURE-CLAIMS-001",
-      "status": "done",
+      "status": "next",
       "priority": 6.2,
       "summary": "Move article details from raw newsletter HTML to mobile-safe, claim-reviewed structured article templates.",
       "files": [
@@ -1336,7 +1345,7 @@
       "id": "NEXT-SEO-CONTENT-GROWTH-001",
       "status": "next",
       "priority": 7.4,
-      "summary": "Run the Phase 3 SEO content-growth pass for non-brand specifier queries after the legacy URL cleanup has deployed.",
+      "summary": "Run the Phase 3 SEO content-growth pass and make CMS-only published detail URLs crawl-discoverable after the legacy URL cleanup has deployed.",
       "files": [
         "docs/SEO_PHASE_2_PLAN.md",
         "docs/brand-baseline.md",
@@ -1348,19 +1357,26 @@
         "src/pages/ProductDetailPage.tsx",
         "src/pages/Projects.tsx",
         "src/pages/ProjectDetails.tsx",
+        "src/components/PublicContentSeo.tsx",
+        "src/lib/publicEntitySeo.ts",
+        "src/service/publicContentOverlay.ts",
+        "public/sitemap.xml",
+        "scripts/check-seo-readiness.mjs",
         "public/articles/index.json",
         "public/articles/*/content.html"
       ],
       "notes": [
         "This is the content and conversion phase, not the redirect-cleanup phase.",
         "Prioritize useful, evidence-backed long-tail specifier intent such as stone bollards, bluestone seating, natural stone streetscape furniture, urban landscape stone products, material/finish combinations, and project proof terms.",
-        "Do not add generic SEO filler, unsupported price/availability claims, or unqualified sustainability/cost/speed claims."
+        "Do not add generic SEO filler, unsupported price/availability claims, or unqualified sustainability/cost/speed claims.",
+        "2026-07-13: Runtime metadata now follows resolved published CMS entities, but a CMS-only slug is still absent from the static sitemap/route registry and its first HTML response remains the SPA shell. Choose and document a generated release manifest, dynamic sitemap, or pre-render strategy before treating CMS publication as search-discoverable."
       ],
       "acceptance": [
         "Priority Product, Stone Library, Project, and Article pages have clearer non-brand search intent coverage without weakening Urblo's brand voice.",
         "Claims remain qualified and evidence-backed against docs/brand-baseline.md.",
         "CTA paths remain focused on enquiry, sample request, and capability download flows.",
-        "Any decision to pre-render or server-render public detail pages is based on post-refresh GSC indexing evidence."
+        "Any decision to pre-render or server-render public detail pages is based on post-refresh GSC indexing evidence.",
+        "A newly published CMS-only Project, Product, Article, or Stone URL is represented in the canonical sitemap/structured route inventory and exposes crawlable canonical metadata without relying only on post-load client JavaScript."
       ],
       "verification": [
         "npm run agent:seo-readiness",
@@ -2196,6 +2212,144 @@
       ],
       "verification": [
         "npm run agent:smoke"
+      ]
+    },
+    {
+      "id": "NOW-ADMIN-RELIABILITY-UX-001",
+      "status": "now",
+      "priority": 0.5,
+      "summary": "Reopen the production admin handoff, fix confirmed workflow failures, and redesign the CMS around editor tasks.",
+      "files": [
+        ".env.example",
+        "AGENTS.md",
+        "docs/ADMIN_EDITOR_GUIDE.md",
+        "docs/ADMIN_IA_ACCESS.md",
+        "docs/ADMIN_PRODUCTION_WALKTHROUGH.md",
+        "docs/ARCHITECTURE.md",
+        "docs/CLOUDFLARE_DEPLOYMENT.md",
+        "docs/DESIGN.md",
+        "docs/HANDOFF.md",
+        "docs/NEXT_STEPS.md",
+        "docs/WORKLOG.md",
+        "docs/agent/admin-handoff-evidence.json",
+        "docs/agent/harness-gc.md",
+        "docs/agent/status.json",
+        "docs/agent/tasks.json",
+        "docs/agent/verification.md",
+        "functions/_lib/admin-invite.js",
+        "package.json",
+        "scripts/admin-cms-predeploy.sh",
+        "scripts/agent-init.sh",
+        "scripts/agent-smoke.sh",
+        "scripts/check-admin-crud-coverage.mjs",
+        "scripts/check-admin-handoff-readiness.mjs",
+        "scripts/check-admin-media-role-boundary-live.mjs",
+        "scripts/check-cloudflare-pages-readiness.mjs",
+        "scripts/check-harness.mjs",
+        "scripts/check-live-readiness.mjs",
+        "scripts/check-public-content-overlay.mjs",
+        "scripts/check-public-supabase-readiness.mjs",
+        "scripts/check-supabase-foundation-readiness.mjs",
+        "src/App.tsx",
+        "src/components/PublicContentSeo.tsx",
+        "src/components/site/SiteFooter.tsx",
+        "src/data/projectData.ts",
+        "src/data/seoRoutes.ts",
+        "src/lib/PublicSiteSettingsProvider.tsx",
+        "src/lib/adminAuth.tsx",
+        "src/lib/adminAuthState.ts",
+        "src/lib/projectFactValue.ts",
+        "src/lib/publicContentLink.ts",
+        "src/lib/publicEntitySeo.ts",
+        "src/lib/publicMediaUrl.ts",
+        "src/lib/publicSiteSettings.ts",
+        "src/lib/siteSettingsFooterContract.ts",
+        "src/lib/siteSettingsPublicContract.ts",
+        "src/lib/supabaseClient.ts",
+        "src/pages/ArticlePage.tsx",
+        "src/pages/ProductDetailPage.tsx",
+        "src/pages/ProjectDetails.tsx",
+        "src/pages/StoneLibraryDetailPage.tsx",
+        "src/pages/StoneLibraryPage.tsx",
+        "src/pages/admin/AdminAccountSetupPage.tsx",
+        "src/pages/admin/AdminApp.tsx",
+        "src/pages/admin/AdminArticlesPage.tsx",
+        "src/pages/admin/AdminCmsPrimitives.tsx",
+        "src/pages/admin/AdminLoginPage.tsx",
+        "src/pages/admin/AdminMediaPage.tsx",
+        "src/pages/admin/AdminProductsPage.tsx",
+        "src/pages/admin/AdminProjectsPage.tsx",
+        "src/pages/admin/AdminSettingsPage.tsx",
+        "src/pages/admin/AdminShell.tsx",
+        "src/pages/admin/AdminStoneLibraryPage.tsx",
+        "src/service/ArticleService.ts",
+        "src/service/ProductService.ts",
+        "src/service/ProjectService.ts",
+        "src/service/StoneLibraryService.ts",
+        "src/service/publicContentOverlay.ts",
+        "src/types/article.ts",
+        "src/types/product.ts",
+        "src/types/stone-library.ts",
+        "supabase/migrations/20260713065628_media_public_bucket_role_hardening.sql",
+        "supabase/migrations/README.md"
+      ],
+      "notes": [
+        "2026-07-13: Reopened after direct user report that production admin is not working and is extremely difficult to use. User evidence overrides the earlier route-shell/source-only handoff claim.",
+        "2026-07-13: The prior strict handoff gate only matched a Pass string in WORKLOG and did not log in, save, publish, archive, or verify a public result. Machine-readable golden-workflow evidence is now required.",
+        "2026-07-13: Confirmed source failures include an auth-state callback deadlock pattern, incomplete invite/password recovery, Media new-record reset and 80-row truncation, false private-to-public Storage publication, missing public Storage URL resolution, category-wide fallback replacement, and site settings with no public consumer.",
+        "2026-07-13: Source repairs cover deferred auth refresh; implicit-flow invite/recovery verification and password update on one isolated non-persistent Auth client while the shared client ignores URL sessions and callback credentials are cleared from the address bar; same-origin invite callbacks with orphan-user cleanup; Media list/new-record reliability; private-only initial uploads with metadata-failure readback; original-path/version-bound private-to-public Storage copy with reference-safe owner/admin rollback handling; public media URL resolution; and a responsive, route-lazy admin shell.",
+        "2026-07-13: Same-user token refreshes now update the authenticated session in the background without unmounting the admin route tree; genuine user transitions still use the blocking profile gate.",
+        "2026-07-13: Projects now has stable record URLs, Overview/Facts/Materials/Media/Maps task workspaces, all-editor unsaved-change guards, isolated child saves, publish-blocker jumps, and searchable media selection. Pagination, preview, and authenticated deployed browser proof remain open.",
+        "2026-07-13: Published CMS records now overlay matching static records per canonical key. Matching Project overlays preserve legacy sector/category/material-map presentation fields that the current CMS schema cannot represent, and dependent CMS read failures fall back to the complete static Project instead of returning partial content.",
+        "2026-07-13: Supported published site settings now share one validation/normalization contract with the public consumer, refresh between provider mounts, retry after transient failures, and reject unsafe internal footer destinations.",
+        "2026-07-13: CMS entity SEO metadata and runtime Article/WebPage/Breadcrumb structured data are applied after Project, Product, Article, and Stone detail resolution. CMS-only published URLs still need a generated sitemap and first-HTML strategy under NEXT-SEO-CONTENT-GROWTH-001.",
+        "2026-07-13: Lifecycle copy now warns that archived CMS content may reveal a matching legacy static fallback during migration.",
+        "2026-07-13: Products and Stone Library child mutations now capture parent/row editor identity, constrain UPDATE queries by the original parent ownership keys, discard stale bundle/capability responses with request-generation guards, and block family/variant switching while a save is active.",
+        "2026-07-13: Projects and Article sections now discard stale child-load responses, constrain child UPDATEs by captured parent ownership, block record switching during saves, and apply save results only while the same parent/editor remains active. Project structured facts accept only public-render-safe text or text arrays; Article CTA/video links require safe root-relative or http(s) destinations in both Admin and the public renderer.",
+        "2026-07-13: Pending Storage migration source now preserves Editor writes to the private draft bucket while restricting public-bucket insert/update to owner/admin. It must be applied and live role-boundary tested before the Media fix is production-complete.",
+        "2026-07-13: Added a default no-network/no-write Media role-boundary verifier plus a mandatory structured production prerequisite. Approved live mode uses distinct Editor and owner/admin browser-key sessions to prove Editor private insert/update success, Editor public insert/update denial, owner/admin public insert/update success, and tagged-object cleanup.",
+        "2026-07-13: Closed content-editor loading races by making Articles, Projects, Products, and Stone Library inert while the selected parent bundle is incomplete, clearing stale child state before a new selection, and clearing loading only for the current selection generation. Articles validation now occurs before the save lock, and unexpected save failures always release it.",
+        "Production remains revalidation_required until the fixed deployment receives approved end-to-end browser evidence. `NOW-ADMIN-SETTINGS-CRUD-001` owns creation of the Settings public-readback and Auth email evidence; this P0 task aggregates those references into the full twelve-workflow handoff and must not close them independently. Do not turn this task done from source gates alone."
+      ],
+      "acceptance": [
+        "Admin sign-in does not hang and profile loading occurs outside the synchronous Supabase auth-state callback.",
+        "Same-user token refresh updates the session without unmounting the active admin route tree or discarding unsaved editor state.",
+        "A newly invited editor can receive an Auth email, set a password through an isolated callback session that cannot be rebound by another browser tab or replace an unrelated shared browser login, sign out, and sign back in; password recovery also succeeds through configured Supabase Auth SMTP.",
+        "Media search covers the complete current library, External media starts a stable blank record, every initial file upload remains private, and an owner/admin can copy the selected record's original path/version to real public Storage before its metadata is Published without deleting another record's path.",
+        "Storage RLS allows Editors to insert/update private draft objects but rejects their direct public-bucket insert/update; owner/admin public promotion remains allowed.",
+        "Published Storage media resolves to a public URL in Projects, Products, Articles, and Stone Library; private or draft media never resolves publicly.",
+        "Publishing one CMS record overlays the matching static record without removing other static Projects, Products, Articles, or Stone Library cards during migration.",
+        "A matching CMS Project keeps required public taxonomy/presentation fields that are not yet represented by the CMS schema, and a dependent CMS read failure leaves the complete static Project visible.",
+        "Published default site settings have a validated public consumer for supported footer/contact/social/default SEO fields.",
+        "Published settings refetch on a later provider mount, recover after transient fetch failure, and reject unsafe internal footer destinations.",
+        "Admin navigation and actions remain usable at mobile, 1116px desktop, and wide desktop widths, with route modules loaded on demand.",
+        "High-frequency editors gain record-level URLs, unsaved-change protection, searchable media selection, and progressive disclosure so Projects is no longer a single approximately 9,600px database form.",
+        "Overview, Fact, Material, Media, Map, and Hotspot forms each block unsafe transitions when dirty, while saving one child updates only that child's baseline and preserves other unsaved forms.",
+        "Projects and Article sections reject stale parent-bundle responses, never reparent a child row during UPDATE, and never apply an old save response to a newly selected parent or editor.",
+        "Project structured facts accept only a JSON string or string array in Admin and normalize legacy object/number values to safe public text without crashing React.",
+        "Published Article CTA and video destinations accept only canonical root-relative site paths or http(s) URLs, with unsafe schemes and encoded control/backslash variants rejected in Admin and the public renderer.",
+        "Products and Stone Library reject stale parent-bundle responses and child UPDATE paths cannot reparent a row because each mutation retains the captured product, stone-group, stone-variant, and finish ownership predicates.",
+        "Articles, Projects, Products, and Stone Library block editing, new-record actions, and publish readiness while the selected parent/child bundle is incomplete; stale child readiness cannot publish a newly selected parent, and validation failure cannot leave an editor permanently locked in saving state.",
+        "CMS-backed public detail pages apply validated entity metadata plus runtime Article/WebPage/Breadcrumb structured data after content resolution without indexing draft or unresolved entities.",
+        "Production prerequisite evidence proves the pending Media Storage migration is applied/read back and the live Editor/owner role boundary passes before handoff.",
+        "Production golden workflow evidence covers sign-in, draft save/refresh, private media publish, public readback, archive behavior, settings public readback, invite/password setup, password recovery, responsive navigation, the Projects task workspace, the Dashboard operational queue, and editor-guide usability against one recorded deployment SHA."
+      ],
+      "verification": [
+        "npm run build",
+        "npm run lint",
+        "npx tsc -b",
+        "npm run agent:smoke",
+        "npm run agent:admin-cms-predeploy",
+        "npm run agent:admin-config-gate",
+        "npm run agent:public-content-overlay",
+        "npm run agent:public-supabase-readiness",
+        "npm run agent:supabase-foundation-readiness",
+        "npm run agent:admin-media-role-boundary-live (plan-only; no network or writes)",
+        "npm run agent:admin-media-role-boundary-live -- --allow-writes --strict (only after migration apply/readback, distinct active Editor and owner/admin credentials, and Jay approval for tagged Storage writes)",
+        "npm run agent:admin-handoff-readiness -- --base-url https://urblo.com.au --admin-email info@urblo.com.au --strict (must remain failing until approved production-prerequisite and golden-workflow evidence is recorded)",
+        "Browser: complete the workflows listed in docs/agent/admin-handoff-evidence.json on the deployed SHA",
+        "npm run agent:check",
+        "git diff --check"
       ]
     },
     {

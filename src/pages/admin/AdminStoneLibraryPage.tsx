@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import {
@@ -154,6 +154,11 @@ interface FinishImageFormState {
     sortOrder: string;
 }
 
+interface StoneEditorSelection {
+    variantId: number | null;
+    imageId: number | null;
+}
+
 const emptyGroupForm: StoneGroupFormState = {
     status: 'draft',
     stoneGroupKey: '',
@@ -226,6 +231,13 @@ function AdminStoneLibraryContent() {
     const [savingCapabilityId, setSavingCapabilityId] = useState<number | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [notice, setNotice] = useState<string | null>(null);
+    const selectedGroupIdRef = useRef<number | null>(null);
+    const selectedVariantIdRef = useRef<number | null>(null);
+    const selectedImageIdRef = useRef<number | null>(null);
+    const libraryGenerationRef = useRef(0);
+    const groupSelectionGenerationRef = useRef(0);
+    const variantSelectionGenerationRef = useRef(0);
+    const activeSaveCountRef = useRef(0);
 
     const selectedGroup = useMemo(
         () => groups.find((group) => group.id === selectedGroupId) ?? null,
@@ -295,7 +307,86 @@ function AdminStoneLibraryContent() {
     const canPublishGroup = groupPublishChecklist.every((item) => item.ready);
     const canPublishVariant = variantPublishChecklist.every((item) => item.ready);
 
-    const loadFinishImages = useCallback(async (client: SupabaseClient, groupId: number, preferredImageId?: number) => {
+    const isAnySaving =
+        isSavingGroup || isSavingVariant || isSavingFinishImage || savingCapabilityId !== null;
+
+    const setCurrentGroupId = useCallback((id: number | null) => {
+        selectedGroupIdRef.current = id;
+        setSelectedGroupId(id);
+    }, []);
+
+    const setCurrentVariantId = useCallback((id: number | null) => {
+        selectedVariantIdRef.current = id;
+        setSelectedVariantId(id);
+    }, []);
+
+    const setCurrentImageId = useCallback((id: number | null) => {
+        selectedImageIdRef.current = id;
+        setSelectedImageId(id);
+    }, []);
+
+    function getCurrentStoneEditors(): StoneEditorSelection {
+        return {
+            variantId: selectedVariantIdRef.current,
+            imageId: selectedImageIdRef.current,
+        };
+    }
+
+    function isCurrentGroupSelection(
+        groupId: number,
+        groupGeneration: number,
+        expectedEditors?: StoneEditorSelection,
+    ) {
+        return (
+            groupSelectionGenerationRef.current === groupGeneration &&
+            selectedGroupIdRef.current === groupId &&
+            (!expectedEditors ||
+                (selectedVariantIdRef.current === expectedEditors.variantId &&
+                    selectedImageIdRef.current === expectedEditors.imageId))
+        );
+    }
+
+    function beginSaveOperation() {
+        if (activeSaveCountRef.current > 0) {
+            setError('Wait for the current save to finish before starting another change.');
+            return false;
+        }
+        activeSaveCountRef.current += 1;
+        return true;
+    }
+
+    function endSaveOperation() {
+        activeSaveCountRef.current = Math.max(0, activeSaveCountRef.current - 1);
+    }
+
+    function blockParentSwitchWhileSaving() {
+        if (activeSaveCountRef.current === 0) {
+            return false;
+        }
+        setError('Wait for the current save to finish before switching stone families or variants.');
+        return true;
+    }
+
+    const resetStoneChildren = useCallback(
+        (finishes: FinishDefinitionRow[]) => {
+            setVariants([]);
+            setCurrentVariantId(null);
+            setCurrentImageId(null);
+            setVariantForm(emptyVariantForm);
+            setCapabilityForms(createCapabilityForms(finishes, []));
+            setFinishImages([]);
+            setFinishImageForm(emptyFinishImageForm);
+        },
+        [setCurrentImageId, setCurrentVariantId],
+    );
+
+    const loadFinishImages = useCallback(async (
+        client: SupabaseClient,
+        groupId: number,
+        preferredImageId: number | undefined,
+        groupGeneration: number,
+        expectedEditors?: StoneEditorSelection,
+    ) => {
         const { data, error: imageError } = await client
             .from('stone_finish_images')
             .select(
@@ -312,10 +403,14 @@ function AdminStoneLibraryContent() {
 
         const nextImages = data ?? [];
         const nextImage = nextImages.find((image) => image.id === preferredImageId) ?? null;
+        if (!isCurrentGroupSelection(groupId, groupGeneration, expectedEditors)) {
+            return false;
+        }
         setFinishImages(nextImages);
-        setSelectedImageId(nextImage?.id ?? null);
+        setCurrentImageId(nextImage?.id ?? null);
         setFinishImageForm(rowToFinishImageForm(nextImage));
-    }, []);
+        return true;
+    }, [setCurrentImageId]);
 
     const loadVariantBundle = useCallback(
         async (
@@ -323,6 +418,8 @@ function AdminStoneLibraryContent() {
             groupId: number,
             preferredVariantId: number | null,
             finishes: FinishDefinitionRow[],
+            groupGeneration: number,
+            expectedEditors?: StoneEditorSelection,
         ) => {
             const { data: variantRows, error: variantError } = await client
                 .from('stone_variants')
@@ -338,17 +435,21 @@ function AdminStoneLibraryContent() {
                 throw new Error(variantError.message);
             }
 
+            if (!isCurrentGroupSelection(groupId, groupGeneration, expectedEditors)) {
+                return false;
+            }
+
             const nextVariants = variantRows ?? [];
             const nextVariant =
                 nextVariants.find((variant) => variant.id === preferredVariantId) ?? nextVariants[0] ?? null;
 
-            setVariants(nextVariants);
-            setSelectedVariantId(nextVariant?.id ?? null);
-            setVariantForm(rowToVariantForm(nextVariant));
-
             if (!nextVariant) {
+                setVariants(nextVariants);
+                variantSelectionGenerationRef.current += 1;
+                setCurrentVariantId(null);
+                setVariantForm(emptyVariantForm);
                 setCapabilityForms(createCapabilityForms(finishes, []));
-                return;
+                return true;
             }
 
             const { data: capabilityRows, error: capabilityError } = await client
@@ -363,9 +464,18 @@ function AdminStoneLibraryContent() {
                 throw new Error(capabilityError.message);
             }
 
+            if (!isCurrentGroupSelection(groupId, groupGeneration, expectedEditors)) {
+                return false;
+            }
+
+            setVariants(nextVariants);
+            variantSelectionGenerationRef.current += 1;
+            setCurrentVariantId(nextVariant.id);
+            setVariantForm(rowToVariantForm(nextVariant));
             setCapabilityForms(createCapabilityForms(finishes, capabilityRows ?? []));
+            return true;
         },
-        [],
+        [setCurrentVariantId],
     );
 
     const loadLibrary = useCallback(
@@ -375,6 +485,9 @@ function AdminStoneLibraryContent() {
             }
 
             const client: SupabaseClient = supabase;
+            const libraryGeneration = ++libraryGenerationRef.current;
+            const groupGeneration = ++groupSelectionGenerationRef.current;
+            variantSelectionGenerationRef.current += 1;
             setIsLoading(true);
             setError(null);
 
@@ -400,6 +513,10 @@ function AdminStoneLibraryContent() {
                     .limit(160)
                     .returns<MediaAssetOption[]>(),
             ]);
+
+            if (libraryGeneration !== libraryGenerationRef.current) {
+                return;
+            }
 
             if (groupsResult.error) {
                 setError(groupsResult.error.message);
@@ -428,35 +545,40 @@ function AdminStoneLibraryContent() {
             setGroups(nextGroups);
             setFinishDefinitions(finishes);
             setMediaAssets(media);
-            setSelectedGroupId(nextGroup?.id ?? null);
+            setCurrentGroupId(nextGroup?.id ?? null);
             setGroupForm(rowToGroupForm(nextGroup));
 
             if (!nextGroup) {
-                setVariants([]);
-                setSelectedVariantId(null);
-                setSelectedImageId(null);
-                setVariantForm(emptyVariantForm);
-                setCapabilityForms(createCapabilityForms(finishes, []));
-                setFinishImages([]);
-                setFinishImageForm(emptyFinishImageForm);
+                resetStoneChildren(finishes);
                 setIsLoading(false);
                 return;
             }
 
             try {
-                await loadVariantBundle(client, nextGroup.id, null, finishes);
-                await loadFinishImages(client, nextGroup.id);
+                await Promise.all([
+                    loadVariantBundle(client, nextGroup.id, null, finishes, groupGeneration),
+                    loadFinishImages(client, nextGroup.id, undefined, groupGeneration),
+                ]);
             } catch (loadError) {
-                setError(loadError instanceof Error ? loadError.message : 'Stone Library detail load failed.');
+                if (isCurrentGroupSelection(nextGroup.id, groupGeneration)) {
+                    setError(loadError instanceof Error ? loadError.message : 'Stone Library detail load failed.');
+                }
             }
 
-            setIsLoading(false);
+            if (libraryGeneration === libraryGenerationRef.current) {
+                setIsLoading(false);
+            }
         },
-        [loadFinishImages, loadVariantBundle],
+        [loadFinishImages, loadVariantBundle, resetStoneChildren, setCurrentGroupId],
     );
 
     useEffect(() => {
         void loadLibrary();
+        return () => {
+            libraryGenerationRef.current += 1;
+            groupSelectionGenerationRef.current += 1;
+            variantSelectionGenerationRef.current += 1;
+        };
     }, [loadLibrary]);
 
     function updateGroupField<Key extends keyof StoneGroupFormState>(
@@ -499,69 +621,138 @@ function AdminStoneLibraryContent() {
     }
 
     async function selectGroup(group: StoneGroupRow) {
-        setSelectedGroupId(group.id);
+        if (blockParentSwitchWhileSaving()) {
+            return;
+        }
+        if (!supabase) {
+            return;
+        }
+
+        const groupGeneration = ++groupSelectionGenerationRef.current;
+        variantSelectionGenerationRef.current += 1;
+        setIsLoading(true);
+        setCurrentGroupId(group.id);
         setGroupForm(rowToGroupForm(group));
+        resetStoneChildren(finishDefinitions);
         setError(null);
         setNotice(null);
 
-        if (supabase) {
-            try {
-                await loadVariantBundle(supabase, group.id, null, finishDefinitions);
-                await loadFinishImages(supabase, group.id);
-            } catch (loadError) {
+        try {
+            await Promise.all([
+                loadVariantBundle(supabase, group.id, null, finishDefinitions, groupGeneration),
+                loadFinishImages(supabase, group.id, undefined, groupGeneration),
+            ]);
+        } catch (loadError) {
+            if (isCurrentGroupSelection(group.id, groupGeneration)) {
                 setError(loadError instanceof Error ? loadError.message : 'Stone Library detail load failed.');
+            }
+        } finally {
+            if (isCurrentGroupSelection(group.id, groupGeneration)) {
+                setIsLoading(false);
             }
         }
     }
 
     async function selectVariant(variant: StoneVariantRow) {
-        setSelectedVariantId(variant.id);
-        setSelectedImageId(null);
-        setVariantForm(rowToVariantForm(variant));
-        setFinishImageForm(emptyFinishImageForm);
-        setError(null);
-        setNotice(null);
-
+        if (blockParentSwitchWhileSaving()) {
+            return;
+        }
         if (!supabase) {
             return;
         }
 
-        const { data, error: capabilityError } = await supabase
-            .from('stone_finish_capabilities')
-            .select('id,stone_variant_id,finish_definition_id,capability,sources,behavior_note,admin_note,updated_at')
-            .eq('stone_variant_id', variant.id)
-            .returns<CapabilityRow[]>();
-
-        if (capabilityError) {
-            setError(capabilityError.message);
+        const groupId = selectedGroupIdRef.current;
+        if (groupId === null || variant.stone_group_id !== groupId) {
+            setError('That variant no longer belongs to the selected stone family. Reload and try again.');
             return;
         }
 
-        setCapabilityForms(createCapabilityForms(finishDefinitions, data ?? []));
+        const groupGeneration = groupSelectionGenerationRef.current;
+        const variantGeneration = ++variantSelectionGenerationRef.current;
+        setIsLoading(true);
+        setCurrentVariantId(variant.id);
+        setCurrentImageId(null);
+        setVariantForm(rowToVariantForm(variant));
+        setCapabilityForms(createCapabilityForms(finishDefinitions, []));
+        setFinishImageForm(emptyFinishImageForm);
+        setError(null);
+        setNotice(null);
+
+        try {
+            const { data, error: capabilityError } = await supabase
+                .from('stone_finish_capabilities')
+                .select('id,stone_variant_id,finish_definition_id,capability,sources,behavior_note,admin_note,updated_at')
+                .eq('stone_variant_id', variant.id)
+                .returns<CapabilityRow[]>();
+
+            if (capabilityError) {
+                if (
+                    isCurrentGroupSelection(groupId, groupGeneration) &&
+                    variantSelectionGenerationRef.current === variantGeneration &&
+                    selectedVariantIdRef.current === variant.id
+                ) {
+                    setError(capabilityError.message);
+                }
+                return;
+            }
+
+            if (
+                isCurrentGroupSelection(groupId, groupGeneration) &&
+                variantSelectionGenerationRef.current === variantGeneration &&
+                selectedVariantIdRef.current === variant.id
+            ) {
+                setCapabilityForms(createCapabilityForms(finishDefinitions, data ?? []));
+            }
+        } catch (loadError) {
+            if (
+                isCurrentGroupSelection(groupId, groupGeneration) &&
+                variantSelectionGenerationRef.current === variantGeneration &&
+                selectedVariantIdRef.current === variant.id
+            ) {
+                setError(loadError instanceof Error ? loadError.message : 'Finish availability failed to load.');
+            }
+        } finally {
+            if (
+                isCurrentGroupSelection(groupId, groupGeneration) &&
+                variantSelectionGenerationRef.current === variantGeneration &&
+                selectedVariantIdRef.current === variant.id
+            ) {
+                setIsLoading(false);
+            }
+        }
     }
 
     function startNewGroup() {
-        setSelectedGroupId(null);
-        setSelectedVariantId(null);
-        setSelectedImageId(null);
+        if (isLoading) {
+            setNotice('Wait for the Stone Library to finish loading before starting a new stone family.');
+            return;
+        }
+        if (blockParentSwitchWhileSaving()) {
+            return;
+        }
+
+        groupSelectionGenerationRef.current += 1;
+        variantSelectionGenerationRef.current += 1;
+        setCurrentGroupId(null);
         setGroupForm(emptyGroupForm);
-        setVariantForm(emptyVariantForm);
-        setVariants([]);
-        setCapabilityForms(createCapabilityForms(finishDefinitions, []));
-        setFinishImages([]);
-        setFinishImageForm(emptyFinishImageForm);
+        resetStoneChildren(finishDefinitions);
         setError(null);
         setNotice('New stone group started.');
     }
 
     function startNewVariant() {
+        if (blockParentSwitchWhileSaving()) {
+            return;
+        }
+
         if (!selectedGroup) {
             setError('Create or select a stone group before adding variants.');
             return;
         }
 
-        setSelectedVariantId(null);
-        setSelectedImageId(null);
+        variantSelectionGenerationRef.current += 1;
+        setCurrentVariantId(null);
+        setCurrentImageId(null);
         setVariantForm(emptyVariantForm);
         setCapabilityForms(createCapabilityForms(finishDefinitions, []));
         setFinishImageForm(emptyFinishImageForm);
@@ -570,7 +761,14 @@ function AdminStoneLibraryContent() {
     }
 
     function selectFinishImage(image: StoneFinishImageRow) {
-        setSelectedImageId(image.id);
+        if (
+            image.stone_group_id !== selectedGroupIdRef.current ||
+            image.stone_variant_id !== selectedVariantIdRef.current
+        ) {
+            setError('That finish image no longer belongs to the selected stone and variant. Reload and try again.');
+            return;
+        }
+        setCurrentImageId(image.id);
         setFinishImageForm(rowToFinishImageForm(image));
         setError(null);
         setNotice(null);
@@ -582,7 +780,7 @@ function AdminStoneLibraryContent() {
             return;
         }
 
-        setSelectedImageId(null);
+        setCurrentImageId(null);
         setFinishImageForm({
             ...emptyFinishImageForm,
             finishDefinitionId: finishDefinitions[0] ? String(finishDefinitions[0].id) : '',
@@ -627,6 +825,11 @@ function AdminStoneLibraryContent() {
             return;
         }
 
+        if (!beginSaveOperation()) return;
+
+        const client: SupabaseClient = supabase;
+        const operationGroupId = selectedGroupIdRef.current;
+
         const now = new Date().toISOString();
         const payload = {
             stone_group_key: groupForm.stoneGroupKey.trim(),
@@ -655,56 +858,68 @@ function AdminStoneLibraryContent() {
         setError(null);
         setNotice(null);
 
-        const response = selectedGroupId
-            ? await supabase
-                  .from('stone_groups')
-                  .update(payload)
-                  .eq('id', selectedGroupId)
-                  .select(
-                      'id,stone_group_key,display_name,source_name,status,stone_type_source,stone_type_display,origin_region,origin_country,price_source,price_tier,raw_block_length_mm,raw_block_width_mm,raw_block_height_mm,summary,notes,sort_order,published_at,archived_at,updated_at,created_at',
-                  )
-                  .single<StoneGroupRow>()
-            : await supabase
-                  .from('stone_groups')
-                  .insert({ ...payload, created_by: user.id })
-                  .select(
-                      'id,stone_group_key,display_name,source_name,status,stone_type_source,stone_type_display,origin_region,origin_country,price_source,price_tier,raw_block_length_mm,raw_block_width_mm,raw_block_height_mm,summary,notes,sort_order,published_at,archived_at,updated_at,created_at',
-                  )
-                  .single<StoneGroupRow>();
+        try {
+            const response = operationGroupId
+                ? await client
+                      .from('stone_groups')
+                      .update(payload)
+                      .eq('id', operationGroupId)
+                      .select(
+                          'id,stone_group_key,display_name,source_name,status,stone_type_source,stone_type_display,origin_region,origin_country,price_source,price_tier,raw_block_length_mm,raw_block_width_mm,raw_block_height_mm,summary,notes,sort_order,published_at,archived_at,updated_at,created_at',
+                      )
+                      .single<StoneGroupRow>()
+                : await client
+                      .from('stone_groups')
+                      .insert({ ...payload, created_by: user.id })
+                      .select(
+                          'id,stone_group_key,display_name,source_name,status,stone_type_source,stone_type_display,origin_region,origin_country,price_source,price_tier,raw_block_length_mm,raw_block_width_mm,raw_block_height_mm,summary,notes,sort_order,published_at,archived_at,updated_at,created_at',
+                      )
+                      .single<StoneGroupRow>();
 
-        setIsSavingGroup(false);
+            if (response.error) {
+                if (selectedGroupIdRef.current === operationGroupId) setError(response.error.message);
+                return;
+            }
 
-        if (response.error) {
-            setError(response.error.message);
-            return;
+            const auditError = await recordAdminAuditEvent(client, {
+                actorUserId: user.id,
+                action: operationGroupId
+                    ? nextStatus === 'published'
+                        ? 'stone_group.publish'
+                        : nextStatus === 'archived'
+                          ? 'stone_group.archive'
+                          : 'stone_group.update'
+                    : 'stone_group.create',
+                entityType: 'stone_groups',
+                entityId: response.data.id,
+                metadata: { key: response.data.stone_group_key, status: response.data.status },
+            });
+            if (selectedGroupIdRef.current !== operationGroupId) return;
+            setNotice(
+                withAuditNotice(nextStatus === 'published' ? 'Stone group published.' : 'Stone group saved.', auditError),
+            );
+            await loadLibrary(response.data.id);
+        } catch (saveError) {
+            if (selectedGroupIdRef.current === operationGroupId) {
+                setError(saveError instanceof Error ? saveError.message : 'Stone family save failed.');
+            }
+        } finally {
+            endSaveOperation();
+            setIsSavingGroup(false);
         }
-
-        const auditError = await recordAdminAuditEvent(supabase, {
-            actorUserId: user.id,
-            action: selectedGroupId
-                ? nextStatus === 'published'
-                    ? 'stone_group.publish'
-                    : nextStatus === 'archived'
-                      ? 'stone_group.archive'
-                      : 'stone_group.update'
-                : 'stone_group.create',
-            entityType: 'stone_groups',
-            entityId: response.data.id,
-            metadata: {
-                key: response.data.stone_group_key,
-                status: response.data.status,
-            },
-        });
-        setNotice(
-            withAuditNotice(nextStatus === 'published' ? 'Stone group published.' : 'Stone group saved.', auditError),
-        );
-        await loadLibrary(response.data.id);
     }
 
     async function saveVariant(nextStatus: StoneStatus) {
         if (!supabase || !canEdit || !user || !selectedGroup) {
             return;
         }
+
+        const operation = {
+            groupId: selectedGroup.id,
+            rowId: selectedVariantIdRef.current,
+            editors: getCurrentStoneEditors(),
+        };
+        if (selectedGroupIdRef.current !== operation.groupId) return;
 
         if (nextStatus === 'published' && !canPublishVariant) {
             setError('Complete the variant publish checklist before publishing this variant.');
@@ -717,9 +932,13 @@ function AdminStoneLibraryContent() {
             return;
         }
 
+        if (!beginSaveOperation()) return;
+
+        const client: SupabaseClient = supabase;
+
         const now = new Date().toISOString();
         const payload = {
-            stone_group_id: selectedGroup.id,
+            stone_group_id: operation.groupId,
             variant_key: variantForm.variantKey.trim(),
             display_name: variantForm.displayName.trim() || null,
             source_variant: variantForm.sourceVariant.trim() || null,
@@ -736,50 +955,72 @@ function AdminStoneLibraryContent() {
         setError(null);
         setNotice(null);
 
-        const response = selectedVariantId
-            ? await supabase
-                  .from('stone_variants')
-                  .update(payload)
-                  .eq('id', selectedVariantId)
-                  .select(
-                      'id,stone_group_id,variant_key,display_name,source_variant,variant_type,status,sort_order,published_at,archived_at,updated_at,created_at',
-                  )
-                  .single<StoneVariantRow>()
-            : await supabase
-                  .from('stone_variants')
-                  .insert({ ...payload, created_by: user.id })
-                  .select(
-                      'id,stone_group_id,variant_key,display_name,source_variant,variant_type,status,sort_order,published_at,archived_at,updated_at,created_at',
-                  )
-                  .single<StoneVariantRow>();
+        try {
+            const response = operation.rowId
+                ? await client
+                      .from('stone_variants')
+                      .update(payload)
+                      .eq('id', operation.rowId)
+                      .eq('stone_group_id', operation.groupId)
+                      .select(
+                          'id,stone_group_id,variant_key,display_name,source_variant,variant_type,status,sort_order,published_at,archived_at,updated_at,created_at',
+                      )
+                      .single<StoneVariantRow>()
+                : await client
+                      .from('stone_variants')
+                      .insert({ ...payload, created_by: user.id })
+                      .select(
+                          'id,stone_group_id,variant_key,display_name,source_variant,variant_type,status,sort_order,published_at,archived_at,updated_at,created_at',
+                      )
+                      .single<StoneVariantRow>();
 
-        setIsSavingVariant(false);
+            if (response.error) {
+                if (
+                    selectedGroupIdRef.current === operation.groupId &&
+                    selectedVariantIdRef.current === operation.rowId
+                ) setError(response.error.message);
+                return;
+            }
 
-        if (response.error) {
-            setError(response.error.message);
-            return;
+            const auditError = await recordAdminAuditEvent(client, {
+                actorUserId: user.id,
+                action: operation.rowId
+                    ? nextStatus === 'published'
+                        ? 'stone_variant.publish'
+                        : nextStatus === 'archived'
+                          ? 'stone_variant.archive'
+                          : 'stone_variant.update'
+                    : 'stone_variant.create',
+                entityType: 'stone_variants',
+                entityId: response.data.id,
+                metadata: {
+                    stoneGroupId: response.data.stone_group_id,
+                    key: response.data.variant_key,
+                    status: response.data.status,
+                },
+            });
+            if (
+                selectedGroupIdRef.current !== operation.groupId ||
+                selectedVariantIdRef.current !== operation.rowId
+            ) return;
+            setNotice(withAuditNotice(nextStatus === 'published' ? 'Variant published.' : 'Variant saved.', auditError));
+            await loadVariantBundle(
+                client,
+                operation.groupId,
+                response.data.id,
+                finishDefinitions,
+                groupSelectionGenerationRef.current,
+                operation.editors,
+            );
+        } catch (saveError) {
+            if (
+                selectedGroupIdRef.current === operation.groupId &&
+                selectedVariantIdRef.current === operation.rowId
+            ) setError(saveError instanceof Error ? saveError.message : 'Variant save failed.');
+        } finally {
+            endSaveOperation();
+            setIsSavingVariant(false);
         }
-
-        const auditError = await recordAdminAuditEvent(supabase, {
-            actorUserId: user.id,
-            action: selectedVariantId
-                ? nextStatus === 'published'
-                    ? 'stone_variant.publish'
-                    : nextStatus === 'archived'
-                      ? 'stone_variant.archive'
-                      : 'stone_variant.update'
-                : 'stone_variant.create',
-            entityType: 'stone_variants',
-            entityId: response.data.id,
-            metadata: {
-                stoneGroupId: response.data.stone_group_id,
-                key: response.data.variant_key,
-                status: response.data.status,
-            },
-        });
-        setNotice(withAuditNotice(nextStatus === 'published' ? 'Variant published.' : 'Variant saved.', auditError));
-        await loadVariantBundle(supabase, selectedGroup.id, response.data.id, finishDefinitions);
-        await loadFinishImages(supabase, selectedGroup.id);
     }
 
     async function saveCapability(finish: FinishDefinitionRow) {
@@ -788,10 +1029,20 @@ function AdminStoneLibraryContent() {
         }
 
         const form = capabilityForms[finish.id] ?? emptyCapabilityForm();
+        const operation = {
+            groupId: selectedGroupIdRef.current,
+            variantId: selectedVariant.id,
+            finishId: finish.id,
+            rowId: form.id,
+        };
+        if (operation.groupId === null || selectedVariant.stone_group_id !== operation.groupId) return;
+        if (!beginSaveOperation()) return;
+
+        const client: SupabaseClient = supabase;
         const sources = parseSources(form.sourcesText);
         const payload = {
-            stone_variant_id: selectedVariant.id,
-            finish_definition_id: finish.id,
+            stone_variant_id: operation.variantId,
+            finish_definition_id: operation.finishId,
             capability: form.capability,
             sources,
             behavior_note: form.behaviorNote.trim() || null,
@@ -803,33 +1054,34 @@ function AdminStoneLibraryContent() {
         setError(null);
         setNotice(null);
 
-        const response = form.id
-            ? await supabase
+        const response = operation.rowId
+            ? await client
                   .from('stone_finish_capabilities')
                   .update(payload)
-                  .eq('id', form.id)
+                  .eq('id', operation.rowId)
+                  .eq('stone_variant_id', operation.variantId)
+                  .eq('finish_definition_id', operation.finishId)
                   .select('id,stone_variant_id,finish_definition_id,capability,sources,behavior_note,admin_note,updated_at')
                   .single<CapabilityRow>()
-            : await supabase
+            : await client
                   .from('stone_finish_capabilities')
                   .insert({ ...payload, created_by: user.id })
                   .select('id,stone_variant_id,finish_definition_id,capability,sources,behavior_note,admin_note,updated_at')
                   .single<CapabilityRow>();
 
-        setSavingCapabilityId(null);
-
         if (response.error) {
-            setError(response.error.message);
+            if (
+                selectedGroupIdRef.current === operation.groupId &&
+                selectedVariantIdRef.current === operation.variantId
+            ) setError(response.error.message);
+            endSaveOperation();
+            setSavingCapabilityId(null);
             return;
         }
 
-        setCapabilityForms((current) => ({
-            ...current,
-            [finish.id]: rowToCapabilityForm(response.data),
-        }));
-        const auditError = await recordAdminAuditEvent(supabase, {
+        const auditError = await recordAdminAuditEvent(client, {
             actorUserId: user.id,
-            action: form.id ? 'stone_finish_capability.update' : 'stone_finish_capability.create',
+            action: operation.rowId ? 'stone_finish_capability.update' : 'stone_finish_capability.create',
             entityType: 'stone_finish_capabilities',
             entityId: response.data.id,
             metadata: {
@@ -838,13 +1090,36 @@ function AdminStoneLibraryContent() {
                 capability: response.data.capability,
             },
         });
-        setNotice(withAuditNotice(`${finish.display_name} capability saved.`, auditError));
+        if (
+            selectedGroupIdRef.current === operation.groupId &&
+            selectedVariantIdRef.current === operation.variantId
+        ) {
+            setCapabilityForms((current) => ({
+                ...current,
+                [operation.finishId]: rowToCapabilityForm(response.data),
+            }));
+            setNotice(withAuditNotice(`${finish.display_name} capability saved.`, auditError));
+        }
+        endSaveOperation();
+        setSavingCapabilityId(null);
     }
 
     async function saveFinishImage(nextStatus: FinishImageStatus) {
         if (!supabase || !canEdit || !user || !selectedGroup || !selectedVariant) {
             return;
         }
+
+        const operation = {
+            groupId: selectedGroup.id,
+            variantId: selectedVariant.id,
+            rowId: selectedImageIdRef.current,
+            editors: getCurrentStoneEditors(),
+        };
+        if (
+            selectedGroupIdRef.current !== operation.groupId ||
+            selectedVariantIdRef.current !== operation.variantId ||
+            selectedVariant.stone_group_id !== operation.groupId
+        ) return;
 
         const validation = validateFinishImageForm({ ...finishImageForm, status: nextStatus });
         if (validation.error) {
@@ -860,11 +1135,24 @@ function AdminStoneLibraryContent() {
             return;
         }
 
+        if (!beginSaveOperation()) return;
+
+        const client: SupabaseClient = supabase;
+
         const now = new Date().toISOString();
-        const selectedImage = finishImages.find((image) => image.id === selectedImageId) ?? null;
+        const selectedImage = finishImages.find((image) => image.id === operation.rowId) ?? null;
+        if (
+            selectedImage &&
+            (selectedImage.stone_group_id !== operation.groupId ||
+                selectedImage.stone_variant_id !== operation.variantId)
+        ) {
+            endSaveOperation();
+            setError('That finish image no longer belongs to the selected stone and variant. Reload and try again.');
+            return;
+        }
         const payload = {
-            stone_group_id: selectedGroup.id,
-            stone_variant_id: selectedVariant.id,
+            stone_group_id: operation.groupId,
+            stone_variant_id: operation.variantId,
             finish_definition_id: validation.finishDefinitionId,
             media_asset_id: validation.mediaAssetId,
             image_role: finishImageForm.imageRole,
@@ -880,16 +1168,18 @@ function AdminStoneLibraryContent() {
         setError(null);
         setNotice(null);
 
-        const response = selectedImageId
-            ? await supabase
+        const response = operation.rowId
+            ? await client
                   .from('stone_finish_images')
                   .update(payload)
-                  .eq('id', selectedImageId)
+                  .eq('id', operation.rowId)
+                  .eq('stone_group_id', operation.groupId)
+                  .eq('stone_variant_id', operation.variantId)
                   .select(
                       'id,stone_group_id,stone_variant_id,finish_definition_id,media_asset_id,image_role,sort_order,status,published_at,archived_at,updated_at',
                   )
                   .single<StoneFinishImageRow>()
-            : await supabase
+            : await client
                   .from('stone_finish_images')
                   .insert({ ...payload, created_by: user.id })
                   .select(
@@ -897,16 +1187,20 @@ function AdminStoneLibraryContent() {
                   )
                   .single<StoneFinishImageRow>();
 
-        setIsSavingFinishImage(false);
-
         if (response.error) {
-            setError(response.error.message);
+            if (
+                selectedGroupIdRef.current === operation.groupId &&
+                selectedVariantIdRef.current === operation.variantId &&
+                selectedImageIdRef.current === operation.rowId
+            ) setError(response.error.message);
+            endSaveOperation();
+            setIsSavingFinishImage(false);
             return;
         }
 
-        const auditError = await recordAdminAuditEvent(supabase, {
+        const auditError = await recordAdminAuditEvent(client, {
             actorUserId: user.id,
-            action: selectedImageId
+            action: operation.rowId
                 ? nextStatus === 'published'
                     ? 'stone_finish_image.publish'
                     : nextStatus === 'archived'
@@ -924,13 +1218,27 @@ function AdminStoneLibraryContent() {
                 status: response.data.status,
             },
         });
-        setNotice(
-            withAuditNotice(
-                nextStatus === 'published' ? 'Finish image published.' : 'Finish image link saved.',
-                auditError,
-            ),
-        );
-        await loadFinishImages(supabase, selectedGroup.id, response.data.id);
+        if (
+            selectedGroupIdRef.current === operation.groupId &&
+            selectedVariantIdRef.current === operation.variantId &&
+            selectedImageIdRef.current === operation.rowId
+        ) {
+            setNotice(
+                withAuditNotice(
+                    nextStatus === 'published' ? 'Finish image published.' : 'Finish image link saved.',
+                    auditError,
+                ),
+            );
+            await loadFinishImages(
+                client,
+                operation.groupId,
+                response.data.id,
+                groupSelectionGenerationRef.current,
+                operation.editors,
+            );
+        }
+        endSaveOperation();
+        setIsSavingFinishImage(false);
     }
 
     return (
@@ -941,7 +1249,7 @@ function AdminStoneLibraryContent() {
                 <button
                     type="button"
                     onClick={startNewGroup}
-                    disabled={!canEdit}
+                    disabled={!canEdit || isLoading || isAnySaving}
                     className="inline-flex min-h-10 items-center gap-2 rounded border border-black/15 bg-white px-3 text-xs font-bold uppercase tracking-[0.12em] text-black transition hover:border-black disabled:cursor-not-allowed disabled:text-black/35"
                 >
                     <Plus className="h-4 w-4" />
@@ -949,7 +1257,14 @@ function AdminStoneLibraryContent() {
                 </button>
             }
         >
-            <div className="grid gap-5 xl:grid-cols-[minmax(280px,390px)_minmax(0,1fr)_360px]">
+            <div
+                className={[
+                    'grid gap-5 xl:grid-cols-[minmax(280px,390px)_minmax(0,1fr)_360px]',
+                    isLoading ? 'opacity-60' : '',
+                ].join(' ')}
+                aria-busy={isLoading}
+                inert={isLoading}
+            >
                 <section className="border border-black/10 bg-white">
                     <div className="border-b border-black/10 p-4">
                         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-black/45">
@@ -1015,8 +1330,9 @@ function AdminStoneLibraryContent() {
                                         key={group.id}
                                         type="button"
                                         onClick={() => void selectGroup(group)}
+                                        disabled={isAnySaving}
                                         className={[
-                                            'block w-full p-4 text-left transition hover:bg-[#f8f9f5]',
+                                            'block w-full p-4 text-left transition hover:bg-[#f8f9f5] disabled:cursor-wait disabled:opacity-55',
                                             selectedGroupId === group.id ? 'bg-[#f8f9f5]' : 'bg-white',
                                         ].join(' ')}
                                     >
@@ -1283,7 +1599,7 @@ function AdminStoneLibraryContent() {
                             <button
                                 type="button"
                                 onClick={startNewVariant}
-                                disabled={!canEdit || !selectedGroup}
+                                disabled={!canEdit || !selectedGroup || isAnySaving}
                                 className="inline-flex min-h-10 items-center gap-2 rounded border border-black/15 bg-white px-3 text-xs font-bold uppercase tracking-[0.12em] text-black transition hover:border-black disabled:cursor-not-allowed disabled:text-black/35"
                             >
                                 <Plus className="h-4 w-4" />
@@ -1297,8 +1613,9 @@ function AdminStoneLibraryContent() {
                                     key={variant.id}
                                     type="button"
                                     onClick={() => void selectVariant(variant)}
+                                    disabled={isAnySaving}
                                     className={[
-                                        'inline-flex min-h-9 items-center gap-2 rounded border px-3 text-xs font-bold uppercase tracking-[0.12em] transition',
+                                        'inline-flex min-h-9 items-center gap-2 rounded border px-3 text-xs font-bold uppercase tracking-[0.12em] transition disabled:cursor-wait disabled:opacity-55',
                                         selectedVariantId === variant.id
                                             ? 'border-black bg-black text-white'
                                             : 'border-black/15 bg-white text-black/58 hover:border-black hover:text-black',
@@ -1618,7 +1935,7 @@ function AdminStoneLibraryContent() {
                             <li>Published finish images require a selected finish and a Media library item that is Published in Media.</li>
                             <li>Needs confirmation stays visible to editors until the stone or finish is ready for the website.</li>
                             <li>Viewers can inspect the Stone Library but cannot save changes.</li>
-                            <li>Use Archive to remove a stone from the website while keeping its editing history.</li>
+                            <li>Archive hides the CMS version. A matching legacy stone can remain visible during migration until CMS-only cutover.</li>
                         </ul>
                     </section>
 
@@ -1780,7 +2097,7 @@ function StoneStatusHelp({ status }: { status: StoneStatus }) {
         draft: 'Draft is safe to edit and will not appear on the public website.',
         tbc: 'Needs confirmation stays visible in the CMS, but is treated like Draft for public pages.',
         published: 'Published can appear in the public Stone Library and linked product material choices.',
-        archived: 'Archived is hidden from the public website and kept for editing history.',
+        archived: 'The Archived CMS version is hidden and kept for history; a matching legacy stone may remain visible during migration.',
     };
 
     return (

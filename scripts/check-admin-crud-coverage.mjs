@@ -9,6 +9,7 @@ const notes = [];
 
 const requiredAdminRoutes = [
   { path: 'index', component: 'AdminDashboardPage' },
+  { path: 'account-setup', component: 'AdminAccountSetupPage' },
   { path: 'login', component: 'AdminLoginPage' },
   { path: 'unauthorized', component: 'AdminUnauthorizedPage' },
   { path: 'leads', component: 'AdminLeadsPage' },
@@ -127,8 +128,9 @@ const pageChecks = [
       'CMS access handoff actions',
       'Use Invite and grant access for a new editor. Use Grant existing login only when the person already has a login setup code.',
       'Choose the lowest role',
-      'Global contact and search defaults',
-      'Search defaults',
+      'Global contact and homepage search settings',
+      'Homepage search settings',
+      'Homepage title and description apply only to the homepage.',
       'People and access',
       'CMS team access is restricted to CMS managers and website owners.',
       'Active access',
@@ -168,7 +170,7 @@ const pageChecks = [
       'media_assets.export_manifest',
     ],
     requiredText: [
-      'supabase.storage.from(uploadBucket).upload',
+      'supabase.storage.from(PRIVATE_MEDIA_BUCKET).upload',
       'urblo-admin-media',
       'urblo-public-media',
       'Publish checklist',
@@ -200,7 +202,13 @@ const pageChecks = [
       'visible media library items',
       'Untitled uploaded',
       'Untitled ${formatSourceKind(asset.source_kind).toLowerCase()} media',
-      'Uploads create a draft media item.',
+      'Every upload starts in the Private draft library.',
+      'Draft files are never uploaded directly into the public bucket.',
+      'metadataConfirmedByReadback',
+      'removePublicObjectIfUnreferenced',
+      'removePrivatePromotionSourceIfUnreferenced',
+      "eq('updated_at', privateStoragePromotion.originalUpdatedAt)",
+      'sourcePathBoundToSelectedRecord: true',
       'CSV manifest exports are recorded in Change history and include only visible media items.',
       'Viewer roles can inspect but not change media items.',
       'Media actions',
@@ -292,7 +300,7 @@ const pageChecks = [
       'Ask a CMS editor to update stone content.',
       'Stone type proof note',
       'Pricing note',
-      'Use Archive to remove a stone from the website while keeping its editing history.',
+      'Archive hides the CMS version. A matching legacy stone can remain visible during migration until CMS-only cutover.',
       'Needs confirmation stays visible in the CMS, but is treated like Draft for public pages.',
       'Published Stone Library content can appear in public stone listings and product material links.',
     ],
@@ -361,7 +369,7 @@ const pageChecks = [
     ],
     requiredText: [
       'Current role is read-only for Projects',
-      'Use Archive to remove a project from the website while keeping its editing history.',
+      'Archive hides the CMS version. A matching legacy project can remain visible during migration until CMS-only cutover.',
       'Media blocks',
       'Drag point placement',
       'CmsPublicPageLink',
@@ -504,7 +512,7 @@ const pageChecks = [
       'This Media library item can support a public product image.',
       'Nothing added yet.',
       'Publishing rules',
-      'Use Archive to remove a product from the website while keeping its editing history.',
+      'Archive hides the CMS version. A matching legacy product can remain visible during migration until CMS-only cutover.',
       'Published in Media',
       'Draft is safe to edit and will not appear on the public website.',
     ],
@@ -585,7 +593,7 @@ const pageChecks = [
       'Publishing rules',
       'Published in Media',
       'Draft is safe to edit and will not appear on the public website.',
-      'Use Archive to remove an article from the website while keeping its editing history.',
+      'Archive hides the CMS version. A matching legacy article can remain visible during migration until CMS-only cutover.',
     ],
     forbiddenText: [
       'Legacy source path',
@@ -840,6 +848,7 @@ function checkRoutes() {
   const content = readRequired('src/pages/admin/adminContent.ts');
   const requireAdmin = readRequired('src/pages/admin/RequireAdmin.tsx');
   const login = readRequired('src/pages/admin/AdminLoginPage.tsx');
+  const accountSetup = readRequired('src/pages/admin/AdminAccountSetupPage.tsx');
   const auth = readRequired('src/lib/adminAuth.tsx');
   const client = readRequired('src/lib/supabaseClient.ts');
   const audit = readRequired('src/lib/adminAudit.ts');
@@ -908,8 +917,44 @@ function checkRoutes() {
   requireIncludes(auth, 'supabase.auth.getUser()', 'src/lib/adminAuth.tsx');
   requireIncludes(auth, ".eq('user_id', verifiedUser.id)", 'src/lib/adminAuth.tsx');
   requireIncludes(auth, ".eq('is_active', true)", 'src/lib/adminAuth.tsx');
+  requireIncludes(auth, 'supabase.auth.onAuthStateChange', 'src/lib/adminAuth.tsx');
+  requireIncludes(auth, 'window.setTimeout', 'src/lib/adminAuth.tsx deferred auth refresh');
+  requireNotIncludes(
+    auth,
+    'supabase.auth.onAuthStateChange(() => {\n            void loadSession();',
+    'src/lib/adminAuth.tsx direct auth callback refresh',
+  );
   requireIncludes(client, 'VITE_SUPABASE_PUBLISHABLE_KEY', 'src/lib/supabaseClient.ts');
   requireIncludes(client, 'VITE_SUPABASE_ANON_KEY', 'src/lib/supabaseClient.ts');
+  requireIncludes(client, 'supabaseAuthRedirectContext', 'src/lib/supabaseClient.ts');
+  requireIncludes(client, 'clearCapturedSupabaseAuthRedirectFromAddressBar', 'src/lib/supabaseClient.ts callback address-bar cleanup');
+  requireIncludes(client, "url.searchParams.delete('code')", 'src/lib/supabaseClient.ts rejected PKCE code cleanup');
+  requireNotIncludes(client, 'detectSessionInUrl: true', 'src/lib/supabaseClient.ts shared callback consumption');
+  requireIncludes(client, 'verifySupabaseAuthRedirectSession', 'src/lib/supabaseClient.ts');
+  requireIncludes(client, 'isolatedClient.auth.setSession', 'src/lib/supabaseClient.ts isolated callback session');
+  requireIncludes(client, 'isolatedClient.auth.getUser()', 'src/lib/supabaseClient.ts isolated server-verified callback user');
+  requireIncludes(client, 'persistSession: false', 'src/lib/supabaseClient.ts non-persistent callback client');
+  requireIncludes(client, 'autoRefreshToken: false', 'src/lib/supabaseClient.ts callback auto-refresh boundary');
+  requireIncludes(client, 'detectSessionInUrl: false', 'src/lib/supabaseClient.ts callback URL-detection boundary');
+  requireIncludes(client, "flowType: 'implicit'", 'src/lib/supabaseClient.ts callback flow contract');
+  requireIncludes(client, 'redirectSession.client.auth.updateUser', 'src/lib/supabaseClient.ts isolated password update');
+  requireNotIncludes(client, 'supabase.auth.updateUser({ password })', 'src/lib/supabaseClient.ts shared-client password update');
+  requireIncludes(client, "value === 'invite' || value === 'recovery'", 'src/lib/supabaseClient.ts supported callback types');
+  requireIncludes(client, "type: hash.get('type')", 'src/lib/supabaseClient.ts implicit callback type source');
+  requireIncludes(client, 'updatePasswordFromSupabaseAuthRedirect', 'src/lib/supabaseClient.ts guarded password update');
+  requireNotIncludes(client, "url.searchParams.get('type')", 'src/lib/supabaseClient.ts query-string callback type spoofing');
+  requireNotIncludes(client, 'callbackUserId', 'src/lib/supabaseClient.ts user-only callback matching');
+  requireNotIncludes(client, 'readJwtSubject', 'src/lib/supabaseClient.ts unverified JWT parsing');
+  requireNotIncludes(client, 'window.atob', 'src/lib/supabaseClient.ts unverified JWT parsing');
+  requireNotIncludes(client, 'supabase.auth.getUser(accessToken)', 'src/lib/supabaseClient.ts shared-client callback verification');
+  requireIncludes(login, 'requestPasswordReset', 'src/pages/admin/AdminLoginPage.tsx');
+  requireIncludes(login, 'Forgot password?', 'src/pages/admin/AdminLoginPage.tsx');
+  requireIncludes(accountSetup, 'verifySupabaseAuthRedirectSession()', 'src/pages/admin/AdminAccountSetupPage.tsx');
+  requireIncludes(accountSetup, 'updatePasswordFromSupabaseAuthRedirect(password)', 'src/pages/admin/AdminAccountSetupPage.tsx');
+  requireIncludes(accountSetup, 'Sign in to Urblo Admin', 'src/pages/admin/AdminAccountSetupPage.tsx explicit post-setup sign-in');
+  requireNotIncludes(accountSetup, 'await auth.refresh()', 'src/pages/admin/AdminAccountSetupPage.tsx shared-session inference after password setup');
+  requireNotIncludes(accountSetup, 'supabase.auth.updateUser', 'src/pages/admin/AdminAccountSetupPage.tsx unguarded password update');
+  requireIncludes(accountSetup, 'This secure link cannot be used', 'src/pages/admin/AdminAccountSetupPage.tsx');
   requireIncludes(adminInviteRoute, 'handleAdminInviteUserRequest', 'functions/api/admin/invite-user.js');
   requireIncludes(adminInviteFunction, 'inviteUserByEmail', 'functions/_lib/admin-invite.js');
   requireIncludes(adminInviteFunction, 'getBearerToken', 'functions/_lib/admin-invite.js');
@@ -927,6 +972,9 @@ function checkRoutes() {
   requireIncludes(adminInviteFunction, 'SUPABASE_SERVICE_ROLE_KEY', 'functions/_lib/admin-invite.js');
   requireIncludes(adminInviteFunction, "source: 'functions/api/admin/invite-user.js'", 'functions/_lib/admin-invite.js');
   requireIncludes(adminInviteFunction, 'persistSession: false', 'functions/_lib/admin-invite.js');
+  requireIncludes(adminInviteFunction, 'detectSessionInUrl: false', 'functions/_lib/admin-invite.js');
+  requireIncludes(adminInviteFunction, '/admin/account-setup?mode=invite', 'functions/_lib/admin-invite.js');
+  requireIncludes(adminInviteFunction, 'supabase.auth.admin.deleteUser', 'functions/_lib/admin-invite.js');
 
   if (/SERVICE_ROLE|SUPABASE_SERVICE|service_role/.test(client)) {
     failures.push('src/lib/supabaseClient.ts: browser client must not reference service-role keys');
@@ -1246,13 +1294,13 @@ function checkDashboardEditorLanguage() {
   requireNotIncludes(media, 'Activity log recorded.', 'src/pages/admin/AdminMediaPage.tsx');
   requireIncludes(dashboard, 'handoffLabel', 'src/pages/admin/AdminDashboardPage.tsx');
   requireNotIncludes(content, 'dependency:', 'src/pages/admin/adminContent.ts editor module cards');
-  requireIncludes(shell, 'Published content can appear on the website. Draft and Archived stay hidden.', 'src/pages/admin/AdminShell.tsx');
-  requireIncludes(primitives, 'Draft content is safe to edit. Archived content stays hidden.', 'src/pages/admin/AdminCmsPrimitives.tsx');
+  requireIncludes(shell, 'A matching legacy page may remain', 'src/pages/admin/AdminShell.tsx migration visibility warning');
+  requireIncludes(primitives, 'a matching legacy static page', 'src/pages/admin/AdminCmsPrimitives.tsx migration visibility warning');
   requireIncludes(primitives, 'Can appear on website', 'src/pages/admin/AdminCmsPrimitives.tsx');
   requireIncludes(primitives, 'Safe to edit', 'src/pages/admin/AdminCmsPrimitives.tsx');
   requireIncludes(primitives, 'Hidden but kept', 'src/pages/admin/AdminCmsPrimitives.tsx');
   requireIncludes(primitives, 'editing history', 'src/pages/admin/AdminCmsPrimitives.tsx');
-  requireIncludes(primitives, 'This item is still Draft/Needs confirmation', 'src/pages/admin/AdminCmsPrimitives.tsx');
+  requireIncludes(primitives, 'This CMS version is still Draft/Needs confirmation', 'src/pages/admin/AdminCmsPrimitives.tsx');
   requireIncludes(primitives, 'Change copy, media, facts, and page sections without affecting the website.', 'src/pages/admin/AdminCmsPrimitives.tsx');
   requireNotIncludes(shell, 'Published content can go live', 'src/pages/admin/AdminShell.tsx');
   requireNotIncludes(primitives, 'Draft rows are safe to edit', 'src/pages/admin/AdminCmsPrimitives.tsx');
@@ -1400,7 +1448,7 @@ function checkAdminRemovalContract() {
   requireIncludes(adminIa, 'Current launch removal model', 'docs/ADMIN_IA_ACCESS.md');
   requireIncludes(
     adminIa,
-    'Live admin verification should prove publish/archive behavior, public invisibility, and auditability',
+    'Live admin verification should prove publish/archive behavior, the documented hidden-or-static-fallback result, and auditability after archive',
     'docs/ADMIN_IA_ACCESS.md',
   );
   requireIncludes(
@@ -1409,6 +1457,134 @@ function checkAdminRemovalContract() {
     'docs/SUPABASE_SCHEMA.md',
   );
   requireIncludes(liveVerifier, 'no physical deletes are attempted.', 'scripts/check-admin-crud-live.mjs');
+}
+
+function checkAdminMediaSafety() {
+  const media = readRequired('src/pages/admin/AdminMediaPage.tsx');
+
+  requireIncludes(
+    media,
+    'supabase.storage.from(PRIVATE_MEDIA_BUCKET).upload',
+    'src/pages/admin/AdminMediaPage.tsx private-only initial upload',
+  );
+  requireNotIncludes(media, 'setUploadBucket', 'src/pages/admin/AdminMediaPage.tsx public upload selector');
+  requireNotIncludes(
+    media,
+    'supabase.storage.from(uploadBucket)',
+    'src/pages/admin/AdminMediaPage.tsx variable initial upload bucket',
+  );
+  requireIncludes(
+    media,
+    'form.objectPath.trim() !== originalObjectPath',
+    'src/pages/admin/AdminMediaPage.tsx selected-path promotion guard',
+  );
+  requireIncludes(
+    media,
+    ".eq('updated_at', privateStoragePromotion.originalUpdatedAt)",
+    'src/pages/admin/AdminMediaPage.tsx optimistic promotion guard',
+  );
+  requireIncludes(
+    media,
+    'metadataConfirmedByReadback',
+    'src/pages/admin/AdminMediaPage.tsx metadata insert readback',
+  );
+  requireIncludes(
+    media,
+    'removePublicObjectIfUnreferenced',
+    'src/pages/admin/AdminMediaPage.tsx reference-safe public rollback',
+  );
+  requireIncludes(
+    media,
+    'removePrivatePromotionSourceIfUnreferenced',
+    'src/pages/admin/AdminMediaPage.tsx reference-safe private cleanup',
+  );
+}
+
+function checkAdminParentOwnershipSafety() {
+  const products = readRequired('src/pages/admin/AdminProductsPage.tsx');
+  const stones = readRequired('src/pages/admin/AdminStoneLibraryPage.tsx');
+
+  const productOwnershipPredicates = products.match(/\.eq\('product_id', operation\.productId\)/g) ?? [];
+  if (productOwnershipPredicates.length < 3) {
+    failures.push(
+      'src/pages/admin/AdminProductsPage.tsx: model, material-default, and spec updates must retain product ownership predicates',
+    );
+  }
+  requireIncludes(
+    products,
+    'productSelectionGenerationRef.current === selectionGeneration',
+    'src/pages/admin/AdminProductsPage.tsx stale parent-bundle guard',
+  );
+  requireIncludes(
+    products,
+    'selectedModelIdRef.current !== operation.rowId',
+    'src/pages/admin/AdminProductsPage.tsx saved-model identity guard',
+  );
+
+  const stoneGroupPredicates = stones.match(/\.eq\('stone_group_id', operation\.groupId\)/g) ?? [];
+  const stoneVariantPredicates = stones.match(/\.eq\('stone_variant_id', operation\.variantId\)/g) ?? [];
+  if (stoneGroupPredicates.length < 2 || stoneVariantPredicates.length < 2) {
+    failures.push(
+      'src/pages/admin/AdminStoneLibraryPage.tsx: variant and finish-image updates must retain group/variant ownership predicates',
+    );
+  }
+  requireIncludes(
+    stones,
+    ".eq('finish_definition_id', operation.finishId)",
+    'src/pages/admin/AdminStoneLibraryPage.tsx capability finish ownership predicate',
+  );
+  requireIncludes(
+    stones,
+    'groupSelectionGenerationRef.current === groupGeneration',
+    'src/pages/admin/AdminStoneLibraryPage.tsx stale parent-bundle guard',
+  );
+  requireIncludes(
+    stones,
+    'variantSelectionGenerationRef.current === variantGeneration',
+    'src/pages/admin/AdminStoneLibraryPage.tsx stale variant-capability guard',
+  );
+}
+
+function checkAdminLoadingAndSaveLockSafety() {
+  const pages = [
+    ['src/pages/admin/AdminArticlesPage.tsx', readRequired('src/pages/admin/AdminArticlesPage.tsx')],
+    ['src/pages/admin/AdminProjectsPage.tsx', readRequired('src/pages/admin/AdminProjectsPage.tsx')],
+    ['src/pages/admin/AdminProductsPage.tsx', readRequired('src/pages/admin/AdminProductsPage.tsx')],
+    ['src/pages/admin/AdminStoneLibraryPage.tsx', readRequired('src/pages/admin/AdminStoneLibraryPage.tsx')],
+  ];
+
+  for (const [path, text] of pages) {
+    requireIncludes(text, 'inert={isLoading}', `${path} loading interaction boundary`);
+    requireIncludes(text, 'aria-busy={isLoading}', `${path} loading accessibility state`);
+  }
+
+  const articles = pages[0][1];
+  const articleSaveStart = articles.indexOf('async function saveArticle');
+  const articleSaveEnd = articles.indexOf('async function handleArticleSubmit', articleSaveStart);
+  const articleSaveSource = articles.slice(articleSaveStart, articleSaveEnd);
+  const validationIndex = articleSaveSource.indexOf('validateArticleForm');
+  const lockIndex = articleSaveSource.indexOf('savingArticleRef.current = true');
+  if (validationIndex === -1 || lockIndex === -1 || validationIndex > lockIndex) {
+    failures.push('src/pages/admin/AdminArticlesPage.tsx: article validation must finish before the save lock is taken');
+  }
+  requireIncludes(articleSaveSource, 'finally {', 'src/pages/admin/AdminArticlesPage.tsx article save lock release');
+  requireIncludes(articleSaveSource, 'savingArticleRef.current = false', 'src/pages/admin/AdminArticlesPage.tsx article save ref release');
+
+  for (const [path, text, selector] of [
+    [pages[0][0], pages[0][1], 'async function selectArticle'],
+    [pages[2][0], pages[2][1], 'async function selectProduct'],
+    [pages[3][0], pages[3][1], 'async function selectGroup'],
+    [pages[3][0], pages[3][1], 'async function selectVariant'],
+  ]) {
+    const start = text.indexOf(selector);
+    const nextFunction = text.indexOf('\n    function ', start + selector.length);
+    const nextAsyncFunction = text.indexOf('\n    async function ', start + selector.length);
+    const candidates = [nextFunction, nextAsyncFunction].filter((index) => index > start);
+    const end = candidates.length > 0 ? Math.min(...candidates) : text.length;
+    const selectionSource = text.slice(start, end);
+    requireIncludes(selectionSource, 'setIsLoading(true)', `${path} ${selector} bundle loading lock`);
+    requireIncludes(selectionSource, 'setIsLoading(false)', `${path} ${selector} current selection loading release`);
+  }
 }
 
 checkRoutes();
@@ -1420,6 +1596,9 @@ checkProductEditorAuthoring();
 checkDashboardEditorLanguage();
 checkAdminLiveVerifierBoundaries();
 checkAdminRemovalContract();
+checkAdminMediaSafety();
+checkAdminParentOwnershipSafety();
+checkAdminLoadingAndSaveLockSafety();
 
 if (failures.length) {
   console.error('Admin CRUD coverage checks failed:');

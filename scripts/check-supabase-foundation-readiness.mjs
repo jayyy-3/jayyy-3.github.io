@@ -19,6 +19,7 @@ const expectedMigrations = [
   '202605290001_security_definer_private_helpers.sql',
   '202605290002_admin_profile_email_uniqueness.sql',
   '202605290003_sample_request_atomic_insert.sql',
+  '20260713065628_media_public_bucket_role_hardening.sql',
 ];
 
 const publicContentTables = [
@@ -222,9 +223,10 @@ function checkSampleRequestRpc(rpcSql) {
   }
 }
 
-function checkStorage(storageSql, storageHardeningSql) {
+function checkStorage(storageSql, storageHardeningSql, storageRoleHardeningSql) {
   const normalizedStorage = normalizeSql(storageSql);
   const normalizedHardening = normalizeSql(storageHardeningSql);
+  const normalizedRoleHardening = normalizeSql(storageRoleHardeningSql);
 
   for (const fragment of [
     "'urblo-public-media'",
@@ -252,6 +254,29 @@ function checkStorage(storageSql, storageHardeningSql) {
 
   if (/create\s+policy\s+urblo_storage_public_object_select\b/i.test(storageHardeningSql)) {
     failures.push('media Storage public listing hardening: must not recreate broad public object listing');
+  }
+
+  for (const fragment of [
+    'drop policy if exists urblo_storage_admin_object_insert on storage.objects;',
+    'create policy urblo_storage_admin_object_insert',
+    'drop policy if exists urblo_storage_admin_object_update on storage.objects;',
+    'create policy urblo_storage_admin_object_update',
+    "bucket_id = 'urblo-admin-media' and private.has_admin_role(array['owner', 'admin', 'editor'])",
+    "bucket_id = 'urblo-public-media' and private.has_admin_role(array['owner', 'admin'])",
+  ]) {
+    requireIncludes(normalizedRoleHardening, fragment, 'media Storage public-write role hardening');
+  }
+
+  const publicBucketRoleClauses = [
+    ...storageRoleHardeningSql.matchAll(
+      /bucket_id\s*=\s*'urblo-public-media'\s+and\s+private\.has_admin_role\s*\(\s*array\s*\[([^\]]*)\]/gi,
+    ),
+  ];
+  if (
+    publicBucketRoleClauses.length === 0 ||
+    publicBucketRoleClauses.some((match) => /'editor'/i.test(match[1]))
+  ) {
+    failures.push('media Storage public-write role hardening: editor must not write directly to the public bucket');
   }
 }
 
@@ -301,6 +326,7 @@ const foundationSchema = readRequired('supabase/migrations/202605270001_foundati
 const baselineSeed = readRequired('supabase/migrations/202605270004_baseline_seed.sql');
 const storageFoundation = readRequired('supabase/migrations/202605280002_media_storage_foundation.sql');
 const storageHardening = readRequired('supabase/migrations/202605280003_media_storage_listing_hardening.sql');
+const storageRoleHardening = readRequired('supabase/migrations/20260713065628_media_public_bucket_role_hardening.sql');
 const publicHelperGrants = readRequired('supabase/migrations/202605280005_security_definer_function_grants.sql');
 const privateHelpers = readRequired('supabase/migrations/202605290001_security_definer_private_helpers.sql');
 const emailUniqueness = readRequired('supabase/migrations/202605290002_admin_profile_email_uniqueness.sql');
@@ -318,7 +344,7 @@ const combinedSql = sqlSource(
 checkFoundationSchema(foundationSchema, combinedSql);
 checkBaselineSeed(baselineSeed);
 checkSampleRequestRpc(sampleRequestRpc);
-checkStorage(storageFoundation, storageHardening);
+checkStorage(storageFoundation, storageHardening, storageRoleHardening);
 checkSecurityHelpers(privateHelpers, publicHelperGrants);
 checkAdminProfileEmailUniqueness(emailUniqueness);
 
@@ -330,5 +356,5 @@ if (failures.length) {
 
 console.log('Supabase foundation readiness checks passed.');
 console.log(
-  'Verified migration files, 24 launch tables, RLS source, anon read-only posture, baseline seeds, atomic sample RPC, Storage buckets/listing hardening, private helper hardening, and admin email uniqueness.',
+  'Verified migration files, 24 launch tables, RLS source, anon read-only posture, baseline seeds, atomic sample RPC, Storage buckets/listing/public-write role hardening, private helper hardening, and admin email uniqueness.',
 );

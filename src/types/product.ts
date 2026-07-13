@@ -1,3 +1,5 @@
+import type { PublicEntitySeo } from '../lib/publicEntitySeo';
+
 // 可按需扩充
 export type MaterialCategory = 'body' | 'frame' | 'battens';
 
@@ -41,4 +43,7 @@ export interface Product {
     };
     /** 规格参数 (Key → Value) */
     specs?: Record<string, string>;
+    /** Present for Published CMS records; static fallback records omit it. */
+    contentSource?: 'cms';
+    seo?: PublicEntitySeo;
 }

@@ -1,6 +1,6 @@
 # Agent Verification Matrix
 
-Last updated: 2026-06-30
+Last updated: 2026-07-13
 
 ## Purpose
 Use this matrix to choose the smallest verification set that proves a change is safe. Runtime changes still need the full build/lint/typecheck gate unless a task explicitly defines a temporary exception.
@@ -98,6 +98,7 @@ Run:
 - `npm run agent:content-import` when changing static-to-Supabase import mapping or source content used by that dry run.
 - `npm run agent:content-import:apply-sql` when changing static-to-Supabase import or rollback SQL artifact generation.
 - `npm run agent:public-supabase-readiness` when changing public-content import status rules, structured article-block import assumptions, public read cutover assumptions, static/public route boundaries, or Supabase published-only policy checks.
+- `npm run agent:public-content-overlay` when changing a public Project, Product, Article, or Stone Library service adapter, canonical content key, Published/static merge rule, public media resolver, or list/detail/filter fallback behavior.
 - `npm run agent:smoke` when route output changes.
 
 Evidence to record:
@@ -167,6 +168,7 @@ Run:
 - Tool-specific migration dry run or local Supabase verification when available.
 - `npm run agent:content-import:apply-sql` when changing guarded static-to-Supabase import or rollback SQL artifacts.
 - `npm run agent:public-supabase-readiness` when public content import/cutover safety is in scope.
+- `npm run agent:public-content-overlay` when the Published/static migration merge or canonical route keys change.
 
 Evidence to record:
 - Tables/relations changed.
@@ -217,10 +219,13 @@ Run:
 - `npm run agent:admin-auth-browser -- --allow-login --expect-unauthorized --strict` when a valid Auth user without an active `admin_profiles` row is available through `URBLO_UNPROFILED_EMAIL` and `URBLO_UNPROFILED_PASSWORD`; the check must keep all launch-critical admin route probes on `/admin/unauthorized` without private module content.
 - `npm run agent:first-admin-bootstrap` when changing first-admin bootstrap tooling. Use `--verify-only` only after a service-role key and first admin email are configured; write mode requires explicit approval.
 - `npm run agent:admin-crud-live` in plan-only mode when changing live admin verification contracts; run `npm run agent:admin-crud-live -- --allow-writes` only after browser-safe Supabase config and a real owner/admin session are available and Jay has approved tagged QA writes.
-- `npm run agent:admin-crud-live -- --allow-writes --include-storage` for final media upload policy proof after the same credentials/session/approval gate is satisfied.
-- Browser or Playwright checks for authenticated and unauthenticated admin routes when possible.
+- `npm run agent:admin-crud-live -- --allow-writes --include-storage` for owner/admin private-upload/readback plus anonymous-denial proof after the same credentials/session/approval gate is satisfied; this is not the Editor public-bucket boundary proof.
+- `npm run agent:admin-media-role-boundary-live` in plan-only mode when changing the Storage role verifier; after the migration is applied/read back and Jay approves tagged Storage writes, run `npm run agent:admin-media-role-boundary-live -- --allow-writes --strict` with distinct active Editor and owner/admin credentials to prove Editor private insert/update success, Editor public insert/update denial, owner/admin public insert/update success, and cleanup.
+- `npm run agent:live-readiness -- --base-url <production-origin> --admin-email <first-admin-email>` before requesting live inputs. The Media role check must remain blocked until the migration readback is complete, distinct Editor/owner credentials exist, Jay approves that exact tagged Storage role proof, and `--media-role-migration-verified --media-role-writes-approved` records those non-secret prerequisites.
+- Browser checks are mandatory for any handoff claim. Route-shell checks are useful but do not prove editing.
 - `docs/ADMIN_PRODUCTION_WALKTHROUGH.md` after the current CMS UX stack is deployed and before final non-technical editor handoff.
-- `npm run agent:admin-handoff-readiness -- --base-url https://urblo.com.au --admin-email info@urblo.com.au --strict` after the production walkthrough Results Template has been copied into `docs/WORKLOG.md` and filled with evidence.
+- Update `docs/agent/admin-handoff-evidence.json` only after the fixed production deployment completes the Storage role-boundary prerequisite and every required golden workflow with evidence references, one deployment SHA, verified/expiry timestamps, and the actual admin identity.
+- `npm run agent:admin-handoff-readiness -- --base-url https://urblo.com.au --admin-email info@urblo.com.au --strict` after structured evidence is complete. WORKLOG prose or a `Pass` table cell cannot satisfy this gate by itself.
 
 Evidence to record:
 - Admin routes touched.
@@ -228,8 +233,11 @@ Evidence to record:
 - Validation/save/publish/archive/error/read-only state coverage when source-only verification is used.
 - Draft/published visibility behavior.
 - Auth/RLS assumptions.
+- Applied Storage migration/policy readback plus Editor private insert/update success, Editor public insert/update denial, and owner/admin public insert/update success.
 - Any content type still requiring code edits.
-- Production walkthrough results for the Handoff Evidence Matrix, Dashboard orientation, Settings invite/access, Stone Library publish path, Article publish path, and Open public page confirmation when claiming editor-handoff readiness.
+- Production walkthrough results for the Handoff Evidence Matrix, Dashboard operational queue, responsive navigation at mobile/1116px/wide widths, Projects task-workspace usability, Settings invite/access, Stone Library publish path, Article publish path, editor-guide usability, and Open public page confirmation when claiming editor-handoff readiness.
+- Golden workflow results for authenticated sign-in, draft save/refresh persistence, private Media Storage promotion, Published public readback, archive behavior, Published Settings public readback, invite/password setup, logout/password sign-in, password recovery, responsive navigation at mobile/1116px/wide widths, the Projects stable-record/task-workspace/dirty-guard/blocker-jump/media-search flow, the Dashboard operational queue, and non-technical editor-guide usability.
+- Supabase Auth custom SMTP delivery/log evidence and the exact allowed invite/recovery Redirect URLs. Contact/Sample Request SMTP proof is not equivalent.
 - Final handoff readiness audit result, including whether the strict command passed or which production evidence is still missing.
 
 ## Output Rule

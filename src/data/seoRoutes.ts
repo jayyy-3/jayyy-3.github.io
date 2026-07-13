@@ -37,6 +37,12 @@ export interface SeoMeta {
     robots: string;
 }
 
+export interface SeoMetaDefaults {
+    homepageTitle?: string | null;
+    homepageDescription?: string | null;
+    defaultShareImage?: string | null;
+}
+
 type JsonLd = Record<string, unknown>;
 
 type StoneSeoSource = {
@@ -261,16 +267,20 @@ export function getSeoRouteForPathname(pathname: string): SeoRoute | null {
     return seoRouteByPath.get(normalizePath(pathname)) ?? null;
 }
 
-export function getSeoMetaForPathname(pathname: string): SeoMeta {
+export function getSeoMetaForPathname(pathname: string, defaults: SeoMetaDefaults = {}): SeoMeta {
     const normalizedPath = normalizePath(pathname);
     const seoRoute = getSeoRouteForPathname(normalizedPath);
 
     if (seoRoute) {
+        const isHomepage = normalizedPath === '/';
         return {
-            title: seoRoute.title,
-            description: seoRoute.description,
+            title: isHomepage && defaults.homepageTitle ? defaults.homepageTitle : seoRoute.title,
+            description:
+                isHomepage && defaults.homepageDescription
+                    ? toMetaDescription(defaults.homepageDescription)
+                    : seoRoute.description,
             canonicalUrl: canonicalUrlForPath(seoRoute.path),
-            image: DEFAULT_SHARE_IMAGE,
+            image: toAbsoluteUrl(seoRoute.image || defaults.defaultShareImage || DEFAULT_SHARE_IMAGE),
             ogType: seoRoute.ogType || 'website',
             robots: 'index,follow',
         };
@@ -281,7 +291,7 @@ export function getSeoMetaForPathname(pathname: string): SeoMeta {
             title: 'Admin | Urblo',
             description: 'Protected Urblo admin console for content, media, lead, and launch operations.',
             canonicalUrl: canonicalUrlForPath(normalizedPath),
-            image: DEFAULT_SHARE_IMAGE,
+            image: toAbsoluteUrl(defaults.defaultShareImage || DEFAULT_SHARE_IMAGE),
             ogType: 'website',
             robots: 'noindex,nofollow',
         };
@@ -292,7 +302,7 @@ export function getSeoMetaForPathname(pathname: string): SeoMeta {
         description:
             'The requested Urblo page could not be found. Explore projects, products, Stone Library, or contact pathways.',
         canonicalUrl: canonicalUrlForPath(normalizedPath),
-        image: DEFAULT_SHARE_IMAGE,
+        image: toAbsoluteUrl(defaults.defaultShareImage || DEFAULT_SHARE_IMAGE),
         ogType: 'website',
         robots: 'noindex,follow',
     };

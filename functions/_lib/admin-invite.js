@@ -30,7 +30,9 @@ export async function handleAdminInviteUserRequest(request, env) {
     const supabase = createServiceClient(config);
     const actor = await requireManagingAdmin(supabase, accessToken, input.role);
     await assertNoExistingCmsAccess(supabase, input.email);
-    const redirectTo = input.redirectTo || `${new URL(request.url).origin}/admin/login`;
+    // Keep invite callbacks on the same Urblo origin that received this request.
+    // Do not accept a browser-supplied redirect target from an admin form.
+    const redirectTo = `${new URL(request.url).origin}/admin/account-setup?mode=invite`;
 
     const { data: inviteData, error: inviteError } = await supabase.auth.admin.inviteUserByEmail(
       input.email,
@@ -62,11 +64,14 @@ export async function handleAdminInviteUserRequest(request, env) {
       .single();
 
     if (profileError || !profile) {
+      const { error: rollbackError } = await supabase.auth.admin.deleteUser(invitedUser.id);
       throw new AdminInviteError(
         409,
         'profile_create_failed',
-        profileError?.message ||
-          'The invite was sent, but CMS access could not be created. Check People and access before inviting again.',
+        rollbackError
+          ? 'The invite was sent, but CMS access could not be created or safely rolled back. Check Supabase Auth and People and access before inviting again.'
+          : profileError?.message ||
+              'CMS access could not be created, so the incomplete invited login was removed. Review People and access before retrying.',
       );
     }
 
@@ -123,6 +128,7 @@ function createServiceClient(config) {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
+      detectSessionInUrl: false,
     },
   });
 }
@@ -149,7 +155,6 @@ async function parseInviteInput(request) {
   const email = normalizeEmail(String(body?.email || ''));
   const displayName = String(body?.displayName || '').trim();
   const role = String(body?.role || 'editor').trim().toLowerCase();
-  const redirectTo = String(body?.redirectTo || '').trim();
 
   if (!isEmail(email)) {
     throw new AdminInviteError(400, 'invalid_email', 'Enter a valid invite email address.');
@@ -159,11 +164,7 @@ async function parseInviteInput(request) {
     throw new AdminInviteError(400, 'invalid_role', 'Choose a valid CMS role.');
   }
 
-  if (redirectTo && !/^https?:\/\//i.test(redirectTo)) {
-    throw new AdminInviteError(400, 'invalid_redirect', 'Invite redirect URLs must start with http:// or https://.');
-  }
-
-  return { email, displayName, role, redirectTo };
+  return { email, displayName, role };
 }
 
 async function requireManagingAdmin(supabase, accessToken, requestedRole) {

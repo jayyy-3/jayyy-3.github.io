@@ -26,6 +26,7 @@ export interface AdminAuthContextValue {
     error: string | null;
     refresh: () => Promise<void>;
     signIn: (email: string, password: string) => Promise<{ error: string | null }>;
+    requestPasswordReset: (email: string) => Promise<{ error: string | null }>;
     signOut: () => Promise<void>;
 }
 

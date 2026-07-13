@@ -5,7 +5,9 @@ import {
     getStoneFinishImageResolution,
 } from '../data/stoneFinishImages';
 import { getPublicContentClient } from '../lib/publicContentClient';
+import { resolvePublicMediaUrl, type PublicMediaLocation } from '../lib/publicMediaUrl';
 import type { OptionItem } from '../types/product';
+import { overlayPublishedContent } from './publicContentOverlay';
 import type {
     FinishCapabilityVM,
     FinishKey,
@@ -74,19 +76,17 @@ type PublishedCapabilityRow = {
     }[] | null;
 };
 
+type PublishedImageMediaRef = PublicMediaLocation & {
+    alt: string | null;
+};
+
 type PublishedImageRow = {
     stone_group_id: number | null;
     stone_variant_id: number | null;
     finish_definition_id: number | null;
     image_role?: 'primary' | 'secondary' | 'detail' | 'swatch';
     sort_order: number;
-    media_assets?: {
-        source_url: string | null;
-        alt: string | null;
-    } | {
-        source_url: string | null;
-        alt: string | null;
-    }[] | null;
+    media_assets?: PublishedImageMediaRef | PublishedImageMediaRef[] | null;
 };
 
 function firstRelation<T>(value: T | T[] | null | undefined): T | null {
@@ -404,6 +404,76 @@ function mapStoneCard(stone: StoneGroupRaw): StoneCardVM {
     };
 }
 
+function filterStoneCards(
+    cards: readonly StoneCardVM[],
+    filters: StoneCardFilters = {},
+): StoneCardVM[] {
+    const query = filters.query ? normalizeText(filters.query) : '';
+
+    return cards
+        .filter((card) => {
+            if (filters.stoneType && card.stoneType !== filters.stoneType) {
+                return false;
+            }
+
+            if (
+                filters.finishKey &&
+                !card.availableFinishKeys.includes(filters.finishKey)
+            ) {
+                return false;
+            }
+
+            if (!query) {
+                return true;
+            }
+
+            const searchable = [card.name, card.stoneType, card.originLabel]
+                .join(' ')
+                .toLowerCase();
+
+            return searchable.includes(query);
+        })
+        .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function getStoneFilterFacets(cards: readonly StoneCardVM[]): StoneFilterFacets {
+    const typeCounter = new Map<string, number>();
+    const finishCounter = new Map<FinishKey, number>();
+
+    for (const card of cards) {
+        typeCounter.set(card.stoneType, (typeCounter.get(card.stoneType) || 0) + 1);
+        for (const finishKey of card.availableFinishKeys) {
+            finishCounter.set(finishKey, (finishCounter.get(finishKey) || 0) + 1);
+        }
+    }
+
+    const stoneTypes = Array.from(typeCounter.entries())
+        .map(([stoneType, count]) => ({
+            value: stoneType,
+            label: stoneType,
+            count,
+        }))
+        .sort(compareByLabel);
+
+    const finishes = Array.from(finishCounter.entries())
+        .map(([finishKey, count]) => {
+            const finish = finishDefinitionByKey.get(finishKey);
+            return {
+                value: finishKey,
+                label: finish?.displayName || toTitleCase(finishKey),
+                count,
+                sortOrder: finish?.sortOrder ?? 999,
+            };
+        })
+        .sort((a, b) => a.sortOrder - b.sortOrder || a.label.localeCompare(b.label))
+        .map(({ value, label, count }) => ({ value, label, count }));
+
+    return {
+        stoneTypes,
+        finishes,
+    };
+}
+
 function sortCapabilitiesByFinishOrder(
     capabilities: StoneFinishCapabilityRaw[],
 ): StoneFinishCapabilityRaw[] {
@@ -443,82 +513,20 @@ function placeholderStoneImage(label: string): string {
 
 class StoneLibraryService {
     static getStoneCards(filters: StoneCardFilters = {}): StoneCardVM[] {
-        const query = filters.query ? normalizeText(filters.query) : '';
-
-        return stoneLibrary.stones
-            .map(mapStoneCard)
-            .filter((card) => {
-                if (filters.stoneType && card.stoneType !== filters.stoneType) {
-                    return false;
-                }
-
-                if (
-                    filters.finishKey &&
-                    !card.availableFinishKeys.includes(filters.finishKey)
-                ) {
-                    return false;
-                }
-
-                if (!query) {
-                    return true;
-                }
-
-                const searchable = [card.name, card.stoneType, card.originLabel]
-                    .join(' ')
-                    .toLowerCase();
-
-                return searchable.includes(query);
-            })
-            .sort((a, b) => a.name.localeCompare(b.name));
+        return filterStoneCards(stoneLibrary.stones.map(mapStoneCard), filters);
     }
 
-    static getFilterFacets(): StoneFilterFacets {
-        const cards = stoneLibrary.stones.map(mapStoneCard);
+    static filterStoneCards(
+        cards: readonly StoneCardVM[],
+        filters: StoneCardFilters = {},
+    ): StoneCardVM[] {
+        return filterStoneCards(cards, filters);
+    }
 
-        const typeCounter = new Map<string, number>();
-        cards.forEach((card) => {
-            typeCounter.set(
-                card.stoneType,
-                (typeCounter.get(card.stoneType) || 0) + 1,
-            );
-        });
-
-        const finishCounter = new Map<FinishKey, number>();
-        cards.forEach((card) => {
-            card.availableFinishKeys.forEach((finishKey) => {
-                finishCounter.set(finishKey, (finishCounter.get(finishKey) || 0) + 1);
-            });
-        });
-
-        const stoneTypes = Array.from(typeCounter.entries())
-            .map(([stoneType, count]) => ({
-                value: stoneType,
-                label: stoneType,
-                count,
-            }))
-            .sort(compareByLabel);
-
-        const finishes = stoneLibrary.finishes
-            .map((finish) => {
-                const finishKey = toFinishKey(
-                    finish.finishId,
-                    finish.finishVariantId,
-                );
-                return {
-                    value: finishKey,
-                    label: finish.displayName,
-                    count: finishCounter.get(finishKey) || 0,
-                    sortOrder: finish.sortOrder,
-                };
-            })
-            .filter((finish) => finish.count > 0)
-            .sort((a, b) => a.sortOrder - b.sortOrder)
-            .map(({ value, label, count }) => ({ value, label, count }));
-
-        return {
-            stoneTypes,
-            finishes,
-        };
+    static getFilterFacets(
+        cards: readonly StoneCardVM[] = stoneLibrary.stones.map(mapStoneCard),
+    ): StoneFilterFacets {
+        return getStoneFilterFacets(cards);
     }
 
     static async getPublishedStoneCards(filters: StoneCardFilters = {}): Promise<StoneCardVM[]> {
@@ -557,7 +565,20 @@ class StoneLibraryService {
 
         const { data: images } = await supabase
             .from('stone_finish_images')
-            .select('stone_group_id, stone_variant_id, finish_definition_id, sort_order, media_assets (source_url, alt)')
+            .select(`
+                stone_group_id,
+                stone_variant_id,
+                finish_definition_id,
+                sort_order,
+                media_assets (
+                    status,
+                    source_kind,
+                    source_url,
+                    bucket,
+                    object_path,
+                    alt
+                )
+            `)
             .in('stone_group_id', groupIds)
             .eq('status', 'published')
             .order('sort_order', { ascending: true });
@@ -595,7 +616,10 @@ class StoneLibraryService {
                         ),
                     ),
                 );
-                const cover = imagesByGroup.get(group.id)?.find((image) => firstRelation(image.media_assets)?.source_url);
+                const cover = imagesByGroup
+                    .get(group.id)
+                    ?.find((image) => Boolean(resolvePublicMediaUrl(firstRelation(image.media_assets), supabase)));
+                const coverMedia = firstRelation(cover?.media_assets);
                 const originLabel = toPublishedOriginLabel(group);
 
                 return {
@@ -606,8 +630,8 @@ class StoneLibraryService {
                     originLabel,
                     finishCount: finishKeys.length,
                     availableFinishKeys: finishKeys,
-                    coverImageUrl: firstRelation(cover?.media_assets)?.source_url || undefined,
-                    coverImageAlt: firstRelation(cover?.media_assets)?.alt || group.display_name,
+                    coverImageUrl: resolvePublicMediaUrl(coverMedia, supabase),
+                    coverImageAlt: coverMedia?.alt || group.display_name,
                     variantCount: groupVariants.length,
                 };
             })
@@ -620,33 +644,25 @@ class StoneLibraryService {
             .sort((a, b) => a.name.localeCompare(b.name));
     }
 
+    static async getPublicStoneCards(filters: StoneCardFilters = {}): Promise<StoneCardVM[]> {
+        const fallbackCards = StoneLibraryService.getStoneCards();
+        const publishedCards = await StoneLibraryService.getPublishedStoneCards();
+        const mergedCards = overlayPublishedContent(
+            fallbackCards,
+            publishedCards,
+            (card) => card.stoneGroupId,
+        );
+
+        return filterStoneCards(mergedCards, filters);
+    }
+
     static async getPublishedFilterFacets(): Promise<StoneFilterFacets | null> {
         const cards = await StoneLibraryService.getPublishedStoneCards();
         if (!cards.length) {
             return null;
         }
 
-        const typeCounter = new Map<string, number>();
-        const finishCounter = new Map<string, number>();
-        cards.forEach((card) => {
-            typeCounter.set(card.stoneType, (typeCounter.get(card.stoneType) ?? 0) + 1);
-            card.availableFinishKeys.forEach((finishKey) => {
-                finishCounter.set(finishKey, (finishCounter.get(finishKey) ?? 0) + 1);
-            });
-        });
-
-        return {
-            stoneTypes: Array.from(typeCounter.entries())
-                .map(([value, count]) => ({ value, label: value, count }))
-                .sort(compareByLabel),
-            finishes: Array.from(finishCounter.entries())
-                .map(([value, count]) => ({
-                    value,
-                    label: finishDefinitionByKey.get(value as FinishKey)?.displayName || toTitleCase(value),
-                    count,
-                }))
-                .sort(compareByLabel),
-        };
+        return getStoneFilterFacets(cards);
     }
 
     static async getPublishedStoneDetail(
@@ -729,7 +745,11 @@ class StoneLibraryService {
                 image_role,
                 sort_order,
                 media_assets!stone_finish_images_media_asset_id_fkey (
+                    status,
+                    source_kind,
                     source_url,
+                    bucket,
+                    object_path,
                     alt
                 )
             `)
@@ -746,7 +766,7 @@ class StoneLibraryService {
         }
 
         const imageRows = ((images ?? []) as unknown as PublishedImageRow[])
-            .filter((image) => firstRelation(image.media_assets)?.source_url)
+            .filter((image) => Boolean(resolvePublicMediaUrl(firstRelation(image.media_assets), supabase)))
             .sort((a, b) => a.sort_order - b.sort_order);
         const activeCapabilities = capabilitiesByVariant.get(activeVariant.id) ?? [];
         const sortedCapabilities = [...activeCapabilities].sort((a, b) => {
@@ -788,13 +808,14 @@ class StoneLibraryService {
                     matchingImages.find((image) => image.finish_definition_id === finish.id) ||
                     matchingImages[0];
                 const primaryMedia = firstRelation(primaryImage?.media_assets);
+                const primaryMediaUrl = resolvePublicMediaUrl(primaryMedia, supabase);
                 const secondaryImages = matchingImages
                     .filter((image) => image !== primaryImage)
                     .filter((image) => image.image_role !== 'swatch')
                     .map((image, index) => {
                         const media = firstRelation(image.media_assets);
                         return {
-                            imageUrl: media?.source_url || '',
+                            imageUrl: resolvePublicMediaUrl(media, supabase) || '',
                             imageAlt: media?.alt || `${group.display_name} ${finish.display_name} frame`,
                             label: image.image_role === 'detail' ? 'Detail frame' : `Secondary frame ${index + 1}`,
                         };
@@ -805,11 +826,11 @@ class StoneLibraryService {
                 const defaultFallback = getStoneDefaultImage(activeVariant.variant_key);
                 const fallbackImage = staticFallback.asset || defaultFallback;
                 const hasFinishSpecificImage = Boolean(
-                    primaryMedia?.source_url && primaryImage?.finish_definition_id === finish.id,
+                    primaryMediaUrl && primaryImage?.finish_definition_id === finish.id,
                 );
                 const imageRole: StoneFinishImageRole = hasFinishSpecificImage
                     ? 'finish-specific'
-                    : primaryMedia?.source_url || fallbackImage?.imageUrl
+                    : primaryMediaUrl || fallbackImage?.imageUrl
                       ? 'reference'
                       : 'placeholder';
                 const behavior = getFinishBehaviorMeta(finish.finish_key, finishId);
@@ -826,7 +847,7 @@ class StoneLibraryService {
                         ? { ...behavior, summary: capability.behavior_note }
                         : behavior,
                     imageUrl:
-                        primaryMedia?.source_url ||
+                        primaryMediaUrl ||
                         fallbackImage?.imageUrl ||
                         placeholderStoneImage(group.display_name),
                     thumbUrl: fallbackImage?.thumbUrl,
@@ -856,6 +877,7 @@ class StoneLibraryService {
 
         return {
             stoneGroupId: group.stone_group_key,
+            contentSource: 'cms',
             name: group.display_name,
             status: 'active',
             stoneType: group.stone_type_display || group.stone_type_source || 'Stone',

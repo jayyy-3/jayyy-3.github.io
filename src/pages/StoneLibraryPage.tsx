@@ -3,55 +3,40 @@ import FilterBar from '../components/stone-library/FilterBar';
 import StoneCard from '../components/stone-library/StoneCard';
 import StoneLibraryService from '../service/StoneLibraryService';
 
-import type { StoneCardVM, StoneFilterFacets } from '../types/stone-library';
+import type { StoneCardVM } from '../types/stone-library';
 
 export default function StoneLibraryPage() {
-  const [publishedCards, setPublishedCards] = useState<StoneCardVM[] | null>(null);
-  const [publishedFacets, setPublishedFacets] = useState<StoneFilterFacets | null>(null);
+  const [publicCards, setPublicCards] = useState<StoneCardVM[]>(() =>
+    StoneLibraryService.getStoneCards(),
+  );
 
   const [search, setSearch] = useState('');
   const [stoneType, setStoneType] = useState('');
   const [finishKey, setFinishKey] = useState('');
-  const facets = publishedFacets ?? StoneLibraryService.getFilterFacets();
+  const facets = useMemo(
+    () => StoneLibraryService.getFilterFacets(publicCards),
+    [publicCards],
+  );
 
   const cards = useMemo(
-    () => {
-      const filters = {
+    () =>
+      StoneLibraryService.filterStoneCards(publicCards, {
         query: search,
         stoneType: stoneType || undefined,
         finishKey: finishKey || undefined,
-      };
-
-      if (publishedCards) {
-        const query = search.trim().toLowerCase();
-        return publishedCards.filter((card) => {
-          if (filters.stoneType && card.stoneType !== filters.stoneType) return false;
-          if (filters.finishKey && !card.availableFinishKeys.includes(filters.finishKey)) return false;
-          if (!query) return true;
-          return [card.name, card.stoneType, card.originLabel].join(' ').toLowerCase().includes(query);
-        });
-      }
-
-      return StoneLibraryService.getStoneCards(filters);
-    },
-    [publishedCards, search, stoneType, finishKey],
+      }),
+    [publicCards, search, stoneType, finishKey],
   );
 
   useEffect(() => {
     let isCurrent = true;
-    Promise.all([
-      StoneLibraryService.getPublishedStoneCards(),
-      StoneLibraryService.getPublishedFilterFacets(),
-    ])
-      .then(([nextCards, nextFacets]) => {
-        if (!isCurrent || !nextCards.length || !nextFacets) return;
-        setPublishedCards(nextCards);
-        setPublishedFacets(nextFacets);
+    StoneLibraryService.getPublicStoneCards()
+      .then((nextCards) => {
+        if (!isCurrent) return;
+        setPublicCards(nextCards);
       })
       .catch(() => {
-        if (!isCurrent) return;
-        setPublishedCards(null);
-        setPublishedFacets(null);
+        // The initial static cards stay visible if the public CMS read fails.
       });
 
     return () => {

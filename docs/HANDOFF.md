@@ -1,6 +1,6 @@
 # HANDOFF - Current Agent State
 
-Last updated: 2026-06-30
+Last updated: 2026-07-13
 
 ## Read First
 Use this file as the short current-state entry. Detailed evidence lives in `docs/WORKLOG.md`; task execution state lives in `docs/agent/tasks.json`; compact machine state lives in `docs/agent/status.json`.
@@ -41,10 +41,11 @@ SEO:
 - Google Search Console review on 2026-06-12 showed stale sitemap reads and mostly legacy WordPress/old-site URLs in indexing issues. Phase 2 SEO is documented in `docs/SEO_PHASE_2_PLAN.md`: refresh the sitemap, map valuable old URLs, add selective 301 redirects, then improve non-brand long-tail content.
 - `https://urblo.com.au/sitemap.xml` was submitted/refreshed in GSC on 2026-06-12. GSC showed the submitted date as 12 Jun 2026 and confirmed submission, but `Last read` still showed 3 Aug 2023 immediately after submission; monitor for Google's next processing pass.
 - Phase 2 legacy URL cleanup is implemented in source: selected old contact/capacity/product/category/stone-product/article URLs now have semantic 301 rules in `public/_redirects`, representative redirect checks are in smoke runners, and junk WordPress/admin/feed/upload paths remain intentionally unrescued.
-- Remaining SEO limitation: the current public site is still a Vite React SPA, so deep-link first HTML is the shared app shell until JavaScript runs. Pre-rendered or server-rendered public detail HTML is a Phase 2 technical SEO decision.
+- Remaining SEO limitation: the current public site is still a Vite React SPA, so deep-link first HTML is the shared app shell until JavaScript runs. CMS-only sitemap/route discovery and any pre-rendered or server-rendered detail HTML decision are tracked under `NEXT-SEO-CONTENT-GROWTH-001` rather than the completed Phase 2 redirect cleanup.
 
 Supabase:
 - Project `Urblo` (`npkidywzwddbnfrnxlmo`, `ap-southeast-2`) has launch schema, RLS, policies, Storage buckets, baseline seeds, admin helper hardening, and admin profile email uniqueness applied and verified.
+- Local migration `supabase/migrations/20260713065628_media_public_bucket_role_hardening.sql` closes the remaining direct-API media boundary by keeping editor uploads private and requiring owner/admin for public-bucket insert/update. It is source-verified but not applied or live-read back in production.
 - Public Projects, Products, Articles, and Stone Library listing/detail prefer Published CMS content with static fallback.
 - Public content import/public-read cutover remains guarded: imported production content stays Draft until reviewed, public reads expose Published CMS content only, and static fallback stays explicit.
 - Imported production content is intentionally in CMS Draft state until an editor reviews and publishes items.
@@ -52,24 +53,28 @@ Supabase:
 Admin CMS:
 - Production admin address is `https://urblo.com.au/admin`.
 - First admin bootstrap is complete for `info@urblo.com.au`, linked to one active Website owner profile.
-- No-write active-admin browser QA passed on 2026-06-04 for all 9 authenticated admin route shells plus Sign out.
-- Admin CRUD live proof passed on 2026-06-04, including Settings, Media, Stone Library, Products, Projects, Articles, Leads, Change history audit rows, dashboard health predicates, public/private visibility checks, and optional private Storage upload/readback/anonymous-denial proof.
-- Production CMS handoff readiness passed after the production walkthrough evidence in `docs/WORKLOG.md` marked Final editor handoff as Pass.
+- The prior June proof covered authenticated route shells and direct browser-key/API mutations, not a real editor completing save, refresh, publish, public readback, archive, invite, or recovery through the UI.
+- On 2026-07-13 Jay reported that the admin is not working and is extremely difficult to use. The handoff is reopened and production state is `revalidation_required`.
+- Confirmed source failures include a Supabase auth-listener deadlock pattern, incomplete invite/password setup, Media new-record reset and 80-row truncation, false private-to-public Storage publication, missing public Storage media URLs, category-wide fallback replacement, and site settings with no public consumer.
+- Local source repairs now cover the auth callback and non-blocking same-user refresh; isolated-session invite/recovery password writes that cannot replace the shared browser session; Media loading, private-only initial upload, owner/admin-only public-bucket write policy source, and create-only Storage promotion bound to the selected row's original path/version with reference-safe cleanup disclosure. They also cover public Storage URL resolution, per-record public overlay with Project fallback-field preservation, normalized/refetchable Published settings consumption, parent-bound/stale-safe child saves across Projects, Products, Articles, and Stone Library, loading-state interaction locks that prevent stale child bundles from driving another record's save/publish checklist, the Articles validation lockup, admin route chunks/provider continuity, medium-desktop header clipping, and the first Projects task-workspace redesign with all-editor dirty guards.
+- These repairs are not deployed or production-write verified in this session. `docs/agent/admin-handoff-evidence.json` is the new machine handoff assertion and intentionally remains `revalidation_required`.
+- `npm run agent:admin-handoff-readiness -- --base-url https://urblo.com.au --admin-email info@urblo.com.au --strict` must fail until one deployed SHA has fresh evidence for the applied Storage role-boundary prerequisite and every required golden workflow. A WORKLOG `Pass` string is no longer sufficient.
 
 ## Active Executable Tasks
-Only two tasks should currently be treated as `now` execution work:
+Only three tasks should currently be treated as `now` execution work:
 
+- `NOW-ADMIN-RELIABILITY-UX-001`: P0 admin incident. Finish source fixes, deploy, prove the editor golden workflows, then continue the task-oriented UX redesign. Do not mark done from source checks alone.
 - `NOW-FORMS-SUPABASE-001`: final Turnstile proof only. Persistence, SMTP2GO delivery, browser-key lead privacy, and admin-visible lead workflow are already verified.
-- `NOW-ADMIN-SETTINGS-CRUD-001`: real Settings invite proof only after Jay supplies or approves a target editor email. Settings source, site settings save path, CMS access UI, RLS, and tagged admin live QA are otherwise complete.
+- `NOW-ADMIN-SETTINGS-CRUD-001`: Published settings public-consumer proof plus a real Settings invite proof after Jay supplies or approves a target editor email and Supabase Auth SMTP/redirect configuration is verified.
 
-The admin CMS umbrella is not an executable `now` task. `NOW-ADMIN-CMS-001` is complete as an umbrella after production walkthrough and strict handoff readiness.
+The historical admin CMS umbrella is not an executable `now` task. Its former handoff conclusion has been superseded by `NOW-ADMIN-RELIABILITY-UX-001`.
 
 ## Deferred Or Decision-Gated Work
 - Article claim cleanup is paused by user direction and now belongs in `next` until Jay explicitly resumes it.
 - Imported Draft CMS content needs customer/editor review before public publishing decisions.
-- Optional unprofiled unauthorized admin browser QA is available with `npm run agent:admin-auth-browser -- --allow-login --expect-unauthorized --strict` once an unprofiled Auth user is supplied.
+- Optional unprofiled unauthorized admin browser QA remains useful, but it cannot substitute for the reopened golden workflow.
 - Destructive delete controls remain out of scope until Jay approves a retention/delete policy.
-- Turnstile configuration is not required for the completed CMS handoff, but it is still the remaining forms proof.
+- Turnstile remains a separate forms proof and is not a substitute for admin incident closure.
 
 ## Harness GC State
 Harness GC is installed and should be used as a periodic reality check:
@@ -79,7 +84,7 @@ Harness GC is installed and should be used as a periodic reality check:
 - Operating guide: `docs/agent/harness-gc.md`
 
 The 2026-06-05 cleanup goal is to keep GC warnings meaningful:
-- `now` should stay at 2 active executable tasks.
+- `now` should stay at 3 active executable tasks while the admin incident is open.
 - Umbrella objectives should not appear in the active executable list.
 - Done tasks should not use current-blocker wording.
 - `docs/HANDOFF.md` should stay under the configured 220-line target.
@@ -105,6 +110,7 @@ CMS predeploy and handoff:
 - `npm run agent:admin-cms-predeploy`
 - `npm run agent:smoke`
 - `npm run agent:admin-config-gate`
+- After approved production migration/readback and tagged Storage writes: `npm run agent:admin-media-role-boundary-live -- --allow-writes --strict`
 - `npm run agent:admin-handoff-readiness -- --base-url https://urblo.com.au --admin-email info@urblo.com.au --strict`
 
 Live-write checks require explicit approval and credentials. Do not run tagged live writes or invite emails without fresh approval for the target action.
@@ -112,7 +118,10 @@ Live-write checks require explicit approval and credentials. Do not run tagged l
 ## Next Recommended Action
 For Harness GC repair, finish the queue/doc cleanup, then run the docs/harness checks above. A healthy post-cleanup GC report should have no failures and should leave only the known `docs/WORKLOG.md` size warning.
 
-For product launch work, choose one of:
+Required product action: with explicit production-write approval, apply and read back the pending Storage role migration and pass the Editor/owner role-boundary verifier; then deploy one reviewed admin reliability SHA, configure Supabase Auth SMTP/redirect URLs, and run all twelve approved production golden workflows against that same immutable deployment. This includes browser-testing the Projects record URLs/task workspaces/all-editor dirty guards/searchable media. Only after the strict handoff passes should pagination/preview or another editor-module redesign be selected.
+
+Other decision-gated follow-ups:
+- Choose a generated sitemap/release-manifest or pre-render strategy for CMS-only published slugs; current runtime entity metadata does not add new slugs to the static sitemap or the first HTML response.
 - Configure and prove Turnstile.
 - Provide a target editor email for the real Settings invite proof.
 - Have a customer/editor review Draft CMS content and decide what to publish first.

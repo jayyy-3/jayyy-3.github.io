@@ -9,7 +9,9 @@ npm run build
 npm run lint
 npx tsc -b
 npm run agent:supabase-foundation-readiness
+npm run agent:admin-media-role-boundary-live
 npm run agent:public-supabase-readiness
+npm run agent:public-content-overlay
 npm run agent:cloudflare-readiness
 npm run agent:check
 git diff --check
@@ -17,4 +19,4 @@ npm run agent:admin-handoff-readiness -- --base-url https://urblo.com.au --admin
 
 echo "Admin CMS predeploy gate passed."
 echo "Run preview/browser gates separately before deployment: npm run agent:smoke && npm run agent:admin-config-gate"
-echo "Production handoff is still not complete until deployment and the production walkthrough Results Template pass."
+echo "Production handoff is still not complete until the applied Storage role prerequisite and one deployed SHA have fresh structured evidence, and the strict handoff audit passes."

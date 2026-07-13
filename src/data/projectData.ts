@@ -1,3 +1,5 @@
+import type { PublicEntitySeo } from '../lib/publicEntitySeo';
+
 export interface ProjectData {
     slug: string;
     name: string;
@@ -12,6 +14,9 @@ export interface ProjectData {
     materials?: ProjectMaterial[];
     gallery?: ProjectGalleryImage[];
     cta?: ProjectCta;
+    /** Present for Published CMS records; static fallback records omit it. */
+    contentSource?: 'cms';
+    seo?: PublicEntitySeo;
 }
 
 export interface ProjectListing {
