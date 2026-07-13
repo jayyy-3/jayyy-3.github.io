@@ -322,7 +322,8 @@
         "npm run agent:smoke",
         "npm run agent:cloudflare-readiness",
         "npm run agent:live-readiness",
-        "npm run agent:cloudflare-preview-smoke -- --base-url https://<preview>.pages.dev (after Cloudflare preview deployment exists)"
+        "npm run agent:cloudflare-preview-smoke -- --base-url https://<preview>.pages.dev (after Cloudflare preview deployment exists)",
+        "npm run agent:cloudflare-preview-smoke -- --base-url https://urblo.com.au --reference-url https://c7a910df.urblo.pages.dev"
       ],
       "notes": [
         "2026-05-28: Added `npm run agent:cloudflare-readiness` as a no-secret repo-side verifier for Cloudflare Pages. It checks the build script, Vite root base, SPA fallback, Function routing scope, headers, API handler files, environment placeholders, and deployment runbook. At that checkpoint, account-level Pages project creation, production env vars, preview URL, custom domain, DNS, and rollback were waiting on Cloudflare account access; later notes supersede that state.",
@@ -348,7 +349,8 @@
         "2026-06-02: After env configuration, production redeploy `17588cfa-2204-4b95-b6e0-4e3531e366bb` succeeded and approved tagged live form QA writes verified basic deployed persistence/audit behavior on `https://urblo.pages.dev`. DNS and custom domains were not changed at that checkpoint.",
         "2026-06-02: Production custom domains `urblo.com.au` and `www.urblo.com.au` were attached to the Pages project. Apex website DNS was changed from `A urblo.com.au -> 159.198.65.164` to proxied `CNAME urblo.com.au -> urblo.pages.dev`; `www` was changed from proxied `CNAME www.urblo.com.au -> urblo.com.au` to proxied `CNAME www.urblo.com.au -> urblo.pages.dev`. Google MX/SPF/TXT, NS records, and `qa.urblo.com.au` were not changed. `npm run agent:cloudflare-preview-smoke -- --base-url https://urblo.com.au` and the same command for `https://www.urblo.com.au` passed.",
         "2026-06-03 reconciliation: Marked done after repo-side readiness, production/default/custom-domain Cloudflare smoke, production DNS cutover, custom domains, Function safe-failure checks, and rollback DNS documentation were all verified. Remaining form/admin live proofs stay tracked in their own Supabase/admin tasks rather than keeping this deployment task open.",
-        "2026-07-13: PR #5 deployment exposed a custom-domain cache failure that the status-only smoke falsely accepted: three exact hashed JS/CSS URLs returned the SPA HTML shell with HTTP 200. The runner now follows both absolute and relative dynamic asset references, requires exact JavaScript/CSS MIME types, rejects redirects/empty/HTML bodies on canonical asset URLs without cache-busting, and fails instead of silently truncating an asset graph over 200 entries. The affected source/CSS chunks produce new hashes for the repair deployment, project-authored `/assets/*`, `/fonts/*`, and `/media/*` Cache-Control overrides were removed so Pages default cache/revalidation behavior is authoritative, and ESLint excludes machine-local nested worktree/Vite caches so the gate measures only the active checkout."
+        "2026-07-13: PR #5 deployment exposed a custom-domain cache failure that the status-only smoke falsely accepted: three exact hashed JS/CSS URLs returned the SPA HTML shell with HTTP 200. The runner now follows both absolute and relative dynamic asset references, requires exact JavaScript/CSS MIME types, rejects redirects/empty/HTML bodies on canonical asset URLs without cache-busting, and fails instead of silently truncating an asset graph over 200 entries. The affected source/CSS chunks produce new hashes for the repair deployment, project-authored `/assets/*`, `/fonts/*`, and `/media/*` Cache-Control overrides were removed so Pages default cache/revalidation behavior is authoritative, and ESLint excludes machine-local nested worktree/Vite caches so the gate measures only the active checkout.",
+        "2026-07-13: Cache repair PR #6 merged as `a2a7ae5` and deployed as `c7a910df-6dd3-440b-8971-a6120353ed19`. The immutable deployment, apex, and `www` pass the strengthened smoke across 59 recursively discovered JS/CSS assets. Every direct SPA route must avoid redirects and reference the same entry assets as `/`; absolute/protocol-relative/query/fragment/namespace-escaping asset references fail; apex, `www`, and the moving `urblo.pages.dev` alias are matched after FQDN trailing-dot normalization and also require an independent exact `https://<8-hex-deployment>.urblo.pages.dev` reference plus byte-for-byte and MIME equality for the full asset graph. Apex reports four stale immutable response headers as warnings only after that proof, while `www` reports none. Source readiness continues to hard-fail any project-authored `Cache-Control:` rule."
       ]
     },
     {
@@ -2225,6 +2227,7 @@
         ".gitignore",
         ".env.example",
         "AGENTS.md",
+        "eslint.config.js",
         "docs/ADMIN_EDITOR_GUIDE.md",
         "docs/ADMIN_IA_ACCESS.md",
         "docs/ADMIN_PRODUCTION_WALKTHROUGH.md",
@@ -2241,6 +2244,7 @@
         "docs/agent/verification.md",
         "functions/_lib/admin-invite.js",
         "package.json",
+        "public/_headers",
         "scripts/admin-cms-predeploy.sh",
         "scripts/agent-init.sh",
         "scripts/agent-smoke.sh",
@@ -2249,6 +2253,7 @@
         "scripts/check-admin-crud-coverage.mjs",
         "scripts/check-admin-handoff-readiness.mjs",
         "scripts/check-admin-media-role-boundary-live.mjs",
+        "scripts/check-cloudflare-preview-smoke.mjs",
         "scripts/check-cloudflare-pages-readiness.mjs",
         "scripts/check-harness.mjs",
         "scripts/check-live-readiness.mjs",
@@ -2319,6 +2324,8 @@
         "2026-07-13: PR #3 deployed the repair through Cloudflare Pages. Branch-preview and production no-write smoke passed; production deployment `6d193af5-cf8e-4541-a1e2-c73164d1a290` corresponds to merge commit `46d46b4` and immutable URL `https://6d193af5.urblo.pages.dev`.",
         "2026-07-13: Jay approved separate QA Editor provisioning. Password sign-in and own-profile Editor RLS readback pass with ignored local credentials. The delivered invite callback fell back to `http://localhost:3000`, so direct Auth activation was used only to prepare the test account; the real invite/password workflow remains missing until Auth Site URL/Redirect configuration is corrected.",
         "2026-07-13: The auth-browser verifier no longer matches obsolete `Admin login` display copy and instead uses a stable login-form marker. It builds an isolated configured bundle from current source, enforces a 500000-byte entry budget and no eager Supabase module preload, verifies the served entry hash, aborts the Supabase chunk to prove Product/Project/Article static fallback, and reopens a protected route after Sign out. The no-config gate separately builds an isolated temporary bundle with Supabase browser variables explicitly cleared and verifies its served entry hash. Both reject early preview exit and force stalled preview cleanup. Public Supabase is loaded on demand into a dedicated vendor chunk; dynamic SDK/client initialization failure returns to static fallback and permits a later retry.",
+        "2026-07-13: PR #6 merged as `a2a7ae5` and deployed as `c7a910df-6dd3-440b-8971-a6120353ed19` at `https://c7a910df.urblo.pages.dev`. MIME/body-aware smoke bound both production domains to that immutable deployment: all 59 recursively discovered JS/CSS assets matched exact bytes and MIME; apex retained four non-blocking stale immutable response-header warnings while `www` was clean.",
+        "2026-07-13: The strengthened production auth browser passed three blocked-Supabase public fallbacks, all nine authenticated routes, Sign out, and protected-route revisit on `https://urblo.com.au`. This is no-write auth/route evidence, not editor save/publish/archive or the twelve-workflow handoff.",
         "Production remains revalidation_required until the fixed deployment receives approved end-to-end browser evidence. `NOW-ADMIN-SETTINGS-CRUD-001` owns creation of the Settings public-readback and Auth email evidence; this P0 task aggregates those references into the full twelve-workflow handoff and must not close them independently. Do not turn this task done from source gates or deployment smoke alone."
       ],
       "acceptance": [
@@ -2357,7 +2364,8 @@
         "npm run agent:admin-media-role-boundary-live (plan-only; no network or writes)",
         "npm run agent:admin-media-role-boundary-live -- --allow-writes --strict (only after migration apply/readback, distinct active Editor and owner/admin credentials, and Jay approval for tagged Storage writes)",
         "npm run agent:admin-handoff-readiness -- --base-url https://urblo.com.au --admin-email info@urblo.com.au --strict (must remain failing until approved production-prerequisite and golden-workflow evidence is recorded)",
-        "npm run agent:cloudflare-preview-smoke -- --base-url https://urblo.com.au --reference-url https://<deployment-id-prefix>.urblo.pages.dev (current origin correctly fails before the cache repair; rerun after repair deployment)",
+        "npm run agent:cloudflare-preview-smoke -- --base-url https://urblo.com.au --reference-url https://c7a910df.urblo.pages.dev (pass; all 59 JS/CSS assets match exact bytes/MIME, with four residual apex cache-header warnings)",
+        "npm run agent:admin-auth-browser -- --allow-login --strict --base-url https://urblo.com.au (pass; three blocked-Supabase static fallbacks, nine authenticated routes, Sign out, and protected-route revisit)",
         "Browser: complete the workflows listed in docs/agent/admin-handoff-evidence.json on the deployed SHA",
         "npm run agent:check",
         "git diff --check"

@@ -46,7 +46,7 @@ Use this order after Jay approves push/deploy for the current CMS UX stack:
 3. Push the approved CMS UX stack and wait for the Cloudflare Pages deployment to finish.
 4. Record the Cloudflare deployment identifier or commit in `docs/WORKLOG.md`.
 5. Run the no-write deployed smoke:
-   - `npm run agent:cloudflare-preview-smoke -- --base-url https://urblo.com.au`
+   - `npm run agent:cloudflare-preview-smoke -- --base-url https://urblo.com.au --reference-url https://<8-hex-deployment>.urblo.pages.dev`
 6. Run active-admin browser QA when the required browser-safe key and admin login inputs are present:
    - `npm run agent:admin-auth-browser -- --allow-login --strict --base-url https://urblo.com.au`
 7. Run the module walkthrough steps below and record results in `docs/WORKLOG.md`.
@@ -104,7 +104,7 @@ Copy this table into `docs/WORKLOG.md` after the production walkthrough and fill
 | Area | Result | Evidence | Changes Made | Public URL / Screenshot | Follow-up |
 |---|---|---|---|---|---|
 | Deployment | Pending | Cloudflare deployment id or commit. | None expected. | Production origin checked. | None. |
-| Deployed smoke | Pending | Command output for `npm run agent:cloudflare-preview-smoke -- --base-url https://urblo.com.au`. | None expected. | Smoke output or screenshot folder. | None. |
+| Deployed smoke | Pending | Command output for `npm run agent:cloudflare-preview-smoke -- --base-url https://urblo.com.au --reference-url https://<8-hex-deployment>.urblo.pages.dev`. | None expected. | Smoke output or screenshot folder. | None. |
 | Active-admin browser QA | Pending | Command output for `npm run agent:admin-auth-browser -- --allow-login --strict --base-url https://urblo.com.au`. | None expected. | Screenshot folder if generated. | None. |
 | Media Storage role boundary | Pending | Applied migration/policy readback and `npm run agent:admin-media-role-boundary-live -- --allow-writes --strict`. | Tagged private/public Storage objects, removed before completion. | Dated command evidence. | Record retained paths if cleanup is uncertain. |
 | Draft save and refresh | Pending | Browser before/after value plus refreshed readback on one tagged Draft. | Reversible tagged Draft edit. | Editor screenshot. | Restore or retain tagged note. |

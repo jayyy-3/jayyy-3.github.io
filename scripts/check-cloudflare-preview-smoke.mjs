@@ -143,8 +143,23 @@ function parseArgs(argv) {
   }
 
   options.baseUrl = normalizeBaseUrlOrigin(options.baseUrl, '--base-url');
+  const targetHostname = new URL(options.baseUrl).hostname.toLowerCase().replace(/\.+$/, '');
+  const movingProductionHosts = new Set(['urblo.com.au', 'www.urblo.com.au', 'urblo.pages.dev']);
+  assert(
+    options.referenceUrl || !movingProductionHosts.has(targetHostname),
+    '--reference-url is required for production custom/default domains so the moving origin is bound to one immutable deployment',
+  );
   if (options.referenceUrl) {
     options.referenceUrl = normalizeBaseUrlOrigin(options.referenceUrl, '--reference-url');
+    const reference = new URL(options.referenceUrl);
+    assert(
+      reference.protocol === 'https:' && /^[0-9a-f]{8}\.urblo\.pages\.dev$/i.test(reference.hostname),
+      '--reference-url must be the exact immutable https://<8-hex-deployment>.urblo.pages.dev origin',
+    );
+    assert(
+      options.referenceUrl !== options.baseUrl,
+      '--reference-url must be independent from --base-url; self-comparison cannot prove a deployment',
+    );
   }
 
   if (!Number.isInteger(options.timeoutMs) || options.timeoutMs < 1000) {
@@ -187,6 +202,7 @@ function assert(condition, message) {
 }
 
 function assertHtmlShell(path, response, html) {
+  assert(!response.redirected, `${path} unexpectedly redirected to ${response.url}`);
   assert(response.status === 200, `${path} returned ${response.status}, expected 200`);
 
   const contentType = response.headers.get('content-type') || '';
@@ -205,7 +221,9 @@ function collectAssetPaths(html) {
 
 function collectReferencedAssetPaths(text, parentAssetPath) {
   const paths = new Set();
-  for (const match of text.matchAll(/["'`]((?:\.{1,2}\/|\/?assets\/)[^"'`]+?\.(?:js|css))["'`]/g)) {
+  for (const match of text.matchAll(
+    /["'`]((?:(?:https?:)?\/\/[^"'`]*?\/assets\/|\.{1,2}\/|\/?assets\/)[^"'`]+?\.(?:js|css)(?:[?#][^"'`]*)?)["'`]/g,
+  )) {
     paths.add(normalizeAssetPath(match[1], parentAssetPath));
   }
   return [...paths].filter(Boolean);
@@ -213,23 +231,42 @@ function collectReferencedAssetPaths(text, parentAssetPath) {
 
 function normalizeAssetPath(rawPath, parentAssetPath = '/') {
   if (!rawPath) return '';
-  if (rawPath.startsWith('http')) {
-    return new URL(rawPath).pathname;
+  const candidate = rawPath.trim();
+  assert(!/^[a-z][a-z\d+.-]*:/i.test(candidate), `Asset references must be same-origin paths, not absolute URLs: ${rawPath}`);
+  assert(!candidate.startsWith('//'), `Asset references must not use protocol-relative URLs: ${rawPath}`);
+
+  let resolved;
+  if (candidate.startsWith('./') || candidate.startsWith('../')) {
+    resolved = new URL(candidate, `https://urblo.invalid${parentAssetPath}`);
+  } else if (candidate.startsWith('/')) {
+    resolved = new URL(candidate, 'https://urblo.invalid');
+  } else {
+    assert(candidate.startsWith('assets/'), `Asset reference escaped the /assets/ namespace: ${rawPath}`);
+    resolved = new URL(`/${candidate}`, 'https://urblo.invalid');
   }
-  if (rawPath.startsWith('./') || rawPath.startsWith('../')) {
-    return new URL(rawPath, `https://urblo.invalid${parentAssetPath}`).pathname;
-  }
-  return rawPath.startsWith('/') ? rawPath : `/${rawPath}`;
+  assert(!resolved.search && !resolved.hash, `Asset references must not use query strings or fragments: ${rawPath}`);
+  assert(resolved.pathname.startsWith('/assets/'), `Asset reference escaped the /assets/ namespace: ${rawPath}`);
+  return resolved.pathname;
 }
 
 async function checkHtmlRoutes(options) {
   const allRoutes = [...publicRoutes, ...adminRoutes, ...stateRoutes];
   let rootHtml = '';
+  let rootAssetIdentity = [];
 
   for (const route of allRoutes) {
     const { response, text } = await fetchText(route, options);
     assertHtmlShell(route, response, text);
-    if (route === '/') rootHtml = text;
+    const routeAssetIdentity = collectAssetPaths(text).sort();
+    if (route === '/') {
+      rootHtml = text;
+      rootAssetIdentity = routeAssetIdentity;
+    } else {
+      assert(
+        JSON.stringify(routeAssetIdentity) === JSON.stringify(rootAssetIdentity),
+        `${route} HTML asset identity differs from the root shell: route=${routeAssetIdentity.join(',')} root=${rootAssetIdentity.join(',')}`,
+      );
+    }
     console.log(`route ok: ${route}`);
   }
 
@@ -257,6 +294,7 @@ async function checkAssets(html, options) {
   const queue = collectAssetPaths(html);
   const seen = new Set();
   const jsAssetTexts = new Map();
+  const cacheWarnings = [];
   assert(queue.length > 0, 'No /assets/ references found in root HTML');
   assert(queue.length <= MAX_ASSET_GRAPH_SIZE, `Initial asset graph exceeds ${MAX_ASSET_GRAPH_SIZE} entries`);
 
@@ -268,8 +306,23 @@ async function checkAssets(html, options) {
     const response = await timedFetch(`${options.baseUrl}${path}`, options);
     assert(response.status === 200, `${path} returned ${response.status}, expected 200`);
     if (path.endsWith('.js') || path.endsWith('.css')) {
-      const text = await response.text();
+      const bytes = new Uint8Array(await response.arrayBuffer());
+      const text = new TextDecoder().decode(bytes);
       assertAssetContentType(path, response, text);
+      if (options.referenceUrl) {
+        await verifyAssetAgainstReference(path, response, bytes, options);
+      }
+      if (hasRemovedLongLivedCachePolicy(response)) {
+        assert(
+          options.referenceUrl,
+          `${path} still exposes the removed long-lived custom cache policy; rerun with --reference-url to prove the cached bytes and MIME match the immutable deployment`,
+        );
+        const cacheControl = response.headers.get('cache-control') || '';
+        cacheWarnings.push(`${path}: ${cacheControl}`);
+        console.warn(
+          `asset cache warning: ${path} still exposes ${cacheControl}, but its bytes and MIME exactly match ${options.referenceUrl}`,
+        );
+      }
       if (path.endsWith('.js')) {
         jsAssetTexts.set(path, text);
       }
@@ -286,12 +339,16 @@ async function checkAssets(html, options) {
   }
 
   checkDeployedBundleContracts(jsAssetTexts);
+  if (cacheWarnings.length > 0) {
+    console.warn(
+      `asset cache warning summary: ${cacheWarnings.length} current asset(s) retain stale response headers; source policy removal remains enforced and bytes/MIME matched the immutable reference`,
+    );
+  }
 }
 
 function assertAssetContentType(path, response, text) {
   const contentType = (response.headers.get('content-type') || '').toLowerCase();
   const mediaType = contentType.split(';', 1)[0].trim();
-  const cacheControl = (response.headers.get('cache-control') || '').toLowerCase();
   const normalizedBody = text.trimStart();
   const normalizedPrefix = normalizedBody.slice(0, 1024).toLowerCase();
   const isHtmlFallback =
@@ -302,10 +359,6 @@ function assertAssetContentType(path, response, text) {
   assert(!response.redirected, `${path} unexpectedly redirected to ${response.url}`);
   assert(normalizedBody.length > 0, `${path} returned an empty asset body`);
   assert(!isHtmlFallback, `${path} returned the SPA HTML shell instead of the requested asset`);
-  assert(
-    !cacheControl.includes('immutable') && !/max-age=(?:31536000|31556952)\b/.test(cacheControl),
-    `${path} still exposes the removed long-lived custom cache policy: ${cacheControl}`,
-  );
 
   if (path.endsWith('.js')) {
     assert(
@@ -316,6 +369,41 @@ function assertAssetContentType(path, response, text) {
   }
 
   assert(mediaType === 'text/css', `${path} returned non-CSS content type: ${mediaType || '(missing)'}`);
+}
+
+function hasRemovedLongLivedCachePolicy(response) {
+  const cacheControl = (response.headers.get('cache-control') || '').toLowerCase();
+  return cacheControl.includes('immutable') || /max-age=(?:31536000|31556952)\b/.test(cacheControl);
+}
+
+async function verifyAssetAgainstReference(path, targetResponse, targetBytes, options) {
+  const referenceResponse = await timedFetch(`${options.referenceUrl}${path}`, options);
+  assert(
+    referenceResponse.status === 200,
+    `${path} reference deployment returned ${referenceResponse.status}`,
+  );
+  const referenceBytes = new Uint8Array(await referenceResponse.arrayBuffer());
+  const referenceText = new TextDecoder().decode(referenceBytes);
+  assertAssetContentType(`${options.referenceUrl}${path}`, referenceResponse, referenceText);
+
+  const targetMediaType = (targetResponse.headers.get('content-type') || '').toLowerCase().split(';', 1)[0].trim();
+  const referenceMediaType = (referenceResponse.headers.get('content-type') || '')
+    .toLowerCase()
+    .split(';', 1)[0]
+    .trim();
+  assert(
+    targetMediaType === referenceMediaType,
+    `${path} MIME ${targetMediaType || '(missing)'} does not match reference MIME ${referenceMediaType || '(missing)'}`,
+  );
+  assert(
+    bytesEqual(targetBytes, referenceBytes),
+    `${path} bytes do not match the immutable reference deployment`,
+  );
+}
+
+function bytesEqual(left, right) {
+  if (left.byteLength !== right.byteLength) return false;
+  return left.every((value, index) => value === right[index]);
 }
 
 function checkDeployedBundleContracts(jsAssetTexts) {
