@@ -311,7 +311,7 @@
         "Repo-side Cloudflare Pages build command, output directory, SPA fallback, function routing, and launch headers are documented and verified locally.",
         "Only future API routes are configured to invoke Pages Functions; static site traffic remains static.",
         "Clean URL direct refresh works locally for declared routes.",
-        "Cloudflare zone/account read access is verified, the Hunter-account `urblo` Pages project exists, GitHub source is connected, production custom domains are attached, apex/`www` website DNS points to `urblo.pages.dev`, and smoke passes against `https://urblo.pages.dev`, `https://urblo.com.au`, and `https://www.urblo.com.au`.",
+        "Cloudflare zone/account read access is verified, the Hunter-account `urblo` Pages project exists, GitHub source is connected, production custom domains are attached, apex/`www` website DNS points to `urblo.pages.dev`, and the MIME-aware smoke must pass against the immutable deployment plus `https://urblo.com.au` and `https://www.urblo.com.au` before custom-domain health is claimed.",
         "Rollback DNS values for the previous WordPress target are recorded in `docs/CLOUDFLARE_DEPLOYMENT.md`.",
         "After a preview URL exists, direct-refresh routes, recursively discovered deployed route chunks, JavaScript/CSS MIME and body integrity, deployed admin bundle config/profile-gate markers, browser service-role env boundaries, Cloudflare redirects, and API safe-failure behavior can be checked with `npm run agent:cloudflare-preview-smoke -- --base-url https://<preview>.pages.dev`."
       ],
@@ -2357,7 +2357,7 @@
         "npm run agent:admin-media-role-boundary-live (plan-only; no network or writes)",
         "npm run agent:admin-media-role-boundary-live -- --allow-writes --strict (only after migration apply/readback, distinct active Editor and owner/admin credentials, and Jay approval for tagged Storage writes)",
         "npm run agent:admin-handoff-readiness -- --base-url https://urblo.com.au --admin-email info@urblo.com.au --strict (must remain failing until approved production-prerequisite and golden-workflow evidence is recorded)",
-        "npm run agent:cloudflare-preview-smoke -- --base-url https://urblo.com.au (passed for repair deployment on 2026-07-13)",
+        "npm run agent:cloudflare-preview-smoke -- --base-url https://urblo.com.au --reference-url https://<deployment-id-prefix>.urblo.pages.dev (current origin correctly fails before the cache repair; rerun after repair deployment)",
         "Browser: complete the workflows listed in docs/agent/admin-handoff-evidence.json on the deployed SHA",
         "npm run agent:check",
         "git diff --check"

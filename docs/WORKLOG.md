@@ -13,6 +13,7 @@ Last updated: 2026-07-13
 ### Harness And Runtime Repair
 - `scripts/check-cloudflare-preview-smoke.mjs` previously asserted only HTTP 200 for recursively discovered assets, then parsed an HTML fallback as if it were JavaScript. It now checks the exact browser URL without cache-busting, requires JavaScript/CSS MIME types, and rejects a doctype, HTML document, or React root shell body on an asset path.
 - The asset traversal now resolves both `/assets/...` and relative `./chunk.js` / `../chunk.js` references, rejects redirects and empty bodies, accepts only exact JavaScript/EcmaScript media types or `text/css`, rejects the removed year-long immutable asset policy, and fails explicitly if the recursively discovered graph exceeds 200 entries instead of silently truncating coverage.
+- Production smoke accepts an optional immutable `--reference-url` and requires the custom origin's root entry/style asset identity to match it. This binds a green custom-domain result to the newly promoted deployment instead of allowing a complete but stale version to pass.
 - Removed the project-authored one-year `/assets/*` and `/fonts/*` immutable cache rules plus the one-day `/media/*` override. Cloudflare Pages default cache/revalidation behavior now owns static assets; `agent:cloudflare-readiness` fails if those custom cache patterns return.
 - The first host-equivalent gate exposed a local `.claude/worktrees/.../.vite` dependency cache to the root ESLint scan. ESLint now ignores nested Vite caches and the machine-local Claude worktree root, so lint measures the active working tree instead of generated files from a separate checkout.
 - A negative production run of the strengthened gate fails on the cached CSS false 200, proving the new assertion detects the incident.
@@ -23,6 +24,7 @@ Last updated: 2026-07-13
 - Docker remains unavailable, so the documented host-equivalent gate passed: `npm run build`, `npm run lint`, `npx tsc -b`, `npm run agent:smoke`, `npm run agent:check`, and `git diff --check`.
 - `npm run agent:cloudflare-readiness`: pass with project-authored asset/font/media cache overrides required to remain absent.
 - Strengthened deployed smoke: pass against the local production build; expected fail against the currently affected production origin on the cached CSS HTML shell.
+- Immutable-reference mode: pass against the local build when its root entry/style identity matches the supplied reference origin; production promotion will supply the exact `*.urblo.pages.dev` deployment URL.
 - `npm run agent:admin-cms-predeploy`: pass in no-write mode; `npm run agent:admin-config-gate`: 11/11 pass; configured `npm run agent:admin-auth-browser -- --allow-login --strict`: pass for three blocked-Supabase fallbacks, nine authenticated routes, Sign out, and protected-route revisit.
 - Harness GC: zero failures; the only warning remains the intentional historical WORKLOG size threshold.
 

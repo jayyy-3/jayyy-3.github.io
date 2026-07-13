@@ -83,6 +83,7 @@ const JAVASCRIPT_MEDIA_TYPES = new Set([
 function parseArgs(argv) {
   const options = {
     baseUrl: '',
+    referenceUrl: '',
     skipRedirects: false,
     skipFunctions: false,
     timeoutMs: 12_000,
@@ -99,6 +100,17 @@ function parseArgs(argv) {
 
     if (arg.startsWith('--base-url=')) {
       options.baseUrl = arg.slice('--base-url='.length);
+      continue;
+    }
+
+    if (arg === '--reference-url') {
+      options.referenceUrl = argv[index + 1] || '';
+      index += 1;
+      continue;
+    }
+
+    if (arg.startsWith('--reference-url=')) {
+      options.referenceUrl = arg.slice('--reference-url='.length);
       continue;
     }
 
@@ -131,6 +143,9 @@ function parseArgs(argv) {
   }
 
   options.baseUrl = normalizeBaseUrlOrigin(options.baseUrl, '--base-url');
+  if (options.referenceUrl) {
+    options.referenceUrl = normalizeBaseUrlOrigin(options.referenceUrl, '--reference-url');
+  }
 
   if (!Number.isInteger(options.timeoutMs) || options.timeoutMs < 1000) {
     throw new Error('--timeout-ms must be an integer >= 1000');
@@ -219,6 +234,23 @@ async function checkHtmlRoutes(options) {
   }
 
   return rootHtml;
+}
+
+async function checkDeploymentReference(rootHtml, options) {
+  if (!options.referenceUrl) return;
+
+  const response = await timedFetch(`${options.referenceUrl}/`, options);
+  const referenceHtml = await response.text();
+  assertHtmlShell(`${options.referenceUrl}/`, response, referenceHtml);
+
+  const targetAssets = collectAssetPaths(rootHtml).sort();
+  const referenceAssets = collectAssetPaths(referenceHtml).sort();
+  assert(
+    JSON.stringify(targetAssets) === JSON.stringify(referenceAssets),
+    `Root asset identity does not match reference deployment ${options.referenceUrl}: target=${targetAssets.join(',')} reference=${referenceAssets.join(',')}`,
+  );
+
+  console.log(`deployment reference ok: ${options.referenceUrl}`);
 }
 
 async function checkAssets(html, options) {
@@ -431,11 +463,15 @@ async function run() {
 
   console.log('Cloudflare preview smoke starting.');
   console.log(`Base URL: ${options.baseUrl}`);
+  if (options.referenceUrl) {
+    console.log(`Reference deployment: ${options.referenceUrl}`);
+  }
   if (options.isLocalBaseUrl) {
     console.log('Local base URL detected; Cloudflare-only redirect and Function checks will be skipped.');
   }
 
   const rootHtml = await checkHtmlRoutes(options);
+  await checkDeploymentReference(rootHtml, options);
   await checkAssets(rootHtml, options);
   await checkRedirects(options);
   await checkFunctions(options);

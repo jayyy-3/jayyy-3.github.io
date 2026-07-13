@@ -142,18 +142,12 @@ function checkHeaders() {
     requireIncludes(headers, header, 'public/_headers');
   }
 
-  for (const forbiddenCacheOverride of [
-    '/assets/*',
-    '/fonts/*',
-    '/media/*',
-    'Cache-Control:',
-    'immutable',
-  ]) {
-    if (headers.includes(forbiddenCacheOverride)) {
-      failures.push(
-        `public/_headers: custom Pages cache override must stay absent after the cached-HTML asset incident (${forbiddenCacheOverride})`,
-      );
-    }
+  const cacheControlLines = headers
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => /^cache-control\s*:/i.test(line));
+  if (cacheControlLines.length > 0) {
+    failures.push('public/_headers: custom Cache-Control lines must stay absent after the cached-HTML asset incident');
   }
 }
 

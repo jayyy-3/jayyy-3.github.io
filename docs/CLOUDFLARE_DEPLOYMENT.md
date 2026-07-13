@@ -42,7 +42,7 @@ Before running live form/admin/preview checks, `npm run agent:live-readiness` ca
 - `Referrer-Policy: strict-origin-when-cross-origin`
 - `Permissions-Policy: camera=(), microphone=(), geolocation=()`
 
-Do not add project-authored `Cache-Control` rules for `/assets/*`, `/fonts/*`, or `/media/*`. Cloudflare Pages already provides asset caching and revalidation; the former one-year immutable asset rule cached an SPA fallback HTML response under three hashed JS/CSS URLs on the custom domain after a deployment race. New asset hashes recover the active release, while the source readiness gate keeps those custom cache overrides removed.
+Do not add project-authored `Cache-Control` rules for `/assets/*`, `/fonts/*`, or `/media/*`. Cloudflare Pages already provides asset caching and revalidation; after a deployment, the former one-year immutable asset rule was observed serving a cached SPA fallback HTML response under three hashed JS/CSS URLs on the custom domain. The exact cache-population sequence was not proven. New asset hashes recover the active release, while the source readiness gate keeps those custom cache overrides removed.
 
 No Content Security Policy is added yet because current content still depends on remote legacy media, mailto links, video sources, and article content. CSP should be added after media migration.
 
@@ -149,6 +149,7 @@ Legacy URLs such as `/products/primeBlock` and `/articles/Modular-Mastery-How-Pr
 
 Run the deployed preview smoke runner:
 - `npm run agent:cloudflare-preview-smoke -- --base-url https://<preview>.pages.dev`
+- For production promotion/readback, bind the custom origin to the exact immutable deployment: `npm run agent:cloudflare-preview-smoke -- --base-url https://urblo.com.au --reference-url https://<deployment-id-prefix>.urblo.pages.dev`.
 
 The `--base-url` value must be a real `http`/`https` origin with no path, query, or hash. Copied placeholders are rejected before any route, asset, redirect, or Function request runs.
 
@@ -197,8 +198,7 @@ Current custom-domain state:
 - Apex website DNS record is now `CNAME urblo.com.au -> urblo.pages.dev`, proxied, TTL auto.
 - `www` website DNS record is now `CNAME www.urblo.com.au -> urblo.pages.dev`, proxied, TTL auto.
 - Google Workspace MX records, apex TXT/SPF/verification records, NS records, and `qa.urblo.com.au` were not changed.
-- `npm run agent:cloudflare-preview-smoke -- --base-url https://urblo.com.au` passes.
-- `npm run agent:cloudflare-preview-smoke -- --base-url https://www.urblo.com.au` passes.
+- The former status-only smoke passes for `urblo.com.au` and `www.urblo.com.au` are invalidated by the 2026-07-13 cached-HTML asset incident. Both origins require a fresh MIME-aware pass bound to the repair deployment's immutable URL before custom-domain health is restored.
 - SMTP2GO DNS-only CNAME records are present:
   - `em905485.urblo.com.au -> return.smtp2go.net`, record id `999d935aa8b2323d0d1b613aa5bcc276`.
   - `s905485._domainkey.urblo.com.au -> dkim.smtp2go.net`, record id `15b74562f23fb255774c77ad46c7d473`.

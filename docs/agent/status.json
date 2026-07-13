@@ -78,7 +78,7 @@
     "gitDiffCheck": "2026-07-13",
     "smoke": "2026-07-13",
     "typecheck": "2026-07-13",
-    "cloudflarePreviewSmokeProduction": "2026-07-13",
+    "cloudflarePreviewSmokeProduction": "invalidated_2026-07-13_cached_asset_incident_repair_pending",
     "adminAuthBrowserProduction": "2026-06-05",
     "adminHandoffReadinessStrictExpectedFailure": "2026-07-13",
     "adminMediaRoleBoundaryPlanOnly": "2026-07-13",
