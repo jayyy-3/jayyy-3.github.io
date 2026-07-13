@@ -1,6 +1,105 @@
 # WORKLOG - Urblo Execution Log
 
-Last updated: 2026-06-30
+Last updated: 2026-07-13
+
+## Entry - 2026-07-13 (Admin Reliability And Task UX Re-Audit)
+
+### Scope
+- Reopened the production CMS handoff after Jay reported that `/admin` was not working and was extremely difficult to use.
+- Read the Harness control documents, inspected the implemented admin/public data paths, and reviewed the current production admin at a common 1116 x 799 desktop viewport without signing in or writing data.
+- Treated prior route-shell screenshots and direct browser-key/API mutations as historical infrastructure evidence, not proof that an editor can complete the UI workflow.
+- Made local source, UI, contract, and Harness repairs only. No deployment, production login, Supabase write, Storage write, invitation, recovery email, content publication, or archive action was attempted.
+
+### Management And Harness Findings
+- The earlier strict handoff check could pass from a WORKLOG `Pass` phrase plus valid URL/email inputs. It did not require a login, draft save/refresh, publication, public readback, archive, invitation, or recovery result.
+- The June auth browser check proved authenticated route shells and sign-out. The June CRUD verifier mutated tables directly through browser-key/RLS calls. Both were useful infrastructure tests, but neither represented the actual editor product.
+- This created a completion-evidence mismatch: the Harness was strong on source contracts, schema/RLS posture, and safe live-write gating, but weak on task-level product outcomes.
+- Current truth is spread across `AGENTS.md`, `docs/HANDOFF.md`, `docs/agent/status.json`, the approximately 200 KB task queue, the approximately 668 KB WORKLOG, and many exact-copy source checks. The compact startup surfaces help, but current claims can still drift unless evidence is machine-bound to a deployment.
+- The machine queue marked `NOW-ARTICLE-STRUCTURE-CLAIMS-001` done even though its own notes and current handoff said claim cleanup was paused and acceptance was unmet; it is now `next`, matching the user decision and remaining work.
+- `docs/agent/admin-handoff-evidence.json` v2 is now the machine-readable production assertion. It starts as `revalidation_required`, expires evidence after seven days, requires one immutable Cloudflare deployment URL and a real local Git commit SHA, and requires tracked or same-deployment evidence for every editor golden workflow.
+- The strengthened readiness checker now rejects source/documentation drift even in report mode. Missing live evidence remains report-only before deployment and becomes blocking under `--strict`.
+
+### Confirmed Reliability Failures
+- The Supabase auth listener called session/profile work from inside `onAuthStateChange`, matching Supabase's documented client-lock deadlock pattern.
+- Settings could invite an Auth user, but there was no safe account-setup/password-recovery product flow. Contact/Sample Request SMTP2GO proof did not prove Supabase Auth email delivery.
+- Invite redirects accepted a browser-supplied URL, and a failed profile insert could leave an orphaned invited Auth user.
+- Media loading was capped at 80 records while the imported library contained 115 candidates. Selecting new External media could be overwritten by the selected-record effect.
+- Publishing private Storage media changed database metadata without copying the object to the public bucket. Public adapters then read `source_url`, so Storage-backed uploads had no usable public URL.
+- Public services replaced an entire static category as soon as any Published CMS row existed. Publishing one record could hide unrelated static records.
+- Published `site_settings` had an admin editor but no public consumer.
+- Lifecycle copy said Archive removed content from the website, while migration fallback can reveal a matching legacy static record after the CMS version is hidden.
+
+### Confirmed UX Failures
+- The production Projects screen mounted all project, fact, material, media, map, and hotspot editors in one page. At 1116 x 799 it was approximately 9,600 pixels tall before completing a normal record task.
+- Projects had no stable selected-record URL, no unsaved-change warning, repeated non-searchable media selects, and no task-stage focus.
+- Most admin modules are large page monoliths that expose the database shape rather than an editor workflow. Projects was approximately 3,200 source lines before this repair; Stone Library was approximately 2,500.
+- The repository has extensive source-string and live API verifiers but no normal component/integration/end-to-end suite for editor behavior. Generated configuration-gate browser specs do not replace an authenticated editor journey.
+- Production contains visible tagged QA residue in leads/content queues, which makes the operational dashboard harder to trust.
+
+### Local Source Repairs
+- Deferred auth refresh outside the synchronous Supabase auth-state callback. Same-user/token refreshes now run in the background without unmounting the active editor; initial login, sign-out, and genuine user transitions retain blocking state changes.
+- Added focused sign-in, forgot-password, invite/recovery account setup, explicit expired/invalid-link states, keyboard focus indicators, and announced error/success states.
+- Bound implicit invite/recovery callbacks to the captured token pair inside a separate non-persistent/no-refresh/no-URL-detection Auth client. The shared browser client no longer auto-consumes URL sessions, captured callback credentials are removed from the address bar, and the same isolated client verifies the callback user and writes the password. A different login in this or another tab therefore cannot rebind the callback, and opening a password link cannot replace an unrelated shared admin session. The completion screen returns to explicit password sign-in instead of inferring access from whichever shared session is present. Query-string spoofing, stale/unrelated sessions, reused links, and unsupported PKCE callbacks fail safely.
+- Derived invite callbacks from the request origin, disabled server URL-session detection, removed the browser redirect input, and delete the newly invited Auth user if profile creation fails.
+- Increased Media loading to 500 records, stabilized new External records, and validated external/hosted media as safe HTTP(S) or root-relative URLs.
+- Forced every initial Media upload into the private bucket. A failed metadata insert is read back before cleanup; owner/admin roles can best-effort remove a confirmed private orphan, while editors receive an explicit private-only orphan warning because their role cannot delete Storage objects.
+- Restricted private-to-public automatic promotion to Website owner/CMS manager roles and bound it to the selected record's original private bucket/path plus `updated_at`. Promotion creates a new public object without overwrite, reads back ambiguous or zero-row guarded updates, and checks for other media-record references before rollback or private-source cleanup, retaining the object whenever ownership cannot be proved.
+- Added pending migration `supabase/migrations/20260713065628_media_public_bucket_role_hardening.sql` so the same private-first rule is enforced by Storage RLS: Editors retain private-bucket insert/update, while public-bucket insert/update requires owner/admin. It is source-verified only and was not applied to production in this session.
+- Added `npm run agent:admin-media-role-boundary-live` as a default no-network/no-write plan and approval-gated browser-key/RLS verifier. Live mode requires distinct active Editor and owner/admin credentials, proves Editor private insert/update success plus public insert/update denial, proves owner/admin public insert/update success, and fails unless all tagged objects are removed. The handoff evidence schema now treats applied-migration/readback plus this live role proof as a required production prerequisite separate from the twelve editor workflows.
+- Extended `npm run agent:live-readiness` with that separate role-boundary check. It distinguishes the older owner/admin private-upload/anonymous-denial proof from the Editor public-bucket policy proof, rejects matching Editor/owner email identities, and keeps migration readback plus approval for that exact tagged role proof as explicit non-secret manual gates; `--media-role-migration-verified` records readback only, while the dedicated `--media-role-writes-approved` avoids conflating this permission with general CRUD approval. Neither flag applies SQL or runs writes.
+- Public media resolution now requires a Published media row, accepts Storage objects only from `urblo-public-media`, and rejects unsafe external URL schemes.
+- Added per-canonical-record Published CMS overlay for Projects, Products, Articles, and Stone Library so unrelated static fallback remains visible.
+- Matching Published Projects retain static-only sector/category/material/map/gallery/CTA fields until the schema/public adapter owns them; facts/media dependency failures reject the CMS overlay instead of replacing healthy fallback with partial content.
+- Added a validated public consumer for Published default site settings covering company name, supported footer/contact/social data, homepage SEO defaults, and default share image. Admin Published saves and public parsing share exact normalization/validation; later public mounts refetch instead of reusing a permanent success/failure cache; a static fallback result receives one bounded 750 ms retry that is cancelled on unmount; `/admin` does not perform this public settings fetch.
+- Added runtime metadata plus Article/WebPage/Breadcrumb JSON-LD for resolved Published CMS Project, Product, Article, and Stone detail routes so CMS SEO fields/defaults replace the initial SPA fallback and stale static entity JSON-LD after the entity loads. Brand-new CMS-only URLs still need a release-time sitemap and crawlable first-HTML strategy.
+- Lazy-loaded admin route modules, kept one stable Admin/Auth provider across `/admin/*` navigation, and kept medium-desktop header actions wrapped instead of clipped.
+- Reworked Projects around stable `/admin/projects/:projectId` URLs and Overview, Facts, Materials, Media, and Maps/hotspots workspaces. Only the active workspace mounts; all six editor forms have baseline-derived unsaved-change warnings across record/new/tab/admin-navigation/sign-out/history/reload transitions; child saves update only their own row/baseline; publish blockers jump to the correct workspace; media selection is searchable.
+- Added request-generation guards to Project bundle/hotspot and Article-section loads. Project/Article child saves capture the original parent and editor identity, constrain UPDATEs by parent ownership, block record switching while writes are active, and ignore a response after its parent/editor is no longer current instead of reparenting or overwriting another record.
+- Added the same parent/row identity capture, ownership-constrained UPDATEs, in-flight parent-switch locks, and stale bundle/capability rejection to Products and Stone Library child editors.
+- Made the Articles, Projects, Products, and Stone Library editor grids inert while a parent catalog or child bundle is incomplete. Parent selection now clears stale child forms/readiness first, enters loading state, and only the current selection generation releases it, so another record's sections/capabilities cannot drive Save or Publish. Articles now validates before taking the save lock and releases that lock in `finally`, preventing invalid or exceptional saves from freezing the editor until refresh.
+- Restricted Project structured facts to JSON text or text arrays in Admin and defensively normalize legacy object/number values before public React rendering. Published Article CTA/video destinations now share a root-relative-or-http(s) contract in Admin and the public renderer, rejecting protocol-relative, unsafe-scheme, control-character, and encoded-backslash inputs.
+- Updated Archive/status language across content modules to distinguish hiding the CMS version from removing a matching legacy fallback.
+
+### Verification Results
+- `npm run build`: pass. Admin route chunks are separate; the known Browserslist data-staleness notice remains.
+- `npm run lint`: pass.
+- `npx tsc -b`: pass.
+- `npm run agent:smoke`: pass, including `/admin/account-setup` and `/admin/projects/1` route shells.
+- `npm run agent:admin-config-gate`: pass for 11 no-config admin routes in Firefox.
+- `npm run agent:admin-crud-coverage`: pass, including isolated callback-password writes, private-only initial Media uploads, selected-path/version promotion guards, metadata readback, reference-safe Storage cleanup, parent ownership, loading interaction boundaries, and Articles save-lock release source contracts.
+- `npm run agent:public-content-overlay`: pass, including unmatched-static retention, Published precedence, Draft media rejection, and unsafe media URL rejection.
+- Targeted ESLint and `npx tsc -b`: pass after the Project/Article concurrency, structured-fact, safe-link, dynamic JSON-LD, and Settings retry repairs.
+- `npm run agent:admin-crud-coverage`: pass after parent-ownership predicates and stale-response guards were added to Projects and Article sections.
+- `npm run agent:public-supabase-readiness`: pass.
+- `npm run agent:supabase-foundation-readiness`: pass, including the pending owner/admin-only public-bucket insert/update policy source.
+- `npm run agent:admin-media-role-boundary-live`: pass in plan-only mode. It reported the missing live credentials, made no network call, login, upload, update, or delete, and did not claim the migration was applied.
+- `node --check scripts/check-live-readiness.mjs` and targeted ESLint for the live-readiness/role-boundary verifiers: pass.
+- `npm run agent:live-readiness -- --base-url https://urblo.com.au --admin-email info@urblo.com.au`: pass in report-only mode. It lists the production URL and admin email without printing secrets, keeps the migration/approval/Editor-owner credential gates missing, and does not query or mutate Supabase.
+- Synthetic no-network identity checks: pass. Both readiness reporting and the role-boundary verifier reject `Same@Example.com` versus `same@example.com` as the same account even when every other fake input/flag is present; the readiness item remains `ready: false`.
+- `npm run agent:cloudflare-readiness`: pass.
+- `npm run agent:seo-readiness`: pass.
+- `npm run agent:admin-cms-predeploy`: pass in no-write source/report mode.
+- `npm run agent:check`: pass.
+- `npm run agent:harness-gc` and `npm run agent:harness-gc:review`: zero failures and one intentional warning for the 12,000-line historical WORKLOG.
+- Strict admin handoff readiness: expected fail. The repaired source is not deployed, the applied-migration/role-boundary prerequisite is missing, and all twelve production workflow/usability evidence items remain missing or stale.
+
+### Residual Risks And Explicit Follow-Ups
+- Production still runs the previous admin build. This entry does not claim that the user's production problem is closed.
+- Supabase Auth custom SMTP and exact allowed invite/recovery redirect URLs remain unverified. The implemented callback supports implicit token-pair links only; PKCE `?code=` callbacks are deliberately rejected until a state-bound code-exchange flow is designed.
+- Media promotion spans Storage and database operations and cannot be atomic in the current browser workflow. Original-path/version binding, reference checks, and retain-on-uncertainty behavior reduce cross-record deletion risk but do not create a transaction.
+- The public-bucket role-hardening migration is not applied in production yet. Until it is applied and read back, a signed-in Editor can still bypass the UI and call the existing public-bucket write policy directly.
+- Media search is capped at 500 rather than paginated/virtualized, Projects has confirmation-based protection rather than autosave/draft recovery, and there is no admin-to-public preview contract.
+- Products, Articles, Stone Library, Media, Settings, and Leads still need the same task-level UX treatment where user testing shows friction.
+- Project materials, maps, and hotspots are editable in admin, but not every stored relationship has a complete public consumer. Multi-table content saves are not transactional.
+- The current Project schema has no sector/category fields. Matching legacy Projects preserve static taxonomy, while a brand-new CMS-only Project still receives generic taxonomy until a migration/editor field is designed.
+- An Archived CMS record can reveal a matching static fallback until CMS-only cutover. Editors must verify the public route rather than assuming Archive means absence.
+- Client-side entity SEO and entity JSON-LD update after JavaScript loads; brand-new CMS-only URLs are not added automatically to the static sitemap or structured route inventory, and deep-link first HTML remains the shared SPA shell.
+- Tagged QA residue should be reviewed and cleaned only under an approved retention policy; no destructive cleanup was attempted here.
+- Production closure requires applied-migration/readback plus live Editor/owner Storage-role evidence, then deployment and approved evidence for sign-in, draft save/refresh, private media publish, public readback, archive behavior, settings public readback, invite/password setup, recovery, responsive admin navigation, the Projects task workflow, the Dashboard operational queue, and non-technical editor-guide usability against the same deployment SHA.
+
+### Result
+- The codebase now has a credible local P0 reliability patch and the first task-oriented editor redesign, plus a Harness that refuses to call the CMS handed off from source checks alone.
+- `NOW-ADMIN-RELIABILITY-UX-001` remains `now`. The next action is apply/read back the Storage role migration and pass the approved Editor/owner verifier, deploy one reviewed SHA, configure Auth email/redirects, run the approved production golden workflow, then close Projects pagination/preview gaps before copying the pattern to other modules.
 
 ## Entry - 2026-06-30 (Operating Protocol + Container Gate)
 

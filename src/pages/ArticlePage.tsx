@@ -2,8 +2,10 @@ import DOMPurify from 'dompurify';
 import { useEffect, useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 import ReadingProgressBar from '../components/ReadingProgressBar';
+import PublicContentSeo from '../components/PublicContentSeo';
 import RouteState from '../components/RouteState';
 import { prepareArticleHtml, resolveArticleAssetPath } from '../lib/articleMedia';
+import { toSafePublicContentDestination } from '../lib/publicContentLink';
 import ArticleService from '../service/ArticleService';
 import type { ArticleBody, PublicArticleBlock } from '../service/ArticleService';
 import type { ArticleMeta } from '../types/article';
@@ -160,6 +162,19 @@ export default function ArticlePage() {
 
   return (
     <div className="bg-white">
+      {meta.contentSource === 'cms' ? (
+        <PublicContentSeo
+          canonicalPath={`/articles/${meta.slug}`}
+          fallbackTitle={`${meta.title} | Urblo`}
+          fallbackDescription={
+            meta.excerpt ||
+            `Read ${meta.title}, an Urblo article on natural stone, public realm design, and streetscape delivery.`
+          }
+          image={meta.cover}
+          ogType="article"
+          seo={meta.seo}
+        />
+      ) : null}
       <ReadingProgressBar />
 
       <header className="relative overflow-hidden bg-black text-white">
@@ -280,22 +295,23 @@ function ArticleBlockRenderer({ block }: { block: PublicArticleBlock }) {
   }
 
   if (block.blockType === 'cta') {
-    const href = contentString(content, 'href') || '/contact';
+    const rawHref = contentString(content, 'href');
+    const destination = toSafePublicContentDestination(rawHref || '/contact');
     const label = contentString(content, 'label') || 'Contact Urblo';
     const className = 'mt-5 inline-flex min-h-11 items-center justify-center rounded bg-[var(--urblo-lime)] px-5 text-xs font-bold uppercase tracking-[0.14em] text-black';
 
     return (
       <section className="border border-black/10 bg-black p-5 text-white">
         <ParagraphText text={contentString(content, 'body')} className="text-white/72" />
-        {isInternalHref(href) ? (
-          <Link to={href} className={className}>
+        {destination?.kind === 'internal' ? (
+          <Link to={destination.href} className={className}>
             {label}
           </Link>
-        ) : (
-          <a href={href} className={className}>
+        ) : destination?.kind === 'external' ? (
+          <a href={destination.href} className={className} rel="noopener noreferrer">
             {label}
           </a>
-        )}
+        ) : null}
       </section>
     );
   }
@@ -354,7 +370,14 @@ function ArticleBlockRenderer({ block }: { block: PublicArticleBlock }) {
 
   if (block.blockType === 'video_embed') {
     const url = contentString(content, 'url');
-    return <ReferenceBlock title="Video" body={contentString(content, 'caption') || url} href={url || undefined} />;
+    const destination = toSafePublicContentDestination(url);
+    return (
+      <ReferenceBlock
+        title="Video"
+        body={contentString(content, 'caption') || destination?.href}
+        href={destination?.href}
+      />
+    );
   }
 
   if (block.blockType === 'comparison_table') {
@@ -391,17 +414,16 @@ function ReferenceBlock({ title, body, href }: { title: string; body?: string; h
 
   if (!href) return content;
 
-  return isInternalHref(href) ? (
-    <Link to={href}>{content}</Link>
+  const destination = toSafePublicContentDestination(href);
+  if (!destination) return content;
+
+  return destination.kind === 'internal' ? (
+    <Link to={destination.href}>{content}</Link>
   ) : (
-    <a href={href} rel="noreferrer">
+    <a href={destination.href} rel="noopener noreferrer">
       {content}
     </a>
   );
-}
-
-function isInternalHref(href: string) {
-  return href.startsWith('/');
 }
 
 function ParagraphText({ text, className = '' }: { text: string; className?: string }) {

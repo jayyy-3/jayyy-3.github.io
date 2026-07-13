@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, ArrowUpRight } from 'lucide-react';
 import ProjectHotspotImage from '../components/projects/ProjectHotspotImage';
 import RouteState from '../components/RouteState';
+import PublicContentSeo from '../components/PublicContentSeo';
 import {
   type ProjectData,
   type ProjectMaterial,
@@ -447,6 +448,19 @@ export default function ProjectDetails() {
 
   return (
     <div className="bg-white">
+      {project.contentSource === 'cms' ? (
+        <PublicContentSeo
+          canonicalPath={`/projects/${project.slug}`}
+          fallbackTitle={`${project.name} Stone Streetscape Project | Urblo`}
+          fallbackDescription={
+            project.listing.summary ||
+            project.lead ||
+            `Review ${project.name}, an Urblo public realm stone project with project facts, material notes, and delivery proof.`
+          }
+          image={project.hero?.image || project.listing.cover}
+          seo={project.seo}
+        />
+      ) : null}
       <ProjectOpening project={project} allProjects={projects} />
       <ProjectHero project={project} />
       <ProjectInformation project={project} />

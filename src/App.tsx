@@ -13,6 +13,8 @@ import RouteState from './components/RouteState';
 import { getSeoMetaForPathname, getStructuredDataForPathname } from './data/seoRoutes';
 import DefaultLayout from './layouts/DefaultLayout';
 import HomepageLayout from './layouts/HomepageLayout';
+import { PublicSiteSettingsProvider } from './lib/PublicSiteSettingsProvider';
+import { usePublicSiteSettings } from './lib/publicSiteSettings';
 
 const Home = lazy(() => import('./pages/Home'));
 const ProductsPage = lazy(() => import('./pages/ProductsPage'));
@@ -40,22 +42,27 @@ const ROUTE_BANNERS = {
 
 function TitleUpdater() {
     const location = useLocation();
+    const settings = usePublicSiteSettings();
 
     useEffect(() => {
-        const meta = getSeoMetaForPathname(location.pathname);
+        const meta = getSeoMetaForPathname(location.pathname, {
+            homepageTitle: settings.seo.title,
+            homepageDescription: settings.seo.description,
+            defaultShareImage: settings.seo.defaultShareImage,
+        });
         const structuredData = getStructuredDataForPathname(location.pathname);
 
         document.title = meta.title;
         upsertMeta('name', 'description', meta.description);
         upsertMeta('name', 'robots', meta.robots);
         upsertCanonical(meta.canonicalUrl);
-        upsertMeta('property', 'og:site_name', 'Urblo');
+        upsertMeta('property', 'og:site_name', settings.companyName);
         upsertMeta('property', 'og:type', meta.ogType);
         upsertMeta('property', 'og:title', meta.title);
         upsertMeta('property', 'og:description', meta.description);
         upsertMeta('property', 'og:url', meta.canonicalUrl);
         upsertMeta('property', 'og:image', meta.image);
-        upsertMeta('property', 'og:image:type', 'image/png');
+        upsertMeta('property', 'og:image:type', getImageMimeType(meta.image));
         upsertMeta('property', 'og:image:width', '1200');
         upsertMeta('property', 'og:image:height', '630');
         upsertMeta('name', 'twitter:card', 'summary_large_image');
@@ -63,7 +70,13 @@ function TitleUpdater() {
         upsertMeta('name', 'twitter:description', meta.description);
         upsertMeta('name', 'twitter:image', meta.image);
         upsertJsonLd('urblo-structured-data', structuredData);
-    }, [location.pathname]);
+    }, [
+        location.pathname,
+        settings.companyName,
+        settings.seo.defaultShareImage,
+        settings.seo.description,
+        settings.seo.title,
+    ]);
 
     return null;
 }
@@ -93,6 +106,23 @@ function upsertCanonical(href: string) {
     tag.href = href;
 }
 
+function getImageMimeType(imageUrl: string) {
+    let pathname = imageUrl;
+
+    try {
+        pathname = new URL(imageUrl, window.location.origin).pathname;
+    } catch {
+        // Keep the original value and use the safe default below.
+    }
+
+    const normalized = pathname.toLowerCase();
+    if (normalized.endsWith('.jpg') || normalized.endsWith('.jpeg')) return 'image/jpeg';
+    if (normalized.endsWith('.webp')) return 'image/webp';
+    if (normalized.endsWith('.avif')) return 'image/avif';
+    if (normalized.endsWith('.gif')) return 'image/gif';
+    return 'image/png';
+}
+
 function upsertJsonLd(id: string, structuredData: Record<string, unknown>[]) {
     let tag = document.head.querySelector<HTMLScriptElement>(`script#${id}`);
 
@@ -108,6 +138,7 @@ function upsertJsonLd(id: string, structuredData: Record<string, unknown>[]) {
         document.head.appendChild(tag);
     }
 
+    tag.removeAttribute('data-owner');
     tag.textContent = JSON.stringify(structuredData);
 }
 
@@ -154,10 +185,11 @@ function loadPage(page: ReactNode, options: { headerOffset?: boolean } = {}) {
 function AnimatedRoutes() {
     const location = useLocation();
     const shouldReduceMotion = useReducedMotion();
+    const routeTransitionKey = location.pathname.startsWith('/admin') ? 'admin' : location.pathname;
 
     return (
         <motion.div
-            key={location.pathname}
+            key={routeTransitionKey}
             initial={shouldReduceMotion ? false : { opacity: 0, y: 10 }}
             animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
             transition={{ duration: shouldReduceMotion ? 0.01 : 0.22, ease: [0.22, 1, 0.36, 1] }}
@@ -289,10 +321,32 @@ function AnimatedRoutes() {
 export default function App() {
     return (
         <BrowserRouter>
+            <AppRuntime />
+        </BrowserRouter>
+    );
+}
+
+function AppRuntime() {
+    const location = useLocation();
+
+    if (location.pathname.startsWith('/admin')) {
+        return <AppRuntimeContent />;
+    }
+
+    return (
+        <PublicSiteSettingsProvider>
+            <AppRuntimeContent />
+        </PublicSiteSettingsProvider>
+    );
+}
+
+function AppRuntimeContent() {
+    return (
+        <>
             <WelcomePopupGate />
             <TitleUpdater />
             <ScrollRestoration />
             <AnimatedRoutes />
-        </BrowserRouter>
+        </>
     );
 }

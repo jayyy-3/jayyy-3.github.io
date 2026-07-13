@@ -3,6 +3,16 @@ import type { FormEvent } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { CheckCircle2, KeyRound, Pencil, Plus, Save, ShieldCheck, UserPlus, Users, X } from 'lucide-react';
 import { recordAdminAuditEvent, withAuditNotice } from '../../lib/adminAudit';
+import {
+    siteSettingsFooterLimits,
+    toSafeExternalFooterDestination,
+    toSafeInternalFooterDestination,
+} from '../../lib/siteSettingsFooterContract';
+import {
+    normalizePublishedSiteSettingsFields,
+    toBoundedPublicSiteSettingsText,
+    type NormalizedPublishedSiteSettingsFields,
+} from '../../lib/siteSettingsPublicContract';
 import { supabase } from '../../lib/supabaseClient';
 import { useAdminAuth } from '../../lib/adminAuthHooks';
 import AdminShell from './AdminShell';
@@ -239,21 +249,26 @@ function AdminSettingsContent() {
         }
 
         const now = new Date().toISOString();
+        const publishedFields = validation.publishedFields;
         const payload = {
             settings_key: 'default',
             status: form.status,
-            company_name: form.companyName.trim(),
-            primary_email: form.primaryEmail.trim() || null,
-            primary_phone: form.primaryPhone.trim() || null,
+            company_name: publishedFields?.companyName ?? form.companyName.trim(),
+            primary_email: publishedFields ? publishedFields.primaryEmail : form.primaryEmail.trim() || null,
+            primary_phone: publishedFields ? publishedFields.primaryPhone : form.primaryPhone.trim() || null,
             social_links: {
-                instagram: form.instagram.trim() || undefined,
-                linkedin: form.linkedin.trim() || undefined,
+                instagram: publishedFields ? publishedFields.instagram ?? undefined : form.instagram.trim() || undefined,
+                linkedin: publishedFields ? publishedFields.linkedin ?? undefined : form.linkedin.trim() || undefined,
             },
             footer_columns: validation.footerColumns,
             seo: {
-                title: form.seoTitle.trim() || undefined,
-                description: form.seoDescription.trim() || undefined,
-                defaultShareImage: form.defaultShareImage.trim() || undefined,
+                title: publishedFields ? publishedFields.seoTitle ?? undefined : form.seoTitle.trim() || undefined,
+                description: publishedFields
+                    ? publishedFields.seoDescription ?? undefined
+                    : form.seoDescription.trim() || undefined,
+                defaultShareImage: publishedFields
+                    ? publishedFields.defaultShareImage ?? undefined
+                    : form.defaultShareImage.trim() || undefined,
             },
             published_at: form.status === 'published' ? (row?.published_at ?? now) : row?.published_at,
             archived_at: form.status === 'archived' ? now : null,
@@ -313,7 +328,7 @@ function AdminSettingsContent() {
                                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-black/45">
                                     Default site identity
                                 </p>
-                                <h2 className="mt-2 text-2xl font-semibold text-black">Global contact and search defaults</h2>
+                                <h2 className="mt-2 text-2xl font-semibold text-black">Global contact and homepage search settings</h2>
                                 <p className="mt-2 text-sm leading-6 text-black/58">{statusNote}</p>
                             </div>
                             <CmsStatusPill status={form.status} />
@@ -422,11 +437,11 @@ function AdminSettingsContent() {
 
                     <div className="border border-black/10 bg-white p-5 md:p-6">
                         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-black/45">
-                            Search defaults
+                            Homepage search settings
                         </p>
                         <div className="mt-5 grid gap-4">
                             <label className="text-xs font-bold uppercase tracking-[0.14em] text-black/55">
-                                Default title
+                                Homepage title
                                 <input
                                     value={form.seoTitle}
                                     onChange={(event) => updateField('seoTitle', event.target.value)}
@@ -435,7 +450,7 @@ function AdminSettingsContent() {
                                 />
                             </label>
                             <label className="text-xs font-bold uppercase tracking-[0.14em] text-black/55">
-                                Default description
+                                Homepage description
                                 <textarea
                                     value={form.seoDescription}
                                     onChange={(event) => updateField('seoDescription', event.target.value)}
@@ -500,10 +515,11 @@ function AdminSettingsContent() {
                         <ShieldCheck className="h-5 w-5 text-black" />
                         <h2 className="mt-5 text-xl font-semibold text-black">What this changes</h2>
                         <ul className="mt-4 space-y-3 text-sm leading-6 text-black/62">
-                            <li>Company, email, phone, social links, footer content, and search defaults are site-wide.</li>
+                            <li>Company, email, phone, social links, and footer content are site-wide.</li>
+                            <li>Homepage title and description apply only to the homepage. The default share image can support other route previews.</li>
                             <li>Published settings are the public-ready website settings.</li>
                             <li>CMS team changes affect who can edit the CMS, not public website content.</li>
-                            <li>A login account must exist before CMS access is granted here.</li>
+                            <li>Invite and grant access creates the new login path; Grant existing login is only for an account that already exists.</li>
                         </ul>
                     </section>
 
@@ -760,7 +776,6 @@ function AdminProfilesManager({
                 email: inviteForm.email.trim(),
                 displayName: inviteForm.displayName.trim(),
                 role: inviteForm.role,
-                redirectTo: `${window.location.origin}/admin/login`,
             }),
         });
 
@@ -900,7 +915,7 @@ function AdminProfilesManager({
                     <ol className="mt-4 space-y-3 text-sm leading-6 text-black/62">
                         <li>1. Use Invite and grant access for a new CMS user.</li>
                         <li>2. Choose the lowest role they need.</li>
-                        <li>3. Ask them to accept the invite email and sign in at `/admin`.</li>
+                        <li>3. They accept the email, choose a password, then open `/admin`.</li>
                         <li>4. Use Grant existing login only when the person already has a login account.</li>
                     </ol>
                     <p className="mt-4 text-xs leading-5 text-black/45">
@@ -1131,7 +1146,7 @@ function WebsiteSettingsStatusCard({ status }: { status: SiteSettingsStatus }) {
         status === 'published'
             ? {
                   title: 'Public website can use these settings',
-                  detail: 'Published contact details, footer links, and search defaults are the public-ready version.',
+                  detail: 'Published contact details, footer links, homepage metadata, and the default share image are the public-ready version.',
                   badge: 'Live settings',
                   tone: 'ready' as const,
               }
@@ -1194,7 +1209,7 @@ function SiteSettingsActionBar({
               ? 'Archived settings stay hidden. Save only if you are retiring this settings draft.'
               : 'Draft settings are safe to prepare before they become public.';
     const actionNote = canEdit
-        ? `${statusNote} Save settings when contact, footer, and search defaults are ready.`
+        ? `${statusNote} Save settings when contact, footer, homepage metadata, and the default share image are ready.`
         : 'This role can review site settings, but only CMS managers can save global website settings.';
 
     return (
@@ -1441,17 +1456,39 @@ function FooterItemRow({
     );
 }
 
-function validateSettings(form: SettingsFormState): { error: string | null; footerColumns: unknown[] } {
+function validateSettings(form: SettingsFormState): {
+    error: string | null;
+    footerColumns: unknown[];
+    publishedFields: NormalizedPublishedSiteSettingsFields | null;
+} {
     if (!form.companyName.trim()) {
-        return { error: 'Company name is required.', footerColumns: [] };
+        return { error: 'Company name is required.', footerColumns: [], publishedFields: null };
     }
 
     const footerColumns = serializeFooterColumns(form.footerColumns);
     if (footerColumns.error) {
-        return { error: footerColumns.error, footerColumns: [] };
+        return { error: footerColumns.error, footerColumns: [], publishedFields: null };
     }
 
-    return { error: null, footerColumns: footerColumns.value };
+    if (form.status === 'published') {
+        const publishedFields = normalizePublishedSiteSettingsFields({
+            companyName: form.companyName,
+            primaryEmail: form.primaryEmail,
+            primaryPhone: form.primaryPhone,
+            instagram: form.instagram,
+            linkedin: form.linkedin,
+            seoTitle: form.seoTitle,
+            seoDescription: form.seoDescription,
+            defaultShareImage: form.defaultShareImage,
+        });
+        if (publishedFields.error) {
+            return { error: publishedFields.error, footerColumns: [], publishedFields: null };
+        }
+
+        return { error: null, footerColumns: footerColumns.value, publishedFields: publishedFields.value };
+    }
+
+    return { error: null, footerColumns: footerColumns.value, publishedFields: null };
 }
 
 function normalizeFooterColumns(columns: unknown[]): FooterColumnForm[] {
@@ -1483,39 +1520,78 @@ function normalizeFooterColumns(columns: unknown[]): FooterColumnForm[] {
 }
 
 function serializeFooterColumns(columns: FooterColumnForm[]): { error: string | null; value: unknown[] } {
+    if (columns.length > siteSettingsFooterLimits.columns) {
+        return {
+            error: `Footer content supports up to ${siteSettingsFooterLimits.columns} columns.`,
+            value: [],
+        };
+    }
+
     const serialized = [];
 
     for (const column of columns) {
-        const title = column.title.trim();
+        const title = toBoundedPublicSiteSettingsText(column.title, siteSettingsFooterLimits.titleLength);
         if (!title) {
-            return { error: 'Every footer column needs a title.', value: [] };
+            return {
+                error: `Every footer column needs a title of ${siteSettingsFooterLimits.titleLength} characters or fewer.`,
+                value: [],
+            };
+        }
+        if (!column.items.length) {
+            return { error: 'Every footer column needs at least one item.', value: [] };
+        }
+        if (column.items.length > siteSettingsFooterLimits.itemsPerColumn) {
+            return {
+                error: `Each footer column supports up to ${siteSettingsFooterLimits.itemsPerColumn} items.`,
+                value: [],
+            };
         }
 
         const items = [];
         for (const item of column.items) {
-            const label = item.label.trim();
+            const label = toBoundedPublicSiteSettingsText(item.label, siteSettingsFooterLimits.labelLength);
+            const rawDestination = item.destination;
             const destination = item.destination.trim();
             if (!label || !destination) {
                 return { error: 'Every footer item needs a label and text or link destination.', value: [] };
             }
 
             if (item.destinationKind === 'internal') {
-                if (!destination.startsWith('/')) {
-                    return { error: 'Internal footer links must start with `/`.', value: [] };
+                const safeDestination = toSafeInternalFooterDestination(rawDestination);
+                if (!safeDestination) {
+                    return {
+                        error: 'Internal footer links must start with one `/` and use a valid site path.',
+                        value: [],
+                    };
                 }
-                items.push({ label, to: destination });
+                items.push({ label, to: safeDestination });
                 continue;
             }
 
             if (item.destinationKind === 'external') {
-                if (!/^https?:\/\//i.test(destination)) {
-                    return { error: 'External footer links must start with `https://` or `http://`.', value: [] };
+                const safeDestination = toSafeExternalFooterDestination(destination);
+                if (!safeDestination) {
+                    return {
+                        error: 'External footer links must be valid `https://` or `http://` URLs.',
+                        value: [],
+                    };
                 }
-                items.push({ label, href: destination });
+                items.push({ label, href: safeDestination });
                 continue;
             }
 
-            items.push({ label, value: destination });
+            const textValue = toBoundedPublicSiteSettingsText(
+                rawDestination,
+                siteSettingsFooterLimits.textValueLength,
+            );
+            if (!textValue) {
+                return {
+                    error: `Footer text values must be ${siteSettingsFooterLimits.textValueLength} characters or fewer.`,
+                    value: [],
+                };
+            }
+
+            items.push({ label, value: textValue });
         }
 
         serialized.push({ title, items });

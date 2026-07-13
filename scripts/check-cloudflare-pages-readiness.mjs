@@ -17,6 +17,8 @@ const requiredEnvNames = [
   'URBLO_ADMIN_EMAIL',
   'URBLO_ADMIN_PASSWORD',
   'URBLO_ADMIN_ACCESS_TOKEN',
+  'URBLO_EDITOR_EMAIL',
+  'URBLO_EDITOR_PASSWORD',
   'URBLO_UNPROFILED_EMAIL',
   'URBLO_UNPROFILED_PASSWORD',
   'SUPABASE_URL',
@@ -186,6 +188,9 @@ function checkFunctions() {
   requireIncludes(adminInvite, 'requireManagingAdmin', 'functions/_lib/admin-invite.js');
   requireIncludes(adminInvite, 'assertNoExistingCmsAccess', 'functions/_lib/admin-invite.js');
   requireIncludes(adminInvite, 'existing_cms_access', 'functions/_lib/admin-invite.js');
+  requireIncludes(adminInvite, '/admin/account-setup?mode=invite', 'functions/_lib/admin-invite.js');
+  requireIncludes(adminInvite, 'detectSessionInUrl: false', 'functions/_lib/admin-invite.js');
+  requireIncludes(adminInvite, 'supabase.auth.admin.deleteUser', 'functions/_lib/admin-invite.js');
   requireIncludes(adminInvite, "['owner', 'admin'].includes(profile.role)", 'functions/_lib/admin-invite.js');
   requireIncludes(adminInvite, ".from('admin_profiles')", 'functions/_lib/admin-invite.js');
   requireIncludes(adminInvite, ".from('admin_audit_events')", 'functions/_lib/admin-invite.js');
@@ -223,6 +228,7 @@ function checkEnvAndDocs() {
     'npm run agent:first-admin-bootstrap -- --allow-writes --admin-email <first-admin-email> --confirm-email <first-admin-email>',
     'npm run agent:admin-live-readiness -- --admin-email <first-admin-email>',
     'npm run agent:admin-crud-live -- --allow-writes --include-storage',
+    'npm run agent:admin-media-role-boundary-live -- --allow-writes --strict',
   ]) {
     requireIncludes(runbook, command, 'docs/CLOUDFLARE_DEPLOYMENT.md');
   }
@@ -233,7 +239,10 @@ function checkEnvAndDocs() {
     '--first-admin-writes-approved',
     'Jay approves creating/upserting the first profile or sending an invite',
     '--admin-writes-approved',
-    'Jay approves tagged live admin QA writes',
+    'Jay approves tagged live admin CRUD QA writes',
+    '--media-role-migration-verified',
+    '--media-role-writes-approved',
+    'Jay approves that exact tagged Editor/owner proof',
     '--turnstile-token-provided',
   ]) {
     requireIncludes(runbook, approvalGate, 'docs/CLOUDFLARE_DEPLOYMENT.md');

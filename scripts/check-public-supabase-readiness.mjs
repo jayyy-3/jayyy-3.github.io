@@ -474,8 +474,9 @@ function checkPublicRuntimeBoundary() {
 
   for (const file of scannedFiles) {
     const text = readRequired(file);
+    const runtimeText = text.replace(/(^|\n)\s*import\s+type\b[\s\S]*?;\s*(?=\n|$)/g, '\n');
     for (const forbidden of ['@supabase/supabase-js', 'supabaseClient', 'VITE_SUPABASE_', 'service_role', 'SUPABASE_SERVICE_ROLE']) {
-      if (text.includes(forbidden)) {
+      if (runtimeText.includes(forbidden)) {
         failures.push(`${file}: public runtime must use publicContentClient and must not expose admin/service-role boundaries; found ${forbidden}`);
       }
     }
@@ -494,10 +495,38 @@ function checkPublicRuntimeBoundary() {
     requireIncludes(text, ".eq('status', 'published')", file);
   }
 
-  requireIncludes(readRequired('src/service/ProductService.ts'), 'return publishedProducts.length ? publishedProducts : products', 'ProductService static fallback');
-  requireIncludes(readRequired('src/service/ProjectService.ts'), 'return publishedProjects.length ? publishedProjects : staticProjects', 'ProjectService static fallback');
+  const overlayHelper = readRequired('src/service/publicContentOverlay.ts');
+  requireIncludes(overlayHelper, 'publishedByKey.get(key) ?? item', 'Published overlay replaces matching canonical fallback records');
+  requireIncludes(overlayHelper, 'if (!fallbackKeys.has(key))', 'Published overlay appends new CMS records without removing unmatched fallback records');
+
+  const productService = readRequired('src/service/ProductService.ts');
+  requireIncludes(productService, 'mergeProductsWithPublishedOverlay', 'ProductService per-record Published overlay');
+  requireIncludes(productService, 'await ProductService.getAll()', 'ProductService detail reads the merged public collection');
+
+  const projectService = readRequired('src/service/ProjectService.ts');
+  requireIncludes(projectService, 'mergeProjectsWithPublishedOverlay', 'ProjectService per-record Published overlay');
+  requireIncludes(projectService, 'sector: fallback.listing.sector', 'ProjectService static taxonomy preservation');
+  requireIncludes(projectService, 'factsResult.error || mediaResult.error', 'ProjectService dependent-read failure fallback');
+  requireIncludes(projectService, 'const projects = await ProjectService.getAll()', 'ProjectService detail reads the merged public collection');
+
+  const publicSettings = readRequired('src/lib/publicSiteSettings.ts');
+  const settingsContract = readRequired('src/lib/siteSettingsPublicContract.ts');
+  const footerContract = readRequired('src/lib/siteSettingsFooterContract.ts');
+  const adminSettings = readRequired('src/pages/admin/AdminSettingsPage.tsx');
+  requireIncludes(app, '<PublicSiteSettingsProvider>', 'Public settings provider public-route boundary');
+  requireIncludes(app, "location.pathname.startsWith('/admin')", 'Public settings provider admin exclusion');
+  requireIncludes(publicSettings, 'createRefreshablePublicSiteSettingsLoader', 'Public settings refreshable request loader');
+  requireIncludes(publicSettings, 'activeRequest = null', 'Public settings settled-request invalidation');
+  requireIncludes(settingsContract, 'validatePublishedSiteSettingsFields', 'Shared Published settings validation');
+  requireIncludes(adminSettings, "form.status === 'published'", 'Admin Published-only settings validation');
+  requireIncludes(adminSettings, 'normalizePublishedSiteSettingsFields', 'Admin shared public settings validation and payload normalization');
+  requireIncludes(footerContract, 'toSafeInternalFooterDestination', 'Same-origin internal footer destination resolver');
+  requireIncludes(footerContract, 'hasUnsafeInternalDestinationCharacter', 'Internal footer control/backslash rejection');
+
   const stoneService = readRequired('src/service/StoneLibraryService.ts');
   const stoneDetailPage = readRequired('src/pages/StoneLibraryDetailPage.tsx');
+  requireIncludes(stoneService, 'getPublicStoneCards', 'StoneLibraryService merged public listing adapter');
+  requireIncludes(stoneService, '(card) => card.stoneGroupId', 'StoneLibraryService stoneGroupId Published overlay');
   requireIncludes(stoneService, 'getPublishedStoneDetail', 'StoneLibraryService public detail adapter');
   requireIncludes(stoneService, ".from('stone_finish_capabilities')", 'StoneLibraryService public detail adapter');
   requireIncludes(stoneService, ".from('stone_finish_images')", 'StoneLibraryService public detail adapter');
@@ -506,14 +535,18 @@ function checkPublicRuntimeBoundary() {
   requireIncludes(stoneDetailPage, 'StoneLibraryService.getStoneDetail', 'StoneLibraryDetailPage static fallback');
   const articleService = readRequired('src/service/ArticleService.ts');
   const articlePage = readRequired('src/pages/ArticlePage.tsx');
-  requireIncludes(articleService, 'publishedArticles.length ? publishedArticles : await getStaticArticles()', 'ArticleService static fallback');
+  requireIncludes(articleService, 'mergeArticlesWithPublishedOverlay', 'ArticleService per-record Published overlay');
+  requireIncludes(articleService, 'static async getBySlug', 'ArticleService merged detail lookup');
   requireIncludes(articleService, ".from('article_blocks')", 'ArticleService structured block public read');
   requireIncludes(articleService, ".eq('status', 'published')", 'ArticleService structured block public read');
   requireIncludes(articleService, 'getBody(meta', 'ArticleService structured body adapter');
   requireIncludes(articlePage, 'ArticleService.getBody(meta)', 'ArticlePage structured body adapter');
   requireIncludes(articlePage, 'StructuredArticleBody', 'ArticlePage structured block renderer');
   requireIncludes(articlePage, "body?.kind === 'structured'", 'ArticlePage structured-vs-legacy rendering');
-  requireIncludes(readRequired('src/pages/StoneLibraryPage.tsx'), 'StoneLibraryService.getStoneCards(filters)', 'Stone Library static fallback');
+  const stoneLibraryPage = readRequired('src/pages/StoneLibraryPage.tsx');
+  requireIncludes(stoneLibraryPage, 'StoneLibraryService.getPublicStoneCards()', 'Stone Library merged listing read');
+  requireIncludes(stoneLibraryPage, 'getFilterFacets(publicCards)', 'Stone Library facets use the merged listing collection');
+  requireIncludes(stoneLibraryPage, 'filterStoneCards(publicCards', 'Stone Library result count uses the merged listing collection');
 }
 
 function checkCloudflareStaticBoundary() {
@@ -556,7 +589,16 @@ function checkDocsContracts() {
   }
 
   requireIncludes(architecture, 'public page components are lazy-loaded', 'docs/ARCHITECTURE.md');
-  requireIncludes(architecture, 'Public Projects, Stone Library, Products, and Articles prefer published Supabase content with static fallback', 'docs/ARCHITECTURE.md');
+  requireIncludes(
+    architecture,
+    'Published Projects, Products, and Articles overlay the matching static item by canonical slug',
+    'docs/ARCHITECTURE.md per-record public overlay contract',
+  );
+  requireIncludes(
+    architecture,
+    'Published Stone Library cards overlay matching static cards by `stoneGroupId`',
+    'docs/ARCHITECTURE.md Stone Library public overlay contract',
+  );
   requireIncludes(handoff, 'content import/public-read cutover', 'docs/HANDOFF.md');
 }
 

@@ -1,0 +1,88 @@
+{
+  "version": 2,
+  "lastUpdated": "2026-07-13",
+  "state": "revalidation_required",
+  "environment": "production",
+  "baseUrl": "https://urblo.com.au",
+  "deploymentSha": null,
+  "deploymentUrl": null,
+  "verifiedAt": null,
+  "expiresAt": null,
+  "verifiedAdminEmail": null,
+  "productionPrerequisites": {
+    "mediaPublicBucketRoleBoundary": {
+      "status": "missing",
+      "migration": "20260713065628_media_public_bucket_role_hardening.sql",
+      "evidenceRefs": [],
+      "note": "Requires applied-migration readback plus live proof that Editor private insert/update succeeds, Editor public insert/update is denied, and owner/admin public insert/update succeeds."
+    }
+  },
+  "workflows": {
+    "authenticatedSignIn": {
+      "status": "stale",
+      "evidenceRefs": [],
+      "note": "The June route-shell login proof predates the current auth reliability changes."
+    },
+    "draftSaveRefresh": {
+      "status": "missing",
+      "evidenceRefs": [],
+      "note": "Requires a real browser draft edit, save, refresh, and persisted-value readback."
+    },
+    "privateMediaPublish": {
+      "status": "missing",
+      "evidenceRefs": [],
+      "note": "Requires owner/admin private upload, automatic public Storage copy, published metadata readback, and public URL load. The separate mediaPublicBucketRoleBoundary prerequisite proves the direct Editor/owner Storage RLS boundary."
+    },
+    "publishedPublicReadback": {
+      "status": "missing",
+      "evidenceRefs": [],
+      "note": "Requires publishing through the UI and confirming the matching public route renders the saved result."
+    },
+    "archivePublicReadback": {
+      "status": "missing",
+      "evidenceRefs": [],
+      "note": "Requires archiving through the UI and confirming the documented fallback or hidden result."
+    },
+    "settingsPublicReadback": {
+      "status": "missing",
+      "evidenceRefs": [],
+      "note": "Requires changing a safe Published setting and confirming the public site consumes it."
+    },
+    "inviteSetPassword": {
+      "status": "missing",
+      "evidenceRefs": [],
+      "note": "Requires an approved fresh editor invite, delivered email, password setup, logout, and password sign-in."
+    },
+    "passwordRecovery": {
+      "status": "missing",
+      "evidenceRefs": [],
+      "note": "Requires Supabase Auth SMTP delivery plus old-password failure and new-password success."
+    },
+    "responsiveAdminNavigation": {
+      "status": "missing",
+      "evidenceRefs": [],
+      "note": "Requires browser evidence that navigation and primary actions remain discoverable and unclipped at mobile, 1116px desktop, and wide desktop widths."
+    },
+    "projectsTaskWorkspace": {
+      "status": "missing",
+      "evidenceRefs": [],
+      "note": "Requires one stable Project record URL, task-workspace navigation, Overview dirty-change protection, blocker jump, searchable media selection, save, refresh, and persisted readback."
+    },
+    "dashboardOperationalQueue": {
+      "status": "missing",
+      "evidenceRefs": [],
+      "note": "Requires Dashboard evidence that real leads, publish blockers, failed operations, and recent activity drive the operational queue and next action."
+    },
+    "editorGuideUsability": {
+      "status": "missing",
+      "evidenceRefs": [],
+      "note": "Requires a non-technical editor to use the deployed interface with docs/ADMIN_EDITOR_GUIDE.md and identify where to start, how to save safely, and how to confirm a public result without technical assistance."
+    }
+  },
+  "notes": [
+    "This file is the machine-readable production handoff assertion. WORKLOG prose and route-shell screenshots are historical evidence, not a passing gate by themselves.",
+    "Final evidence must name a deployment SHA that exists in the local Git repository, use Git-tracked repo-relative regular evidence files or HTTPS references on the exact immutable Cloudflare deployment origin, and expire within seven days of verification.",
+    "Every production prerequisite and workflow reference must appear in the matching Pass row inside one Admin CMS Golden Workflow Evidence WORKLOG section tied to the same deployment SHA and immutable URL.",
+    "No production writes, invite emails, or account recovery emails were triggered during the 2026-07-13 re-audit."
+  ]
+}

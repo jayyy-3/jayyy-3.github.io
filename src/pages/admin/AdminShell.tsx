@@ -42,7 +42,8 @@ export default function AdminShell({ title, eyebrow = 'Urblo Admin', actions, ch
                                         Public website
                                     </p>
                                     <p className="mt-1 text-sm leading-5 text-white/72">
-                                        Published content can appear on the website. Draft and Archived stay hidden.
+                                        Published CMS content can appear publicly. A matching legacy page may remain
+                                        during migration even when its CMS version is Draft or Archived.
                                     </p>
                                 </div>
                             </div>
@@ -91,8 +92,8 @@ export default function AdminShell({ title, eyebrow = 'Urblo Admin', actions, ch
 
                 <section className="min-w-0">
                     <header className="border-b border-black/10 bg-white px-5 py-5 md:px-8">
-                        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                            <div>
+                        <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-end">
+                            <div className="min-w-0">
                                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-black/45">
                                     {eyebrow}
                                 </p>
@@ -101,7 +102,7 @@ export default function AdminShell({ title, eyebrow = 'Urblo Admin', actions, ch
                                 </h1>
                             </div>
 
-                            <div className="flex flex-wrap items-center gap-2">
+                            <div className="flex min-w-0 flex-wrap items-center gap-2 xl:shrink-0 xl:justify-end">
                                 {actions}
                                 <button
                                     type="button"

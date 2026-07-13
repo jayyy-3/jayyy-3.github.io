@@ -1,16 +1,23 @@
+import type { SupabaseClient } from '@supabase/supabase-js';
 import products from '../data/productData.ts';
 import { getPublicContentClient } from '../lib/publicContentClient.ts';
+import { parsePublicEntitySeo } from '../lib/publicEntitySeo.ts';
+import { resolvePublicMediaUrl, type PublicMediaLocation } from '../lib/publicMediaUrl.ts';
 import type { Product } from '../types/product.ts';
+import { overlayPublishedContent, toCanonicalContentKey } from './publicContentOverlay.ts';
+
+type MediaRef = PublicMediaLocation;
 
 type ProductRow = {
     slug: string;
     name: string;
     short_description: string | null;
+    seo: unknown;
     product_models?: {
         model_key: string;
         label: string;
         sort_order: number | null;
-        media_assets?: { source_url: string | null } | { source_url: string | null }[] | null;
+        media_assets?: MediaRef | MediaRef[] | null;
     }[];
     product_material_defaults?: {
         material_category: string;
@@ -28,14 +35,14 @@ function firstRelation<T>(value: T | T[] | null | undefined): T | null {
     return Array.isArray(value) ? value[0] ?? null : value ?? null;
 }
 
-function mapPublishedProduct(row: ProductRow): Product {
+function mapPublishedProduct(row: ProductRow, supabase: SupabaseClient): Product {
     const models = (row.product_models ?? [])
         .slice()
         .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
         .map((model) => ({
             key: model.model_key,
             label: model.label,
-            img: firstRelation(model.media_assets)?.source_url || '/products/primeBlock/core.png',
+            img: resolvePublicMediaUrl(firstRelation(model.media_assets), supabase) || '/products/primeBlock/core.png',
         }));
 
     const defaultMaterials = Object.fromEntries(
@@ -53,6 +60,8 @@ function mapPublishedProduct(row: ProductRow): Product {
         slug: row.slug,
         name: row.name,
         shortDesc: row.short_description || undefined,
+        contentSource: 'cms',
+        seo: parsePublicEntitySeo(row.seo),
         models: models.length ? models : [{ key: 'default', label: 'Default', img: '/products/primeBlock/core.png' }],
         defaultMaterials,
         specs,
@@ -71,13 +80,18 @@ async function getPublishedProducts(): Promise<Product[]> {
             slug,
             name,
             short_description,
+            seo,
             sort_order,
             product_models (
                 model_key,
                 label,
                 sort_order,
                 media_assets:media_assets!product_models_image_media_id_fkey (
-                    source_url
+                    status,
+                    source_kind,
+                    source_url,
+                    bucket,
+                    object_path
                 )
             ),
             product_material_defaults (
@@ -103,23 +117,44 @@ async function getPublishedProducts(): Promise<Product[]> {
         return [];
     }
 
-    return (data as unknown as ProductRow[]).map(mapPublishedProduct);
+    return (data as unknown as ProductRow[]).map((row) => mapPublishedProduct(row, supabase));
+}
+
+function mergeProductsWithPublishedOverlay(publishedProducts: Product[]): Product[] {
+    const fallbackBySlug = new Map(
+        products.map((product) => [toCanonicalContentKey(product.slug), product]),
+    );
+    const publishedWithLegacyRoutes = publishedProducts.map((product) => {
+        const fallback = fallbackBySlug.get(toCanonicalContentKey(product.slug));
+        if (!fallback?.legacySlugs?.length) {
+            return product;
+        }
+
+        return {
+            ...product,
+            legacySlugs: product.legacySlugs ?? fallback.legacySlugs,
+        };
+    });
+
+    return overlayPublishedContent(products, publishedWithLegacyRoutes, (product) => product.slug);
 }
 
 class ProductService {
     static async getAll(): Promise<Product[]> {
         const publishedProducts = await getPublishedProducts();
-        return publishedProducts.length ? publishedProducts : products;
+        return mergeProductsWithPublishedOverlay(publishedProducts);
     }
 
     static async getBySlug(slug: string): Promise<Product | undefined> {
-        const publishedProducts = await getPublishedProducts();
-        const productSource = publishedProducts.length ? publishedProducts : products;
+        const productSource = await ProductService.getAll();
+        const canonicalSlug = toCanonicalContentKey(slug);
 
         return productSource.find(
             (product) =>
-                product.slug === slug ||
-                product.legacySlugs?.includes(slug),
+                toCanonicalContentKey(product.slug) === canonicalSlug ||
+                product.legacySlugs?.some(
+                    (legacySlug) => toCanonicalContentKey(legacySlug) === canonicalSlug,
+                ),
         );
     }
 }

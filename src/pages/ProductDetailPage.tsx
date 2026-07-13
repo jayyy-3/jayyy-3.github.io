@@ -3,6 +3,7 @@ import { Link, Navigate, useParams } from 'react-router-dom';
 import ModelSelector from '../components/ModelSelector';
 import OptionSelector from '../components/OptionSelector';
 import RouteState from '../components/RouteState';
+import PublicContentSeo from '../components/PublicContentSeo';
 import SpecTable from '../components/SpecTable';
 import { battenOptions } from '../data/battenData';
 import { frameFinishes } from '../data/frameFinishData';
@@ -165,6 +166,18 @@ export default function ProductDetailPage() {
 
   return (
     <div className="bg-white">
+      {product.contentSource === 'cms' ? (
+        <PublicContentSeo
+          canonicalPath={`/products/${product.slug}`}
+          fallbackTitle={`${product.name} Stone Streetscape Product | Urblo`}
+          fallbackDescription={
+            product.shortDesc ||
+            `Explore ${product.name}, an Urblo modular stone product system for streetscape and public realm projects.`
+          }
+          image={currentModel.img}
+          seo={product.seo}
+        />
+      ) : null}
       <section className="urblo-section-tight border-b border-black/10">
         <div className="urblo-page-container">
           <p className="urblo-eyebrow">Product Details</p>

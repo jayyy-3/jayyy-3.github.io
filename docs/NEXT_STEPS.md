@@ -1,6 +1,6 @@
 # NEXT_STEPS - Urblo Roadmap
 
-Last updated: 2026-06-30
+Last updated: 2026-07-13
 
 ## Purpose
 This is the human-readable roadmap. The machine-readable source of truth is `docs/agent/tasks.json`; the compact current-state snapshot is `docs/agent/status.json`; historical proof lives in `docs/WORKLOG.md`.
@@ -8,16 +8,16 @@ This is the human-readable roadmap. The machine-readable source of truth is `doc
 Use this file to choose direction. Use `docs/agent/tasks.json` to execute.
 
 ## Current Objective
-Urblo is now operating as a Cloudflare Pages + Supabase site with real forms and a production `/admin` CMS. The next cycle should focus on proof polish and customer handoff decisions rather than rebuilding the launch stack.
+Urblo is operating as a Cloudflare Pages + Supabase site with real forms, but the production `/admin` handoff is reopened after a direct not-working report and a 2026-07-13 code/UX audit. The immediate cycle is admin reliability and editor workflow recovery, not handoff polish.
 
 ## What Is Complete
 - Cloudflare Pages production hosting is complete for `https://urblo.com.au` and `https://www.urblo.com.au`.
 - Contact and Sample Request persistence is complete, including server-side audit rows, SMTP2GO notification proof, and browser-key private-row denial.
-- Supabase foundation, baseline seeds, RLS, Storage hardening, admin helper hardening, and admin profile uniqueness are complete.
+- The original Supabase foundation, baseline seeds, table RLS, Storage bucket/listing hardening, admin helper hardening, and admin profile uniqueness are complete. The new Editor-versus-public-bucket role hardening remains pending production apply/readback and live role proof.
 - First admin bootstrap is complete for `info@urblo.com.au`.
-- `/admin` CMS source and production handoff are complete for Dashboard, Projects, Stone Library, Products, Articles, Media, Leads, Settings, and Change history.
-- Admin CRUD live QA, private Storage proof, deployed smoke, active-admin browser QA, and strict handoff readiness have passed.
-- Public Projects, Products, Articles, and Stone Library listing/detail prefer Published CMS content with static fallback.
+- `/admin` route shells, schema/RLS, source CRUD surfaces, and direct API-level tagged QA exist for Dashboard, Projects, Stone Library, Products, Articles, Media, Leads, Settings, and Change history. This does not prove editor workflow completion.
+- The June route-shell, private Storage, and direct browser-key/API proofs remain historical infrastructure evidence; they no longer count as a completed CMS handoff.
+- Public Projects, Products, Articles, and Stone Library have Published CMS read paths with static fallback; migration-safe per-record overlay and real Storage URL consumption are corrected in local source and still require deployed readback.
 - Static production content has been imported into the CMS as Draft items for editor review.
 - Phase 1 SEO indexability foundation is implemented in source: real `robots.txt`, real `sitemap.xml` with 36 approved public URLs, centralized public route metadata in `src/data/seoRoutes.ts`, conservative client-side JSON-LD, and `npm run agent:seo-readiness`.
 - Google Search Console was reviewed on 2026-06-12 and `https://urblo.com.au/sitemap.xml` was submitted/refreshed the same day. The current SEO follow-up belongs to Phase 2: monitor when Google reads the refreshed sitemap, map old URLs with search signal, add selective 301 redirects for valuable legacy paths, and then expand non-brand long-tail Product/Stone/Project/Article content.
@@ -27,20 +27,27 @@ Urblo is now operating as a Cloudflare Pages + Supabase site with real forms and
 ## Active Now
 Only these task IDs should be treated as current executable work:
 
+- `NOW-ADMIN-RELIABILITY-UX-001`: P0. Source reliability fixes and the first Projects task-workspace redesign are implemented locally, including isolated invite/recovery password sessions, private-only initial Media uploads, owner/admin-only public-bucket policy source, path/version-bound Media promotion, parent-bound/stale-safe child saves, and all-editor Projects dirty guards; apply the pending Storage RLS migration, deploy one SHA, prove the complete browser golden workflow, then close media pagination and preview gaps.
 - `NOW-FORMS-SUPABASE-001`: final Turnstile proof. The public widget key, server secret, and valid token must be available before running the strict live proof.
-- `NOW-ADMIN-SETTINGS-CRUD-001`: real Settings invite proof. This waits for Jay to approve a target editor email and the invite action.
+- `NOW-ADMIN-SETTINGS-CRUD-001`: Published settings public readback plus a real invite/password proof. This waits for Supabase Auth custom SMTP, exact redirect allowlist entries, and Jay approval of a target editor email.
 
 ## Next Decisions
+- Approve a deployed admin golden-workflow run with tagged draft/media/settings changes that can be safely reverted or archived.
+- Configure Supabase Auth custom SMTP separately from the already verified Contact/Sample SMTP2GO Function path.
+- Apply and verify `20260713065628_media_public_bucket_role_hardening.sql` so an Editor cannot bypass the private-first Media UI and write directly to the public bucket.
+- Add exact production invite and recovery callback URLs to the Supabase Auth redirect allowlist.
+- Browser-test the new Projects record URL, task workspaces, all-editor dirty guards, blocker jumps, child-save isolation, and searchable-media behavior before copying the pattern to another module.
 - Decide whether Turnstile proof is required before the next public launch checkpoint.
 - Choose who should receive the first real CMS invite proof email.
 - Ask a customer/editor to review imported Draft CMS content and decide what to publish first.
 - Decide whether to resume article claim cleanup, currently paused by user direction.
 - Decide whether physical delete controls are needed, and define retention/destructive-delete policy before adding them.
 - Decide Phase 3 SEO content scope: light copy/CTA polish, standard Stone/Product/Project landing-page expansion, or deeper pre-render/SSR-style static HTML output if post-refresh GSC data still shows indexing weakness.
+- Choose how CMS-only published slugs enter the sitemap/structured route inventory and first-response HTML; runtime metadata alone does not make a newly created CMS route fully search-discoverable.
 
 ## Deferred Follow-Ups
-- `NOW-ADMIN-CMS-001` is complete as an umbrella. Future CMS work should use specific child/follow-up task IDs.
-- `NOW-ADMIN-AUTH-RLS-001`, `NOW-ADMIN-CONTENT-CRUD-001`, and `NOW-ADMIN-MEDIA-LEADS-001` are complete for launch handoff.
+- `NOW-ADMIN-CMS-001` remains a historical launch umbrella, but its handoff conclusion is superseded by the active reliability incident.
+- `NOW-ADMIN-AUTH-RLS-001`, `NOW-ADMIN-CONTENT-CRUD-001`, and `NOW-ADMIN-MEDIA-LEADS-001` are complete only for their source/schema/data-layer scopes; their historical evidence does not complete the reopened production editor handoff.
 - Optional unprofiled unauthorized browser QA remains available but is not required for completed CMS handoff.
 - Capability-specific download capture can receive its own live check, but base `/api/enquiries` persistence is already verified.
 - Static fallback should remain until Jay explicitly approves a CMS-only public cutover.
@@ -63,7 +70,10 @@ Docs and harness changes should pass:
 CMS handoff checks:
 - `npm run agent:admin-cms-predeploy`
 - `npm run agent:admin-config-gate`
+- After approved production migration/readback and tagged Storage writes: `npm run agent:admin-media-role-boundary-live -- --allow-writes --strict`
 - `npm run agent:admin-handoff-readiness -- --base-url https://urblo.com.au --admin-email info@urblo.com.au --strict`
+
+The strict handoff command is expected to fail while `docs/agent/admin-handoff-evidence.json` is `revalidation_required`. It may pass only after the Storage role-boundary production prerequisite and all twelve recorded golden workflows have fresh evidence tied to one production deployment SHA.
 
 Live writes and invite emails require explicit approval for the specific target action.
 
@@ -75,6 +85,7 @@ These scripts are intentionally documented so harness GC can check command cover
 - `npm run agent:admin-config-gate`
 - `npm run agent:admin-crud-coverage`
 - `npm run agent:admin-crud-live`
+- `npm run agent:admin-media-role-boundary-live`
 - `npm run agent:admin-handoff-readiness`
 - `npm run agent:admin-live-readiness`
 - `npm run agent:capabilities-ui`
@@ -95,13 +106,14 @@ These scripts are intentionally documented so harness GC can check command cover
 - `npm run agent:harness-gc:review`
 - `npm run agent:init`
 - `npm run agent:live-readiness`
+- `npm run agent:public-content-overlay`
 - `npm run agent:public-supabase-readiness`
 - `npm run agent:seo-readiness`
 - `npm run agent:smoke`
 - `npm run agent:supabase-foundation-readiness`
 
 ## Last Verified
-Latest relevant 2026-06-05 proof set:
+Latest local source/runtime proof set on 2026-07-13:
 - `npm run agent:admin-crud-coverage`: pass
 - `npm run build`: pass
 - `npm run lint`: pass
@@ -112,15 +124,21 @@ Latest relevant 2026-06-05 proof set:
 - `npm run agent:cloudflare-readiness`: pass
 - `npm run agent:admin-config-gate`: pass
 - `npm run agent:seo-readiness`: pass
-- `npm run agent:cloudflare-preview-smoke -- --base-url https://urblo.com.au`: pass
-- `npm run agent:admin-auth-browser -- --allow-login --strict --base-url https://urblo.com.au`: pass
-- `npm run agent:admin-handoff-readiness -- --base-url https://urblo.com.au --admin-email info@urblo.com.au --strict`: pass
+- `npm run agent:public-content-overlay`: pass
+- `npm run agent:admin-cms-predeploy`: pass in no-write source/report mode
+- `npm run agent:admin-handoff-readiness -- --base-url https://urblo.com.au --admin-email info@urblo.com.au --strict`: expected fail because the repaired deployment and golden-workflow evidence do not exist yet
 
-Build still shows the known Browserslist staleness notice and AdminApp chunk-size warning. Treat those as monitoring items unless they change materially.
+Historical production proof remains the 2026-06-05 deployed smoke and route-shell login set. It predates the incident repairs and does not close the reopened handoff.
+
+Build still shows the known Browserslist staleness notice. Admin route-level chunks are now implemented locally; verify the deployed bundle after release.
 
 ## Exit Criteria For The Current Cycle
 - `docs/agent/tasks.json` keeps only true active execution work in `now`.
 - Harness GC reports no failures and only intentional warnings.
+- One reviewed commit SHA is deployed to an immutable `*.urblo.pages.dev` URL and promoted to the production origin.
+- `20260713065628_media_public_bucket_role_hardening.sql` is applied/read back and the `mediaPublicBucketRoleBoundary` prerequisite has fresh Editor/owner live evidence.
+- All twelve golden workflows in `docs/agent/admin-handoff-evidence.json` have fresh `Pass` evidence against that same deployment and admin identity.
+- `npm run agent:admin-handoff-readiness -- --base-url https://urblo.com.au --admin-email info@urblo.com.au --strict` passes, and Jay's reported production incident has been revalidated through the real UI.
 - Turnstile and Settings invite decisions are explicit.
 - Editor/customer content review decisions are explicit.
 - Any new runtime work passes the runtime gate set above.

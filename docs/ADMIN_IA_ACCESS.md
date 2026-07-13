@@ -1,20 +1,20 @@
 # Urblo Admin IA and Access Contract
 
-Last updated: 2026-06-02
+Last updated: 2026-07-13
 
 ## Purpose
 This document defines the executable contract for Urblo's `/admin` site.
 
-Admin auth shell source is now implemented and config-gated. Settings/admin profiles, Media, Stone Library, Projects, Products, Articles, Leads, and Audit are the first source CRUD/workflow/review screens. The dashboard now has source-side content health checks for media metadata gaps, project claim review, missing Product/Article media, TBC Stone Library rows, and stale new leads, plus an editor-facing Draft/Published/Archived status overview. Admin navigation is grouped by Work queue, Content library, and Operations so non-technical editors can orient themselves before editing records. Media, Products, and Articles now have searchable/filterable lists and shared Draft/Published/Archived language. Stone Library source now includes finish image links from `stone_finish_images` to `media_assets`, searchable/filterable group lists, TBC language that frames those rows as needing confirmation, and finish-image media selectors/previews that explain when a selected media record must be published before the finish image can go public. Projects source now includes ordered media block editing for normal images, hotspot images, and optional YouTube video rows, with draggable hotspot placement on selected material maps, search/status filtering, a project-editor Publish checklist that names title, URL, public copy, project claim, fact claim, and material claim blockers before Publish can be clicked, and media pickers/previews instead of raw media ID fields for project, material, media block, map, and hotspot image links. Products now has hero/model media pickers with previews and material-default Stone Library status feedback instead of raw media ID entry. Articles now has cover/block media pickers with previews plus block-type content guidance so structured authoring is clearer without exposing raw media IDs as the main task. Leads now has inbox search plus kind/status filtering. Settings now explains public site identity fields versus admin team access, uses shared status language for the default settings row, edits footer columns/items through form controls instead of raw JSON, supports Invite and grant access for new CMS users through a protected server Function, and keeps Grant existing login as the setup-code fallback. Admin CRUD/workflow save flows now call a shared audit writer after successful primary mutations. Media and Leads now have CSV export paths that must record audit events before downloading. Live first-admin verification, admin CRUD verification, Storage-inclusive upload proof, content import, and public read cutover have passed; broader editor-experience productization remains open before the CMS is fully handoff-ready for non-technical customer use.
+Admin auth, CRUD shells, schema/RLS, import, and direct browser-key verification exist, but the production handoff is reopened after Jay's 2026-07-13 not-working report. Earlier verification proved route access and database mutations; it did not prove a non-technical editor completing the UI golden workflow. `NOW-ADMIN-RELIABILITY-UX-001` owns the incident, confirmed source failures, production revalidation, and task-oriented redesign. This document describes current code reality plus the required target; `docs/agent/admin-handoff-evidence.json` decides whether production handoff is actually verified.
 
 ## Product Principle
 The admin site exists so Urblo can maintain launch-critical content without code edits while protecting public pages from drafts, unreviewed claims, missing media, and broken lead workflows.
 
-The first admin release should feel like an operating console, not a marketing site:
-- dense but readable lists;
+The admin should feel like a calm operating workspace, not a marketing site or database console:
+- compact, searchable lists paired with progressively disclosed editors;
 - obvious content health warnings;
 - clear draft/published state;
-- restrained editing screens;
+- stable record URLs, unsaved-change protection, and restrained editing stages;
 - no decorative cards inside cards;
 - no free-form page builder where structured content is safer.
 
@@ -24,12 +24,13 @@ The first admin release should feel like an operating console, not a marketing s
 |---|---|---|---|
 | `/admin` | Admin dashboard redirect target | Authenticated admin only | Shows content health, recent leads, draft content, and launch warnings. |
 | `/admin/login` | Login screen | Unauthenticated only | Uses Supabase Auth. Authenticated users redirect to `/admin`. |
+| `/admin/account-setup` | Invite acceptance and password recovery | Valid Supabase invite/recovery callback session only | Current implicit flow captures and clears the callback fragment, keeps it out of the shared session, and server-validates then updates through one isolated callback client before returning to explicit sign-in. |
 | `/admin/unauthorized` | Active session without admin profile or allowed role | Authenticated but not authorized | Do not reveal private content or row counts. |
 | `/admin/loading` | Session/profile bootstrap state | Transitional | Use while Supabase Auth session and `admin_profiles` are loading. |
 | `/admin/leads` | Enquiry and sample request inbox | Admin/editor/viewer read; owner/admin assign/export | First operational module after auth. |
-| `/admin/media` | Media library and asset metadata | Admin/editor write; viewer read | Uploads require Supabase Storage. Alt text and usage notes are required before publish. |
+| `/admin/media` | Media library and asset metadata | Admin/editor write; viewer read | New files always upload privately. Alt text and usage notes are required before publish; private-to-public Storage promotion is Website owner / CMS manager only, is bound to the selected row's original path/version, and retains objects when cleanup ownership is uncertain. |
 | `/admin/stone-library` | Stone groups, variants, finishes, and images | Admin/editor write; viewer read | Missing image, media-not-published, and TBC states must stay explicit. |
-| `/admin/projects` | Project list and case study editor | Admin/editor write; viewer read | Includes ordered media blocks, material schedules, material maps, draggable hotspots, media pickers/previews, and a Publish checklist with actionable blockers. |
+| `/admin/projects`, `/admin/projects/:projectId` | Project list and task-oriented case study editor | Admin/editor write; viewer read | Stable record URL; one Overview/Facts/Materials/Media/Maps workspace at a time; all-editor dirty guards and child-save isolation; searchable media; ordered blocks/maps/hotspots; actionable Publish checklist. |
 | `/admin/products` | Product families, models, specs, and defaults | Admin/editor write; viewer read | Product/model media use selectors/previews; material defaults should reference Stone Library records where possible. |
 | `/admin/articles` | Article editor | Admin/editor write; viewer read | Uses Article sections, media pickers/previews, and type-specific content guidance, not raw newsletter HTML as normal authoring. |
 | `/admin/settings` | Website settings and CMS team access | Website owner / CMS manager only | Includes Invite and grant access, Grant existing login, role management, and global site settings. |
@@ -44,7 +45,7 @@ The first admin release should feel like an operating console, not a marketing s
 | Authenticated but unprofiled | Redirect to `/admin/unauthorized`. | Supabase session exists, but no active `admin_profiles` row. |
 | Inactive admin | Redirect to `/admin/unauthorized`. | `admin_profiles.is_active = false`. |
 | Viewer | Read-only admin views. | Can inspect content/leads but cannot mutate, publish, delete, export, or manage users. |
-| Editor | Draft and edit content, manage non-sensitive media metadata. | Cannot manage admin users, publish high-risk content without approval, delete records, or export leads. |
+| Editor | Draft and edit content, manage non-sensitive media metadata. | Current RLS/UI can publish general content and already-public/external media. Private-upload Storage promotion requires Website owner / CMS manager rollback capability. Review-only high-risk publishing is a target but is not enforced yet; Editors still cannot manage users, delete records, or export leads. |
 | Admin | Full content operations, publish, assign leads, export leads, manage media. | Cannot remove owner protection unless explicitly allowed by owner policy. |
 | Owner | Full account-level admin. | Can manage admin profiles, dangerous deletes, settings, and audit access. |
 
@@ -65,9 +66,9 @@ Lead modules use operational status instead of public visibility:
 - sample requests: `new`, `confirmed`, `packed`, `sent`, `closed`, `spam`.
 
 Current launch removal model:
-- Content and media records use archive/publish state changes as the customer-facing removal path.
+- Archive hides the CMS version without deleting history. During migration, a matching static fallback may remain visible until CMS-only cutover.
 - Physical deletes are destructive operations and remain outside the launch-critical CMS path until Jay approves a retention and destructive-delete policy.
-- Live admin verification should prove publish/archive behavior, public invisibility, and auditability after archive; it should not physically delete production rows.
+- Live admin verification should prove publish/archive behavior, the documented hidden-or-static-fallback result, and auditability after archive; it should not physically delete production rows.
 
 ## Module Rollout Sequence
 
@@ -158,6 +159,7 @@ Do now, before credentials:
 
 Current implementation:
 - `/admin`, `/admin/login`, `/admin/unauthorized`, and protected module routes exist outside the public site chrome.
+- `/admin/account-setup` handles invite and recovery callbacks in an isolated non-persistent session, clears callback credentials from the address bar, keeps the shared session unchanged, allows password setup even while profile access is pending, returns to explicit sign-in, and blocks expired/reused links from changing an unrelated existing session.
 - The admin shell uses Supabase Auth and `admin_profiles` lookup when browser-safe Supabase configuration is present.
 - Without `VITE_SUPABASE_ANON_KEY` or `VITE_SUPABASE_PUBLISHABLE_KEY`, admin routes render a configuration-required state and do not show dashboard content.
 - `npm run agent:admin-config-gate` is the repeatable no-secret browser gate for this state. It starts built Vite preview by default, checks every launch-critical admin route in Firefox for the configuration-required state, rejects private admin/module text, and writes ignored screenshots under `.tmp/admin-config-gate/screenshots`.
@@ -169,9 +171,11 @@ Current implementation:
 - When first-admin write mode is approved and run, the bootstrap script records a server-side `admin_profile.bootstrap` audit event with `actor_user_id = null` because the operation is performed by the guarded service-role setup path, not a signed-in browser admin.
 - `/admin/settings` is the first CRUD source screen behind the auth gate, with owner/admin save controls for the default `site_settings` row.
 - `/admin/settings` also includes a non-destructive admin team manager. New CMS users can be invited through protected server Function `/api/admin/invite-user`; existing login accounts can still be granted access through the setup-code fallback. Owner/admin profile create/update controls, owner-role guardrails, self-lockout prevention, role explanations, and no delete controls remain required.
-- `/api/admin/invite-user` must verify the signed-in bearer session, require an active Website owner or CMS manager profile, keep the Supabase service key server-side, send the Supabase Auth invite, create the `admin_profiles` row, and record `admin_profile.invite` in Change history.
+- `/api/admin/invite-user` must verify the signed-in bearer session, require an active Website owner or CMS manager profile, keep the Supabase service key server-side, derive a same-origin account-setup redirect, send the Supabase Auth invite, create the `admin_profiles` row, roll back an orphan Auth user if profile creation fails, and record `admin_profile.invite` in Change history.
+- Invite and recovery delivery require Supabase Auth custom SMTP plus exact allowed redirect URLs. The Contact/Sample Request SMTP2GO proof is a different email path and does not satisfy this requirement.
 - `/admin/settings` validates duplicate login account IDs and duplicate admin profile emails before save so database uniqueness failures are not the first user-facing feedback.
-- `/admin/media` is the first media CRUD source screen behind the auth gate, with admin/editor upload and metadata controls, audit-gated media manifest export, viewer read-only behavior, and publish/archive guardrails.
+- `/admin/media` is the first media CRUD source screen behind the auth gate, with private-only admin/editor upload, metadata-failure readback, path/version-bound owner/admin promotion, audit-gated media manifest export, viewer read-only behavior, and publish/archive guardrails.
+- The pending Storage role migration must be applied/read back before handoff. `npm run agent:admin-media-role-boundary-live` is plan-only by default; approved live mode uses distinct active Editor and owner/admin browser-key sessions to prove Editor private insert/update success, public insert/update denial, owner/admin public insert/update success, and tagged-object cleanup.
 - `/admin/stone-library` is the first content CRUD source screen behind the auth gate, with group, variant, finish capability, finish image link, media selector/preview, validation, publish/archive, and read-only states.
 - `/admin/projects` is the next content CRUD source screen behind the auth gate, with project, fact, material schedule, media block, material map, hotspot, validation, claim review, a project-editor Publish checklist, media selectors/previews, publish/archive, draggable placement, and read-only states. Live media block writes require `supabase/migrations/20260603142359_project_media_blocks.sql`, which is applied and verified in production.
 - `/admin/products` is the next content CRUD source screen behind the auth gate, with product family, model, material default, spec, media selectors/previews, validation, publish/archive, and read-only states.

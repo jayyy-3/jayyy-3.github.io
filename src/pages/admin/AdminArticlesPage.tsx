@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent, ReactNode } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import {
@@ -13,6 +13,8 @@ import {
     ShieldAlert,
 } from 'lucide-react';
 import { recordAdminAuditEvent, withAuditNotice } from '../../lib/adminAudit';
+import { toSafePublicContentDestination } from '../../lib/publicContentLink';
+import { validatePublicEntitySeoDraft } from '../../lib/publicEntitySeo';
 import { supabase } from '../../lib/supabaseClient';
 import { useAdminAuth } from '../../lib/adminAuthHooks';
 import AdminShell from './AdminShell';
@@ -208,6 +210,15 @@ function AdminArticlesContent() {
     const [isSavingBlock, setIsSavingBlock] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [notice, setNotice] = useState<string | null>(null);
+    const articleLoadGenerationRef = useRef(0);
+    const blockLoadGenerationRef = useRef(0);
+    const selectedArticleIdRef = useRef<number | null>(null);
+    const selectedBlockIdRef = useRef<number | null>(null);
+    const savingArticleRef = useRef(false);
+    const savingBlockRef = useRef(false);
+
+    selectedArticleIdRef.current = selectedArticleId;
+    selectedBlockIdRef.current = selectedBlockId;
 
     const selectedArticle = useMemo(
         () => articles.find((article) => article.id === selectedArticleId) ?? null,
@@ -260,6 +271,7 @@ function AdminArticlesContent() {
 
     const loadArticleBlocks = useCallback(
         async (client: SupabaseClient, articleId: number, preferredBlockId: number | null = null) => {
+            const generation = ++blockLoadGenerationRef.current;
             const { data, error: blockError } = await client
                 .from('article_blocks')
                 .select(
@@ -274,11 +286,20 @@ function AdminArticlesContent() {
                 throw new Error(blockError.message);
             }
 
+            if (
+                generation !== blockLoadGenerationRef.current ||
+                selectedArticleIdRef.current !== articleId
+            ) {
+                return false;
+            }
+
             const rows = data ?? [];
             const nextBlock = rows.find((block) => block.id === preferredBlockId) ?? rows[0] ?? null;
+            selectedBlockIdRef.current = nextBlock?.id ?? null;
             setBlocks(rows);
             setSelectedBlockId(nextBlock?.id ?? null);
             setBlockForm(rowToBlockForm(nextBlock));
+            return true;
         },
         [],
     );
@@ -289,6 +310,7 @@ function AdminArticlesContent() {
                 return;
             }
 
+            const generation = ++articleLoadGenerationRef.current;
             const client: SupabaseClient = supabase;
             setIsLoading(true);
             setError(null);
@@ -320,6 +342,8 @@ function AdminArticlesContent() {
                     .returns<MediaOptionRow[]>(),
             ]);
 
+            if (generation !== articleLoadGenerationRef.current) return;
+
             if (articlesResult.error) {
                 setError(articlesResult.error.message);
                 setIsLoading(false);
@@ -346,6 +370,7 @@ function AdminArticlesContent() {
 
             const rows = articlesResult.data ?? [];
             const nextArticle = rows.find((article) => article.id === preferredArticleId) ?? rows[0] ?? null;
+            selectedArticleIdRef.current = nextArticle?.id ?? null;
             setArticles(rows);
             setProjectOptions(projectsResult.data ?? []);
             setStoneOptions(stonesResult.data ?? []);
@@ -360,9 +385,15 @@ function AdminArticlesContent() {
             }
 
             try {
-                await loadArticleBlocks(client, nextArticle.id);
+                const applied = await loadArticleBlocks(client, nextArticle.id);
+                if (!applied || generation !== articleLoadGenerationRef.current) return;
             } catch (loadError) {
-                setError(loadError instanceof Error ? loadError.message : 'Article sections failed to load.');
+                if (
+                    generation === articleLoadGenerationRef.current &&
+                    selectedArticleIdRef.current === nextArticle.id
+                ) {
+                    setError(loadError instanceof Error ? loadError.message : 'Article sections failed to load.');
+                }
             }
 
             setIsLoading(false);
@@ -375,29 +406,54 @@ function AdminArticlesContent() {
     }, [loadArticles]);
 
     function resetBlockState() {
+        blockLoadGenerationRef.current += 1;
+        selectedBlockIdRef.current = null;
         setBlocks([]);
         setSelectedBlockId(null);
         setBlockForm(emptyBlockForm);
     }
 
     async function selectArticle(article: ArticleRow) {
+        if (savingArticleRef.current || savingBlockRef.current) {
+            setNotice('A save is still finishing. Wait for it to complete before switching articles.');
+            return;
+        }
+        if (!supabase) {
+            return;
+        }
+
+        setIsLoading(true);
+        resetBlockState();
+        selectedArticleIdRef.current = article.id;
         setSelectedArticleId(article.id);
         setArticleForm(rowToArticleForm(article));
         setError(null);
         setNotice(null);
 
-        if (!supabase) {
-            return;
-        }
-
         try {
             await loadArticleBlocks(supabase, article.id);
         } catch (loadError) {
-            setError(loadError instanceof Error ? loadError.message : 'Article sections failed to load.');
+            if (selectedArticleIdRef.current === article.id) {
+                setError(loadError instanceof Error ? loadError.message : 'Article sections failed to load.');
+            }
+        } finally {
+            if (selectedArticleIdRef.current === article.id) {
+                setIsLoading(false);
+            }
         }
     }
 
     function startNewArticle() {
+        if (isLoading) {
+            setNotice('Wait for the article library to finish loading before starting a new article.');
+            return;
+        }
+        if (savingArticleRef.current || savingBlockRef.current) {
+            setNotice('A save is still finishing. Wait for it to complete before starting a new article.');
+            return;
+        }
+        articleLoadGenerationRef.current += 1;
+        selectedArticleIdRef.current = null;
         setSelectedArticleId(null);
         setArticleForm(emptyArticleForm);
         resetBlockState();
@@ -424,8 +480,30 @@ function AdminArticlesContent() {
         setNotice(null);
     }
 
+    function startNewBlock() {
+        if (savingArticleRef.current || savingBlockRef.current) {
+            setNotice('A save is still finishing. Wait for it to complete before starting a new section.');
+            return;
+        }
+        selectedBlockIdRef.current = null;
+        setSelectedBlockId(null);
+        setBlockForm(emptyBlockForm);
+    }
+
+    function selectBlock(block: ArticleBlockRow) {
+        if (block.id === selectedBlockIdRef.current) return;
+        if (savingArticleRef.current || savingBlockRef.current) {
+            setNotice('A save is still finishing. Wait for it to complete before switching sections.');
+            return;
+        }
+        selectedBlockIdRef.current = block.id;
+        setSelectedBlockId(block.id);
+        setBlockForm(rowToBlockForm(block));
+    }
+
     async function saveArticle(nextStatus: ArticleStatus) {
         if (!supabase || !canEdit || !user) return;
+        if (savingArticleRef.current || savingBlockRef.current) return;
 
         if (nextStatus === 'published' && !canPublishArticle) {
             setError(formatArticlePublishError('article', publishChecklist));
@@ -437,6 +515,10 @@ function AdminArticlesContent() {
             setError(validation.error);
             return;
         }
+
+        const articleId = selectedArticleIdRef.current;
+        savingArticleRef.current = true;
+        setIsSavingArticle(true);
 
         const now = new Date().toISOString();
         const payload = {
@@ -458,53 +540,66 @@ function AdminArticlesContent() {
             archived_at: nextStatus === 'archived' ? now : null,
         };
 
-        setIsSavingArticle(true);
         setError(null);
         setNotice(null);
 
-        const response = selectedArticleId
-            ? await supabase
-                  .from('articles')
-                  .update(payload)
-                  .eq('id', selectedArticleId)
-                  .select(
-                      'id,slug,title,status,published_on,author,excerpt,cover_media_id,tags,seo,legacy_source_path,legacy_source_url,sort_order,published_at,archived_at,updated_at,created_at',
-                  )
-                  .single<ArticleRow>()
-            : await supabase
-                  .from('articles')
-                  .insert({ ...payload, created_by: user.id })
-                  .select(
-                      'id,slug,title,status,published_on,author,excerpt,cover_media_id,tags,seo,legacy_source_path,legacy_source_url,sort_order,published_at,archived_at,updated_at,created_at',
-                  )
-                  .single<ArticleRow>();
+        try {
+            const response = articleId
+                ? await supabase
+                      .from('articles')
+                      .update(payload)
+                      .eq('id', articleId)
+                      .select(
+                          'id,slug,title,status,published_on,author,excerpt,cover_media_id,tags,seo,legacy_source_path,legacy_source_url,sort_order,published_at,archived_at,updated_at,created_at',
+                      )
+                      .single<ArticleRow>()
+                : await supabase
+                      .from('articles')
+                      .insert({ ...payload, created_by: user.id })
+                      .select(
+                          'id,slug,title,status,published_on,author,excerpt,cover_media_id,tags,seo,legacy_source_path,legacy_source_url,sort_order,published_at,archived_at,updated_at,created_at',
+                      )
+                      .single<ArticleRow>();
 
-        setIsSavingArticle(false);
+            if (response.error) {
+                setError(response.error.message);
+                return;
+            }
 
-        if (response.error) {
-            setError(response.error.message);
-            return;
+            const auditError = await recordAdminAuditEvent(supabase, {
+                actorUserId: user.id,
+                action: articleId
+                    ? nextStatus === 'published'
+                        ? 'article.publish'
+                        : nextStatus === 'archived'
+                          ? 'article.archive'
+                          : 'article.update'
+                    : 'article.create',
+                entityType: 'articles',
+                entityId: response.data.id,
+                metadata: {
+                    slug: response.data.slug,
+                    status: response.data.status,
+                    tags: response.data.tags,
+                },
+            });
+            if (selectedArticleIdRef.current !== articleId) {
+                return;
+            }
+
+            selectedArticleIdRef.current = response.data.id;
+            setSelectedArticleId(response.data.id);
+            setArticles((current) =>
+                [...current.filter((article) => article.id !== response.data.id), response.data].sort(compareArticleRows),
+            );
+            setArticleForm(rowToArticleForm(response.data));
+            setNotice(withAuditNotice(nextStatus === 'published' ? 'Article published.' : 'Article saved.', auditError));
+        } catch (saveError) {
+            setError(saveError instanceof Error ? saveError.message : 'The article could not be saved. Try again.');
+        } finally {
+            savingArticleRef.current = false;
+            setIsSavingArticle(false);
         }
-
-        const auditError = await recordAdminAuditEvent(supabase, {
-            actorUserId: user.id,
-            action: selectedArticleId
-                ? nextStatus === 'published'
-                    ? 'article.publish'
-                    : nextStatus === 'archived'
-                      ? 'article.archive'
-                      : 'article.update'
-                : 'article.create',
-            entityType: 'articles',
-            entityId: response.data.id,
-            metadata: {
-                slug: response.data.slug,
-                status: response.data.status,
-                tags: response.data.tags,
-            },
-        });
-        setNotice(withAuditNotice(nextStatus === 'published' ? 'Article published.' : 'Article saved.', auditError));
-        await loadArticles(response.data.id);
     }
 
     async function handleArticleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -514,6 +609,7 @@ function AdminArticlesContent() {
 
     async function saveBlock(nextStatus: ArticleStatus) {
         if (!supabase || !canEdit || !user || !selectedArticle) return;
+        if (savingArticleRef.current || savingBlockRef.current) return;
 
         if (nextStatus === 'published' && !canPublishBlock) {
             setError(formatArticlePublishError('section', blockPublishChecklist));
@@ -526,9 +622,13 @@ function AdminArticlesContent() {
             return;
         }
 
+        const articleId = selectedArticle.id;
+        const blockId = selectedBlockIdRef.current;
+        savingBlockRef.current = true;
+        setIsSavingBlock(true);
+
         const now = new Date().toISOString();
         const payload = {
-            article_id: selectedArticle.id,
             block_type: blockForm.blockType,
             content: validation.content,
             media_asset_id: validation.mediaAssetId,
@@ -541,53 +641,70 @@ function AdminArticlesContent() {
             archived_at: nextStatus === 'archived' ? now : null,
         };
 
-        setIsSavingBlock(true);
         setError(null);
         setNotice(null);
 
-        const response = selectedBlockId
-            ? await supabase
-                  .from('article_blocks')
-                  .update(payload)
-                  .eq('id', selectedBlockId)
-                  .select(
-                      'id,article_id,block_type,content,media_asset_id,linked_project_id,linked_stone_group_id,sort_order,status,published_at,archived_at,updated_at',
-                  )
-                  .single<ArticleBlockRow>()
-            : await supabase
-                  .from('article_blocks')
-                  .insert({ ...payload, created_by: user.id })
-                  .select(
-                      'id,article_id,block_type,content,media_asset_id,linked_project_id,linked_stone_group_id,sort_order,status,published_at,archived_at,updated_at',
-                  )
-                  .single<ArticleBlockRow>();
+        try {
+            const response = blockId
+                ? await supabase
+                      .from('article_blocks')
+                      .update(payload)
+                      .eq('id', blockId)
+                      .eq('article_id', articleId)
+                      .select(
+                          'id,article_id,block_type,content,media_asset_id,linked_project_id,linked_stone_group_id,sort_order,status,published_at,archived_at,updated_at',
+                      )
+                      .single<ArticleBlockRow>()
+                : await supabase
+                      .from('article_blocks')
+                      .insert({ ...payload, article_id: articleId, created_by: user.id })
+                      .select(
+                          'id,article_id,block_type,content,media_asset_id,linked_project_id,linked_stone_group_id,sort_order,status,published_at,archived_at,updated_at',
+                      )
+                      .single<ArticleBlockRow>();
 
-        setIsSavingBlock(false);
+            if (response.error) {
+                setError(response.error.message);
+                return;
+            }
 
-        if (response.error) {
-            setError(response.error.message);
-            return;
+            const auditError = await recordAdminAuditEvent(supabase, {
+                actorUserId: user.id,
+                action: blockId
+                    ? nextStatus === 'published'
+                        ? 'article_block.publish'
+                        : nextStatus === 'archived'
+                          ? 'article_block.archive'
+                          : 'article_block.update'
+                    : 'article_block.create',
+                entityType: 'article_blocks',
+                entityId: response.data.id,
+                metadata: {
+                    articleId: response.data.article_id,
+                    blockType: response.data.block_type,
+                    status: response.data.status,
+                },
+            });
+            if (
+                selectedArticleIdRef.current !== articleId ||
+                selectedBlockIdRef.current !== blockId
+            ) {
+                return;
+            }
+
+            selectedBlockIdRef.current = response.data.id;
+            setSelectedBlockId(response.data.id);
+            setBlocks((current) =>
+                [...current.filter((block) => block.id !== response.data.id), response.data].sort(compareArticleBlockRows),
+            );
+            setBlockForm(rowToBlockForm(response.data));
+            setNotice(withAuditNotice(nextStatus === 'published' ? 'Section published.' : 'Section saved.', auditError));
+        } catch (saveError) {
+            setError(saveError instanceof Error ? saveError.message : 'The section could not be saved. Try again.');
+        } finally {
+            savingBlockRef.current = false;
+            setIsSavingBlock(false);
         }
-
-        const auditError = await recordAdminAuditEvent(supabase, {
-            actorUserId: user.id,
-            action: selectedBlockId
-                ? nextStatus === 'published'
-                    ? 'article_block.publish'
-                    : nextStatus === 'archived'
-                      ? 'article_block.archive'
-                      : 'article_block.update'
-                : 'article_block.create',
-            entityType: 'article_blocks',
-            entityId: response.data.id,
-            metadata: {
-                articleId: response.data.article_id,
-                blockType: response.data.block_type,
-                status: response.data.status,
-            },
-        });
-        setNotice(withAuditNotice(nextStatus === 'published' ? 'Section published.' : 'Section saved.', auditError));
-        await loadArticleBlocks(supabase, selectedArticle.id, response.data.id);
     }
 
     return (
@@ -598,7 +715,7 @@ function AdminArticlesContent() {
                 <button
                     type="button"
                     onClick={startNewArticle}
-                    disabled={!canEdit}
+                    disabled={!canEdit || isLoading || isSavingArticle || isSavingBlock}
                     className="inline-flex min-h-10 items-center gap-2 rounded border border-black/15 bg-white px-3 text-xs font-bold uppercase tracking-[0.12em] text-black transition hover:border-black disabled:cursor-not-allowed disabled:text-black/35"
                 >
                     <Plus className="h-4 w-4" />
@@ -606,7 +723,14 @@ function AdminArticlesContent() {
                 </button>
             }
         >
-            <div className="grid gap-5 xl:grid-cols-[minmax(280px,390px)_minmax(0,1fr)_380px]">
+            <div
+                className={[
+                    'grid gap-5 xl:grid-cols-[minmax(280px,390px)_minmax(0,1fr)_380px]',
+                    isLoading ? 'opacity-60' : '',
+                ].join(' ')}
+                aria-busy={isLoading}
+                inert={isLoading}
+            >
                 <section className="border border-black/10 bg-white">
                     <div className="border-b border-black/10 p-4">
                         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-black/45">
@@ -668,6 +792,7 @@ function AdminArticlesContent() {
                                         key={article.id}
                                         type="button"
                                         onClick={() => void selectArticle(article)}
+                                        disabled={isSavingArticle || isSavingBlock}
                                         className={[
                                             'block w-full p-4 text-left transition hover:bg-[#f8f9f5]',
                                             selectedArticleId === article.id ? 'bg-[#f8f9f5]' : 'bg-white',
@@ -859,7 +984,7 @@ function AdminArticlesContent() {
                                 />
                             </div>
                             <p className="mt-3 text-sm leading-6 text-black/58">
-                                Leave these blank to let the public site reuse the article title and excerpt.
+                                Leave these blank to reuse the article title and excerpt. A brand-new public URL also needs a release check before search engines can discover it.
                             </p>
                         </div>
 
@@ -883,20 +1008,14 @@ function AdminArticlesContent() {
                     <SubrecordEditor
                         title="Article sections"
                         eyebrow={`${blocks.length} sections`}
-                        onNew={() => {
-                            setSelectedBlockId(null);
-                            setBlockForm(emptyBlockForm);
-                        }}
-                        disabled={!canEdit || !selectedArticle}
+                        onNew={startNewBlock}
+                        disabled={!canEdit || !selectedArticle || isSavingArticle || isSavingBlock}
                     >
                         <RecordChips
                             rows={blocks}
                             selectedId={selectedBlockId}
                             getLabel={(row) => `${row.sort_order}. ${formatBlockTypeLabel(row.block_type)}`}
-                            onSelect={(row) => {
-                                setSelectedBlockId(row.id);
-                                setBlockForm(rowToBlockForm(row));
-                            }}
+                            onSelect={selectBlock}
                         />
                         <div className="grid gap-4 md:grid-cols-2">
                             <SelectField
@@ -1008,7 +1127,7 @@ function AdminArticlesContent() {
                             <li>Complete the Article publish checklist before publishing.</li>
                             <li>Use Article sections for the public article body.</li>
                             <li>Publish at least one article section so the public article body can appear.</li>
-                            <li>Use Archive to remove an article from the website while keeping its editing history.</li>
+                            <li>Archive hides the CMS version. A matching legacy article can remain visible during migration until CMS-only cutover.</li>
                         </ul>
                     </section>
 
@@ -1043,7 +1162,7 @@ function ArticleStatusHelp({ status }: { status: ArticleStatus }) {
     const messages: Record<ArticleStatus, string> = {
         draft: 'Draft is safe to edit and will not appear on the public website.',
         published: 'Published can appear on public article pages where CMS content is active.',
-        archived: 'Archived is hidden from the public website and kept for editing history.',
+        archived: 'The Archived CMS version is hidden and kept for history; a matching legacy article may remain visible during migration.',
     };
 
     return (
@@ -1796,13 +1915,15 @@ function validateArticleForm(form: ArticleFormState) {
     if (coverMediaId.error) return validationFailure(coverMediaId.error);
 
     const seo = parseContentRecord(form.seoBaseJson);
-    if (form.seoTitle.trim()) {
-        seo.title = form.seoTitle.trim();
+    const seoValidation = validatePublicEntitySeoDraft(form.seoTitle, form.seoDescription);
+    if (seoValidation.error) return validationFailure(seoValidation.error);
+    if (seoValidation.title) {
+        seo.title = seoValidation.title;
     } else {
         delete seo.title;
     }
-    if (form.seoDescription.trim()) {
-        seo.description = form.seoDescription.trim();
+    if (seoValidation.description) {
+        seo.description = seoValidation.description;
     } else {
         delete seo.description;
     }
@@ -1837,6 +1958,18 @@ function validateBlockForm(form: BlockFormState) {
         } catch {
             return validationFailure('Section content could not be read. Re-open the section and try again.');
         }
+    }
+
+    const contentRecord = objectRecord(content);
+    const destinationKey = form.blockType === 'cta' ? 'href' : form.blockType === 'video_embed' ? 'url' : null;
+    if (destinationKey && form.status === 'published') {
+        const destination = toSafePublicContentDestination(contentString(contentRecord, destinationKey));
+        if (!destination) {
+            return validationFailure(
+                `Published ${formatBlockTypeLabel(form.blockType)} sections need a root-relative site path or an http(s) URL.`,
+            );
+        }
+        content = { ...contentRecord, [destinationKey]: destination.href };
     }
 
     if (form.status === 'published' && !hasPublishReadyBlockContent(form.blockType, content, mediaAssetId.value)) {
@@ -1969,11 +2102,11 @@ function hasPublishReadyBlockContent(blockType: ArticleBlockType, content: unkno
         case 'faq':
             return Array.isArray(record.items) && record.items.length > 0;
         case 'cta':
-            return contentString(record, 'label').trim().length > 0 && contentString(record, 'href').trim().length > 0;
+            return contentString(record, 'label').trim().length > 0 && Boolean(toSafePublicContentDestination(contentString(record, 'href')));
         case 'proof_metric':
             return contentString(record, 'value').trim().length > 0 && contentString(record, 'label').trim().length > 0;
         case 'video_embed':
-            return contentString(record, 'url').trim().length > 0;
+            return Boolean(toSafePublicContentDestination(contentString(record, 'url')));
         default:
             return hasAnyText && !isEmptyObject(record);
     }
@@ -2080,4 +2213,14 @@ function summarizeArticles(articles: ArticleRow[]) {
         }),
         { draft: 0, published: 0, archived: 0 },
     );
+}
+
+function compareArticleRows(left: ArticleRow, right: ArticleRow) {
+    const leftPublishedAt = left.published_on ? new Date(left.published_on).getTime() : Number.NEGATIVE_INFINITY;
+    const rightPublishedAt = right.published_on ? new Date(right.published_on).getTime() : Number.NEGATIVE_INFINITY;
+    return rightPublishedAt - leftPublishedAt || left.sort_order - right.sort_order || left.title.localeCompare(right.title);
+}
+
+function compareArticleBlockRows(left: ArticleBlockRow, right: ArticleBlockRow) {
+    return left.sort_order - right.sort_order || left.id - right.id;
 }

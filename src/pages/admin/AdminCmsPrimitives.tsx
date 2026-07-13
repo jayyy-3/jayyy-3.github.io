@@ -140,8 +140,8 @@ export function CmsLiveRuleCard({ children }: { children?: ReactNode }) {
                     <p className="text-xs font-bold uppercase tracking-[0.14em] text-black/45">Website visibility</p>
                     <h2 className="mt-2 text-xl font-semibold text-black">Only Published content goes public</h2>
                     <p className="mt-2 text-sm leading-6 text-black/62">
-                        Draft content is safe to edit. Archived content stays hidden. Public pages use Published CMS
-                        content where cutover is complete, with static fallback still protecting unfinished areas.
+                        Draft and Archived CMS versions stay hidden. During migration, a matching legacy static page
+                        can still remain visible until the CMS-only cutover is explicitly approved.
                     </p>
                 </div>
             </div>
@@ -186,9 +186,9 @@ export function CmsPublicPageLink({
     const isPublished = status === 'published';
     const reason =
         status === 'draft' || status === 'tbc'
-            ? 'This item is still Draft/Needs confirmation, so public pages will not show it yet.'
+            ? 'This CMS version is still Draft/Needs confirmation. A matching legacy static page may remain visible during migration.'
             : status === 'archived'
-              ? 'This item is Archived, so public pages will keep it hidden.'
+              ? 'This CMS version is Archived. A matching legacy static page may remain visible during migration.'
               : 'This item can appear on public CMS-backed pages.';
 
     if (isPublished && href) {

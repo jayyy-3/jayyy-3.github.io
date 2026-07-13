@@ -35,4 +35,8 @@ Applied media Storage migrations on 2026-05-28:
 - `media_storage_foundation`
 - `media_storage_listing_hardening`
 
+Pending production apply and live role-boundary verification:
+
+- `media_public_bucket_role_hardening` — keeps Editor uploads in `urblo-admin-media`; only owner/admin may insert or update `urblo-public-media` objects.
+
 Do not commit Supabase service role keys, database passwords, Turnstile secrets, or email provider secrets here.

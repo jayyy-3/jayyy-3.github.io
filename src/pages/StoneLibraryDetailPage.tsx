@@ -7,6 +7,7 @@ import SpecsPanel from '../components/stone-library/SpecsPanel';
 import StatusPill from '../components/stone-library/StatusPill';
 import VariantSwitch from '../components/stone-library/VariantSwitch';
 import RouteState from '../components/RouteState';
+import PublicContentSeo from '../components/PublicContentSeo';
 import StoneLibraryService from '../service/StoneLibraryService';
 import type { StoneDetailVM } from '../types/stone-library';
 
@@ -106,6 +107,14 @@ export default function StoneLibraryDetailPage() {
 
   return (
     <div className="bg-white">
+      {detail.contentSource === 'cms' ? (
+        <PublicContentSeo
+          canonicalPath={`/stone-library/${detail.stoneGroupId}`}
+          fallbackTitle={`${detail.name} ${detail.stoneType} | Urblo Stone Library`}
+          fallbackDescription={`Review ${detail.name} in the Urblo Stone Library, including finish options, sourcing notes, and public realm application guidance.`}
+          image={activeFinish?.imageUrl}
+        />
+      ) : null}
       <nav className="border-b border-black/10 bg-white/92 py-4">
         <div className="urblo-page-container flex flex-wrap items-center gap-2 text-[13px] font-semibold uppercase tracking-[0.12em] text-black/55">
           <Link to="/stone-library" className="hover:text-[var(--urblo-lime)]">

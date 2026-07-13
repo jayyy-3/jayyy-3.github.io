@@ -1,6 +1,6 @@
 # Urblo Cloudflare Pages Deployment Runbook
 
-Last updated: 2026-06-04
+Last updated: 2026-07-13
 
 ## Purpose
 This runbook captures the repo-side Cloudflare Pages deployment contract and the manual account steps required before production cutover.
@@ -13,7 +13,7 @@ Repo-side readiness is checked by `npm run agent:cloudflare-readiness`. This com
 
 After a preview deployment exists, preview HTTP smoke is checked by `npm run agent:cloudflare-preview-smoke -- --base-url https://<preview>.pages.dev`. This command verifies direct-refresh route shells, recursively discovered deployed JS/CSS assets and route chunks, the deployed admin config-required/profile-gate bundle contract, browser bundle service-role env boundaries, Cloudflare redirect behavior, and no-write API safe-failure behavior for `/api/enquiries` and `/api/sample-requests`.
 
-Before running live form/admin/preview checks, `npm run agent:live-readiness` can be used to audit local inputs without printing secret values or mutating Supabase/Cloudflare. Use `--base-url <preview-origin>` and `--admin-email <first-admin-email>` for non-secret manual inputs; replace those placeholders with a real `http`/`https` origin and a real email, because copied placeholders or malformed values stay missing in the report. Use `--form-writes-approved` only after Jay approves tagged live form QA writes, use `--first-admin-writes-approved` only after Jay approves creating/upserting the first profile or sending an invite, use `--admin-writes-approved` only after Jay approves tagged live admin QA writes, use `--content-import-approved`, `--content-merge-approved`, and `--content-public-cutover-approved` only after Jay approves those guarded content migration operations, use `--turnstile-token-provided` only when a valid target-environment token will be passed to the live form verifier, and use `--strict` when missing or manual-gated live inputs should fail the command.
+Before running live form/admin/preview checks, `npm run agent:live-readiness` can be used to audit local inputs without printing secret values or mutating Supabase/Cloudflare. Use `--base-url <preview-origin>` and `--admin-email <first-admin-email>` for non-secret manual inputs; replace those placeholders with a real `http`/`https` origin and a real email, because copied placeholders or malformed values stay missing in the report. Use `--form-writes-approved` only after Jay approves tagged live form QA writes, use `--first-admin-writes-approved` only after Jay approves creating/upserting the first profile or sending an invite, and use `--admin-writes-approved` only after Jay approves tagged live admin CRUD QA writes. For the separate Media Storage role proof, use `--media-role-migration-verified` only after the pending migration is applied/read back and `--media-role-writes-approved` only after Jay approves that exact tagged Editor/owner proof. Use `--content-import-approved`, `--content-merge-approved`, and `--content-public-cutover-approved` only after Jay approves those guarded content migration operations, use `--turnstile-token-provided` only when a valid target-environment token will be passed to the live form verifier, and use `--strict` when missing or manual-gated live inputs should fail the command. Readiness flags record state only; they do not apply SQL or run writes.
 
 ## Repo-Side Contract
 
@@ -108,6 +108,7 @@ Useful local env groups:
 - Admin browser QA: browser-safe Supabase key plus `URBLO_ADMIN_EMAIL` and `URBLO_ADMIN_PASSWORD`.
 - Unprofiled admin browser QA: browser-safe Supabase key plus `URBLO_UNPROFILED_EMAIL` and `URBLO_UNPROFILED_PASSWORD` for a valid Auth user with no active `admin_profiles` row.
 - Admin CRUD live writes: browser-safe Supabase key plus either `URBLO_ADMIN_ACCESS_TOKEN` or `URBLO_ADMIN_EMAIL` and `URBLO_ADMIN_PASSWORD`.
+- Media Storage role boundary: browser-safe Supabase key plus distinct active accounts in `URBLO_EDITOR_EMAIL`/`URBLO_EDITOR_PASSWORD` and `URBLO_ADMIN_EMAIL`/`URBLO_ADMIN_PASSWORD`. After the migration is applied/read back and Jay approves that exact tagged proof, run `npm run agent:admin-media-role-boundary-live -- --allow-writes --strict`; never place these QA passwords in Cloudflare dashboard variables.
 - CMS invite flow: Cloudflare Pages Functions use `SUPABASE_SERVICE_ROLE_KEY` server-side at `/api/admin/invite-user`; signed-in Website owner/CMS manager sessions call it from `/admin/settings`, and the service key must never appear in browser source.
 - `URBLO_FIRST_ADMIN_EMAIL` is only for bootstrap/readiness checks; live browser login and live admin-write verification use `URBLO_ADMIN_EMAIL` or an explicit admin access token.
 - Email proof: `SMTP2GO_API_KEY`, sender, and recipient variables; `RESEND_API_KEY` is still supported as a compatibility provider.
@@ -176,9 +177,10 @@ Current `/functions/api` endpoints:
 - Admin route tests require a browser-safe Supabase key, a Supabase Auth user, and a matching active `admin_profiles` row.
 - First-admin data-layer bootstrap is complete for `info@urblo.com.au`: the confirmed Auth user has one active `owner` profile, and `admin_audit_events.id = 8` records `admin_profile.bootstrap`.
 - Before browser admin QA, run `npm run agent:admin-live-readiness -- --admin-email info@urblo.com.au` with local verification credentials when intentionally rechecking the browser-safe key, service-role verification key, active admin profile, and baseline seed rows without mutating Supabase.
-- Before live admin save/export QA, run `npm run agent:admin-crud-live` in plan-only mode, then run `npm run agent:admin-crud-live -- --allow-writes` only after a real owner/admin Supabase Auth session is available and Jay approves tagged QA writes. Use `--include-storage` when intentionally verifying private Storage object upload policy.
+- Before live admin save/export QA, run `npm run agent:admin-crud-live` in plan-only mode, then run `npm run agent:admin-crud-live -- --allow-writes` only after a real owner/admin Supabase Auth session is available and Jay approves tagged QA writes. Use `--include-storage` only for owner/admin private-upload/readback plus anonymous denial; it does not prove the Editor public-bucket boundary.
+- Before claiming Media role enforcement complete, apply/read back `20260713065628_media_public_bucket_role_hardening.sql`, obtain fresh approval for tagged Storage writes, then run `npm run agent:admin-media-role-boundary-live -- --allow-writes --strict` with distinct active Editor and owner/admin credentials.
 - Settings save tests require an active owner/admin profile because `site_settings` write RLS is owner/admin only. Admin profile save tests require existing Supabase Auth users and must verify owner-role changes are owner-protected.
-- Media upload/save tests require an active owner/admin/editor profile because Storage object writes and `media_assets` mutations are admin/editor only.
+- Media draft upload/save tests require an active owner/admin/editor profile. Public-bucket insert/update must be owner/admin only after the pending role-hardening migration is applied; the dedicated role verifier proves this boundary through normal browser-key RLS.
 - Leads workflow save tests require an active owner/admin profile because lead status, assignment, and internal notes are private operational fields.
 - Stone Library save tests require an active owner/admin/editor profile because `stone_groups`, `stone_variants`, and `stone_finish_capabilities` mutations are admin/editor only.
 - Projects save tests require an active owner/admin/editor profile because `projects`, `project_facts`, `project_materials`, `project_material_maps`, and `project_hotspots` mutations are admin/editor only.
@@ -253,7 +255,10 @@ Active-admin browser QA has been run for the current production path:
 
 After a real owner/admin browser session is available and tagged QA writes are approved, run:
 - `npm run agent:admin-crud-live -- --allow-writes`
-- `npm run agent:admin-crud-live -- --allow-writes --include-storage` when verifying Storage upload policy too.
+- `npm run agent:admin-crud-live -- --allow-writes --include-storage` when verifying owner/admin private Storage upload/readback and anonymous denial.
+
+After the Media role migration is applied/read back, a distinct active Editor account exists, and Jay separately approves the tagged role proof, run:
+- `npm run agent:admin-media-role-boundary-live -- --allow-writes --strict`
 
 Admin CRUD/live lead workflow QA has been run for the current non-Storage path:
 - `supabase/migrations/20260603142359_project_media_blocks.sql` is applied and verified in production.

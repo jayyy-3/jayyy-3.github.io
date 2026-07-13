@@ -1,6 +1,6 @@
 # Urblo Design Contract
 
-Last updated: 2026-06-02
+Last updated: 2026-07-13
 
 ## Purpose
 This document governs Urblo's visual and UX execution. It is the design contract for Codex work in this repository.
@@ -277,35 +277,46 @@ They should:
 - avoid turning one-off email facts into universal company claims
 
 ### Admin
-The future `/admin` experience is an operational tool, not a public brand page.
+`/admin` is a current product surface for Website owners, CMS managers, Editors, and Viewers. It is an operational tool, not a public brand page and not a direct rendering of the database schema.
 
-Priorities:
-- dense but readable content lists
-- clear draft, review, published, archived, and TBC status treatment
-- content health warnings before visual decoration
-- fast table/detail editing for repeated maintenance work
-- obvious read-only, unauthorized, loading, and unsaved-change states
+The 2026-07-13 production audit found that the deployed CMS over-optimized for dense forms. The deployed Projects page rendered every child editor at once and reached approximately 9,600px at a common desktop viewport. Density is useful only when it reduces task time; it is not a goal by itself.
 
-Avoid:
-- marketing-style hero sections
-- decorative cards inside cards
-- ambiguous save/publish controls
-- free-form page-builder UI where structured fields are safer
-- implying backend submission or authentication works before Supabase is implemented
+Primary editor jobs:
+- review a work queue and choose the next item
+- find one content record, make a safe draft change, and trust that it saved
+- prepare media, resolve publish blockers, preview the result, then publish or archive
+- respond to a lead without exposing private customer data
+- invite a teammate and confirm they can establish a reusable login
 
-Current source state:
-- `/admin` now uses a black/white operational shell with compact navigation and status-led content.
-- Admin routes intentionally sit outside the public site chrome and suppress the public WelcomePopup.
-- Without browser-safe Supabase configuration, admin routes show a configuration-required state instead of placeholder dashboards.
-- `/admin/settings` is the first source CRUD surface and should remain dense, form-led, and status-led. Its admin team controls should feel like access operations, not a decorative people directory: compact rows, clear role/status pills, explicit owner protection, and no destructive controls.
-- `/admin/media` is the first media library source surface and should remain operational: compact record list, upload panel, metadata editor, explicit draft/published/archived state, audit-gated media manifest export, and clear publication guardrails.
-- `/admin/stone-library` is the first content CRUD source surface and should remain operational: compact stone list, status-led group and variant forms, finish capability matrix, finish image link controls, explicit TBC states, and publication guardrails.
-- `/admin/projects` is now a protected source CRUD surface and should remain proof-operational: compact project list, claim-review state, structured facts/material schedules, ordered media block controls, material-map and draggable hotspot controls, and clear publication guardrails.
-- Admin hotspot editing should use direct point placement on the selected map image plus numeric x/y fields. Physical delete controls stay out of the launch path; archive/status changes are the removal model.
-- `/admin/products` is now a protected source CRUD surface and should remain configuration-operational: compact product list, model/spec/default-material controls, Stone Library references, and clear publication guardrails.
-- `/admin/articles` is now a protected structured editorial CRUD surface and should remain operational: compact article list, metadata form, structured block rows, reference linking, legacy-source provenance, and clear publication guardrails.
-- `/admin/leads` is now a protected lead workflow source surface and should remain privacy-conscious: compact inbox, clear contact detail, sample item rows, status/assignment/notes workflow, notification state, audit-gated owner/admin CSV export, and no decorative CRM clutter.
-- `/admin/audit` is now a protected read-only review surface and should remain restrained: compact event list, clear actor/entity metadata, JSON inspection, owner/admin restriction, and no destructive controls.
+Interaction contract:
+- Lists and filters may be compact, but the selected record has a stable URL and remains selected after refresh.
+- Show one editing stage at a time. Use overview, proof/content, media, and advanced/map sections rather than mounting every relationship editor in one continuous form.
+- Preserve unsaved input. Warn before record switches, route changes, refresh, or new-record actions would discard changes.
+- Use one sticky save/status bar with explicit `Save draft`, `Preview`, `Publish`, and `Archive` outcomes. A status dropdown must not compete with separate lifecycle buttons.
+- Published records must not silently change live content through an ordinary Save. Editing live content needs an explicit draft/review model or an equally clear warning and confirmation contract.
+- Media selection must be searchable and virtualized or paginated; never repeat a 100+ option native select for every media field.
+- Private uploaded media becomes public only through a real Storage promotion step. Changing a bucket label is not publication.
+- Dashboard first view prioritizes real work: new customer leads, publish blockers, failed operations, and recent editor activity. Product education belongs behind concise help affordances.
+- Owner/admin/editor/viewer capabilities must match UI, RLS, and the editor guide. Do not describe review-only publishing restrictions that the database does not enforce.
+- Mobile uses a clear menu/drawer or comparably discoverable navigation. Medium desktop widths must not clip header actions.
+
+System and accessibility states:
+- Authentication, invitation, password setup, recovery, unauthorized, loading, saving, saved, partial failure, offline/retry, and expired-link states each need a clear recovery action.
+- Save/publish feedback uses an announced live region and remains visible long enough to verify.
+- Inputs retain a visible keyboard focus indicator. Filters and selected records expose labels and current/pressed state rather than relying on placeholder text or colour.
+- Respect reduced motion and keep interactive text at readable contrast and size.
+
+Current repair state:
+- Login has been reduced in local source from a marketing-style split hero to a focused account form with password recovery and safe invite/recovery setup.
+- Admin modules are route-lazy-loaded, and the header keeps actions wrapped below wide desktop widths.
+- Media list/new-record reliability is repaired in source; every initial file upload now starts private, and owner/admin promotion is locked to the selected row's original path/version with retain-on-uncertainty cleanup. Deployed browser proof remains required.
+- Projects now uses stable `/admin/projects/:projectId` URLs and one task workspace at a time; it protects Overview, Fact, Material, Media, Map, and Hotspot edits, keeps child saves isolated, jumps blockers to the right workspace, and offers searchable media selection in source. It still needs paginated/virtualized media beyond the current 500-item cap, a public preview contract, and authenticated deployed browser proof before this pattern is copied to other modules.
+
+Admin usability acceptance:
+- A new editor can complete invite, password setup, sign-in, and sign-out without assistance.
+- A trained editor can find an existing Project, change one safe field, save, refresh, and confirm persistence in under two minutes.
+- The editor can identify the first publish blocker without scrolling through unrelated sections.
+- Publishing and archiving produce a verified public result or an explicit, recoverable failure; no partial success is presented as complete.
 
 ## Component Rules
 

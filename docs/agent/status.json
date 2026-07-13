@@ -1,10 +1,11 @@
 {
   "version": 1,
-  "lastUpdated": "2026-06-30",
+  "lastUpdated": "2026-07-13",
   "sourceOfTruth": {
     "currentState": "docs/HANDOFF.md",
     "taskQueue": "docs/agent/tasks.json",
     "verification": "docs/agent/verification.md",
+    "adminHandoffEvidence": "docs/agent/admin-handoff-evidence.json",
     "historicalEvidence": "docs/WORKLOG.md",
     "harnessGc": "docs/agent/harness-gc.md"
   },
@@ -14,32 +15,39 @@
     "formsPersistence": "verified",
     "smtp2go": "verified",
     "turnstile": "not_configured",
-    "adminAuthBrowserQa": "verified",
-    "adminCmsHandoff": "verified",
-    "adminCrudLive": "verified",
-    "adminStorageProof": "verified",
+    "adminAuthBrowserQa": "stale_after_auth_reliability_changes",
+    "adminCmsHandoff": "revalidation_required_after_user_report",
+    "adminCrudLive": "api_level_verified_ui_golden_workflow_missing",
+    "adminStorageProof": "private_upload_historical_verified_private_only_path_bound_promotion_and_public_write_role_hardening_source_verified_live_role_verifier_staged_pending_apply_revalidation",
+    "supabaseAuthSmtp": "unverified",
     "contentImport": "draft_imported",
-    "publicContentCutover": "published_reads_with_static_fallback",
-    "seoIndexability": "production_verified",
+    "publicContentCutover": "published_overlay_with_static_fallback_and_runtime_entity_metadata_source_fixed_pending_deploy",
+    "seoIndexability": "static_36_route_production_verified_cms_only_discovery_strategy_pending",
     "seoLegacyRedirects": "source_verified_pending_deploy_readback",
-    "settingsInviteProof": "deferred_until_target_editor_approval"
+    "settingsInviteProof": "source_repaired_live_auth_smtp_and_target_editor_proof_required"
   },
   "localReproducibility": {
     "sourceHarness": "passing",
     "adminSourceCoverage": "passing",
-    "runtimeGates": "passing_for_latest_cms_handoff_stack",
+    "runtimeGates": "passing_for_2026_07_13_admin_reliability_source_patch",
     "liveSecretsPresent": false,
     "liveReadiness": "manual_inputs_required_for_future_live_write_proofs"
   },
   "nextDecisions": [
+    "Deploy the admin reliability fixes, then run the production golden workflow in docs/agent/admin-handoff-evidence.json with explicit approval for tagged writes and email delivery.",
+    "Configure and verify Supabase Auth custom SMTP plus exact invite/recovery redirect allowlist entries.",
+    "Apply and live-verify the media_public_bucket_role_hardening migration so Editors cannot insert or update public Storage objects directly.",
+    "Deploy and browser-test the new Projects record route, task workspaces, all-editor dirty guards, child-save isolation, blocker jumps, and searchable media; then decide whether pagination/preview or the next module comes first.",
     "Decide whether final Turnstile proof is required before the next public launch checkpoint.",
     "Choose a target editor email before running a real Settings invite proof.",
     "Have a customer or editor review imported Draft CMS content before publishing items publicly.",
     "Decide whether and when to resume paused article claim cleanup.",
     "Monitor GSC after the refreshed sitemap and Phase 2 redirect deployment so Google processing, discovered pages, and old URL decay are visible.",
-    "Plan Phase 3 SEO content growth around non-brand Product, Stone Library, Project, and Article search intent."
+    "Plan Phase 3 SEO content growth around non-brand Product, Stone Library, Project, and Article search intent.",
+    "Choose a generated sitemap/release-manifest, dynamic sitemap, or pre-render strategy so CMS-only published slugs enter the crawlable route inventory and first-response metadata."
   ],
   "activeExecutableTasks": [
+    "NOW-ADMIN-RELIABILITY-UX-001",
     "NOW-FORMS-SUPABASE-001",
     "NOW-ADMIN-SETTINGS-CRUD-001"
   ],
@@ -52,25 +60,27 @@
     "handoffTargetLines": 220,
     "worklogReviewWarningLines": 8000
   },
-    "lastVerified": {
-    "agentCheck": "2026-06-30",
-    "build": "2026-06-30",
+  "lastVerified": {
+    "agentCheck": "2026-07-13",
+    "build": "2026-07-13",
     "containerGate": "2026-06-30",
     "cloudflarePreviewSmokeBranchPreview": "2026-06-30",
-    "cloudflareReadiness": "2026-06-12",
+    "cloudflareReadiness": "2026-07-13",
     "gscSeoReview": "2026-06-12",
     "gscSitemapSubmission": "2026-06-12",
-    "harnessGc": "2026-06-30",
-    "harnessGcReview": "2026-06-30",
-    "lint": "2026-06-30",
+    "harnessGc": "2026-07-13",
+    "harnessGcReview": "2026-07-13",
+    "lint": "2026-07-13",
     "seoLegacyRedirectSource": "2026-06-12",
-    "seoReadiness": "2026-06-12",
+    "seoReadiness": "2026-07-13",
     "seoProductionReadback": "2026-06-12",
-    "gitDiffCheck": "2026-06-30",
-    "smoke": "2026-06-30",
-    "typecheck": "2026-06-30",
+    "gitDiffCheck": "2026-07-13",
+    "smoke": "2026-07-13",
+    "typecheck": "2026-07-13",
     "cloudflarePreviewSmokeProduction": "2026-06-05",
     "adminAuthBrowserProduction": "2026-06-05",
-    "adminHandoffReadinessStrict": "2026-06-05"
+    "adminHandoffReadinessStrictExpectedFailure": "2026-07-13",
+    "adminMediaRoleBoundaryPlanOnly": "2026-07-13",
+    "adminReliabilityReaudit": "2026-07-13"
   }
 }

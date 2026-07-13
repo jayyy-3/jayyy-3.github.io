@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import {
@@ -13,6 +13,7 @@ import {
     ShieldCheck,
 } from 'lucide-react';
 import { recordAdminAuditEvent, withAuditNotice } from '../../lib/adminAudit';
+import { PUBLIC_MEDIA_BUCKET, toSafePublicMediaSourceUrl } from '../../lib/publicMediaUrl';
 import { supabase } from '../../lib/supabaseClient';
 import { useAdminAuth } from '../../lib/adminAuthHooks';
 import AdminShell from './AdminShell';
@@ -24,6 +25,8 @@ type MediaListFilter = MediaStatus | 'all';
 type SourceKind = 'storage' | 'external_legacy' | 'r2' | 'stream';
 type MediaType = 'image' | 'video' | 'document' | 'other';
 type MediaBucket = 'urblo-admin-media' | 'urblo-public-media';
+
+const PRIVATE_MEDIA_BUCKET: MediaBucket = 'urblo-admin-media';
 
 interface MediaAssetRow {
     id: number;
@@ -66,7 +69,7 @@ interface MediaFormState {
 
 const emptyForm: MediaFormState = {
     status: 'draft',
-    bucket: 'urblo-admin-media',
+    bucket: PRIVATE_MEDIA_BUCKET,
     objectPath: '',
     sourceUrl: '',
     sourceKind: 'storage',
@@ -135,6 +138,8 @@ const mediaSourceOptions: Array<{ value: SourceKind; label: string; detail: stri
 const fieldClass =
     'mt-2 min-h-11 w-full rounded border border-black/15 bg-white px-3 text-sm font-medium outline-none transition focus:border-black disabled:bg-black/[0.04] disabled:text-black/45';
 
+const mediaAssetLoadLimit = 500;
+
 export default function AdminMediaPage() {
     return (
         <RequireAdmin>
@@ -146,12 +151,13 @@ export default function AdminMediaPage() {
 function AdminMediaContent() {
     const { profile, user } = useAdminAuth();
     const canEdit = profile?.role === 'owner' || profile?.role === 'admin' || profile?.role === 'editor';
+    const canCleanUpStorage = profile?.role === 'owner' || profile?.role === 'admin';
     const [assets, setAssets] = useState<MediaAssetRow[]>([]);
     const [selectedId, setSelectedId] = useState<number | null>(null);
+    const selectedIdRef = useRef<number | null>(null);
     const [form, setForm] = useState<MediaFormState>(emptyForm);
     const [mediaSearch, setMediaSearch] = useState('');
     const [mediaStatusFilter, setMediaStatusFilter] = useState<MediaListFilter>('all');
-    const [uploadBucket, setUploadBucket] = useState<MediaBucket>('urblo-admin-media');
     const [file, setFile] = useState<File | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
@@ -180,7 +186,7 @@ function AdminMediaContent() {
                 'id,status,bucket,object_path,source_url,source_kind,media_type,mime_type,width_px,height_px,size_bytes,alt,caption,credit,usage_notes,published_at,archived_at,updated_at,created_at',
             )
             .order('updated_at', { ascending: false })
-            .limit(80)
+            .limit(mediaAssetLoadLimit)
             .returns<MediaAssetRow[]>();
 
         if (loadError) {
@@ -190,13 +196,16 @@ function AdminMediaContent() {
         }
 
         const rows = data ?? [];
-        const nextSelected = selectedId ? rows.find((asset) => asset.id === selectedId) : rows[0];
+        const nextSelected = selectedIdRef.current
+            ? (rows.find((asset) => asset.id === selectedIdRef.current) ?? rows[0])
+            : rows[0];
 
         setAssets(rows);
+        selectedIdRef.current = nextSelected?.id ?? null;
         setSelectedId(nextSelected?.id ?? null);
         setForm(rowToForm(nextSelected ?? null));
         setIsLoading(false);
-    }, [selectedId]);
+    }, []);
 
     useEffect(() => {
         void loadAssets();
@@ -208,6 +217,7 @@ function AdminMediaContent() {
     }
 
     function selectAsset(asset: MediaAssetRow) {
+        selectedIdRef.current = asset.id;
         setSelectedId(asset.id);
         setForm(rowToForm(asset));
         setNotice(null);
@@ -215,6 +225,7 @@ function AdminMediaContent() {
     }
 
     function startExternalRecord() {
+        selectedIdRef.current = null;
         setSelectedId(null);
         setForm({
             ...emptyForm,
@@ -242,8 +253,8 @@ function AdminMediaContent() {
             return;
         }
 
-        if (file.size > bucketLimits[uploadBucket]) {
-            setError(`File is too large for ${formatBucketLabel(uploadBucket)}.`);
+        if (file.size > bucketLimits[PRIVATE_MEDIA_BUCKET]) {
+            setError(`File is too large for ${formatBucketLabel(PRIVATE_MEDIA_BUCKET)}.`);
             return;
         }
 
@@ -253,7 +264,7 @@ function AdminMediaContent() {
 
         const dimensions = await getImageDimensions(file);
         const objectPath = buildObjectPath(file);
-        const uploadResult = await supabase.storage.from(uploadBucket).upload(objectPath, file, {
+        const uploadResult = await supabase.storage.from(PRIVATE_MEDIA_BUCKET).upload(objectPath, file, {
             cacheControl: '31536000',
             upsert: false,
             contentType: file.type,
@@ -265,11 +276,11 @@ function AdminMediaContent() {
             return;
         }
 
-        const { data, error: insertError } = await supabase
+        const metadataResponse = await supabase
             .from('media_assets')
             .insert({
                 status: 'draft',
-                bucket: uploadBucket,
+                bucket: PRIVATE_MEDIA_BUCKET,
                 object_path: objectPath,
                 source_kind: 'storage',
                 media_type: mediaTypeFromMime(file.type),
@@ -289,34 +300,78 @@ function AdminMediaContent() {
             )
             .single<MediaAssetRow>();
 
-        setIsUploading(false);
+        let uploadedAsset = metadataResponse.data;
+        let metadataConfirmedByReadback = false;
 
-        if (insertError) {
-            setError(
-                `Storage upload completed, but media metadata could not be created: ${insertError.message}`,
-            );
-            return;
+        if (metadataResponse.error || !uploadedAsset) {
+            const metadataReadback = await supabase
+                .from('media_assets')
+                .select(
+                    'id,status,bucket,object_path,source_url,source_kind,media_type,mime_type,width_px,height_px,size_bytes,alt,caption,credit,usage_notes,published_at,archived_at,updated_at,created_at',
+                )
+                .eq('bucket', PRIVATE_MEDIA_BUCKET)
+                .eq('object_path', objectPath)
+                .maybeSingle<MediaAssetRow>();
+
+            if (metadataReadback.data) {
+                uploadedAsset = metadataReadback.data;
+                metadataConfirmedByReadback = true;
+            } else {
+                setIsUploading(false);
+                const metadataError = metadataResponse.error?.message ?? 'No media metadata row was returned.';
+
+                if (metadataReadback.error) {
+                    setError(
+                        `The file was uploaded privately, but the media record response failed and readback could not confirm whether it committed: ${metadataError}; readback: ${metadataReadback.error.message}. The private object was not deleted because a record may exist. Ask an Owner or Admin to inspect ${objectPath}.`,
+                    );
+                    return;
+                }
+
+                if (!canCleanUpStorage) {
+                    setError(
+                        `The file was uploaded privately, but media metadata could not be created: ${metadataError}. Editors cannot delete Storage objects, so a private orphan may remain at ${objectPath}. Ask an Owner or Admin to clean it up. It is not in the public media bucket.`,
+                    );
+                    return;
+                }
+
+                const cleanupError = await removeStorageObjectSafely(
+                    supabase,
+                    PRIVATE_MEDIA_BUCKET,
+                    objectPath,
+                );
+                setError(
+                    cleanupError
+                        ? `The file was uploaded privately, but media metadata could not be created: ${metadataError}. Cleanup also failed: ${cleanupError}. A private orphan may remain at ${objectPath}; inspect it before retrying.`
+                        : `The media record could not be created: ${metadataError}. The private upload was removed during cleanup, so no public object was created.`,
+                );
+                return;
+            }
         }
 
+        setIsUploading(false);
         setFile(null);
-        setAssets((current) => [data, ...current.filter((asset) => asset.id !== data.id)]);
-        setSelectedId(data.id);
-        setForm(rowToForm(data));
+        setAssets((current) => [uploadedAsset, ...current.filter((asset) => asset.id !== uploadedAsset.id)]);
+        selectedIdRef.current = uploadedAsset.id;
+        setSelectedId(uploadedAsset.id);
+        setForm(rowToForm(uploadedAsset));
         const auditError = await recordAdminAuditEvent(supabase, {
             actorUserId: user.id,
             action: 'media_asset.upload',
             entityType: 'media_assets',
-            entityId: data.id,
+            entityId: uploadedAsset.id,
             metadata: {
-                bucket: data.bucket,
-                objectPath: data.object_path,
-                mediaType: data.media_type,
-                sizeBytes: data.size_bytes,
+                bucket: uploadedAsset.bucket,
+                objectPath: uploadedAsset.object_path,
+                mediaType: uploadedAsset.media_type,
+                sizeBytes: uploadedAsset.size_bytes,
+                metadataConfirmedByReadback,
             },
         });
         setNotice(
             withAuditNotice(
-                'Media uploaded as a draft. Add alt text and usage notes before publishing.',
+                metadataConfirmedByReadback
+                    ? 'The initial metadata response failed, but readback confirmed the private Draft media record. Add alt text and usage notes before publishing.'
+                    : 'Media uploaded privately as a Draft. Add alt text and usage notes before publishing.',
                 auditError,
             ),
         );
@@ -332,12 +387,59 @@ function AdminMediaContent() {
             return;
         }
 
+        const privatePromotionRequested =
+            nextStatus === 'published' &&
+            form.sourceKind === 'storage' &&
+            form.bucket === PRIVATE_MEDIA_BUCKET;
+        let privateStoragePromotion: {
+            assetId: number;
+            objectPath: string;
+            originalUpdatedAt: string;
+        } | null = null;
+
+        if (privatePromotionRequested) {
+            const originalObjectPath = selectedAsset?.object_path?.trim() ?? '';
+
+            if (!canCleanUpStorage) {
+                setError('Private-to-public promotion requires an Owner or Admin so rollback can be completed safely.');
+                return;
+            }
+
+            if (
+                !selectedAsset ||
+                selectedId !== selectedAsset.id ||
+                selectedAsset.source_kind !== 'storage' ||
+                selectedAsset.bucket !== PRIVATE_MEDIA_BUCKET ||
+                !originalObjectPath
+            ) {
+                setError('Reload and select an existing private upload before publishing it.');
+                return;
+            }
+
+            if (form.objectPath.trim() !== originalObjectPath) {
+                setError(
+                    'Publishing stopped because the uploaded file location no longer matches the selected private media record. Reload the item before publishing; Storage paths cannot be repaired through the publish action.',
+                );
+                return;
+            }
+
+            privateStoragePromotion = {
+                assetId: selectedAsset.id,
+                objectPath: originalObjectPath,
+                originalUpdatedAt: selectedAsset.updated_at,
+            };
+        }
+
         if (nextStatus === 'published' && !canPublishMedia) {
             setError(formatMediaPublishError(publishChecklist));
             return;
         }
 
-        const validation = validateMediaForm({ ...form, status: nextStatus });
+        const shouldPromotePrivateStorage = Boolean(privateStoragePromotion);
+        const validation = validateMediaForm(
+            { ...form, status: nextStatus },
+            { allowPrivateStoragePublish: shouldPromotePrivateStorage },
+        );
         if (validation.error) {
             setError(validation.error);
             return;
@@ -346,8 +448,8 @@ function AdminMediaContent() {
         const now = new Date().toISOString();
         const payload = {
             status: nextStatus,
-            bucket: validation.bucket,
-            object_path: validation.objectPath,
+            bucket: shouldPromotePrivateStorage ? PUBLIC_MEDIA_BUCKET : validation.bucket,
+            object_path: privateStoragePromotion?.objectPath ?? validation.objectPath,
             source_url: validation.sourceUrl,
             source_kind: form.sourceKind,
             media_type: form.mediaType,
@@ -369,7 +471,57 @@ function AdminMediaContent() {
         setError(null);
         setNotice(null);
 
-        const response = selectedId
+        let promotedContentType: string | null = null;
+
+        if (privateStoragePromotion) {
+            const privateDownload = await supabase.storage
+                .from(PRIVATE_MEDIA_BUCKET)
+                .download(privateStoragePromotion.objectPath);
+
+            if (privateDownload.error || !privateDownload.data) {
+                setIsSaving(false);
+                setError(
+                    `Publishing stopped before the database was changed because the private source file could not be downloaded: ${privateDownload.error?.message ?? 'No file was returned.'}`,
+                );
+                return;
+            }
+
+            promotedContentType =
+                privateDownload.data.type || selectedAsset?.mime_type || form.mimeType.trim() || null;
+            const publicFileBody =
+                promotedContentType && privateDownload.data.type !== promotedContentType
+                    ? new Blob([privateDownload.data], { type: promotedContentType })
+                    : privateDownload.data;
+            const publicUpload = await supabase.storage
+                .from(PUBLIC_MEDIA_BUCKET)
+                .upload(privateStoragePromotion.objectPath, publicFileBody, {
+                    cacheControl: '31536000',
+                    upsert: false,
+                    ...(promotedContentType ? { contentType: promotedContentType } : {}),
+                });
+
+            if (publicUpload.error) {
+                setIsSaving(false);
+                setError(
+                    `Publishing stopped before the database was changed because a new public copy could not be created: ${publicUpload.error.message}. The destination was not overwritten. If this path already exists, inspect it before retrying.`,
+                );
+                return;
+            }
+        }
+
+        const response = privateStoragePromotion
+            ? await supabase
+                  .from('media_assets')
+                  .update(payload)
+                  .eq('id', privateStoragePromotion.assetId)
+                  .eq('bucket', PRIVATE_MEDIA_BUCKET)
+                  .eq('object_path', privateStoragePromotion.objectPath)
+                  .eq('updated_at', privateStoragePromotion.originalUpdatedAt)
+                  .select(
+                      'id,status,bucket,object_path,source_url,source_kind,media_type,mime_type,width_px,height_px,size_bytes,alt,caption,credit,usage_notes,published_at,archived_at,updated_at,created_at',
+                  )
+                  .maybeSingle<MediaAssetRow>()
+            : selectedId
             ? await supabase
                   .from('media_assets')
                   .update(payload)
@@ -389,19 +541,84 @@ function AdminMediaContent() {
                   )
                   .single<MediaAssetRow>();
 
-        setIsSaving(false);
+        let persistedAsset = response.data;
+        let databaseWriteConfirmedByReadback = false;
 
-        if (response.error) {
-            setError(response.error.message);
+        if (response.error || !persistedAsset) {
+            const responseFailure =
+                response.error?.message ??
+                'The selected private media record changed after it was loaded, so the guarded publish updated no row.';
+
+            if (!privateStoragePromotion) {
+                setIsSaving(false);
+                setError(responseFailure);
+                return;
+            }
+
+            const publishReadback = await supabase
+                .from('media_assets')
+                .select(
+                    'id,status,bucket,object_path,source_url,source_kind,media_type,mime_type,width_px,height_px,size_bytes,alt,caption,credit,usage_notes,published_at,archived_at,updated_at,created_at',
+                )
+                .eq('id', privateStoragePromotion.assetId)
+                .maybeSingle<MediaAssetRow>();
+
+            if (publishReadback.error || !publishReadback.data) {
+                setIsSaving(false);
+                setError(
+                    `The database publish response failed and readback could not confirm the final state: ${responseFailure}; readback: ${publishReadback.error?.message ?? 'No media record was returned.'}. The new public object was not deleted because the database may have committed. Inspect asset ${privateStoragePromotion.assetId} and ${privateStoragePromotion.objectPath} before retrying. Storage and database changes are not atomic in this browser workflow.`,
+                );
+                return;
+            }
+
+            const publishWasCommitted =
+                publishReadback.data.status === 'published' &&
+                publishReadback.data.bucket === PUBLIC_MEDIA_BUCKET &&
+                publishReadback.data.object_path === privateStoragePromotion.objectPath;
+
+            if (!publishWasCommitted) {
+                const publicRollback = await removePublicObjectIfUnreferenced(
+                    supabase,
+                    privateStoragePromotion.objectPath,
+                );
+                setIsSaving(false);
+                setError(
+                    publicRollback.removed
+                        ? `The database did not publish the media after a new public object was created: ${responseFailure}. The unreferenced public object was removed during rollback.`
+                        : `The database did not publish the media after a new public object was created: ${responseFailure}. The public object was retained: ${publicRollback.detail}. Inspect ${privateStoragePromotion.objectPath} before retrying; rollback never deletes an object referenced by another media record.`,
+                );
+                return;
+            }
+
+            persistedAsset = publishReadback.data;
+            databaseWriteConfirmedByReadback = true;
+        }
+
+        if (!persistedAsset) {
+            setIsSaving(false);
+            setError('The media save returned no database row, so the final state could not be confirmed.');
             return;
         }
 
+        let privateSourceCleanup = shouldPromotePrivateStorage ? 'retained' : 'not_applicable';
+        let privateSourceCleanupError: string | null = null;
+
+        if (privateStoragePromotion) {
+            const privateCleanup = await removePrivatePromotionSourceIfUnreferenced(
+                supabase,
+                privateStoragePromotion.objectPath,
+            );
+            privateSourceCleanup = privateCleanup.removed ? 'removed_after_publish' : 'retained';
+            privateSourceCleanupError = privateCleanup.detail;
+        }
+
         setAssets((current) => [
-            response.data,
-            ...current.filter((asset) => asset.id !== response.data.id),
+            persistedAsset,
+            ...current.filter((asset) => asset.id !== persistedAsset.id),
         ]);
-        setSelectedId(response.data.id);
-        setForm(rowToForm(response.data));
+        selectedIdRef.current = persistedAsset.id;
+        setSelectedId(persistedAsset.id);
+        setForm(rowToForm(persistedAsset));
         const auditError = await recordAdminAuditEvent(supabase, {
             actorUserId: user.id,
             action: selectedId
@@ -412,16 +629,45 @@ function AdminMediaContent() {
                       : 'media_asset.update'
                 : 'media_asset.create',
             entityType: 'media_assets',
-            entityId: response.data.id,
+            entityId: persistedAsset.id,
             metadata: {
-                status: response.data.status,
-                sourceKind: response.data.source_kind,
-                mediaType: response.data.media_type,
+                status: persistedAsset.status,
+                sourceKind: persistedAsset.source_kind,
+                mediaType: persistedAsset.media_type,
+                storagePromotion: shouldPromotePrivateStorage
+                    ? {
+                          sourceBucket: PRIVATE_MEDIA_BUCKET,
+                          destinationBucket: PUBLIC_MEDIA_BUCKET,
+                          objectPath: privateStoragePromotion?.objectPath,
+                          originalUpdatedAt: privateStoragePromotion?.originalUpdatedAt,
+                          sourcePathBoundToSelectedRecord: true,
+                          contentType: promotedContentType,
+                          destinationWriteMode: 'create_only_no_overwrite',
+                          rollbackCapability: 'owner_admin_storage_delete',
+                          browserWorkflowAtomic: false,
+                          databaseWriteConfirmedByReadback,
+                          privateSourceCleanup,
+                          privateSourceCleanupError,
+                      }
+                    : null,
             },
         });
+        const publishNotice = shouldPromotePrivateStorage
+            ? privateSourceCleanup === 'removed_after_publish'
+                ? 'Media copied to the Public website library and published. The original private file was removed after the database update succeeded.'
+                : privateSourceCleanup === 'retained'
+                  ? `Media copied to the Public website library and published. The private source copy remains: ${privateSourceCleanupError}`
+                  : 'Media copied to the Public website library and published.'
+            : 'Media published.';
+        const databaseConfirmationNotice = databaseWriteConfirmedByReadback
+            ? ' The initial database response failed, but a follow-up read confirmed the Published record before private-source cleanup.'
+            : '';
+        setIsSaving(false);
         setNotice(
             withAuditNotice(
-                nextStatus === 'published' ? 'Media published.' : 'Media metadata saved.',
+                nextStatus === 'published'
+                    ? `${publishNotice}${databaseConfirmationNotice}`
+                    : 'Media metadata saved.',
                 auditError,
             ),
         );
@@ -463,7 +709,27 @@ function AdminMediaContent() {
 
     const previewUrl = getMediaUrl(selectedAsset);
     const mediaCounts = useMemo(() => summarizeMedia(assets), [assets]);
-    const publishChecklist = useMemo(() => getMediaPublishChecklist(form), [form]);
+    const isPrivateStorageSelection = Boolean(
+        selectedAsset &&
+            selectedId === selectedAsset.id &&
+            form.sourceKind === 'storage' &&
+            selectedAsset.source_kind === 'storage' &&
+            selectedAsset.bucket === PRIVATE_MEDIA_BUCKET,
+    );
+    const privateStoragePathMatches = Boolean(
+        isPrivateStorageSelection &&
+            selectedAsset?.object_path?.trim() &&
+            form.objectPath.trim() === selectedAsset.object_path.trim(),
+    );
+    const canAutoPromotePrivateStorage = Boolean(
+        isPrivateStorageSelection &&
+            privateStoragePathMatches &&
+            (profile?.role === 'owner' || profile?.role === 'admin'),
+    );
+    const publishChecklist = useMemo(
+        () => getMediaPublishChecklist(form, canAutoPromotePrivateStorage, isPrivateStorageSelection),
+        [canAutoPromotePrivateStorage, form, isPrivateStorageSelection],
+    );
     const canPublishMedia = publishChecklist.every((item) => item.ready);
     const filteredAssets = useMemo(
         () =>
@@ -507,7 +773,7 @@ function AdminMediaContent() {
                     <button
                         type="button"
                         onClick={startExternalRecord}
-                        disabled={!canEdit}
+                        disabled={!canEdit || isLoading}
                         className="inline-flex min-h-10 items-center gap-2 rounded border border-black/15 bg-white px-3 text-xs font-bold uppercase tracking-[0.12em] text-black transition hover:border-black disabled:cursor-not-allowed disabled:text-black/35"
                     >
                         <Plus className="h-4 w-4" />
@@ -680,19 +946,22 @@ function AdminMediaContent() {
                             </label>
 
                             <label className="text-xs font-bold uppercase tracking-[0.14em] text-black/55">
-                                Website visibility location
-                                <select
-                                    value={form.bucket}
-                                    onChange={(event) => updateField('bucket', event.target.value as MediaBucket)}
-                                    disabled={!canEdit || isSaving || isLoading || form.sourceKind !== 'storage'}
+                                Website visibility location (managed)
+                                <input
+                                    value={
+                                        form.sourceKind === 'storage'
+                                            ? formatBucketLabel(form.bucket)
+                                            : 'Not used for external links'
+                                    }
+                                    readOnly
+                                    disabled
                                     className={fieldClass}
-                                >
-                                    {mediaBucketOptions.map(({ value, label }) => (
-                                        <option key={value} value={value}>
-                                            {label}
-                                        </option>
-                                    ))}
-                                </select>
+                                />
+                                <span className="mt-2 block text-xs font-semibold normal-case leading-5 tracking-normal text-black/45">
+                                    Upload decides the real Storage location. Owner/Admin publishing creates a
+                                    non-overwriting public copy before updating this record; Editor roles cannot run
+                                    that cross-library promotion because rollback may require file deletion.
+                                </span>
                             </label>
 
                             <label className="text-xs font-bold uppercase tracking-[0.14em] text-black/55">
@@ -720,12 +989,18 @@ function AdminMediaContent() {
                             <input
                                 value={form.objectPath}
                                 onChange={(event) => updateField('objectPath', event.target.value)}
-                                disabled={!canEdit || isSaving || isLoading || form.sourceKind !== 'storage'}
+                                disabled={
+                                    !canEdit ||
+                                    isSaving ||
+                                    isLoading ||
+                                    form.sourceKind !== 'storage' ||
+                                    selectedAsset?.source_kind === 'storage'
+                                }
                                 className={fieldClass}
                             />
                             <span className="mt-2 block text-xs font-semibold normal-case leading-5 tracking-normal text-black/45">
-                                Usually filled automatically after upload. Editors normally only change this when fixing
-                                an existing uploaded-file item.
+                                Filled automatically after upload. Existing Storage paths are locked so publishing and
+                                cleanup cannot affect another media record; reload the item if this location looks wrong.
                             </span>
                         </label>
 
@@ -749,6 +1024,7 @@ function AdminMediaContent() {
                             isSaving={isSaving}
                             disabled={!canEdit || isLoading}
                             canPublish={canPublishMedia}
+                            willPromotePrivateStorage={canAutoPromotePrivateStorage}
                             onSaveDraft={() => void saveAsset('draft')}
                             onPublish={() => void saveAsset('published')}
                             onArchive={() => void saveAsset('archived')}
@@ -853,23 +1129,21 @@ function AdminMediaContent() {
                         <FileUp className="h-5 w-5 text-[var(--urblo-lime)]" />
                         <h2 className="mt-5 text-xl font-semibold">Upload draft media</h2>
                         <p className="mt-3 text-sm leading-6 text-white/68">
-                            Uploads create a draft media item. Public publishing still requires alt text, usage
-                            notes, and the Public website library.
+                            Every upload starts in the Private draft library. Publishing copies the selected file into
+                            the Public website library after alt text and usage notes are ready. Owner or Admin access
+                            is required for that promotion and its rollback.
                         </p>
                         <label className="mt-5 block text-xs font-bold uppercase tracking-[0.14em] text-white/65">
                             Upload destination
-                            <select
-                                value={uploadBucket}
-                                onChange={(event) => setUploadBucket(event.target.value as MediaBucket)}
-                                disabled={!canEdit || isUploading}
+                            <input
+                                value={formatBucketLabel(PRIVATE_MEDIA_BUCKET)}
+                                readOnly
+                                disabled
                                 className="mt-2 min-h-11 w-full rounded border border-white/20 bg-black px-3 text-sm font-semibold text-white outline-none transition focus:border-white disabled:text-white/35"
-                            >
-                                {mediaBucketOptions.map(({ value, label }) => (
-                                    <option key={value} value={value}>
-                                        {label}
-                                    </option>
-                                ))}
-                            </select>
+                            />
+                            <span className="mt-2 block text-xs font-semibold normal-case leading-5 tracking-normal text-white/55">
+                                Draft files are never uploaded directly into the public bucket.
+                            </span>
                         </label>
                         <input
                             type="file"
@@ -894,7 +1168,10 @@ function AdminMediaContent() {
                         <ShieldCheck className="h-5 w-5 text-black" />
                         <h2 className="mt-5 text-xl font-semibold text-black">Publishing rules</h2>
                         <ul className="mt-4 space-y-3 text-sm leading-6 text-black/62">
-                            <li>Published uploaded files must live in the Public website library.</li>
+                            <li>Owner/Admin publishing creates a new public file without overwriting an existing path.</li>
+                            <li>If the database update fails, cleanup checks Media references first and retains the file whenever ownership is uncertain.</li>
+                            <li>Storage and database writes are sequential and are not one atomic transaction.</li>
+                            <li>Storage location is managed by upload and publish actions, not by editing a bucket label.</li>
                             <li>Published media needs usage notes so editors know where it is safe to reuse.</li>
                             <li>Published images need alt text before they can support public pages.</li>
                             <li>CSV manifest exports are recorded in Change history and include only visible media items.</li>
@@ -949,6 +1226,7 @@ function AdminMediaContent() {
                         isSaving={isSaving}
                         disabled={!canEdit || isLoading}
                         canPublish={canPublishMedia}
+                        willPromotePrivateStorage={canAutoPromotePrivateStorage}
                         onSaveDraft={() => void saveAsset('draft')}
                         onPublish={() => void saveAsset('published')}
                         onArchive={() => void saveAsset('archived')}
@@ -1083,6 +1361,7 @@ function MediaActionBar({
     isSaving,
     disabled,
     canPublish,
+    willPromotePrivateStorage,
     onSaveDraft,
     onPublish,
     onArchive,
@@ -1092,6 +1371,7 @@ function MediaActionBar({
     isSaving: boolean;
     disabled?: boolean;
     canPublish: boolean;
+    willPromotePrivateStorage: boolean;
     onSaveDraft: () => void;
     onPublish: () => void;
     onArchive: () => void;
@@ -1099,7 +1379,9 @@ function MediaActionBar({
 }) {
     const isDisabled = disabled || isSaving;
     const actionNote = canPublish
-        ? status === 'published'
+        ? willPromotePrivateStorage
+            ? 'Publish creates a non-overwriting public copy, then updates the record. A failed database update checks Media references before cleanup and retains the object when ownership is uncertain; these writes are not atomic.'
+            : status === 'published'
             ? 'Published media can be selected on public CMS-backed pages after you save.'
             : status === 'archived'
               ? 'Archived media stays hidden from public pickers. Save draft if you are preparing it again.'
@@ -1131,10 +1413,16 @@ function MediaActionBar({
                         disabled={isDisabled || !canPublish}
                         onClick={onPublish}
                         className="inline-flex min-h-11 items-center justify-center gap-2 rounded bg-[var(--urblo-lime)] px-4 text-xs font-bold uppercase tracking-[0.14em] text-black transition hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:bg-black/20 disabled:text-black/35"
-                        title={canPublish ? 'Publish media' : 'Complete the Media publish checklist first.'}
+                        title={
+                            canPublish
+                                ? willPromotePrivateStorage
+                                    ? 'Copy private file to public Storage and publish media'
+                                    : 'Publish media'
+                                : 'Complete the Media publish checklist first.'
+                        }
                     >
                         <CheckCircle2 className="h-4 w-4" />
-                        Publish media
+                        {willPromotePrivateStorage ? 'Copy & publish' : 'Publish media'}
                     </button>
                     <button
                         type="button"
@@ -1190,7 +1478,10 @@ function rowToForm(row: MediaAssetRow | null): MediaFormState {
     };
 }
 
-function validateMediaForm(form: MediaFormState): {
+function validateMediaForm(
+    form: MediaFormState,
+    { allowPrivateStoragePublish = false }: { allowPrivateStoragePublish?: boolean } = {},
+): {
     error: string | null;
     bucket: string | null;
     objectPath: string | null;
@@ -1211,13 +1502,21 @@ function validateMediaForm(form: MediaFormState): {
         return validationFailure('Uploaded media needs an uploaded file location before it can be saved.');
     }
 
-    if (form.sourceKind !== 'storage' && !form.sourceUrl.trim()) {
-        return validationFailure('External or hosted media needs a URL before it can be saved.');
+    if (form.sourceKind !== 'storage' && !toSafePublicMediaSourceUrl(form.sourceUrl)) {
+        return validationFailure(
+            'External or hosted media needs a valid http(s) URL or site path before it can be saved.',
+        );
     }
 
     if (form.status === 'published') {
-        if (form.sourceKind === 'storage' && form.bucket !== 'urblo-public-media') {
-            return validationFailure('Move uploaded media to the Public website library before publishing.');
+        if (
+            form.sourceKind === 'storage' &&
+            form.bucket !== 'urblo-public-media' &&
+            !allowPrivateStoragePublish
+        ) {
+            return validationFailure(
+                'Select an existing private upload so Publish can copy the file into the Public website library.',
+            );
         }
 
         if (form.mediaType === 'image' && !form.alt.trim()) {
@@ -1233,19 +1532,28 @@ function validateMediaForm(form: MediaFormState): {
         error: null,
         bucket: form.sourceKind === 'storage' ? form.bucket : null,
         objectPath: form.sourceKind === 'storage' ? form.objectPath.trim() : null,
-        sourceUrl: form.sourceUrl.trim() || null,
+        sourceUrl:
+            form.sourceKind === 'storage'
+                ? form.sourceUrl.trim() || null
+                : toSafePublicMediaSourceUrl(form.sourceUrl) ?? null,
         widthPx: widthPx.value,
         heightPx: heightPx.value,
         sizeBytes: sizeBytes.value,
     };
 }
 
-function getMediaPublishChecklist(form: MediaFormState) {
+function getMediaPublishChecklist(
+    form: MediaFormState,
+    canAutoPromotePrivateStorage: boolean,
+    isPrivateStorageSelection: boolean,
+) {
     const hasSource =
         form.sourceKind === 'storage'
             ? Boolean(form.objectPath.trim())
-            : Boolean(form.sourceUrl.trim());
-    const publicLocationReady = form.sourceKind !== 'storage' || form.bucket === 'urblo-public-media';
+            : Boolean(toSafePublicMediaSourceUrl(form.sourceUrl));
+    const isPrivateStorage = form.sourceKind === 'storage' && form.bucket === 'urblo-admin-media';
+    const publicLocationReady =
+        form.sourceKind !== 'storage' || form.bucket === 'urblo-public-media' || (isPrivateStorage && canAutoPromotePrivateStorage);
     const altReady = form.mediaType !== 'image' || Boolean(form.alt.trim());
 
     return [
@@ -1260,9 +1568,13 @@ function getMediaPublishChecklist(form: MediaFormState) {
         {
             label: 'Public location',
             ready: publicLocationReady,
-            detail: publicLocationReady
-                ? 'The selected source can be used by public pages.'
-                : 'Move uploaded media to the Public website library before publishing.',
+            detail: canAutoPromotePrivateStorage
+                ? 'An Owner or Admin can create a non-overwriting public copy at the same path, then update the database. If the database fails, cleanup checks Media references first and retains the object when ownership is uncertain; this browser workflow is not atomic.'
+                : isPrivateStorageSelection
+                  ? 'Private-to-public promotion requires an Owner or Admin because a failed database update may require deleting the newly created public object during rollback.'
+                : publicLocationReady
+                  ? 'The selected source can be used by public pages.'
+                  : 'Select an existing private upload so Publish can create a real public Storage copy.',
         },
         {
             label: 'Alt text for images',
@@ -1434,6 +1746,88 @@ function downloadTextFile(content: string, filename: string) {
     URL.revokeObjectURL(url);
 }
 
+async function removeStorageObjectSafely(
+    client: SupabaseClient,
+    bucket: MediaBucket,
+    objectPath: string,
+) {
+    try {
+        const removal = await client.storage.from(bucket).remove([objectPath]);
+        return removal.error?.message ?? null;
+    } catch (error) {
+        return error instanceof Error ? error.message : 'Unknown Storage cleanup error.';
+    }
+}
+
+type ConditionalStorageRemoval = {
+    removed: boolean;
+    detail: string | null;
+};
+
+async function removePublicObjectIfUnreferenced(
+    client: SupabaseClient,
+    objectPath: string,
+): Promise<ConditionalStorageRemoval> {
+    const referenceCheck = await client
+        .from('media_assets')
+        .select('id')
+        .eq('bucket', PUBLIC_MEDIA_BUCKET)
+        .eq('object_path', objectPath)
+        .limit(1)
+        .returns<Array<{ id: number }>>();
+
+    if (referenceCheck.error) {
+        return {
+            removed: false,
+            detail: `media-reference readback failed (${referenceCheck.error.message}), so deletion was skipped`,
+        };
+    }
+
+    if (referenceCheck.data?.length) {
+        return {
+            removed: false,
+            detail: `media record ${referenceCheck.data[0].id} references this public path, so deletion was skipped`,
+        };
+    }
+
+    const removalError = await removeStorageObjectSafely(client, PUBLIC_MEDIA_BUCKET, objectPath);
+    return removalError
+        ? { removed: false, detail: `Storage rollback failed (${removalError})` }
+        : { removed: true, detail: null };
+}
+
+async function removePrivatePromotionSourceIfUnreferenced(
+    client: SupabaseClient,
+    objectPath: string,
+): Promise<ConditionalStorageRemoval> {
+    const otherReferenceCheck = await client
+        .from('media_assets')
+        .select('id')
+        .eq('bucket', PRIVATE_MEDIA_BUCKET)
+        .eq('object_path', objectPath)
+        .limit(1)
+        .returns<Array<{ id: number }>>();
+
+    if (otherReferenceCheck.error) {
+        return {
+            removed: false,
+            detail: `private media-reference readback failed (${otherReferenceCheck.error.message}), so source deletion was skipped`,
+        };
+    }
+
+    if (otherReferenceCheck.data?.length) {
+        return {
+            removed: false,
+            detail: `media record ${otherReferenceCheck.data[0].id} still references this private path, so source deletion was skipped`,
+        };
+    }
+
+    const removalError = await removeStorageObjectSafely(client, PRIVATE_MEDIA_BUCKET, objectPath);
+    return removalError
+        ? { removed: false, detail: `private source cleanup failed (${removalError})` }
+        : { removed: true, detail: null };
+}
+
 function getMediaUrl(asset: MediaAssetRow | null) {
     if (!asset) {
         return null;
@@ -1443,7 +1837,7 @@ function getMediaUrl(asset: MediaAssetRow | null) {
         return supabase.storage.from(asset.bucket).getPublicUrl(asset.object_path).data.publicUrl;
     }
 
-    return asset.source_url;
+    return toSafePublicMediaSourceUrl(asset.source_url) ?? null;
 }
 
 function formatSourceKind(sourceKind: SourceKind) {

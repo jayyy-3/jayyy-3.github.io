@@ -1,5 +1,9 @@
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { getPublicContentClient } from '../lib/publicContentClient.ts';
+import { parsePublicEntitySeo } from '../lib/publicEntitySeo.ts';
+import { resolvePublicMediaUrl, type PublicMediaLocation } from '../lib/publicMediaUrl.ts';
 import type { ArticleMeta } from '../types/article.ts';
+import { overlayPublishedContent, toCanonicalContentKey } from './publicContentOverlay.ts';
 
 export type PublicArticleBlockType =
   | 'rich_text'
@@ -24,7 +28,8 @@ type ArticleRow = {
   excerpt: string | null;
   tags: string[] | null;
   legacy_source_path: string | null;
-  cover_media?: { source_url: string | null } | { source_url: string | null }[] | null;
+  seo: unknown;
+  cover_media?: PublicMediaLocation | PublicMediaLocation[] | null;
 };
 
 export interface PublicArticleBlock {
@@ -51,24 +56,18 @@ export interface ArticleBody {
 
 type ArticleBodyRow = ArticleRow & { id: number };
 
+type ArticleMediaRef = PublicMediaLocation & {
+  alt: string | null;
+  caption: string | null;
+  media_type: string | null;
+};
+
 type ArticleBlockRow = {
   id: number;
   block_type: PublicArticleBlockType;
   content: unknown;
   sort_order: number;
-  media_asset?: {
-    source_url: string | null;
-    object_path: string | null;
-    alt: string | null;
-    caption: string | null;
-    media_type: string | null;
-  } | {
-    source_url: string | null;
-    object_path: string | null;
-    alt: string | null;
-    caption: string | null;
-    media_type: string | null;
-  }[] | null;
+  media_asset?: ArticleMediaRef | ArticleMediaRef[] | null;
   linked_project?: { slug: string; title: string } | { slug: string; title: string }[] | null;
   linked_stone_group?: { stone_group_key: string; display_name: string } | { stone_group_key: string; display_name: string }[] | null;
 };
@@ -90,24 +89,26 @@ function sourceSlugFromPath(path: string | null): string | undefined {
   return match?.[1];
 }
 
-function mapArticle(row: ArticleRow): ArticleMeta {
+function mapArticle(row: ArticleRow, supabase: SupabaseClient): ArticleMeta {
   return {
     slug: row.slug,
     sourceSlug: sourceSlugFromPath(row.legacy_source_path),
     title: row.title,
     date: row.published_on || '',
     author: row.author || undefined,
-    cover: firstRelation(row.cover_media)?.source_url || undefined,
+    cover: resolvePublicMediaUrl(firstRelation(row.cover_media), supabase),
     excerpt: row.excerpt || undefined,
     tags: row.tags ?? undefined,
+    contentSource: 'cms',
+    seo: parsePublicEntitySeo(row.seo),
   };
 }
 
-function mapArticleBlock(row: ArticleBlockRow): PublicArticleBlock {
+function mapArticleBlock(row: ArticleBlockRow, supabase: SupabaseClient): PublicArticleBlock {
   const media = firstRelation(row.media_asset);
   const project = firstRelation(row.linked_project);
   const stone = firstRelation(row.linked_stone_group);
-  const mediaSource = media?.source_url || media?.object_path || undefined;
+  const mediaSource = resolvePublicMediaUrl(media, supabase);
 
   return {
     id: row.id,
@@ -150,15 +151,20 @@ async function getPublishedArticles(): Promise<ArticleMeta[]> {
       excerpt,
       tags,
       legacy_source_path,
+      seo,
       cover_media:media_assets!articles_cover_media_id_fkey (
-        source_url
+        status,
+        source_kind,
+        source_url,
+        bucket,
+        object_path
       )
     `)
     .eq('status', 'published')
     .order('published_on', { ascending: false });
 
   if (error || !data?.length) return [];
-  return (data as unknown as ArticleRow[]).map(mapArticle);
+  return (data as unknown as ArticleRow[]).map((row) => mapArticle(row, supabase));
 }
 
 async function getPublishedArticleBody(slug: string): Promise<ArticleBody | null> {
@@ -182,7 +188,10 @@ async function getPublishedArticleBody(slug: string): Promise<ArticleBody | null
       content,
       sort_order,
       media_asset:media_assets!article_blocks_media_asset_id_fkey (
+        status,
+        source_kind,
         source_url,
+        bucket,
         object_path,
         alt,
         caption,
@@ -211,16 +220,58 @@ async function getPublishedArticleBody(slug: string): Promise<ArticleBody | null
 
   return {
     kind: 'structured',
-    blocks: (blocks as unknown as ArticleBlockRow[]).map(mapArticleBlock),
+    blocks: (blocks as unknown as ArticleBlockRow[]).map((block) => mapArticleBlock(block, supabase)),
     legacySourceSlug: sourceSlugFromPath(article.legacy_source_path) ?? article.slug,
   };
 }
 
+function mergeArticlesWithPublishedOverlay(
+  staticArticles: ArticleMeta[],
+  publishedArticles: ArticleMeta[],
+): ArticleMeta[] {
+  const fallbackBySlug = new Map(
+    staticArticles.map((article) => [toCanonicalContentKey(article.slug), article]),
+  );
+  const publishedWithLegacyRoutes = publishedArticles.map((article) => {
+    const fallback = fallbackBySlug.get(toCanonicalContentKey(article.slug));
+    if (!fallback) return article;
+
+    return {
+      ...article,
+      sourceSlug: article.sourceSlug ?? fallback.sourceSlug,
+      legacySlugs: article.legacySlugs ?? fallback.legacySlugs,
+    };
+  });
+
+  return overlayPublishedContent(
+    staticArticles,
+    publishedWithLegacyRoutes,
+    (article) => article.slug,
+  );
+}
+
 class ArticleService {
   static async getAll(): Promise<ArticleMeta[]> {
-    const publishedArticles = await getPublishedArticles();
-    const source = publishedArticles.length ? publishedArticles : await getStaticArticles();
-    return source.sort((a, b) => new Date(b.date ?? 0).getTime() - new Date(a.date ?? 0).getTime());
+    const [staticArticles, publishedArticles] = await Promise.all([
+      getStaticArticles(),
+      getPublishedArticles(),
+    ]);
+    const mergedArticles = mergeArticlesWithPublishedOverlay(staticArticles, publishedArticles);
+    return mergedArticles.sort((a, b) => new Date(b.date ?? 0).getTime() - new Date(a.date ?? 0).getTime());
+  }
+
+  static async getBySlug(slug: string): Promise<ArticleMeta | undefined> {
+    const articles = await ArticleService.getAll();
+    const canonicalSlug = toCanonicalContentKey(slug);
+
+    return articles.find(
+      (article) =>
+        toCanonicalContentKey(article.slug) === canonicalSlug ||
+        (article.sourceSlug && toCanonicalContentKey(article.sourceSlug) === canonicalSlug) ||
+        article.legacySlugs?.some(
+          (legacySlug) => toCanonicalContentKey(legacySlug) === canonicalSlug,
+        ),
+    );
   }
 
   static async getBody(meta: ArticleMeta): Promise<ArticleBody> {

@@ -1,6 +1,6 @@
 # Harness GC
 
-Last updated: 2026-06-30
+Last updated: 2026-07-13
 
 ## Purpose
 Harness GC is the self-maintenance layer for the Urblo AI Harness.
@@ -16,11 +16,12 @@ Use it when Jay says:
 The expected response is a concise report: what is true, what is stale, what is noisy, what can be safely cleaned up, and what needs Jay's judgment.
 
 ## Mental Model
-Harness files are treated as four categories:
+Harness files are treated as five categories:
 
 - Policy: `AGENTS.md`, `docs/OPERATING_PROTOCOL.md`, `docs/agent/verification.md`, and stable execution rules. Note: `npm run gate` is not an `agent:*` script, so GC's agent-script coverage check does not track it; `scripts/check-harness.mjs` guards it instead.
 - State: `docs/agent/status.json`, `docs/HANDOFF.md`, and the active portion of `docs/agent/tasks.json`.
-- Evidence: `docs/WORKLOG.md` and ignored `.tmp/` artifacts.
+- Evidence assertion: `docs/agent/admin-handoff-evidence.json` for fresh, deployment-bound admin handoff state.
+- Evidence history: `docs/WORKLOG.md` and ignored `.tmp/` artifacts. Historical prose does not override a current structured assertion.
 - Knowledge: `docs/ARCHITECTURE.md`, `docs/DESIGN.md`, `docs/brand-baseline.md`, `docs/ADMIN_IA_ACCESS.md`, and schema/runbook docs.
 
 Harness GC reports when these categories drift into each other.
@@ -105,6 +106,8 @@ Harness GC expects every `agent:*` package script to appear in Harness documenta
 - `agent:harness-gc:review`
 - `agent:init`
 - `agent:live-readiness`
+- `agent:admin-media-role-boundary-live`
+- `agent:public-content-overlay`
 - `agent:public-supabase-readiness`
 - `agent:smoke`
 - `agent:supabase-foundation-readiness`
@@ -114,4 +117,5 @@ Harness GC expects every `agent:*` package script to appear in Harness documenta
 - Keep `docs/agent/status.json` compact. Link to canonical docs instead of copying long explanations.
 - Do not use Harness GC to hide unresolved product risk.
 - Do not let historical `docs/WORKLOG.md` evidence become the first thing a new agent must parse.
+- Do not treat route-shell checks, source phrases, or direct API mutations as proof that an editor workflow works.
 - Keep umbrella tasks separate from active executable tasks.
