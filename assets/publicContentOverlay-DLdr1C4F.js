@@ -1,0 +1,1 @@
+function c(o){return o.trim().toLowerCase()}function u(o,f,r){const n=new Map;for(const t of f)n.set(c(r(t)),t);const s=new Set,a=o.map(t=>{const e=c(r(t));return s.add(e),n.get(e)??t});for(const[t,e]of n)s.has(t)||(a.push(e),s.add(t));return a}export{u as o,c as t};
