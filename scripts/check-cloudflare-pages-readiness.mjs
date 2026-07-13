@@ -138,13 +138,22 @@ function checkHeaders() {
     'X-Content-Type-Options: nosniff',
     'Referrer-Policy: strict-origin-when-cross-origin',
     'Permissions-Policy: camera=(), microphone=(), geolocation=()',
-    '/assets/*',
-    'Cache-Control: public, max-age=31536000, immutable',
-    '/fonts/*',
-    '/media/*',
-    'Cache-Control: public, max-age=86400',
   ]) {
     requireIncludes(headers, header, 'public/_headers');
+  }
+
+  for (const forbiddenCacheOverride of [
+    '/assets/*',
+    '/fonts/*',
+    '/media/*',
+    'Cache-Control:',
+    'immutable',
+  ]) {
+    if (headers.includes(forbiddenCacheOverride)) {
+      failures.push(
+        `public/_headers: custom Pages cache override must stay absent after the cached-HTML asset incident (${forbiddenCacheOverride})`,
+      );
+    }
   }
 }
 

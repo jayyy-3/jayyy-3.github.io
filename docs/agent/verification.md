@@ -139,6 +139,7 @@ Use when changing the Cloudflare Pages launch contract, Pages Functions routing,
 Run:
 - `npm run agent:cloudflare-readiness`
 - `npm run agent:cloudflare-preview-smoke -- --base-url https://<preview>.pages.dev` after a Pages preview URL exists
+- The deployed smoke must verify exact recursively discovered asset URLs without cache-busting, require JavaScript/CSS MIME types, and reject an SPA HTML shell returned with HTTP 200; status-only asset checks are insufficient.
 - `npm run build`
 - `npm run lint`
 - `npx tsc -b`

@@ -8,7 +8,7 @@ This is the human-readable roadmap. The machine-readable source of truth is `doc
 Use this file to choose direction. Use `docs/agent/tasks.json` to execute.
 
 ## Current Objective
-Urblo is operating as a Cloudflare Pages + Supabase site with real forms, but the production `/admin` handoff is reopened after a direct not-working report and a 2026-07-13 code/UX audit. The immediate cycle is admin reliability and editor workflow recovery, not handoff polish.
+Urblo is operating as a Cloudflare Pages + Supabase site with real forms, but the production `/admin` handoff is reopened after a direct not-working report and a 2026-07-13 code/UX audit. PR `#5` then exposed a custom-domain cached-asset incident that the status-only deployed smoke had falsely accepted, so the immediate cycle is production asset integrity plus admin reliability/editor workflow recovery, not handoff polish.
 
 ## What Is Complete
 - Cloudflare Pages production hosting is complete for `https://urblo.com.au` and `https://www.urblo.com.au`.
@@ -28,7 +28,7 @@ Urblo is operating as a Cloudflare Pages + Supabase site with real forms, but th
 ## Active Now
 Only these task IDs should be treated as current executable work:
 
-- `NOW-ADMIN-RELIABILITY-UX-001`: P0. Reliability fixes and the first Projects task-workspace redesign are deployed through PR `#3`; a separate QA Editor is active. Deploy the stable-marker/isolated-build Harness repair, correct the confirmed localhost Auth callback fallback, apply the pending Storage RLS migration with approval, and prove the complete browser golden workflow before closing media pagination and preview gaps.
+- `NOW-ADMIN-RELIABILITY-UX-001`: P0. Reliability fixes and the first Projects task-workspace redesign are deployed through PR `#3`; Harness hardening is deployed through PR `#5`; a separate QA Editor is active. First deploy and verify the MIME/body-aware custom-domain asset repair, then correct the confirmed localhost Auth callback fallback, apply the pending Storage RLS migration with approval, and prove the complete browser golden workflow before closing media pagination and preview gaps.
 - `NOW-FORMS-SUPABASE-001`: final Turnstile proof. The public widget key, server secret, and valid token must be available before running the strict live proof.
 - `NOW-ADMIN-SETTINGS-CRUD-001`: Published settings public readback plus a real invite/password proof. The recipient is approved and email delivery occurred, but the invite callback fell back to `http://localhost:3000`; correct/read back the Auth Site URL and exact redirect allowlist entries, then repeat the complete UI workflow.
 
@@ -124,13 +124,13 @@ Latest local source/runtime proof set on 2026-07-13:
 - `npm run agent:public-supabase-readiness`: pass
 - `npm run agent:cloudflare-readiness`: pass
 - `npm run agent:admin-config-gate`: pass
-- `npm run agent:admin-auth-browser -- --allow-login --strict`: pass against the configured local build for all 9 authenticated routes plus Sign out; production rerun pending deployment of the stable-marker verifier
+- `npm run agent:admin-auth-browser -- --allow-login --strict`: pass against the configured local build for three blocked-Supabase static fallbacks, all 9 authenticated routes, and Sign out; the same checks pass on immutable PR `#5` deployment `4aef2ba1...`, while the custom domain is blocked by the cached-asset incident pending repair deployment
 - `npm run agent:seo-readiness`: pass
 - `npm run agent:public-content-overlay`: pass
 - `npm run agent:admin-cms-predeploy`: pass in no-write source/report mode
 - `npm run agent:admin-handoff-readiness -- --base-url https://urblo.com.au --admin-email info@urblo.com.au --strict`: expected fail because the deployed repair still lacks the Storage prerequisite and twelve golden-workflow evidence items
 
-Admin repair PR `#3` merge commit `46d46b4` passed branch-preview and production no-write smoke on 2026-07-13. The June route-shell login proof remains stale and the new deployment smoke does not close the reopened handoff.
+Admin repair PR `#3` merge commit `46d46b4` passed branch-preview and the former status-only production smoke on 2026-07-13. Harness PR `#5` merge `cb0ec9a` / immutable deployment `4aef2ba1...` passes static-fallback fault injection and nine authenticated routes, but the custom domain returned cached SPA HTML for three hashed JS/CSS URLs. The strengthened smoke now fails that false-200 condition; a new-hash deployment and production readback are required.
 
 Build still shows the known Browserslist staleness notice. The configured local build now loads public Supabase on demand into its own vendor chunk; the auth-browser gate confirms the entry stays below 500,000 bytes and the Supabase chunk is not module-preloaded. Admin route chunks and the browser-secret boundary also pass.
 

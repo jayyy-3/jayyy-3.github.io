@@ -84,7 +84,7 @@ body,
 
 body {
     margin: 0;
-    background: #ffffff;
+    background-color: #ffffff;
     color: var(--urblo-text);
     font-family: var(--urblo-font-sans);
     -webkit-font-smoothing: antialiased;

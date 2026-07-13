@@ -72,6 +72,13 @@ const redirectContracts = [
 ];
 
 const functionPaths = ['/api/enquiries', '/api/sample-requests'];
+const MAX_ASSET_GRAPH_SIZE = 200;
+const JAVASCRIPT_MEDIA_TYPES = new Set([
+  'application/ecmascript',
+  'application/javascript',
+  'text/ecmascript',
+  'text/javascript',
+]);
 
 function parseArgs(argv) {
   const options = {
@@ -181,18 +188,21 @@ function collectAssetPaths(html) {
   return [...paths].filter(Boolean);
 }
 
-function collectReferencedAssetPaths(text) {
+function collectReferencedAssetPaths(text, parentAssetPath) {
   const paths = new Set();
-  for (const match of text.matchAll(/["'`](\/?assets\/[^"'`]+?\.(?:js|css))["'`]/g)) {
-    paths.add(normalizeAssetPath(match[1]));
+  for (const match of text.matchAll(/["'`]((?:\.{1,2}\/|\/?assets\/)[^"'`]+?\.(?:js|css))["'`]/g)) {
+    paths.add(normalizeAssetPath(match[1], parentAssetPath));
   }
   return [...paths].filter(Boolean);
 }
 
-function normalizeAssetPath(rawPath) {
+function normalizeAssetPath(rawPath, parentAssetPath = '/') {
   if (!rawPath) return '';
   if (rawPath.startsWith('http')) {
     return new URL(rawPath).pathname;
+  }
+  if (rawPath.startsWith('./') || rawPath.startsWith('../')) {
+    return new URL(rawPath, `https://urblo.invalid${parentAssetPath}`).pathname;
   }
   return rawPath.startsWith('/') ? rawPath : `/${rawPath}`;
 }
@@ -216,6 +226,7 @@ async function checkAssets(html, options) {
   const seen = new Set();
   const jsAssetTexts = new Map();
   assert(queue.length > 0, 'No /assets/ references found in root HTML');
+  assert(queue.length <= MAX_ASSET_GRAPH_SIZE, `Initial asset graph exceeds ${MAX_ASSET_GRAPH_SIZE} entries`);
 
   while (queue.length > 0) {
     const path = queue.shift();
@@ -226,19 +237,53 @@ async function checkAssets(html, options) {
     assert(response.status === 200, `${path} returned ${response.status}, expected 200`);
     if (path.endsWith('.js') || path.endsWith('.css')) {
       const text = await response.text();
+      assertAssetContentType(path, response, text);
       if (path.endsWith('.js')) {
         jsAssetTexts.set(path, text);
       }
-      for (const discoveredPath of collectReferencedAssetPaths(text)) {
-        if (!seen.has(discoveredPath) && queue.length + seen.size < 80) {
-          queue.push(discoveredPath);
-        }
+      for (const discoveredPath of collectReferencedAssetPaths(text, path)) {
+        if (seen.has(discoveredPath) || queue.includes(discoveredPath)) continue;
+        assert(
+          queue.length + seen.size < MAX_ASSET_GRAPH_SIZE,
+          `Deployed asset graph exceeds the ${MAX_ASSET_GRAPH_SIZE}-entry verification budget`,
+        );
+        queue.push(discoveredPath);
       }
     }
     console.log(`asset ok: ${path}`);
   }
 
   checkDeployedBundleContracts(jsAssetTexts);
+}
+
+function assertAssetContentType(path, response, text) {
+  const contentType = (response.headers.get('content-type') || '').toLowerCase();
+  const mediaType = contentType.split(';', 1)[0].trim();
+  const cacheControl = (response.headers.get('cache-control') || '').toLowerCase();
+  const normalizedBody = text.trimStart();
+  const normalizedPrefix = normalizedBody.slice(0, 1024).toLowerCase();
+  const isHtmlFallback =
+    normalizedPrefix.startsWith('<!doctype html') ||
+    normalizedPrefix.startsWith('<html') ||
+    normalizedPrefix.includes('<div id="root"></div>');
+
+  assert(!response.redirected, `${path} unexpectedly redirected to ${response.url}`);
+  assert(normalizedBody.length > 0, `${path} returned an empty asset body`);
+  assert(!isHtmlFallback, `${path} returned the SPA HTML shell instead of the requested asset`);
+  assert(
+    !cacheControl.includes('immutable') && !/max-age=(?:31536000|31556952)\b/.test(cacheControl),
+    `${path} still exposes the removed long-lived custom cache policy: ${cacheControl}`,
+  );
+
+  if (path.endsWith('.js')) {
+    assert(
+      JAVASCRIPT_MEDIA_TYPES.has(mediaType),
+      `${path} returned non-JavaScript content type: ${mediaType || '(missing)'}`,
+    );
+    return;
+  }
+
+  assert(mediaType === 'text/css', `${path} returned non-CSS content type: ${mediaType || '(missing)'}`);
 }
 
 function checkDeployedBundleContracts(jsAssetTexts) {

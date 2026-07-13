@@ -1,5 +1,6 @@
 export function toCanonicalContentKey(value: string): string {
-    return value.trim().toLowerCase();
+    const normalized = value.trim();
+    return normalized.length > 0 ? normalized.toLowerCase() : '';
 }
 
 /**
