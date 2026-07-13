@@ -17,7 +17,7 @@ Urblo is operating as a Cloudflare Pages + Supabase site with real forms, but th
 - First admin bootstrap is complete for `info@urblo.com.au`.
 - `/admin` route shells, schema/RLS, source CRUD surfaces, and direct API-level tagged QA exist for Dashboard, Projects, Stone Library, Products, Articles, Media, Leads, Settings, and Change history. This does not prove editor workflow completion.
 - The June route-shell, private Storage, and direct browser-key/API proofs remain historical infrastructure evidence; they no longer count as a completed CMS handoff.
-- Public Projects, Products, Articles, and Stone Library have Published CMS read paths with static fallback; migration-safe per-record overlay and real Storage URL consumption are corrected in local source and still require deployed readback.
+- Public Projects, Products, Articles, and Stone Library have Published CMS read paths with static fallback; migration-safe per-record overlay and real Storage URL consumption are deployed, while authenticated publish/public-readback proof remains open.
 - Static production content has been imported into the CMS as Draft items for editor review.
 - Phase 1 SEO indexability foundation is implemented in source: real `robots.txt`, real `sitemap.xml` with 36 approved public URLs, centralized public route metadata in `src/data/seoRoutes.ts`, conservative client-side JSON-LD, and `npm run agent:seo-readiness`.
 - Google Search Console was reviewed on 2026-06-12 and `https://urblo.com.au/sitemap.xml` was submitted/refreshed the same day. The current SEO follow-up belongs to Phase 2: monitor when Google reads the refreshed sitemap, map old URLs with search signal, add selective 301 redirects for valuable legacy paths, and then expand non-brand long-tail Product/Stone/Project/Article content.
@@ -27,7 +27,7 @@ Urblo is operating as a Cloudflare Pages + Supabase site with real forms, but th
 ## Active Now
 Only these task IDs should be treated as current executable work:
 
-- `NOW-ADMIN-RELIABILITY-UX-001`: P0. Source reliability fixes and the first Projects task-workspace redesign are implemented locally, including isolated invite/recovery password sessions, private-only initial Media uploads, owner/admin-only public-bucket policy source, path/version-bound Media promotion, parent-bound/stale-safe child saves, and all-editor Projects dirty guards; apply the pending Storage RLS migration, deploy one SHA, prove the complete browser golden workflow, then close media pagination and preview gaps.
+- `NOW-ADMIN-RELIABILITY-UX-001`: P0. Reliability fixes and the first Projects task-workspace redesign are deployed through PR `#3`, including isolated invite/recovery password sessions, private-only initial Media uploads, owner/admin-only public-bucket policy source, path/version-bound Media promotion, parent-bound/stale-safe child saves, and all-editor Projects dirty guards; provision a QA Editor, apply the pending Storage RLS migration with approval, prove the complete browser golden workflow, then close media pagination and preview gaps.
 - `NOW-FORMS-SUPABASE-001`: final Turnstile proof. The public widget key, server secret, and valid token must be available before running the strict live proof.
 - `NOW-ADMIN-SETTINGS-CRUD-001`: Published settings public readback plus a real invite/password proof. This waits for Supabase Auth custom SMTP, exact redirect allowlist entries, and Jay approval of a target editor email.
 
@@ -126,11 +126,11 @@ Latest local source/runtime proof set on 2026-07-13:
 - `npm run agent:seo-readiness`: pass
 - `npm run agent:public-content-overlay`: pass
 - `npm run agent:admin-cms-predeploy`: pass in no-write source/report mode
-- `npm run agent:admin-handoff-readiness -- --base-url https://urblo.com.au --admin-email info@urblo.com.au --strict`: expected fail because the repaired deployment and golden-workflow evidence do not exist yet
+- `npm run agent:admin-handoff-readiness -- --base-url https://urblo.com.au --admin-email info@urblo.com.au --strict`: expected fail because the deployed repair still lacks the Storage prerequisite and twelve golden-workflow evidence items
 
-Historical production proof remains the 2026-06-05 deployed smoke and route-shell login set. It predates the incident repairs and does not close the reopened handoff.
+Admin repair PR `#3` merge commit `46d46b4` passed branch-preview and production no-write smoke on 2026-07-13. The June route-shell login proof remains stale and the new deployment smoke does not close the reopened handoff.
 
-Build still shows the known Browserslist staleness notice. Admin route-level chunks are now implemented locally; verify the deployed bundle after release.
+Build still shows the known Browserslist staleness notice. The deployed bundle now contains the separated admin route chunks and passes the browser-secret boundary check.
 
 ## Exit Criteria For The Current Cycle
 - `docs/agent/tasks.json` keeps only true active execution work in `now`.

@@ -83,6 +83,7 @@
     "This file is the machine-readable production handoff assertion. WORKLOG prose and route-shell screenshots are historical evidence, not a passing gate by themselves.",
     "Final evidence must name a deployment SHA that exists in the local Git repository, use Git-tracked repo-relative regular evidence files or HTTPS references on the exact immutable Cloudflare deployment origin, and expire within seven days of verification.",
     "Every production prerequisite and workflow reference must appear in the matching Pass row inside one Admin CMS Golden Workflow Evidence WORKLOG section tied to the same deployment SHA and immutable URL.",
-    "No production writes, invite emails, or account recovery emails were triggered during the 2026-07-13 re-audit."
+    "Repair PR #3 is deployed at merge commit 46d46b4 and immutable URL https://6d193af5.urblo.pages.dev, with branch-preview and production no-write smoke passing. These deployment facts do not populate deploymentSha/deploymentUrl until one complete golden-workflow evidence set is verified against the final target deployment.",
+    "No production writes, Storage writes, invite emails, or account recovery emails were triggered during the 2026-07-13 re-audit or deployment."
   ]
 }

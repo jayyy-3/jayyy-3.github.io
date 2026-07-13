@@ -2,6 +2,30 @@
 
 Last updated: 2026-07-13
 
+## Entry - 2026-07-13 (Admin Reliability Preview And Production Deployment)
+
+### Scope
+- Rebased the admin reliability/UX repair onto current `origin/main`, preserved the operating protocol and image-optimization work, and kept the unrelated untracked `docs/SEO_EXTERNAL_AI_BRIEF.md` out of the release.
+- Added `.dev.vars` to `.gitignore` and changed the local `.env` mode from `0644` to `0600`; no secret value was printed, staged, or committed.
+- Published branch `codex/admin-reliability-ux`, opened PR `#3`, verified its Cloudflare preview, and merged it to `main` after the preview gate passed.
+- Verified Cloudflare production deployment `6d193af5-cf8e-4541-a1e2-c73164d1a290` for merge commit `46d46b4` at immutable URL `https://6d193af5.urblo.pages.dev` and production origin `https://urblo.com.au`.
+
+### Verification Results
+- Docker was unavailable on this workstation, so the documented host-equivalent fallback ran in order: `npm run build`, `npm run lint`, `npm run agent:smoke`, `npm run agent:check`, and `git diff --check`: pass.
+- `npm run agent:admin-cms-predeploy`: pass in no-write mode.
+- `npm run agent:admin-config-gate`: 11/11 Firefox route checks passed.
+- `npm run agent:harness-gc` and `npm run agent:harness-gc:review`: zero failures; one intentional warning remains because `docs/WORKLOG.md` is over the 8,000-line review threshold.
+- Cloudflare branch preview `https://codex-admin-reliability-ux.urblo.pages.dev`: deployment success and `npm run agent:cloudflare-preview-smoke` pass.
+- GitHub PR `#3`: merged to `main` as `46d46b4` after the Cloudflare preview check passed.
+- Cloudflare production deployment and the GitHub Pages workflow: success.
+- `npm run agent:cloudflare-preview-smoke -- --base-url https://urblo.com.au`: pass for public/admin route shells, recursively discovered assets, admin bundle secret/config boundaries, representative redirects, and safe no-write Function behavior.
+
+### Result And Remaining Boundary
+- The repair is now deployed; the previous statement that production still ran the old admin build is superseded by this entry.
+- Deployment proves buildability and public/no-write route behavior only. It does not prove signed-in editor save/refresh, private-media promotion, publish/public readback, archive, settings consumption, invite/password setup, recovery, responsive authenticated navigation, Projects task completion, Dashboard operations, or editor-guide usability.
+- The pending Media Storage role migration was not applied and no Supabase row, Storage object, invitation, recovery email, or content status was changed during this release.
+- A separate QA Editor still needs provisioning before the approved Editor/owner role-boundary proof. Production handoff remains `revalidation_required`.
+
 ## Entry - 2026-07-13 (Admin Reliability And Task UX Re-Audit)
 
 ### Scope
