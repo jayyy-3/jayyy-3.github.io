@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, statSync } from 'node:fs';
 import { mkdir, rm } from 'node:fs/promises';
 import { spawn } from 'node:child_process';
 import { cwd, env as processEnv, exit } from 'node:process';
@@ -27,7 +27,6 @@ const forbiddenAuthenticatedText = [
   'Configuration required',
   'CMS access is not connected yet',
   'This account is not an active Urblo admin',
-  'Admin login',
 ];
 
 const forbiddenUnauthorizedText = [
@@ -59,6 +58,9 @@ const runtimeEnv = loadedEnvironment.env;
 const host = runtimeEnv.ADMIN_AUTH_BROWSER_HOST ?? '127.0.0.1';
 const port = runtimeEnv.ADMIN_AUTH_BROWSER_PORT ?? '4193';
 let serverProcess = null;
+let serverStartupError = null;
+let serverReady = false;
+let expectedEntryAsset = null;
 
 main().catch((error) => {
   console.error(error instanceof Error ? error.message : error);
@@ -78,20 +80,33 @@ async function main() {
 
   const screenshotsDir = args.screenshotsDir ?? defaultScreenshotsDir;
   const baseUrl = args.baseUrl ?? `http://${host}:${port}`;
+  const gateRoot = join(root, '.tmp/admin-auth-browser');
+  const isolatedDistDir = join(gateRoot, 'dist');
 
   try {
+    await rm(gateRoot, { recursive: true, force: true });
+    await mkdir(gateRoot, { recursive: true });
+    await mkdir(join(root, screenshotsDir), { recursive: true });
+
     if (!args.baseUrl) {
-      if (!existsSync(join(root, 'dist'))) {
-        throw new Error('dist/ not found. Run npm run build before npm run agent:admin-auth-browser -- --allow-login.');
+      const buildResult = await runCommand(
+        'npx',
+        ['vite', 'build', '--outDir', isolatedDistDir, '--emptyOutDir'],
+        {
+          VITE_SUPABASE_URL: runtimeEnv.VITE_SUPABASE_URL ?? '',
+          VITE_SUPABASE_PUBLISHABLE_KEY: runtimeEnv.VITE_SUPABASE_PUBLISHABLE_KEY ?? '',
+          VITE_SUPABASE_ANON_KEY: runtimeEnv.VITE_SUPABASE_ANON_KEY ?? '',
+        },
+      );
+      if (buildResult !== 0) {
+        throw new Error(`Admin auth browser isolated build failed with exit code ${buildResult}.`);
       }
-      serverProcess = startPreview();
+      expectedEntryAsset = assertConfiguredBundleBoundary(isolatedDistDir);
+      serverProcess = startPreview(isolatedDistDir);
       await waitForServer(baseUrl);
     } else {
       await waitForServer(baseUrl);
     }
-
-    await rm(join(root, '.tmp/admin-auth-browser'), { recursive: true, force: true });
-    await mkdir(join(root, screenshotsDir), { recursive: true });
 
     await runBrowserCheck({
       baseUrl,
@@ -282,11 +297,11 @@ function printPlan(readiness, scannedFiles) {
   }
 }
 
-function startPreview() {
+function startPreview(outDir) {
   console.log(`Starting Vite preview on http://${host}:${port}`);
   const child = spawn(
     'npx',
-    ['vite', 'preview', '--host', host, '--port', port, '--strictPort'],
+    ['vite', 'preview', '--host', host, '--port', port, '--strictPort', '--outDir', outDir],
     {
       cwd: root,
       env: runtimeEnv,
@@ -294,32 +309,100 @@ function startPreview() {
     },
   );
 
-  child.stdout.on('data', (chunk) => process.stdout.write(chunk));
+  child.stdout.on('data', (chunk) => {
+    const text = chunk.toString();
+    if (text.includes('Local:')) serverReady = true;
+    process.stdout.write(chunk);
+  });
   child.stderr.on('data', (chunk) => process.stderr.write(chunk));
+  child.once('error', (error) => {
+    serverStartupError = error;
+  });
+  child.once('exit', (code, signal) => {
+    if (code !== null && code !== 0) {
+      serverStartupError = new Error(`Vite preview exited with code ${code}.`);
+    } else if (signal && signal !== 'SIGTERM') {
+      serverStartupError = new Error(`Vite preview exited from signal ${signal}.`);
+    }
+  });
 
   return child;
 }
 
 async function stopPreview() {
   if (!serverProcess) return;
-  serverProcess.kill('SIGTERM');
+  const child = serverProcess;
+  child.kill('SIGTERM');
   await new Promise((resolve) => {
-    serverProcess.once('exit', resolve);
+    child.once('exit', resolve);
     setTimeout(resolve, 500);
   });
+  if (child.exitCode === null && child.signalCode === null) {
+    child.kill('SIGKILL');
+    await new Promise((resolve) => {
+      child.once('exit', resolve);
+      setTimeout(resolve, 500);
+    });
+  }
   serverProcess = null;
 }
 
 async function waitForServer(baseUrl) {
   for (let attempt = 0; attempt < 80; attempt += 1) {
+    if (serverStartupError) {
+      throw new Error(`Preview failed to start: ${serverStartupError.message}`);
+    }
     try {
       const response = await fetch(`${baseUrl}/`);
-      if (response.ok) return;
+      if (response.ok && (!serverProcess || serverReady)) {
+        if (!expectedEntryAsset) return;
+        const html = await response.text();
+        if (html.includes(`src="/${expectedEntryAsset}"`)) return;
+      }
     } catch {
-      await sleep(250);
+      // Retry until the preview process reports readiness or the attempt budget expires.
     }
+    await sleep(250);
   }
   throw new Error(`Preview did not respond at ${baseUrl}.`);
+}
+
+async function runCommand(command, commandArgs, extraEnv) {
+  return new Promise((resolve) => {
+    let settled = false;
+    const finish = (code) => {
+      if (settled) return;
+      settled = true;
+      resolve(code);
+    };
+    const child = spawn(command, commandArgs, {
+      cwd: root,
+      env: { ...processEnv, ...extraEnv },
+      stdio: 'inherit',
+    });
+    child.once('error', () => finish(1));
+    child.once('exit', (code) => finish(code ?? 1));
+  });
+}
+
+function assertConfiguredBundleBoundary(outDir) {
+  const html = readFileSync(join(outDir, 'index.html'), 'utf8');
+  const entryMatch = /<script[^>]+src="\/(assets\/index-[^"]+\.js)"/.exec(html);
+  if (!entryMatch) {
+    throw new Error('Configured admin build did not expose the expected hashed entry script.');
+  }
+
+  const entryBytes = statSync(join(outDir, entryMatch[1])).size;
+  if (entryBytes > 500_000) {
+    throw new Error(`Configured entry bundle exceeds 500000 bytes: ${entryBytes}.`);
+  }
+
+  if (/rel="modulepreload"[^>]+supabase-|supabase-[^>]+rel="modulepreload"/.test(html)) {
+    throw new Error('Configured build eagerly module-preloads the Supabase vendor chunk.');
+  }
+
+  console.log(`Configured entry bundle boundary passed (${entryBytes} bytes; Supabase is not module-preloaded).`);
+  return entryMatch[1];
 }
 
 async function runBrowserCheck({ baseUrl, expectUnauthorized, screenshotsDir, email, password }) {
@@ -338,8 +421,10 @@ async function runBrowserCheck({ baseUrl, expectUnauthorized, screenshotsDir, em
   });
 
   try {
+    await verifyStaticFallbackWithoutSupabase(browser, baseUrl, screenshotsDir);
+
     await page.goto(new URL('/admin/media', baseUrl).toString(), { waitUntil: 'domcontentloaded' });
-    await waitForText(page, 'Admin login', 'unauthenticated admin login screen');
+    await waitForTestId(page, 'admin-login-form', 'unauthenticated admin login screen');
     assertAdminLoginUrl(page.url(), '/admin/media');
     await assertNoText(page, 'Configuration required');
     await assertNoText(page, 'Media Library');
@@ -373,6 +458,7 @@ async function runBrowserCheck({ baseUrl, expectUnauthorized, screenshotsDir, em
       for (const text of forbiddenAuthenticatedText) {
         await assertNoText(page, text);
       }
+      await assertNoTestId(page, 'admin-login-form');
       await page.screenshot({ path: `${screenshotsDir}/${route.slug}.png`, fullPage: true });
     }
 
@@ -381,11 +467,54 @@ async function runBrowserCheck({ baseUrl, expectUnauthorized, screenshotsDir, em
     await assertNoText(page, 'Change history');
     await page.screenshot({ path: `${screenshotsDir}/signed-out.png`, fullPage: true });
 
+    await page.goto(new URL('/admin/media', baseUrl).toString(), { waitUntil: 'domcontentloaded' });
+    await waitForSignedOutRoute(page, '/admin/media');
+    await assertNoText(page, 'Media Library');
+    await page.screenshot({ path: `${screenshotsDir}/signed-out-protected-route.png`, fullPage: true });
+
     if (consoleErrors.length > 0) {
       throw new Error(`Console/page errors detected: ${consoleErrors.join(' | ')}`);
     }
   } finally {
     await browser.close();
+  }
+}
+
+async function verifyStaticFallbackWithoutSupabase(browser, baseUrl, screenshotsDir) {
+  const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+  const page = await context.newPage();
+  let blockedSupabaseChunks = 0;
+
+  await page.route('**/assets/supabase-*.js', async (route) => {
+    blockedSupabaseChunks += 1;
+    await route.abort();
+  });
+
+  try {
+    const fallbackChecks = [
+      { path: '/products', text: 'Prime Block', slug: 'fallback-products' },
+      { path: '/projects', text: 'Australian Catholic University', slug: 'fallback-projects' },
+      {
+        path: '/articles',
+        text: 'Curving the Future: Greening the Pipeline’s Sustainable Legacy',
+        slug: 'fallback-articles',
+      },
+    ];
+
+    for (const check of fallbackChecks) {
+      await page.goto(new URL(check.path, baseUrl).toString(), { waitUntil: 'domcontentloaded' });
+      await waitForText(page, check.text, `${check.path} static fallback`, 30000);
+      await page.screenshot({ path: `${screenshotsDir}/${check.slug}.png`, fullPage: true });
+    }
+
+    if (blockedSupabaseChunks < fallbackChecks.length) {
+      throw new Error(
+        `Expected a blocked Supabase chunk request for each public fallback route; observed ${blockedSupabaseChunks}.`,
+      );
+    }
+    console.log(`Static public fallback passed with ${blockedSupabaseChunks} blocked Supabase chunk requests.`);
+  } finally {
+    await context.close();
   }
 }
 
@@ -449,7 +578,7 @@ async function waitForAuthenticatedRoute(page, expectedText) {
 
 async function waitForSignedOutRoute(page, expectedNext) {
   try {
-    await waitForText(page, 'Admin login', 'signed-out admin login screen', 30000);
+    await waitForTestId(page, 'admin-login-form', 'signed-out admin login screen', 30000);
   } catch (error) {
     const visibleFailure = await firstVisibleText(page, [
       'Configuration required',
@@ -482,10 +611,23 @@ async function waitForHeading(page, text, label, timeout = 15000) {
   });
 }
 
+async function waitForTestId(page, testId, label, timeout = 15000) {
+  await page.getByTestId(testId).waitFor({ state: 'visible', timeout }).catch(() => {
+    throw new Error(`Expected visible test id "${testId}" for ${label}.`);
+  });
+}
+
 async function assertNoText(page, text) {
   const count = await page.getByText(text, { exact: false }).count();
   if (count > 0) {
     throw new Error(`Unexpected text is visible in the admin browser check: ${text}`);
+  }
+}
+
+async function assertNoTestId(page, testId) {
+  const count = await page.getByTestId(testId).count();
+  if (count > 0) {
+    throw new Error(`Unexpected admin browser element is present: ${testId}`);
   }
 }
 

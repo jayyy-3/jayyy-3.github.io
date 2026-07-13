@@ -21,7 +21,7 @@
     "authenticatedSignIn": {
       "status": "stale",
       "evidenceRefs": [],
-      "note": "The June route-shell login proof predates the current auth reliability changes."
+      "note": "The June production route-shell login proof predates the current auth reliability changes. A configured local current-source run now passes all nine authenticated routes, Sign out, and a protected-route revisit, but local evidence does not close this production workflow."
     },
     "draftSaveRefresh": {
       "status": "missing",
@@ -51,7 +51,7 @@
     "inviteSetPassword": {
       "status": "missing",
       "evidenceRefs": [],
-      "note": "Requires an approved fresh editor invite, delivered email, password setup, logout, and password sign-in."
+      "note": "A 2026-07-13 approved QA invite was delivered, but its callback fell back to http://localhost:3000. Direct Auth API activation was used only to prepare the separate QA Editor account and does not satisfy this workflow. Requires corrected/read-back Auth callback configuration, a fresh delivered invite, UI password setup, logout, and password sign-in."
     },
     "passwordRecovery": {
       "status": "missing",
@@ -84,6 +84,7 @@
     "Final evidence must name a deployment SHA that exists in the local Git repository, use Git-tracked repo-relative regular evidence files or HTTPS references on the exact immutable Cloudflare deployment origin, and expire within seven days of verification.",
     "Every production prerequisite and workflow reference must appear in the matching Pass row inside one Admin CMS Golden Workflow Evidence WORKLOG section tied to the same deployment SHA and immutable URL.",
     "Repair PR #3 is deployed at merge commit 46d46b4 and immutable URL https://6d193af5.urblo.pages.dev, with branch-preview and production no-write smoke passing. These deployment facts do not populate deploymentSha/deploymentUrl until one complete golden-workflow evidence set is verified against the final target deployment.",
-    "No production writes, Storage writes, invite emails, or account recovery emails were triggered during the 2026-07-13 re-audit or deployment."
+    "The re-audit and repair deployment themselves made no production writes. Afterward, Jay approved QA account provisioning: one inaccessible unconfirmed test invite was removed, and one separate active QA Editor plus profile/audit history was created. No content rows, Storage objects, content statuses, or recovery emails were changed.",
+    "The delivered QA invite exposed a callback fallback to http://localhost:3000. Account existence and direct Auth activation are prerequisites only; they are not golden-workflow evidence."
   ]
 }

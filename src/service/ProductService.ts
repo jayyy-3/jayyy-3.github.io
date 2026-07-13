@@ -69,7 +69,7 @@ function mapPublishedProduct(row: ProductRow, supabase: SupabaseClient): Product
 }
 
 async function getPublishedProducts(): Promise<Product[]> {
-    const supabase = getPublicContentClient();
+    const supabase = await getPublicContentClient();
     if (!supabase) {
         return [];
     }

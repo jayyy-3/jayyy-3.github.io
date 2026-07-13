@@ -15,31 +15,31 @@
     "formsPersistence": "verified",
     "smtp2go": "verified",
     "turnstile": "not_configured",
-    "adminAuthBrowserQa": "stale_after_auth_reliability_changes",
+    "adminAuthBrowserQa": "configured_local_9_routes_and_signout_verified_stable_marker_production_rerun_pending",
     "adminCmsHandoff": "revalidation_required_after_user_report_and_repair_deploy",
     "adminCrudLive": "api_level_verified_ui_golden_workflow_missing",
     "adminStorageProof": "private_upload_historical_verified_private_only_path_bound_promotion_and_public_write_role_hardening_source_verified_live_role_verifier_staged_pending_apply_revalidation",
-    "supabaseAuthSmtp": "unverified",
+    "supabaseAuthSmtp": "invite_delivery_observed_sender_ownership_unverified_callback_fallback_localhost",
     "contentImport": "draft_imported",
     "publicContentCutover": "published_overlay_with_static_fallback_and_runtime_entity_metadata_deployed_authenticated_readback_pending",
     "seoIndexability": "static_36_route_production_verified_cms_only_discovery_strategy_pending",
     "seoLegacyRedirects": "production_smoke_verified_2026_07_13",
-    "settingsInviteProof": "source_repaired_live_auth_smtp_and_target_editor_proof_required"
+    "settingsInviteProof": "qa_editor_active_via_direct_auth_activation_real_ui_invite_blocked_by_callback_config"
   },
   "localReproducibility": {
     "sourceHarness": "passing",
     "adminSourceCoverage": "passing",
     "runtimeGates": "passing_for_2026_07_13_admin_reliability_source_patch",
-    "liveSecretsPresent": false,
-    "liveReadiness": "manual_inputs_required_for_future_live_write_proofs"
+    "liveSecretsPresent": true,
+    "liveReadiness": "browser_key_owner_and_distinct_editor_credentials_present_service_role_migration_and_write_approval_missing"
   },
   "nextDecisions": [
-    "Provision a separate QA Editor, then run the production golden workflow in docs/agent/admin-handoff-evidence.json with explicit approval for tagged writes and email delivery.",
-    "Configure and verify Supabase Auth custom SMTP plus exact invite/recovery redirect allowlist entries.",
+    "Deploy and production-rerun the stable-marker admin auth verifier and isolated no-config gate.",
+    "Correct and read back the Supabase Auth Site URL plus exact invite/recovery redirect allowlist entries after the observed localhost callback fallback; verify Auth SMTP ownership separately.",
     "Apply and live-verify the media_public_bucket_role_hardening migration so Editors cannot insert or update public Storage objects directly.",
     "Browser-test the deployed Projects record route, task workspaces, all-editor dirty guards, child-save isolation, blocker jumps, and searchable media; then decide whether pagination/preview or the next module comes first.",
     "Decide whether final Turnstile proof is required before the next public launch checkpoint.",
-    "Choose a target editor email before running a real Settings invite proof.",
+    "Repeat the complete Settings invite/password workflow with the approved QA recipient after Auth callback configuration is corrected.",
     "Have a customer or editor review imported Draft CMS content before publishing items publicly.",
     "Decide whether and when to resume paused article claim cleanup.",
     "Monitor GSC after the refreshed sitemap and Phase 2 redirect deployment so Google processing, discovered pages, and old URL decay are visible.",
@@ -83,6 +83,10 @@
     "adminHandoffReadinessStrictExpectedFailure": "2026-07-13",
     "adminMediaRoleBoundaryPlanOnly": "2026-07-13",
     "adminReliabilityReaudit": "2026-07-13",
-    "adminReliabilityDeployment": "2026-07-13"
+    "adminReliabilityDeployment": "2026-07-13",
+    "qaEditorProvisioning": "2026-07-13",
+    "adminAuthBrowserLocalConfigured": "2026-07-13",
+    "adminConfigGateIsolated": "2026-07-13",
+    "configuredBundleSplit": "2026-07-13"
   }
 }

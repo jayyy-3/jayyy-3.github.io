@@ -79,6 +79,7 @@ export default function AdminLoginPage() {
                     </div>
 
                     <form
+                        data-testid="admin-login-form"
                         onSubmit={(event) => void handleSubmit(event)}
                         className="border border-black/12 bg-white p-6 shadow-[0_24px_70px_rgba(0,0,0,0.1)] md:p-8"
                     >

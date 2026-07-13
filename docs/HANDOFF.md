@@ -53,19 +53,21 @@ Supabase:
 Admin CMS:
 - Production admin address is `https://urblo.com.au/admin`.
 - First admin bootstrap is complete for `info@urblo.com.au`, linked to one active Website owner profile.
+- A separate QA Editor is active. Its password sign-in and own-profile RLS readback passed, and its credentials are stored only in the ignored mode-`0600` local `.env`.
+- A real invite reached the approved QA recipient, but its callback incorrectly fell back to `http://localhost:3000`. The account was activated through the Auth API only to unblock role testing; this does not count as the Settings invite/password UI proof. Supabase Auth Site URL/exact Redirect URL configuration must be corrected and read back.
 - The prior June proof covered authenticated route shells and direct browser-key/API mutations, not a real editor completing save, refresh, publish, public readback, archive, invite, or recovery through the UI.
 - On 2026-07-13 Jay reported that the admin is not working and is extremely difficult to use. The handoff is reopened and production state is `revalidation_required`.
 - Confirmed source failures include a Supabase auth-listener deadlock pattern, incomplete invite/password setup, Media new-record reset and 80-row truncation, false private-to-public Storage publication, missing public Storage media URLs, category-wide fallback replacement, and site settings with no public consumer.
 - The deployed repairs cover the auth callback and non-blocking same-user refresh; isolated-session invite/recovery password writes that cannot replace the shared browser session; Media loading, private-only initial upload, owner/admin-only public-bucket write policy source, and create-only Storage promotion bound to the selected row's original path/version with reference-safe cleanup disclosure. They also cover public Storage URL resolution, per-record public overlay with Project fallback-field preservation, normalized/refetchable Published settings consumption, parent-bound/stale-safe child saves across Projects, Products, Articles, and Stone Library, loading-state interaction locks, the Articles validation lockup, admin route chunks/provider continuity, medium-desktop header clipping, and the first Projects task-workspace redesign with all-editor dirty guards.
-- Deployment and anonymous/no-write route/API smoke are proven. Production login, editor writes, Storage role boundaries, invite/recovery delivery, and the twelve UI golden workflows are not; `docs/agent/admin-handoff-evidence.json` intentionally remains `revalidation_required`.
+- Deployment and anonymous/no-write route/API smoke are proven. A configured local login run now passes nine authenticated routes plus sign-out after replacing stale copy matching with a stable login-form marker; the production rerun, editor writes, Storage role boundaries, valid invite/recovery callbacks, and the twelve UI golden workflows are not proven. `docs/agent/admin-handoff-evidence.json` intentionally remains `revalidation_required`.
 - `npm run agent:admin-handoff-readiness -- --base-url https://urblo.com.au --admin-email info@urblo.com.au --strict` must fail until one deployed SHA has fresh evidence for the applied Storage role-boundary prerequisite and every required golden workflow. A WORKLOG `Pass` string is no longer sufficient.
 
 ## Active Executable Tasks
 Only three tasks should currently be treated as `now` execution work:
 
-- `NOW-ADMIN-RELIABILITY-UX-001`: P0 admin incident. The repaired build is deployed; now provision the separate QA Editor, complete the Storage prerequisite, prove the editor golden workflows, then continue task-oriented UX work. Do not mark done from deployment or source checks alone.
+- `NOW-ADMIN-RELIABILITY-UX-001`: P0 admin incident. The repaired build is deployed and a separate QA Editor is active; now deploy the Harness verifier hardening, correct Auth callback configuration, complete the Storage prerequisite, and prove the editor golden workflows before continuing task-oriented UX work. Do not mark done from deployment, account existence, or source checks alone.
 - `NOW-FORMS-SUPABASE-001`: final Turnstile proof only. Persistence, SMTP2GO delivery, browser-key lead privacy, and admin-visible lead workflow are already verified.
-- `NOW-ADMIN-SETTINGS-CRUD-001`: Published settings public-consumer proof plus a real Settings invite proof after Jay supplies or approves a target editor email and Supabase Auth SMTP/redirect configuration is verified.
+- `NOW-ADMIN-SETTINGS-CRUD-001`: Published settings public-consumer proof plus a real Settings invite proof after the confirmed localhost callback fallback is corrected and Supabase Auth SMTP/redirect configuration is verified.
 
 The historical admin CMS umbrella is not an executable `now` task. Its former handoff conclusion has been superseded by `NOW-ADMIN-RELIABILITY-UX-001`.
 
@@ -118,12 +120,12 @@ Live-write checks require explicit approval and credentials. Do not run tagged l
 ## Next Recommended Action
 For Harness GC repair, finish the queue/doc cleanup, then run the docs/harness checks above. A healthy post-cleanup GC report should have no failures and should leave only the known `docs/WORKLOG.md` size warning.
 
-Required product action: provision a separate QA Editor, then with explicit production-write approval apply/read back the pending Storage role migration and pass the Editor/owner role-boundary verifier. Configure Supabase Auth SMTP/redirect URLs and run all twelve approved production golden workflows against one immutable deployment, including the Projects record URLs/task workspaces/all-editor dirty guards/searchable media. If runtime code changes again, use the resulting newer deployment for the complete evidence set. Only after the strict handoff passes should pagination/preview or another editor-module redesign be selected.
+Required product action: deploy and production-rerun the stable-marker/isolated-build Harness repair, correct and read back the Supabase Auth Site URL plus exact invite/recovery callbacks, then with explicit production-write approval apply/read back the pending Storage role migration and pass the already-provisioned Editor/owner role-boundary verifier. Run all twelve approved production golden workflows against one immutable deployment, including the Projects record URLs/task workspaces/all-editor dirty guards/searchable media. If runtime code changes again, use the resulting newer deployment for the complete evidence set. Only after the strict handoff passes should pagination/preview or another editor-module redesign be selected.
 
 Other decision-gated follow-ups:
 - Choose a generated sitemap/release-manifest or pre-render strategy for CMS-only published slugs; current runtime entity metadata does not add new slugs to the static sitemap or the first HTML response.
 - Configure and prove Turnstile.
-- Complete the separate QA Editor provisioning; a real Settings invite email remains a distinct Auth-delivery proof.
+- Repeat the Settings invite/password workflow after the localhost callback fallback is fixed; the active QA Editor account is only a test prerequisite, not that workflow proof.
 - Have a customer/editor review Draft CMS content and decide what to publish first.
 - Monitor production/GSC after the Phase 2 redirect deployment, then plan the Phase 3 non-brand content pass for Product, Stone Library, Project, and Article pages.
 

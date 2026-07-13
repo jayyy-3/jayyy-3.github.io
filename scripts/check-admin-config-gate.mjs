@@ -1,6 +1,5 @@
 #!/usr/bin/env node
-import { existsSync } from 'node:fs';
-import { mkdir, rm, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { spawn } from 'node:child_process';
 import { cwd, env, exit } from 'node:process';
 import { join } from 'node:path';
@@ -27,7 +26,6 @@ const adminRoutes = [
 
 const forbiddenPrivateText = [
   'Protected operating console',
-  'Admin login',
   'This account is not an active Urblo admin',
   'Content health queue',
   'Recent lead signal',
@@ -52,6 +50,9 @@ try {
   exit(1);
 }
 let serverProcess = null;
+let serverStartupError = null;
+let serverReady = false;
+let expectedEntryAsset = null;
 
 main().catch((error) => {
   console.error(error instanceof Error ? error.message : error);
@@ -61,26 +62,38 @@ main().catch((error) => {
 async function main() {
   const screenshotsDir = args.screenshotsDir ?? defaultScreenshotsDir;
   const baseUrl = args.baseUrl ?? `http://${host}:${port}`;
+  const gateRoot = join(root, '.tmp/admin-config-gate');
+  const isolatedDistDir = join(gateRoot, 'dist');
 
   let result = 1;
 
   try {
+    await rm(gateRoot, { recursive: true, force: true });
+    await mkdir(gateRoot, { recursive: true });
+    await mkdir(join(root, screenshotsDir), { recursive: true });
+
     if (!args.baseUrl) {
-      if (!existsSync(join(root, 'dist'))) {
-        throw new Error('dist/ not found. Run npm run build before npm run agent:admin-config-gate.');
+      const buildResult = await runCommand(
+        'npx',
+        ['vite', 'build', '--outDir', isolatedDistDir, '--emptyOutDir'],
+        {
+          VITE_SUPABASE_URL: '',
+          VITE_SUPABASE_PUBLISHABLE_KEY: '',
+          VITE_SUPABASE_ANON_KEY: '',
+        },
+      );
+      if (buildResult !== 0) {
+        throw new Error(`Admin config gate isolated build failed with exit code ${buildResult}.`);
       }
-      serverProcess = startPreview();
+      expectedEntryAsset = readEntryAsset(await readFile(join(isolatedDistDir, 'index.html'), 'utf8'));
+      serverProcess = startPreview(isolatedDistDir);
       await waitForServer(baseUrl);
     } else {
       await waitForServer(baseUrl);
     }
 
-    await rm(join(root, '.tmp/admin-config-gate'), { recursive: true, force: true });
-    await mkdir(join(root, '.tmp/admin-config-gate'), { recursive: true });
-    await mkdir(join(root, screenshotsDir), { recursive: true });
-
-    const specPath = join(root, '.tmp/admin-config-gate/admin-config-gate.spec.js');
-    const configPath = join(root, '.tmp/admin-config-gate/playwright.config.js');
+    const specPath = join(gateRoot, 'admin-config-gate.spec.js');
+    const configPath = join(gateRoot, 'playwright.config.js');
     await writeFile(specPath, buildSpec(), 'utf8');
     await writeFile(configPath, buildConfig(), 'utf8');
 
@@ -133,11 +146,11 @@ function parseArgs(rawArgs) {
   return parsed;
 }
 
-function startPreview() {
+function startPreview(outDir) {
   console.log(`Starting Vite preview on http://${host}:${port}`);
   const child = spawn(
     'npx',
-    ['vite', 'preview', '--host', host, '--port', port, '--strictPort'],
+    ['vite', 'preview', '--host', host, '--port', port, '--strictPort', '--outDir', outDir],
     {
       cwd: root,
       env,
@@ -145,42 +158,87 @@ function startPreview() {
     },
   );
 
-  child.stdout.on('data', (chunk) => process.stdout.write(chunk));
+  child.stdout.on('data', (chunk) => {
+    const text = chunk.toString();
+    if (text.includes('Local:')) serverReady = true;
+    process.stdout.write(chunk);
+  });
   child.stderr.on('data', (chunk) => process.stderr.write(chunk));
+  child.once('error', (error) => {
+    serverStartupError = error;
+  });
+  child.once('exit', (code, signal) => {
+    if (code !== null && code !== 0) {
+      serverStartupError = new Error(`Vite preview exited with code ${code}.`);
+    } else if (signal && signal !== 'SIGTERM') {
+      serverStartupError = new Error(`Vite preview exited from signal ${signal}.`);
+    }
+  });
 
   return child;
 }
 
 async function stopPreview() {
   if (!serverProcess) return;
-  serverProcess.kill('SIGTERM');
+  const child = serverProcess;
+  child.kill('SIGTERM');
   await new Promise((resolve) => {
-    serverProcess.once('exit', resolve);
+    child.once('exit', resolve);
     setTimeout(resolve, 500);
   });
+  if (child.exitCode === null && child.signalCode === null) {
+    child.kill('SIGKILL');
+    await new Promise((resolve) => {
+      child.once('exit', resolve);
+      setTimeout(resolve, 500);
+    });
+  }
   serverProcess = null;
 }
 
 async function waitForServer(baseUrl) {
   for (let attempt = 0; attempt < 80; attempt += 1) {
+    if (serverStartupError) {
+      throw new Error(`Preview failed to start: ${serverStartupError.message}`);
+    }
     try {
       const response = await fetch(`${baseUrl}/`);
-      if (response.ok) return;
+      if (response.ok && (!serverProcess || serverReady)) {
+        if (!expectedEntryAsset) return;
+        const html = await response.text();
+        if (html.includes(`src="/${expectedEntryAsset}"`)) return;
+      }
     } catch {
-      await sleep(250);
+      // Retry until the preview process reports readiness or the attempt budget expires.
     }
+    await sleep(250);
   }
   throw new Error(`Preview did not respond at ${baseUrl}.`);
 }
 
+function readEntryAsset(html) {
+  const entryMatch = /<script[^>]+src="\/(assets\/index-[^"]+\.js)"/.exec(html);
+  if (!entryMatch) {
+    throw new Error('Isolated admin build did not expose the expected hashed entry script.');
+  }
+  return entryMatch[1];
+}
+
 async function runCommand(command, commandArgs, extraEnv) {
   return new Promise((resolve) => {
+    let settled = false;
+    const finish = (code) => {
+      if (settled) return;
+      settled = true;
+      resolve(code);
+    };
     const child = spawn(command, commandArgs, {
       cwd: root,
       env: { ...env, ...extraEnv },
       stdio: 'inherit',
     });
-    child.on('exit', (code) => resolve(code ?? 1));
+    child.once('error', () => finish(1));
+    child.once('exit', (code) => finish(code ?? 1));
   });
 }
 
@@ -214,6 +272,7 @@ test.describe('admin no-config gate', () => {
       await expect(page.getByText('finish the login connection')).toBeVisible();
       await expect(page.getByText('Admin auth is not connected yet')).toHaveCount(0);
       await expect(page.getByText('browser-safe Supabase key')).toHaveCount(0);
+      await expect(page.getByTestId('admin-login-form')).toHaveCount(0);
 
       for (const text of forbiddenText) {
         await expect(page.getByText(text, { exact: false })).toHaveCount(0);

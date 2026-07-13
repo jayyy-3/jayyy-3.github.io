@@ -138,7 +138,7 @@ async function getStaticArticles(): Promise<ArticleMeta[]> {
 }
 
 async function getPublishedArticles(): Promise<ArticleMeta[]> {
-  const supabase = getPublicContentClient();
+  const supabase = await getPublicContentClient();
   if (!supabase) return [];
 
   const { data, error } = await supabase
@@ -168,7 +168,7 @@ async function getPublishedArticles(): Promise<ArticleMeta[]> {
 }
 
 async function getPublishedArticleBody(slug: string): Promise<ArticleBody | null> {
-  const supabase = getPublicContentClient();
+  const supabase = await getPublicContentClient();
   if (!supabase) return null;
 
   const { data: article, error: articleError } = await supabase
