@@ -138,13 +138,16 @@ function checkHeaders() {
     'X-Content-Type-Options: nosniff',
     'Referrer-Policy: strict-origin-when-cross-origin',
     'Permissions-Policy: camera=(), microphone=(), geolocation=()',
-    '/assets/*',
-    'Cache-Control: public, max-age=31536000, immutable',
-    '/fonts/*',
-    '/media/*',
-    'Cache-Control: public, max-age=86400',
   ]) {
     requireIncludes(headers, header, 'public/_headers');
+  }
+
+  const cacheControlLines = headers
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => /^cache-control\s*:/i.test(line));
+  if (cacheControlLines.length > 0) {
+    failures.push('public/_headers: custom Cache-Control lines must stay absent after the cached-HTML asset incident');
   }
 }
 

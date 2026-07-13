@@ -59,7 +59,7 @@ Last updated: 2026-07-13
   - Preview deployments are required for branch/PR review.
   - Cloudflare environment variables and secrets must not be committed.
   - Function routing must be restricted so only `/api/*` invokes Pages Functions.
-  - Deployed preview route/asset/redirect/API safe-failure smoke is staged through `npm run agent:cloudflare-preview-smoke -- --base-url https://<preview>.pages.dev`. The command requires no secrets, rejects placeholder or non-origin base URLs before any network checks, verifies direct-refresh route shells, recursively discovers deployed JS/CSS assets, checks that the deployed admin bundle still contains the configuration-required/profile-gate contract without browser service-role env access patterns, checks Cloudflare-applied legacy redirects, and verifies `/api/enquiries` and `/api/sample-requests` reject unsafe methods, malformed JSON, and invalid payloads without creating rows.
+  - Deployed preview route/asset/redirect/API safe-failure smoke is staged through `npm run agent:cloudflare-preview-smoke -- --base-url https://<preview>.pages.dev`. The command requires no secrets, rejects placeholder or non-origin base URLs before any network checks, verifies direct-refresh route shells, recursively discovers deployed JS/CSS assets, requires JavaScript/CSS MIME types and rejects an SPA HTML shell even when an asset URL returns HTTP 200, checks that the deployed admin bundle still contains the configuration-required/profile-gate contract without browser service-role env access patterns, checks Cloudflare-applied legacy redirects, and verifies `/api/enquiries` and `/api/sample-requests` reject unsafe methods, malformed JSON, and invalid payloads without creating rows.
 - Current Pages Function source lives under `functions/api/enquiries.js`, `functions/api/sample-requests.js`, and `functions/api/admin/invite-user.js`.
 - Browser-side admin Auth requires `VITE_SUPABASE_ANON_KEY` or `VITE_SUPABASE_PUBLISHABLE_KEY`; `VITE_SUPABASE_URL` may be configured, but defaults to the Urblo project URL if omitted.
 - Browser-side auth-state callbacks must return synchronously. Any `getSession`, `getUser`, or profile query triggered by `onAuthStateChange` runs in a deferred task so it cannot deadlock the Supabase client lock.
@@ -96,7 +96,7 @@ Last updated: 2026-07-13
   - `public/_redirects` provides SPA fallback with `/* /index.html 200`.
   - Cloudflare Pages should continue to use `_redirects`; the GitHub Pages `404.html` fallback is harmless but not required on Cloudflare.
   - `public/_routes.json` scopes future Pages Functions to `/api/*`.
-  - `public/_headers` sets conservative launch headers, long-cache rules for hashed assets/fonts, and one-day cache for unversioned launch media under `/media/*`.
+  - `public/_headers` sets conservative launch security headers only. Project-authored `Cache-Control` overrides for `/assets/*`, `/fonts/*`, and `/media/*` are intentionally absent after an immutable custom-domain cache stored SPA HTML under hashed asset URLs; Cloudflare Pages default cache/revalidation behavior is authoritative.
 - Build script contract: `package.json`
   - `npm run build` => `tsc -b && vite build`
   - `npm run lint` => `eslint .`
@@ -176,7 +176,7 @@ Last updated: 2026-07-13
   - This command does not create a Cloudflare Pages project, set environment variables, validate a preview URL, change custom domains, or touch DNS.
 - Cloudflare preview smoke:
   - `npm run agent:cloudflare-preview-smoke -- --base-url https://<preview>.pages.dev` => `node scripts/check-cloudflare-preview-smoke.mjs`
-  - Verifies deployed direct-refresh shells for public/admin routes, deployed `/assets/*`, recursively discovered route chunks, the deployed admin config-required/profile-gate bundle markers, legacy `_redirects` behavior, and no-write API safe-failure behavior for `/api/enquiries` and `/api/sample-requests`, including malformed JSON.
+  - Verifies deployed direct-refresh shells for public/admin routes, deployed `/assets/*`, recursively discovered route chunks, JS/CSS MIME and body integrity (including cached SPA-shell false 200 denial), absence of the removed year-long immutable asset policy, the deployed admin config-required/profile-gate bundle markers, legacy `_redirects` behavior, and no-write API safe-failure behavior for `/api/enquiries` and `/api/sample-requests`, including malformed JSON. Optional `--reference-url https://<deployment>.urblo.pages.dev` compares root entry/style asset identity so a healthy but stale custom origin cannot pass as the newly promoted deployment.
   - Local Vite preview URLs are supported for route/asset/bundle validation; Cloudflare-only redirect and Function checks are skipped on local hosts.
   - This command does not create a Pages project, set environment variables, submit valid form rows, verify Supabase persistence, change custom domains, or touch DNS.
 - Admin live readiness:

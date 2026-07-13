@@ -10,12 +10,12 @@
     "harnessGc": "docs/agent/harness-gc.md"
   },
   "production": {
-    "cloudflarePages": "verified",
+    "cloudflarePages": "immutable_deployment_verified_custom_domain_cached_asset_repair_pending",
     "productionDomains": "verified",
     "formsPersistence": "verified",
     "smtp2go": "verified",
     "turnstile": "not_configured",
-    "adminAuthBrowserQa": "configured_local_9_routes_and_signout_verified_stable_marker_production_rerun_pending",
+    "adminAuthBrowserQa": "immutable_deployment_9_routes_signout_and_static_fallback_verified_custom_domain_asset_cache_blocked",
     "adminCmsHandoff": "revalidation_required_after_user_report_and_repair_deploy",
     "adminCrudLive": "api_level_verified_ui_golden_workflow_missing",
     "adminStorageProof": "private_upload_historical_verified_private_only_path_bound_promotion_and_public_write_role_hardening_source_verified_live_role_verifier_staged_pending_apply_revalidation",
@@ -34,7 +34,7 @@
     "liveReadiness": "browser_key_owner_and_distinct_editor_credentials_present_service_role_migration_and_write_approval_missing"
   },
   "nextDecisions": [
-    "Deploy and production-rerun the stable-marker admin auth verifier and isolated no-config gate.",
+    "Deploy the MIME/body-aware asset smoke plus new hashes and require both the immutable deployment and production custom origin to pass exact-URL asset integrity.",
     "Correct and read back the Supabase Auth Site URL plus exact invite/recovery redirect allowlist entries after the observed localhost callback fallback; verify Auth SMTP ownership separately.",
     "Apply and live-verify the media_public_bucket_role_hardening migration so Editors cannot insert or update public Storage objects directly.",
     "Browser-test the deployed Projects record route, task workspaces, all-editor dirty guards, child-save isolation, blocker jumps, and searchable media; then decide whether pagination/preview or the next module comes first.",
@@ -78,7 +78,7 @@
     "gitDiffCheck": "2026-07-13",
     "smoke": "2026-07-13",
     "typecheck": "2026-07-13",
-    "cloudflarePreviewSmokeProduction": "2026-07-13",
+    "cloudflarePreviewSmokeProduction": "invalidated_2026-07-13_cached_asset_incident_repair_pending",
     "adminAuthBrowserProduction": "2026-06-05",
     "adminHandoffReadinessStrictExpectedFailure": "2026-07-13",
     "adminMediaRoleBoundaryPlanOnly": "2026-07-13",

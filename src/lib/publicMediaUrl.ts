@@ -24,7 +24,8 @@ export function toSafePublicMediaSourceUrl(value: string | null | undefined): st
 
   try {
     const url = new URL(normalized);
-    return url.protocol === 'https:' || url.protocol === 'http:' ? url.toString() : undefined;
+    const isPublicWebUrl = url.protocol === 'http:' || url.protocol === 'https:';
+    return isPublicWebUrl ? url.toString() : undefined;
   } catch {
     return undefined;
   }
