@@ -2,6 +2,34 @@
 
 Last updated: 2026-07-13
 
+## Entry - 2026-07-13 (PR #6 Production Recovery And Evidence-Bound Cache Gate)
+
+### Deployment Result
+- Cache-repair PR `#6` merged as `a2a7ae5`; Cloudflare production deployment `c7a910df-6dd3-440b-8971-a6120353ed19` completed at immutable origin `https://c7a910df.urblo.pages.dev`.
+- The immutable deployment passes the MIME/body-aware asset smoke across 59 recursively discovered JavaScript/CSS assets. Both `https://urblo.com.au` and `https://www.urblo.com.au` are bound to that exact deployment by root asset identity plus full-graph byte-for-byte and MIME comparison.
+- Apex production passes with four residual response-header warnings on `Home-esKw3164.css`, `publicEntitySeo-CgpviqMQ.js`, `projectFactValue-CROx5WB9.js`, and `supabase-KVA2hGew.js`. Each warned response has exact byte and MIME equality with the immutable deployment; `www` passes without warnings. These stale headers are operational cleanup, not evidence of stale or malformed current code.
+- The Cloudflare dashboard session available to this run was signed out and no Cloudflare API token was present, so no cache purge or account configuration mutation was attempted.
+
+### Harness Closure
+- `scripts/check-cloudflare-preview-smoke.mjs` now rejects redirects on every direct SPA route, requires every route to reference the same entry assets as `/`, rejects absolute/protocol-relative/query/fragment/namespace-escaping asset references, then compares every recursively discovered same-origin query-free production JavaScript/CSS asset against an independent immutable deployment when `--reference-url` is supplied. Redirect-to-home, route-specific stale shells, URL substitution, status, empty bodies, SPA HTML fallbacks, MIME, bytes, graph budget, bundle markers, browser-secret boundaries, legacy redirects, and Function safe failures remain hard gates.
+- A residual year-long cache header remains a hard failure without `--reference-url`. With a reference it becomes a warning only after exact bytes and MIME match; source readiness still hard-fails any project-authored `Cache-Control:` line in `public/_headers`.
+- Production apex, `www`, and the moving `urblo.pages.dev` alias are matched after FQDN trailing-dot normalization and require `--reference-url`; it accepts only an HTTPS `https://<8-hex-deployment>.urblo.pages.dev` origin and must differ from `--base-url`. Negative checks proved a missing production reference, trailing-dot bypass, production-domain self-reference, immutable self-comparison, route redirect, route-specific stale shell, absolute asset URL, and query-bearing asset URL all fail, while the previous PR `#5` deployment fails root asset identity.
+
+### Production Admin Verification
+- `npm run agent:admin-auth-browser -- --allow-login --strict --base-url https://urblo.com.au`: pass. The browser gate proved three blocked-Supabase public static fallbacks, all nine authenticated admin routes, Sign out, and a protected-route revisit.
+- This is no-write production auth/route evidence. It does not prove editor draft save/refresh, Storage promotion, publish/public readback, archive, Settings public readback, invite/password setup, password recovery, responsive workflow completion, Dashboard use, or editor-guide usability.
+- No Supabase content row, Storage object, content status, invite, recovery email, Cloudflare setting, or DNS record was changed during this production recovery/readback.
+
+### Verification
+- Docker remained unavailable, so the documented host-equivalent runtime gate passed in order: `npm run build`, `npm run lint`, `npx tsc -b`, and `npm run agent:smoke`.
+- `npm run agent:admin-cms-predeploy`, `npm run agent:admin-config-gate` (11/11 routes), `npm run agent:cloudflare-readiness`, `npm run agent:check`, JSON parsing, and `git diff --check`: pass.
+- `npm run agent:harness-gc` and `npm run agent:harness-gc:review`: zero failures; the only warning is the intentional historical WORKLOG size threshold.
+- Bound production smoke: apex and `www` pass against `https://c7a910df.urblo.pages.dev`; the previous immutable deployment and missing-reference negative runs fail for the intended reasons.
+
+### Remaining Boundary
+- Production `/admin` is reachable and authenticates on the repair deployment; the prior cached-asset release blocker is superseded.
+- CMS handoff remains `revalidation_required` until the confirmed localhost Auth callback configuration is corrected, the pending Media Storage migration is applied/read back and its Editor/owner role proof passes with explicit write approval, and all twelve UI golden workflows are recorded against one deployment.
+
 ## Entry - 2026-07-13 (PR #5 Production Asset Cache Incident And Harness Repair)
 
 ### Deployment And Discovery

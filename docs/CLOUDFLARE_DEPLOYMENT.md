@@ -3,11 +3,11 @@
 Last updated: 2026-07-13
 
 ## Purpose
-This runbook captures the repo-side Cloudflare Pages deployment contract and the manual account steps required before production cutover.
+This runbook captures the repo-side Cloudflare Pages deployment contract and the manual account steps required to operate and verify production safely.
 
-It records the current Cloudflare Pages project and the account-level steps that remain before production cutover.
+It records the current Cloudflare Pages project, production verification state, and remaining account-level work.
 
-Current account checkpoint: `urblo.com.au` is readable in Hunter's Cloudflare account (`077afae2c6f4e77badadf21e49e58eb7`), the zone ID is `544d6bf99e48f4b36d7abb24f053ab17`, and the `urblo` Pages project exists with default domain `urblo.pages.dev`. GitHub source is connected to `jayyy-3/jayyy-3.github.io`. Admin repair PR `#3` is verified at runtime deployment `6d193af5-cf8e-4541-a1e2-c73164d1a290` / merge `46d46b4`; Harness PR `#5` deployed as `4aef2ba1-3e00-4e43-b5d6-1ac962fbf02d` / merge `cb0ec9a`. Its immutable URL passes authenticated admin and static-fallback fault injection, but the production custom domain served cached SPA HTML with HTTP 200 for three exact hashed JS/CSS URLs. The status-only smoke had falsely accepted those responses. MIME/body-aware smoke and new asset hashes are prepared; production custom-domain health remains open until that newer deployment passes. Contact/Sample Request persistence and SMTP2GO notification delivery remain verified. SMTP2GO CNAME records for return-path, DKIM, and tracking are DNS-only; Google MX/SPF/TXT records and `qa.urblo.com.au` were not changed.
+Current account checkpoint: `urblo.com.au` is readable in Hunter's Cloudflare account (`077afae2c6f4e77badadf21e49e58eb7`), the zone ID is `544d6bf99e48f4b36d7abb24f053ab17`, and the `urblo` Pages project exists with default domain `urblo.pages.dev`. GitHub source is connected to `jayyy-3/jayyy-3.github.io`. Admin repair PR `#3` deployed as `6d193af5-cf8e-4541-a1e2-c73164d1a290` / merge `46d46b4`; Harness PR `#5` then exposed cached SPA HTML under three hashed asset URLs that the former status-only smoke had accepted. Cache repair PR `#6` is now deployed as `c7a910df-6dd3-440b-8971-a6120353ed19` / merge `a2a7ae5`. Its immutable URL plus `urblo.com.au` and `www.urblo.com.au` pass the deployment-bound MIME/body smoke, and production admin auth passes three blocked-Supabase public fallbacks plus all nine authenticated routes. Four unchanged apex assets still expose the removed long-lived cache header, but their bytes and MIME match the immutable deployment exactly; the latest `www` readback was warning-free. Contact/Sample Request persistence and SMTP2GO notification delivery remain verified. SMTP2GO CNAME records for return-path, DKIM, and tracking are DNS-only; Google MX/SPF/TXT records and `qa.urblo.com.au` were not changed.
 
 Repo-side readiness is checked by `npm run agent:cloudflare-readiness`. This command verifies the build contract, SPA fallback, Pages Functions routing scope, headers, API handler files, environment placeholders, and this runbook without touching Cloudflare account state.
 
@@ -42,7 +42,7 @@ Before running live form/admin/preview checks, `npm run agent:live-readiness` ca
 - `Referrer-Policy: strict-origin-when-cross-origin`
 - `Permissions-Policy: camera=(), microphone=(), geolocation=()`
 
-Do not add project-authored `Cache-Control` rules for `/assets/*`, `/fonts/*`, or `/media/*`. Cloudflare Pages already provides asset caching and revalidation; after a deployment, the former one-year immutable asset rule was observed serving a cached SPA fallback HTML response under three hashed JS/CSS URLs on the custom domain. The exact cache-population sequence was not proven. New asset hashes recover the active release, while the source readiness gate keeps those custom cache overrides removed.
+Do not add project-authored `Cache-Control` rules for `/assets/*`, `/fonts/*`, or `/media/*`. Cloudflare Pages already provides asset caching and revalidation; after a deployment, the former one-year immutable asset rule was observed serving a cached SPA fallback HTML response under three hashed JS/CSS URLs on the custom domain. The exact cache-population sequence was not proven. PR `#6` new hashes recovered the active release, while the source readiness gate keeps those custom cache overrides removed. Unchanged apex assets may retain the retired response header until Cloudflare revalidates or an approved purge clears it; the deployed smoke reports that state as a warning only after exact bytes/MIME comparison with the immutable deployment.
 
 No Content Security Policy is added yet because current content still depends on remote legacy media, mailto links, video sources, and article content. CSP should be added after media migration.
 
@@ -149,13 +149,14 @@ Legacy URLs such as `/products/primeBlock` and `/articles/Modular-Mastery-How-Pr
 
 Run the deployed preview smoke runner:
 - `npm run agent:cloudflare-preview-smoke -- --base-url https://<preview>.pages.dev`
-- For production promotion/readback, bind the custom origin to the exact immutable deployment: `npm run agent:cloudflare-preview-smoke -- --base-url https://urblo.com.au --reference-url https://<deployment-id-prefix>.urblo.pages.dev`.
+- For production promotion/readback, bind the custom origin to the exact immutable deployment: `npm run agent:cloudflare-preview-smoke -- --base-url https://urblo.com.au --reference-url https://<8-hex-deployment>.urblo.pages.dev`.
+- Current verified production command: `npm run agent:cloudflare-preview-smoke -- --base-url https://urblo.com.au --reference-url https://c7a910df.urblo.pages.dev`; repeat with `https://www.urblo.com.au` as the base URL for the second custom domain.
 
-The `--base-url` value must be a real `http`/`https` origin with no path, query, or hash. Copied placeholders are rejected before any route, asset, redirect, or Function request runs.
+The `--base-url` value must be a real `http`/`https` origin with no path, query, or hash. Copied placeholders are rejected before any route, asset, redirect, or Function request runs. Apex, `www`, and the moving `urblo.pages.dev` production alias are recognized after removing FQDN trailing dots and require `--reference-url`; it must be a different HTTPS origin matching the exact immutable `https://<8-hex-deployment>.urblo.pages.dev` alias. Production/default/branch aliases and self-comparison are rejected before network verification.
 
 This runner does not require secrets. It checks:
-- direct refresh for public routes, unknown-route fallback, and `/admin/*` route shells;
-- deployed `/assets/*` JavaScript/CSS availability, including recursively discovered route chunks referenced by deployed bundles, with real JavaScript/CSS MIME types, explicit rejection of an SPA HTML shell returned with HTTP 200, and denial of the removed year-long immutable custom cache policy;
+- non-redirecting direct refresh for public routes, unknown-route fallback, and `/admin/*` route shells, with every SPA route required to reference the same entry assets as `/` so a redirect-to-home or route-specific stale shell cannot escape the asset graph;
+- same-origin, query-free deployed `/assets/*` JavaScript/CSS availability, including recursively discovered route chunks referenced by deployed bundles, with real JavaScript/CSS MIME types and explicit rejection of an SPA HTML shell returned with HTTP 200. Absolute, protocol-relative, query-bearing, fragment-bearing, and namespace-escaping asset references fail rather than being normalized to another URL. With `--reference-url`, every discovered JS/CSS response must match the immutable deployment byte-for-byte and by MIME. Source readiness forbids the removed year-long immutable custom cache policy; when a deployed response still exposes that header, the smoke emits a warning only after the immutable comparison, otherwise it fails;
 - deployed admin bundle markers for the configuration-required state and `admin_profiles` profile gate, while rejecting browser-side service-role env access patterns;
 - legacy product/article and GSC-recovered SEO 301 redirects from `_redirects`;
 - `/api/enquiries` and `/api/sample-requests` GET/OPTIONS/malformed JSON/invalid POST safe-failure behavior, including CORS preflight headers. Malformed and invalid POST checks are deliberately no-write and do not replace the credential-gated live form persistence command.
@@ -198,7 +199,7 @@ Current custom-domain state:
 - Apex website DNS record is now `CNAME urblo.com.au -> urblo.pages.dev`, proxied, TTL auto.
 - `www` website DNS record is now `CNAME www.urblo.com.au -> urblo.pages.dev`, proxied, TTL auto.
 - Google Workspace MX records, apex TXT/SPF/verification records, NS records, and `qa.urblo.com.au` were not changed.
-- The former status-only smoke passes for `urblo.com.au` and `www.urblo.com.au` are invalidated by the 2026-07-13 cached-HTML asset incident. Both origins require a fresh MIME-aware pass bound to the repair deployment's immutable URL before custom-domain health is restored.
+- The former status-only smoke passes were invalidated by the 2026-07-13 cached-HTML asset incident. PR `#6` deployment `c7a910df-6dd3-440b-8971-a6120353ed19` now passes fresh MIME/body-aware smoke on both `urblo.com.au` and `www.urblo.com.au`, bound to `https://c7a910df.urblo.pages.dev`. The apex run reports four stale long-lived cache-header warnings after exact immutable bytes/MIME comparison; the latest `www` run reports none.
 - SMTP2GO DNS-only CNAME records are present:
   - `em905485.urblo.com.au -> return.smtp2go.net`, record id `999d935aa8b2323d0d1b613aa5bcc276`.
   - `s905485._domainkey.urblo.com.au -> dkim.smtp2go.net`, record id `15b74562f23fb255774c77ad46c7d473`.
@@ -252,8 +253,7 @@ For active-admin browser QA after the first admin profile is configured, run:
 - `npm run agent:admin-auth-browser -- --allow-login --expect-unauthorized --strict` after a valid unprofiled Auth test user is available; this also probes all launch-critical admin routes and keeps them unauthorized without private module content
 
 Active-admin browser QA has been run for the current production path:
-- `npm run agent:admin-auth-browser -- --allow-login --strict --base-url https://urblo.com.au` passed on 2026-06-04 for `info@urblo.com.au`, covering all 9 authenticated admin route shells plus Sign out with no content writes.
-- A 2026-07-13 configured local current-source run passes all 9 authenticated routes, Sign out, and a protected-route revisit. Production must be rerun after the stable-marker/isolated-build verifier follow-up is deployed.
+- `npm run agent:admin-auth-browser -- --allow-login --strict --base-url https://urblo.com.au` passed on 2026-07-13 against the PR `#6` production runtime, covering three blocked-Supabase static fallbacks, all 9 authenticated admin route shells, Sign out, and protected-route revisit with no content or Storage writes.
 
 After a real owner/admin browser session is available and tagged QA writes are approved, run:
 - `npm run agent:admin-crud-live -- --allow-writes`
@@ -280,13 +280,13 @@ Current project:
 - Build command: `npm run build`
 - Output directory: `dist`
 - Root directory: `/`
-- Latest verified admin-repair runtime deployment: `6d193af5-cf8e-4541-a1e2-c73164d1a290`
-- Latest verified admin-repair runtime URL: `https://6d193af5.urblo.pages.dev`
+- Latest verified admin-repair runtime deployment: `c7a910df-6dd3-440b-8971-a6120353ed19`
+- Latest verified admin-repair runtime URL: `https://c7a910df.urblo.pages.dev`
 - Production URL: `https://urblo.pages.dev`
 - Deployment status: `success`
-- Runtime deployment commit: `46d46b4`
+- Runtime deployment commit: `a2a7ae5`
 
-The next account-level action is deciding whether Turnstile proof is required before launch; first Supabase Auth user/profile bootstrap, active-admin browser QA, project media block migration, admin CRUD/live lead workflow QA, Storage upload proof, draft content import, and public published-read cutover are complete.
+The next account-level action is correcting and reading back the Supabase Auth Site URL plus exact invite/recovery Redirect URL entries. After that, the pending Media Storage role migration and approved Editor/owner role proof must pass before all twelve production editor golden workflows are recorded against one deployment. Turnstile remains a separate forms decision.
 
 Still pending after preview validation:
 - Cloudflare Pages production already has `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`; preview environment variables remain empty;

@@ -21,7 +21,7 @@
     "authenticatedSignIn": {
       "status": "stale",
       "evidenceRefs": [],
-      "note": "The June production route-shell login proof predates the current auth reliability changes. A configured local current-source run now passes all nine authenticated routes, Sign out, and a protected-route revisit, but local evidence does not close this production workflow."
+      "note": "A 2026-07-13 no-write production browser run on the PR #6 repair deployment passed all nine authenticated routes, Sign out, protected-route revisit, and three blocked-Supabase static fallbacks. It remains unpromoted here until the complete golden-workflow evidence section is tied to one final deployment SHA and immutable URL."
     },
     "draftSaveRefresh": {
       "status": "missing",
@@ -85,6 +85,7 @@
     "Every production prerequisite and workflow reference must appear in the matching Pass row inside one Admin CMS Golden Workflow Evidence WORKLOG section tied to the same deployment SHA and immutable URL.",
     "Repair PR #3 is deployed at merge commit 46d46b4 and immutable URL https://6d193af5.urblo.pages.dev, with branch-preview and production no-write smoke passing. These deployment facts do not populate deploymentSha/deploymentUrl until one complete golden-workflow evidence set is verified against the final target deployment.",
     "The re-audit and repair deployment themselves made no production writes. Afterward, Jay approved QA account provisioning: one inaccessible unconfirmed test invite was removed, and one separate active QA Editor plus profile/audit history was created. No content rows, Storage objects, content statuses, or recovery emails were changed.",
-    "The delivered QA invite exposed a callback fallback to http://localhost:3000. Account existence and direct Auth activation are prerequisites only; they are not golden-workflow evidence."
+    "The delivered QA invite exposed a callback fallback to http://localhost:3000. Account existence and direct Auth activation are prerequisites only; they are not golden-workflow evidence.",
+    "PR #6 is deployed as merge a2a7ae5 at https://c7a910df.urblo.pages.dev; production asset integrity and no-write authentication pass. Those checks do not populate the final deployment fields or replace the missing Storage prerequisite and UI mutation workflows."
   ]
 }
