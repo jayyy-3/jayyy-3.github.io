@@ -781,10 +781,11 @@
         "2026-06-04: `/admin/settings` now uses Website settings, CMS manager, Website owner, Global contact and search defaults, Search defaults, CMS team, People and access, Active access, and CMS-access validation language; admin CRUD coverage rejects older Owner/Admin, Supabase Auth, admin-profile-row, owner-role, default SEO, and default-row visible wording.",
         "2026-06-04: `/admin/settings` now shows Site settings actions and CMS access handoff actions, keeping Save settings beside Draft/Published/Archived website visibility meaning and explaining when to use Invite and grant access versus Grant existing login; admin CRUD coverage guards the action language.",
         "2026-06-05: `/admin/settings` now shows Website settings status before the shared status rules, distinguishing Live settings, Draft settings, and Hidden settings so CMS managers know whether global contact/footer/search defaults are public-ready.",
-        "Live settings/profile API-level save verification is covered by the approved admin CRUD live runs; public settings UI readback, Auth email delivery, invite/password setup, and recovery remain separately gated by production configuration, a target editor email, and Jay approval.",
+        "Live settings/profile API-level save verification is covered by the approved admin CRUD live runs; public settings UI readback, complete invite/password setup, and recovery remain separately gated by production configuration and Jay approval.",
         "2026-05-28: Admin CRUD coverage verifier now checks settings/admin profile table references, owner/self-lockout guardrail copy, mutation paths, and site_settings/admin_profile audit actions.",
         "2026-05-28: Admin CRUD live verifier now includes a tagged site_settings create/update/publish/archive path through owner/admin RLS, but it does not create or mutate first-admin profile rows.",
-        "2026-07-13: Kept as a `now` task for Published settings public readback plus real Auth SMTP invite/password setup and recovery proof with exact Redirect URL allowlist entries and an approved target editor. This task owns production evidence creation for those Settings/Auth workflows; `NOW-ADMIN-RELIABILITY-UX-001` references the same evidence only as part of the aggregate CMS handoff. Settings source, status UX, site_settings save path, CMS access UI, RLS, and tagged API-level QA are otherwise complete."
+        "2026-07-13: Kept as a `now` task for Published settings public readback plus real Auth SMTP invite/password setup and recovery proof with exact Redirect URL allowlist entries and an approved target editor. This task owns production evidence creation for those Settings/Auth workflows; `NOW-ADMIN-RELIABILITY-UX-001` references the same evidence only as part of the aggregate CMS handoff. Settings source, status UX, site_settings save path, CMS access UI, RLS, and tagged API-level QA are otherwise complete.",
+        "2026-07-13: Jay approved a QA Editor recipient and the invite email arrived, but its callback fell back to `http://localhost:3000`. The account was activated directly through Auth only to unblock role testing. Password login/profile RLS readiness therefore passes, while the real Settings invite/password workflow remains missing until the Auth Site URL and exact Redirect URL configuration are corrected and the UI flow is repeated."
       ],
       "acceptance": [
         "CMS managers can inspect and save the default site settings through /admin/settings.",
@@ -2242,6 +2243,8 @@
         "scripts/admin-cms-predeploy.sh",
         "scripts/agent-init.sh",
         "scripts/agent-smoke.sh",
+        "scripts/check-admin-auth-browser.mjs",
+        "scripts/check-admin-config-gate.mjs",
         "scripts/check-admin-crud-coverage.mjs",
         "scripts/check-admin-handoff-readiness.mjs",
         "scripts/check-admin-media-role-boundary-live.mjs",
@@ -2260,6 +2263,7 @@
         "src/lib/adminAuth.tsx",
         "src/lib/adminAuthState.ts",
         "src/lib/projectFactValue.ts",
+        "src/lib/publicContentClient.ts",
         "src/lib/publicContentLink.ts",
         "src/lib/publicEntitySeo.ts",
         "src/lib/publicMediaUrl.ts",
@@ -2291,6 +2295,7 @@
         "src/types/article.ts",
         "src/types/product.ts",
         "src/types/stone-library.ts",
+        "vite.config.ts",
         "supabase/migrations/20260713065628_media_public_bucket_role_hardening.sql",
         "supabase/migrations/README.md"
       ],
@@ -2311,6 +2316,8 @@
         "2026-07-13: Added a default no-network/no-write Media role-boundary verifier plus a mandatory structured production prerequisite. Approved live mode uses distinct Editor and owner/admin browser-key sessions to prove Editor private insert/update success, Editor public insert/update denial, owner/admin public insert/update success, and tagged-object cleanup.",
         "2026-07-13: Closed content-editor loading races by making Articles, Projects, Products, and Stone Library inert while the selected parent bundle is incomplete, clearing stale child state before a new selection, and clearing loading only for the current selection generation. Articles validation now occurs before the save lock, and unexpected save failures always release it.",
         "2026-07-13: PR #3 deployed the repair through Cloudflare Pages. Branch-preview and production no-write smoke passed; production deployment `6d193af5-cf8e-4541-a1e2-c73164d1a290` corresponds to merge commit `46d46b4` and immutable URL `https://6d193af5.urblo.pages.dev`.",
+        "2026-07-13: Jay approved separate QA Editor provisioning. Password sign-in and own-profile Editor RLS readback pass with ignored local credentials. The delivered invite callback fell back to `http://localhost:3000`, so direct Auth activation was used only to prepare the test account; the real invite/password workflow remains missing until Auth Site URL/Redirect configuration is corrected.",
+        "2026-07-13: The auth-browser verifier no longer matches obsolete `Admin login` display copy and instead uses a stable login-form marker. It builds an isolated configured bundle from current source, enforces a 500000-byte entry budget and no eager Supabase module preload, verifies the served entry hash, aborts the Supabase chunk to prove Product/Project/Article static fallback, and reopens a protected route after Sign out. The no-config gate separately builds an isolated temporary bundle with Supabase browser variables explicitly cleared and verifies its served entry hash. Both reject early preview exit and force stalled preview cleanup. Public Supabase is loaded on demand into a dedicated vendor chunk; dynamic SDK/client initialization failure returns to static fallback and permits a later retry.",
         "Production remains revalidation_required until the fixed deployment receives approved end-to-end browser evidence. `NOW-ADMIN-SETTINGS-CRUD-001` owns creation of the Settings public-readback and Auth email evidence; this P0 task aggregates those references into the full twelve-workflow handoff and must not close them independently. Do not turn this task done from source gates or deployment smoke alone."
       ],
       "acceptance": [

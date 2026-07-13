@@ -97,7 +97,7 @@ export function createRefreshablePublicSiteSettingsLoader(
 export const loadPublicSiteSettings = createRefreshablePublicSiteSettingsLoader(fetchPublicSiteSettings);
 
 async function fetchPublicSiteSettings(): Promise<PublicSiteSettings> {
-  const client = getPublicContentClient();
+  const client = await getPublicContentClient();
   if (!client) {
     return staticPublicSiteSettings;
   }

@@ -1,10 +1,11 @@
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 const DEFAULT_SUPABASE_URL = 'https://npkidywzwddbnfrnxlmo.supabase.co';
 
 let publicContentClient: SupabaseClient | null | undefined;
+let publicContentClientPromise: Promise<SupabaseClient | null> | null = null;
 
-export function getPublicContentClient(): SupabaseClient | null {
+export async function getPublicContentClient(): Promise<SupabaseClient | null> {
   if (publicContentClient !== undefined) {
     return publicContentClient;
   }
@@ -18,16 +19,27 @@ export function getPublicContentClient(): SupabaseClient | null {
     return publicContentClient;
   }
 
-  publicContentClient = createClient(
-    import.meta.env.VITE_SUPABASE_URL || DEFAULT_SUPABASE_URL,
-    key,
-    {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-    },
-  );
+  if (!publicContentClientPromise) {
+    publicContentClientPromise = import('@supabase/supabase-js')
+      .then(({ createClient }) => {
+        publicContentClient = createClient(
+          import.meta.env.VITE_SUPABASE_URL || DEFAULT_SUPABASE_URL,
+          key,
+          {
+            auth: {
+              autoRefreshToken: false,
+              persistSession: false,
+            },
+          },
+        );
 
-  return publicContentClient;
+        return publicContentClient;
+      })
+      .catch(() => {
+        publicContentClientPromise = null;
+        return null;
+      });
+  }
+
+  return publicContentClientPromise;
 }

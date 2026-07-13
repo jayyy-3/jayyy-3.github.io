@@ -7,7 +7,7 @@ This runbook captures the repo-side Cloudflare Pages deployment contract and the
 
 It records the current Cloudflare Pages project and the account-level steps that remain before production cutover.
 
-Current account checkpoint: `urblo.com.au` is readable in Hunter's Cloudflare account (`077afae2c6f4e77badadf21e49e58eb7`), the zone ID is `544d6bf99e48f4b36d7abb24f053ab17`, and the `urblo` Pages project exists with default domain `urblo.pages.dev`. GitHub source is connected to `jayyy-3/jayyy-3.github.io`, the latest production redeploy after SMTP2GO source deployment (`0439e4f9-73d4-44d1-ac5a-17b7cf363dfa`) is successful, deployed preview smoke passes, and deployed Contact/Sample Request persistence plus SMTP2GO notification delivery are verified. Production custom domains `urblo.com.au` and `www.urblo.com.au` are attached and active, and both website DNS records now point to `urblo.pages.dev`; `npm run agent:cloudflare-preview-smoke` passes on both custom domains. SMTP2GO CNAME records for return-path, DKIM, and tracking are added as DNS-only records. Google MX/SPF/TXT records and `qa.urblo.com.au` were not changed.
+Current account checkpoint: `urblo.com.au` is readable in Hunter's Cloudflare account (`077afae2c6f4e77badadf21e49e58eb7`), the zone ID is `544d6bf99e48f4b36d7abb24f053ab17`, and the `urblo` Pages project exists with default domain `urblo.pages.dev`. GitHub source is connected to `jayyy-3/jayyy-3.github.io`. Admin repair PR `#3` is verified at runtime deployment `6d193af5-cf8e-4541-a1e2-c73164d1a290` / merge `46d46b4`; docs reconciliation PR `#4` deployed successfully as `4505cc81-a37e-4274-9b60-7c71893b2c01` / merge `daf2c85` without further runtime changes. Production custom domains `urblo.com.au` and `www.urblo.com.au` are attached and active, both website DNS records point to `urblo.pages.dev`, and no-write deployed smoke passes. Contact/Sample Request persistence and SMTP2GO notification delivery remain verified. SMTP2GO CNAME records for return-path, DKIM, and tracking are DNS-only; Google MX/SPF/TXT records and `qa.urblo.com.au` were not changed.
 
 Repo-side readiness is checked by `npm run agent:cloudflare-readiness`. This command verifies the build contract, SPA fallback, Pages Functions routing scope, headers, API handler files, environment placeholders, and this runbook without touching Cloudflare account state.
 
@@ -252,6 +252,7 @@ For active-admin browser QA after the first admin profile is configured, run:
 
 Active-admin browser QA has been run for the current production path:
 - `npm run agent:admin-auth-browser -- --allow-login --strict --base-url https://urblo.com.au` passed on 2026-06-04 for `info@urblo.com.au`, covering all 9 authenticated admin route shells plus Sign out with no content writes.
+- A 2026-07-13 configured local current-source run passes all 9 authenticated routes, Sign out, and a protected-route revisit. Production must be rerun after the stable-marker/isolated-build verifier follow-up is deployed.
 
 After a real owner/admin browser session is available and tagged QA writes are approved, run:
 - `npm run agent:admin-crud-live -- --allow-writes`
@@ -278,11 +279,11 @@ Current project:
 - Build command: `npm run build`
 - Output directory: `dist`
 - Root directory: `/`
-- Latest verified CMS code deployment: `bc830b5f-4c98-46ab-8962-586478ff9259`
-- Latest verified CMS code deployment URL: `https://bc830b5f.urblo.pages.dev`
+- Latest verified admin-repair runtime deployment: `6d193af5-cf8e-4541-a1e2-c73164d1a290`
+- Latest verified admin-repair runtime URL: `https://6d193af5.urblo.pages.dev`
 - Production URL: `https://urblo.pages.dev`
 - Deployment status: `success`
-- Deployment commit: `7a318ab`
+- Runtime deployment commit: `46d46b4`
 
 The next account-level action is deciding whether Turnstile proof is required before launch; first Supabase Auth user/profile bootstrap, active-admin browser QA, project media block migration, admin CRUD/live lead workflow QA, Storage upload proof, draft content import, and public published-read cutover are complete.
 

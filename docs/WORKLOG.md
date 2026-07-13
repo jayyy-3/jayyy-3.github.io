@@ -2,6 +2,45 @@
 
 Last updated: 2026-07-13
 
+## Entry - 2026-07-13 (QA Editor Provisioning And Harness Reality Repair)
+
+### Scope And Approved Account Change
+- Jay approved creating a separate production QA Editor and keeping its credentials in the ignored local `.env`.
+- The local browser-safe Supabase key plus owner and Editor credentials are now present without being printed or committed; `.env` remains mode `0600`.
+- The first test invite used an address unavailable in the connected mailbox. Its newly created, still-unconfirmed Auth user was removed with an ID/email/age/confirmation-constrained cleanup; the historical invite audit event remains.
+- A final approved QA Editor invite was created through the protected production Function. The email arrived, but its callback fell back to `http://localhost:3000` even though the Function supplied the production origin. This confirms an incorrect or incomplete Supabase Auth Site URL/Redirect URL configuration.
+- The one-time invite was consumed directly through the Auth API only to activate the QA account for role testing. Password sign-in and the account's own active `editor` profile RLS readback passed. This direct activation does not satisfy the Settings invite/password golden workflow.
+
+### Harness Problems Confirmed
+- `scripts/check-admin-auth-browser.mjs` still matched the retired display copy `Admin login`, so the repaired login page produced a false failure before authentication.
+- `scripts/check-admin-config-gate.mjs` reused the normal `dist/`; after a real browser key was added locally, the supposed no-config check exercised a configured bundle and failed for the wrong reason.
+- The auth-browser check also reused any existing `dist/`, so an old bundle could pass while current source was broken. Its Sign out assertion stopped at the returned login page and did not reopen a protected route to prove the session was actually gone.
+- The env-less build had hidden a configured-build regression: with the Supabase browser key present, the main entry had grown to approximately 627.72 kB. Merely splitting a vendor file would remove the per-file warning without proving that Supabase left the eager entry path.
+
+### Repairs
+- Added a stable `admin-login-form` test marker and removed display-copy matching from login/signed-out state assertions.
+- The no-config gate now builds a dedicated temporary bundle with all browser-safe Supabase variables explicitly cleared. It no longer depends on the normal configured `dist/`.
+- The auth-browser gate now builds current source into its own configured temporary bundle, enforces a maximum 500,000-byte entry file, rejects eager Supabase module preload, aborts the dynamic Supabase chunk and proves Products/Projects/Articles still render static fallback, signs in, verifies all nine authenticated routes, signs out, then reopens `/admin/media` and verifies the protected redirect again.
+- Both browser gates now require the current preview process to report readiness, verify the served HTML references the entry hash from that gate's isolated build, treat early process exit as failure, and force cleanup if graceful preview shutdown stalls. This prevents an old service already occupying the port from producing a false pass.
+- The public Supabase client now loads on demand. Vite keeps it in a dedicated vendor chunk, but the configured `index.html` does not module-preload that chunk; this improves the dependency boundary instead of only suppressing a size warning.
+- A failed dynamic SDK chunk load or client construction now resolves as no public client, resets the in-flight initializer for a later retry, and preserves the existing static-content fallback instead of rejecting Product, Project, or Article page loads. Public settings still requests the chunk shortly after the first public render, so this change removes it from the eager entry/preload path; it does not claim the homepage never downloads Supabase.
+
+### Verification Results
+- `npm run build`: pass. Configured output entry `416.89 kB`; Supabase vendor `211.64 kB`; no `>500kB` warning; Supabase is absent from `dist/index.html` preload links. The existing Browserslist staleness notice remains.
+- `npm run agent:admin-auth-browser -- --allow-login --strict`: pass against an isolated configured current-source build for three blocked-Supabase static fallback routes, all 9 authenticated routes, Sign out, and the protected-route revisit. No content rows, Storage objects, or audit events were created by this browser check.
+- `npm run agent:admin-config-gate`: pass for 11/11 routes against the isolated no-config build.
+- Port-conflict negative check: pass. With a dummy service occupying the strict preview port, `agent:admin-config-gate` failed instead of accepting the old service, confirming the early-exit/readiness/entry-hash guard prevents that false pass.
+- `npm run agent:public-supabase-readiness`: pass after the public client became asynchronous/on-demand.
+- `npm run agent:public-content-overlay`: pass.
+- `npm run agent:admin-media-role-boundary-live`: the earlier plan-only run now finds distinct owner/Editor/browser-key inputs; it made no login or Storage write and still requires migration readback plus explicit approval for the tagged live proof.
+- `npm run lint`, `npx tsc -b`, `npm run agent:smoke`, `npm run agent:check`, `npm run agent:admin-cms-predeploy`, and `git diff --check`: pass.
+- `npm run agent:harness-gc` and `npm run agent:harness-gc:review`: zero failures; the only warning is the intentional historical WORKLOG length threshold.
+
+### Remaining Boundary
+- Production Auth callback configuration is not fixed. Email arrival plus a localhost callback is a failing invite-flow result, not partial handoff completion; Auth custom SMTP ownership is also still unverified.
+- The pending Media Storage role migration was not applied, and no content row, content status, Storage object, password-recovery email, or golden-workflow mutation was created in this checkpoint.
+- The Harness/runtime follow-up in this entry still requires reviewed deployment, production no-write smoke, and a production auth-browser rerun. The twelve-workflow handoff remains `revalidation_required`.
+
 ## Entry - 2026-07-13 (Admin Reliability Preview And Production Deployment)
 
 ### Scope

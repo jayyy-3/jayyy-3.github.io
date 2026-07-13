@@ -530,7 +530,7 @@ class StoneLibraryService {
     }
 
     static async getPublishedStoneCards(filters: StoneCardFilters = {}): Promise<StoneCardVM[]> {
-        const supabase = getPublicContentClient();
+        const supabase = await getPublicContentClient();
         if (!supabase) {
             return [];
         }
@@ -669,7 +669,7 @@ class StoneLibraryService {
         stoneGroupId: string,
         variantId?: string,
     ): Promise<StoneDetailVM | null> {
-        const supabase = getPublicContentClient();
+        const supabase = await getPublicContentClient();
         if (!supabase) {
             return null;
         }

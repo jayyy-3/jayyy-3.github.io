@@ -458,9 +458,18 @@ function checkPublicRuntimeBoundary() {
   }
   requireIncludes(app, '/admin/*', 'src/App.tsx');
   requireIncludes(publicClient, '@supabase/supabase-js', 'src/lib/publicContentClient.ts');
+  requireIncludes(publicClient, "import('@supabase/supabase-js')", 'src/lib/publicContentClient.ts on-demand SDK load');
   requireIncludes(publicClient, 'VITE_SUPABASE_PUBLISHABLE_KEY', 'src/lib/publicContentClient.ts');
   requireIncludes(publicClient, 'VITE_SUPABASE_ANON_KEY', 'src/lib/publicContentClient.ts');
   requireIncludes(publicClient, 'persistSession: false', 'src/lib/publicContentClient.ts');
+  requireIncludes(
+    publicClient,
+    ".catch(() => {\n        publicContentClientPromise = null;\n        return null;\n      });",
+    'src/lib/publicContentClient.ts static-fallback-safe lazy-load failure',
+  );
+  if (/import\s*\{[^}]*\bcreateClient\b[^}]*\}\s*from\s*['\"]@supabase\/supabase-js['\"]/.test(publicClient)) {
+    failures.push('src/lib/publicContentClient.ts: createClient must remain dynamically imported so the public entry does not eagerly load Supabase');
+  }
 
   const scannedFiles = walkFiles('src').filter((file) => {
     if (!/\.(tsx?|jsx?)$/.test(file)) return false;

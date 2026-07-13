@@ -147,8 +147,11 @@ function mapProjectRow(
 }
 
 export async function getPublishedProjects(
-  supabase: SupabaseClient | null = getPublicContentClient(),
+  suppliedClient?: SupabaseClient | null,
 ): Promise<ProjectData[]> {
+  const supabase = suppliedClient === undefined
+    ? await getPublicContentClient()
+    : suppliedClient;
   if (!supabase) return [];
 
   const { data, error } = await supabase

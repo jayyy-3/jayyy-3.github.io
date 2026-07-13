@@ -11,7 +11,7 @@ Use the admin only with an approved Urblo login account. If a signed-in user doe
 
 ## Customer Handoff Summary
 
-Current warning: this guide is the target operating flow, not proof that production is handoff-ready. Jay reported the production admin as not working on 2026-07-13, and the strengthened evidence gate remains `revalidation_required` until the fixed deployment completes every golden workflow in `docs/agent/admin-handoff-evidence.json`.
+Current warning: this guide is the target operating flow, not proof that production is handoff-ready. Jay reported the production admin as not working on 2026-07-13, and the strengthened evidence gate remains `revalidation_required` until the fixed deployment completes every golden workflow in `docs/agent/admin-handoff-evidence.json`. A QA Editor account exists, but the delivered invite link fell back to `http://localhost:3000`; do not rely on new-user invitations until the Auth callback configuration is corrected and retested.
 
 Give an editor the production admin address, their invited login email, and the lowest role they need. Most content-only users should be Editor; people who manage accounts, leads, exports, or global site settings should be CMS manager.
 
@@ -88,7 +88,7 @@ For additional people:
 5. Ask them to sign out, then sign back in at `/admin` with that password before treating access as complete.
 6. Use Grant existing login only when the person already has a login account and you have the setup code.
 
-The invite flow uses a secure server endpoint and adds the access change to Change history. It also needs Supabase Auth custom SMTP and exact invite/recovery Redirect URL entries; the Contact form SMTP2GO proof does not prove Auth email delivery. The repaired flow still needs deployment and approved live invite/recovery proof before production editors rely on it.
+The invite flow uses a secure server endpoint and adds the access change to Change history. The 2026-07-13 QA email arrived, but its callback fell back to `http://localhost:3000`, so steps 4-5 above are not currently a verified production handoff path. Correct/read back the Supabase Auth Site URL and exact invite/recovery Redirect URL entries, verify Auth SMTP ownership, and repeat the complete UI workflow before production editors rely on invitations. The Contact form SMTP2GO proof does not prove this Auth path.
 
 `Active access` controls whether an existing person may enter the CMS. Turning it off should be treated as an access decision, not as deleting the person's login or history.
 
@@ -191,8 +191,8 @@ If Publish is blocked, use the on-screen checklist, Website publish status, or v
 ## Handoff Gaps
 
 The CMS is not currently handoff-ready. Required closure:
-- Deploy the reliability/public-consumer fixes and record the deployment SHA.
-- Configure and verify Supabase Auth custom SMTP plus exact invite/recovery redirect allowlist entries.
+- Deploy the current Harness/runtime follow-up and record the deployment SHA.
+- Correct and verify the Supabase Auth Site URL plus exact invite/recovery redirect allowlist entries after the observed localhost fallback; verify Auth custom SMTP ownership separately.
 - Complete the real browser golden workflow: sign in, draft edit/save/refresh, private media copy/publish, public readback, archive behavior, settings public readback, invite/password setup, logout/login, password recovery, responsive navigation at mobile/1116px/wide widths, the Projects task workspace, the Dashboard operational queue, and this guide's usability with a non-technical editor.
 - Deploy and browser-test the Projects stable record route, task workspaces, all-editor dirty guards, blocker jumps, child-save isolation, searchable media, and save/refresh readback; then add paginated media and public preview before reusing the pattern in Products, Articles, and Stone Library.
 - Record fresh evidence and expiry in `docs/agent/admin-handoff-evidence.json`; do not infer readiness from route shells, source text, direct API writes, or this guide.

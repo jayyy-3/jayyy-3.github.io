@@ -15,6 +15,7 @@ Urblo is operating as a Cloudflare Pages + Supabase site with real forms, but th
 - Contact and Sample Request persistence is complete, including server-side audit rows, SMTP2GO notification proof, and browser-key private-row denial.
 - The original Supabase foundation, baseline seeds, table RLS, Storage bucket/listing hardening, admin helper hardening, and admin profile uniqueness are complete. The new Editor-versus-public-bucket role hardening remains pending production apply/readback and live role proof.
 - First admin bootstrap is complete for `info@urblo.com.au`.
+- A separate active QA Editor is provisioned; password sign-in and its own Editor-profile RLS readback pass. This is test readiness, not invite-flow completion.
 - `/admin` route shells, schema/RLS, source CRUD surfaces, and direct API-level tagged QA exist for Dashboard, Projects, Stone Library, Products, Articles, Media, Leads, Settings, and Change history. This does not prove editor workflow completion.
 - The June route-shell, private Storage, and direct browser-key/API proofs remain historical infrastructure evidence; they no longer count as a completed CMS handoff.
 - Public Projects, Products, Articles, and Stone Library have Published CMS read paths with static fallback; migration-safe per-record overlay and real Storage URL consumption are deployed, while authenticated publish/public-readback proof remains open.
@@ -27,9 +28,9 @@ Urblo is operating as a Cloudflare Pages + Supabase site with real forms, but th
 ## Active Now
 Only these task IDs should be treated as current executable work:
 
-- `NOW-ADMIN-RELIABILITY-UX-001`: P0. Reliability fixes and the first Projects task-workspace redesign are deployed through PR `#3`, including isolated invite/recovery password sessions, private-only initial Media uploads, owner/admin-only public-bucket policy source, path/version-bound Media promotion, parent-bound/stale-safe child saves, and all-editor Projects dirty guards; provision a QA Editor, apply the pending Storage RLS migration with approval, prove the complete browser golden workflow, then close media pagination and preview gaps.
+- `NOW-ADMIN-RELIABILITY-UX-001`: P0. Reliability fixes and the first Projects task-workspace redesign are deployed through PR `#3`; a separate QA Editor is active. Deploy the stable-marker/isolated-build Harness repair, correct the confirmed localhost Auth callback fallback, apply the pending Storage RLS migration with approval, and prove the complete browser golden workflow before closing media pagination and preview gaps.
 - `NOW-FORMS-SUPABASE-001`: final Turnstile proof. The public widget key, server secret, and valid token must be available before running the strict live proof.
-- `NOW-ADMIN-SETTINGS-CRUD-001`: Published settings public readback plus a real invite/password proof. This waits for Supabase Auth custom SMTP, exact redirect allowlist entries, and Jay approval of a target editor email.
+- `NOW-ADMIN-SETTINGS-CRUD-001`: Published settings public readback plus a real invite/password proof. The recipient is approved and email delivery occurred, but the invite callback fell back to `http://localhost:3000`; correct/read back the Auth Site URL and exact redirect allowlist entries, then repeat the complete UI workflow.
 
 ## Next Decisions
 - Approve a deployed admin golden-workflow run with tagged draft/media/settings changes that can be safely reverted or archived.
@@ -38,7 +39,7 @@ Only these task IDs should be treated as current executable work:
 - Add exact production invite and recovery callback URLs to the Supabase Auth redirect allowlist.
 - Browser-test the new Projects record URL, task workspaces, all-editor dirty guards, blocker jumps, child-save isolation, and searchable-media behavior before copying the pattern to another module.
 - Decide whether Turnstile proof is required before the next public launch checkpoint.
-- Choose who should receive the first real CMS invite proof email.
+- Repeat the real CMS invite proof with the approved QA recipient after the Auth callback configuration is corrected.
 - Ask a customer/editor to review imported Draft CMS content and decide what to publish first.
 - Decide whether to resume article claim cleanup, currently paused by user direction.
 - Decide whether physical delete controls are needed, and define retention/destructive-delete policy before adding them.
@@ -123,6 +124,7 @@ Latest local source/runtime proof set on 2026-07-13:
 - `npm run agent:public-supabase-readiness`: pass
 - `npm run agent:cloudflare-readiness`: pass
 - `npm run agent:admin-config-gate`: pass
+- `npm run agent:admin-auth-browser -- --allow-login --strict`: pass against the configured local build for all 9 authenticated routes plus Sign out; production rerun pending deployment of the stable-marker verifier
 - `npm run agent:seo-readiness`: pass
 - `npm run agent:public-content-overlay`: pass
 - `npm run agent:admin-cms-predeploy`: pass in no-write source/report mode
@@ -130,7 +132,7 @@ Latest local source/runtime proof set on 2026-07-13:
 
 Admin repair PR `#3` merge commit `46d46b4` passed branch-preview and production no-write smoke on 2026-07-13. The June route-shell login proof remains stale and the new deployment smoke does not close the reopened handoff.
 
-Build still shows the known Browserslist staleness notice. The deployed bundle now contains the separated admin route chunks and passes the browser-secret boundary check.
+Build still shows the known Browserslist staleness notice. The configured local build now loads public Supabase on demand into its own vendor chunk; the auth-browser gate confirms the entry stays below 500,000 bytes and the Supabase chunk is not module-preloaded. Admin route chunks and the browser-secret boundary also pass.
 
 ## Exit Criteria For The Current Cycle
 - `docs/agent/tasks.json` keeps only true active execution work in `now`.
