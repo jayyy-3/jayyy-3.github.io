@@ -1,6 +1,6 @@
 # HANDOFF - Current Agent State
 
-Last updated: 2026-07-13
+Last updated: 2026-07-14
 
 ## Read First
 Use this file as the short current-state entry. Detailed evidence lives in `docs/WORKLOG.md`; task execution state lives in `docs/agent/tasks.json`; compact machine state lives in `docs/agent/status.json`.
@@ -63,6 +63,7 @@ Admin CMS:
 - The deployed repairs cover the auth callback and non-blocking same-user refresh; isolated-session invite/recovery password writes that cannot replace the shared browser session; Media loading, private-only initial upload, owner/admin-only public-bucket write policy source, and create-only Storage promotion bound to the selected row's original path/version with reference-safe cleanup disclosure. They also cover public Storage URL resolution, per-record public overlay with Project fallback-field preservation, normalized/refetchable Published settings consumption, parent-bound/stale-safe child saves across Projects, Products, Articles, and Stone Library, loading-state interaction locks, the Articles validation lockup, admin route chunks/provider continuity, medium-desktop header clipping, and the first Projects task-workspace redesign with all-editor dirty guards.
 - The PR `#6` production runtime proves static public fallback for Products, Projects, and Articles under a blocked Supabase chunk plus all nine authenticated admin routes, sign-out, and protected-route revisit. Editor writes, Storage role boundaries, valid invite/recovery callbacks, and the twelve UI golden workflows are still not proven. `docs/agent/admin-handoff-evidence.json` intentionally remains `revalidation_required`.
 - `npm run agent:admin-handoff-readiness -- --base-url https://urblo.com.au --admin-email info@urblo.com.au --strict` must fail until one deployed SHA has fresh evidence for the applied Storage role-boundary prerequisite and every required golden workflow. A WORKLOG `Pass` string is no longer sufficient.
+- Jay approved `docs/ADMIN_UX_RESHAPE_PLAN.md` on 2026-07-14 as the temporary execution authority for rebuilding Admin around website pages rather than database tables. `NOW-ADMIN-UX-RESHAPE-001` is registered in `next` until the two Phase 0 environment prerequisites close; Jay alone owns the final unassisted fool-test acceptance.
 
 ## Active Executable Tasks
 Only three tasks should currently be treated as `now` execution work:
@@ -70,6 +71,10 @@ Only three tasks should currently be treated as `now` execution work:
 - `NOW-ADMIN-RELIABILITY-UX-001`: P0 admin incident. The repaired build, MIME-aware asset verifier, immutable-reference binding, and production auth/fallback checks are deployed and passing, and a separate QA Editor is active. Next correct Auth callback configuration, complete the Storage prerequisite, and prove the editor golden workflows. Do not mark done from deployment, account existence, route-shell checks, or source checks alone.
 - `NOW-FORMS-SUPABASE-001`: final Turnstile proof only. Persistence, SMTP2GO delivery, browser-key lead privacy, and admin-visible lead workflow are already verified.
 - `NOW-ADMIN-SETTINGS-CRUD-001`: Published settings public-consumer proof plus a real Settings invite proof after the confirmed localhost callback fallback is corrected and Supabase Auth SMTP/redirect configuration is verified.
+
+Queued immediately after Phase 0 without exceeding the max-three `now` rule:
+
+- `NOW-ADMIN-UX-RESHAPE-001`: rebuild `/admin/projects` as the approved page-shaped vertical prototype with one aggregate draft, one Save, live draft preview, visual hotspots, inline media, and server-side audited publish/promotion.
 
 The historical admin CMS umbrella is not an executable `now` task. Its former handoff conclusion has been superseded by `NOW-ADMIN-RELIABILITY-UX-001`.
 
@@ -122,7 +127,7 @@ Live-write checks require explicit approval and credentials. Do not run tagged l
 ## Next Recommended Action
 PR `#6` has restored the production no-write runtime and Harness baseline. Keep the four apex cache-header warnings visible until Cloudflare revalidation or an approved purge removes them, but do not confuse those exact-bytes/MIME warnings with the remaining CMS handoff blockers.
 
-Required product action: correct and read back the Supabase Auth Site URL plus exact invite/recovery callbacks, then with explicit production-write approval apply/read back the pending Storage role migration and pass the already-provisioned Editor/owner role-boundary verifier. Run all twelve approved production golden workflows against deployment `c7a910df-6dd3-440b-8971-a6120353ed19`, including the Projects record URLs/task workspaces/all-editor dirty guards/searchable media; if runtime code changes again, use the resulting newer deployment for the complete evidence set. Only after the strict handoff passes should pagination/preview or another editor-module redesign be selected.
+Required product action: correct and read back the Supabase Auth Site URL plus exact invite/recovery callbacks, then with explicit production-write approval apply/read back the pending Storage role migration and pass the already-provisioned Editor/owner role-boundary verifier. After those Phase 0 items close, promote `NOW-ADMIN-UX-RESHAPE-001` into `now` and execute the Projects vertical prototype from `docs/ADMIN_UX_RESHAPE_PLAN.md`; run the golden workflows against the reshaped UI rather than certifying the old editor twice. The fool test remains Jay's acceptance and cannot be self-certified by an agent.
 
 Other decision-gated follow-ups:
 - Choose a generated sitemap/release-manifest or pre-render strategy for CMS-only published slugs; current runtime entity metadata does not add new slugs to the static sitemap or the first HTML response.

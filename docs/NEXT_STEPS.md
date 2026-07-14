@@ -1,6 +1,6 @@
 # NEXT_STEPS - Urblo Roadmap
 
-Last updated: 2026-07-13
+Last updated: 2026-07-14
 
 ## Purpose
 This is the human-readable roadmap. The machine-readable source of truth is `docs/agent/tasks.json`; the compact current-state snapshot is `docs/agent/status.json`; historical proof lives in `docs/WORKLOG.md`.
@@ -8,7 +8,7 @@ This is the human-readable roadmap. The machine-readable source of truth is `doc
 Use this file to choose direction. Use `docs/agent/tasks.json` to execute.
 
 ## Current Objective
-Urblo is operating as a Cloudflare Pages + Supabase site with real forms, but the production `/admin` handoff is reopened after a direct not-working report and a 2026-07-13 code/UX audit. PR `#6` has restored production asset integrity and the no-write auth/fallback baseline after PR `#5` exposed a cached-asset incident that the old status-only smoke had falsely accepted. The immediate cycle is now Auth callback correction, Storage role enforcement, and real editor workflow proof, not handoff polish.
+Urblo is operating as a Cloudflare Pages + Supabase site with real forms, but the production `/admin` handoff is reopened after a direct not-working report and a 2026-07-13 code/UX audit. PR `#6` restored production asset integrity and the no-write auth/fallback baseline after PR `#5` exposed a cached-asset incident that the old status-only smoke had falsely accepted. Jay approved `docs/ADMIN_UX_RESHAPE_PLAN.md` on 2026-07-14: close Auth callback and Storage-role Phase 0 first, then rebuild Projects as the page-shaped vertical prototype and prove the real workflow there.
 
 ## What Is Complete
 - Cloudflare Pages production hosting is complete for `https://urblo.com.au` and `https://www.urblo.com.au`.
@@ -33,12 +33,14 @@ Only these task IDs should be treated as current executable work:
 - `NOW-FORMS-SUPABASE-001`: final Turnstile proof. The public widget key, server secret, and valid token must be available before running the strict live proof.
 - `NOW-ADMIN-SETTINGS-CRUD-001`: Published settings public readback plus a real invite/password proof. The recipient is approved and email delivery occurred, but the invite callback fell back to `http://localhost:3000`; correct/read back the Auth Site URL and exact redirect allowlist entries, then repeat the complete UI workflow.
 
+`NOW-ADMIN-UX-RESHAPE-001` is registered as `next` so the queue stays within the max-three `now` rule. Promote it when Phase 0 closes. Its design authority is `docs/ADMIN_UX_RESHAPE_PLAN.md`, and Jay—not the executing agent—owns the final fool test.
+
 ## Next Decisions
 - Approve a deployed admin golden-workflow run with tagged draft/media/settings changes that can be safely reverted or archived.
 - Configure Supabase Auth custom SMTP separately from the already verified Contact/Sample SMTP2GO Function path.
 - Apply and verify `20260713065628_media_public_bucket_role_hardening.sql` so an Editor cannot bypass the private-first Media UI and write directly to the public bucket.
 - Add exact production invite and recovery callback URLs to the Supabase Auth redirect allowlist.
-- Browser-test the new Projects record URL, task workspaces, all-editor dirty guards, blocker jumps, child-save isolation, and searchable-media behavior before copying the pattern to another module.
+- After Phase 0, replace the current Projects multi-form editor with the approved aggregate draft, one-Save, live-preview, visual-hotspot, inline-media vertical prototype; update behavior verification rather than preserving obsolete literal UI strings.
 - Decide whether Turnstile proof is required before the next public launch checkpoint.
 - Repeat the real CMS invite proof with the approved QA recipient after the Auth callback configuration is corrected.
 - Ask a customer/editor to review imported Draft CMS content and decide what to publish first.

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lastUpdated": "2026-07-13",
+  "lastUpdated": "2026-07-14",
   "sourceOfTruth": "Machine-readable task queue for active and upcoming agent work. Human-readable roadmap lives in docs/NEXT_STEPS.md.",
   "tasks": [
     {
@@ -2367,6 +2367,64 @@
         "npm run agent:cloudflare-preview-smoke -- --base-url https://urblo.com.au --reference-url https://c7a910df.urblo.pages.dev (pass; all 59 JS/CSS assets match exact bytes/MIME, with four residual apex cache-header warnings)",
         "npm run agent:admin-auth-browser -- --allow-login --strict --base-url https://urblo.com.au (pass; three blocked-Supabase static fallbacks, nine authenticated routes, Sign out, and protected-route revisit)",
         "Browser: complete the workflows listed in docs/agent/admin-handoff-evidence.json on the deployed SHA",
+        "npm run agent:check",
+        "git diff --check"
+      ]
+    },
+    {
+      "id": "NOW-ADMIN-UX-RESHAPE-001",
+      "status": "next",
+      "priority": 0.75,
+      "summary": "Reshape the admin around website pages and non-technical editor tasks, beginning with a Projects vertical prototype.",
+      "files": [
+        "docs/ADMIN_UX_RESHAPE_PLAN.md",
+        "docs/ADMIN_EDITOR_GUIDE.md",
+        "docs/ADMIN_IA_ACCESS.md",
+        "docs/ARCHITECTURE.md",
+        "docs/DESIGN.md",
+        "docs/HANDOFF.md",
+        "docs/NEXT_STEPS.md",
+        "docs/WORKLOG.md",
+        "docs/agent/tasks.json",
+        "docs/agent/verification.md",
+        "functions/api/admin/",
+        "scripts/check-admin-crud-coverage.mjs",
+        "src/components/projects/",
+        "src/pages/ProjectDetails.tsx",
+        "src/pages/admin/AdminProjectsPage.tsx",
+        "src/service/ProjectService.ts",
+        "src/service/publicContentOverlay.ts",
+        "supabase/migrations/"
+      ],
+      "notes": [
+        "2026-07-14: Registered from Jay's approved docs/ADMIN_UX_RESHAPE_PLAN.md directive. The plan is the temporary design authority until its sunset clause is completed.",
+        "Remain in next while Phase 0 closes the Supabase Auth Site URL/exact invite-recovery redirect configuration and the approved Media role migration plus live Editor/owner boundary proof; promote into now without exceeding the max-three rule when that prerequisite slot frees.",
+        "Do not substitute another copy-only Clarify pass for structural work, and update behavior verification when the new UI invalidates literal string assertions.",
+        "Jay owns the fool-test acceptance. Agent checks, screenshots, route shells, or self-review cannot certify that criterion."
+      ],
+      "acceptance": [
+        "Projects is edited as one page-shaped aggregate draft with one Save action, no parallel child Save buttons, and no confirm dialogs.",
+        "Draft preview reuses the public Project rendering and reflects current unsaved editor state.",
+        "Facts, materials, media, maps, and hotspots appear as sections in public-page order; child publish states and database-shaped controls are not exposed.",
+        "Hotspots are placed and moved visually; editors never type raw x_percent or y_percent values.",
+        "Media upload and library selection are inline, private-first, and publish-time promotion is handled by an authenticated audited server path without exposing bucket language.",
+        "Aggregate save is all-or-nothing and writes its audit event server-side.",
+        "Draft content remains publicly invisible, no service-role key enters browser code, and existing RLS/security contracts remain intact.",
+        "Jay completes the documented fool test unassisted in under five minutes; the agent does not self-certify it.",
+        "The temporary directive is absorbed into canonical docs and deleted only after all reshape phases complete, following its sunset clause."
+      ],
+      "verification": [
+        "npm run build",
+        "npm run lint",
+        "npx tsc -b",
+        "npm run agent:smoke",
+        "npm run agent:admin-crud-coverage (updated for behavior-level expectations; do not preserve obsolete UI strings)",
+        "npm run agent:admin-cms-predeploy",
+        "npm run agent:admin-config-gate",
+        "npm run gate before push",
+        "npm run agent:cloudflare-preview-smoke -- --base-url https://<branch-preview>.urblo.pages.dev",
+        "Browser: verify aggregate edit, one Save, unsaved draft preview, visual hotspot movement, inline media, publish, public readback, and archive on the preview deployment",
+        "Jay: complete the unassisted under-five-minute fool test",
         "npm run agent:check",
         "git diff --check"
       ]

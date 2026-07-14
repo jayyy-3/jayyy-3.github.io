@@ -1,6 +1,20 @@
 # WORKLOG - Urblo Execution Log
 
-Last updated: 2026-07-13
+Last updated: 2026-07-14
+
+## Entry - 2026-07-14 (Admin UX Reshape Directive And Phase 0 Read-Only Audit)
+
+### Direction And Task State
+- Imported Jay's approved `docs/ADMIN_UX_RESHAPE_PLAN.md` directive from the Claude review branch into `codex/admin-ux-reshape`; the complete sunset clause remains part of the temporary authority.
+- Registered `NOW-ADMIN-UX-RESHAPE-001` as `next`, preserving the max-three active-task rule while Phase 0 remains open. The task prohibits copy-only Clarify loops, requires behavior verification to follow the new UI, and reserves the fool test for Jay.
+- No Phase 1 runtime source was changed before the Phase 0 prerequisites.
+
+### Phase 0 Read-Only Evidence
+- Supabase migration history stops at `20260603142359 project_media_blocks`; `20260713065628_media_public_bucket_role_hardening.sql` is not applied.
+- Production `storage.objects` INSERT/UPDATE policies currently allow active Editor access to both `urblo-admin-media` and `urblo-public-media`, confirming the direct-public-write gap remains open.
+- `npm run agent:admin-media-role-boundary-live` passed in plan-only mode: distinct owner/editor credentials and the browser-safe key are present; no login, network request, Storage object, update, delete, or other production write occurred.
+- Official Supabase guidance confirms Site URL is the default fallback and recommends exact production redirect paths. The app requests `https://urblo.com.au/admin/account-setup?mode=invite` and `?mode=recovery`; the prior delivered invite's localhost callback remains failing evidence.
+- The available Supabase database connector cannot read hosted Auth URL configuration, and the local environment has no Management API token. Chrome reached the Supabase/GitHub sign-in screen but had no existing dashboard session, so configuration readback and mutation stopped pending Jay login plus item-specific approval.
 
 ## Entry - 2026-07-13 (PR #6 Production Recovery And Evidence-Bound Cache Gate)
 
