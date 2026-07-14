@@ -281,3 +281,4 @@ NODE
 node scripts/check-forms-api.mjs
 node scripts/check-contact-form-ui-source.mjs
 node scripts/check-capabilities-page-source.mjs
+node --experimental-strip-types scripts/check-admin-projects-aggregate.mjs

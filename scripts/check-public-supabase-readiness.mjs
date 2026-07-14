@@ -515,7 +515,12 @@ function checkPublicRuntimeBoundary() {
   const projectService = readRequired('src/service/ProjectService.ts');
   requireIncludes(projectService, 'mergeProjectsWithPublishedOverlay', 'ProjectService per-record Published overlay');
   requireIncludes(projectService, 'sector: fallback.listing.sector', 'ProjectService static taxonomy preservation');
-  requireIncludes(projectService, 'factsResult.error || mediaResult.error', 'ProjectService dependent-read failure fallback');
+  requireRegex(
+    projectService,
+    /factsResult\.error\s*\|\|\s*mediaResult\.error\s*\|\|\s*materialsResult\.error\s*\|\|\s*materialMapsResult\.error/,
+    'src/service/ProjectService.ts',
+    'ProjectService dependent-read failure fallback',
+  );
   requireIncludes(projectService, 'const projects = await ProjectService.getAll()', 'ProjectService detail reads the merged public collection');
 
   const publicSettings = readRequired('src/lib/publicSiteSettings.ts');
@@ -582,12 +587,21 @@ function checkDocsContracts() {
 
   for (const fragment of [
     'Public Stone Library routes use Supabase published reads with static fallback',
-    'Public Project routes use Supabase published reads with static fallback',
     'Public Product routes use Supabase published reads with static fallback',
     'Public Article routes use Supabase published reads with static fallback',
   ]) {
     requireIncludes(schema, fragment, 'docs/SUPABASE_SCHEMA.md');
   }
+  requireIncludes(
+    schema,
+    'Public Project source now reads approved facts/materials plus published media/maps/hotspots',
+    'docs/SUPABASE_SCHEMA.md Project published aggregate reads',
+  );
+  requireIncludes(
+    schema,
+    'Tombstone failure remains availability-first and preserves static fallback',
+    'docs/SUPABASE_SCHEMA.md Project static fallback boundary',
+  );
 
   for (const fragment of [
     'Public routes continue exposing only published content',

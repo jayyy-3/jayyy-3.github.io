@@ -2,6 +2,34 @@
 
 Last updated: 2026-07-14
 
+## Entry - 2026-07-14 (Admin Projects Phase 1 Source Candidate)
+
+### Scope
+- Implemented the approved Phase 1 Projects vertical prototype in local source as a page-shaped aggregate workspace: one aggregate draft and sticky action bar, collapsible sections in public-page order, shared public/draft rendering, visual hotspot placement, inline private-first media, and archived-slug suppression so a hidden CMS project does not reappear from bundled fallback.
+- Added accessible up/down ordering for facts, materials, media blocks, maps, and map-scoped points; continuous sort indexes are derived from visible order rather than exposed as editor fields. The Projects list/editor now remain side by side around 1116px, narrow section actions wrap, and material-map tabs have roving keyboard/tabpanel semantics.
+- Removed the global user-facing legacy/migration fallback card and disabled redundant clean Save, already-live Publish, and already-hidden Hide actions.
+- Kept the searchable picker bounded to the latest 500 library rows while exact-batch-fetching every image referenced by the loaded draft; referenced private signed previews refresh every 45 minutes. Dirty-state comparison is computed once in the parent editor page instead of duplicated during hotspot movement.
+- Added a protected `/api/admin/projects` Pages Function and service-role-only aggregate RPC source for list/get/save/publish/archive. Aggregate save and its audit event are transaction-bound; publish persists the request's current draft revision before applying the canonical aggregate.
+- Updated behavior-level Harness coverage for the new editor rather than preserving obsolete string assertions.
+
+### Security And Reliability Boundaries Present In Source
+- The Function keeps the service-role key server-side, authenticates an active admin profile, allows Viewer reads only, and normalizes new or claim-bearing Editor changes back to `needs_review` instead of trusting browser-supplied approval state. The RPC locks and rechecks that profile against the Function's initial trusted role so a concurrent role change fails closed. Existing canonical Projects also carry a required `baseUpdatedAt` token from GET through POST/RPC, including first adoption before a private draft exists.
+- Publish performs early checks plus transaction-local media and taxonomy reference rechecks. The locked canonical token comparison precedes every first-adoption draft/canonical write and all later Publish/Hide mutations. PGRST errors carry the structured HTTP detail shape expected by the Function mapper so intended conflict/permission responses do not collapse into generic upstream errors.
+- Private-to-public Storage promotion is create-only with byte verification. A failed publish performs reference-aware compensation for public copies created by that request and reports retained objects when safe cleanup cannot be proven.
+
+### Production And Acceptance Boundary
+- Projects database rollout is split into two source-only migrations. Expand migration `supabase/migrations/20260714052955_project_aggregate_drafts.sql` creates the private draft/RPC contract and writes the child lifecycle backfill. Contract migration `supabase/migrations/20260714052956_project_aggregate_write_lockdown.sql` later revokes legacy browser table/sequence writes and hardens public parent/child policies. Jay has not approved either migration and neither has been applied or read back in production.
+- No Phase 1 production content/Storage write, branch preview, authenticated aggregate save/publish/public-readback/hide workflow, or production promotion occurred in this source milestone.
+- The full host-side local suite passed on 2026-07-14: build, lint, typecheck, agent smoke, Admin CMS predeploy, Admin config gate (11/11 routes), Harness check, Supabase/public/Cloudflare readiness, aggregate/CRUD coverage, plan-only admin CRUD/content-import checks, JSON parsing, and `git diff --check`. The preferred clean-container `npm run gate` remains the final post-commit pre-push check.
+- A read-only local Playwright implementation check used the real owner session plus a mocked aggregate GET endpoint, with POST requests forced to 405. It verified the 1116px side-by-side workspace, clean action states, and the inline dirty-navigation choice. It also exposed a 390px shell overflow; the mobile grid/nav containment was fixed, the page read back at `scrollWidth === innerWidth`, and the aggregate verifier now guards that containment. This is implementation evidence only, not the authenticated preview workflow or Jay's fool test.
+- `NOW-ADMIN-UX-RESHAPE-001` remains `now` and cannot be marked done from source inspection, Harness checks, screenshots, or agent self-review.
+- Jay alone owns the documented unassisted fool-test acceptance; it remains pending.
+
+### Next Handoff
+- Commit the complete Phase 1 candidate, run the clean-container gate, push the branch preview, and run its no-write smoke before requesting approval for expand migration `supabase/migrations/20260714052955_project_aggregate_drafts.sql`.
+- After expand readback, request separate action-specific approval for tagged Project/Storage writes, then freeze all Project editing before the authenticated preview workflow. Keep the freeze through aggregate UI/endpoint production promotion and contract readback so legacy child-table writes cannot overlap the new aggregate path.
+- Request a fresh separate approval before applying contract migration `supabase/migrations/20260714052956_project_aggregate_write_lockdown.sql`; then read back table/sequence privileges, public policies, and security advisor state before lifting the freeze. After contract, a Cloudflare-only rollback to the legacy direct-write UI is invalid.
+
 ## Entry - 2026-07-14 (Admin UX Reshape Directive And Phase 0 Read-Only Audit)
 
 ### Direction And Task State

@@ -72,6 +72,7 @@ const redirectContracts = [
 ];
 
 const functionPaths = ['/api/enquiries', '/api/sample-requests'];
+const protectedFunctionPaths = ['/api/admin/projects'];
 const MAX_ASSET_GRAPH_SIZE = 200;
 const JAVASCRIPT_MEDIA_TYPES = new Set([
   'application/ecmascript',
@@ -535,6 +536,39 @@ async function checkFunctionPath(path, options) {
   console.log(`function ok: ${path}`);
 }
 
+async function checkProtectedFunctionPath(path, options) {
+  for (const method of ['GET', 'POST']) {
+    const response = await timedFetch(`${options.baseUrl}${path}`, {
+      ...options,
+      fetch: {
+        method,
+        headers: method === 'POST' ? { 'content-type': 'application/json' } : undefined,
+        body: method === 'POST' ? JSON.stringify({ action: 'save' }) : undefined,
+      },
+    });
+    const payload = await expectJson(response, `${path} unauthenticated ${method}`);
+    assert(response.status === 401, `${path} unauthenticated ${method} returned ${response.status}, expected 401`);
+    assert(
+      Boolean(payload?.error || payload?.error?.code),
+      `${path} unauthenticated ${method} returned no structured error`,
+    );
+  }
+
+  const optionsResponse = await timedFetch(`${options.baseUrl}${path}`, {
+    ...options,
+    fetch: { method: 'OPTIONS' },
+  });
+  assert(optionsResponse.status === 204, `${path} OPTIONS returned ${optionsResponse.status}, expected 204`);
+  const allowedMethods = (optionsResponse.headers.get('access-control-allow-methods') || '').toUpperCase();
+  assert(allowedMethods.includes('GET'), `${path} OPTIONS is missing GET in access-control-allow-methods`);
+  assert(allowedMethods.includes('POST'), `${path} OPTIONS is missing POST in access-control-allow-methods`);
+  const allowedHeaders = (optionsResponse.headers.get('access-control-allow-headers') || '').toLowerCase();
+  assert(allowedHeaders.includes('authorization'), `${path} OPTIONS is missing authorization in access-control-allow-headers`);
+  assert(allowedHeaders.includes('content-type'), `${path} OPTIONS is missing content-type in access-control-allow-headers`);
+
+  console.log(`protected function boundary ok: ${path}`);
+}
+
 async function checkFunctions(options) {
   if (options.skipFunctions || options.isLocalBaseUrl) {
     console.log('function checks skipped.');
@@ -543,6 +577,10 @@ async function checkFunctions(options) {
 
   for (const path of functionPaths) {
     await checkFunctionPath(path, options);
+  }
+
+  for (const path of protectedFunctionPaths) {
+    await checkProtectedFunctionPath(path, options);
   }
 }
 

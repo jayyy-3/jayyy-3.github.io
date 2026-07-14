@@ -1,6 +1,6 @@
 import { Link, NavLink } from 'react-router-dom';
 import type { ReactNode } from 'react';
-import { Eye, LogOut, RefreshCw } from 'lucide-react';
+import { LogOut, RefreshCw } from 'lucide-react';
 import { useAdminAuth } from '../../lib/adminAuthHooks';
 import { adminModules } from './adminContent';
 
@@ -21,9 +21,9 @@ export default function AdminShell({ title, eyebrow = 'Urblo Admin', actions, ch
     const { profile, signOut, refresh, status } = useAdminAuth();
 
     return (
-        <main className="min-h-screen bg-[#f5f6f2] text-[var(--urblo-text)]">
-            <div className="grid min-h-screen lg:grid-cols-[264px_1fr]">
-                <aside className="border-b border-black/10 bg-black text-white lg:border-b-0 lg:border-r">
+        <main className="min-h-screen min-w-0 bg-[#f5f6f2] text-[var(--urblo-text)]">
+            <div className="grid min-h-screen min-w-0 grid-cols-[minmax(0,1fr)] lg:grid-cols-[264px_minmax(0,1fr)]">
+                <aside className="min-w-0 max-w-full border-b border-black/10 bg-black text-white lg:border-b-0 lg:border-r">
                     <div className="flex min-h-full flex-col">
                         <div className="border-b border-white/15 px-5 py-5">
                             <Link to="/admin" className="block text-[22px] font-semibold tracking-[-0.01em]">
@@ -34,22 +34,7 @@ export default function AdminShell({ title, eyebrow = 'Urblo Admin', actions, ch
                             </p>
                         </div>
 
-                        <div className="border-b border-white/10 px-4 py-4 lg:border-b">
-                            <div className="flex items-start gap-3 rounded border border-white/12 bg-white/[0.06] p-3">
-                                <Eye className="mt-0.5 h-4 w-4 shrink-0 text-[var(--urblo-lime)]" />
-                                <div>
-                                    <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/45">
-                                        Public website
-                                    </p>
-                                    <p className="mt-1 text-sm leading-5 text-white/72">
-                                        Published CMS content can appear publicly. A matching legacy page may remain
-                                        during migration even when its CMS version is Draft or Archived.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <nav className="flex gap-1 overflow-x-auto px-3 py-3 lg:flex-1 lg:flex-col lg:gap-4 lg:overflow-visible">
+                        <nav className="flex w-full min-w-0 max-w-full gap-1 overflow-x-auto px-3 py-3 lg:flex-1 lg:flex-col lg:gap-4 lg:overflow-visible">
                             {navGroups.map((group) => {
                                 const modules = adminModules.filter((module) => module.group === group.key);
                                 return (

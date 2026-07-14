@@ -8,7 +8,7 @@ This is the human-readable roadmap. The machine-readable source of truth is `doc
 Use this file to choose direction. Use `docs/agent/tasks.json` to execute.
 
 ## Current Objective
-Urblo is operating as a Cloudflare Pages + Supabase site with real forms, but the production `/admin` handoff is reopened after a direct not-working report and a 2026-07-13 code/UX audit. PR `#6` restored production asset integrity and the no-write auth/fallback baseline after PR `#5` exposed a cached-asset incident that the old status-only smoke had falsely accepted. Jay approved `docs/ADMIN_UX_RESHAPE_PLAN.md` on 2026-07-14: Auth callbacks and the Media role migration are now corrected/read back; complete the tagged Storage role proof, then rebuild Projects as the page-shaped vertical prototype and prove the real workflow there.
+Urblo is operating as a Cloudflare Pages + Supabase site with real forms, but the production `/admin` handoff is reopened after a direct not-working report and a 2026-07-13 code/UX audit. PR `#6` restored production asset integrity and the no-write auth/fallback baseline after PR `#5` exposed a cached-asset incident that the old status-only smoke had falsely accepted. Jay approved `docs/ADMIN_UX_RESHAPE_PLAN.md` on 2026-07-14: Phase 0 is closed and the page-shaped Projects Phase 1 source candidate is implemented, but its expand/contract migrations, branch preview, authenticated workflow, and Jay-owned fool test remain open.
 
 ## What Is Complete
 - Cloudflare Pages production hosting is complete for `https://urblo.com.au` and `https://www.urblo.com.au`.
@@ -25,13 +25,14 @@ Urblo is operating as a Cloudflare Pages + Supabase site with real forms, but th
 - Phase 2 SEO legacy URL cleanup is implemented in source: GSC-recovered old URLs now have selective 301 redirects, representative smoke checks guard those mappings, and junk WordPress/admin/feed/upload paths remain out of the sitemap.
 - Harness GC first pass is implemented.
 - PR `#6` merge `a2a7ae5` is deployed as `c7a910df-6dd3-440b-8971-a6120353ed19`; its immutable URL and both custom domains pass the deployment-bound MIME/body asset smoke, and production auth passes three blocked-Supabase static fallbacks plus all nine authenticated routes. Four unchanged apex assets retain stale cache-header warnings only after exact immutable bytes/MIME comparison.
+- Phase 0 of the approved Admin reshape is complete. Phase 1 Projects is implemented in local source with one aggregate draft/action bar, shared public/draft rendering, visual hotspots, inline private-first media, a protected server aggregate path, and source-level security hardening. This is a source milestone only, not deployed or user-accepted evidence.
 
 ## Active Now
 Only these task IDs should be treated as current executable work:
 
 - `NOW-ADMIN-RELIABILITY-UX-001`: P0. Reliability fixes and the first Projects task-workspace redesign are deployed through PR `#3`; Harness hardening is deployed through PR `#5`; the cache repair, deployment binding, and production auth/fallback proof are deployed through PR `#6`; a separate QA Editor is active; production Auth callbacks are corrected/read back; and the Storage migration plus live Editor/owner role boundary have passed. Complete the browser golden workflow before closing the incident.
 - `NOW-ADMIN-SETTINGS-CRUD-001`: Published settings public readback plus a real invite/password/recovery proof. The previous invite callback fell back to localhost; production Site URL and the exact callbacks are now corrected and read back. Custom Auth SMTP ownership and a separately approved complete UI email/password workflow remain open.
-- `NOW-ADMIN-UX-RESHAPE-001`: Phase 0 is closed. Execute the approved Projects aggregate draft, one-Save, live-preview, visual-hotspot, and inline-media vertical prototype; Jay owns the final fool test.
+- `NOW-ADMIN-UX-RESHAPE-001`: Phase 0 is closed and the Projects aggregate draft, one-action-bar, shared-preview, visual-hotspot, inline-media, and protected aggregate source candidate is implemented. The full host-side local suite passes; keep it active until the clean-container/preview gates pass, expand migration `20260714052955_project_aggregate_drafts.sql` is separately approved/applied/read back, the approved authenticated preview workflow passes, the aggregate runtime is promoted, contract migration `20260714052956_project_aggregate_write_lockdown.sql` is separately approved/applied/read back, and Jay completes the fool test.
 
 `NOW-FORMS-SUPABASE-001` is now `next`: only the configuration/approval-gated Turnstile proof remains, so it yielded the active slot to the approved Admin reshape.
 
@@ -40,7 +41,9 @@ Only these task IDs should be treated as current executable work:
 - Configure Supabase Auth custom SMTP separately from the already verified Contact/Sample SMTP2GO Function path.
 - Production migration `20260714050750_media_public_bucket_role_hardening.sql`, its INSERT/UPDATE policy readback, and the separately approved tagged Editor/owner Storage proof are complete with zero tagged objects remaining.
 - Exact production invite and recovery callback URLs were added to the Supabase Auth redirect allowlist and read back on 2026-07-14.
-- Replace the current Projects multi-form editor with the approved aggregate draft, one-Save, live-preview, visual-hotspot, inline-media vertical prototype; update behavior verification rather than preserving obsolete literal UI strings.
+- Commit the Phase 1 Projects candidate, run the clean-container gate, push a branch preview, and run its no-write route/asset/API smoke. Then obtain explicit approval before applying expand migration `supabase/migrations/20260714052955_project_aggregate_drafts.sql`; it is source-only, unapplied, and its lifecycle backfill is a production write.
+- After expand readback and a separate approval for tagged Project/Storage writes, freeze all Project editing and prove aggregate save/refresh, unsaved preview, visual hotspot movement, inline media, publish/public readback, and hide against the branch preview. Keep the freeze through production promotion and contract readback; promote the aggregate runtime only after preview evidence is acceptable.
+- Obtain a fresh, separate approval before applying contract migration `supabase/migrations/20260714052956_project_aggregate_write_lockdown.sql`; read back all six Project table privileges, six sequence privileges, public policies, and security advisor state before lifting the edit freeze. After contract, never Cloudflare-only roll back to the legacy direct-write UI. Only Jay may accept the fool test.
 - Decide whether Turnstile proof is required before the next public launch checkpoint.
 - After separate approval, verify custom Auth SMTP ownership and repeat the real CMS invite/recovery proof against the corrected callback configuration.
 - Ask a customer/editor to review imported Draft CMS content and decide what to publish first.
@@ -90,6 +93,7 @@ These scripts are intentionally documented so harness GC can check command cover
 - `npm run agent:admin-crud-coverage`
 - `npm run agent:admin-crud-live`
 - `npm run agent:admin-media-role-boundary-live`
+- `npm run agent:admin-projects-aggregate`
 - `npm run agent:admin-handoff-readiness`
 - `npm run agent:admin-live-readiness`
 - `npm run agent:capabilities-ui`
@@ -131,7 +135,9 @@ Latest local source/runtime proof set on 2026-07-13:
 - `npm run agent:seo-readiness`: pass
 - `npm run agent:public-content-overlay`: pass
 - `npm run agent:admin-cms-predeploy`: pass in no-write source/report mode
-- `npm run agent:admin-handoff-readiness -- --base-url https://urblo.com.au --admin-email info@urblo.com.au --strict`: expected fail because the deployed repair still lacks the Storage prerequisite and twelve golden-workflow evidence items
+- `npm run agent:admin-handoff-readiness -- --base-url https://urblo.com.au --admin-email info@urblo.com.au --strict`: expected fail because handoff evidence remains `revalidation_required` and the twelve deployed golden workflows are not recorded; the Storage role-boundary prerequisite itself passed on 2026-07-14
+
+The 2026-07-14 Projects Phase 1 source candidate is newer than that deployed proof set. Its host-side local suite and read-only 1116px/mobile implementation check pass; the clean-container/preview gates, unapplied expand/contract migrations, authenticated workflow, privilege/policy readback, and fool test remain pending. It must not inherit the 2026-07-13 deployment status.
 
 Admin repair PR `#3` merge commit `46d46b4` passed branch preview and the former status-only production smoke on 2026-07-13; the later cache incident invalidated that production result. Harness PR `#5` merge `cb0ec9a` exposed the false-200 condition. Cache repair PR `#6` merge `a2a7ae5` / deployment `c7a910df-6dd3-440b-8971-a6120353ed19` now passes immutable, apex, and `www` asset smoke with exact deployment binding plus the production auth/fallback gate. Four apex assets still report stale cache headers, but their bytes and MIME match the immutable deployment exactly.
 
@@ -142,6 +148,7 @@ Build still shows the known Browserslist staleness notice. The configured local 
 - Harness GC reports no failures and only intentional warnings.
 - Runtime candidate `a2a7ae5` is deployed at immutable URL `https://c7a910df.urblo.pages.dev` and promoted to the production origin. If runtime code changes before the golden workflow, bind the complete evidence set to the resulting newer deployment instead.
 - `20260714050750_media_public_bucket_role_hardening.sql` is applied/read back and the `mediaPublicBucketRoleBoundary` prerequisite has fresh Editor/owner live evidence.
+- Each Projects expand/contract migration is applied/read back only after its own approval and in the documented order; the reshaped Projects workflow is verified on preview/production without treating source checks as user acceptance.
 - All twelve golden workflows in `docs/agent/admin-handoff-evidence.json` have fresh `Pass` evidence against that same deployment and admin identity.
 - `npm run agent:admin-handoff-readiness -- --base-url https://urblo.com.au --admin-email info@urblo.com.au --strict` passes, and Jay's reported production incident has been revalidated through the real UI.
 - Turnstile and Settings invite decisions are explicit.

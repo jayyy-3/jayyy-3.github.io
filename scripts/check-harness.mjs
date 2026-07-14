@@ -29,6 +29,7 @@ const requiredFiles = [
   'scripts/check-admin-config-gate.mjs',
   'scripts/check-admin-handoff-readiness.mjs',
   'scripts/check-admin-media-role-boundary-live.mjs',
+  'scripts/check-admin-projects-aggregate.mjs',
   'scripts/check-capabilities-page-source.mjs',
   'scripts/check-contact-form-ui-source.mjs',
   'scripts/check-doc-paths.mjs',
@@ -47,6 +48,7 @@ const requiredPackageScripts = {
   'agent:admin-auth-browser': 'node scripts/check-admin-auth-browser.mjs',
   'agent:admin-crud-live': 'node scripts/check-admin-crud-live.mjs',
   'agent:admin-media-role-boundary-live': 'node scripts/check-admin-media-role-boundary-live.mjs',
+  'agent:admin-projects-aggregate': 'node --experimental-strip-types scripts/check-admin-projects-aggregate.mjs',
   'agent:admin-handoff-readiness': 'node scripts/check-admin-handoff-readiness.mjs',
   'agent:admin-live-readiness': 'node scripts/check-admin-live-readiness.mjs',
   'agent:cloudflare-preview-smoke': 'node scripts/check-cloudflare-preview-smoke.mjs',
@@ -148,6 +150,9 @@ try {
   if (!smoke.includes('node scripts/check-capabilities-page-source.mjs')) {
     failures.push('scripts/agent-smoke.sh must run the Capabilities page source contract check.')
   }
+  if (!smoke.includes('node --experimental-strip-types scripts/check-admin-projects-aggregate.mjs')) {
+    failures.push('scripts/agent-smoke.sh must run the Admin Projects aggregate behavior check.')
+  }
 } catch (error) {
   failures.push(`Unable to read scripts/agent-smoke.sh: ${error.message}`)
 }
@@ -159,6 +164,9 @@ try {
   }
   if (!predeploy.includes('npm run agent:admin-media-role-boundary-live')) {
     failures.push('scripts/admin-cms-predeploy.sh must run the plan-only Media role-boundary verifier.')
+  }
+  if (!predeploy.includes('npm run agent:admin-projects-aggregate')) {
+    failures.push('scripts/admin-cms-predeploy.sh must run the Admin Projects aggregate behavior verifier.')
   }
 } catch (error) {
   failures.push(`Unable to read scripts/admin-cms-predeploy.sh: ${error.message}`)

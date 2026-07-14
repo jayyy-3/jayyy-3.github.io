@@ -157,6 +157,8 @@ function checkFunctions() {
   const forms = readRequired('functions/_lib/forms.js');
   const adminInviteRoute = readRequired('functions/api/admin/invite-user.js');
   const adminInvite = readRequired('functions/_lib/admin-invite.js');
+  const adminProjectsRoute = readRequired('functions/api/admin/projects.js');
+  const adminProjects = readRequired('functions/_lib/admin-projects.js');
 
   for (const [label, text, handler] of [
     ['functions/api/enquiries.js', enquiries, 'handleEnquiryRequest'],
@@ -198,12 +200,47 @@ function checkFunctions() {
   requireIncludes(adminInvite, ".from('admin_profiles')", 'functions/_lib/admin-invite.js');
   requireIncludes(adminInvite, ".from('admin_audit_events')", 'functions/_lib/admin-invite.js');
 
+  requireIncludes(adminProjectsRoute, 'export async function onRequest(context)', 'functions/api/admin/projects.js');
+  requireIncludes(adminProjectsRoute, "context.request.method === 'OPTIONS'", 'functions/api/admin/projects.js');
+  requireRegex(
+    adminProjectsRoute,
+    /context\.request\.method\s*===\s*['"]GET['"]|\[[^\]]*['"]GET['"][^\]]*\]\.includes\(context\.request\.method\)/,
+    'functions/api/admin/projects.js',
+    'authenticated GET draft loader',
+  );
+  requireRegex(
+    adminProjectsRoute,
+    /context\.request\.method\s*===\s*['"]POST['"]|\[[^\]]*['"]POST['"][^\]]*\]\.includes\(context\.request\.method\)/,
+    'functions/api/admin/projects.js',
+    'authenticated POST action handler',
+  );
+  requireIncludes(adminProjectsRoute, 'handleAdminProjectsRequest', 'functions/api/admin/projects.js');
+
+  for (const contract of [
+    'SUPABASE_SERVICE_ROLE_KEY',
+    'getBearerToken',
+    'supabase.auth.getUser',
+    'admin_project_aggregate',
+  ]) {
+    requireIncludes(adminProjects, contract, 'functions/_lib/admin-projects.js');
+  }
+  requireRegex(
+    adminProjects,
+    /\.from\(\s*['"]admin_profiles['"]\s*\)/,
+    'functions/_lib/admin-projects.js',
+    'active admin profile lookup',
+  );
+
   if (/VITE_SUPABASE_(?:ANON|PUBLISHABLE)_KEY/.test(forms)) {
     failures.push('functions/_lib/forms.js: server Functions must not use browser Supabase keys');
   }
 
   if (/VITE_SUPABASE_(?:ANON|PUBLISHABLE)_KEY/.test(adminInvite)) {
     failures.push('functions/_lib/admin-invite.js: admin invite Function must not use browser Supabase keys');
+  }
+
+  if (/VITE_SUPABASE_(?:ANON|PUBLISHABLE)_KEY/.test(adminProjects)) {
+    failures.push('functions/_lib/admin-projects.js: admin Projects Function must not use browser Supabase keys');
   }
 }
 

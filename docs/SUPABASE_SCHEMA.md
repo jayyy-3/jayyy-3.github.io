@@ -5,7 +5,9 @@ Last updated: 2026-07-14
 ## Purpose
 This document defines the first production Supabase data model for the Urblo website launch.
 
-It is both the schema design contract and the current implementation checkpoint record. The foundation migrations, baseline seeds, admin settings/profile/helper hardening, admin profile email uniqueness, and media Storage role policies are applied. Admin role helper RPC execution is revoked from browser roles in the exposed public schema, while RLS and Storage policies call private SECURITY DEFINER helpers from a non-exposed schema. The 2026-07-14 security advisor readback reports one unrelated Auth warning because leaked-password protection is disabled; the Media role migration introduced no Storage/RLS security lint. Cloudflare Pages Function source exists for forms, and basic deployed Contact/Sample Request persistence is verified on `https://urblo.pages.dev`: one valid tagged enquiry, one valid tagged sample request, the first sample item, and matching server-side audit rows were created; invalid tagged payloads created no lead or audit rows. The `/admin` auth shell, `/admin/settings`, `/admin/media`, `/admin/stone-library`, `/admin/projects`, `/admin/products`, `/admin/articles`, `/admin/leads`, and `/admin/audit` source screens are implemented. The dashboard now includes source-side health queries for published media metadata gaps, project claim review, missing Product/Article media, TBC Stone Library rows, and stale new leads. Stone Library source now includes finish image links from `stone_finish_images` to `media_assets`. Leads includes an owner/admin CSV export path that requires an audit event before download. `npm run agent:admin-crud-coverage` provides source-only coverage for the implemented `/admin` route/module/table/dashboard-health/audit/export paths before live credential checks run. `npm run agent:admin-live-readiness` also checks the configured browser-safe key's anonymous public/private boundary: published `site_settings` and `finish_definitions` must be readable, while `admin_profiles` must not return private rows without an authenticated admin session. `npm run agent:admin-auth-browser -- --allow-login --expect-unauthorized --strict` is staged to prove a valid Auth user with no active `admin_profiles` row reaches `/admin/unauthorized` and that all launch-critical admin route probes stay unauthorized without private module content. `npm run agent:admin-crud-live` now stages browser-key readback after tagged dashboard-health predicate matches, tagged public-content QA rows are published and archived, tagged private lead QA rows, and the optional `--include-storage` private object upload. `npm run agent:live-readiness` separately reports the unprofiled unauthorized browser QA gate, final `npm run agent:admin-crud-live -- --allow-writes --include-storage` media upload, signed-in admin readback, anonymous-read denial proof, guarded content import apply approval, merge/upsert approval, and public read cutover approval. Runtime work must still configure browser-safe Supabase Auth keys, create the first admin profile, verify live unprofiled unauthorized behavior, verify live settings/admin-profile/media/Stone Library/Projects/Products/Articles/Leads writes and export, verify live media upload through Storage, verify live audit row creation from the shared admin audit writer, and complete email/Turnstile/browser-key final form proofs.
+It is both the schema design contract and the current implementation checkpoint record. The foundation migrations, baseline seeds, admin settings/profile/helper hardening, admin profile email uniqueness, and media Storage role policies are applied. Admin role helper RPC execution is revoked from browser roles in the exposed public schema, while RLS and Storage policies call private SECURITY DEFINER helpers from a non-exposed schema. The 2026-07-14 security advisor readback reports one unrelated Auth warning because leaked-password protection is disabled; the Media role migration introduced no Storage/RLS security lint. Cloudflare Pages Function source exists for forms, and basic deployed Contact/Sample Request persistence is verified on `https://urblo.pages.dev`: one valid tagged enquiry, one valid tagged sample request, the first sample item, and matching server-side audit rows were created; invalid tagged payloads created no lead or audit rows. The `/admin` auth shell, `/admin/settings`, `/admin/media`, `/admin/stone-library`, `/admin/projects`, `/admin/products`, `/admin/articles`, `/admin/leads`, and `/admin/audit` source screens are implemented. The dashboard now includes source-side health queries for published media metadata gaps, project claim review, missing Product/Article media, TBC Stone Library rows, and stale new leads. Stone Library source now includes finish image links from `stone_finish_images` to `media_assets`. Leads includes an owner/admin CSV export path that requires an audit event before download. `npm run agent:admin-crud-coverage` provides source-only coverage for the implemented `/admin` route/module/table/dashboard-health/audit/export paths before live credential checks run. `npm run agent:admin-live-readiness` also checks the configured browser-safe key's anonymous public/private boundary: published `site_settings` and `finish_definitions` must be readable, while `admin_profiles` must not return private rows without an authenticated admin session. `npm run agent:admin-auth-browser -- --allow-login --expect-unauthorized --strict` is staged to prove a valid Auth user with no active `admin_profiles` row reaches `/admin/unauthorized` and that all launch-critical admin route probes stay unauthorized without private module content. `npm run agent:admin-crud-live` now stages browser-key readback after tagged dashboard-health predicate matches, tagged public-content QA rows are published and archived, tagged private lead QA rows, and the optional `--include-storage` private object upload. `npm run agent:live-readiness` separately reports the unprofiled unauthorized browser QA gate, live admin prerequisites, guarded content import apply/merge/cutover approval, and final Turnstile inputs. The first owner and a QA Editor now exist, production browser configuration is present, Auth URL correction and the Media role boundary proof are complete, but authenticated UI golden workflows, repeated invite/recovery, Turnstile, and the pending Projects aggregate still require their own approved evidence.
+
+The Phase 1 Projects page-shaped aggregate source now adds protected `/api/admin/projects`, one private aggregate draft/revision contract, one service-role-only transactional RPC, server-orchestrated media promotion, public material/map/hotspot consumption, and a narrow archived-slug tombstone read. Its rollout is split across two reviewed local source migrations: `supabase/migrations/20260714052955_project_aggregate_drafts.sql` expands the schema/RPC and performs the child lifecycle backfill; `supabase/migrations/20260714052956_project_aggregate_write_lockdown.sql` later removes legacy browser writes and hardens public parent/child reads. Neither has been approved or applied, and neither is accepted through Jay's fool test.
 
 ## Current Supabase Project
 
@@ -24,6 +26,7 @@ The Supabase connector can access the Urblo project directly. Do not ask the use
 | Media Storage migrations | Applied on 2026-05-28: `media_storage_foundation`, `media_storage_listing_hardening` |
 | First content CRUD sources | Implemented on 2026-05-28: `/admin/stone-library` source screen for Stone Library groups, variants, and finish capabilities; expanded on 2026-05-29 with finish image links to media records. `/admin/projects` source screen for project records, facts, material schedules, media blocks, material maps, and hotspots; `/admin/products` source screen for product families, models, material defaults, and specs; `/admin/articles` source screen for article metadata and structured article blocks |
 | Project media block migration | Applied and verified on 2026-06-04: `supabase/migrations/20260603142359_project_media_blocks.sql` extends `project_media` for `normal_image`, `hotspot_image`, and optional `youtube_video` detail blocks. |
+| Project aggregate migrations | Source-only on 2026-07-14: expand migration `supabase/migrations/20260714052955_project_aggregate_drafts.sql` defines `private.project_drafts`, child lifecycle columns/backfill, revision conflicts, one service-role-only aggregate RPC, and archived-slug tombstones. Contract migration `supabase/migrations/20260714052956_project_aggregate_write_lockdown.sql` later revokes legacy browser table/sequence writes and hardens public Project parent/child policies. Each production apply requires its own Jay approval; neither is applied and no deployed write or fool-test result exists yet. |
 | First lead workflow source | Implemented on 2026-05-28: `/admin/leads` source screen for enquiry/sample request status, assignment, internal notes, notification state, sample item inspection, and audit-gated owner/admin CSV export |
 | First audit visibility source | Implemented on 2026-05-28: `/admin/audit` source screen for owner/admin audit event inspection |
 | First admin audit writer source | Implemented on 2026-05-28: `src/lib/adminAudit.ts` inserts audit rows after successful admin CRUD/workflow saves; live row creation remains pending browser-safe Supabase config and active admin profiles |
@@ -154,14 +157,16 @@ Acceptance:
 - Live browser save verification still requires browser-safe Supabase key configuration and an active admin/editor profile.
 
 ### Phase 4d - Projects CRUD Source
-Outcome: the project proof workflow has a protected source editing surface before public runtime migration.
+Outcome: the project proof workflow uses one protected page-shaped draft and one publish transaction instead of independent child-table forms.
 
 Acceptance:
-- In progress on 2026-06-02. `/admin/projects` source implements project, fact, material schedule, ordered media block, material map, and hotspot editing behind the existing Supabase Auth/profile gate.
-- The screen reads `projects`, `project_facts`, `project_materials`, `project_media`, `project_material_maps`, `project_hotspots`, `stone_groups`, `finish_definitions`, and `media_assets`; editor/admin/owner roles can save records and publish/archive projects, media blocks, maps, and hotspots after `supabase/migrations/20260603142359_project_media_blocks.sql` is applied.
-- The screen includes loading, empty, validation, save, publish/archive, read-only, claim-review, media block type, YouTube ID, draggable hotspot placement, and error states.
-- Public Project routes use Supabase published reads with static fallback.
-- Live browser save verification still requires browser-safe Supabase key configuration and an active admin/editor profile.
+- Phase 1 source on 2026-07-14 replaces the schema-shaped Projects form with one `ProjectAggregateDraft` covering project metadata, facts, materials, ordered media blocks, material maps, and hotspots. One sticky action bar owns Save, Publish, Hide, and preview; the preview shares `ProjectPageView` with the public route.
+- The browser loads the private-draft-aware list or one aggregate through bearer-authenticated `/api/admin/projects` GET, then sends `{ action, projectId, baseRevision, draft }` by POST. It does not mutate Projects child tables or write a second audit event directly.
+- Inline image selection uses searchable thumbnails and private upload with alt capture, capped at 10 MiB for this Worker copy/hash path. Material map points are created, dragged, or keyboard-moved on the image; percentage coordinates remain a storage detail. Editors cannot set project/fact/material proof-review decisions. Claim-bearing Editor changes return the affected decision to `needs_review`; image-only replacement does not.
+- The server keeps a non-persistent service-role client behind the Function boundary, uses it to verify the bearer Auth user and active profile before parsing a write or mutating data, rejects Viewer POST requests before reading the body, then validates publish blockers, linked published stone/finish rows, safe non-archived image media/alt/size state, and source versions before calling the single service-role-only `admin_project_aggregate` RPC. Contract migration `20260714052956_project_aggregate_write_lockdown.sql`, not the expand migration, removes authenticated insert/update/delete/truncate/reference/trigger privileges and all sequence privileges from `projects`, `project_facts`, `project_materials`, `project_material_maps`, `project_media`, and `project_hotspots`, so browser-key writes cannot bypass the aggregate revision, claim, audit, or transaction boundary after cutover.
+- Publishing can create-only copy private Storage media to a nonce-scoped public path and verify the bytes before the relational transaction. Attempted destinations are registered before upload so ambiguous network failures still enter reference-aware compensation. Retained uncertain objects are disclosed and recorded in a durable compensation audit; successful publish performs separate reference-aware private-source cleanup without rolling back the live Project. Storage is never described as SQL-atomic.
+- Public Project source now reads approved facts/materials plus published media/maps/hotspots, uses the shared Project renderer, and reads a narrow archived-slug tombstone RPC so Hide can suppress a matching bundled fallback after migration. Tombstone failure remains availability-first and preserves static fallback.
+- Both Projects migrations are source-only. Rollout is: separately approve/apply/read back expand migration `20260714052955_project_aggregate_drafts.sql`; verify the branch preview and separately approved authenticated save/refresh/publish/public-readback/hide workflow; promote the aggregate UI/endpoint to production; freeze Project editing; then separately approve/apply/read back contract migration `20260714052956_project_aggregate_write_lockdown.sql` and verify table/sequence privileges and public policies. Automated source gates cannot pass Jay's fool test, so Phase 4d is not complete or deployed.
 
 ### Phase 4e - Products CRUD Source
 Outcome: the product family workflow has a protected source editing surface before public runtime migration.
@@ -202,10 +207,10 @@ Acceptance:
 - The screen reads `admin_audit_events` and active `admin_profiles`; Website owner / CMS manager roles can inspect actors, actions, entity references, timestamps, and metadata once live browser-safe Supabase config exists.
 - The screen includes loading, empty, filter, detail, metadata JSON, restricted-role, and error states.
 - Audit event mutation remains intentionally absent from the screen.
-- Admin Settings, Media, Stone Library, Projects, Products, Articles, and Leads save flows call `recordAdminAuditEvent` after successful primary mutations. If the audit insert fails, the UI appends a Change history warning to the success notice instead of rolling back the primary save.
+- Admin Settings, Media, Stone Library, Products, Articles, and Leads save flows call `recordAdminAuditEvent` after successful primary mutations. Projects is the exception: aggregate Save/Publish/Hide writes its audit row inside the same database transaction. Outside Projects, if the audit insert fails, the UI appends a Change history warning instead of rolling back the primary save.
 - The one-time first-admin bootstrap script also writes `admin_profile.bootstrap` into `admin_audit_events` during approved `--allow-writes` mode. Because that operation runs through service-role setup rather than a signed-in admin browser session, the audit event uses `actor_user_id = null` and metadata for the target Auth user/profile.
 - Live audit row creation verification still requires browser-safe Supabase key configuration and an active profile. Server-side form audit events remain pending live form persistence verification.
-- `npm run agent:admin-crud-live` is now staged for that live proof. Default mode is no-write. With `--allow-writes`, it signs in using `URBLO_ADMIN_EMAIL`/`URBLO_ADMIN_PASSWORD` or uses an admin access token, then writes tagged QA rows across Settings, Media, Stone Library including finish images, Projects, Products, Articles, private lead workflow rows, and export-audit actions through authenticated RLS. `URBLO_FIRST_ADMIN_EMAIL` is not used as a live-login fallback, so bootstrap/readiness identity and live session credentials stay explicit. It verifies dashboard-health predicates against tagged QA rows before archive cleanup, publishes then archives public-facing QA parents where possible, verifies the exact expected tagged audit actions and entity types, verifies tagged archived public-content QA rows and private lead QA rows are not anonymously visible through browser-key reads, verifies optional private Storage upload objects can be read back by the signed-in admin and are not anonymously readable when `--include-storage` is used, and performs no physical deletes.
+- `npm run agent:admin-crud-live` is staged for the remaining schema-shaped modules. Default mode is no-write. With `--allow-writes`, it signs in through a real owner/admin session and writes tagged Settings, Media, Stone Library, Products, Articles, private lead, and export-audit rows through authenticated RLS. It deliberately excludes all six Project tables because contract migration B revokes their authenticated direct DML; Project Save/Publish/Hide proof must use `/api/admin/projects`. The verifier retains its dashboard, exact-audit, anonymous-boundary, optional private Storage readback, and no-physical-delete checks for the modules it covers.
 
 ### Phase 5 - Content Migration and CRUD
 Outcome: content can move out of static files in a controlled order.
@@ -222,14 +227,15 @@ Current preparation:
 - The preflight SQL keeps Supabase Data API exposure review separate from RLS review by checking table grants for `anon`, `authenticated`, and `service_role`, plus generated-identity sequence usage grants for `authenticated` and `service_role`.
 - The dry run can also write local ignored guarded draft import and rollback SQL artifacts with `npm run agent:content-import:apply-sql`. The generated apply SQL aborts unless `urblo.import_approved=true` is explicitly set inside the transaction, imports draft rows only, contains no destructive delete/truncate/drop operation, and aborts on existing parent natural-key matches unless `urblo.import_merge_approved=true` is separately set after merge/upsert review. The generated rollback SQL aborts unless `urblo.rollback_approved=true` is explicitly set, runs in reverse dependency order, and targets matching draft/import rows only.
 - Current Supabase target preflight on 2026-05-29 confirmed the content import target tables are still empty, seed tables contain 12 finish definitions and one site settings row, checked seed/import target tables have RLS enabled, every checked public content table has a public-select policy, and parent target tables used by the merge/conflict gates (`media_assets`, `stone_groups`, `products`, `projects`, and `articles`) contain 0 rows.
-- Current Supabase grant preflight on 2026-05-29 confirmed 19 public content tables expose anon `select`, 5 private/admin/lead tables deny anon `select`, all 24 launch tables deny anon writes, all 24 launch tables grant authenticated CRUD, all 24 launch tables grant service-role CRUD, and all 23 generated public sequences grant usage to authenticated and service-role.
+- Historical Supabase grant preflight on 2026-05-29 confirmed 19 public content tables exposed anon `select`, 5 private/admin/lead tables denied anon `select`, all 24 launch tables denied anon writes, all 24 launch tables granted authenticated CRUD, all 24 launch tables granted service-role CRUD, and all 23 generated public sequences granted usage to authenticated and service-role. Pending Project contract migration B intentionally changes that posture by revoking every non-SELECT authenticated privilege on the six canonical Project tables plus all authenticated privileges on their generated sequences, while retaining authenticated reads and the service-role aggregate path.
+- `npm run agent:content-import:live` no longer contains direct Project table upserts. In live mode it fails before login or writes when the payload contains Project rows, because a future Project re-import needs a separately reviewed aggregate-endpoint adapter. The previously approved 2026-06-04 draft import remains historical evidence; this fail-closed change does not alter those existing rows.
 - `npm run agent:public-supabase-readiness` now verifies the no-write public cutover posture: content import rows with status are all `draft`, the import has zero warnings/blockers, article block imports remain structured and free of placeholder/newsletter artifact regressions, generated guarded draft apply SQL still has manual import and merge approval gates, no destructive statements, no publish-status changes, forced `draft` import status, and parent natural-key conflict checks for `media_assets`, `stone_groups`, `products`, `projects`, and `articles`; generated guarded rollback SQL keeps its destructive gate manual and follows reverse dependency order, generated preflight SQL includes Data API grant inspection, public RLS policy source is published-only, anonymous grants are read-only, public runtime uses browser-key Supabase published reads with static fallback, and Cloudflare routes only invoke Pages Functions under `/api/*`.
 
 Order:
 1. Site settings is started under Phase 4a.
 2. Media records and Storage policy.
 3. Stone Library data. Source CRUD is implemented under `/admin/stone-library` for groups, variants, finish capabilities, and finish image links; live save verification and static-to-Supabase content import are pending browser-safe Supabase config and active admin/editor profile access.
-4. Projects and project material maps. Source CRUD is implemented under `/admin/projects`; live save verification and static-to-Supabase content import are pending browser-safe Supabase config and active admin/editor profile access.
+4. Projects and project material maps. The page-shaped aggregate source is implemented under `/admin/projects` and `/api/admin/projects`; production migration approval, preview deployment, authenticated aggregate save/publish/hide verification, and Jay's fool test remain pending.
 5. Products. Source CRUD is implemented under `/admin/products`; live save verification and static-to-Supabase content import are pending browser-safe Supabase config and active admin/editor profile access.
 6. Articles as structured blocks. Source CRUD is implemented under `/admin/articles`; the no-write content import now prepares draft structured article blocks from legacy newsletter HTML, while live save verification and approved static-to-Supabase content import are pending browser-safe Supabase config and active admin/editor profile access.
 
@@ -537,6 +543,8 @@ Fields:
 
 ## Projects
 
+The base relational tables and `20260603142359_project_media_blocks.sql` are applied. The private draft, child-status/backfill, aggregate RPC, and archived-slug entries below describe expand migration `20260714052955_project_aggregate_drafts.sql`. Final table/sequence revocation and public parent/child policy hardening belong to contract migration `20260714052956_project_aggregate_write_lockdown.sql`. Both remain source-only and require separate explicit production approvals.
+
 ### `projects`
 Purpose: project listing and detail pages.
 
@@ -575,6 +583,9 @@ Fields:
 - `fact_value_json jsonb`
 - `claim_status text not null default 'needs_review' check (claim_status in ('needs_review', 'approved', 'deferred'))`
 - `sort_order integer not null default 0`
+- `status text not null default 'draft' check (status in ('draft', 'published', 'archived'))`
+- `published_at timestamptz`
+- `archived_at timestamptz`
 - shared audit fields
 
 ### `project_media`
@@ -613,6 +624,9 @@ Fields:
 - `media_asset_id bigint references media_assets(id)`
 - `claim_status text not null default 'needs_review' check (claim_status in ('needs_review', 'approved', 'deferred'))`
 - `sort_order integer not null default 0`
+- `status text not null default 'draft' check (status in ('draft', 'published', 'archived'))`
+- `published_at timestamptz`
+- `archived_at timestamptz`
 - shared audit fields
 
 ### `project_material_maps`
@@ -648,6 +662,49 @@ Fields:
 
 Constraints:
 - Unique `project_material_map_id, hotspot_key`.
+
+### `private.project_drafts`
+Purpose: private page-shaped working copy for one Project aggregate, including records that have no canonical public row yet.
+
+Fields:
+- `project_id bigint primary key`; the aggregate RPC reserves the canonical Projects identity before a new Project is published.
+- `draft jsonb not null`; object containing `project`, `facts`, `materials`, `maps`, `mediaBlocks`, and `hotspots`.
+- `revision bigint not null`; optimistic concurrency token incremented by Save, Publish, and Hide.
+- `base_updated_at timestamptz`; canonical Project baseline returned as `baseUpdatedAt` and required on later writes. It protects first adoption as well as later Save/Publish/Hide from independently changed live rows.
+- `published_revision bigint`; last private revision committed to canonical public tables.
+- `created_by`, `updated_by`, `published_by`, and `archived_by` UUID actor references.
+- `created_at`, `updated_at`, `published_at`, and `archived_at` timestamps.
+
+Access:
+- The table is in the non-exposed `private` schema.
+- Table access is revoked from `public`, `anon`, and `authenticated`; the browser reaches it only through the authenticated Pages Function and service-role-only RPC.
+
+### `admin_project_aggregate(text, bigint, bigint, timestamptz, jsonb, uuid, text, jsonb)`
+Purpose: the single database transaction boundary for the Projects page aggregate.
+
+Behavior:
+- Accepts `list`, `get`, `save`, `publish`, and `archive` actions and rechecks/locks the supplied active owner/admin/editor/viewer profile. The role must exactly match the Function's initial trusted profile read or the request fails closed with `actor_role_changed`; Viewers may use only `list` and `get`, while aggregate writes require owner/admin/editor.
+- Enforces both the supplied private base revision and the canonical `baseUpdatedAt` token under the locked Project row. Existing canonical Projects require an exact non-null token even when no private draft exists yet, so the first aggregate Save/Publish/Hide cannot silently bless a legacy/manual edit made after load. Stale clients and out-of-band canonical edits receive a conflict before any private-draft or canonical write.
+- Save writes one normalized private draft revision and its `project.aggregate_draft.save` audit event without mutating canonical Project rows.
+- Publish first persists the current request draft as a new private revision, then validates proof decisions and the server-supplied media promotion plan, publishes/updates the Project aggregate, archives omitted prior child rows, and records `project.aggregate.publish` in the same Postgres transaction. It does not physically delete child rows.
+- Archive marks canonical Project/children and the private draft archived and records `project.aggregate.archive`, preserving history.
+- Runs as `SECURITY DEFINER` with `search_path = ''`; execute is revoked from `public`, `anon`, and `authenticated` and granted only to `service_role`.
+- Storage copies happen before this RPC in `functions/_lib/admin-projects.js`; the RPC validates source version/destination metadata and final public-ready media state but does not claim Storage atomicity.
+
+### `get_archived_project_slugs()`
+Purpose: narrow public tombstone read used only to suppress a bundled static Project after Hide.
+
+Behavior:
+- Returns distinct non-empty slugs from archived canonical Projects or archived private aggregate drafts without exposing draft JSON or other archived fields.
+- Runs as `SECURITY DEFINER` with `search_path = ''`; execute is available to `anon`, `authenticated`, and `service_role`.
+- Public runtime treats read failure as availability-first and preserves the static fallback; a Published CMS Project still wins over a stale tombstone.
+
+### Projects expand/contract rollout and rollback
+
+- Migration A, `20260714052955_project_aggregate_drafts.sql`, is the expand step. It is compatible with the currently deployed direct-write UI, but it creates schema/RPC objects and writes lifecycle backfill values, so applying it is still a production migration/write requiring Jay's explicit approval and readback.
+- After A, deploy and verify the branch preview. Any authenticated tagged Project or Storage mutation requires its own explicit approval. Freeze all Project editing before those writes begin and keep the freeze through preview evidence, aggregate runtime production promotion, B application, and B readback; this prevents legacy child-table writes during the expand/contract overlap. Promote the matching aggregate UI/endpoint to production only after preview evidence is acceptable.
+- Migration B, `20260714052956_project_aggregate_write_lockdown.sql`, is the contract step. Separately obtain Jay's approval, apply it only after the aggregate runtime is already in production, then read back all six Project table privileges, six sequence privileges, public policies, and the security advisor before lifting the edit freeze.
+- After B, the legacy browser-direct-write UI is intentionally incompatible. A Cloudflare-only rollback to that UI is invalid; runtime rollback must keep the aggregate UI/endpoint or be paired with a separately reviewed and approved forward-compatibility migration.
 
 ## Articles
 
@@ -758,7 +815,7 @@ Public routes should read only published data:
 - Media with `status = 'published'` and public-safe storage location.
 - Stone groups, variants, finishes, finish images with public statuses.
 - Products and models with public statuses.
-- Projects and related records with public statuses.
+- Projects plus Published related media/maps/hotspots and approved Published facts/materials. The narrow `get_archived_project_slugs()` function exposes only tombstone slugs needed to suppress a bundled fallback; it does not expose an archived row or private draft.
 - Articles and blocks with public statuses.
 
 Implementation options:
@@ -773,8 +830,9 @@ Baseline policies:
 - Anonymous users can read published public content only.
 - Anonymous users cannot read admin-only tables, enquiries, sample requests, audit events, or draft content.
 - Public form submissions should normally go through Cloudflare Pages Functions using server-side credentials after Turnstile validation, rather than allowing broad anonymous inserts directly from the browser.
-- Authenticated admin users can read and write according to their active `admin_profiles.role`.
+- Authenticated admin users can read and write according to their active `admin_profiles.role`, except canonical Project writes, which become endpoint-only after contract migration B.
 - `service_role` keys must never be shipped to browser code.
+- `private.project_drafts` has no browser-role table grant. The protected Pages Function verifies the bearer identity and calls the service-role-only Projects aggregate RPC; browser code must not call that RPC or private schema directly.
 
 Policy performance:
 - Wrap `auth.uid()` calls with `(select auth.uid())` in policies.

@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
-import { cwd, exit } from 'node:process';
+import { cwd, execPath, exit } from 'node:process';
 
 const root = cwd();
 const failures = [];
@@ -333,123 +334,8 @@ const pageChecks = [
   {
     label: 'Projects',
     file: 'src/pages/admin/AdminProjectsPage.tsx',
-    lifecycle: true,
-    tables: [
-      'projects',
-      'project_facts',
-      'project_materials',
-      'project_media',
-      'project_material_maps',
-      'project_hotspots',
-      'stone_groups',
-      'finish_definitions',
-      'media_assets',
-    ],
-    actions: [
-      'project.create',
-      'project.update',
-      'project.publish',
-      'project.archive',
-      'project_fact.create',
-      'project_fact.update',
-      'project_material.create',
-      'project_material.update',
-      'project_media.create',
-      'project_media.update',
-      'project_media.publish',
-      'project_media.archive',
-      'project_material_map.create',
-      'project_material_map.update',
-      'project_material_map.publish',
-      'project_material_map.archive',
-      'project_hotspot.create',
-      'project_hotspot.update',
-      'project_hotspot.publish',
-      'project_hotspot.archive',
-    ],
-    requiredText: [
-      'Current role is read-only for Projects',
-      'Archive hides the CMS version. A matching legacy project can remain visible during migration until CMS-only cutover.',
-      'Media blocks',
-      'Drag point placement',
-      'CmsPublicPageLink',
-      'Project proof review',
-      'Proof review',
-      'Website URL key',
-      'Search project, URL key, location, client',
-      'Structured detail',
-      'Optional advanced detail for structured project facts',
-      'Media from library',
-      'Project case studies',
-      'No project case studies yet',
-      'Create a project, then add facts, materials, a material map, and hotspots.',
-      'Media library items available for project images and video blocks.',
-      'Editing access',
-      'Nothing added yet.',
-      'YouTube link',
-      'in Media',
-      'Publish is locked for now',
-      'The first repair item is highlighted in the checklist below.',
-      'Start here',
-      'Website publish status',
-      'Live on website',
-      'Ready, not live yet',
-      'Not ready to publish',
-      'Start with:',
-      'Project actions',
-      'Save keeps changes in the CMS. Publish only when the checklist is clear.',
-      'Publish locked: clear',
-      'Published changes can appear on the website after you save.',
-      'highlightedPublishBlockerId',
-      'Published is allowed only after the Publish checklist is clear. Use Draft while editing.',
-      'getProofReviewLabel(row.claim_status)',
-      'will keep Project Publish locked until you choose Approved for public use or Deferred / keep private.',
-      'getProjectStatusLabel(row.status)',
-      'Published blocks can appear on the public project page. Draft blocks stay hidden while you edit.',
-      'Published maps can appear on the public project page when used by a media block. Draft maps stay hidden.',
-      'Published hotspots can appear on a published material map. Draft hotspots stay hidden.',
-      'Publishing rules',
-      'Deferred / keep private',
-    ],
-    forbiddenText: [
-      'Claims checked',
-      'Claim status',
-      'Cannot publish yet.',
-      'Project claim review',
-      'Search projects, slug, location, client',
-      'label="Slug"',
-      'Location TBC',
-      'JSON value',
-      'Project slug must be lowercase kebab-case.',
-      'Fact JSON value is not valid JSON.',
-      'ID linking',
-      'YouTube URL or ID',
-      'media records available for ID linking',
-      'Stone group ID',
-      'proof-sensitive rows',
-      'Finish definition ID',
-      'Hotspot map ID',
-      'Project material ID',
-      'valid YouTube URL or video ID',
-      'Media asset',
-      'Project records',
-      'No project records yet',
-      'Create a project record',
-      'Media library records available for project images and video blocks.',
-      'Ask an editor/admin to update project records.',
-      'Create or select a project record',
-      'Start with the highlighted checklist item below.',
-      'The checklist below has highlighted the first repair item.',
-      '${facts.length} rows',
-      '${materials.length} rows',
-    ],
-    requiredPatterns: [
-      { pattern: /data-hotspot-stage/, label: 'hotspot placement stage marker' },
-      { pattern: /data-hotspot-marker/, label: 'hotspot placement marker control' },
-      { pattern: /onPointerDown=\{/, label: 'hotspot pointer-down placement handler' },
-      { pattern: /onPointerMove=\{/, label: 'hotspot pointer-move drag handler' },
-      { pattern: /onPositionChange=\{\(nextPosition\)/, label: 'hotspot coordinate update callback' },
-    ],
+    aggregate: true,
+    tables: [],
   },
   {
     label: 'Products',
@@ -749,7 +635,7 @@ const forbiddenBrowserSecretPatterns = [
 
 const forbiddenAdminDestructivePatterns = [
   {
-    pattern: /\.delete\s*\(/,
+    pattern: /\.from\s*\([^)]*\)\s*\.delete\s*\(/,
     label: 'Supabase/PostgREST delete mutation',
   },
   {
@@ -1155,6 +1041,11 @@ function checkPage(page) {
   requireIncludes(text, '<RequireAdmin>', page.file);
   requireIncludes(text, '<AdminShell', page.file);
 
+  if (page.aggregate) {
+    notes.push(`- ${page.label}: aggregate draft + server transaction contract`);
+    return;
+  }
+
   for (const table of page.tables) {
     requireRegex(
       text,
@@ -1294,7 +1185,8 @@ function checkDashboardEditorLanguage() {
   requireNotIncludes(media, 'Activity log recorded.', 'src/pages/admin/AdminMediaPage.tsx');
   requireIncludes(dashboard, 'handoffLabel', 'src/pages/admin/AdminDashboardPage.tsx');
   requireNotIncludes(content, 'dependency:', 'src/pages/admin/adminContent.ts editor module cards');
-  requireIncludes(shell, 'A matching legacy page may remain', 'src/pages/admin/AdminShell.tsx migration visibility warning');
+  requireNotIncludes(shell, 'legacy', 'src/pages/admin/AdminShell.tsx shared editor chrome');
+  requireNotIncludes(shell, 'migration', 'src/pages/admin/AdminShell.tsx shared editor chrome');
   requireIncludes(primitives, 'a matching legacy static page', 'src/pages/admin/AdminCmsPrimitives.tsx migration visibility warning');
   requireIncludes(primitives, 'Can appear on website', 'src/pages/admin/AdminCmsPrimitives.tsx');
   requireIncludes(primitives, 'Safe to edit', 'src/pages/admin/AdminCmsPrimitives.tsx');
@@ -1358,14 +1250,35 @@ function checkAdminLiveVerifierBoundaries() {
     'stone_finish_image.publish',
     'product.publish',
     'product_model.publish',
-    'project.publish',
-    'project_media.publish',
-    'project_material_map.publish',
-    'project_hotspot.publish',
     'article.publish',
     'article_block.publish',
   ]) {
     requireIncludes(text, action, 'scripts/check-admin-crud-live.mjs');
+  }
+
+  requireIncludes(
+    text,
+    'Projects were not mutated: their live workflow must use the protected aggregate endpoint.',
+    'scripts/check-admin-crud-live.mjs Projects endpoint-only boundary',
+  );
+  for (const table of [
+    'projects',
+    'project_facts',
+    'project_materials',
+    'project_material_maps',
+    'project_media',
+    'project_hotspots',
+  ]) {
+    requireNotIncludes(
+      text,
+      `insertRow(config, accessToken, '${table}'`,
+      `scripts/check-admin-crud-live.mjs direct ${table} mutation`,
+    );
+    requireNotIncludes(
+      text,
+      `transitionStatus(config, accessToken, authUser.id, '${table}'`,
+      `scripts/check-admin-crud-live.mjs direct ${table} transition`,
+    );
   }
 
   for (const table of ['enquiries', 'sample_requests', 'sample_request_items']) {
@@ -1548,7 +1461,6 @@ function checkAdminParentOwnershipSafety() {
 function checkAdminLoadingAndSaveLockSafety() {
   const pages = [
     ['src/pages/admin/AdminArticlesPage.tsx', readRequired('src/pages/admin/AdminArticlesPage.tsx')],
-    ['src/pages/admin/AdminProjectsPage.tsx', readRequired('src/pages/admin/AdminProjectsPage.tsx')],
     ['src/pages/admin/AdminProductsPage.tsx', readRequired('src/pages/admin/AdminProductsPage.tsx')],
     ['src/pages/admin/AdminStoneLibraryPage.tsx', readRequired('src/pages/admin/AdminStoneLibraryPage.tsx')],
   ];
@@ -1572,9 +1484,9 @@ function checkAdminLoadingAndSaveLockSafety() {
 
   for (const [path, text, selector] of [
     [pages[0][0], pages[0][1], 'async function selectArticle'],
-    [pages[2][0], pages[2][1], 'async function selectProduct'],
-    [pages[3][0], pages[3][1], 'async function selectGroup'],
-    [pages[3][0], pages[3][1], 'async function selectVariant'],
+    [pages[1][0], pages[1][1], 'async function selectProduct'],
+    [pages[2][0], pages[2][1], 'async function selectGroup'],
+    [pages[2][0], pages[2][1], 'async function selectVariant'],
   ]) {
     const start = text.indexOf(selector);
     const nextFunction = text.indexOf('\n    function ', start + selector.length);
@@ -1585,6 +1497,21 @@ function checkAdminLoadingAndSaveLockSafety() {
     requireIncludes(selectionSource, 'setIsLoading(true)', `${path} ${selector} bundle loading lock`);
     requireIncludes(selectionSource, 'setIsLoading(false)', `${path} ${selector} current selection loading release`);
   }
+}
+
+function checkProjectsAggregateContract() {
+  const result = spawnSync(execPath, ['scripts/check-admin-projects-aggregate.mjs'], {
+    cwd: root,
+    encoding: 'utf8',
+  });
+
+  if (result.status !== 0) {
+    const detail = [result.stdout, result.stderr].filter(Boolean).join('\n').trim();
+    failures.push(`Projects aggregate behavior verifier failed${detail ? `:\n${detail}` : ''}`);
+    return;
+  }
+
+  notes.push('- Projects behavior: one aggregate endpoint, shared preview, visual hotspots, inline media');
 }
 
 checkRoutes();
@@ -1599,6 +1526,7 @@ checkAdminRemovalContract();
 checkAdminMediaSafety();
 checkAdminParentOwnershipSafety();
 checkAdminLoadingAndSaveLockSafety();
+checkProjectsAggregateContract();
 
 if (failures.length) {
   console.error('Admin CRUD coverage checks failed:');

@@ -2404,6 +2404,9 @@
       "notes": [
         "2026-07-14: Registered from Jay's approved docs/ADMIN_UX_RESHAPE_PLAN.md directive. The plan is the temporary design authority until its sunset clause is completed.",
         "2026-07-14: Phase 0 is closed. Production Auth Site URL/exact invite-recovery redirects and Media role migration/policy readback are complete; the separately approved live proof passed for marker `media-role-1784006428939-3520f05f`, and an independent `storage.objects` readback found zero objects for both attempted markers. Promoted into `now`; the decision-gated Turnstile task moved to `next` to preserve the max-three rule.",
+        "2026-07-14: Phase 1 Projects is implemented as a local source candidate: one page-shaped aggregate draft and action bar, shared public/draft rendering, accessible content ordering, a 1116px master/detail workspace, visual hotspots, inline private-first media, exact retrieval/refresh of every referenced image beyond the bounded picker window, a protected Pages Function, an atomic service-role-only aggregate RPC, and archived-slug fallback suppression. Present hardening includes PGRST/HTTP error mapping, server-enforced Editor claim normalization, transaction-locked exact actor-role recheck, required first-adoption canonical `baseUpdatedAt` tokens, pre-mutation Save/Publish/Hide conflict detection, transaction-local media/taxonomy reference rechecks, and reference-aware compensation for newly created public copies after a failed publish.",
+        "2026-07-14: Projects rollout is split into source-only expand migration `supabase/migrations/20260714052955_project_aggregate_drafts.sql` and later contract migration `supabase/migrations/20260714052956_project_aggregate_write_lockdown.sql`; neither is approved or applied. Required order is local/container gate and no-write preview smoke, separate A approval/apply/readback, separate tagged-write approval, continuous Project edit freeze, authenticated preview workflow, aggregate runtime production promotion, separate B approval/apply/readback with privilege/policy verification, then lift the freeze and run Jay's fool test. After B, Cloudflare-only rollback to the legacy direct-write UI is invalid. Keep this task in `now`; source completion is not handoff completion or self-certification.",
+        "2026-07-14: The full host-side local suite passes, including build/lint/typecheck/smoke, Admin/Harness/readiness checks, plan-only live runners, JSON/diff checks, and a read-only Playwright implementation check at 1116px and 390px. That browser pass caught and closed a mobile shell overflow and verified the inline dirty-navigation choice; it used a mocked aggregate GET and forced POST to 405, so it is not authenticated preview write evidence or Jay's fool test. The clean-container gate remains the final post-commit pre-push check.",
         "Do not substitute another copy-only Clarify pass for structural work, and update behavior verification when the new UI invalidates literal string assertions.",
         "Jay owns the fool-test acceptance. Agent checks, screenshots, route shells, or self-review cannot certify that criterion."
       ],
@@ -2411,6 +2414,7 @@
         "Projects is edited as one page-shaped aggregate draft with one Save action, no parallel child Save buttons, and no confirm dialogs.",
         "Draft preview reuses the public Project rendering and reflects current unsaved editor state.",
         "Facts, materials, media, maps, and hotspots appear as sections in public-page order; child publish states and database-shaped controls are not exposed.",
+        "Facts, materials, media blocks, maps, and map-scoped points can be reordered through accessible controls without exposing raw sort indexes, and the 1116px workspace keeps the record list beside the editor.",
         "Hotspots are placed and moved visually; editors never type raw x_percent or y_percent values.",
         "Media upload and library selection are inline, private-first, and publish-time promotion is handled by an authenticated audited server path without exposing bucket language.",
         "Aggregate save is all-or-nothing and writes its audit event server-side.",
@@ -2423,6 +2427,7 @@
         "npm run lint",
         "npx tsc -b",
         "npm run agent:smoke",
+        "npm run agent:admin-projects-aggregate",
         "npm run agent:admin-crud-coverage (updated for behavior-level expectations; do not preserve obsolete UI strings)",
         "npm run agent:admin-cms-predeploy",
         "npm run agent:admin-config-gate",

@@ -1,6 +1,6 @@
 # Agent Verification Matrix
 
-Last updated: 2026-07-13
+Last updated: 2026-07-14
 
 ## Purpose
 Use this matrix to choose the smallest verification set that proves a change is safe. Runtime changes still need the full build/lint/typecheck gate unless a task explicitly defines a temporary exception.
@@ -99,6 +99,7 @@ Run:
 - `npm run agent:content-import:apply-sql` when changing static-to-Supabase import or rollback SQL artifact generation.
 - `npm run agent:public-supabase-readiness` when changing public-content import status rules, structured article-block import assumptions, public read cutover assumptions, static/public route boundaries, or Supabase published-only policy checks.
 - `npm run agent:public-content-overlay` when changing a public Project, Product, Article, or Stone Library service adapter, canonical content key, Published/static merge rule, public media resolver, or list/detail/filter fallback behavior.
+- `npm run agent:admin-projects-aggregate` when changing the Project aggregate type/mapping, shared draft/public renderer, archived Project tombstone merge, or publish-blocker behavior.
 - `npm run agent:smoke` when route output changes.
 
 Evidence to record:
@@ -156,6 +157,7 @@ Evidence to record:
 - Direct-refresh checks for declared public routes.
 - Deployed route chunk discovery, admin bundle config/profile-gate contract, and browser service-role secret boundary checks.
 - API safe-failure results for unsafe methods, OPTIONS/CORS preflight, malformed JSON, and invalid payloads.
+- For protected `/api/admin/projects`, unauthenticated GET and POST must return structured `401` responses before configuration/body/database work; OPTIONS must advertise GET/POST plus authorization/content-type. This no-write preview check does not exercise an authenticated aggregate mutation.
 - DNS cutover and rollback assumptions.
 
 ### Supabase Schema or Data Migration
@@ -171,6 +173,7 @@ Run:
 - `npm run agent:content-import:apply-sql` when changing guarded static-to-Supabase import or rollback SQL artifacts.
 - `npm run agent:public-supabase-readiness` when public content import/cutover safety is in scope.
 - `npm run agent:public-content-overlay` when the Published/static migration merge or canonical route keys change.
+- `npm run agent:admin-projects-aggregate` when changing either `20260714052955_project_aggregate_drafts.sql` or `20260714052956_project_aggregate_write_lockdown.sql`, `private.project_drafts`, the service-role-only aggregate RPC, Project table/sequence privilege lockdown, Project public parent/child reads, or archived-slug tombstones.
 
 Evidence to record:
 - Tables/relations changed.
@@ -191,6 +194,7 @@ Run:
 - `npm run agent:forms-ui` when changing Contact form UI state, submit routing, or sample-request mode.
 - `npm run agent:capabilities-ui` when changing the Capability Statement download form, PDF asset path, shared CTA data, or Turnstile reuse on `/capabilities`.
 - API-level positive and negative submission tests when endpoints exist.
+- `npm run agent:admin-projects-aggregate` when changing the protected `/api/admin/projects` handler, bearer/profile authorization, request validation, service-role boundary, media promotion/compensation, or aggregate RPC invocation.
 - `npm run agent:forms-live -- --allow-writes --allow-email --require-email` when verifying real notification delivery after SMTP2GO variables and Jay approval are available.
 - `npm run agent:forms-live -- --allow-writes --require-turnstile --turnstile-token <token>` when verifying real Turnstile handling after `VITE_TURNSTILE_SITE_KEY`, the Turnstile secret/token, and Jay approval are available.
 
@@ -216,6 +220,7 @@ Run:
 - `npm run agent:smoke`
 - `npm run agent:admin-cms-predeploy` when preparing the current CMS UX stack for deployment; it runs the non-preview local admin/content/deployment gates and finishes with report-only handoff readiness. Run `npm run agent:smoke` and `npm run agent:admin-config-gate` separately for preview/browser gates.
 - `npm run agent:admin-crud-coverage` when changing admin routes, module screens, table coverage, audit writers, export controls, role gates, or launch-critical removal/archive behavior.
+- `npm run agent:admin-projects-aggregate` when changing the Projects vertical prototype. It verifies the one-draft shape, one protected endpoint, revision guard, one action bar, shared public/preview renderer, visual hotspots, inline private media, server audit transaction, create-only public-media copy/compensation, private draft table, and service-role-only aggregate RPC. It performs no Supabase writes and does not apply the pending migration.
 - `npm run agent:admin-config-gate` when changing admin route protection, config-missing behavior, or no-config browser QA coverage. Without `--base-url`, it must build an isolated temporary bundle with browser-safe Supabase variables explicitly cleared; it must not reuse the normal configured `dist/`.
 - `npm run agent:admin-auth-browser` in plan-only mode when changing admin browser auth QA tooling; run `npm run agent:admin-auth-browser -- --allow-login --strict` only after browser-safe Supabase config and a real active admin email/password are available. Without `--base-url`, it must build current source into an isolated configured bundle, enforce the entry-size/no-eager-Supabase boundary, prove static public fallback with the Supabase chunk blocked, use stable semantic login markers, and revisit a protected route after Sign out.
 - `npm run agent:admin-auth-browser -- --allow-login --expect-unauthorized --strict` when a valid Auth user without an active `admin_profiles` row is available through `URBLO_UNPROFILED_EMAIL` and `URBLO_UNPROFILED_PASSWORD`; the check must keep all launch-critical admin route probes on `/admin/unauthorized` without private module content.
@@ -225,6 +230,7 @@ Run:
 - `npm run agent:admin-media-role-boundary-live` in plan-only mode when changing the Storage role verifier; after the migration is applied/read back and Jay approves tagged Storage writes, run `npm run agent:admin-media-role-boundary-live -- --allow-writes --strict` with distinct active Editor and owner/admin credentials to prove Editor private insert/update success, Editor public insert/update denial, owner/admin public insert/update success, and cleanup.
 - `npm run agent:live-readiness -- --base-url <production-origin> --admin-email <first-admin-email>` before requesting live inputs. The Media role check must remain blocked until the migration readback is complete, distinct Editor/owner credentials exist, Jay approves that exact tagged Storage role proof, and `--media-role-migration-verified --media-role-writes-approved` records those non-secret prerequisites.
 - Browser checks are mandatory for any handoff claim. Route-shell checks are useful but do not prove editing.
+- The Phase 1 Projects source is not accepted by its own verifier. First obtain separate approval for/apply/read back expand migration `20260714052955_project_aggregate_drafts.sql`; then, under a separate tagged-write approval, freeze all Project editing and collect authenticated Save/refresh, preview parity, Publish/public readback including a saved material map/hotspot, Hide plus archived-slug suppression, failed/conflicting save recovery, and private-media promotion/compensation evidence. Keep the freeze through aggregate runtime production promotion, a fresh approval/application of contract migration `20260714052956_project_aggregate_write_lockdown.sql`, and readback of all six table privileges, six sequence privileges, public policies, and the security advisor. B makes Cloudflare-only rollback to the old direct-write UI invalid. Jay alone passes the fool test; an implementing or reviewing agent must not self-certify it.
 - `docs/ADMIN_PRODUCTION_WALKTHROUGH.md` after the current CMS UX stack is deployed and before final non-technical editor handoff.
 - Update `docs/agent/admin-handoff-evidence.json` only after the fixed production deployment completes the Storage role-boundary prerequisite and every required golden workflow with evidence references, one deployment SHA, verified/expiry timestamps, and the actual admin identity.
 - `npm run agent:admin-handoff-readiness -- --base-url https://urblo.com.au --admin-email info@urblo.com.au --strict` after structured evidence is complete. WORKLOG prose or a `Pass` table cell cannot satisfy this gate by itself.
@@ -238,7 +244,7 @@ Evidence to record:
 - Applied Storage migration/policy readback plus Editor private insert/update success, Editor public insert/update denial, and owner/admin public insert/update success.
 - Any content type still requiring code edits.
 - Production walkthrough results for the Handoff Evidence Matrix, Dashboard operational queue, responsive navigation at mobile/1116px/wide widths, Projects task-workspace usability, Settings invite/access, Stone Library publish path, Article publish path, editor-guide usability, and Open public page confirmation when claiming editor-handoff readiness.
-- Golden workflow results for authenticated sign-in, draft save/refresh persistence, private Media Storage promotion, Published public readback, archive behavior, Published Settings public readback, invite/password setup, logout/password sign-in, password recovery, responsive navigation at mobile/1116px/wide widths, the Projects stable-record/task-workspace/dirty-guard/blocker-jump/media-search flow, the Dashboard operational queue, and non-technical editor-guide usability.
+- Golden workflow results for authenticated sign-in, draft save/refresh persistence, private Media Storage promotion, Published public readback, archive behavior, Published Settings public readback, invite/password setup, logout/password sign-in, password recovery, responsive navigation at mobile/1116px/wide widths, the Projects stable-record/page-shaped aggregate/dirty-guard/blocker-jump/shared-preview/inline-media/visual-hotspot flow, the Dashboard operational queue, and non-technical editor-guide usability.
 - Supabase Auth custom SMTP delivery/log evidence and readback of the Auth Site URL plus exact allowed invite/recovery Redirect URLs. A delivered email whose callback falls back to localhost is a failing result, not partial handoff completion. Contact/Sample Request SMTP proof is not equivalent.
 - Final handoff readiness audit result, including whether the strict command passed or which production evidence is still missing.
 

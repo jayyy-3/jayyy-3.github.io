@@ -1,6 +1,6 @@
 # Urblo Design Contract
 
-Last updated: 2026-07-13
+Last updated: 2026-07-14
 
 ## Purpose
 This document governs Urblo's visual and UX execution. It is the design contract for Codex work in this repository.
@@ -19,6 +19,7 @@ This file does not replace `docs/brand-baseline.md`. The brand baseline defines 
 
 ## Source Material
 - `docs/brand-baseline.md`
+- `docs/ADMIN_UX_RESHAPE_PLAN.md` for the approved 2026 admin redesign sequence, acceptance ownership, and sunset boundary while that instruction remains active.
 - Prior website design discussion archive reviewed while authoring this contract: workflowy notes, website Q&A draft, newsletters, and sales emails. These are source references, not canonical repo files.
 - Current React implementation and user feedback from Stone Library, Contact, and Our Story work.
 
@@ -292,13 +293,15 @@ Interaction contract:
 - Lists and filters may be compact, but the selected record has a stable URL and remains selected after refresh.
 - Show one editing stage at a time. Use overview, proof/content, media, and advanced/map sections rather than mounting every relationship editor in one continuous form.
 - Preserve unsaved input. Warn before record switches, route changes, refresh, or new-record actions would discard changes.
-- Use one sticky save/status bar with explicit `Save draft`, `Preview`, `Publish`, and `Archive` outcomes. A status dropdown must not compete with separate lifecycle buttons.
+- Use one sticky save/status bar with explicit `Save`, `Open preview`, `Publish`, and `Hide` outcomes. A status dropdown or a second section-level save must not compete with these lifecycle actions.
 - Published records must not silently change live content through an ordinary Save. Editing live content needs an explicit draft/review model or an equally clear warning and confirmation contract.
 - Media selection must be searchable and virtualized or paginated; never repeat a 100+ option native select for every media field.
 - Private uploaded media becomes public only through a real Storage promotion step. Changing a bucket label is not publication.
 - Dashboard first view prioritizes real work: new customer leads, publish blockers, failed operations, and recent editor activity. Product education belongs behind concise help affordances.
 - Owner/admin/editor/viewer capabilities must match UI, RLS, and the editor guide. Do not describe review-only publishing restrictions that the database does not enforce.
 - Mobile uses a clear menu/drawer or comparably discoverable navigation. Medium desktop widths must not clip header actions.
+- Shared admin chrome and every reshaped workflow must not expose implementation history, migration, legacy-fallback, table, bucket, or rollback language. Put operational detail in runbooks and translate editor recovery into the next safe action; older modules are corrected when their approved reshape phase begins.
+- Ordered public modules use direct, accessible move controls or an equally discoverable reorder interaction; editors never type storage sort indexes.
 
 System and accessibility states:
 - Authentication, invitation, password setup, recovery, unauthorized, loading, saving, saved, partial failure, offline/retry, and expired-link states each need a clear recovery action.
@@ -310,13 +313,18 @@ Current repair state:
 - Login has been reduced in local source from a marketing-style split hero to a focused account form with password recovery and safe invite/recovery setup.
 - Admin modules are route-lazy-loaded, and the header keeps actions wrapped below wide desktop widths.
 - Media list/new-record reliability is repaired in source; every initial file upload now starts private, and owner/admin promotion is locked to the selected row's original path/version with retain-on-uncertainty cleanup. Deployed browser proof remains required.
-- Projects now uses stable `/admin/projects/:projectId` URLs and one task workspace at a time; it protects Overview, Fact, Material, Media, Map, and Hotspot edits, keeps child saves isolated, jumps blockers to the right workspace, and offers searchable media selection in source. It still needs paginated/virtualized media beyond the current 500-item cap, a public preview contract, and authenticated deployed browser proof before this pattern is copied to other modules.
+- The Phase 1 Projects vertical prototype is now page-shaped in local source: one aggregate draft covers the Project, facts, materials, ordered media, maps, and hotspots; Overview, Facts, Materials, Media, and Maps are progressively disclosed instead of behaving like separate database forms. One sticky action bar owns Save, preview, Publish, and Hide, with at most three plain-language blockers that open the relevant section. Facts, materials, media blocks, maps, and points have keyboard-accessible up/down ordering without raw sort fields; redundant clean/live/hidden lifecycle writes are disabled.
+- At medium desktop widths around 1116px, the Projects record list and editor remain a two-column task workspace with a sticky, independently scrolling list. On narrow screens, section headings and action groups wrap instead of squeezing or overflowing. Material-map tabs expose roving keyboard navigation and an associated tabpanel.
+- Project preview uses the same `src/components/projects/ProjectPageView.tsx` renderer as the public detail route, so the editor inspects the page they are preparing rather than a parallel admin approximation. Media fields combine a searchable thumbnail picker with private inline upload and alt capture; material-map points are placed directly on the image by pointer or keyboard rather than by exposing raw coordinates.
+- The bounded media picker must still resolve every image already referenced by the current draft, even when that asset is older than the latest picker window. Long-lived private previews refresh their signed URLs before expiry so a stable editing session does not lose its selected images.
+- This Projects pattern is source-only until expand migration `supabase/migrations/20260714052955_project_aggregate_drafts.sql` and later contract migration `supabase/migrations/20260714052956_project_aggregate_write_lockdown.sql` receive their separate production approvals in the documented order, the branch/runtime pass preview and authenticated workflow checks, and Jay passes the fool test. Source gates or agent review cannot certify the editor experience, and the pattern must not be copied to other modules before that acceptance.
 
 Admin usability acceptance:
 - A new editor can complete invite, password setup, sign-in, and sign-out without assistance.
 - A trained editor can find an existing Project, change one safe field, save, refresh, and confirm persistence in under two minutes.
 - The editor can identify the first publish blocker without scrolling through unrelated sections.
 - Publishing and archiving produce a verified public result or an explicit, recoverable failure; no partial success is presented as complete.
+- Jay owns the final fool test for this workflow. Passing source, automated, or agent-run browser checks is necessary evidence, not UX acceptance.
 
 ## Component Rules
 
