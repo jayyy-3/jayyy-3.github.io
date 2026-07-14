@@ -19,7 +19,7 @@ const expectedMigrations = [
   '202605290001_security_definer_private_helpers.sql',
   '202605290002_admin_profile_email_uniqueness.sql',
   '202605290003_sample_request_atomic_insert.sql',
-  '20260713065628_media_public_bucket_role_hardening.sql',
+  '20260714050750_media_public_bucket_role_hardening.sql',
 ];
 
 const publicContentTables = [
@@ -326,7 +326,7 @@ const foundationSchema = readRequired('supabase/migrations/202605270001_foundati
 const baselineSeed = readRequired('supabase/migrations/202605270004_baseline_seed.sql');
 const storageFoundation = readRequired('supabase/migrations/202605280002_media_storage_foundation.sql');
 const storageHardening = readRequired('supabase/migrations/202605280003_media_storage_listing_hardening.sql');
-const storageRoleHardening = readRequired('supabase/migrations/20260713065628_media_public_bucket_role_hardening.sql');
+const storageRoleHardening = readRequired('supabase/migrations/20260714050750_media_public_bucket_role_hardening.sql');
 const publicHelperGrants = readRequired('supabase/migrations/202605280005_security_definer_function_grants.sql');
 const privateHelpers = readRequired('supabase/migrations/202605290001_security_definer_private_helpers.sql');
 const emailUniqueness = readRequired('supabase/migrations/202605290002_admin_profile_email_uniqueness.sql');

@@ -92,10 +92,12 @@ Five design rules follow. Every screen you build or rebuild must satisfy all fiv
 The existing P0 configuration work in `docs/HANDOFF.md` is prerequisite and is
 NOT replaced by this plan:
 
-- Correct and read back the Supabase Auth Site URL and exact invite/recovery
-  redirect allowlist (the observed `http://localhost:3000` callback fallback).
-- With approval, apply and live-verify
-  `supabase/migrations/20260713065628_media_public_bucket_role_hardening.sql`.
+- Completed 2026-07-14: correct and read back the Supabase Auth Site URL and
+  exact invite/recovery redirect allowlist (the observed
+  `http://localhost:3000` callback fallback).
+- Migration applied/read back 2026-07-14: with separate approval, live-verify
+  `supabase/migrations/20260714050750_media_public_bucket_role_hardening.sql`
+  through the tagged Editor/owner Storage boundary proof.
 
 These are environment-level fixes needed regardless of UI shape. However, the
 twelve golden-workflow UI proofs should be executed against the reshaped
@@ -224,7 +226,7 @@ Phase 1 is done only when ALL of the following hold:
 - If schema changes are needed (e.g., an RPC for atomic aggregate save), add a
   migration under `supabase/migrations/` following existing naming, keep it
   source-verified, and flag production apply as an approval-gated step in
-  `docs/HANDOFF.md` — the same discipline as the pending media role migration.
+  `docs/HANDOFF.md` — the same discipline used for the separately approved media role migration.
 
 ## Key File Map
 

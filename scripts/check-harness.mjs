@@ -124,7 +124,7 @@ try {
   const mediaRolePrerequisite = evidence.productionPrerequisites?.mediaPublicBucketRoleBoundary
   if (
     !mediaRolePrerequisite ||
-    mediaRolePrerequisite.migration !== '20260713065628_media_public_bucket_role_hardening.sql' ||
+    mediaRolePrerequisite.migration !== '20260714050750_media_public_bucket_role_hardening.sql' ||
     !Array.isArray(mediaRolePrerequisite.evidenceRefs)
   ) {
     failures.push(

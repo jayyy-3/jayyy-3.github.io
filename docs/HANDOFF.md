@@ -47,7 +47,8 @@ SEO:
 
 Supabase:
 - Project `Urblo` (`npkidywzwddbnfrnxlmo`, `ap-southeast-2`) has launch schema, RLS, policies, Storage buckets, baseline seeds, admin helper hardening, and admin profile email uniqueness applied and verified.
-- Local migration `supabase/migrations/20260713065628_media_public_bucket_role_hardening.sql` closes the remaining direct-API media boundary by keeping editor uploads private and requiring owner/admin for public-bucket insert/update. It is source-verified but not applied or live-read back in production.
+- Production migration `supabase/migrations/20260714050750_media_public_bucket_role_hardening.sql` is applied and read back. Editors retain insert/update access to `urblo-admin-media`; only owner/admin may insert/update `urblo-public-media`. The tagged live Editor/owner Storage role proof remains approval-gated.
+- The 2026-07-14 Supabase security advisor readback reports one separate Auth warning because leaked-password protection is disabled. This setting was not changed; no migration-specific Storage/RLS security lint was introduced.
 - Public Projects, Products, Articles, and Stone Library listing/detail prefer Published CMS content with static fallback.
 - Public content import/public-read cutover remains guarded: imported production content stays Draft until reviewed, public reads expose Published CMS content only, and static fallback stays explicit.
 - Imported production content is intentionally in CMS Draft state until an editor reviews and publishes items.
@@ -63,12 +64,12 @@ Admin CMS:
 - The deployed repairs cover the auth callback and non-blocking same-user refresh; isolated-session invite/recovery password writes that cannot replace the shared browser session; Media loading, private-only initial upload, owner/admin-only public-bucket write policy source, and create-only Storage promotion bound to the selected row's original path/version with reference-safe cleanup disclosure. They also cover public Storage URL resolution, per-record public overlay with Project fallback-field preservation, normalized/refetchable Published settings consumption, parent-bound/stale-safe child saves across Projects, Products, Articles, and Stone Library, loading-state interaction locks, the Articles validation lockup, admin route chunks/provider continuity, medium-desktop header clipping, and the first Projects task-workspace redesign with all-editor dirty guards.
 - The PR `#6` production runtime proves static public fallback for Products, Projects, and Articles under a blocked Supabase chunk plus all nine authenticated admin routes, sign-out, and protected-route revisit. Editor writes, Storage role boundaries, valid invite/recovery callbacks, and the twelve UI golden workflows are still not proven. `docs/agent/admin-handoff-evidence.json` intentionally remains `revalidation_required`.
 - `npm run agent:admin-handoff-readiness -- --base-url https://urblo.com.au --admin-email info@urblo.com.au --strict` must fail until one deployed SHA has fresh evidence for the applied Storage role-boundary prerequisite and every required golden workflow. A WORKLOG `Pass` string is no longer sufficient.
-- Jay approved `docs/ADMIN_UX_RESHAPE_PLAN.md` on 2026-07-14 as the temporary execution authority for rebuilding Admin around website pages rather than database tables. The Auth URL prerequisite is closed; `NOW-ADMIN-UX-RESHAPE-001` remains in `next` until the Media migration and live role-boundary prerequisite closes. Jay alone owns the final unassisted fool-test acceptance.
+- Jay approved `docs/ADMIN_UX_RESHAPE_PLAN.md` on 2026-07-14 as the temporary execution authority for rebuilding Admin around website pages rather than database tables. The Auth URL and Media migration prerequisites are closed; `NOW-ADMIN-UX-RESHAPE-001` remains in `next` until the separately approved live role-boundary proof closes. Jay alone owns the final unassisted fool-test acceptance.
 
 ## Active Executable Tasks
 Only three tasks should currently be treated as `now` execution work:
 
-- `NOW-ADMIN-RELIABILITY-UX-001`: P0 admin incident. The repaired build, MIME-aware asset verifier, immutable-reference binding, production auth/fallback checks, and production Auth URL correction/readback are complete, and a separate QA Editor is active. Next complete the Storage prerequisite and prove the editor golden workflows. Do not mark done from deployment, account existence, route-shell checks, or source checks alone.
+- `NOW-ADMIN-RELIABILITY-UX-001`: P0 admin incident. The repaired build, MIME-aware asset verifier, immutable-reference binding, production auth/fallback checks, Auth URL correction/readback, and Media role migration/readback are complete, and a separate QA Editor is active. Next pass the approval-gated tagged Storage role proof and prove the editor golden workflows. Do not mark done from deployment, account existence, route-shell checks, or source checks alone.
 - `NOW-FORMS-SUPABASE-001`: final Turnstile proof only. Persistence, SMTP2GO delivery, browser-key lead privacy, and admin-visible lead workflow are already verified.
 - `NOW-ADMIN-SETTINGS-CRUD-001`: Published settings public-consumer proof plus a real Settings invite/recovery proof. Exact production redirects are now configured and read back; custom Auth SMTP ownership and the approved end-to-end email/password workflows remain open.
 
@@ -119,7 +120,7 @@ CMS predeploy and handoff:
 - `npm run agent:admin-cms-predeploy`
 - `npm run agent:smoke`
 - `npm run agent:admin-config-gate`
-- After approved production migration/readback and tagged Storage writes: `npm run agent:admin-media-role-boundary-live -- --allow-writes --strict`
+- After separate approval for tagged Storage writes: `npm run agent:admin-media-role-boundary-live -- --allow-writes --strict`
 - `npm run agent:admin-handoff-readiness -- --base-url https://urblo.com.au --admin-email info@urblo.com.au --strict`
 
 Live-write checks require explicit approval and credentials. Do not run tagged live writes or invite emails without fresh approval for the target action.
@@ -127,7 +128,7 @@ Live-write checks require explicit approval and credentials. Do not run tagged l
 ## Next Recommended Action
 PR `#6` has restored the production no-write runtime and Harness baseline. Keep the four apex cache-header warnings visible until Cloudflare revalidation or an approved purge removes them, but do not confuse those exact-bytes/MIME warnings with the remaining CMS handoff blockers.
 
-Required product action: with explicit production-write approval, apply/read back the pending Storage role migration, then obtain separate approval for and pass the already-provisioned Editor/owner tagged Storage role-boundary verifier. After that remaining Phase 0 prerequisite closes, promote `NOW-ADMIN-UX-RESHAPE-001` into `now` and execute the Projects vertical prototype from `docs/ADMIN_UX_RESHAPE_PLAN.md`; run the golden workflows against the reshaped UI rather than certifying the old editor twice. The fool test remains Jay's acceptance and cannot be self-certified by an agent.
+Required product action: obtain separate approval for and pass the already-provisioned Editor/owner tagged Storage role-boundary verifier. After that final Phase 0 prerequisite closes, promote `NOW-ADMIN-UX-RESHAPE-001` into `now` and execute the Projects vertical prototype from `docs/ADMIN_UX_RESHAPE_PLAN.md`; run the golden workflows against the reshaped UI rather than certifying the old editor twice. The fool test remains Jay's acceptance and cannot be self-certified by an agent.
 
 Other decision-gated follow-ups:
 - Choose a generated sitemap/release-manifest or pre-render strategy for CMS-only published slugs; current runtime entity metadata does not add new slugs to the static sitemap or the first HTML response.

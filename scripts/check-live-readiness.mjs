@@ -532,7 +532,7 @@ function buildChecks(env, sources, options) {
       manual: [
         options.mediaRoleMigrationVerified
           ? ''
-          : 'Apply and read back 20260713065628_media_public_bucket_role_hardening.sql, then pass --media-role-migration-verified',
+          : 'Apply and read back 20260714050750_media_public_bucket_role_hardening.sql, then pass --media-role-migration-verified',
         options.mediaRoleWritesApproved
           ? ''
           : 'Jay approval for this tagged Storage role proof is required before passing --media-role-writes-approved',

@@ -21,7 +21,15 @@ Last updated: 2026-07-14
 - Site URL was changed to `https://urblo.com.au`; the dashboard returned `Successfully updated site URL` and a fresh readback showed the saved value.
 - Added and precisely read back the two approved allowlist entries: `https://urblo.com.au/admin/account-setup?mode=invite` and `https://urblo.com.au/admin/account-setup?mode=recovery`. A second read-only browser pass verified all three persisted URLs; the recovery value was checked in fixed-length chunks to avoid Chrome title truncation.
 - No invite or recovery email was sent, no database migration was applied, and no Storage object or policy was written during this action. Auth URL configuration is closed as a Phase 0 prerequisite; custom Auth SMTP ownership and the real invite/recovery golden workflow remain open.
-- Phase 0 still blocks Phase 1 on the pending Media role migration plus the distinct Editor/owner tagged Storage boundary proof, each requiring its own production-write approval.
+- The Auth action ended before any migration or Storage write; the separately approved migration is recorded below.
+
+### Phase 0 Approved Media Role Migration
+- Jay separately approved applying the Media role migration only; tagged Storage object writes were explicitly outside this approval.
+- Pre-apply readback confirmed production migration history ended at `20260603142359 project_media_blocks`, while both `urblo_storage_admin_object_insert` and `urblo_storage_admin_object_update` still allowed active Editors across the private and public buckets.
+- Applied `media_public_bucket_role_hardening` to production project `npkidywzwddbnfrnxlmo`. Supabase recorded version `20260714050750`; the local migration filename and Harness references were aligned to `supabase/migrations/20260714050750_media_public_bucket_role_hardening.sql`.
+- Post-apply readback confirms the INSERT policy allows owner/admin/editor for `urblo-admin-media` but only owner/admin for `urblo-public-media`. The UPDATE policy has the same split in both `USING` and `WITH CHECK`.
+- The security advisor reports one current warning: Auth leaked-password protection is disabled. This is unrelated to the Storage migration and was not changed without separate approval. Performance advisor findings are pre-existing unused-index and multiple-permissive-policy notices; no migration-specific Storage/RLS security lint appeared.
+- No Storage object, media metadata row, invite, recovery email, or content status was created or changed. Phase 0 now blocks Phase 1 only on the separately approved tagged Editor/owner Storage role-boundary proof.
 
 ## Entry - 2026-07-13 (PR #6 Production Recovery And Evidence-Bound Cache Gate)
 

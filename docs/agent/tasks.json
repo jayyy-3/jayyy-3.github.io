@@ -2303,7 +2303,7 @@
         "src/types/product.ts",
         "src/types/stone-library.ts",
         "vite.config.ts",
-        "supabase/migrations/20260713065628_media_public_bucket_role_hardening.sql",
+        "supabase/migrations/20260714050750_media_public_bucket_role_hardening.sql",
         "supabase/migrations/README.md"
       ],
       "notes": [
@@ -2328,6 +2328,7 @@
         "2026-07-13: PR #6 merged as `a2a7ae5` and deployed as `c7a910df-6dd3-440b-8971-a6120353ed19` at `https://c7a910df.urblo.pages.dev`. MIME/body-aware smoke bound both production domains to that immutable deployment: all 59 recursively discovered JS/CSS assets matched exact bytes and MIME; apex retained four non-blocking stale immutable response-header warnings while `www` was clean.",
         "2026-07-13: The strengthened production auth browser passed three blocked-Supabase public fallbacks, all nine authenticated routes, Sign out, and protected-route revisit on `https://urblo.com.au`. This is no-write auth/route evidence, not editor save/publish/archive or the twelve-workflow handoff.",
         "2026-07-14: After Jay's item-specific approval, production Auth Site URL and the exact invite/recovery Redirect URLs were corrected and read back. No Auth email was sent; Settings email/password golden-workflow evidence remains open.",
+        "2026-07-14: After separate migration-only approval, production migration `20260714050750_media_public_bucket_role_hardening.sql` was applied and read back. Editor remains allowed to insert/update private draft objects; public insert/update now requires owner/admin. No Storage object was written. The tagged Editor/owner role proof still requires separate approval. The current security advisor has one unrelated Auth warning because leaked-password protection is disabled; no Storage/RLS migration lint appeared and the Auth setting was not changed.",
         "Production remains revalidation_required until the fixed deployment receives approved end-to-end browser evidence. `NOW-ADMIN-SETTINGS-CRUD-001` owns creation of the Settings public-readback and Auth email evidence; this P0 task aggregates those references into the full twelve-workflow handoff and must not close them independently. Do not turn this task done from source gates or deployment smoke alone."
       ],
       "acceptance": [
@@ -2350,7 +2351,7 @@
         "Products and Stone Library reject stale parent-bundle responses and child UPDATE paths cannot reparent a row because each mutation retains the captured product, stone-group, stone-variant, and finish ownership predicates.",
         "Articles, Projects, Products, and Stone Library block editing, new-record actions, and publish readiness while the selected parent/child bundle is incomplete; stale child readiness cannot publish a newly selected parent, and validation failure cannot leave an editor permanently locked in saving state.",
         "CMS-backed public detail pages apply validated entity metadata plus runtime Article/WebPage/Breadcrumb structured data after content resolution without indexing draft or unresolved entities.",
-        "Production prerequisite evidence proves the pending Media Storage migration is applied/read back and the live Editor/owner role boundary passes before handoff.",
+        "Production prerequisite evidence proves Media Storage migration `20260714050750_media_public_bucket_role_hardening.sql` is applied/read back and the live Editor/owner role boundary passes before handoff.",
         "Production golden workflow evidence covers sign-in, draft save/refresh, private media publish, public readback, archive behavior, settings public readback, invite/password setup, password recovery, responsive navigation, the Projects task workspace, the Dashboard operational queue, and editor-guide usability against one recorded deployment SHA."
       ],
       "verification": [
@@ -2400,7 +2401,7 @@
       ],
       "notes": [
         "2026-07-14: Registered from Jay's approved docs/ADMIN_UX_RESHAPE_PLAN.md directive. The plan is the temporary design authority until its sunset clause is completed.",
-        "The Supabase Auth Site URL/exact invite-recovery redirect prerequisite closed on 2026-07-14. Remain in next while Phase 0 closes the Media role migration plus separately approved live Editor/owner boundary proof; promote into now without exceeding the max-three rule when that prerequisite slot frees.",
+        "The Supabase Auth Site URL/exact invite-recovery redirect prerequisite and production Media role migration/readback closed on 2026-07-14. Remain in next while Phase 0 closes the separately approved live Editor/owner boundary proof; promote into now without exceeding the max-three rule when that prerequisite slot frees.",
         "Do not substitute another copy-only Clarify pass for structural work, and update behavior verification when the new UI invalidates literal string assertions.",
         "Jay owns the fool-test acceptance. Agent checks, screenshots, route shells, or self-review cannot certify that criterion."
       ],

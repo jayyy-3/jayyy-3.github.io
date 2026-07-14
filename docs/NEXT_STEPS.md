@@ -8,12 +8,12 @@ This is the human-readable roadmap. The machine-readable source of truth is `doc
 Use this file to choose direction. Use `docs/agent/tasks.json` to execute.
 
 ## Current Objective
-Urblo is operating as a Cloudflare Pages + Supabase site with real forms, but the production `/admin` handoff is reopened after a direct not-working report and a 2026-07-13 code/UX audit. PR `#6` restored production asset integrity and the no-write auth/fallback baseline after PR `#5` exposed a cached-asset incident that the old status-only smoke had falsely accepted. Jay approved `docs/ADMIN_UX_RESHAPE_PLAN.md` on 2026-07-14: close Auth callback and Storage-role Phase 0 first, then rebuild Projects as the page-shaped vertical prototype and prove the real workflow there.
+Urblo is operating as a Cloudflare Pages + Supabase site with real forms, but the production `/admin` handoff is reopened after a direct not-working report and a 2026-07-13 code/UX audit. PR `#6` restored production asset integrity and the no-write auth/fallback baseline after PR `#5` exposed a cached-asset incident that the old status-only smoke had falsely accepted. Jay approved `docs/ADMIN_UX_RESHAPE_PLAN.md` on 2026-07-14: Auth callbacks and the Media role migration are now corrected/read back; complete the tagged Storage role proof, then rebuild Projects as the page-shaped vertical prototype and prove the real workflow there.
 
 ## What Is Complete
 - Cloudflare Pages production hosting is complete for `https://urblo.com.au` and `https://www.urblo.com.au`.
 - Contact and Sample Request persistence is complete, including server-side audit rows, SMTP2GO notification proof, and browser-key private-row denial.
-- The original Supabase foundation, baseline seeds, table RLS, Storage bucket/listing hardening, admin helper hardening, and admin profile uniqueness are complete. The new Editor-versus-public-bucket role hardening remains pending production apply/readback and live role proof.
+- The original Supabase foundation, baseline seeds, table RLS, Storage bucket/listing hardening, admin helper hardening, admin profile uniqueness, and Editor-versus-public-bucket role migration/readback are complete. The tagged live Editor/owner role proof remains approval-gated.
 - First admin bootstrap is complete for `info@urblo.com.au`.
 - A separate active QA Editor is provisioned; password sign-in and its own Editor-profile RLS readback pass. This is test readiness, not invite-flow completion.
 - `/admin` route shells, schema/RLS, source CRUD surfaces, and direct API-level tagged QA exist for Dashboard, Projects, Stone Library, Products, Articles, Media, Leads, Settings, and Change history. This does not prove editor workflow completion.
@@ -29,7 +29,7 @@ Urblo is operating as a Cloudflare Pages + Supabase site with real forms, but th
 ## Active Now
 Only these task IDs should be treated as current executable work:
 
-- `NOW-ADMIN-RELIABILITY-UX-001`: P0. Reliability fixes and the first Projects task-workspace redesign are deployed through PR `#3`; Harness hardening is deployed through PR `#5`; the cache repair, deployment binding, and production auth/fallback proof are deployed through PR `#6`; a separate QA Editor is active; and the production Auth Site URL plus exact invite/recovery callbacks are corrected and read back. Apply the pending Storage RLS migration with approval, prove its role boundary with separately approved tagged writes, and complete the browser golden workflow before closing media pagination and preview gaps.
+- `NOW-ADMIN-RELIABILITY-UX-001`: P0. Reliability fixes and the first Projects task-workspace redesign are deployed through PR `#3`; Harness hardening is deployed through PR `#5`; the cache repair, deployment binding, and production auth/fallback proof are deployed through PR `#6`; a separate QA Editor is active; the production Auth callbacks are corrected/read back; and the Storage RLS migration is applied/read back. Prove its role boundary with separately approved tagged writes and complete the browser golden workflow before closing media pagination and preview gaps.
 - `NOW-FORMS-SUPABASE-001`: final Turnstile proof. The public widget key, server secret, and valid token must be available before running the strict live proof.
 - `NOW-ADMIN-SETTINGS-CRUD-001`: Published settings public readback plus a real invite/password/recovery proof. The previous invite callback fell back to localhost; production Site URL and the exact callbacks are now corrected and read back. Custom Auth SMTP ownership and a separately approved complete UI email/password workflow remain open.
 
@@ -38,7 +38,7 @@ Only these task IDs should be treated as current executable work:
 ## Next Decisions
 - Approve a deployed admin golden-workflow run with tagged draft/media/settings changes that can be safely reverted or archived.
 - Configure Supabase Auth custom SMTP separately from the already verified Contact/Sample SMTP2GO Function path.
-- Apply and verify `20260713065628_media_public_bucket_role_hardening.sql` so an Editor cannot bypass the private-first Media UI and write directly to the public bucket.
+- Production migration `20260714050750_media_public_bucket_role_hardening.sql` is applied and its INSERT/UPDATE policies are read back; the separately approved tagged Editor/owner Storage proof remains.
 - Exact production invite and recovery callback URLs were added to the Supabase Auth redirect allowlist and read back on 2026-07-14.
 - After Phase 0, replace the current Projects multi-form editor with the approved aggregate draft, one-Save, live-preview, visual-hotspot, inline-media vertical prototype; update behavior verification rather than preserving obsolete literal UI strings.
 - Decide whether Turnstile proof is required before the next public launch checkpoint.
@@ -74,7 +74,7 @@ Docs and harness changes should pass:
 CMS handoff checks:
 - `npm run agent:admin-cms-predeploy`
 - `npm run agent:admin-config-gate`
-- After approved production migration/readback and tagged Storage writes: `npm run agent:admin-media-role-boundary-live -- --allow-writes --strict`
+- After separate approval for tagged Storage writes: `npm run agent:admin-media-role-boundary-live -- --allow-writes --strict`
 - `npm run agent:admin-handoff-readiness -- --base-url https://urblo.com.au --admin-email info@urblo.com.au --strict`
 
 The strict handoff command is expected to fail while `docs/agent/admin-handoff-evidence.json` is `revalidation_required`. It may pass only after the Storage role-boundary production prerequisite and all twelve recorded golden workflows have fresh evidence tied to one production deployment SHA.
@@ -141,7 +141,7 @@ Build still shows the known Browserslist staleness notice. The configured local 
 - `docs/agent/tasks.json` keeps only true active execution work in `now`.
 - Harness GC reports no failures and only intentional warnings.
 - Runtime candidate `a2a7ae5` is deployed at immutable URL `https://c7a910df.urblo.pages.dev` and promoted to the production origin. If runtime code changes before the golden workflow, bind the complete evidence set to the resulting newer deployment instead.
-- `20260713065628_media_public_bucket_role_hardening.sql` is applied/read back and the `mediaPublicBucketRoleBoundary` prerequisite has fresh Editor/owner live evidence.
+- `20260714050750_media_public_bucket_role_hardening.sql` is applied/read back and the `mediaPublicBucketRoleBoundary` prerequisite has fresh Editor/owner live evidence.
 - All twelve golden workflows in `docs/agent/admin-handoff-evidence.json` have fresh `Pass` evidence against that same deployment and admin identity.
 - `npm run agent:admin-handoff-readiness -- --base-url https://urblo.com.au --admin-email info@urblo.com.au --strict` passes, and Jay's reported production incident has been revalidated through the real UI.
 - Turnstile and Settings invite decisions are explicit.

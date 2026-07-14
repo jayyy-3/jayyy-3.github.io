@@ -24,7 +24,7 @@ const requiredWorkflowKeys = [
   'editorGuideUsability',
 ];
 const requiredProductionPrerequisiteKeys = ['mediaPublicBucketRoleBoundary'];
-const requiredMediaRoleMigration = '20260713065628_media_public_bucket_role_hardening.sql';
+const requiredMediaRoleMigration = '20260714050750_media_public_bucket_role_hardening.sql';
 const maximumEvidenceWindowMs = 7 * 24 * 60 * 60 * 1000;
 
 function parseArgs(argv) {
