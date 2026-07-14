@@ -398,7 +398,7 @@
     },
     {
       "id": "NOW-FORMS-SUPABASE-001",
-      "status": "now",
+      "status": "next",
       "priority": 4,
       "summary": "Complete Supabase-backed Contact and Sample Request persistence, notifications, and admin lead workflow.",
       "files": [
@@ -418,7 +418,8 @@
         "2026-06-03: Browser-key private-row denial is verified on `https://urblo.com.au`; tagged private lead rows exist, while anonymous REST reads through the deployed publishable key returned HTTP 401.",
         "2026-05-29: Final notification and Turnstile acceptance are now guarded by explicit live verifier flags: `--allow-email --require-email` for sent notification_status, and `--require-turnstile --turnstile-token <token>` for a configured public Turnstile site key plus turnstile_success = true.",
         "2026-05-29: The public Contact form has an optional Cloudflare Turnstile widget behind `VITE_TURNSTILE_SITE_KEY`; production Turnstile still requires the server-side secret and final live proof token.",
-        "2026-06-05 Harness GC cleanup: kept as a `now` task only for the final Turnstile proof. Persistence, SMTP2GO delivery, browser-key private-row denial, and admin-visible lead workflow are already verified elsewhere."
+        "2026-06-05 Harness GC cleanup: kept as a `now` task only for the final Turnstile proof. Persistence, SMTP2GO delivery, browser-key private-row denial, and admin-visible lead workflow are already verified elsewhere.",
+        "2026-07-14: Moved to `next` because the remaining Turnstile proof is configuration/approval-gated and Phase 0 has cleared the approved Admin UX reshape for active execution."
       ],
       "acceptance": [
         "Public form submissions are validated server-side, protected by Turnstile, stored in Supabase, and notify Urblo by email.",
@@ -2328,7 +2329,8 @@
         "2026-07-13: PR #6 merged as `a2a7ae5` and deployed as `c7a910df-6dd3-440b-8971-a6120353ed19` at `https://c7a910df.urblo.pages.dev`. MIME/body-aware smoke bound both production domains to that immutable deployment: all 59 recursively discovered JS/CSS assets matched exact bytes and MIME; apex retained four non-blocking stale immutable response-header warnings while `www` was clean.",
         "2026-07-13: The strengthened production auth browser passed three blocked-Supabase public fallbacks, all nine authenticated routes, Sign out, and protected-route revisit on `https://urblo.com.au`. This is no-write auth/route evidence, not editor save/publish/archive or the twelve-workflow handoff.",
         "2026-07-14: After Jay's item-specific approval, production Auth Site URL and the exact invite/recovery Redirect URLs were corrected and read back. No Auth email was sent; Settings email/password golden-workflow evidence remains open.",
-        "2026-07-14: After separate migration-only approval, production migration `20260714050750_media_public_bucket_role_hardening.sql` was applied and read back. Editor remains allowed to insert/update private draft objects; public insert/update now requires owner/admin. No Storage object was written. The tagged Editor/owner role proof still requires separate approval. The current security advisor has one unrelated Auth warning because leaked-password protection is disabled; no Storage/RLS migration lint appeared and the Auth setting was not changed.",
+        "2026-07-14: After separate migration-only approval, production migration `20260714050750_media_public_bucket_role_hardening.sql` was applied and read back. Editor remains allowed to insert/update private draft objects; public insert/update now requires owner/admin. No Storage object was written during migration. The current security advisor has one unrelated Auth warning because leaked-password protection is disabled; no Storage/RLS migration lint appeared and the Auth setting was not changed.",
+        "2026-07-14: After separate approval for the exact tagged proof, the corrected strict verifier passed with marker `media-role-1784006428939-3520f05f`. Editor private insert/update succeeded, Editor public insert/update was denied without changing the owner object, owner public insert/update succeeded, and independent SQL found zero objects for both attempted markers after cleanup. A unique cache nonce now prevents CDN invalidation delay from creating a false byte/cleanup failure.",
         "Production remains revalidation_required until the fixed deployment receives approved end-to-end browser evidence. `NOW-ADMIN-SETTINGS-CRUD-001` owns creation of the Settings public-readback and Auth email evidence; this P0 task aggregates those references into the full twelve-workflow handoff and must not close them independently. Do not turn this task done from source gates or deployment smoke alone."
       ],
       "acceptance": [
@@ -2376,7 +2378,7 @@
     },
     {
       "id": "NOW-ADMIN-UX-RESHAPE-001",
-      "status": "next",
+      "status": "now",
       "priority": 0.75,
       "summary": "Reshape the admin around website pages and non-technical editor tasks, beginning with a Projects vertical prototype.",
       "files": [
@@ -2401,7 +2403,7 @@
       ],
       "notes": [
         "2026-07-14: Registered from Jay's approved docs/ADMIN_UX_RESHAPE_PLAN.md directive. The plan is the temporary design authority until its sunset clause is completed.",
-        "The Supabase Auth Site URL/exact invite-recovery redirect prerequisite and production Media role migration/readback closed on 2026-07-14. Remain in next while Phase 0 closes the separately approved live Editor/owner boundary proof; promote into now without exceeding the max-three rule when that prerequisite slot frees.",
+        "2026-07-14: Phase 0 is closed. Production Auth Site URL/exact invite-recovery redirects and Media role migration/policy readback are complete; the separately approved live proof passed for marker `media-role-1784006428939-3520f05f`, and an independent `storage.objects` readback found zero objects for both attempted markers. Promoted into `now`; the decision-gated Turnstile task moved to `next` to preserve the max-three rule.",
         "Do not substitute another copy-only Clarify pass for structural work, and update behavior verification when the new UI invalidates literal string assertions.",
         "Jay owns the fool-test acceptance. Agent checks, screenshots, route shells, or self-review cannot certify that criterion."
       ],

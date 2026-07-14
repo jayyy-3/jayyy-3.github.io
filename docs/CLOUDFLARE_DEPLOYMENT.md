@@ -109,7 +109,7 @@ Useful local env groups:
 - Admin browser QA: browser-safe Supabase key plus `URBLO_ADMIN_EMAIL` and `URBLO_ADMIN_PASSWORD`.
 - Unprofiled admin browser QA: browser-safe Supabase key plus `URBLO_UNPROFILED_EMAIL` and `URBLO_UNPROFILED_PASSWORD` for a valid Auth user with no active `admin_profiles` row.
 - Admin CRUD live writes: browser-safe Supabase key plus either `URBLO_ADMIN_ACCESS_TOKEN` or `URBLO_ADMIN_EMAIL` and `URBLO_ADMIN_PASSWORD`.
-- Media Storage role boundary: browser-safe Supabase key plus distinct active accounts in `URBLO_EDITOR_EMAIL`/`URBLO_EDITOR_PASSWORD` and `URBLO_ADMIN_EMAIL`/`URBLO_ADMIN_PASSWORD`. After the migration is applied/read back and Jay approves that exact tagged proof, run `npm run agent:admin-media-role-boundary-live -- --allow-writes --strict`; never place these QA passwords in Cloudflare dashboard variables.
+- Media Storage role boundary: browser-safe Supabase key plus distinct active accounts in `URBLO_EDITOR_EMAIL`/`URBLO_EDITOR_PASSWORD` and `URBLO_ADMIN_EMAIL`/`URBLO_ADMIN_PASSWORD`. The migration/readback and separately approved proof passed on 2026-07-14. Any rerun requires fresh approval; never place these QA passwords in Cloudflare dashboard variables.
 - CMS invite flow: Cloudflare Pages Functions use `SUPABASE_SERVICE_ROLE_KEY` server-side at `/api/admin/invite-user`; signed-in Website owner/CMS manager sessions call it from `/admin/settings`, and the service key must never appear in browser source.
 - `URBLO_FIRST_ADMIN_EMAIL` is only for bootstrap/readiness checks; live browser login and live admin-write verification use `URBLO_ADMIN_EMAIL` or an explicit admin access token.
 - Email proof: `SMTP2GO_API_KEY`, sender, and recipient variables; `RESEND_API_KEY` is still supported as a compatibility provider.
@@ -181,7 +181,7 @@ Current `/functions/api` endpoints:
 - First-admin data-layer bootstrap is complete for `info@urblo.com.au`: the confirmed Auth user has one active `owner` profile, and `admin_audit_events.id = 8` records `admin_profile.bootstrap`.
 - Before browser admin QA, run `npm run agent:admin-live-readiness -- --admin-email info@urblo.com.au` with local verification credentials when intentionally rechecking the browser-safe key, service-role verification key, active admin profile, and baseline seed rows without mutating Supabase.
 - Before live admin save/export QA, run `npm run agent:admin-crud-live` in plan-only mode, then run `npm run agent:admin-crud-live -- --allow-writes` only after a real owner/admin Supabase Auth session is available and Jay approves tagged QA writes. Use `--include-storage` only for owner/admin private-upload/readback plus anonymous denial; it does not prove the Editor public-bucket boundary.
-- Production migration `20260714050750_media_public_bucket_role_hardening.sql` is applied/read back. Before claiming Media role enforcement complete, obtain fresh approval for tagged Storage writes, then run `npm run agent:admin-media-role-boundary-live -- --allow-writes --strict` with distinct active Editor and owner/admin credentials.
+- Production migration `20260714050750_media_public_bucket_role_hardening.sql` is applied/read back, and the separately approved live Editor/owner role proof passed with independent zero-object cleanup readback. A new proof is required only after a relevant policy/runtime change and still needs fresh approval.
 - Settings save tests require an active owner/admin profile because `site_settings` write RLS is owner/admin only. Admin profile save tests require existing Supabase Auth users and must verify owner-role changes are owner-protected.
 - Media draft upload/save tests require an active owner/admin/editor profile. Public-bucket insert/update is owner/admin only after the applied role-hardening migration; the dedicated role verifier still must prove this boundary through normal browser-key RLS.
 - Leads workflow save tests require an active owner/admin profile because lead status, assignment, and internal notes are private operational fields.
@@ -259,7 +259,7 @@ After a real owner/admin browser session is available and tagged QA writes are a
 - `npm run agent:admin-crud-live -- --allow-writes`
 - `npm run agent:admin-crud-live -- --allow-writes --include-storage` when verifying owner/admin private Storage upload/readback and anonymous denial.
 
-After the Media role migration is applied/read back, a distinct active Editor account exists, and Jay separately approves the tagged role proof, run:
+The Media role migration/readback and distinct-account tagged proof passed on 2026-07-14. After a relevant policy/runtime change, obtain fresh approval before rerunning:
 - `npm run agent:admin-media-role-boundary-live -- --allow-writes --strict`
 
 Admin CRUD/live lead workflow QA has been run for the current non-Storage path:
@@ -286,7 +286,7 @@ Current project:
 - Deployment status: `success`
 - Runtime deployment commit: `a2a7ae5`
 
-The Supabase Auth Site URL/exact invite-recovery Redirect URL entries and Media Storage role migration are corrected/applied and read back. The next account-level action is the separately approved Editor/owner tagged Storage role proof before all twelve production editor golden workflows are recorded against one deployment. Turnstile remains a separate forms decision.
+The Supabase Auth Site URL/exact invite-recovery Redirect URL entries, Media Storage role migration/readback, and separately approved Editor/owner tagged proof are complete. The next account-level work is the approved Projects reshape followed by all twelve production editor golden workflows against one deployment. Turnstile remains a separate forms decision.
 
 Still pending after preview validation:
 - Cloudflare Pages production already has `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`; preview environment variables remain empty;

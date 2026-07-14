@@ -29,7 +29,15 @@ Last updated: 2026-07-14
 - Applied `media_public_bucket_role_hardening` to production project `npkidywzwddbnfrnxlmo`. Supabase recorded version `20260714050750`; the local migration filename and Harness references were aligned to `supabase/migrations/20260714050750_media_public_bucket_role_hardening.sql`.
 - Post-apply readback confirms the INSERT policy allows owner/admin/editor for `urblo-admin-media` but only owner/admin for `urblo-public-media`. The UPDATE policy has the same split in both `USING` and `WITH CHECK`.
 - The security advisor reports one current warning: Auth leaked-password protection is disabled. This is unrelated to the Storage migration and was not changed without separate approval. Performance advisor findings are pre-existing unused-index and multiple-permissive-policy notices; no migration-specific Storage/RLS security lint appeared.
-- No Storage object, media metadata row, invite, recovery email, or content status was created or changed. Phase 0 now blocks Phase 1 only on the separately approved tagged Editor/owner Storage role-boundary proof.
+- No Storage object, media metadata row, invite, recovery email, or content status was created or changed during the migration action. Phase 0 then blocked only on the separately approved tagged Editor/owner Storage role-boundary proof recorded below.
+
+### Phase 0 Tagged Media Role-Boundary Proof
+- Jay separately approved the exact tagged production Storage proof. It used the existing active Editor and owner accounts through the browser-safe key; it did not send email or mutate content/database records.
+- The first marker, `media-role-1784006293326-a081ef77`, exposed a verifier defect after the role operations: the public object update and cleanup readbacks reused a cached URL, so Supabase Smart CDN returned the earlier bytes and a temporary HTTP 200 after deletion. Exact `storage.objects` readback was already zero rows, proving cleanup had succeeded rather than leaving an object behind.
+- Updated `scripts/check-admin-media-role-boundary-live.mjs` so every byte and absence readback uses a unique `cacheNonce`, requests no-cache, uses a short QA cache TTL, and reports CDN diagnostics on byte mismatch. This follows Supabase's documented update/delete invalidation window without weakening the rule that a fresh origin read returning an object is a hard cleanup failure.
+- The corrected strict run passed for marker `media-role-1784006428939-3520f05f`: Editor private insert/update succeeded; Editor public insert/update was denied and did not alter the owner-created object; owner public insert/update succeeded; and every tagged object was removed with absence read back.
+- Independent production SQL after the run returned zero `storage.objects` rows for both markers. No tagged object, email, media metadata row, audit/content row, or content status remains from this proof.
+- Phase 0 is closed. `NOW-ADMIN-UX-RESHAPE-001` moved into `now`; the separately decision-gated Turnstile task moved to `next` so the queue remains at three active executable tasks. Phase 1 starts with the approved Projects vertical prototype, while Jay retains the fool-test acceptance.
 
 ## Entry - 2026-07-13 (PR #6 Production Recovery And Evidence-Bound Cache Gate)
 

@@ -13,7 +13,7 @@ Urblo is operating as a Cloudflare Pages + Supabase site with real forms, but th
 ## What Is Complete
 - Cloudflare Pages production hosting is complete for `https://urblo.com.au` and `https://www.urblo.com.au`.
 - Contact and Sample Request persistence is complete, including server-side audit rows, SMTP2GO notification proof, and browser-key private-row denial.
-- The original Supabase foundation, baseline seeds, table RLS, Storage bucket/listing hardening, admin helper hardening, admin profile uniqueness, and Editor-versus-public-bucket role migration/readback are complete. The tagged live Editor/owner role proof remains approval-gated.
+- The original Supabase foundation, baseline seeds, table RLS, Storage bucket/listing hardening, admin helper hardening, admin profile uniqueness, Editor-versus-public-bucket role migration/readback, and separately approved live role proof are complete.
 - First admin bootstrap is complete for `info@urblo.com.au`.
 - A separate active QA Editor is provisioned; password sign-in and its own Editor-profile RLS readback pass. This is test readiness, not invite-flow completion.
 - `/admin` route shells, schema/RLS, source CRUD surfaces, and direct API-level tagged QA exist for Dashboard, Projects, Stone Library, Products, Articles, Media, Leads, Settings, and Change history. This does not prove editor workflow completion.
@@ -29,18 +29,18 @@ Urblo is operating as a Cloudflare Pages + Supabase site with real forms, but th
 ## Active Now
 Only these task IDs should be treated as current executable work:
 
-- `NOW-ADMIN-RELIABILITY-UX-001`: P0. Reliability fixes and the first Projects task-workspace redesign are deployed through PR `#3`; Harness hardening is deployed through PR `#5`; the cache repair, deployment binding, and production auth/fallback proof are deployed through PR `#6`; a separate QA Editor is active; the production Auth callbacks are corrected/read back; and the Storage RLS migration is applied/read back. Prove its role boundary with separately approved tagged writes and complete the browser golden workflow before closing media pagination and preview gaps.
-- `NOW-FORMS-SUPABASE-001`: final Turnstile proof. The public widget key, server secret, and valid token must be available before running the strict live proof.
+- `NOW-ADMIN-RELIABILITY-UX-001`: P0. Reliability fixes and the first Projects task-workspace redesign are deployed through PR `#3`; Harness hardening is deployed through PR `#5`; the cache repair, deployment binding, and production auth/fallback proof are deployed through PR `#6`; a separate QA Editor is active; production Auth callbacks are corrected/read back; and the Storage migration plus live Editor/owner role boundary have passed. Complete the browser golden workflow before closing the incident.
 - `NOW-ADMIN-SETTINGS-CRUD-001`: Published settings public readback plus a real invite/password/recovery proof. The previous invite callback fell back to localhost; production Site URL and the exact callbacks are now corrected and read back. Custom Auth SMTP ownership and a separately approved complete UI email/password workflow remain open.
+- `NOW-ADMIN-UX-RESHAPE-001`: Phase 0 is closed. Execute the approved Projects aggregate draft, one-Save, live-preview, visual-hotspot, and inline-media vertical prototype; Jay owns the final fool test.
 
-`NOW-ADMIN-UX-RESHAPE-001` is registered as `next` so the queue stays within the max-three `now` rule. Promote it when Phase 0 closes. Its design authority is `docs/ADMIN_UX_RESHAPE_PLAN.md`, and Jay—not the executing agent—owns the final fool test.
+`NOW-FORMS-SUPABASE-001` is now `next`: only the configuration/approval-gated Turnstile proof remains, so it yielded the active slot to the approved Admin reshape.
 
 ## Next Decisions
 - Approve a deployed admin golden-workflow run with tagged draft/media/settings changes that can be safely reverted or archived.
 - Configure Supabase Auth custom SMTP separately from the already verified Contact/Sample SMTP2GO Function path.
-- Production migration `20260714050750_media_public_bucket_role_hardening.sql` is applied and its INSERT/UPDATE policies are read back; the separately approved tagged Editor/owner Storage proof remains.
+- Production migration `20260714050750_media_public_bucket_role_hardening.sql`, its INSERT/UPDATE policy readback, and the separately approved tagged Editor/owner Storage proof are complete with zero tagged objects remaining.
 - Exact production invite and recovery callback URLs were added to the Supabase Auth redirect allowlist and read back on 2026-07-14.
-- After Phase 0, replace the current Projects multi-form editor with the approved aggregate draft, one-Save, live-preview, visual-hotspot, inline-media vertical prototype; update behavior verification rather than preserving obsolete literal UI strings.
+- Replace the current Projects multi-form editor with the approved aggregate draft, one-Save, live-preview, visual-hotspot, inline-media vertical prototype; update behavior verification rather than preserving obsolete literal UI strings.
 - Decide whether Turnstile proof is required before the next public launch checkpoint.
 - After separate approval, verify custom Auth SMTP ownership and repeat the real CMS invite/recovery proof against the corrected callback configuration.
 - Ask a customer/editor to review imported Draft CMS content and decide what to publish first.
@@ -74,7 +74,7 @@ Docs and harness changes should pass:
 CMS handoff checks:
 - `npm run agent:admin-cms-predeploy`
 - `npm run agent:admin-config-gate`
-- After separate approval for tagged Storage writes: `npm run agent:admin-media-role-boundary-live -- --allow-writes --strict`
+- Passed after item-specific approval: `npm run agent:admin-media-role-boundary-live -- --allow-writes --strict`
 - `npm run agent:admin-handoff-readiness -- --base-url https://urblo.com.au --admin-email info@urblo.com.au --strict`
 
 The strict handoff command is expected to fail while `docs/agent/admin-handoff-evidence.json` is `revalidation_required`. It may pass only after the Storage role-boundary production prerequisite and all twelve recorded golden workflows have fresh evidence tied to one production deployment SHA.
