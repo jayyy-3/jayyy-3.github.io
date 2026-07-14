@@ -19,12 +19,12 @@
     "adminCmsHandoff": "revalidation_required_after_user_report_and_repair_deploy",
     "adminCrudLive": "api_level_verified_ui_golden_workflow_missing",
     "adminStorageProof": "private_upload_historical_verified_private_only_path_bound_promotion_and_public_write_role_hardening_source_verified_live_role_verifier_staged_pending_apply_revalidation",
-    "supabaseAuthSmtp": "invite_delivery_observed_sender_ownership_unverified_callback_fallback_localhost",
+    "supabaseAuthSmtp": "redirect_config_corrected_and_read_back_invite_delivery_observed_sender_ownership_unverified_golden_flow_not_repeated",
     "contentImport": "draft_imported",
     "publicContentCutover": "published_overlay_with_static_fallback_and_runtime_entity_metadata_deployed_authenticated_readback_pending",
     "seoIndexability": "static_36_route_production_verified_cms_only_discovery_strategy_pending",
     "seoLegacyRedirects": "production_smoke_verified_2026_07_13",
-    "settingsInviteProof": "qa_editor_active_via_direct_auth_activation_real_ui_invite_blocked_by_callback_config"
+    "settingsInviteProof": "qa_editor_active_via_direct_auth_activation_redirect_config_corrected_real_ui_invite_recovery_not_repeated"
   },
   "localReproducibility": {
     "sourceHarness": "passing",
@@ -32,11 +32,11 @@
     "runtimeGates": "passing_for_2026_07_13_admin_reliability_source_patch",
     "liveSecretsPresent": true,
     "liveReadiness": "browser_key_owner_and_distinct_editor_credentials_present_service_role_migration_and_write_approval_missing",
-    "adminUxReshape": "approved_directive_registered_next_phase0_prerequisites_pending"
+    "adminUxReshape": "approved_directive_registered_next_auth_phase0_closed_storage_phase0_pending"
   },
   "nextDecisions": [
     "Monitor or purge the four residual apex cache headers when Cloudflare account access is available; their current bytes and MIME types exactly match the immutable repair deployment and are non-blocking.",
-    "Correct and read back the Supabase Auth Site URL plus exact invite/recovery redirect allowlist entries after the observed localhost callback fallback; verify Auth SMTP ownership separately.",
+    "After separate approval, verify Supabase Auth SMTP ownership and repeat invite/password/recovery against the corrected and read-back production callbacks.",
     "Apply and live-verify the media_public_bucket_role_hardening migration so Editors cannot insert or update public Storage objects directly.",
     "After Phase 0, promote NOW-ADMIN-UX-RESHAPE-001 and execute the approved Projects aggregate-draft, one-Save, live-preview, visual-hotspot, inline-media vertical prototype; Jay owns the fool-test acceptance.",
     "Decide whether final Turnstile proof is required before the next public launch checkpoint.",
@@ -83,6 +83,7 @@
     "adminAuthBrowserProduction": "2026-07-13",
     "adminHandoffReadinessStrictExpectedFailure": "2026-07-13",
     "adminMediaRoleBoundaryPlanOnly": "2026-07-14",
+    "supabaseAuthUrlConfig": "2026-07-14",
     "adminReliabilityReaudit": "2026-07-13",
     "adminReliabilityDeployment": "2026-07-13",
     "qaEditorProvisioning": "2026-07-13",

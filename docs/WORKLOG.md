@@ -16,6 +16,13 @@ Last updated: 2026-07-14
 - Official Supabase guidance confirms Site URL is the default fallback and recommends exact production redirect paths. The app requests `https://urblo.com.au/admin/account-setup?mode=invite` and `?mode=recovery`; the prior delivered invite's localhost callback remains failing evidence.
 - The available Supabase database connector cannot read hosted Auth URL configuration, and the local environment has no Management API token. Chrome reached the Supabase/GitHub sign-in screen but had no existing dashboard session, so configuration readback and mutation stopped pending Jay login plus item-specific approval.
 
+### Phase 0 Approved Auth URL Configuration
+- Jay logged into the production Supabase dashboard and explicitly approved only the Auth URL configuration change. The initial dashboard readback showed Site URL `http://localhost:3000` and no Redirect URLs.
+- Site URL was changed to `https://urblo.com.au`; the dashboard returned `Successfully updated site URL` and a fresh readback showed the saved value.
+- Added and precisely read back the two approved allowlist entries: `https://urblo.com.au/admin/account-setup?mode=invite` and `https://urblo.com.au/admin/account-setup?mode=recovery`. A second read-only browser pass verified all three persisted URLs; the recovery value was checked in fixed-length chunks to avoid Chrome title truncation.
+- No invite or recovery email was sent, no database migration was applied, and no Storage object or policy was written during this action. Auth URL configuration is closed as a Phase 0 prerequisite; custom Auth SMTP ownership and the real invite/recovery golden workflow remain open.
+- Phase 0 still blocks Phase 1 on the pending Media role migration plus the distinct Editor/owner tagged Storage boundary proof, each requiring its own production-write approval.
+
 ## Entry - 2026-07-13 (PR #6 Production Recovery And Evidence-Bound Cache Gate)
 
 ### Deployment Result
