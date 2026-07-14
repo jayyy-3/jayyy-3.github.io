@@ -44,7 +44,7 @@ Last updated: 2026-07-13
 ## Entry - 2026-07-13 (Admin Reliability Preview And Production Deployment)
 
 ### Scope
-- Rebased the admin reliability/UX repair onto current `origin/main`, preserved the operating protocol and image-optimization work, and kept the unrelated untracked `docs/SEO_EXTERNAL_AI_BRIEF.md` out of the release.
+- Rebased the admin reliability/UX repair onto current `origin/main`, preserved the operating protocol and image-optimization work, and kept the unrelated untracked SEO external AI brief draft (never committed) out of the release.
 - Added `.dev.vars` to `.gitignore` and changed the local `.env` mode from `0644` to `0600`; no secret value was printed, staged, or committed.
 - Published branch `codex/admin-reliability-ux`, opened PR `#3`, verified its Cloudflare preview, and merged it to `main` after the preview gate passed.
 - Verified Cloudflare production deployment `6d193af5-cf8e-4541-a1e2-c73164d1a290` for merge commit `46d46b4` at immutable URL `https://6d193af5.urblo.pages.dev` and production origin `https://urblo.com.au`.
