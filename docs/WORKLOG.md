@@ -10,9 +10,14 @@ Last updated: 2026-07-16
 - Jay explicitly approved a one-time exception on 2026-07-16 to skip Docker for this push and defer installation until a later cycle. The exception applies only to pushing the current `codex/admin-ux-reshape` candidate using the already-green host-equivalent evidence; it does not change `docs/OPERATING_PROTOCOL.md` or authorize future pushes without the normal container gate.
 - No Supabase migration, tagged Project/Storage write, invite, or production promotion is included in this exception.
 
+### Branch Preview Evidence
+- Pushed `codex/admin-ux-reshape` through commit `30e9b57` (`389023f` is the Phase 1 implementation commit; `30e9b57` records the one-time gate exception). Cloudflare associated that exact commit with deployment `1c3372dd-d4b0-49c1-a02b-ffee96e60ee3` and immutable URL `https://1c3372dd.urblo.pages.dev`.
+- `npm run agent:cloudflare-preview-smoke -- --base-url https://1c3372dd.urblo.pages.dev` passed: all public/Admin route shells, recursively discovered JavaScript/CSS status and MIME/body checks, configured-bundle/browser-secret boundaries, legacy redirects, safe-failure form Functions, and the protected `/api/admin/projects` boundary passed without content or Storage writes.
+- The branch alias `https://codex-admin-ux-reshape.urblo.pages.dev` and immutable URL both returned HTTP 200. GitHub's Cloudflare check callback still displayed `in_progress` at the final readback even though the immutable deployment was already serving and passed the independent smoke; keep that callback lag visible rather than calling it a completed check.
+
 ### Next Handoff
-- Push `codex/admin-ux-reshape`, wait for the Cloudflare branch preview, and run the no-write route/asset/API smoke.
 - Stop for Jay's separate approval before applying expand migration `supabase/migrations/20260714052955_project_aggregate_drafts.sql`.
+- Do not begin the tagged authenticated Project/Storage workflow under that approval; it remains a second action-specific production-write decision after expand migration readback.
 
 ## Entry - 2026-07-14 (Admin Projects Phase 1 Source Candidate)
 
