@@ -1,6 +1,18 @@
 # WORKLOG - Urblo Execution Log
 
-Last updated: 2026-07-14
+Last updated: 2026-07-16
+
+## Entry - 2026-07-16 (Phase 1 Branch Push Gate Exception)
+
+### Gate Decision
+- Phase 1 implementation commit `389023f` was created only after the full host-side runtime, Admin, Harness, readiness, plan-only, JSON, diff, and read-only responsive browser checks passed.
+- The required post-commit `npm run gate` stopped before executing any project check because this workstation has no Docker-compatible runtime (`docker: command not found`). This was an unavailable runner, not a code-test failure; no attempt was made to disguise the result as a green container gate.
+- Jay explicitly approved a one-time exception on 2026-07-16 to skip Docker for this push and defer installation until a later cycle. The exception applies only to pushing the current `codex/admin-ux-reshape` candidate using the already-green host-equivalent evidence; it does not change `docs/OPERATING_PROTOCOL.md` or authorize future pushes without the normal container gate.
+- No Supabase migration, tagged Project/Storage write, invite, or production promotion is included in this exception.
+
+### Next Handoff
+- Push `codex/admin-ux-reshape`, wait for the Cloudflare branch preview, and run the no-write route/asset/API smoke.
+- Stop for Jay's separate approval before applying expand migration `supabase/migrations/20260714052955_project_aggregate_drafts.sql`.
 
 ## Entry - 2026-07-14 (Admin Projects Phase 1 Source Candidate)
 
