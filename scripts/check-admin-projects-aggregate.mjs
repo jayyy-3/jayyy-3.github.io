@@ -63,9 +63,9 @@ const servicePath = "src/service/ProjectService.ts";
 const routePath = "functions/api/admin/projects.js";
 const functionPath = "functions/_lib/admin-projects.js";
 const migrationPath =
-  "supabase/migrations/20260714052955_project_aggregate_drafts.sql";
+  "supabase/migrations/20260719015649_project_aggregate_drafts.sql";
 const lockdownMigrationPath =
-  "supabase/migrations/20260714052956_project_aggregate_write_lockdown.sql";
+  "supabase/migrations/20260719015650_project_aggregate_write_lockdown.sql";
 
 const page = readRequired(pagePath);
 const shell = readRequired(shellPath);
@@ -2038,5 +2038,5 @@ if (failures.length > 0) {
 
 console.log("Admin Projects aggregate checks passed.");
 console.log(
-  "Verified aggregate mapping behavior, one endpoint, shared live preview, visual hotspots, inline media, server audit, and source-only migration security boundaries.",
+  "Verified aggregate mapping behavior, one endpoint, shared live preview, visual hotspots, inline media, server audit, and migration-source security boundaries.",
 );

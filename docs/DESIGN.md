@@ -1,6 +1,6 @@
 # Urblo Design Contract
 
-Last updated: 2026-07-14
+Last updated: 2026-07-19
 
 ## Purpose
 This document governs Urblo's visual and UX execution. It is the design contract for Codex work in this repository.
@@ -317,7 +317,7 @@ Current repair state:
 - At medium desktop widths around 1116px, the Projects record list and editor remain a two-column task workspace with a sticky, independently scrolling list. On narrow screens, section headings and action groups wrap instead of squeezing or overflowing. Material-map tabs expose roving keyboard navigation and an associated tabpanel.
 - Project preview uses the same `src/components/projects/ProjectPageView.tsx` renderer as the public detail route, so the editor inspects the page they are preparing rather than a parallel admin approximation. Media fields combine a searchable thumbnail picker with private inline upload and alt capture; material-map points are placed directly on the image by pointer or keyboard rather than by exposing raw coordinates.
 - The bounded media picker must still resolve every image already referenced by the current draft, even when that asset is older than the latest picker window. Long-lived private previews refresh their signed URLs before expiry so a stable editing session does not lose its selected images.
-- This Projects pattern is source-only until expand migration `supabase/migrations/20260714052955_project_aggregate_drafts.sql` and later contract migration `supabase/migrations/20260714052956_project_aggregate_write_lockdown.sql` receive their separate production approvals in the documented order, the branch/runtime pass preview and authenticated workflow checks, and Jay passes the fool test. Source gates or agent review cannot certify the editor experience, and the pattern must not be copied to other modules before that acceptance.
+- Expand migration `supabase/migrations/20260719015649_project_aggregate_drafts.sql` is applied/read back, but that does not accept this Projects pattern. It remains a candidate until the separately approved authenticated workflow passes, the tombstone minimum-disclosure residual is narrowed or accepted, the aggregate runtime is promoted, contract migration `supabase/migrations/20260719015650_project_aggregate_write_lockdown.sql` is separately approved/applied/read back, and Jay passes the fool test. Source or migration gates cannot certify the editor experience, and the pattern must not be copied to other modules before that acceptance.
 
 Admin usability acceptance:
 - A new editor can complete invite, password setup, sign-in, and sign-out without assistance.

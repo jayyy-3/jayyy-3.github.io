@@ -3,7 +3,7 @@
 -- contract and backfills child lifecycle columns. Apply only after Jay's
 -- item-specific approval and read it back before authenticated preview writes.
 -- It deliberately does not revoke legacy browser writes or harden final public
--- policies; those contract changes belong to 20260714052956 after the new
+-- policies; those contract changes belong to 20260719015650 after the new
 -- aggregate UI/endpoint is already running in production.
 -- Draft saves stay private. Publishing applies the relational aggregate and audit row
 -- in one Postgres transaction. Storage copies are orchestrated separately by the
