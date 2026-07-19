@@ -1,4 +1,4 @@
--- Contract phase for the Project aggregate rollout (production version 20260719015650).
+-- Contract phase for the Project aggregate rollout (production version 20260719015651).
 -- Apply only after preview verification AND after the aggregate UI/endpoint
 -- have been promoted to production. Freeze Project editing during this brief
 -- contract step; a preview deployment alone is not sufficient authorization.

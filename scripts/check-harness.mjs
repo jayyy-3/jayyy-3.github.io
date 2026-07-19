@@ -48,7 +48,7 @@ const requiredPackageScripts = {
   'agent:admin-auth-browser': 'node scripts/check-admin-auth-browser.mjs',
   'agent:admin-crud-live': 'node scripts/check-admin-crud-live.mjs',
   'agent:admin-media-role-boundary-live': 'node scripts/check-admin-media-role-boundary-live.mjs',
-  'agent:admin-projects-aggregate': 'node --experimental-strip-types scripts/check-admin-projects-aggregate.mjs',
+  'agent:admin-projects-aggregate': 'tsx scripts/check-admin-projects-aggregate.mjs',
   'agent:admin-handoff-readiness': 'node scripts/check-admin-handoff-readiness.mjs',
   'agent:admin-live-readiness': 'node scripts/check-admin-live-readiness.mjs',
   'agent:cloudflare-preview-smoke': 'node scripts/check-cloudflare-preview-smoke.mjs',
@@ -65,7 +65,7 @@ const requiredPackageScripts = {
   'agent:harness-gc:review': 'node scripts/check-harness-gc.mjs --review',
   'agent:init': 'bash scripts/agent-init.sh',
   'agent:live-readiness': 'node scripts/check-live-readiness.mjs',
-  'agent:public-content-overlay': 'node --experimental-strip-types scripts/check-public-content-overlay.mjs',
+  'agent:public-content-overlay': 'tsx scripts/check-public-content-overlay.mjs',
   'agent:public-supabase-readiness': 'node scripts/check-public-supabase-readiness.mjs',
   'agent:supabase-foundation-readiness': 'node scripts/check-supabase-foundation-readiness.mjs',
   'agent:smoke': 'bash scripts/agent-smoke.sh',
@@ -150,7 +150,7 @@ try {
   if (!smoke.includes('node scripts/check-capabilities-page-source.mjs')) {
     failures.push('scripts/agent-smoke.sh must run the Capabilities page source contract check.')
   }
-  if (!smoke.includes('node --experimental-strip-types scripts/check-admin-projects-aggregate.mjs')) {
+  if (!smoke.includes('npm run agent:admin-projects-aggregate')) {
     failures.push('scripts/agent-smoke.sh must run the Admin Projects aggregate behavior check.')
   }
 } catch (error) {
@@ -170,6 +170,20 @@ try {
   }
 } catch (error) {
   failures.push(`Unable to read scripts/admin-cms-predeploy.sh: ${error.message}`)
+}
+
+try {
+  const adminCrudCoverage = readFileSync(
+    join(root, 'scripts/check-admin-crud-coverage.mjs'),
+    'utf8',
+  )
+  if (!adminCrudCoverage.includes("join(root, 'node_modules/tsx/dist/cli.mjs')")) {
+    failures.push(
+      'scripts/check-admin-crud-coverage.mjs must invoke the Projects aggregate verifier through tsx for Node 20.',
+    )
+  }
+} catch (error) {
+  failures.push(`Unable to read scripts/check-admin-crud-coverage.mjs: ${error.message}`)
 }
 
 try {

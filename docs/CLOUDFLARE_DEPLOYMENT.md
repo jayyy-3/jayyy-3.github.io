@@ -22,7 +22,7 @@ Before running live form/admin/preview checks, `npm run agent:live-readiness` ca
 - Build command: `npm run build`.
 - Output directory: `dist`.
 - Production branch: `main`.
-- Node version: use the Cloudflare default compatible with the project, or pin to the current repo-supported Node LTS if the dashboard requires an explicit value.
+- Node version: pin the Cloudflare Pages build environment to `NODE_VERSION=20`, matching the repository gate and deployment workflow.
 
 ### Routing
 - The app now uses React Router `BrowserRouter` for clean URLs.
@@ -35,6 +35,8 @@ Before running live form/admin/preview checks, `npm run agent:live-readiness` ca
 - Current Pages Function routes:
   - `/api/enquiries`
   - `/api/sample-requests`
+  - `/api/admin/invite-user`
+  - `/api/admin/projects`
 
 ### Headers
 `public/_headers` adds conservative launch-safe headers:

@@ -642,13 +642,21 @@ export async function getArchivedProjectSlugs(
   // make otherwise healthy static project pages disappear.
   if (error || !Array.isArray(data)) return [];
 
+  // The RPC is a public suppression signal, not a private-content feed. Keep a
+  // client-side allowlist as defence in depth so an unexpected function result
+  // can only hide a Project slug that is already bundled in the public site.
+  const staticProjectSlugs = new Set(
+    staticProjects.map((project) => toCanonicalContentKey(project.slug)),
+  );
   const slugs = new Set<string>();
   for (const row of data as unknown[]) {
     if (!row || typeof row !== 'object') continue;
     const slug = (row as { slug?: unknown }).slug;
     if (typeof slug !== 'string') continue;
     const canonicalSlug = toCanonicalContentKey(slug);
-    if (canonicalSlug) slugs.add(canonicalSlug);
+    if (canonicalSlug && staticProjectSlugs.has(canonicalSlug)) {
+      slugs.add(canonicalSlug);
+    }
   }
 
   return [...slugs];

@@ -158,7 +158,7 @@ export default function ProjectEditor({
     media.find((asset) => asset.id === selectedMap?.mediaAssetId) ?? null;
   const hasPendingMedia = pendingMediaKeys.size > 0;
   const hasActiveMediaRequest = busyMediaKeys.size > 0;
-  const mutationDisabled = !canEdit || isSaving;
+  const mutationDisabled = !canEdit || isSaving || showReload;
   const editorFieldsDisabled = mutationDisabled || hasPendingMedia;
 
   const handleMediaPendingChange = useCallback(
@@ -228,7 +228,7 @@ export default function ProjectEditor({
 
   function submitSave(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (canEdit && isDirty && !isSaving && !hasPendingMedia)
+    if (canEdit && isDirty && !isSaving && !hasPendingMedia && !showReload)
       void onAction("save");
   }
 
@@ -1322,9 +1322,9 @@ export default function ProjectEditor({
                           }
                           hotspots={mapHotspots}
                           selectedKey={selectedHotspot?.key ?? null}
-                          disabled={isSaving}
-                          readOnly={!canEdit || hasPendingMedia}
-                          selectionDisabled={hasPendingMedia}
+                          disabled={isSaving || showReload}
+                          readOnly={!canEdit || hasPendingMedia || showReload}
+                          selectionDisabled={hasPendingMedia || showReload}
                           onAdd={addHotspot}
                           onSelect={setSelectedHotspotKey}
                           onMove={(key, position) =>
@@ -1524,7 +1524,7 @@ export default function ProjectEditor({
               ) : null}
             </div>
             <div className="flex flex-wrap gap-2">
-              {(isDirty || hasPendingMedia) && !isSaving ? (
+              {(isDirty || hasPendingMedia) && !isSaving && !showReload ? (
                 <button
                   type="button"
                   onClick={onDiscard}

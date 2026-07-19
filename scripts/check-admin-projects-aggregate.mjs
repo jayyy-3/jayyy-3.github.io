@@ -11,6 +11,7 @@ import {
   mergeProjectMediaOptions,
   moveProjectDraftItem,
 } from "../src/features/projects/projectAggregate.ts";
+import { projects as staticProjectFixtures } from "../src/data/projectData.ts";
 import {
   assertPublishDraft,
   assertPublishableMedia,
@@ -27,6 +28,18 @@ import {
 
 const root = resolve(import.meta.dirname, "..");
 const failures = [];
+
+// Supabase initializes its Realtime client even though this source verifier
+// never opens a socket. Node 20 has no native WebSocket global, so provide a
+// deliberately unusable test-only constructor: accidental realtime use still
+// fails, while the mocked Auth/REST handler path remains runnable in the gate.
+if (typeof globalThis.WebSocket === "undefined") {
+  globalThis.WebSocket = class TestOnlyWebSocket {
+    constructor() {
+      throw new Error("Admin Projects source checks do not permit WebSocket use.");
+    }
+  };
+}
 
 function readRequired(path) {
   const absolutePath = resolve(root, path);
@@ -49,6 +62,75 @@ function forbidMatches(text, pattern, path, label) {
   if (pattern.test(text)) failures.push(`${path}: unexpected ${label}`);
 }
 
+async function withAdminProjectsFetchMock(mock, run) {
+  const originalFetch = globalThis.fetch;
+  const calls = [];
+  globalThis.fetch = async (input, init = {}) => {
+    const call = {
+      url: input instanceof Request ? input.url : String(input),
+      method: init.method || (input instanceof Request ? input.method : "GET"),
+      body: init.body,
+    };
+    calls.push(call);
+    return mock(call, calls);
+  };
+
+  try {
+    return await run(calls);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+}
+
+const mockAdminUserId = "11111111-1111-4111-8111-111111111111";
+const mockAdminEnvironment = {
+  SUPABASE_URL: "https://example.supabase.co",
+  SUPABASE_SERVICE_ROLE_KEY: "test-service-key",
+};
+
+function mockAdminIdentity(call) {
+  const url = new URL(call.url);
+  if (url.pathname === "/auth/v1/user") {
+    return Response.json(
+      { id: mockAdminUserId, email: "owner@example.test" },
+      { status: 200 },
+    );
+  }
+  if (url.pathname === "/rest/v1/admin_profiles") {
+    return Response.json([{ role: "owner", is_active: true }], {
+      status: 200,
+    });
+  }
+  return null;
+}
+
+function adminProjectMutationRequest(body) {
+  return new Request("https://example.test/api/admin/projects", {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer test-token",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+}
+
+function revisionConflictResponse(message) {
+  return Response.json(
+    {
+      code: "PGRST",
+      message: JSON.stringify({ code: "revision_conflict", message }),
+      details: JSON.stringify({
+        status: 409,
+        status_text: "Conflict",
+        headers: {},
+      }),
+      hint: null,
+    },
+    { status: 409 },
+  );
+}
+
 const pagePath = "src/pages/admin/AdminProjectsPage.tsx";
 const shellPath = "src/pages/admin/AdminShell.tsx";
 const aggregatePath = "src/features/projects/projectAggregate.ts";
@@ -64,8 +146,10 @@ const routePath = "functions/api/admin/projects.js";
 const functionPath = "functions/_lib/admin-projects.js";
 const migrationPath =
   "supabase/migrations/20260719015649_project_aggregate_drafts.sql";
+const tombstoneMigrationPath =
+  "supabase/migrations/20260719015650_restrict_archived_project_tombstones.sql";
 const lockdownMigrationPath =
-  "supabase/migrations/20260719015650_project_aggregate_write_lockdown.sql";
+  "supabase/migrations/20260719015651_project_aggregate_write_lockdown.sql";
 
 const page = readRequired(pagePath);
 const shell = readRequired(shellPath);
@@ -81,6 +165,7 @@ const service = readRequired(servicePath);
 const route = readRequired(routePath);
 const server = readRequired(functionPath);
 const migration = readRequired(migrationPath);
+const tombstoneMigration = readRequired(tombstoneMigrationPath);
 const lockdownMigration = readRequired(lockdownMigrationPath);
 const browserProjectsSource = [
   page,
@@ -161,6 +246,48 @@ requireMatches(
   /error\.code\s*===\s*["']revision_conflict["']/,
   pagePath,
   "revision-only reload recovery",
+);
+requireIncludes(
+  page,
+  "showReload={hasConflict}",
+  pagePath,
+  "revision-conflict recovery state handoff",
+);
+requireMatches(
+  editor,
+  /const mutationDisabled\s*=\s*!canEdit\s*\|\|\s*isSaving\s*\|\|\s*showReload;/,
+  editorPath,
+  "revision-conflict mutation lock",
+);
+requireMatches(
+  editor,
+  /\(isDirty\s*\|\|\s*hasPendingMedia\)\s*&&\s*!isSaving\s*&&\s*!showReload/,
+  editorPath,
+  "revision-conflict stale discard suppression",
+);
+requireMatches(
+  editor,
+  /if\s*\(canEdit\s*&&\s*isDirty\s*&&\s*!isSaving\s*&&\s*!hasPendingMedia\s*&&\s*!showReload\)/,
+  editorPath,
+  "revision-conflict submit guard",
+);
+for (const hotspotConflictLock of [
+  "disabled={isSaving || showReload}",
+  "readOnly={!canEdit || hasPendingMedia || showReload}",
+  "selectionDisabled={hasPendingMedia || showReload}",
+]) {
+  requireIncludes(
+    editor,
+    hotspotConflictLock,
+    editorPath,
+    `hotspot revision-conflict lock ${hotspotConflictLock}`,
+  );
+}
+requireMatches(
+  page,
+  /async function handleAction\(action: ProjectEditorAction\)[\s\S]{0,260}hasConflict[\s\S]{0,40}return;/,
+  pagePath,
+  "parent revision-conflict mutation guard",
 );
 requireIncludes(page, "onRetry", pagePath, "failed draft retry action");
 requireIncludes(
@@ -735,10 +862,56 @@ requireIncludes(
   "archived Project tombstone RPC",
 );
 requireIncludes(
-  migration,
-  "from private.project_drafts as drafts",
-  migrationPath,
-  "private-only archived draft tombstones",
+  tombstoneMigration,
+  "get_archived_project_slugs",
+  tombstoneMigrationPath,
+  "replacement archived Project tombstone RPC",
+);
+requireIncludes(
+  tombstoneMigration,
+  "static_fallback_slugs",
+  tombstoneMigrationPath,
+  "known public fallback allowlist",
+);
+requireMatches(
+  tombstoneMigration,
+  /select\s+fallback\.slug/i,
+  tombstoneMigrationPath,
+  "allowlisted tombstone output",
+);
+requireMatches(
+  tombstoneMigration,
+  /from public\.projects[\s\S]+projects\.status = 'archived'/i,
+  tombstoneMigrationPath,
+  "archived canonical Project intersection",
+);
+forbidMatches(
+  tombstoneMigration,
+  /private\.project_drafts/i,
+  tombstoneMigrationPath,
+  "private draft read in public tombstone endpoint",
+);
+const expectedTombstoneSlugs = staticProjectFixtures
+  .map((project) => project.slug)
+  .sort();
+const migrationTombstoneSlugs = [
+  ...tombstoneMigration.matchAll(/\('([^']+)'::text\)/g),
+]
+  .map((match) => match[1])
+  .sort();
+if (
+  JSON.stringify(migrationTombstoneSlugs) !==
+  JSON.stringify(expectedTombstoneSlugs)
+) {
+  failures.push(
+    `${tombstoneMigrationPath}: tombstone allowlist must exactly match bundled public Project slugs`,
+  );
+}
+requireIncludes(
+  service,
+  "staticProjectSlugs.has(canonicalSlug)",
+  servicePath,
+  "client-side tombstone allowlist defence",
 );
 
 for (const contract of [
@@ -1100,13 +1273,6 @@ requireMatches(
   migrationPath,
   "transaction-local published finish lock",
 );
-requireMatches(
-  migration,
-  /drafts\.archived_at is not null[\s\S]{0,500}not exists[\s\S]{0,300}published_projects\.status = ['"]published['"]/i,
-  migrationPath,
-  "published canonical exclusion from private tombstones",
-);
-
 const pgrstBlocks = [
   ...migration.matchAll(
     /raise sqlstate 'PGRST' using[\s\S]*?detail\s*=\s*(jsonb_build_object\([^;]+\))::text;/gi,
@@ -1166,6 +1332,221 @@ assert.equal(
 assert.equal(
   (await unauthenticatedMalformedPost.json()).error,
   "missing_session",
+);
+
+const conflictDraft = createEmptyProjectAggregateDraft();
+Object.assign(conflictDraft.project, {
+  id: 12,
+  title: "Conflict proof",
+  slug: "conflict-proof",
+});
+await withAdminProjectsFetchMock(
+  (call) => {
+    const identityResponse = mockAdminIdentity(call);
+    if (identityResponse) return identityResponse;
+    if (new URL(call.url).pathname === "/rest/v1/rpc/admin_project_aggregate") {
+      return revisionConflictResponse("Reload before saving.");
+    }
+    throw new Error(`Unexpected mocked Projects request: ${call.method} ${call.url}`);
+  },
+  async (calls) => {
+    const response = await handleAdminProjectsRequest(
+      adminProjectMutationRequest({
+        action: "save",
+        projectId: 12,
+        baseRevision: 1,
+        baseUpdatedAt: "2026-07-19T00:00:00.000000+00:00",
+        draft: conflictDraft,
+      }),
+      mockAdminEnvironment,
+    );
+    const body = await response.json();
+    assert.equal(
+      response.status,
+      409,
+      `Stale Save response: ${JSON.stringify(body)}; calls: ${JSON.stringify(calls)}`,
+    );
+    assert.equal(body.error, "revision_conflict");
+    assert.equal(body.message, "Reload before saving.");
+    assert.equal(
+      calls.filter(
+        (call) =>
+          new URL(call.url).pathname ===
+          "/rest/v1/rpc/admin_project_aggregate",
+      ).length,
+      1,
+      "A stale Save must issue one aggregate RPC and preserve its revision-conflict response",
+    );
+  },
+);
+
+const compensationDraft = createEmptyProjectAggregateDraft();
+Object.assign(compensationDraft.project, {
+  id: 12,
+  title: "Publish compensation proof",
+  slug: "publish-compensation-proof",
+  summary: "A local mocked publish compensation proof.",
+  claimReviewStatus: "approved",
+  heroMediaId: 7,
+  coverMediaId: 7,
+});
+const compensationSourceBytes = new Uint8Array([0xff, 0xd8, 0xff, 0xd9]);
+const compensationSourceBlob = new Blob([compensationSourceBytes], {
+  type: "image/jpeg",
+});
+const compensationMediaRow = {
+  id: 7,
+  status: "draft",
+  bucket: "urblo-admin-media",
+  object_path: "project-editor/compensation-proof.jpg",
+  source_url: null,
+  source_kind: "storage",
+  media_type: "image",
+  mime_type: "image/jpeg",
+  size_bytes: compensationSourceBlob.size,
+  alt: "Mocked compensation proof image",
+  updated_at: "2026-07-19T00:00:00.000000+00:00",
+};
+
+await withAdminProjectsFetchMock(
+  (call) => {
+    const identityResponse = mockAdminIdentity(call);
+    if (identityResponse) return identityResponse;
+
+    const url = new URL(call.url);
+    if (
+      url.pathname === "/rest/v1/media_assets" &&
+      url.searchParams.get("select")?.startsWith("id,status")
+    ) {
+      return Response.json([compensationMediaRow], { status: 200 });
+    }
+    if (
+      url.pathname ===
+        "/storage/v1/object/urblo-admin-media/project-editor/compensation-proof.jpg" &&
+      call.method === "GET"
+    ) {
+      return new Response(compensationSourceBlob, {
+        status: 200,
+        headers: { "Content-Type": "image/jpeg" },
+      });
+    }
+    if (
+      url.pathname.startsWith(
+        "/storage/v1/object/urblo-public-media/project-assets/7/",
+      ) &&
+      call.method === "POST"
+    ) {
+      return Response.json({ Key: url.pathname }, { status: 200 });
+    }
+    if (
+      url.pathname.startsWith(
+        "/storage/v1/object/urblo-public-media/project-assets/7/",
+      ) &&
+      call.method === "GET"
+    ) {
+      return new Response(compensationSourceBlob, {
+        status: 200,
+        headers: { "Content-Type": "image/jpeg" },
+      });
+    }
+    if (url.pathname === "/rest/v1/rpc/admin_project_aggregate") {
+      return revisionConflictResponse("Reload before publishing.");
+    }
+    if (
+      url.pathname === "/rest/v1/media_assets" &&
+      url.searchParams.get("select") === "id"
+    ) {
+      return Response.json([], { status: 200 });
+    }
+    if (
+      url.pathname === "/storage/v1/object/urblo-public-media" &&
+      call.method === "DELETE"
+    ) {
+      return Response.json([], { status: 200 });
+    }
+    if (
+      url.pathname === "/rest/v1/admin_audit_events" &&
+      call.method === "POST"
+    ) {
+      return new Response(null, { status: 201 });
+    }
+    throw new Error(`Unexpected mocked Projects request: ${call.method} ${call.url}`);
+  },
+  async (calls) => {
+    const response = await handleAdminProjectsRequest(
+      adminProjectMutationRequest({
+        action: "publish",
+        projectId: 12,
+        baseRevision: 1,
+        baseUpdatedAt: "2026-07-19T00:00:00.000000+00:00",
+        draft: compensationDraft,
+      }),
+      mockAdminEnvironment,
+    );
+    const body = await response.json();
+    assert.equal(response.status, 409);
+    assert.equal(body.error, "revision_conflict");
+    assert.deepEqual(body.cleanup, {
+      removedCount: 1,
+      retainedCount: 0,
+      auditRecorded: true,
+    });
+
+    const publicUpload = calls.find(
+      (call) =>
+        call.method === "POST" &&
+        new URL(call.url).pathname.startsWith(
+          "/storage/v1/object/urblo-public-media/project-assets/7/",
+        ),
+    );
+    const aggregateRpc = calls.find(
+      (call) =>
+        new URL(call.url).pathname ===
+        "/rest/v1/rpc/admin_project_aggregate",
+    );
+    const publicRemoval = calls.find(
+      (call) =>
+        call.method === "DELETE" &&
+        new URL(call.url).pathname ===
+          "/storage/v1/object/urblo-public-media",
+    );
+    const compensationAudit = calls.find(
+      (call) =>
+        call.method === "POST" &&
+        new URL(call.url).pathname === "/rest/v1/admin_audit_events",
+    );
+    assert.ok(publicUpload, "Publish must create the mocked public copy first");
+    assert.ok(aggregateRpc, "Publish must call the aggregate RPC");
+    assert.ok(publicRemoval, "A failed RPC must remove its mocked public copy");
+    assert.ok(
+      compensationAudit,
+      "A failed publish must record its mocked compensation audit",
+    );
+    assert.ok(calls.indexOf(publicUpload) < calls.indexOf(aggregateRpc));
+    assert.ok(calls.indexOf(aggregateRpc) < calls.indexOf(publicRemoval));
+    assert.ok(calls.indexOf(publicRemoval) < calls.indexOf(compensationAudit));
+
+    const publicPathPrefix =
+      "/storage/v1/object/urblo-public-media/";
+    const uploadedPath = decodeURIComponent(
+      new URL(publicUpload.url).pathname.slice(publicPathPrefix.length),
+    );
+    const removalBody = JSON.parse(String(publicRemoval.body));
+    const rpcBody = JSON.parse(String(aggregateRpc.body));
+    const auditBody = JSON.parse(String(compensationAudit.body));
+    assert.deepEqual(removalBody.prefixes, [uploadedPath]);
+    assert.equal(
+      rpcBody.p_promotions[0].destinationPath,
+      uploadedPath,
+      "The compensated path must be the exact request-owned promotion path",
+    );
+    assert.equal(
+      auditBody.action,
+      "project.aggregate.publish_compensation",
+    );
+    assert.deepEqual(auditBody.metadata.removed, [uploadedPath]);
+    assert.equal(auditBody.metadata.originalError.code, "revision_conflict");
+  },
 );
 
 const referencedMediaDraft = createEmptyProjectAggregateDraft();

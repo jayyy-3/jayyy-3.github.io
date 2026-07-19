@@ -549,7 +549,15 @@ function AdminProjectsContent() {
   }
 
   async function handleAction(action: ProjectEditorAction) {
-    if (!supabase || !canEdit || !draft || isSaving || isMediaPending) return;
+    if (
+      !supabase ||
+      !canEdit ||
+      !draft ||
+      isSaving ||
+      isMediaPending ||
+      hasConflict
+    )
+      return;
     setIsSaving(true);
     setEditorError(null);
     setNotice(null);

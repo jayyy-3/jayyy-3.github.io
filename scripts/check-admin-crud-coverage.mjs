@@ -1500,10 +1500,17 @@ function checkAdminLoadingAndSaveLockSafety() {
 }
 
 function checkProjectsAggregateContract() {
-  const result = spawnSync(execPath, ['scripts/check-admin-projects-aggregate.mjs'], {
-    cwd: root,
-    encoding: 'utf8',
-  });
+  const result = spawnSync(
+    execPath,
+    [
+      join(root, 'node_modules/tsx/dist/cli.mjs'),
+      'scripts/check-admin-projects-aggregate.mjs',
+    ],
+    {
+      cwd: root,
+      encoding: 'utf8',
+    },
+  );
 
   if (result.status !== 0) {
     const detail = [result.stdout, result.stderr].filter(Boolean).join('\n').trim();

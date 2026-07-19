@@ -586,9 +586,9 @@ function checkDocsContracts() {
   const handoff = readRequired('docs/HANDOFF.md');
 
   for (const fragment of [
-    'Public Stone Library routes use Supabase published reads with static fallback',
+    'Public Stone Library listing and detail routes prefer Published Supabase content with static fallback',
     'Public Product routes use Supabase published reads with static fallback',
-    'Public Article routes use Supabase published reads with static fallback',
+    'Public Article routes prefer Published Supabase content with static fallback',
   ]) {
     requireIncludes(schema, fragment, 'docs/SUPABASE_SCHEMA.md');
   }

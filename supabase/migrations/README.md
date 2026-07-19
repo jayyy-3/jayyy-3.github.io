@@ -42,6 +42,9 @@ Applied production migrations:
 
 Pending production approval and apply:
 
-- `20260719015650_project_aggregate_write_lockdown.sql` — contract step that removes legacy browser Project table/sequence writes and hardens public parent/child reads. Apply only with separate approval after preview passes and the aggregate UI/endpoint is already promoted to production; freeze Project editing during apply/readback. After this step, do not Cloudflare-only roll back to the legacy direct-write UI.
+- `20260719015650_restrict_archived_project_tombstones.sql` — minimum-disclosure repair for the public archived-Project RPC. It limits output to the intersection of archived canonical Projects and the five fallback slugs already bundled in the public site, and never reads private drafts. Apply/read back only with fresh, item-specific approval; it is independent of contract B. Because B is the next pending migration, do not use a bulk linked migration command for C: apply exactly C through a single-migration path, then read back its version/function result before any runtime promotion.
+- `20260719015651_project_aggregate_write_lockdown.sql` — contract step that removes legacy browser Project table/sequence writes and hardens public parent/child reads. Apply only with separate approval after preview passes and the aggregate UI/endpoint is already promoted to production; freeze Project editing during apply/readback. After this step, do not Cloudflare-only roll back to the legacy direct-write UI.
+
+Migration A is already applied and remains byte-for-byte immutable. Its historical comment names `20260719015650` as the then-planned contract step; production-history alignment inserted C at that version and moved the still-unapplied contract step to `20260719015651`.
 
 Do not commit Supabase service role keys, database passwords, Turnstile secrets, or email provider secrets here.

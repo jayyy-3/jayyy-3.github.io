@@ -308,6 +308,7 @@ const archivedProjectSlugs = await getArchivedProjectSlugs(createProjectClient({
   data: [
     { slug: ' XAVIER-COLLEGE ' },
     { slug: 'xavier-college' },
+    { slug: 'never-published-private-project' },
     { slug: '' },
     { slug: 42 },
   ],
@@ -316,7 +317,7 @@ const archivedProjectSlugs = await getArchivedProjectSlugs(createProjectClient({
 assert.deepEqual(
   archivedProjectSlugs,
   ['xavier-college'],
-  'Archived project slug tombstones must be canonical, non-empty, and deduplicated',
+  'Archived Project tombstones must be canonical, deduplicated, and limited to bundled public fallbacks',
 );
 
 const mergedWithArchivedFallback = mergeProjectsWithPublishedOverlay(
