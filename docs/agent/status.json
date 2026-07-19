@@ -17,9 +17,10 @@
     "turnstile": "not_configured",
     "adminAuthBrowserQa": "production_9_authenticated_routes_signout_protected_revisit_and_3_blocked_supabase_static_fallbacks_verified",
     "adminCmsHandoff": "revalidation_required_after_user_report_and_repair_deploy",
-    "adminCrudLive": "api_level_verified_ui_golden_workflow_missing",
-    "adminProjectsAggregateMigrations": "20260719015649_expand_applied_and_read_back_zero_private_drafts_existing_counts_unchanged_20260719015650_contract_source_only_fresh_approval_required_unapplied",
-    "adminProjectsBranchPreview": "commit_9441811_deployment_d29d45cf_no_write_smoke_passing_github_cloudflare_callback_still_in_progress_at_final_readback",
+    "adminCrudLive": "api_level_verified_projects_owner_preview_happy_path_verified_remaining_ui_golden_workflows_missing",
+    "adminProjectsAggregateMigrations": "20260719015649_expand_applied_and_read_back_one_previously_published_tagged_aggregate_now_archived_20260719015650_contract_source_only_fresh_approval_required_unapplied",
+    "adminProjectsBranchPreview": "commit_9441811_deployment_1a3e0d4b_no_write_smoke_and_owner_login_passing_preview_secrets_only",
+    "adminProjectsAuthenticatedPreview": "marker_admin-projects-ui-mrroa6p0_one_save_refresh_unsaved_preview_private_first_media_hotspot_55_55_publish_public_readback_hide_public_not_found_passed_final_project_archived_public_media_retained_private_source_removed",
     "adminStorageProof": "media_role_migration_and_policies_read_back_live_editor_owner_boundary_passed_zero_tagged_objects_remain",
     "supabaseAuthSmtp": "redirect_config_corrected_and_read_back_invite_delivery_observed_sender_ownership_unverified_golden_flow_not_repeated",
     "contentImport": "draft_imported",
@@ -27,7 +28,7 @@
     "seoIndexability": "static_36_route_production_verified_cms_only_discovery_strategy_pending",
     "seoLegacyRedirects": "production_smoke_verified_2026_07_13",
     "settingsInviteProof": "qa_editor_active_via_direct_auth_activation_redirect_config_corrected_real_ui_invite_recovery_not_repeated",
-    "supabaseSecurityAdvisor": "one_auth_leaked_password_warning_plus_two_expected_browser_callable_archived_slug_security_definer_warnings_private_drafts_currently_zero"
+    "supabaseSecurityAdvisor": "one_auth_leaked_password_warning_plus_two_expected_browser_callable_archived_slug_security_definer_warnings_one_archived_previously_published_qa_draft_no_never_published_private_only_draft"
   },
   "localReproducibility": {
     "sourceHarness": "passing",
@@ -35,12 +36,12 @@
     "runtimeGates": "2026_07_14_phase1_projects_full_host_side_suite_passing_docker_unavailable_jay_approved_one_time_push_exception_2026_07_16",
     "liveSecretsPresent": true,
     "liveReadiness": "browser_key_owner_and_distinct_editor_credentials_present_media_migration_applied_live_role_boundary_passed",
-    "adminUxReshape": "phase0_closed_phase1_projects_source_candidate_host_suite_and_no_write_preview_passing_expand_migration_applied_read_back_authenticated_workflow_runtime_contract_and_fool_test_pending"
+    "adminUxReshape": "phase0_closed_phase1_projects_preview_implementation_evidence_complete_acceptance_pending_conflict_failure_recovery_tombstone_decision_production_runtime_contract_b_and_jay_fool_test"
   },
   "nextDecisions": [
     "Monitor or purge the four residual apex cache headers when Cloudflare account access is available; their current bytes and MIME types exactly match the immutable repair deployment and are non-blocking.",
     "After separate approval, verify Supabase Auth SMTP ownership and repeat invite/password/recovery against the corrected and read-back production callbacks.",
-    "Obtain separate approval for cleanable tagged Project/Storage workflow evidence; before those writes freeze Project editing continuously through authenticated preview evidence, tombstone minimum-disclosure resolution or acceptance, aggregate runtime promotion, and fresh approval/application/readback of contract migration `20260719015650_project_aggregate_write_lockdown.sql`. Expand migration A is complete; Jay's fool test remains unverified.",
+    "Keep Project editing frozen; authenticated Preview happy-path evidence is complete. Close conflict/failure recovery, narrow or accept the tombstone disclosure, promote the matching aggregate runtime, then obtain fresh approval/application/readback of contract migration `20260719015650_project_aggregate_write_lockdown.sql`. Jay's fool test remains unverified.",
     "Decide whether final Turnstile proof is required before the next public launch checkpoint.",
     "Repeat the complete Settings invite/password workflow with the approved QA recipient after Auth callback configuration is corrected.",
     "Have a customer or editor review imported Draft CMS content before publishing items publicly.",
@@ -90,6 +91,7 @@
     "adminMediaRoleMigrationProduction": "2026-07-14",
     "supabaseSecurityAdvisor": "2026-07-19",
     "adminProjectsAggregateExpandProduction": "2026-07-19",
+    "adminProjectsAuthenticatedPreviewWorkflow": "2026-07-19",
     "supabaseAuthUrlConfig": "2026-07-14",
     "adminReliabilityReaudit": "2026-07-13",
     "adminReliabilityDeployment": "2026-07-13",

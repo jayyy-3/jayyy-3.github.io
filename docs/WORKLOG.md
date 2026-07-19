@@ -2,6 +2,28 @@
 
 Last updated: 2026-07-19
 
+## Entry - 2026-07-19 (Projects Authenticated Preview Workflow)
+
+### Approved Scope And Preview Configuration
+- After Jay's separate approval for the cleanable tagged Project/Storage workflow, production Project editing was placed under the documented operational freeze. The approved scope covered one owner-driven aggregate Project happy path plus restoration of the temporary Stone prerequisite; it did not authorize production runtime promotion, contract migration B, invitations, destructive cleanup, or any other production content change.
+- Cloudflare Pages Preview received `VITE_SUPABASE_PUBLISHABLE_KEY` and `SUPABASE_SERVICE_ROLE_KEY` as Preview-only secrets. Production Cloudflare configuration was not changed. Retrying commit `9441811` produced immutable deployment `1a3e0d4b-d74a-4979-be64-921e5a510ccc` at `https://1a3e0d4b.urblo.pages.dev`; the no-write smoke passed 23 public/Admin/404 routes, recursive JS/CSS MIME/body integrity, configured browser-secret boundaries, nine redirects, form safe-failure behavior, and the protected Projects API boundary. Owner sign-in reached the real configured Admin, and an invalid bearer request returned `401 invalid_session`, not `server_not_configured`.
+- Production had no Published Stone family, so the workflow temporarily published existing archived QA fixture `stone_groups.id = 1` through the normal Stone Library UI. No real Draft stone copy was changed. Audit `154` recorded `stone_group.publish`.
+
+### One-Save Project Evidence
+- Marker `admin-projects-ui-mrroa6p0` was used throughout. The owner created Project `9` in the page-shaped editor with Overview fields, one approved Fact, one approved Stone/Finish material, one material map, one visually created hotspot moved by keyboard from 50/50 to 55/55, and one inline image uploaded with alt text. Upload audit `155` proves the image began private-first in `urblo-admin-media` as Media `119`.
+- Unsaved `Open preview` used the public Project renderer and showed the title, hero, Fact, material, map, hotspot, and `Ready to publish` before Save. The public-shaped hotspot rendered at `left: 55%; top: 55%`.
+- The complete aggregate was saved exactly once with no confirmation dialog. Audit `156` is the only `project.aggregate_draft.save` for Project `9`, revision `1`, with `liveStatus = null` and one Fact/Material/Map/Hotspot. The canonical Project did not yet exist; reload then read back every saved field and the 55/55 point from the private aggregate.
+
+### Publish, Public Readback, Hide, And Restore
+- Publish created canonical Project `9` and all four child rows as Published. Audit `157` recorded `project.aggregate.publish`; Media `119` was copied create-only to `urblo-public-media`, and audit `158` recorded removal of the private source with no retained private object. The public Preview route displayed the complete Project, both image uses, material map, and 55/55 hotspot.
+- Hide produced audit `159` and archived Project `9`, its Fact/Material/Map/Hotspot, and private aggregate revision `3`. An anonymous REST read of the slug returned `200 []`, and a cache-busted public route read rendered `Project not found` without the tagged title.
+- The temporary Stone fixture was restored through the normal UI to its exact original Archived state. Audit `160` records `stone_group.archive`; final Stone counts are 0 Published, 12 Draft, and 4 Archived. Its Variant and Finish image remain Draft and their linked Media remains Archived.
+- Final residual state follows the approved archive-first/no-destructive-delete contract: the tagged Project aggregate and audit history remain Archived; Media `119` and one 123,161-byte public JPEG remain Published so the archived record's historical reference is not broken; the private upload source is gone. Physical deletion would require a separate retention/destructive-delete approval.
+
+### Acceptance Boundary And Next Action
+- This closes the authenticated Preview implementation happy path for exactly-one-Save, refresh persistence, shared unsaved preview, inline private-first media, visual hotspot, Publish/public readback, Hide, and public suppression. It is not a production deployment proof, does not update `docs/agent/admin-handoff-evidence.json`, and is not Jay's unassisted fool test.
+- `NOW-ADMIN-UX-RESHAPE-001` remains `now`. Keep the Project edit freeze while live conflict/failure-recovery evidence is completed, the archived-slug minimum-disclosure case is narrowed or accepted, the aggregate UI/endpoint is promoted to production, and contract migration `20260719015650_project_aggregate_write_lockdown.sql` receives fresh approval/apply/readback. Contract B was not applied in this workflow.
+
 ## Entry - 2026-07-19 (Projects Aggregate Expand Migration A)
 
 ### Approved Production Scope

@@ -38,7 +38,7 @@ Applied media Storage migrations on 2026-05-28:
 Applied production migrations:
 
 - `20260714050750_media_public_bucket_role_hardening.sql` — keeps Editor uploads in `urblo-admin-media`; only owner/admin may insert or update `urblo-public-media` objects. Migration/policy readback and the separately approved tagged Editor/owner role proof passed; do not rerun live writes without fresh approval.
-- `20260719015649_project_aggregate_drafts.sql` — applied/read back on 2026-07-19 after migration-only approval. It adds private draft revisions, child lifecycle columns/backfill, the service-role-only aggregate transaction, and archived-slug tombstones. The private draft table is empty and existing Project counts/statuses are unchanged. It did not apply contract B or create tagged Project/Storage data.
+- `20260719015649_project_aggregate_drafts.sql` — applied/read back on 2026-07-19 after migration-only approval. It adds private draft revisions, child lifecycle columns/backfill, the service-role-only aggregate transaction, and archived-slug tombstones. Initial apply left the private draft table empty and existing Project counts/statuses unchanged. A later separately approved preview workflow created one tagged aggregate and finished with it Archived; contract B is still unapplied.
 
 Pending production approval and apply:
 

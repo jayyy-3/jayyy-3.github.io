@@ -695,14 +695,14 @@ Behavior:
 Purpose: narrow public tombstone read used only to suppress a bundled static Project after Hide.
 
 Behavior:
-- Returns distinct non-empty slugs from archived canonical Projects or archived private aggregate drafts without exposing draft JSON or other archived fields. A never-published private draft could therefore disclose its slug; the table is currently empty, and this case must be narrowed or explicitly accepted before production runtime promotion.
+- Returns distinct non-empty slugs from archived canonical Projects or archived private aggregate drafts without exposing draft JSON or other archived fields. A never-published private draft could therefore disclose its slug. The table currently contains one archived aggregate for a previously published tagged QA Project, not a never-published private-only record; the general case must still be narrowed or explicitly accepted before production runtime promotion.
 - Runs as `SECURITY DEFINER` with `search_path = ''`; execute is available to `anon`, `authenticated`, and `service_role`.
 - Public runtime treats read failure as availability-first and preserves the static fallback; a Published CMS Project still wins over a stale tombstone.
 
 ### Projects expand/contract rollout and rollback
 
-- Migration A, `20260719015649_project_aggregate_drafts.sql`, is the completed expand step. Jay approved it separately; it was applied/read back on 2026-07-19 with zero private drafts, unchanged existing counts/statuses, and contract B still absent.
-- Any authenticated tagged Project or Storage mutation requires its own explicit approval. Freeze all Project editing before those writes begin and keep the freeze through preview evidence, tombstone minimum-disclosure resolution or acceptance, aggregate runtime production promotion, B application, and B readback; this prevents legacy child-table writes during the expand/contract overlap. Promote the matching aggregate UI/endpoint to production only after preview evidence is acceptable.
+- Migration A, `20260719015649_project_aggregate_drafts.sql`, is the completed expand step. Jay approved it separately; it was applied/read back on 2026-07-19 with zero private drafts, unchanged existing counts/statuses, and contract B still absent. A later separately approved preview workflow created one tagged aggregate and finished with that Project/draft/children Archived.
+- The authenticated preview happy path is complete. Keep all Project editing frozen through the remaining conflict/failure-recovery evidence, tombstone minimum-disclosure resolution or acceptance, aggregate runtime production promotion, B application, and B readback; this prevents legacy child-table writes during the expand/contract overlap. Promote the matching aggregate UI/endpoint to production only after preview evidence is acceptable.
 - Migration B, `20260719015650_project_aggregate_write_lockdown.sql`, is the contract step. Separately obtain Jay's approval, apply it only after the aggregate runtime is already in production, then read back all six Project table privileges, six sequence privileges, public policies, and the security advisor before lifting the edit freeze.
 - After B, the legacy browser-direct-write UI is intentionally incompatible. A Cloudflare-only rollback to that UI is invalid; runtime rollback must keep the aggregate UI/endpoint or be paired with a separately reviewed and approved forward-compatibility migration.
 
