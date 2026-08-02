@@ -149,7 +149,7 @@ const migrationPath =
 const tombstoneMigrationPath =
   "supabase/migrations/20260802103337_restrict_archived_project_tombstones.sql";
 const lockdownMigrationPath =
-  "supabase/migrations/20260802103338_project_aggregate_write_lockdown.sql";
+  "supabase/migrations/20260802105537_project_aggregate_write_lockdown.sql";
 
 const page = readRequired(pagePath);
 const shell = readRequired(shellPath);
