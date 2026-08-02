@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "lastUpdated": "2026-07-13",
+  "lastUpdated": "2026-07-14",
   "state": "revalidation_required",
   "environment": "production",
   "baseUrl": "https://urblo.com.au",
@@ -11,10 +11,12 @@
   "verifiedAdminEmail": null,
   "productionPrerequisites": {
     "mediaPublicBucketRoleBoundary": {
-      "status": "missing",
-      "migration": "20260713065628_media_public_bucket_role_hardening.sql",
-      "evidenceRefs": [],
-      "note": "Requires applied-migration readback plus live proof that Editor private insert/update succeeds, Editor public insert/update is denied, and owner/admin public insert/update succeeds."
+      "status": "passed",
+      "migration": "20260714050750_media_public_bucket_role_hardening.sql",
+      "evidenceRefs": [
+        "docs/WORKLOG.md#phase-0-tagged-media-role-boundary-proof"
+      ],
+      "note": "Migration 20260714050750 and its INSERT/UPDATE policies are read back. The separately approved production proof passed for marker media-role-1784006428939-3520f05f: Editor private insert/update succeeded, Editor public insert/update was denied without changing the object, owner public insert/update succeeded, and independent storage.objects readback found zero objects for both attempted markers after cleanup."
     }
   },
   "workflows": {
@@ -51,7 +53,7 @@
     "inviteSetPassword": {
       "status": "missing",
       "evidenceRefs": [],
-      "note": "A 2026-07-13 approved QA invite was delivered, but its callback fell back to http://localhost:3000. Direct Auth API activation was used only to prepare the separate QA Editor account and does not satisfy this workflow. Requires corrected/read-back Auth callback configuration, a fresh delivered invite, UI password setup, logout, and password sign-in."
+      "note": "A 2026-07-13 approved QA invite was delivered, but its callback fell back to http://localhost:3000. Direct Auth API activation was used only to prepare the separate QA Editor account and does not satisfy this workflow. Auth callback configuration was corrected/read back on 2026-07-14; a separately approved fresh delivered invite, UI password setup, logout, and password sign-in are still required."
     },
     "passwordRecovery": {
       "status": "missing",
@@ -86,6 +88,6 @@
     "Repair PR #3 is deployed at merge commit 46d46b4 and immutable URL https://6d193af5.urblo.pages.dev, with branch-preview and production no-write smoke passing. These deployment facts do not populate deploymentSha/deploymentUrl until one complete golden-workflow evidence set is verified against the final target deployment.",
     "The re-audit and repair deployment themselves made no production writes. Afterward, Jay approved QA account provisioning: one inaccessible unconfirmed test invite was removed, and one separate active QA Editor plus profile/audit history was created. No content rows, Storage objects, content statuses, or recovery emails were changed.",
     "The delivered QA invite exposed a callback fallback to http://localhost:3000. Account existence and direct Auth activation are prerequisites only; they are not golden-workflow evidence.",
-    "PR #6 is deployed as merge a2a7ae5 at https://c7a910df.urblo.pages.dev; production asset integrity and no-write authentication pass. Those checks do not populate the final deployment fields or replace the missing Storage prerequisite and UI mutation workflows."
+    "PR #6 is deployed as merge a2a7ae5 at https://c7a910df.urblo.pages.dev; production asset integrity and no-write authentication pass. Production Media role migration 20260714050750 is applied/read back and its tagged Editor/owner boundary proof has passed. These checks do not populate the final deployment fields or replace the remaining UI mutation workflows."
   ]
 }

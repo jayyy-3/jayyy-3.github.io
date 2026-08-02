@@ -14,6 +14,7 @@ import {
   validatePublishedSiteSettingsFields,
 } from '../src/lib/siteSettingsPublicContract.ts';
 import {
+  getArchivedProjectSlugs,
   getPublishedProjects,
   mergeProjectsWithPublishedOverlay,
   normalizePublicProjectFactValue,
@@ -134,13 +135,16 @@ const publishedProjectRow = {
   title: 'CMS Moon Gate',
   location: 'Dickson ACT',
   project_date_label: '2026',
+  completed_on: '2026-06-01',
   summary: 'CMS summary',
   lead: 'CMS lead',
+  client: 'CMS client',
   landscape_architect: null,
   contractor: null,
   address: null,
   quantity_label: null,
   carbon_status: null,
+  carbon_note: null,
   seo: { title: 'CMS project search title', description: 'CMS project search description' },
   sort_order: 0,
   cover_media: null,
@@ -169,11 +173,20 @@ function createQueryBuilder(result) {
   return builder;
 }
 
-function createProjectClient(resultsByTable) {
+function createProjectClient(
+  resultsByTable,
+  archivedSlugsResult = { data: [], error: null },
+) {
   return {
     from(table) {
       assert.ok(table in resultsByTable, `Unexpected public project query: ${table}`);
       return createQueryBuilder(resultsByTable[table]);
+    },
+    rpc(functionName, args, options) {
+      assert.equal(functionName, 'get_archived_project_slugs');
+      assert.equal(args, undefined);
+      assert.deepEqual(options, { get: true });
+      return Promise.resolve(archivedSlugsResult);
     },
   };
 }
@@ -181,10 +194,95 @@ function createProjectClient(resultsByTable) {
 const successfulProjectClient = createProjectClient({
   projects: { data: [publishedProjectRow], error: null },
   project_facts: { data: [], error: null },
-  project_media: { data: [], error: null },
+  project_media: {
+    data: [
+      {
+        id: 31,
+        project_id: 1,
+        project_material_map_id: 21,
+        media_role: 'hotspot_image',
+        label: null,
+        caption: null,
+        block_title: 'First map view',
+        youtube_url: null,
+        sort_order: 0,
+        media_assets: null,
+      },
+      {
+        id: 32,
+        project_id: 1,
+        project_material_map_id: 21,
+        media_role: 'hotspot_image',
+        label: null,
+        caption: null,
+        block_title: 'Second map view',
+        youtube_url: null,
+        sort_order: 1,
+        media_assets: null,
+      },
+    ],
+    error: null,
+  },
+  project_materials: {
+    data: [{
+      id: 11,
+      project_id: 1,
+      application: 'CMS paving',
+      note: 'CMS material note',
+      sort_order: 0,
+      status: 'published',
+      stone_groups: { stone_group_key: 'bluestone' },
+      finish_definitions: { finish_key: 'sawn' },
+      media_assets: null,
+    }],
+    error: null,
+  },
+  project_material_maps: {
+    data: [{
+      id: 21,
+      project_id: 1,
+      title: 'CMS material placement',
+      intro: 'CMS placement intro',
+      sort_order: 0,
+      status: 'published',
+      media_assets: {
+        status: 'published',
+        source_kind: 'external_legacy',
+        source_url: '/media/example-map.jpg',
+        bucket: null,
+        object_path: null,
+        alt: 'CMS map alt',
+      },
+    }],
+    error: null,
+  },
+  project_hotspots: {
+    data: [{
+      project_material_map_id: 21,
+      project_material_id: 11,
+      hotspot_key: 'cms-hotspot',
+      x_percent: 25,
+      y_percent: 40,
+      label: 'CMS hotspot',
+      application: 'CMS paving',
+      note: 'CMS hotspot note',
+      sort_order: 0,
+      status: 'published',
+      preview_media: null,
+    }],
+    error: null,
+  },
 });
 const mappedPublishedProjects = await getPublishedProjects(successfulProjectClient);
 assert.equal(mappedPublishedProjects[0].contentSource, 'cms');
+assert.equal(mappedPublishedProjects[0].materials?.[0]?.application, 'CMS paving');
+assert.equal(mappedPublishedProjects[0].materialMap?.hotspots[0]?.id, 'cms-hotspot');
+assert.equal(mappedPublishedProjects[0].mediaBlocks?.[0]?.type, 'hotspot_image');
+assert.equal(
+  new Set(mappedPublishedProjects[0].mediaBlocks?.map((block) => block.id)).size,
+  mappedPublishedProjects[0].mediaBlocks?.length,
+  'Multiple media blocks linked to one map must retain unique React keys',
+);
 assert.deepEqual(mappedPublishedProjects[0].seo, {
   title: 'CMS project search title',
   description: 'CMS project search description',
@@ -199,14 +297,87 @@ assert.equal(
   'Urban sculpture and public realm',
   'Static project category must survive a matching CMS overlay',
 );
-assert.ok(mergedMoonGate.materials?.length, 'Static-only public material display must remain available');
+assert.equal(
+  mergedMoonGate.materials?.[0]?.application,
+  'CMS paving',
+  'Published CMS materials must replace the matching static project materials',
+);
 assert.equal(mergedMoonGate.cta?.primaryTo, '/contact', 'Static-only project CTA routing must remain available');
 
-for (const failingTable of ['project_facts', 'project_media']) {
+const archivedProjectSlugs = await getArchivedProjectSlugs(createProjectClient({}, {
+  data: [
+    { slug: ' XAVIER-COLLEGE ' },
+    { slug: 'xavier-college' },
+    { slug: 'never-published-private-project' },
+    { slug: '' },
+    { slug: 42 },
+  ],
+  error: null,
+}));
+assert.deepEqual(
+  archivedProjectSlugs,
+  ['xavier-college'],
+  'Archived Project tombstones must be canonical, deduplicated, and limited to bundled public fallbacks',
+);
+
+const mergedWithArchivedFallback = mergeProjectsWithPublishedOverlay(
+  mappedPublishedProjects,
+  [...archivedProjectSlugs, 'moon-gate-woolley-street'],
+);
+assert.equal(
+  mergedWithArchivedFallback.some((project) => project.slug === 'xavier-college'),
+  false,
+  'An archived CMS slug must suppress the matching static Project fallback',
+);
+assert.equal(
+  mergedWithArchivedFallback.find((project) => project.slug === 'moon-gate-woolley-street')?.name,
+  'CMS Moon Gate',
+  'A Published CMS overlay must remain visible even if a stale tombstone contains the same slug',
+);
+
+const archivedSlugReadFailure = await getArchivedProjectSlugs(createProjectClient({}, {
+  data: null,
+  error: { message: 'tombstone RPC unavailable' },
+}));
+assert.deepEqual(
+  archivedSlugReadFailure,
+  [],
+  'A tombstone RPC failure must explicitly preserve the existing static fallback behavior',
+);
+assert.equal(
+  mergeProjectsWithPublishedOverlay([], archivedSlugReadFailure)
+    .some((project) => project.slug === 'xavier-college'),
+  true,
+  'A tombstone read failure must not hide a healthy static Project page',
+);
+
+for (const failingTable of [
+  'project_facts',
+  'project_media',
+  'project_materials',
+  'project_material_maps',
+  'project_hotspots',
+]) {
   const resultsByTable = {
     projects: { data: [publishedProjectRow], error: null },
     project_facts: { data: [], error: null },
     project_media: { data: [], error: null },
+    project_materials: { data: [], error: null },
+    project_material_maps: {
+      data: failingTable === 'project_hotspots'
+        ? [{
+            id: 21,
+            project_id: 1,
+            title: 'Map',
+            intro: null,
+            sort_order: 0,
+            status: 'published',
+            media_assets: null,
+          }]
+        : [],
+      error: null,
+    },
+    project_hotspots: { data: [], error: null },
   };
   resultsByTable[failingTable] = { data: null, error: { message: `${failingTable} failed` } };
   const failedPublishedProjects = await getPublishedProjects(createProjectClient(resultsByTable));
@@ -314,8 +485,21 @@ await retryingSettingsLoader();
 assert.equal(settingsFetchAttempts, 3, 'Settled settings reads must refresh on the next provider mount');
 
 const requiredSourceFragments = new Map([
-  ['src/service/ProjectService.ts', ['mergeProjectsWithPublishedOverlay', 'seo: parsePublicEntitySeo(row.seo)', 'factsResult.error || mediaResult.error']],
-  ['src/pages/admin/AdminProjectsPage.tsx', ['projectBundleLoadGenerationRef', ".eq('project_id', projectId)", 'selectedProjectIdRef.current !== projectId', 'parseProjectFactJsonDraft']],
+  ['src/service/ProjectService.ts', [
+    "rpc(\n    'get_archived_project_slugs'",
+    'archivedProjectSlugs: readonly string[] = []',
+    'mergeProjectsWithPublishedOverlay',
+    'seo: parsePublicEntitySeo(row.seo)',
+    ".from('project_materials')",
+    ".from('project_material_maps')",
+    ".from('project_hotspots')",
+    'hotspotsResult.error',
+  ]],
+  ['src/pages/admin/AdminProjectsPage.tsx', [
+    'draftLoadGenerationRef',
+    'readProjectListApiResponse',
+    'baseRevision',
+  ]],
   ['src/pages/ProjectDetails.tsx', ['<PublicContentSeo', "contentSource === 'cms'"]],
   ['src/components/PublicContentSeo.tsx', ['upsertDynamicJsonLd', "'@type': 'Article'", "'@type': 'WebPage'", "'@type': 'BreadcrumbList'", "tag?.dataset.owner === 'public-content-seo'"]],
   ['src/service/ProductService.ts', ['mergeProductsWithPublishedOverlay', 'await ProductService.getAll()', 'seo: parsePublicEntitySeo(row.seo)']],
@@ -338,5 +522,20 @@ for (const [file, fragments] of requiredSourceFragments) {
     assert.ok(source.includes(fragment), `${file} must include ${fragment}`);
   }
 }
+
+const adminProjectsSource = readFileSync(
+  new URL('../src/pages/admin/AdminProjectsPage.tsx', import.meta.url),
+  'utf8',
+);
+assert.match(
+  adminProjectsSource,
+  /method:\s*["']GET["']/,
+  'Projects admin must read through the protected aggregate endpoint',
+);
+assert.match(
+  adminProjectsSource,
+  /method:\s*["']POST["']/,
+  'Projects admin must mutate through the protected aggregate endpoint',
+);
 
 console.log('Public content overlay checks passed.');

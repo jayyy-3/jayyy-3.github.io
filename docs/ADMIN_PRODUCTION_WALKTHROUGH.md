@@ -1,6 +1,6 @@
 # Urblo Admin Production Walkthrough
 
-Last updated: 2026-07-13
+Last updated: 2026-07-14
 
 ## Purpose
 Use this checklist after the admin reliability stack is pushed and deployed. The 2026-07-13 incident invalidated the earlier handoff conclusion. This walkthrough must prove real editor outcomes, not route shells, source wording, or direct API mutations.
@@ -13,7 +13,7 @@ Do not use this checklist to create unreviewed public customer content. Prefer e
 - Production active-admin browser QA can run:
   - `npm run agent:admin-auth-browser -- --allow-login --strict --base-url https://urblo.com.au`
 - The walkthrough user has Website owner or CMS manager access when testing Settings, Leads export, Change history, and private-to-public Media promotion. A separate active Editor login is available for the Storage role-boundary proof.
-- `20260713065628_media_public_bucket_role_hardening.sql` has been applied to production and its migration history/policy definitions can be read back before the CMS handoff audit.
+- `20260714050750_media_public_bucket_role_hardening.sql` has been applied to production and its migration history/policy definitions can be read back before the CMS handoff audit.
 - Supabase Auth custom SMTP is configured for non-team recipient addresses, and exact production invite/recovery account-setup URLs are in the Auth Redirect URL allowlist.
 - Jay has approved the tagged reversible content/settings/media writes and the controlled invite/recovery recipient used by this walkthrough.
 - Keep `docs/CLOUDFLARE_DEPLOYMENT.md` rollback values intact.
@@ -39,7 +39,7 @@ Use this order after Jay approves push/deploy for the current CMS UX stack:
    - `npm run agent:check`
    - `git diff --check`
    - `npm run agent:admin-handoff-readiness -- --base-url https://urblo.com.au --admin-email info@urblo.com.au` in report-only mode. Missing live evidence is reported without failing predeploy; malformed source or documentation still fails.
-2. After separate approval for the production migration and tagged Storage writes, apply `20260713065628_media_public_bucket_role_hardening.sql`, read back the applied migration/policies, and run:
+2. Migration `20260714050750_media_public_bucket_role_hardening.sql` is applied and its policies are read back. After separate approval for tagged Storage writes, run:
    - `npm run agent:admin-media-role-boundary-live -- --allow-writes --strict`
 
    The role-boundary proof must show Editor private insert/update succeeds, Editor public insert/update is rejected, owner/admin public insert/update succeeds, and every tagged object is removed. The source-only foundation gate is not a substitute for this live proof.
@@ -288,7 +288,7 @@ Pass condition: the editor completes the agreed path and explains the safe save/
 ## Final Handoff Decision
 The CMS can be handed to non-technical editors only when all are true:
 - The current CMS UX stack is deployed to production.
-- `20260713065628_media_public_bucket_role_hardening.sql` is applied/read back and `mediaPublicBucketRoleBoundary` has passed with live Editor/owner evidence.
+- `20260714050750_media_public_bucket_role_hardening.sql` is applied/read back and `mediaPublicBucketRoleBoundary` has passed with live Editor/owner evidence.
 - Active-admin browser QA passes on `https://urblo.com.au`.
 - The walkthrough above passes with production evidence.
 - Draft save/refresh, private Media promotion, Published public readback, archive behavior, and Settings public readback have all passed through the deployed UI.

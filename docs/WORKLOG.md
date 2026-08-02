@@ -1,6 +1,164 @@
 # WORKLOG - Urblo Execution Log
 
-Last updated: 2026-07-13
+Last updated: 2026-08-02
+
+## Entry - 2026-08-02 (Fresh Projects Preview And Minimum-Disclosure Migration C)
+
+### Delivery Gate And Preview
+- Installed and started the Homebrew-managed Docker/Colima runtime, added the Docker Buildx plugin, and passed `npm run gate` in a clean Node 20 container for commit `a79a364`. The local branch was pushed through that commit and opened as draft PR `#9`.
+- Cloudflare bound commit `a79a3645383fea7e55b5cc5cdc8bee6487aa0f20` to deployment `a20062a0-951e-4d18-8aae-31e69f537b6f` at `https://a20062a0.urblo.pages.dev`. The immutable Preview smoke passed all public/Admin routes, recursive asset MIME/body checks, redirects, safe-failure form endpoints, and the protected Projects API boundary. The real owner login check passed all nine authenticated Admin routes. No content, Storage, invitation, or production runtime write occurred.
+- The C readback/documentation checkpoint `fdf7a47` also passed the clean Node 20 container gate and deployed as `480ac707-7c03-4f21-98c7-52d388ce5f83` at `https://480ac707.urblo.pages.dev`; its immutable smoke passed. The strict Firefox login runner then exposed a verifier-only false positive: Supabase Storage's Cloudflare response emitted `Cookie “__cf_bm” has been rejected for invalid domain`, which Firefox classified as a console error even though the app does not set or consume that cookie. The message reproduced twice. Direct in-app browser verification on the same immutable deployment signed the owner into `/admin`, opened the real `/admin/projects/4` workspace, found meaningful content and no relevant application warnings/errors, and made no content changes.
+- `scripts/check-admin-auth-browser.mjs` now ignores only that exact third-party `__cf_bm` invalid-domain diagnostic. Every other console error and every page error remains blocking. This synchronizes the verifier with browser reality; no UI/runtime behavior was changed to satisfy the check.
+
+### Approved C Apply And Readback
+- Jay separately approved only the production minimum-disclosure migration C. Read-only preflight found project `npkidywzwddbnfrnxlmo` active/healthy on Postgres 17.6.1, A applied, C/B absent, and the old tombstone RPC returning all four archived QA slugs.
+- Applied migration `restrict_archived_project_tombstones` once. Supabase recorded production version `20260802103337`; source is aligned as `supabase/migrations/20260802103337_restrict_archived_project_tombstones.sql`, and the still-unapplied contract B is ordered after it as `supabase/migrations/20260802103338_project_aggregate_write_lockdown.sql`.
+- Function readback matches the reviewed C source: it is owned by `postgres`, remains `STABLE SECURITY DEFINER`, has an empty `search_path`, reads only `public.projects`, and no longer references `private.project_drafts`. `PUBLIC` has no execute privilege; `anon`, `authenticated`, and `service_role` retain intentional execute access.
+- The four archived QA Projects remain in their existing Archived state, but the RPC result changed from those four slugs to an empty list, exactly matching the intersection of archived canonical Projects and the five bundled public fallback slugs. No Project row, child row, draft, media record, Storage object, audit record, user, email, or runtime configuration was created or changed.
+- Security advisor output remains the known leaked-password-protection Auth warning plus the two expected generic warnings for the intentionally browser-callable, slug-only `SECURITY DEFINER` function. Performance findings are pre-existing and unchanged in scope; C introduced no table, policy, or index changes.
+
+### Next Approval Boundary
+- Migration C is closed. Keep Project editing frozen. The next production write is promotion of the matching aggregate runtime from PR `#9`; it requires a separate explicit approval. Contract B remains unapplied and requires another approval/readback only after the aggregate runtime is live. Jay's fool test remains the final acceptance and cannot be self-certified.
+
+## Entry - 2026-07-19 (Projects Closeout Negative Paths And Tombstone Repair)
+
+### Problems Found And Source Repair
+- The approved Preview marker `admin-projects-ui-mrroa6p0` was not one of the five bundled static Project slugs. Its Hide/public-not-found result proved that a non-static archived CMS page disappears, but it did not exercise static-fallback tombstone suppression. Subsequent read-only production analysis found A's public `get_archived_project_slugs()` returns four QA slugs, including one never-published marker, so the minimum-disclosure concern is a concrete data-boundary defect.
+- Added source migration `supabase/migrations/20260802103337_restrict_archived_project_tombstones.sql`. It replaces the public function with the exact intersection of archived canonical Projects and the five slugs already public in `src/data/projectData.ts`, returns the allowlisted constant, and never reads `private.project_drafts`. The contract migration moved to `20260802103338_project_aggregate_write_lockdown.sql`. Both C and B remain unapplied and require separate, fresh production approvals/readback.
+- Added defence in depth in `src/service/ProjectService.ts`: unknown RPC results cannot hide or enumerate anything outside the bundled public Project set. The overlay verifier now injects an unknown private-style slug and proves it is discarded.
+- A `revision_conflict` previously set a reload notice without disabling editor mutations; ordinary Discard could then clear the warning while retaining the stale revision/timestamp. The editor now locks fields and Save/Publish/Hide during conflict, hides ordinary Discard, and leaves Reload latest as the only recovery that fetches fresh tokens.
+- The Projects verifier now executes deterministic, no-network full-handler behavior: a stale Save preserves the structured 409 `revision_conflict`; a failed Publish copies a mocked private image create-only, verifies the copy, receives an RPC conflict, checks references, removes the exact nonce path, records `project.aggregate.publish_compensation`, and reports the cleanup summary. This closes source orchestration evidence, not real two-session/Postgres/Storage behavior; any live negative write needs fresh approval and should not intentionally force compensation-delete/audit failure in production.
+
+### Harness Parity And Approval Boundary
+- The closeout audit found both TypeScript-importing verifier scripts used Node's `--experimental-strip-types`, which is unavailable in the protocol's Node 20 container. Added explicit dev dependency `tsx`, routed both scripts through it, and made the parent Admin CRUD coverage runner invoke the Projects verifier through the same local `tsx` entry. Direct Node 20.20.2 execution now passes the Projects verifier, the nested CRUD coverage chain, and the complete Admin CMS predeploy chain. A test-only nonfunctional WebSocket constructor lets Supabase initialize its unused Realtime client under Node 20 while still failing any accidental socket use.
+- The first final predeploy rerun exposed two stale documentation-string assertions for the Stone Library and Article public read paths. The docs keep the more accurate Published-first/static-fallback contract, and `scripts/check-public-supabase-readiness.mjs` now verifies that contract instead of forcing the old wording; the complete rerun passed.
+- Fresh host-side verification passed: `npm run build`, `npm run lint`, `npx tsc -b`, `npm run agent:smoke`, `npm run agent:admin-cms-predeploy`, the isolated 11-route `npm run agent:admin-config-gate`, Projects aggregate/public overlay/foundation/public Supabase checks, Cloudflare source readiness, Harness checks, Harness GC/review with zero failures and two known documentation-size/date warnings, JSON parse, and `git diff --check`. Direct Node 20.20.2 execution passed the complete Admin CMS predeploy chain, including both `tsx`-backed TypeScript-importing verifiers. `npm audit --omit=dev` reports zero production dependency vulnerabilities; existing development-tool advisories were not expanded into this Projects closeout.
+- No Supabase migration, content/Storage write, invitation, Cloudflare configuration change, runtime promotion, push, or production deployment occurred. Project editing remains frozen. Next delivery order is fresh gate and immutable Preview, separately approved C apply/readback, separately approved production runtime promotion, separately approved B apply/readback, then Jay's fool test. The 2026-07-16 Docker exception applied only to the original push and is not reused here.
+
+## Entry - 2026-07-19 (Projects Authenticated Preview Workflow)
+
+### Approved Scope And Preview Configuration
+- After Jay's separate approval for the cleanable tagged Project/Storage workflow, production Project editing was placed under the documented operational freeze. The approved scope covered one owner-driven aggregate Project happy path plus restoration of the temporary Stone prerequisite; it did not authorize production runtime promotion, contract migration B, invitations, destructive cleanup, or any other production content change.
+- Cloudflare Pages Preview received `VITE_SUPABASE_PUBLISHABLE_KEY` and `SUPABASE_SERVICE_ROLE_KEY` as Preview-only secrets. Production Cloudflare configuration was not changed. Retrying commit `9441811` produced immutable deployment `1a3e0d4b-d74a-4979-be64-921e5a510ccc` at `https://1a3e0d4b.urblo.pages.dev`; the no-write smoke passed 23 public/Admin/404 routes, recursive JS/CSS MIME/body integrity, configured browser-secret boundaries, nine redirects, form safe-failure behavior, and the protected Projects API boundary. Owner sign-in reached the real configured Admin, and an invalid bearer request returned `401 invalid_session`, not `server_not_configured`.
+- Production had no Published Stone family, so the workflow temporarily published existing archived QA fixture `stone_groups.id = 1` through the normal Stone Library UI. No real Draft stone copy was changed. Audit `154` recorded `stone_group.publish`.
+
+### One-Save Project Evidence
+- Marker `admin-projects-ui-mrroa6p0` was used throughout. The owner created Project `9` in the page-shaped editor with Overview fields, one approved Fact, one approved Stone/Finish material, one material map, one visually created hotspot moved by keyboard from 50/50 to 55/55, and one inline image uploaded with alt text. Upload audit `155` proves the image began private-first in `urblo-admin-media` as Media `119`.
+- Unsaved `Open preview` used the public Project renderer and showed the title, hero, Fact, material, map, hotspot, and `Ready to publish` before Save. The public-shaped hotspot rendered at `left: 55%; top: 55%`.
+- The complete aggregate was saved exactly once with no confirmation dialog. Audit `156` is the only `project.aggregate_draft.save` for Project `9`, revision `1`, with `liveStatus = null` and one Fact/Material/Map/Hotspot. The canonical Project did not yet exist; reload then read back every saved field and the 55/55 point from the private aggregate.
+
+### Publish, Public Readback, Hide, And Restore
+- Publish created canonical Project `9` and all four child rows as Published. Audit `157` recorded `project.aggregate.publish`; Media `119` was copied create-only to `urblo-public-media`, and audit `158` recorded removal of the private source with no retained private object. The public Preview route displayed the complete Project, both image uses, material map, and 55/55 hotspot.
+- Hide produced audit `159` and archived Project `9`, its Fact/Material/Map/Hotspot, and private aggregate revision `3`. An anonymous REST read of the slug returned `200 []`, and a cache-busted public route read rendered `Project not found` without the tagged title.
+- The temporary Stone fixture was restored through the normal UI to its exact original Archived state. Audit `160` records `stone_group.archive`; final Stone counts are 0 Published, 12 Draft, and 4 Archived. Its Variant and Finish image remain Draft and their linked Media remains Archived.
+- Final residual state follows the approved archive-first/no-destructive-delete contract: the tagged Project aggregate and audit history remain Archived; Media `119` and one 123,161-byte public JPEG remain Published so the archived record's historical reference is not broken; the private upload source is gone. Physical deletion would require a separate retention/destructive-delete approval.
+
+### Acceptance Boundary And Next Action
+- This closes the authenticated Preview implementation happy path for exactly-one-Save, refresh persistence, shared unsaved preview, inline private-first media, visual hotspot, Publish/public readback, Hide, and public-not-found for a non-static QA slug. It did not prove bundled static-fallback tombstone suppression. It is not a production deployment proof, does not update `docs/agent/admin-handoff-evidence.json`, and is not Jay's unassisted fool test.
+- `NOW-ADMIN-UX-RESHAPE-001` remains `now`. The later closeout entry records deterministic conflict/compensation evidence and the selected minimum-disclosure repair. Keep the Project edit freeze through a fresh Preview, C, aggregate runtime promotion, B, and Jay's fool test. Contract B was not applied in this workflow.
+
+## Entry - 2026-07-19 (Projects Aggregate Expand Migration A)
+
+### Approved Production Scope
+- Jay explicitly approved only the Production expand migration for the Projects aggregate. The approved action was apply/readback of `project_aggregate_drafts`; it did not authorize tagged Project or Storage records, invitations, contract migration B, or production runtime promotion.
+- Read-only preflight found project `npkidywzwddbnfrnxlmo` active and healthy on Postgres 17.6.1. Migration A's objects were absent, no unrelated transaction was waiting, existing Project counts were 8 projects, 44 facts, 5 materials, 4 material maps, 17 media blocks, and 4 hotspots, with 5 Draft and 3 Archived projects. The focused foundation, Projects aggregate, public-readiness, and diff checks passed before apply.
+
+### Apply And Readback
+- Applied migration name `project_aggregate_drafts` once. Supabase recorded production version `20260719015649`; the local file is aligned as `supabase/migrations/20260719015649_project_aggregate_drafts.sql`, and the unapplied contract step is ordered after it as `supabase/migrations/20260802103338_project_aggregate_write_lockdown.sql`.
+- Readback confirms `private.project_drafts`, `admin_project_aggregate(...)`, `get_archived_project_slugs()`, both child lifecycle indexes, and the Facts/Materials lifecycle columns exist. The private draft table contains 0 rows. All six existing Project/child counts and the 5 Draft / 3 Archived status split are unchanged; Facts and Materials have zero parent-lifecycle mismatches.
+- The aggregate RPC is `SECURITY DEFINER`, has an empty `search_path`, returns `jsonb`, and is executable only by `service_role`. The tombstone RPC is also search-path pinned and deliberately executable by `anon`, `authenticated`, and `service_role`; its read-only call returned the 3 archived slugs without exposing archived records. Browser roles have no table privileges on `private.project_drafts`; the pre-existing authenticated schema usage remains necessary for private RLS helpers and does not grant draft-table access.
+- Contract B was not applied: all 18 legacy Project write policies remain, authenticated insert/update/delete privileges remain on all six Project tables, and authenticated sequence usage remains on all six Project sequences. The aggregate list read returned all 8 Projects and left the private draft table at 0 rows.
+
+### Advisor And Residual State
+- The security advisor reports the pre-existing leaked-password-protection Auth warning plus two expected generic warnings because the slug-only archived-project function is browser-callable `SECURITY DEFINER`. No archived record or draft JSON was exposed, but A did not yet enforce the public-fallback minimum. The private draft table was empty at this readback; the later closeout audit found canonical QA slugs still made the endpoint over-broad and supersedes the earlier assumption that the issue was only hypothetical.
+- Performance advisor INFOs include the two new lifecycle indexes as unused immediately after creation and four unindexed actor foreign keys on the empty private draft table. These do not block the expand readback; no unapproved follow-up DDL was applied, and they remain visible for later review before contract closure.
+- No test Project, media row, Storage object, audit record, invite, recovery email, public content status, or production runtime was created or changed by this step beyond the approved lifecycle backfill and schema objects.
+- Post-bookkeeping no-write verification passed: JSON parse, `git diff --check`, `npm run agent:supabase-foundation-readiness`, `npm run agent:admin-projects-aggregate`, `npm run agent:public-supabase-readiness`, `npm run agent:check`, Harness GC/report with no failures, and the full Cloudflare preview smoke against latest deployed preview `https://d29d45cf.urblo.pages.dev` for commit `9441811`.
+
+### Next Approval Boundary
+- Migration A is closed. At this checkpoint the next step required a second action-specific approval and a continuous Project edit freeze; that approved happy path is recorded above. The later closeout entry now governs C, fresh Preview, runtime promotion, B, and Jay's fool-test boundary.
+
+## Entry - 2026-07-16 (Phase 1 Branch Push Gate Exception)
+
+### Gate Decision
+- Phase 1 implementation commit `389023f` was created only after the full host-side runtime, Admin, Harness, readiness, plan-only, JSON, diff, and read-only responsive browser checks passed.
+- The required post-commit `npm run gate` stopped before executing any project check because this workstation has no Docker-compatible runtime (`docker: command not found`). This was an unavailable runner, not a code-test failure; no attempt was made to disguise the result as a green container gate.
+- Jay explicitly approved a one-time exception on 2026-07-16 to skip Docker for this push and defer installation until a later cycle. The exception applies only to pushing the current `codex/admin-ux-reshape` candidate using the already-green host-equivalent evidence; it does not change `docs/OPERATING_PROTOCOL.md` or authorize future pushes without the normal container gate.
+- No Supabase migration, tagged Project/Storage write, invite, or production promotion is included in this exception.
+
+### Branch Preview Evidence
+- Pushed `codex/admin-ux-reshape` through commit `30e9b57` (`389023f` is the Phase 1 implementation commit; `30e9b57` records the one-time gate exception). Cloudflare associated that exact commit with deployment `1c3372dd-d4b0-49c1-a02b-ffee96e60ee3` and immutable URL `https://1c3372dd.urblo.pages.dev`.
+- `npm run agent:cloudflare-preview-smoke -- --base-url https://1c3372dd.urblo.pages.dev` passed: all public/Admin route shells, recursively discovered JavaScript/CSS status and MIME/body checks, configured-bundle/browser-secret boundaries, legacy redirects, safe-failure form Functions, and the protected `/api/admin/projects` boundary passed without content or Storage writes.
+- The branch alias `https://codex-admin-ux-reshape.urblo.pages.dev` and immutable URL both returned HTTP 200. GitHub's Cloudflare check callback still displayed `in_progress` at the final readback even though the immutable deployment was already serving and passed the independent smoke; keep that callback lag visible rather than calling it a completed check.
+
+### Next Handoff
+- Stop for Jay's separate approval before applying expand migration `supabase/migrations/20260719015649_project_aggregate_drafts.sql`.
+- Do not begin the tagged authenticated Project/Storage workflow under that approval; it remains a second action-specific production-write decision after expand migration readback.
+
+## Entry - 2026-07-14 (Admin Projects Phase 1 Source Candidate)
+
+### Scope
+- Implemented the approved Phase 1 Projects vertical prototype in local source as a page-shaped aggregate workspace: one aggregate draft and sticky action bar, collapsible sections in public-page order, shared public/draft rendering, visual hotspot placement, inline private-first media, and archived-slug suppression so a hidden CMS project does not reappear from bundled fallback.
+- Added accessible up/down ordering for facts, materials, media blocks, maps, and map-scoped points; continuous sort indexes are derived from visible order rather than exposed as editor fields. The Projects list/editor now remain side by side around 1116px, narrow section actions wrap, and material-map tabs have roving keyboard/tabpanel semantics.
+- Removed the global user-facing legacy/migration fallback card and disabled redundant clean Save, already-live Publish, and already-hidden Hide actions.
+- Kept the searchable picker bounded to the latest 500 library rows while exact-batch-fetching every image referenced by the loaded draft; referenced private signed previews refresh every 45 minutes. Dirty-state comparison is computed once in the parent editor page instead of duplicated during hotspot movement.
+- Added a protected `/api/admin/projects` Pages Function and service-role-only aggregate RPC source for list/get/save/publish/archive. Aggregate save and its audit event are transaction-bound; publish persists the request's current draft revision before applying the canonical aggregate.
+- Updated behavior-level Harness coverage for the new editor rather than preserving obsolete string assertions.
+
+### Security And Reliability Boundaries Present In Source
+- The Function keeps the service-role key server-side, authenticates an active admin profile, allows Viewer reads only, and normalizes new or claim-bearing Editor changes back to `needs_review` instead of trusting browser-supplied approval state. The RPC locks and rechecks that profile against the Function's initial trusted role so a concurrent role change fails closed. Existing canonical Projects also carry a required `baseUpdatedAt` token from GET through POST/RPC, including first adoption before a private draft exists.
+- Publish performs early checks plus transaction-local media and taxonomy reference rechecks. The locked canonical token comparison precedes every first-adoption draft/canonical write and all later Publish/Hide mutations. PGRST errors carry the structured HTTP detail shape expected by the Function mapper so intended conflict/permission responses do not collapse into generic upstream errors.
+- Private-to-public Storage promotion is create-only with byte verification. A failed publish performs reference-aware compensation for public copies created by that request and reports retained objects when safe cleanup cannot be proven.
+
+### Production And Acceptance Boundary
+- Projects database rollout is split into two source-only migrations. Expand migration `supabase/migrations/20260719015649_project_aggregate_drafts.sql` creates the private draft/RPC contract and writes the child lifecycle backfill. Contract migration `supabase/migrations/20260802103338_project_aggregate_write_lockdown.sql` later revokes legacy browser table/sequence writes and hardens public parent/child policies. Jay has not approved either migration and neither has been applied or read back in production.
+- No Phase 1 production content/Storage write, branch preview, authenticated aggregate save/publish/public-readback/hide workflow, or production promotion occurred in this source milestone.
+- The full host-side local suite passed on 2026-07-14: build, lint, typecheck, agent smoke, Admin CMS predeploy, Admin config gate (11/11 routes), Harness check, Supabase/public/Cloudflare readiness, aggregate/CRUD coverage, plan-only admin CRUD/content-import checks, JSON parsing, and `git diff --check`. The preferred clean-container `npm run gate` remains the final post-commit pre-push check.
+- A read-only local Playwright implementation check used the real owner session plus a mocked aggregate GET endpoint, with POST requests forced to 405. It verified the 1116px side-by-side workspace, clean action states, and the inline dirty-navigation choice. It also exposed a 390px shell overflow; the mobile grid/nav containment was fixed, the page read back at `scrollWidth === innerWidth`, and the aggregate verifier now guards that containment. This is implementation evidence only, not the authenticated preview workflow or Jay's fool test.
+- `NOW-ADMIN-UX-RESHAPE-001` remains `now` and cannot be marked done from source inspection, Harness checks, screenshots, or agent self-review.
+- Jay alone owns the documented unassisted fool-test acceptance; it remains pending.
+
+### Next Handoff
+- Commit the complete Phase 1 candidate, run the clean-container gate, push the branch preview, and run its no-write smoke before requesting approval for expand migration `supabase/migrations/20260719015649_project_aggregate_drafts.sql`.
+- After expand readback, request separate action-specific approval for tagged Project/Storage writes, then freeze all Project editing before the authenticated preview workflow. Keep the freeze through aggregate UI/endpoint production promotion and contract readback so legacy child-table writes cannot overlap the new aggregate path.
+- Request a fresh separate approval before applying contract migration `supabase/migrations/20260802103338_project_aggregate_write_lockdown.sql`; then read back table/sequence privileges, public policies, and security advisor state before lifting the freeze. After contract, a Cloudflare-only rollback to the legacy direct-write UI is invalid.
+
+## Entry - 2026-07-14 (Admin UX Reshape Directive And Phase 0 Read-Only Audit)
+
+### Direction And Task State
+- Imported Jay's approved `docs/ADMIN_UX_RESHAPE_PLAN.md` directive from the Claude review branch into `codex/admin-ux-reshape`; the complete sunset clause remains part of the temporary authority.
+- Registered `NOW-ADMIN-UX-RESHAPE-001` as `next`, preserving the max-three active-task rule while Phase 0 remains open. The task prohibits copy-only Clarify loops, requires behavior verification to follow the new UI, and reserves the fool test for Jay.
+- No Phase 1 runtime source was changed before the Phase 0 prerequisites.
+
+### Phase 0 Read-Only Evidence
+- Supabase migration history stops at `20260603142359 project_media_blocks`; `20260713065628_media_public_bucket_role_hardening.sql` is not applied.
+- Production `storage.objects` INSERT/UPDATE policies currently allow active Editor access to both `urblo-admin-media` and `urblo-public-media`, confirming the direct-public-write gap remains open.
+- `npm run agent:admin-media-role-boundary-live` passed in plan-only mode: distinct owner/editor credentials and the browser-safe key are present; no login, network request, Storage object, update, delete, or other production write occurred.
+- Official Supabase guidance confirms Site URL is the default fallback and recommends exact production redirect paths. The app requests `https://urblo.com.au/admin/account-setup?mode=invite` and `?mode=recovery`; the prior delivered invite's localhost callback remains failing evidence.
+- The available Supabase database connector cannot read hosted Auth URL configuration, and the local environment has no Management API token. Chrome reached the Supabase/GitHub sign-in screen but had no existing dashboard session, so configuration readback and mutation stopped pending Jay login plus item-specific approval.
+
+### Phase 0 Approved Auth URL Configuration
+- Jay logged into the production Supabase dashboard and explicitly approved only the Auth URL configuration change. The initial dashboard readback showed Site URL `http://localhost:3000` and no Redirect URLs.
+- Site URL was changed to `https://urblo.com.au`; the dashboard returned `Successfully updated site URL` and a fresh readback showed the saved value.
+- Added and precisely read back the two approved allowlist entries: `https://urblo.com.au/admin/account-setup?mode=invite` and `https://urblo.com.au/admin/account-setup?mode=recovery`. A second read-only browser pass verified all three persisted URLs; the recovery value was checked in fixed-length chunks to avoid Chrome title truncation.
+- No invite or recovery email was sent, no database migration was applied, and no Storage object or policy was written during this action. Auth URL configuration is closed as a Phase 0 prerequisite; custom Auth SMTP ownership and the real invite/recovery golden workflow remain open.
+- The Auth action ended before any migration or Storage write; the separately approved migration is recorded below.
+
+### Phase 0 Approved Media Role Migration
+- Jay separately approved applying the Media role migration only; tagged Storage object writes were explicitly outside this approval.
+- Pre-apply readback confirmed production migration history ended at `20260603142359 project_media_blocks`, while both `urblo_storage_admin_object_insert` and `urblo_storage_admin_object_update` still allowed active Editors across the private and public buckets.
+- Applied `media_public_bucket_role_hardening` to production project `npkidywzwddbnfrnxlmo`. Supabase recorded version `20260714050750`; the local migration filename and Harness references were aligned to `supabase/migrations/20260714050750_media_public_bucket_role_hardening.sql`.
+- Post-apply readback confirms the INSERT policy allows owner/admin/editor for `urblo-admin-media` but only owner/admin for `urblo-public-media`. The UPDATE policy has the same split in both `USING` and `WITH CHECK`.
+- The security advisor reports one current warning: Auth leaked-password protection is disabled. This is unrelated to the Storage migration and was not changed without separate approval. Performance advisor findings are pre-existing unused-index and multiple-permissive-policy notices; no migration-specific Storage/RLS security lint appeared.
+- No Storage object, media metadata row, invite, recovery email, or content status was created or changed during the migration action. Phase 0 then blocked only on the separately approved tagged Editor/owner Storage role-boundary proof recorded below.
+
+### Phase 0 Tagged Media Role-Boundary Proof
+- Jay separately approved the exact tagged production Storage proof. It used the existing active Editor and owner accounts through the browser-safe key; it did not send email or mutate content/database records.
+- The first marker, `media-role-1784006293326-a081ef77`, exposed a verifier defect after the role operations: the public object update and cleanup readbacks reused a cached URL, so Supabase Smart CDN returned the earlier bytes and a temporary HTTP 200 after deletion. Exact `storage.objects` readback was already zero rows, proving cleanup had succeeded rather than leaving an object behind.
+- Updated `scripts/check-admin-media-role-boundary-live.mjs` so every byte and absence readback uses a unique `cacheNonce`, requests no-cache, uses a short QA cache TTL, and reports CDN diagnostics on byte mismatch. This follows Supabase's documented update/delete invalidation window without weakening the rule that a fresh origin read returning an object is a hard cleanup failure.
+- The corrected strict run passed for marker `media-role-1784006428939-3520f05f`: Editor private insert/update succeeded; Editor public insert/update was denied and did not alter the owner-created object; owner public insert/update succeeded; and every tagged object was removed with absence read back.
+- Independent production SQL after the run returned zero `storage.objects` rows for both markers. No tagged object, email, media metadata row, audit/content row, or content status remains from this proof.
+- Phase 0 is closed. `NOW-ADMIN-UX-RESHAPE-001` moved into `now`; the separately decision-gated Turnstile task moved to `next` so the queue remains at three active executable tasks. Phase 1 starts with the approved Projects vertical prototype, while Jay retains the fool-test acceptance.
 
 ## Entry - 2026-07-13 (PR #6 Production Recovery And Evidence-Bound Cache Gate)
 
@@ -102,7 +260,7 @@ Last updated: 2026-07-13
 ## Entry - 2026-07-13 (Admin Reliability Preview And Production Deployment)
 
 ### Scope
-- Rebased the admin reliability/UX repair onto current `origin/main`, preserved the operating protocol and image-optimization work, and kept the unrelated untracked `docs/SEO_EXTERNAL_AI_BRIEF.md` out of the release.
+- Rebased the admin reliability/UX repair onto current `origin/main`, preserved the operating protocol and image-optimization work, and kept the unrelated untracked SEO external AI brief draft (never committed) out of the release.
 - Added `.dev.vars` to `.gitignore` and changed the local `.env` mode from `0644` to `0600`; no secret value was printed, staged, or committed.
 - Published branch `codex/admin-reliability-ux`, opened PR `#3`, verified its Cloudflare preview, and merged it to `main` after the preview gate passed.
 - Verified Cloudflare production deployment `6d193af5-cf8e-4541-a1e2-c73164d1a290` for merge commit `46d46b4` at immutable URL `https://6d193af5.urblo.pages.dev` and production origin `https://urblo.com.au`.

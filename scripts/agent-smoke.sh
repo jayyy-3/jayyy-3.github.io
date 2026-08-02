@@ -281,3 +281,4 @@ NODE
 node scripts/check-forms-api.mjs
 node scripts/check-contact-form-ui-source.mjs
 node scripts/check-capabilities-page-source.mjs
+npm run agent:admin-projects-aggregate

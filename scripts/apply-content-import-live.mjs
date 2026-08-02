@@ -12,7 +12,8 @@ const ADMIN_PASSWORD_NAMES = ['URBLO_ADMIN_PASSWORD'];
 const livePlan = [
   'Load the reviewed .tmp/content-import-preview.json draft payload.',
   'Sign in as an active Urblo owner/admin through the browser-safe Supabase key.',
-  'Upsert media, Stone Library, Products, Projects, Articles, and dependent rows as draft/import content.',
+  'Upsert media, Stone Library, Products, Articles, and dependent rows as draft/import content.',
+  'Refuse payloads containing Project rows: Projects must be imported through the protected aggregate endpoint, never direct browser-key table writes.',
   'Keep every imported public-content row in draft status; no rows are published or deleted.',
   'Read back imported row counts and verify anonymous public reads still expose zero imported draft rows.',
 ];
@@ -121,6 +122,24 @@ function rows(payload, table) {
   return Array.isArray(payload.rows?.[table]) ? payload.rows[table] : [];
 }
 
+const PROJECT_IMPORT_TABLES = [
+  'projects',
+  'project_facts',
+  'project_materials',
+  'project_material_maps',
+  'project_media',
+  'project_hotspots',
+];
+
+function assertNoDirectProjectImport(payload) {
+  const populated = PROJECT_IMPORT_TABLES.filter((table) => rows(payload, table).length > 0);
+  if (populated.length) {
+    throw new Error(
+      `Project import requires the protected aggregate endpoint; direct browser-key import is disabled for: ${populated.join(', ')}`,
+    );
+  }
+}
+
 function byKey(rowsToIndex, key) {
   return new Map(rowsToIndex.map((row) => [row[key], row]));
 }
@@ -177,9 +196,6 @@ async function runImport(supabase, payload) {
   const stoneGroupByKey = new Map();
   const stoneVariantByKey = new Map();
   const productBySlug = new Map();
-  const projectBySlug = new Map();
-  const projectMapByKey = new Map();
-  const projectMaterialByKey = new Map();
   const articleBySlug = new Map();
 
   for (const row of rows(payload, 'media_assets')) {
@@ -356,157 +372,6 @@ async function runImport(supabase, payload) {
   }
   imported.product_specs = rows(payload, 'product_specs').length;
 
-  for (const row of rows(payload, 'projects')) {
-    const cover = mediaBySource.get(mediaSource(row, 'cover_source_url'));
-    const hero = mediaBySource.get(mediaSource(row, 'hero_source_url'));
-    const saved = await putRow(
-      supabase,
-      'projects',
-      { slug: row.slug },
-      {
-        slug: row.slug,
-        title: row.title,
-        status: 'draft',
-        location: row.location,
-        project_date_label: row.project_date_label,
-        summary: row.summary,
-        lead: row.lead,
-        client: row.client,
-        landscape_architect: row.landscape_architect,
-        contractor: row.contractor,
-        address: row.address,
-        quantity_label: row.quantity_label,
-        carbon_status: row.carbon_status,
-        claim_review_status: row.claim_review_status,
-        hero_media_id: hero?.id ?? null,
-        cover_media_id: cover?.id ?? null,
-        sort_order: row.sort_order,
-      },
-    );
-    projectBySlug.set(row.slug, saved);
-  }
-  imported.projects = projectBySlug.size;
-
-  for (const row of rows(payload, 'project_facts')) {
-    const project = projectBySlug.get(row.project_slug);
-    if (!project) throw new Error(`Missing project for fact ${row.project_slug}`);
-    await putRow(
-      supabase,
-      'project_facts',
-      { project_id: project.id, fact_label: row.fact_label },
-      {
-        project_id: project.id,
-        fact_label: row.fact_label,
-        fact_value: row.fact_value,
-        fact_value_json: row.fact_value_json,
-        claim_status: row.claim_status,
-        sort_order: row.sort_order,
-      },
-    );
-  }
-  imported.project_facts = rows(payload, 'project_facts').length;
-
-  for (const row of rows(payload, 'project_materials')) {
-    const project = projectBySlug.get(row.project_slug);
-    const media = mediaBySource.get(mediaSource(row));
-    if (!project) throw new Error(`Missing project for material ${row.project_slug}`);
-    const saved = await putRow(
-      supabase,
-      'project_materials',
-      { project_id: project.id, application: row.application },
-      {
-        project_id: project.id,
-        stone_group_id: stoneGroupByKey.get(row.stone_group_key)?.id ?? null,
-        finish_definition_id: finishByKey.get(row.finish_key)?.id ?? null,
-        application: row.application,
-        note: row.note,
-        media_asset_id: media?.id ?? null,
-        claim_status: row.claim_status,
-        sort_order: row.sort_order,
-      },
-    );
-    projectMaterialByKey.set(`${row.project_slug}\u0000${row.application}`, saved);
-  }
-  imported.project_materials = rows(payload, 'project_materials').length;
-
-  for (const row of rows(payload, 'project_material_maps')) {
-    const project = projectBySlug.get(row.project_slug);
-    const media = mediaBySource.get(mediaSource(row));
-    if (!project || !media) throw new Error(`Missing project/media for material map ${row.project_slug}/${row.map_key}`);
-    const saved = await putRow(
-      supabase,
-      'project_material_maps',
-      { project_id: project.id, sort_order: row.sort_order },
-      {
-        project_id: project.id,
-        media_asset_id: media.id,
-        title: row.title,
-        intro: row.intro,
-        sort_order: row.sort_order,
-        status: 'draft',
-      },
-    );
-    projectMapByKey.set(`${row.project_slug}\u0000${row.map_key}`, saved);
-  }
-  imported.project_material_maps = rows(payload, 'project_material_maps').length;
-
-  for (const row of rows(payload, 'project_media')) {
-    const project = projectBySlug.get(row.project_slug);
-    const media = mediaBySource.get(mediaSource(row, 'source_url'));
-    const mapRow = rows(payload, 'project_material_maps').find(
-      (entry) =>
-        entry.project_slug === row.project_slug &&
-        entry.media_source_url === row.project_material_map_source_url &&
-        entry.sort_order === row.project_material_map_sort_order,
-    );
-    const materialMap = mapRow ? projectMapByKey.get(`${mapRow.project_slug}\u0000${mapRow.map_key}`) : null;
-    if (!project) throw new Error(`Missing project for media ${row.project_slug}`);
-    await putRow(
-      supabase,
-      'project_media',
-      { project_id: project.id, media_role: row.media_role, sort_order: row.sort_order },
-      {
-        project_id: project.id,
-        media_asset_id: media?.id ?? null,
-        project_material_map_id: materialMap?.id ?? null,
-        media_role: row.media_role,
-        block_title: row.block_title,
-        youtube_url: row.youtube_url,
-        label: row.label,
-        caption: row.caption,
-        sort_order: row.sort_order,
-        status: 'draft',
-      },
-    );
-  }
-  imported.project_media = rows(payload, 'project_media').length;
-
-  for (const row of rows(payload, 'project_hotspots')) {
-    const materialMap = projectMapByKey.get(`${row.project_slug}\u0000${row.map_key}`);
-    const material = projectMaterialByKey.get(`${row.project_slug}\u0000${row.application}`);
-    const preview = mediaBySource.get(mediaSource(row, 'preview_source_url'));
-    if (!materialMap) throw new Error(`Missing material map for hotspot ${row.project_slug}/${row.hotspot_key}`);
-    await putRow(
-      supabase,
-      'project_hotspots',
-      { project_material_map_id: materialMap.id, hotspot_key: row.hotspot_key },
-      {
-        project_material_map_id: materialMap.id,
-        project_material_id: material?.id ?? null,
-        hotspot_key: row.hotspot_key,
-        x_percent: row.x_percent,
-        y_percent: row.y_percent,
-        label: row.label,
-        application: row.application,
-        note: row.note,
-        preview_media_id: preview?.id ?? null,
-        sort_order: row.sort_order,
-        status: 'draft',
-      },
-    );
-  }
-  imported.project_hotspots = rows(payload, 'project_hotspots').length;
-
   for (const row of rows(payload, 'articles')) {
     const cover = mediaBySource.get(mediaSource(row, 'cover_source_url'));
     const saved = await putRow(
@@ -558,7 +423,6 @@ async function verifyAnonymousBoundary(supabaseUrl, browserKey, payload) {
   const checks = [
     ['stone_groups', 'stone_group_key', rows(payload, 'stone_groups').map((row) => row.stone_group_key)],
     ['products', 'slug', rows(payload, 'products').map((row) => row.slug)],
-    ['projects', 'slug', rows(payload, 'projects').map((row) => row.slug)],
     ['articles', 'slug', rows(payload, 'articles').map((row) => row.slug)],
   ];
 
@@ -597,6 +461,8 @@ async function main() {
     return;
   }
 
+  assertNoDirectProjectImport(payload);
+
   const missing = [];
   if (!env.browserKey) missing.push(BROWSER_KEY_NAMES.join(' or '));
   if (!isValidEmail(env.adminEmail)) missing.push('valid URBLO_ADMIN_EMAIL');
@@ -629,7 +495,6 @@ async function main() {
   const storedCounts = {
     stone_groups: await countImported(supabase, 'stone_groups', 'stone_group_key', rows(payload, 'stone_groups').map((row) => row.stone_group_key)),
     products: await countImported(supabase, 'products', 'slug', rows(payload, 'products').map((row) => row.slug)),
-    projects: await countImported(supabase, 'projects', 'slug', rows(payload, 'projects').map((row) => row.slug)),
     articles: await countImported(supabase, 'articles', 'slug', rows(payload, 'articles').map((row) => row.slug)),
   };
 

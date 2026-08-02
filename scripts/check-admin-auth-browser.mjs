@@ -411,13 +411,18 @@ async function runBrowserCheck({ baseUrl, expectUnauthorized, screenshotsDir, em
   const page = await context.newPage();
   const consoleErrors = [];
 
+  const recordBrowserError = (message) => {
+    if (isIgnorableThirdPartyCookieDiagnostic(message)) return;
+    consoleErrors.push(message);
+  };
+
   page.on('console', (message) => {
     if (message.type() === 'error') {
-      consoleErrors.push(message.text());
+      recordBrowserError(message.text());
     }
   });
   page.on('pageerror', (error) => {
-    consoleErrors.push(error.message);
+    recordBrowserError(error.message);
   });
 
   try {
@@ -478,6 +483,10 @@ async function runBrowserCheck({ baseUrl, expectUnauthorized, screenshotsDir, em
   } finally {
     await browser.close();
   }
+}
+
+function isIgnorableThirdPartyCookieDiagnostic(message) {
+  return /Cookie [“"]__cf_bm[”"] has been rejected for invalid domain\./.test(message);
 }
 
 async function verifyStaticFallbackWithoutSupabase(browser, baseUrl, screenshotsDir) {

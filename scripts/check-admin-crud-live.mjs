@@ -21,7 +21,7 @@ const livePlan = [
   'Create, publish, and archive a tagged media_assets row; optionally upload a tiny private Storage object.',
   'Create tagged Stone Library group, variant, finish capability, and finish image records.',
   'Create tagged Product, model, material-default, and spec records.',
-  'Create tagged Project, facts, material schedule, media block, material map, and hotspot records.',
+  'Leave Projects to the dedicated aggregate-endpoint workflow; this browser-key/RLS verifier never writes Project tables directly.',
   'Create tagged Article metadata and structured block records.',
   'Create tagged private enquiry/sample-request QA rows, then update workflow fields.',
   'Record admin_audit_events for primary writes and export-gate actions.',
@@ -56,20 +56,6 @@ const EXPECTED_AUDIT_ACTIONS = [
   { action: 'product_model.archive', entityType: 'product_models', count: 1 },
   { action: 'product_material_default.create', entityType: 'product_material_defaults', count: 1 },
   { action: 'product_spec.create', entityType: 'product_specs', count: 1 },
-  { action: 'project.create', entityType: 'projects', count: 1 },
-  { action: 'project.publish', entityType: 'projects', count: 1 },
-  { action: 'project.archive', entityType: 'projects', count: 1 },
-  { action: 'project_fact.create', entityType: 'project_facts', count: 1 },
-  { action: 'project_material.create', entityType: 'project_materials', count: 1 },
-  { action: 'project_media.create', entityType: 'project_media', count: 1 },
-  { action: 'project_media.publish', entityType: 'project_media', count: 1 },
-  { action: 'project_media.archive', entityType: 'project_media', count: 1 },
-  { action: 'project_material_map.create', entityType: 'project_material_maps', count: 1 },
-  { action: 'project_material_map.publish', entityType: 'project_material_maps', count: 1 },
-  { action: 'project_material_map.archive', entityType: 'project_material_maps', count: 1 },
-  { action: 'project_hotspot.create', entityType: 'project_hotspots', count: 1 },
-  { action: 'project_hotspot.publish', entityType: 'project_hotspots', count: 1 },
-  { action: 'project_hotspot.archive', entityType: 'project_hotspots', count: 1 },
   { action: 'article.create', entityType: 'articles', count: 1 },
   { action: 'article.publish', entityType: 'articles', count: 1 },
   { action: 'article.archive', entityType: 'articles', count: 1 },
@@ -566,22 +552,6 @@ async function assertPublishedDashboardHealth(config, accessToken, ids) {
     assertDashboardHealthMatch(
       config,
       accessToken,
-      'projects',
-      { id: ids.projectId, status: 'published', claim_review_status: 'needs_review' },
-      {},
-      'published project claim-review health check',
-    ),
-    assertDashboardHealthMatch(
-      config,
-      accessToken,
-      'project_facts',
-      { id: ids.projectFactId, claim_status: 'needs_review' },
-      {},
-      'project fact claim-review health check',
-    ),
-    assertDashboardHealthMatch(
-      config,
-      accessToken,
       'products',
       { id: ids.productId, status: 'published' },
       { hero_media_id: 'is.null' },
@@ -977,117 +947,6 @@ async function run() {
   created.push(`product_specs#${productSpec.id}`);
   await recordAudit(config, accessToken, authUser.id, 'product_spec.create', 'product_specs', productSpec.id, metadata);
 
-  const project = await insertRow(config, accessToken, 'projects', {
-    slug,
-    title: `Admin Live Project ${marker}`,
-    status: 'draft',
-    location: 'QA',
-    summary: 'Tagged admin live verification project.',
-    claim_review_status: 'needs_review',
-    sort_order: 9999,
-    seo: {},
-    created_by: authUser.id,
-    updated_by: authUser.id,
-  });
-  created.push(`projects#${project.id}`);
-  await recordAudit(config, accessToken, authUser.id, 'project.create', 'projects', project.id, metadata);
-
-  const projectFact = await insertRow(config, accessToken, 'project_facts', {
-    project_id: project.id,
-    fact_label: 'QA marker',
-    fact_value: marker,
-    claim_status: 'needs_review',
-    sort_order: 0,
-    created_by: authUser.id,
-    updated_by: authUser.id,
-  });
-  created.push(`project_facts#${projectFact.id}`);
-  await recordAudit(config, accessToken, authUser.id, 'project_fact.create', 'project_facts', projectFact.id, metadata);
-
-  const projectMaterial = await insertRow(config, accessToken, 'project_materials', {
-    project_id: project.id,
-    stone_group_id: stoneGroup.id,
-    finish_definition_id: finish.id,
-    application: 'QA application',
-    note: marker,
-    claim_status: 'needs_review',
-    sort_order: 0,
-    created_by: authUser.id,
-    updated_by: authUser.id,
-  });
-  created.push(`project_materials#${projectMaterial.id}`);
-  await recordAudit(
-    config,
-    accessToken,
-    authUser.id,
-    'project_material.create',
-    'project_materials',
-    projectMaterial.id,
-    metadata,
-  );
-
-  const materialMap = await insertRow(config, accessToken, 'project_material_maps', {
-    project_id: project.id,
-    media_asset_id: media.id,
-    title: 'QA material map',
-    intro: marker,
-    status: 'draft',
-    sort_order: 0,
-    created_by: authUser.id,
-    updated_by: authUser.id,
-  });
-  created.push(`project_material_maps#${materialMap.id}`);
-  await recordAudit(
-    config,
-    accessToken,
-    authUser.id,
-    'project_material_map.create',
-    'project_material_maps',
-    materialMap.id,
-    metadata,
-  );
-
-  const projectMediaBlock = await insertRow(config, accessToken, 'project_media', {
-    project_id: project.id,
-    media_asset_id: media.id,
-    project_material_map_id: materialMap.id,
-    media_role: 'hotspot_image',
-    block_title: 'QA hotspot image block',
-    label: 'QA media block',
-    caption: marker,
-    status: 'draft',
-    sort_order: 0,
-    created_by: authUser.id,
-    updated_by: authUser.id,
-  });
-  created.push(`project_media#${projectMediaBlock.id}`);
-  await recordAudit(
-    config,
-    accessToken,
-    authUser.id,
-    'project_media.create',
-    'project_media',
-    projectMediaBlock.id,
-    metadata,
-  );
-
-  const hotspot = await insertRow(config, accessToken, 'project_hotspots', {
-    project_material_map_id: materialMap.id,
-    project_material_id: projectMaterial.id,
-    hotspot_key: 'qa-hotspot',
-    x_percent: 50,
-    y_percent: 50,
-    label: 'QA hotspot',
-    application: 'QA application',
-    note: marker,
-    status: 'draft',
-    sort_order: 0,
-    created_by: authUser.id,
-    updated_by: authUser.id,
-  });
-  created.push(`project_hotspots#${hotspot.id}`);
-  await recordAudit(config, accessToken, authUser.id, 'project_hotspot.create', 'project_hotspots', hotspot.id, metadata);
-
   const article = await insertRow(config, accessToken, 'articles', {
     slug,
     title: `Admin Live Article ${marker}`,
@@ -1106,7 +965,7 @@ async function run() {
     article_id: article.id,
     block_type: 'rich_text',
     content: { markdown: `QA block ${marker}` },
-    linked_project_id: project.id,
+    linked_project_id: null,
     linked_stone_group_id: stoneGroup.id,
     status: 'draft',
     sort_order: 0,
@@ -1197,10 +1056,6 @@ async function run() {
     ['stone_finish_images', finishImage.id, 'stone_finish_image.publish', 'stone_finish_images'],
     ['products', product.id, 'product.publish', 'products'],
     ['product_models', productModel.id, 'product_model.publish', 'product_models'],
-    ['projects', project.id, 'project.publish', 'projects'],
-    ['project_material_maps', materialMap.id, 'project_material_map.publish', 'project_material_maps'],
-    ['project_media', projectMediaBlock.id, 'project_media.publish', 'project_media'],
-    ['project_hotspots', hotspot.id, 'project_hotspot.publish', 'project_hotspots'],
     ['articles', article.id, 'article.publish', 'articles'],
     ['article_blocks', articleBlock.id, 'article_block.publish', 'article_blocks'],
   ]) {
@@ -1209,17 +1064,11 @@ async function run() {
 
   await assertPublishedDashboardHealth(config, accessToken, {
     mediaId: media.id,
-    projectId: project.id,
-    projectFactId: projectFact.id,
     productId: product.id,
     articleId: article.id,
   });
 
   for (const [table, id, action, entityType] of [
-    ['project_hotspots', hotspot.id, 'project_hotspot.archive', 'project_hotspots'],
-    ['project_media', projectMediaBlock.id, 'project_media.archive', 'project_media'],
-    ['project_material_maps', materialMap.id, 'project_material_map.archive', 'project_material_maps'],
-    ['projects', project.id, 'project.archive', 'projects'],
     ['article_blocks', articleBlock.id, 'article_block.archive', 'article_blocks'],
     ['articles', article.id, 'article.archive', 'articles'],
     ['product_models', productModel.id, 'product_model.archive', 'product_models'],
@@ -1260,8 +1109,6 @@ async function run() {
     assertNotPubliclyVisible(config, 'media_assets', { id: media.id }, 'Tagged media_assets row'),
     assertNotPubliclyVisible(config, 'stone_groups', { stone_group_key: slug }, 'Tagged stone_groups row'),
     assertNotPubliclyVisible(config, 'products', { slug }, 'Tagged products row'),
-    assertNotPubliclyVisible(config, 'projects', { slug }, 'Tagged projects row'),
-    assertNotPubliclyVisible(config, 'project_media', { id: projectMediaBlock.id }, 'Tagged project_media row'),
     assertNotPubliclyVisible(config, 'articles', { slug }, 'Tagged articles row'),
     assertNotAnonymousReadable(config, 'enquiries', { id: enquiry.id }, 'Tagged enquiry row'),
     assertNotAnonymousReadable(config, 'sample_requests', { id: sampleRequest.id }, 'Tagged sample_request row'),
@@ -1283,6 +1130,7 @@ async function run() {
   console.log(`Audit rows recorded: ${auditRows.length}`);
   console.log('Dashboard health predicates matched tagged QA rows before archive cleanup.');
   console.log('Tagged QA content rows were published, archived, then checked for anonymous invisibility.');
+  console.log('Projects were not mutated: their live workflow must use the protected aggregate endpoint.');
   console.log('Anonymous browser-key reads returned zero tagged QA content rows and no private lead rows.');
   console.log('Tagged rows are retained for auditability; cleanup is intentionally not destructive.');
 }

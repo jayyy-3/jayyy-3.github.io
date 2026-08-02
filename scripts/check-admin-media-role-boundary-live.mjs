@@ -284,7 +284,7 @@ async function writeStorageObject(config, accessToken, bucket, path, method, byt
     {
       method,
       headers: authHeaders(config, accessToken, {
-        'cache-control': '3600',
+        'cache-control': '60',
         'content-type': 'image/png',
         ...(method === 'POST' ? { 'x-upsert': 'false' } : {}),
       }),
@@ -307,22 +307,43 @@ function assertStorageWriteDenied(result, label) {
 }
 
 async function readStorageObject(config, accessToken, bucket, path) {
-  const response = await fetch(
+  const url = new URL(
     `${config.supabaseUrl}/storage/v1/object/${bucket}/${encodeObjectPath(path)}`,
-    { headers: authHeaders(config, accessToken) },
   );
-  if (!response.ok) return { bytes: null, ok: false, status: response.status };
+  // Supabase Smart CDN invalidation can take up to 60 seconds after an update or delete.
+  // A unique cacheNonce forces this verifier's readback to fetch the current origin state.
+  url.searchParams.set('cacheNonce', `${Date.now()}-${crypto.randomBytes(8).toString('hex')}`);
+  const response = await fetch(
+    url,
+    { headers: authHeaders(config, accessToken, { 'cache-control': 'no-cache' }) },
+  );
+  const diagnostics = {
+    age: response.headers.get('age') || 'none',
+    cacheStatus: response.headers.get('cf-cache-status') || 'none',
+    etag: response.headers.get('etag') || 'none',
+  };
+  if (!response.ok) {
+    return { bytes: null, ok: false, status: response.status, ...diagnostics };
+  }
   return {
     bytes: Buffer.from(await response.arrayBuffer()),
     ok: true,
     status: response.status,
+    ...diagnostics,
   };
+}
+
+function readbackDiagnostics(result) {
+  return `cf-cache-status=${result.cacheStatus}; age=${result.age}; etag=${result.etag}`;
 }
 
 async function assertObjectBytes(config, accessToken, bucket, path, expected, label) {
   const result = await readStorageObject(config, accessToken, bucket, path);
   assert.ok(result.ok, `${label} readback failed with HTTP ${result.status}.`);
-  assert.ok(result.bytes.equals(expected), `${label} readback bytes did not match the expected version.`);
+  assert.ok(
+    result.bytes.equals(expected),
+    `${label} readback bytes did not match the expected version (${readbackDiagnostics(result)}).`,
+  );
 }
 
 async function assertObjectMissing(config, accessToken, bucket, path, label) {
@@ -356,7 +377,7 @@ async function cleanupObject(config, accessToken, reference) {
     );
     if (!readback.ok && [400, 404].includes(readback.status)) return null;
     if (readback.ok) {
-      return `${reference.bucket}/${reference.path} remains readable after cleanup (${deleteStatus})`;
+      return `${reference.bucket}/${reference.path} remains readable after cleanup (${deleteStatus}; ${readbackDiagnostics(readback)})`;
     }
     return `${reference.bucket}/${reference.path} cleanup could not be verified (${deleteStatus}; read HTTP ${readback.status})`;
   } catch (error) {
