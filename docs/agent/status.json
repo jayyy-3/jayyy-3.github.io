@@ -33,15 +33,15 @@
   "localReproducibility": {
     "sourceHarness": "passing",
     "adminSourceCoverage": "passing",
-    "runtimeGates": "2026_08_02_commit_fa205e0_clean_node20_docker_gate_passing_for_public_opacity_and_single_editor_projects_followup",
+    "runtimeGates": "2026_08_02_pr11_merge_59cded9b_immutable_76de2abf_apex_www_smoke_and_production_admin_auth_passing",
     "liveSecretsPresent": true,
     "liveReadiness": "browser_key_owner_and_distinct_editor_credentials_present_media_migration_applied_live_role_boundary_passed",
-    "adminUxReshape": "phase0_closed_phase1_runtime_live_current_local_followup_matches_projects_header_to_stone_library_and_removes_projects_claim_approval_ui_acceptance_pending_fresh_gate_preview_promotion_and_jay_fool_test"
+    "adminUxReshape": "phase0_closed_phase1_and_pr11_single_editor_followup_live_projects_header_matches_stone_library_acceptance_pending_jay_fool_test"
   },
   "nextDecisions": [
     "Monitor or purge the four residual apex cache headers when Cloudflare account access is available; their current bytes and MIME types exactly match the immutable repair deployment and are non-blocking.",
     "After separate approval, verify Supabase Auth SMTP ownership and repeat invite/password/recovery against the corrected and read-back production callbacks.",
-    "Corrected draft PR `#11` passes clean-container and immutable Preview gates at `https://b438de5b.urblo.pages.dev`; request production-promotion approval. After promotion Jay runs the production Projects fool test. Any live negative write proof needs its own approval.",
+    "Jay runs the production Projects fool test on PR `#11` merge `59cded9b` / immutable deployment `76de2abf-a27b-4ecb-9e1f-fe229af4c8ed`. Any live negative write proof needs its own approval.",
     "Decide whether final Turnstile proof is required before the next public launch checkpoint.",
     "Repeat the complete Settings invite/password workflow with the approved QA recipient after Auth callback configuration is corrected.",
     "Have a customer or editor review imported Draft CMS content before publishing items publicly.",

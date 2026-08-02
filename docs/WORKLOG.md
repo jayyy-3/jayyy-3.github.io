@@ -28,10 +28,13 @@ Last updated: 2026-08-02
 - Projects listing and detail now use the same default layout band as Stone Library. The duplicate `pt-[102px]` values and obsolete detail loading offset are removed.
 - Local rendered checks pass at 1280px and 390px for Projects listing, opened navigation menu, and Project detail: support band is black and 102px high, main content begins at 102px, width has no overflow, and no relevant console warning/error appears.
 - Correction commit `9d93624` passed the clean Node 20 container gate and was pushed to draft PR `#11`. Cloudflare immutable Preview `b438de5b-b341-4fe5-bb49-bb944f7f8c30` at `https://b438de5b.urblo.pages.dev` passed every public/Admin route, recursive asset/redirect/Function boundary, blocked-Supabase static fallback, and all nine authenticated Admin routes.
-- In-app Browser verification against that immutable Preview confirmed Stone Library and Projects both use the translucent `rgba(0,0,0,0.88)` header at a 102px main offset; Projects listing/detail and the opened desktop/mobile menu have no horizontal overflow. The Preview is ready for Jay's production-promotion decision; no production deployment occurred.
+- In-app Browser verification against that immutable Preview confirmed Stone Library and Projects both use the translucent `rgba(0,0,0,0.88)` header at a 102px main offset; Projects listing/detail and the opened desktop/mobile menu have no horizontal overflow.
+- After Jay's explicit promotion approval, PR `#11` merged as `59cded9bca05ccee69fafe0ab92e4486debf14f9` and Cloudflare deployed immutable production `76de2abf-a27b-4ecb-9e1f-fe229af4c8ed` at `https://76de2abf.urblo.pages.dev`. The immutable deployment passed full route, recursive asset, redirect, Function, and protected-Projects endpoint smoke.
+- The first immediate custom-domain read occurred during Cloudflare's switch window: `www` still referenced the old entry and apex served one stale dynamic asset as SPA HTML. No rollback or data write was attempted. Fresh deployment-bound reruns passed for both `https://urblo.com.au` and `https://www.urblo.com.au`, with exact root/recursive asset identity against the immutable deployment; production owner login then passed all nine Admin routes and blocked-Supabase static fallback.
+- Final in-app Browser production readback at 1280px and 390px confirmed the Projects header at `rgba(0,0,0,0.88)`, the shared 102px main offset, an opened mobile menu, and zero horizontal overflow. This is deployment evidence, not Jay's fool test.
 
 ### Next Handoff
-- `NOW-ADMIN-UX-RESHAPE-001`: finish gates and immutable Preview, then request production-promotion approval.
+- `NOW-ADMIN-UX-RESHAPE-001`: Jay runs the production Projects fool test.
 
 ## Entry - 2026-08-02 (Projects Production Runtime and Contract B)
 
