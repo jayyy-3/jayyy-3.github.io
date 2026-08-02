@@ -3,7 +3,6 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { ArrowUpRight, Clock3, Compass, FilePenLine } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabaseClient';
-import { useAdminAuth } from '../../lib/adminAuthHooks';
 import AdminShell from './AdminShell';
 import RequireAdmin from './RequireAdmin';
 import { adminModules } from './adminContent';
@@ -65,20 +64,20 @@ const contentTables = [
 
 const editorStartActions: DashboardNextAction[] = [
     {
-        label: 'Review new leads',
+        label: 'Open new leads',
         note: 'Start here when a customer enquiry or sample request arrives.',
         path: '/admin/leads',
         tone: 'urgent',
     },
     {
         label: 'Publish content',
-        note: 'Open Projects, Products, Articles, or Stone Library and clear the publish checklist.',
+        note: 'Open Projects, Products, Articles, or Stone Library, make the change, and publish when ready.',
         path: '/admin/projects',
         tone: 'warning',
     },
     {
         label: 'Prepare media',
-        note: 'Publish images only after source, public location, alt text, and usage notes are ready.',
+        note: 'Upload an image, add its description, and publish it for website use.',
         path: '/admin/media',
         tone: 'steady',
     },
@@ -121,7 +120,6 @@ export default function AdminDashboardPage() {
 }
 
 function AdminDashboardContent() {
-    const { profile } = useAdminAuth();
     const [dashboard, setDashboard] = useState<DashboardState>({
         isLoading: true,
         error: null,
@@ -210,26 +208,9 @@ function AdminDashboardContent() {
                 healthItem(
                     'Published media missing alt or usage notes',
                     count,
-                    'Review media metadata',
+                    'Add media details',
                     '/admin/media',
                 ),
-            ),
-            resolveCount(
-                client
-                    .from('projects')
-                    .select('id', { count: 'exact', head: true })
-                    .eq('status', 'published')
-                    .eq('claim_review_status', 'needs_review'),
-            ).then((count) =>
-                healthItem('Published projects with proof still under review', count, 'Review project proof', '/admin/projects'),
-            ),
-            resolveCount(
-                client
-                    .from('project_facts')
-                    .select('id', { count: 'exact', head: true })
-                    .eq('claim_status', 'needs_review'),
-            ).then((count) =>
-                healthItem('Project facts still under review', count, 'Review proof facts', '/admin/projects'),
             ),
             resolveCount(
                 client
@@ -247,12 +228,12 @@ function AdminDashboardContent() {
                     .eq('status', 'published')
                     .is('cover_media_id', null),
             ).then((count) =>
-                healthItem('Published articles missing cover media', count, 'Review article covers', '/admin/articles'),
+                healthItem('Published articles missing cover media', count, 'Add article cover', '/admin/articles'),
             ),
             resolveCount(
                 client.from('stone_groups').select('id', { count: 'exact', head: true }).eq('status', 'tbc'),
             ).then((count) =>
-                healthItem('Stone families still marked Needs confirmation', count, 'Review Stone Library', '/admin/stone-library'),
+                healthItem('Stone families still marked Needs confirmation', count, 'Complete Stone Library item', '/admin/stone-library'),
             ),
             Promise.all([
                 resolveCount(
@@ -386,8 +367,8 @@ function AdminDashboardContent() {
 
         if (draftContent > 0 && firstDraftModule) {
             actions.push({
-                label: `Review ${draftContent} draft ${pluralize(draftContent, 'content item')}`,
-                note: `${firstDraftModule.moduleLabel} has hidden draft content. Open it, clear the checklist, then publish only when ready.`,
+                label: `Continue ${draftContent} draft ${pluralize(draftContent, 'content item')}`,
+                note: `${firstDraftModule.moduleLabel} has hidden draft content. Open it, finish the edit, then publish when ready.`,
                 path: firstDraftModule.path,
                 tone: 'steady',
             });
@@ -396,7 +377,7 @@ function AdminDashboardContent() {
         if (!actions.length) {
             actions.push({
                 label: 'Continue planned editing',
-                note: 'No urgent queue items are visible. Open the content library and keep routine edits in Draft until reviewed.',
+                note: 'No urgent items are visible. Open the content library and make the next website change.',
                 path: '/admin/projects',
                 tone: 'steady',
             });
@@ -408,7 +389,7 @@ function AdminDashboardContent() {
     return (
         <AdminShell
             title="Dashboard"
-            eyebrow={`Role: ${profile?.role ?? 'admin'}`}
+            eyebrow="Website editing"
             actions={
                 <Link
                     to="/admin/leads"
@@ -436,8 +417,7 @@ function AdminDashboardContent() {
                                 </h2>
                             </div>
                             <p className="max-w-xl text-sm leading-6 text-black/58">
-                                The dashboard now prioritizes customer leads, publish blockers, and hidden draft content
-                                before routine editing.
+                                Start with new customer messages or continue the website content you were editing.
                             </p>
                         </div>
                         <div className="mt-4 grid gap-3 md:grid-cols-3">
@@ -481,11 +461,11 @@ function AdminDashboardContent() {
                                     Editor workflow
                                 </p>
                                 <h2 className="mt-2 text-2xl font-semibold text-black">
-                                    Edit, review, publish
+                                    Edit, save, publish
                                 </h2>
                             </div>
                             <p className="max-w-xl text-sm leading-6 text-black/58">
-                                Treat Draft as the safe workspace. Publish only after the readiness panel is clear.
+                                Save as you work. Publish when the page has the required content and images.
                             </p>
                         </div>
                         <div className="mt-4">
@@ -594,7 +574,7 @@ function AdminDashboardContent() {
                                         <span>
                                             <span className="block text-sm font-semibold text-black">{item.label}</span>
                                             <span className="mt-1 block text-xs font-semibold uppercase tracking-[0.14em] text-black/40">
-                                                {item.severity === 'warning' ? 'Needs review' : 'Clear'}
+                                                {item.severity === 'warning' ? 'Needs a fix' : 'Clear'}
                                             </span>
                                         </span>
                                         <span className="inline-flex h-9 items-center justify-center rounded border border-black/10 px-3 text-[11px] font-bold uppercase tracking-[0.12em] text-black/55">
@@ -604,8 +584,7 @@ function AdminDashboardContent() {
                                 ))
                             ) : (
                                 <div className="p-4 text-sm leading-6 text-black/58">
-                                    No review tasks are visible. Published content checks are clear, and new issues will
-                                    appear here when they need editor attention.
+                                    Nothing needs fixing right now. New missing-content or media issues will appear here.
                                 </div>
                             )}
                         </div>
@@ -667,10 +646,10 @@ function AdminDashboardContent() {
                 <aside className="space-y-5">
                     <section className="border border-black/10 bg-black p-5 text-white">
                         <Compass className="h-5 w-5 text-[var(--urblo-lime)]" />
-                        <h2 className="mt-5 text-2xl font-semibold">Editor handoff status</h2>
+                        <h2 className="mt-5 text-2xl font-semibold">Simple website editing</h2>
                         <p className="mt-3 text-sm leading-6 text-white/68">
-                            The private CMS is login-protected. Editors can work in Draft, use publish checklists,
-                            and archive content without deleting it.
+                            Log in, open a section, make the change, save it, then publish or hide it. Draft changes stay
+                            private until you publish them.
                         </p>
                     </section>
 
@@ -709,12 +688,12 @@ function AdminDashboardContent() {
 
                     <section className="border border-black/10 bg-white p-5">
                         <FilePenLine className="h-5 w-5 text-black" />
-                        <h2 className="mt-5 text-xl font-semibold text-black">Before handing to an editor</h2>
+                        <h2 className="mt-5 text-xl font-semibold text-black">How to edit the website</h2>
                         <ul className="mt-4 space-y-3 text-sm leading-6 text-black/62">
-                            <li>Create or confirm the person's login account, then grant a CMS role in Settings.</li>
-                            <li>Walk through one real Project, Product, Article, Media item, and Stone family.</li>
-                            <li>Publish only after each on-screen checklist is clear.</li>
-                            <li>Use the Open public page link in each editor after publishing to confirm the live route.</li>
+                            <li>Open the section you want to change.</li>
+                            <li>Choose an existing item or create a new one.</li>
+                            <li>Save while working, then publish when it should appear on the website.</li>
+                            <li>Use Open public page after publishing to check the result.</li>
                         </ul>
                     </section>
                 </aside>

@@ -10,13 +10,14 @@ import {
   getProjectPublishBlockers,
   mergeProjectMediaOptions,
   moveProjectDraftItem,
+  normalizeProjectDraftForSave,
 } from "../src/features/projects/projectAggregate.ts";
 import { projects as staticProjectFixtures } from "../src/data/projectData.ts";
 import {
   assertPublishDraft,
   assertPublishableMedia,
   mapRpcError,
-  normalizeEditorClaimSafety,
+  normalizeAutomaticClaimStatuses,
   summarizePublishCompensation,
   validateDraftShape,
 } from "../functions/_lib/admin-projects.js";
@@ -573,17 +574,11 @@ requireIncludes(
   editorPath,
   "stable selected-hotspot media identity",
 );
-requireIncludes(
-  editor,
-  "allowDeferred={false}",
-  editorPath,
-  "no deferred parent review choice",
-);
 forbidMatches(
   editor,
-  /Deferred — choose a project review outcome/,
+  /ProofReviewControl|Review outcome|canManageClaims/,
   editorPath,
-  "legacy deferred parent option",
+  "editor-facing proof review workflow",
 );
 requireMatches(
   editor,
@@ -1065,33 +1060,15 @@ forbidMatches(
 );
 requireIncludes(
   server,
-  "normalizeEditorClaimSafety",
+  "normalizeAutomaticClaimStatuses",
   functionPath,
-  "content-aware Editor claim normalization",
+  "automatic compatibility claim normalization",
 );
-requireIncludes(
+forbidMatches(
   server,
-  "semanticCollectionChanged",
+  /claim_review_forbidden|Finish the project proof review|Finish the proof review/,
   functionPath,
-  "unreviewed aggregate semantic comparison",
-);
-requireIncludes(
-  server,
-  "projectClaimContentChanged",
-  functionPath,
-  "project claim-content comparison",
-);
-requireIncludes(
-  server,
-  "factClaimContentChanged",
-  functionPath,
-  "fact claim-content comparison",
-);
-requireIncludes(
-  server,
-  "materialClaimContentChanged",
-  functionPath,
-  "material claim-content comparison",
+  "claim approval publish gate",
 );
 requireIncludes(
   server,
@@ -1945,212 +1922,37 @@ editorBaseline.facts.push({
   claimStatus: "approved",
   sortOrder: 0,
 });
-Object.assign(editorBaseline.materials[0], { key: "material:22", id: 22 });
+Object.assign(editorBaseline.materials[0], { id: 22 });
+const legacyReviewDraft = structuredClone(editorBaseline);
+legacyReviewDraft.project.claimReviewStatus = "needs_review";
+legacyReviewDraft.facts[0].claimStatus = "deferred";
+legacyReviewDraft.materials[0].claimStatus = "needs_review";
 
-const unchangedEditorDraft = normalizeEditorClaimSafety(
-  editorBaseline,
-  editorBaseline,
-);
-assert.equal(unchangedEditorDraft.project.claimReviewStatus, "approved");
-assert.equal(unchangedEditorDraft.facts[0].claimStatus, "approved");
-assert.equal(unchangedEditorDraft.materials[0].claimStatus, "approved");
-
-const changedEditorDraft = structuredClone(editorBaseline);
-changedEditorDraft.project.summary =
-  "Editor changed a claim-bearing project field.";
-changedEditorDraft.facts[0].factValue = "500 m²";
-changedEditorDraft.materials[0].application = "Walling";
-const normalizedChangedEditorDraft = normalizeEditorClaimSafety(
-  changedEditorDraft,
-  editorBaseline,
-);
-assert.equal(
-  normalizedChangedEditorDraft.project.claimReviewStatus,
-  "needs_review",
-);
-assert.equal(normalizedChangedEditorDraft.facts[0].claimStatus, "needs_review");
-assert.equal(
-  normalizedChangedEditorDraft.materials[0].claimStatus,
-  "needs_review",
-);
-assert.throws(
-  () => assertPublishDraft(normalizedChangedEditorDraft),
-  (error) => error?.status === 409 && error?.code === "publish_blocked",
-  "An Editor cannot publish changed content by carrying forward an approved claim state",
-);
-const removedFactEditorDraft = structuredClone(editorBaseline);
-removedFactEditorDraft.facts = [];
-assert.equal(
-  normalizeEditorClaimSafety(removedFactEditorDraft, editorBaseline).project
-    .claimReviewStatus,
-  "needs_review",
-  "Removing a persisted fact must return the parent project to proof review",
-);
-const removedMaterialEditorDraft = structuredClone(editorBaseline);
-removedMaterialEditorDraft.materials = [];
-const normalizedRemovedMaterial = normalizeEditorClaimSafety(
-  removedMaterialEditorDraft,
-  editorBaseline,
-);
-assert.equal(
-  normalizedRemovedMaterial.project.claimReviewStatus,
-  "needs_review",
-  "Removing a persisted material must return the parent project to proof review",
-);
-assert.throws(
-  () => assertPublishDraft(normalizedRemovedMaterial),
-  (error) => error?.status === 409 && error?.code === "publish_blocked",
-  "An Editor cannot publish immediately after removing approved material proof",
-);
-const privateRowBaseline = structuredClone(editorBaseline);
-privateRowBaseline.facts[0].id = null;
-privateRowBaseline.facts[0].key = "fact:new:approved-private";
-privateRowBaseline.materials[0].id = null;
-privateRowBaseline.materials[0].key = "material:new:approved-private";
-const removedPrivateFact = structuredClone(privateRowBaseline);
-removedPrivateFact.facts = [];
-assert.equal(
-  normalizeEditorClaimSafety(removedPrivateFact, privateRowBaseline).project
-    .claimReviewStatus,
-  "needs_review",
-  "Removing an approved private-draft fact must return the project to proof review",
-);
-const removedPrivateMaterial = structuredClone(privateRowBaseline);
-removedPrivateMaterial.materials = [];
-assert.equal(
-  normalizeEditorClaimSafety(removedPrivateMaterial, privateRowBaseline).project
-    .claimReviewStatus,
-  "needs_review",
-  "Removing an approved private-draft material must return the project to proof review",
-);
-
-const copiedKeyNewFact = structuredClone(editorBaseline);
-copiedKeyNewFact.facts.push({
-  ...editorBaseline.facts[0],
-  id: null,
-  claimStatus: "approved",
-});
-assert.equal(
-  normalizeEditorClaimSafety(copiedKeyNewFact, editorBaseline).facts[1]
-    .claimStatus,
-  "needs_review",
-  "A new row must not inherit approval by reusing a browser key",
-);
-const copiedKeyNewMaterial = structuredClone(editorBaseline);
-copiedKeyNewMaterial.materials.push({
-  ...editorBaseline.materials[0],
-  id: null,
-  claimStatus: "deferred",
-});
-assert.equal(
-  normalizeEditorClaimSafety(copiedKeyNewMaterial, editorBaseline).materials[1]
-    .claimStatus,
-  "needs_review",
-  "A new material must not inherit a decision by reusing a browser key",
-);
-
-const reorderedEditorDraft = structuredClone(editorBaseline);
-reorderedEditorDraft.project.sortOrder = 99;
-reorderedEditorDraft.facts[0].sortOrder = 4;
-reorderedEditorDraft.materials[0].sortOrder = 5;
-assert.equal(
-  normalizeEditorClaimSafety(reorderedEditorDraft, editorBaseline).project
-    .claimReviewStatus,
-  "approved",
-  "Reordering alone must not invalidate unchanged claim content",
-);
-const imageOnlyEditorDraft = structuredClone(editorBaseline);
-imageOnlyEditorDraft.project.heroMediaId = 2;
-imageOnlyEditorDraft.project.coverMediaId = 2;
-imageOnlyEditorDraft.materials[0].mediaAssetId = 2;
-const normalizedImageOnlyDraft = normalizeEditorClaimSafety(
-  imageOnlyEditorDraft,
-  editorBaseline,
-);
-assert.equal(
-  normalizedImageOnlyDraft.project.claimReviewStatus,
-  "approved",
-  "Replacing project imagery alone must preserve the approved project decision",
-);
-assert.equal(
-  normalizedImageOnlyDraft.materials[0].claimStatus,
-  "approved",
-  "Replacing a material image alone must preserve its approved factual decision",
-);
-const semanticMapEditorDraft = structuredClone(editorBaseline);
-semanticMapEditorDraft.maps[0].intro =
-  "Editor changed the public map explanation.";
-assert.equal(
-  normalizeEditorClaimSafety(semanticMapEditorDraft, editorBaseline).project
-    .claimReviewStatus,
-  "needs_review",
-  "Editing map copy must return the parent project to proof review",
-);
-const semanticMediaEditorDraft = structuredClone(editorBaseline);
-semanticMediaEditorDraft.mediaBlocks.push({
-  key: "media:new:editor-video",
-  id: null,
-  mediaRole: "youtube_video",
-  mediaAssetId: null,
-  projectMaterialMapKey: null,
-  blockTitle: "Project proof video",
-  youtubeUrl: "abcdefghijk",
-  label: "",
-  caption: "",
-  sortOrder: 0,
-});
-assert.equal(
-  normalizeEditorClaimSafety(semanticMediaEditorDraft, editorBaseline).project
-    .claimReviewStatus,
-  "needs_review",
-  "Adding semantic media content must return the parent project to proof review",
-);
-const movedHotspotEditorDraft = structuredClone(editorBaseline);
-movedHotspotEditorDraft.hotspots[0].xPercent = 55;
-assert.equal(
-  normalizeEditorClaimSafety(movedHotspotEditorDraft, editorBaseline).project
-    .claimReviewStatus,
-  "needs_review",
-  "Moving a public material point must return the parent project to proof review",
-);
-const aggregateImageOnlyEditorDraft = structuredClone(editorBaseline);
-aggregateImageOnlyEditorDraft.maps[0].mediaAssetId = 9;
-aggregateImageOnlyEditorDraft.hotspots[0].previewMediaId = 10;
-assert.equal(
-  normalizeEditorClaimSafety(aggregateImageOnlyEditorDraft, editorBaseline)
-    .project.claimReviewStatus,
-  "approved",
-  "Replacing map and hotspot imagery alone must preserve the approved project decision",
-);
-const deferredParentDraft = structuredClone(editorBaseline);
-deferredParentDraft.project.claimReviewStatus = "deferred";
+const normalizedClientDraft = normalizeProjectDraftForSave(legacyReviewDraft);
+assert.equal(normalizedClientDraft.project.claimReviewStatus, "approved");
 assert.ok(
-  getProjectPublishBlockers(deferredParentDraft, behaviorContext).some(
-    (blocker) =>
-      blocker.id === "project-review" && blocker.section === "overview",
-  ),
-  "A deferred parent review must block publishing from Overview",
+  normalizedClientDraft.facts.every((row) => row.claimStatus === "approved"),
+  "The single-editor Save path must mechanically normalize legacy fact review fields",
 );
-assert.throws(
-  () => assertPublishDraft(deferredParentDraft),
-  (error) => error?.status === 409 && error?.code === "publish_blocked",
-  "The server must reject a deferred parent project",
-);
-const conservativeDowngrade = structuredClone(editorBaseline);
-conservativeDowngrade.project.claimReviewStatus = "needs_review";
-conservativeDowngrade.facts[0].claimStatus = "needs_review";
-conservativeDowngrade.materials[0].claimStatus = "needs_review";
-assert.doesNotThrow(() =>
-  normalizeEditorClaimSafety(conservativeDowngrade, editorBaseline),
+assert.ok(
+  normalizedClientDraft.materials.every((row) => row.claimStatus === "approved"),
+  "The single-editor Save path must mechanically normalize legacy material review fields",
 );
 
-const forbiddenApproval = structuredClone(editorBaseline);
-const needsReviewBaseline = structuredClone(editorBaseline);
-needsReviewBaseline.project.claimReviewStatus = "needs_review";
-assert.throws(
-  () => normalizeEditorClaimSafety(forbiddenApproval, needsReviewBaseline),
-  (error) => error?.status === 403 && error?.code === "claim_review_forbidden",
-  "An Editor cannot promote an unchanged needs-review claim",
+const normalizedServerDraft = normalizeAutomaticClaimStatuses(legacyReviewDraft);
+assert.equal(normalizedServerDraft.project.claimReviewStatus, "approved");
+assert.ok(normalizedServerDraft.facts.every((row) => row.claimStatus === "approved"));
+assert.ok(normalizedServerDraft.materials.every((row) => row.claimStatus === "approved"));
+assert.equal(
+  getProjectPublishBlockers(legacyReviewDraft, behaviorContext).some(
+    (blocker) => blocker.id.includes("review"),
+  ),
+  false,
+  "Legacy review fields must not create an editor-facing publish blocker",
+);
+assert.doesNotThrow(
+  () => assertPublishDraft(normalizedServerDraft),
+  "A complete single-editor draft must publish without a separate approval step",
 );
 
 const validServerDraft = structuredClone(editorBaseline);

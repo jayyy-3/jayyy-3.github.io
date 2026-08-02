@@ -15,7 +15,7 @@ Current warning: this guide is the target operating flow, not proof that product
 
 Give an editor the production admin address, their invited login email, and the lowest role they need. Most content-only users should be Editor; people who manage accounts, leads, exports, or global site settings should be CMS manager.
 
-Daily editing starts on Dashboard. Editors follow Recommended next action, open the relevant module, search/filter by status, edit the selected item, and use the visible actions bar to save. They should publish only when the on-screen checklist is clear, then use Open public page to confirm the live route.
+Daily editing starts on Dashboard. Open the relevant module, find the item, make the change, Save, preview if needed, then Publish or Hide. Required fields are explained on screen; Projects no longer has a separate proof-review or approval step.
 
 The CMS currently covers Projects, Stone Library, Products, Articles, Media, Leads, Settings, and Change history. Imported Projects, Stone Library, Products, Articles, and Media candidates are already in the CMS as Draft items; they stay hidden until reviewed and Published.
 
@@ -27,7 +27,7 @@ Public pages read Published CMS content where the public adapter is active, with
 2. Start with Dashboard Recommended next action.
 3. Use the module list/search/status filters to find the item you need.
 4. Edit the item, then use the visible actions bar to Save.
-5. Check the publish checklist before changing anything to Published.
+5. If Publish is unavailable, complete the named missing field or image.
 6. Use Open public page after publishing to confirm what the website shows.
 7. Ask a CMS manager when Settings, Leads export, account access, or Change history is needed.
 
@@ -73,7 +73,7 @@ Pass condition: the editor can explain where they start, how they know whether c
 |---|---|
 | Website owner | Full CMS control, including website settings and team access. |
 | CMS manager | Manage settings, team access, content, media, leads, and publishing. |
-| Editor | Edit and currently publish general content plus already-public/external media. Private-upload promotion needs a Website owner or CMS manager because safe rollback requires Storage delete permission. Editors cannot manage settings, delete Storage objects, or export leads. A separate enforced review-only publishing role does not exist yet. |
+| Editor | Edit and publish general content plus already-public/external media. Projects uses the same Save/Preview/Publish/Hide flow with no separate approval step. Private-upload promotion in the standalone Media screen needs a Website owner or CMS manager because safe rollback requires Storage delete permission. Editors cannot manage settings, delete Storage objects, or export leads. |
 | Viewer | Inspect CMS content without saving changes. |
 
 ## Account Setup
@@ -135,7 +135,7 @@ If a module has a long editor, use its actions bar rather than hunting for a but
 | Module | Use It For | Current CMS State |
 |---|---|---|
 | Dashboard | Choose the next editing job, inspect live/draft counts, and open health-queue fixes. | Editor start page with Recommended next action, content status counts, focused attention queue, and correct Stone Library status routing. |
-| Projects | Edit case studies, facts, materials, images, maps, and hotspots. | First task-oriented source repair is implemented: stable record URLs, Overview/Facts/Materials/Media/Maps workspaces, all-editor unsaved-change warnings, isolated child saves, blocker jumps, and searchable media. Pagination, preview, and deployed editor proof remain open. |
+| Projects | Edit case studies, facts, materials, images, maps, and hotspots. | One page-shaped draft with Overview/Facts/Materials/Media/Maps, one Save action, shared preview, inline media, visual hotspots, Publish, and Hide. There is no separate proof-review approval step. Jay's fool test remains the acceptance gate. |
 | Stone Library | Edit stone families, variants, finish availability, and finish imagery. | CMS-ready with Needs confirmation language, family/variant publish checklists, Stone family actions, Variant actions, Finish image public status, and finish-image media guidance; public listing and detail prefer Published CMS items with static fallback. |
 | Products | Edit product families, models, images, search title/description, materials, and specs. | CMS-ready with Product website status, Model publish status, Website URL key / Model website key labels, media selectors, product/model publish checklists, Product actions, Model actions, and Stone Library link feedback. |
 | Articles | Edit article metadata, search title/description, and Article sections through section-type forms. | CMS-ready for metadata and section content with Article website status, Section publish status, Article actions, and Section actions; public detail prefers Published article sections and keeps sanitized original import HTML as fallback. |
@@ -179,7 +179,7 @@ Lead workflow status tells managers whether a lead needs an owner, needs interna
 ## Publishing Checks
 
 Before publishing:
-- Projects need title, URL, public copy, proof reviewed for public use, reviewed facts, and reviewed materials. Use Website publish status to see whether the project is Live on website, Ready not live yet, or Not ready to publish. If Publish is locked, use Start with to jump to the first repair item.
+- Projects need title, URL, public copy, valid referenced content, and the required images for the selected layout. Save applies the whole page together. If Publish is blocked, use the named missing detail to jump to the right section; no second person or proof-approval state is required.
 - Stone Library families need name, URL key, website stone type, public summary, at least one variant, and reviewed finish availability before Publish is available. Variants need a URL key, editor-facing label, and at least one Available or Needs confirmation finish.
 - Stone Library finish images need a selected Media library item that is already Published in Media. Use Finish image public status in Stone Library to see whether the image can appear on the website. If it says Open Media first, publish the media item in Media, then return to Stone Library and publish the finish image link.
 - Products need name, URL, short description, hero image, at least one published model with image, material defaults, and specs before Publish is available. Use Product website status to see whether the product is Live on website, Ready not live yet, or Not ready to publish. Models have their own Model publish status and checklist; they need a clean model website key, label, and image before Model Publish is available.

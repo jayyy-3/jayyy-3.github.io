@@ -73,7 +73,7 @@ export const adminModules: AdminModuleDefinition[] = [
         key: 'projects',
         label: 'Projects',
         path: '/admin/projects',
-        summary: 'Case studies, galleries, material maps, hotspots, and reviewed project proof.',
+        summary: 'Edit case studies, galleries, facts, materials, and project images in one place.',
         handoffLabel: 'Uses Media and Stone Library',
         group: 'content',
         Icon: FileText,

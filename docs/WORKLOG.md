@@ -2,6 +2,28 @@
 
 Last updated: 2026-08-02
 
+## Entry - 2026-08-02 (Public Opacity Repair and Single-Editor Projects Simplification)
+
+### Scope
+- Traced the public Projects/navbar display failure to Tailwind not generating non-default percentage opacity utilities such as the header's `bg-black/88` and menu's `bg-black/96`. Added the complete integer opacity scale and a built-CSS smoke assertion for the critical public utilities.
+- Verified the local public Projects header and opened menu render with the intended opaque dark backgrounds at desktop and mobile widths, with no horizontal overflow or relevant console errors.
+- Removed Project proof-review controls and approval-dependent publish blockers. Client and protected server Save paths now normalize legacy project/fact/material review columns automatically; required copy, references, media, server promotion, conflict handling, audit, Auth, and RLS boundaries remain.
+- Removed the Dashboard Project claim-review queries and rewrote its visible workflow as Edit, Save, Publish. No Supabase migration or production write was required or performed.
+
+### Verification State
+- `npm run agent:admin-projects-aggregate`: pass.
+- `npm run build`, `npm run lint`, `npx tsc -b`, `npm run agent:smoke`: pass.
+- `npm run agent:admin-crud-coverage`, `npm run agent:admin-cms-predeploy`, isolated 11-route `npm run agent:admin-config-gate`, `npm run agent:check`, JSON parsing, and `git diff --check`: pass.
+- Local visual verification: public Projects desktop/mobile navbar and menu backgrounds pass.
+- Clean-container and immutable Preview gates remain to be recorded before promotion.
+
+### Risks and Gaps
+- Authenticated visual inspection of the simplified Admin UI still needs a configured immutable Preview; source verification is not Jay's fool test.
+- Production remains on merge `25c05ebb` until Jay separately approves promotion of this follow-up.
+
+### Next Handoff
+- `NOW-ADMIN-UX-RESHAPE-001`: finish gates and immutable Preview, then request production-promotion approval.
+
 ## Entry - 2026-08-02 (Projects Production Runtime and Contract B)
 
 ### Scope

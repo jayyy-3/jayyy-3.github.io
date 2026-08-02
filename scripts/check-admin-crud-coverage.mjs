@@ -43,7 +43,6 @@ const pageChecks = [
       'media_assets',
       'stone_groups',
       'projects',
-      'project_facts',
       'products',
       'articles',
       'enquiries',
@@ -53,29 +52,27 @@ const pageChecks = [
       'Content health queue',
       'Start here',
       'Recommended next action',
-      'customer leads, publish blockers, and hidden draft content',
+      'Start with new customer messages or continue the website content you were editing.',
       'Respond to ${newLeadCount} new',
-      'Review ${draftContent} draft',
+      'Continue ${draftContent} draft',
       'Needs attention before publishing',
       'All clear checks',
       '/admin/stone-library',
       'Stone families',
       'Published media missing alt or usage notes',
-      'Published projects with proof still under review',
-      'Project facts still under review',
       'Published products missing hero media',
       'Published articles missing cover media',
       'Stone families still marked Needs confirmation',
       'Stale new leads older than 48 hours',
-      'Before handing to an editor',
-      'Open public page link',
+      'How to edit the website',
+      'Use Open public page after publishing',
       'Open editor',
       'handoffLabel',
       'Where each editing job lives',
       'Live on website',
       'What the website can show now',
       'Published items can appear on the website. Draft is still your safe workspace.',
-      'No review tasks are visible. Published content checks are clear',
+      'Nothing needs fixing right now.',
       'New contact and sample request submissions will appear here',
     ],
     forbiddenText: [
@@ -85,6 +82,11 @@ const pageChecks = [
       'live Supabase content',
       'lead rows exist',
       'server-side service-role verification',
+      'Published projects with proof still under review',
+      'Project facts still under review',
+      'Review ${draftContent} draft',
+      "eq('claim_review_status', 'needs_review')",
+      "eq('claim_status', 'needs_review')",
     ],
     mutates: false,
   },
@@ -1193,7 +1195,10 @@ function checkDashboardEditorLanguage() {
   requireIncludes(primitives, 'Hidden but kept', 'src/pages/admin/AdminCmsPrimitives.tsx');
   requireIncludes(primitives, 'editing history', 'src/pages/admin/AdminCmsPrimitives.tsx');
   requireIncludes(primitives, 'This CMS version is still Draft/Needs confirmation', 'src/pages/admin/AdminCmsPrimitives.tsx');
-  requireIncludes(primitives, 'Change copy, media, facts, and page sections without affecting the website.', 'src/pages/admin/AdminCmsPrimitives.tsx');
+  requireIncludes(primitives, "{ label: 'Edit', detail: 'Change copy, images, facts, and page sections.' }", 'src/pages/admin/AdminCmsPrimitives.tsx');
+  requireIncludes(primitives, "{ label: 'Save', detail: 'Keep the latest changes in the CMS without making them public.' }", 'src/pages/admin/AdminCmsPrimitives.tsx');
+  requireIncludes(primitives, "{ label: 'Publish', detail: 'Make the saved page available on the public website.' }", 'src/pages/admin/AdminCmsPrimitives.tsx');
+  requireNotIncludes(primitives, 'Review readiness', 'src/pages/admin/AdminCmsPrimitives.tsx');
   requireNotIncludes(shell, 'Published content can go live', 'src/pages/admin/AdminShell.tsx');
   requireNotIncludes(primitives, 'Draft rows are safe to edit', 'src/pages/admin/AdminCmsPrimitives.tsx');
   requireNotIncludes(primitives, 'published CMS rows', 'src/pages/admin/AdminCmsPrimitives.tsx');

@@ -252,6 +252,25 @@ async function checkCta(contract) {
 
 await waitForServer()
 
+const builtCss = fs.readdirSync('dist/assets')
+  .filter((file) => file.endsWith('.css'))
+  .map((file) => fs.readFileSync(`dist/assets/${file}`, 'utf8'))
+  .join('\n')
+const requiredOpacityUtilities = [
+  'bg-black\\/88',
+  'bg-black\\/96',
+  'bg-white\\/82',
+  'bg-white\\/92',
+  'bg-white\\/98',
+]
+
+for (const utility of requiredOpacityUtilities) {
+  if (!builtCss.includes(utility)) {
+    throw new Error(`Missing compiled Tailwind opacity utility: ${utility}`)
+  }
+  console.log(`style ok: ${utility.replace('\\/', '/')}`)
+}
+
 for (const route of routes) {
   await checkHtmlShell(route)
   console.log(`route ok: ${route}`)

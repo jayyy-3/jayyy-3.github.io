@@ -152,9 +152,9 @@ export function CmsLiveRuleCard({ children }: { children?: ReactNode }) {
 
 export function CmsWorkflowSteps() {
     const steps = [
-        { label: 'Edit draft', detail: 'Change copy, media, facts, and page sections without affecting the website.' },
-        { label: 'Review readiness', detail: 'Clear visible blockers before publishing, including claims and required media/copy.' },
-        { label: 'Publish', detail: 'Published content becomes eligible for public CMS-backed pages.' },
+        { label: 'Edit', detail: 'Change copy, images, facts, and page sections.' },
+        { label: 'Save', detail: 'Keep the latest changes in the CMS without making them public.' },
+        { label: 'Publish', detail: 'Make the saved page available on the public website.' },
     ];
 
     return (
@@ -226,7 +226,7 @@ export function ReadinessBadge({ ready }: { ready: boolean }) {
             ].join(' ')}
         >
             {ready ? <CheckCircle2 className="h-3.5 w-3.5" /> : <ShieldAlert className="h-3.5 w-3.5" />}
-            {ready ? 'Ready' : 'Needs review'}
+            {ready ? 'Ready' : 'Missing details'}
         </span>
     );
 }
