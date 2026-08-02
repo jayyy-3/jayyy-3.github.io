@@ -12,7 +12,6 @@ const POSTGRES_INTEGER_MAX = 2_147_483_647;
 const BASE_UPDATED_AT_PATTERN =
   /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?(?:Z|[+-]\d{2}:\d{2})$/;
 const CLAIM_STATUSES = new Set(["needs_review", "approved", "deferred"]);
-const PUBLISHABLE_CHILD_CLAIM_STATUSES = new Set(["approved", "deferred"]);
 const LIFECYCLE_STATUSES = new Set(["draft", "published", "archived"]);
 const CARBON_STATUSES = new Set(["", "yes", "no", "not_available", "tbc"]);
 const MEDIA_ROLES = new Set([
@@ -88,14 +87,7 @@ export async function handleAdminProjectsRequest(request, env) {
     }
 
     const input = await parsePostInput(request);
-    if (actor.profile.role === "editor") {
-      input.draft = await normalizeEditorClaims(
-        supabase,
-        actor.user.id,
-        actor.profile.role,
-        input,
-      );
-    }
+    input.draft = normalizeAutomaticClaimStatuses(input.draft);
 
     if (input.action === "publish") {
       assertPublishDraft(input.draft);
@@ -759,10 +751,6 @@ export function assertPublishDraft(draft) {
   ) {
     add("Choose a main project image.");
   }
-  if (project.claimReviewStatus !== "approved") {
-    add("Finish the project proof review.");
-  }
-
   const mapKeys = new Set(draft.maps.map((row) => row.key));
   const materialKeys = new Set(draft.materials.map((row) => row.key));
   if (
@@ -773,24 +761,14 @@ export function assertPublishDraft(draft) {
     add("Complete the label and value for each project fact.");
   }
   if (
-    draft.facts.some(
-      (row) => !PUBLISHABLE_CHILD_CLAIM_STATUSES.has(row.claimStatus),
-    )
-  ) {
-    add("Finish the proof review for every project fact.");
-  }
-  if (
     draft.materials.some(
       (row) =>
         !positiveIntegerOrNull(row.stoneGroupId) ||
         !positiveIntegerOrNull(row.finishDefinitionId) ||
-        !stringValue(row.application) ||
-        !PUBLISHABLE_CHILD_CLAIM_STATUSES.has(row.claimStatus),
+        !stringValue(row.application),
     )
   ) {
-    add(
-      "Complete the stone, finish, use, and proof review for every material.",
-    );
+    add("Complete the stone, finish, and use for every material.");
   }
   if (
     draft.maps.some(
@@ -868,183 +846,18 @@ async function loadStatuses(supabase, table, ids) {
   return new Map((data || []).map((row) => [Number(row.id), row.status]));
 }
 
-async function normalizeEditorClaims(
-  supabase,
-  actorUserId,
-  actorRole,
-  input,
-) {
-  let baseline = null;
-  if (input.projectId !== null) {
-    baseline = (
-      await loadAggregateEnvelope(
-        supabase,
-        actorUserId,
-        actorRole,
-        input.projectId,
-      )
-    ).draft;
-  }
-
-  return normalizeEditorClaimSafety(input.draft, baseline);
-}
-
-export function normalizeEditorClaimSafety(requested, baseline) {
+export function normalizeAutomaticClaimStatuses(requested) {
   const normalized = structuredClone(requested);
-  const removedClaimRow =
-    Boolean(baseline) &&
-    (hasRemovedBaselineRows(normalized.facts, baseline.facts) ||
-      hasRemovedBaselineRows(normalized.materials, baseline.materials));
-  const unreviewedAggregateContentChanged =
-    Boolean(baseline) &&
-    (semanticCollectionChanged(normalized.maps, baseline.maps, [
-      "title",
-      "intro",
-    ]) ||
-      semanticCollectionChanged(normalized.mediaBlocks, baseline.mediaBlocks, [
-        "mediaRole",
-        "projectMaterialMapKey",
-        "blockTitle",
-        "youtubeUrl",
-        "label",
-        "caption",
-      ]) ||
-      semanticCollectionChanged(normalized.hotspots, baseline.hotspots, [
-        "projectMaterialMapKey",
-        "projectMaterialKey",
-        "xPercent",
-        "yPercent",
-        "label",
-        "application",
-        "note",
-      ]));
-  normalized.project.claimReviewStatus = normalizeEditorClaimDecision(
-    normalized.project.claimReviewStatus,
-    baseline?.project.claimReviewStatus || null,
-    !baseline ||
-      removedClaimRow ||
-      unreviewedAggregateContentChanged ||
-      projectClaimContentChanged(normalized.project, baseline.project),
-  );
-  normalizeEditorChildClaims(
-    normalized.facts,
-    baseline?.facts || [],
-    factClaimContentChanged,
-  );
-  normalizeEditorChildClaims(
-    normalized.materials,
-    baseline?.materials || [],
-    materialClaimContentChanged,
-  );
+  normalized.project.claimReviewStatus = "approved";
+  normalized.facts = normalized.facts.map((row) => ({
+    ...row,
+    claimStatus: "approved",
+  }));
+  normalized.materials = normalized.materials.map((row) => ({
+    ...row,
+    claimStatus: "approved",
+  }));
   return normalized;
-}
-
-function semanticCollectionChanged(requestedRows, baselineRows, fields) {
-  if (requestedRows.length !== baselineRows.length) return true;
-  const rowIdentity = (row) =>
-    Number.isSafeInteger(row.id) && row.id > 0
-      ? `id:${row.id}`
-      : `key:${row.key}`;
-  const baselineByIdentity = new Map(
-    baselineRows.map((row) => [rowIdentity(row), row]),
-  );
-  return requestedRows.some((row) => {
-    const baseline = baselineByIdentity.get(rowIdentity(row));
-    return (
-      !baseline ||
-      !deepEqualJson(pickFields(row, fields), pickFields(baseline, fields))
-    );
-  });
-}
-
-function hasRemovedBaselineRows(requestedRows, baselineRows) {
-  const rowIdentity = (row) =>
-    Number.isSafeInteger(row.id) && row.id > 0
-      ? `id:${row.id}`
-      : `key:${row.key}`;
-  const requestedIdentities = new Set(requestedRows.map(rowIdentity));
-  return baselineRows.some((row) => !requestedIdentities.has(rowIdentity(row)));
-}
-
-function normalizeEditorChildClaims(
-  requestedRows,
-  baselineRows,
-  contentChanged,
-) {
-  // Only a persisted id establishes identity here. Browser keys are portable
-  // and therefore cannot carry an approved decision onto a new row.
-  const byId = new Map(
-    baselineRows
-      .filter((row) => Number.isSafeInteger(row.id) && row.id > 0)
-      .map((row) => [row.id, row]),
-  );
-  for (const row of requestedRows) {
-    const baseline =
-      Number.isSafeInteger(row.id) && row.id > 0 ? byId.get(row.id) : null;
-    row.claimStatus = normalizeEditorClaimDecision(
-      row.claimStatus,
-      baseline?.claimStatus || null,
-      !baseline || contentChanged(row, baseline),
-    );
-  }
-}
-
-function normalizeEditorClaimDecision(
-  requestedStatus,
-  baselineStatus,
-  contentChanged,
-) {
-  if (contentChanged) {
-    return "needs_review";
-  }
-
-  // An unchanged approved/deferred decision may be carried forward, while an
-  // Editor may always lower it to needs_review. No other transition is allowed.
-  if (
-    requestedStatus !== "needs_review" &&
-    requestedStatus !== baselineStatus
-  ) {
-    throw claimPermissionError();
-  }
-  return requestedStatus;
-}
-
-function projectClaimContentChanged(requested, baseline) {
-  const excluded = new Set([
-    "id",
-    "status",
-    "sortOrder",
-    "claimReviewStatus",
-    "heroMediaId",
-    "coverMediaId",
-  ]);
-  return !deepEqualJson(
-    omitFields(requested, excluded),
-    omitFields(baseline, excluded),
-  );
-}
-
-function factClaimContentChanged(requested, baseline) {
-  return !deepEqualJson(
-    pickFields(requested, ["factLabel", "factValue", "factValueJson"]),
-    pickFields(baseline, ["factLabel", "factValue", "factValueJson"]),
-  );
-}
-
-function materialClaimContentChanged(requested, baseline) {
-  const fields = ["stoneGroupId", "finishDefinitionId", "application", "note"];
-  return !deepEqualJson(
-    pickFields(requested, fields),
-    pickFields(baseline, fields),
-  );
-}
-
-function claimPermissionError() {
-  return new AdminProjectsError(
-    403,
-    "claim_review_forbidden",
-    "A Website owner or CMS manager must change proof-review decisions.",
-  );
 }
 
 async function loadReferencedMedia(supabase, draft) {
@@ -1887,41 +1700,6 @@ function parseJsonObject(value) {
   } catch {
     return null;
   }
-}
-
-function omitFields(value, excluded) {
-  return Object.fromEntries(
-    Object.entries(value || {}).filter(([key]) => !excluded.has(key)),
-  );
-}
-
-function pickFields(value, fields) {
-  return Object.fromEntries(fields.map((field) => [field, value?.[field]]));
-}
-
-function deepEqualJson(left, right) {
-  if (Object.is(left, right)) return true;
-  if (Array.isArray(left) || Array.isArray(right)) {
-    return (
-      Array.isArray(left) &&
-      Array.isArray(right) &&
-      left.length === right.length &&
-      left.every((item, index) => deepEqualJson(item, right[index]))
-    );
-  }
-  if (isObject(left) || isObject(right)) {
-    if (!isObject(left) || !isObject(right)) return false;
-    const leftKeys = Object.keys(left).sort();
-    const rightKeys = Object.keys(right).sort();
-    return (
-      leftKeys.length === rightKeys.length &&
-      leftKeys.every(
-        (key, index) =>
-          key === rightKeys[index] && deepEqualJson(left[key], right[key]),
-      )
-    );
-  }
-  return false;
 }
 
 function upstreamError(code, message) {

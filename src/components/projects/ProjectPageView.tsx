@@ -82,7 +82,7 @@ function ProjectOpening({ project, allProjects }: { project: ProjectData; allPro
     : project.details.Date || project.listing.date;
 
   return (
-    <section className="border-b border-black/10 bg-white pt-[102px]">
+    <section className="border-b border-black/10 bg-white">
       <div className="urblo-page-container py-12 md:py-16">
         <nav className="flex flex-wrap items-center gap-2 text-[12px] font-bold uppercase tracking-[0.14em] text-black/45">
           <Link to="/" className="transition hover:text-black">

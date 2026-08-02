@@ -243,7 +243,7 @@ function AnimatedRoutes() {
                 <Route
                     path="/projects"
                     element={
-                        <DefaultLayout showBanner={false}>
+                        <DefaultLayout>
                             {loadPage(<ProjectsPage />)}
                         </DefaultLayout>
                     }
@@ -252,8 +252,8 @@ function AnimatedRoutes() {
                 <Route
                     path="/projects/:slug"
                     element={
-                        <DefaultLayout showBanner={false}>
-                            {loadPage(<ProjectDetailsPage />, { headerOffset: true })}
+                        <DefaultLayout>
+                            {loadPage(<ProjectDetailsPage />)}
                         </DefaultLayout>
                     }
                 />

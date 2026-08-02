@@ -31,7 +31,6 @@ import {
   slugify,
   type ProjectAggregateDraft,
   type ProjectAggregateMappingContext,
-  type ProjectClaimStatus,
   type ProjectEditorSection,
   type ProjectFinishOption,
   type ProjectHotspotDraft,
@@ -57,7 +56,6 @@ interface ProjectEditorProps {
   finishes: readonly ProjectFinishOption[];
   userId: string | null;
   canEdit: boolean;
-  canManageClaims: boolean;
   canCleanUpStorage: boolean;
   isSaving: boolean;
   error: string | null;
@@ -87,7 +85,6 @@ export default function ProjectEditor({
   finishes,
   userId,
   canEdit,
-  canManageClaims,
   canCleanUpStorage,
   isSaving,
   error,
@@ -274,10 +271,6 @@ export default function ProjectEditor({
     const project = {
       ...draft.project,
       [key]: value,
-      ...(!canManageClaims &&
-      !["heroMediaId", "coverMediaId", "sortOrder"].includes(String(key))
-        ? { claimReviewStatus: "needs_review" as const }
-        : {}),
     };
     if (key === "title" && draft.project.id === null) {
       const oldAutoSlug = slugify(draft.project.title);
@@ -295,59 +288,13 @@ export default function ProjectEditor({
     key: string,
     changes: Partial<ProjectAggregateDraft[Collection][number]>,
   ) {
-    const changedFields = Object.keys(changes);
-    const needsClaimReview =
-      !canManageClaims &&
-      ((collection === "facts" &&
-        changedFields.some((field) => field !== "sortOrder")) ||
-        (collection === "materials" &&
-          changedFields.some((field) =>
-            [
-              "stoneGroupId",
-              "finishDefinitionId",
-              "application",
-              "note",
-            ].includes(field),
-          )) ||
-        (collection === "maps" &&
-          changedFields.some((field) => ["title", "intro"].includes(field))) ||
-        (collection === "mediaBlocks" &&
-          changedFields.some((field) =>
-            [
-              "mediaRole",
-              "projectMaterialMapKey",
-              "blockTitle",
-              "youtubeUrl",
-              "label",
-              "caption",
-            ].includes(field),
-          )) ||
-        (collection === "hotspots" &&
-          changedFields.some((field) =>
-            [
-              "projectMaterialMapKey",
-              "projectMaterialKey",
-              "xPercent",
-              "yPercent",
-              "label",
-              "application",
-              "note",
-            ].includes(field),
-          )));
-    const needsChildClaimReview =
-      needsClaimReview &&
-      (collection === "facts" || collection === "materials");
     onChange({
       ...draft,
-      project: needsClaimReview
-        ? { ...draft.project, claimReviewStatus: "needs_review" }
-        : draft.project,
       [collection]: draft[collection].map((row) =>
         row.key === key
           ? {
               ...row,
               ...changes,
-              ...(needsChildClaimReview ? { claimStatus: "needs_review" } : {}),
             }
           : row,
       ),
@@ -361,9 +308,6 @@ export default function ProjectEditor({
     if (collection === "materials") {
       onChange({
         ...draft,
-        project: canManageClaims
-          ? draft.project
-          : { ...draft.project, claimReviewStatus: "needs_review" },
         materials: draft.materials.filter((row) => row.key !== key),
         hotspots: draft.hotspots.map((hotspot) =>
           hotspot.projectMaterialKey === key
@@ -375,11 +319,6 @@ export default function ProjectEditor({
     }
     onChange({
       ...draft,
-      project:
-        (collection === "facts" || collection === "mediaBlocks") &&
-        !canManageClaims
-          ? { ...draft.project, claimReviewStatus: "needs_review" }
-          : draft.project,
       [collection]: draft[collection].filter((row) => row.key !== key),
     });
   }
@@ -389,9 +328,6 @@ export default function ProjectEditor({
     const key = createProjectDraftKey("fact");
     onChange({
       ...draft,
-      project: canManageClaims
-        ? draft.project
-        : { ...draft.project, claimReviewStatus: "needs_review" },
       facts: [
         ...draft.facts,
         {
@@ -400,7 +336,7 @@ export default function ProjectEditor({
           factLabel: "",
           factValue: "",
           factValueJson: null,
-          claimStatus: "needs_review",
+          claimStatus: "approved",
           sortOrder: draft.facts.length,
         },
       ],
@@ -413,9 +349,6 @@ export default function ProjectEditor({
     const key = createProjectDraftKey("material");
     onChange({
       ...draft,
-      project: canManageClaims
-        ? draft.project
-        : { ...draft.project, claimReviewStatus: "needs_review" },
       materials: [
         ...draft.materials,
         {
@@ -429,7 +362,7 @@ export default function ProjectEditor({
           application: "",
           note: "",
           mediaAssetId: null,
-          claimStatus: "needs_review",
+          claimStatus: "approved",
           sortOrder: draft.materials.length,
         },
       ],
@@ -444,9 +377,6 @@ export default function ProjectEditor({
     const key = createProjectDraftKey("media");
     onChange({
       ...draft,
-      project: canManageClaims
-        ? draft.project
-        : { ...draft.project, claimReviewStatus: "needs_review" },
       mediaBlocks: [
         ...draft.mediaBlocks,
         {
@@ -472,9 +402,6 @@ export default function ProjectEditor({
     const key = createProjectDraftKey("map");
     onChange({
       ...draft,
-      project: canManageClaims
-        ? draft.project
-        : { ...draft.project, claimReviewStatus: "needs_review" },
       maps: [
         ...draft.maps,
         {
@@ -495,9 +422,6 @@ export default function ProjectEditor({
   function removeMap(mapKey: string) {
     onChange({
       ...draft,
-      project: canManageClaims
-        ? draft.project
-        : { ...draft.project, claimReviewStatus: "needs_review" },
       maps: draft.maps.filter((map) => map.key !== mapKey),
       mediaBlocks: draft.mediaBlocks.filter(
         (block) => block.projectMaterialMapKey !== mapKey,
@@ -527,9 +451,6 @@ export default function ProjectEditor({
     };
     onChange({
       ...draft,
-      project: canManageClaims
-        ? draft.project
-        : { ...draft.project, claimReviewStatus: "needs_review" },
       hotspots: [...draft.hotspots, next],
     });
     setSelectedHotspotKey(key);
@@ -538,9 +459,6 @@ export default function ProjectEditor({
   function removeHotspot(key: string) {
     onChange({
       ...draft,
-      project: canManageClaims
-        ? draft.project
-        : { ...draft.project, claimReviewStatus: "needs_review" },
       hotspots: draft.hotspots.filter((hotspot) => hotspot.key !== key),
     });
   }
@@ -751,16 +669,6 @@ export default function ProjectEditor({
               <p className="text-xs font-semibold text-black/42">
                 Page address: /projects/{draft.project.slug || "project-name"}
               </p>
-              {canManageClaims ? (
-                <ProofReviewControl
-                  label="Project proof review"
-                  value={draft.project.claimReviewStatus}
-                  onChange={(value) =>
-                    updateProject("claimReviewStatus", value)
-                  }
-                  allowDeferred={false}
-                />
-              ) : null}
             </ProjectSection>
 
             <ProjectSection
@@ -834,19 +742,6 @@ export default function ProjectEditor({
                           }
                         />
                       </div>
-                      {canManageClaims ? (
-                        <div className="min-[1200px]:col-span-3">
-                          <ProofReviewControl
-                            label="Fact proof review"
-                            value={fact.claimStatus}
-                            onChange={(value) =>
-                              updateCollection("facts", fact.key, {
-                                claimStatus: value,
-                              })
-                            }
-                          />
-                        </div>
-                      ) : null}
                     </article>
                   ))}
                 </div>
@@ -966,19 +861,6 @@ export default function ProjectEditor({
                           onAssetCreated={onAssetCreated}
                         />
                       </div>
-                      {canManageClaims ? (
-                        <div className="mt-4">
-                          <ProofReviewControl
-                            label="Material proof review"
-                            value={material.claimStatus}
-                            onChange={(value) =>
-                              updateCollection("materials", material.key, {
-                                claimStatus: value,
-                              })
-                            }
-                          />
-                        </div>
-                      ) : null}
                     </article>
                   ))}
                 </div>
@@ -1810,46 +1692,6 @@ function factValueForEditor(structuredValue: unknown, fallbackValue: string) {
     return structuredValue.join("\n");
   }
   return fallbackValue;
-}
-
-function ProofReviewControl({
-  label,
-  value,
-  onChange,
-  allowDeferred = true,
-}: {
-  label: string;
-  value: ProjectClaimStatus;
-  onChange: (value: ProjectClaimStatus) => void;
-  allowDeferred?: boolean;
-}) {
-  const disabled = useContext(ProjectMutationDisabledContext);
-  return (
-    <details className="border border-black/10 bg-white px-3 py-3">
-      <summary className="cursor-pointer text-xs font-bold uppercase tracking-[0.12em] text-black/52">
-        Advanced: {label}
-      </summary>
-      <label className="mt-3 block text-xs font-bold uppercase tracking-[0.12em] text-black/48">
-        Review outcome
-        <select
-          disabled={disabled}
-          value={
-            !allowDeferred && value === "deferred" ? "needs_review" : value
-          }
-          onChange={(event) =>
-            onChange(event.target.value as ProjectClaimStatus)
-          }
-          className={fieldClass}
-        >
-          <option value="needs_review">Needs review</option>
-          <option value="approved">Approved for public use</option>
-          {allowDeferred ? (
-            <option value="deferred">Keep out of public claims</option>
-          ) : null}
-        </select>
-      </label>
-    </details>
-  );
 }
 
 function AddButton({

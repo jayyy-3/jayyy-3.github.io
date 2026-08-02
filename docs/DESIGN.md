@@ -147,6 +147,7 @@ Header behavior:
 - On desktop, the visible primary nav and hamburger are one right-aligned control group. Do not distribute the primary nav as a centered middle column between the logo and menu button.
 - Mobile header keeps the same hamburger control but exposes the full navigation list in the opened menu.
 - The hamburger is a compact navigation affordance, not a promotional CTA; avoid adding pill labels or extra explanatory copy around it.
+- Header and opened-menu dark surfaces keep their translucent blur treatment. White content routes that need the dark header, including Projects listing/detail and Stone Library, use the same 102px black `DefaultLayout` support band behind it rather than painting the header differently or adding page-local top padding.
 
 Hero behavior:
 - The first homepage viewport should feel full-screen on desktop and mobile.
@@ -283,9 +284,9 @@ They should:
 The 2026-07-13 production audit found that the deployed CMS over-optimized for dense forms. The deployed Projects page rendered every child editor at once and reached approximately 9,600px at a common desktop viewport. Density is useful only when it reduces task time; it is not a goal by itself.
 
 Primary editor jobs:
-- review a work queue and choose the next item
+- open the content area they need and choose the item to change
 - find one content record, make a safe draft change, and trust that it saved
-- prepare media, resolve publish blockers, preview the result, then publish or archive
+- prepare media, fix any required missing details, preview the result, then publish or hide
 - respond to a lead without exposing private customer data
 - invite a teammate and confirm they can establish a reusable login
 
@@ -294,10 +295,11 @@ Interaction contract:
 - Show one editing stage at a time. Use overview, proof/content, media, and advanced/map sections rather than mounting every relationship editor in one continuous form.
 - Preserve unsaved input. Warn before record switches, route changes, refresh, or new-record actions would discard changes.
 - Use one sticky save/status bar with explicit `Save`, `Open preview`, `Publish`, and `Hide` outcomes. A status dropdown or a second section-level save must not compete with these lifecycle actions.
+- The default single-editor workflow is `Edit -> Save -> Preview -> Publish/Hide`. Internal claim-review compatibility fields must not appear as a parallel approval workflow or block an otherwise complete Project from publishing.
 - Published records must not silently change live content through an ordinary Save. Editing live content needs an explicit draft/review model or an equally clear warning and confirmation contract.
 - Media selection must be searchable and virtualized or paginated; never repeat a 100+ option native select for every media field.
 - Private uploaded media becomes public only through a real Storage promotion step. Changing a bucket label is not publication.
-- Dashboard first view prioritizes real work: new customer leads, publish blockers, failed operations, and recent editor activity. Product education belongs behind concise help affordances.
+- Dashboard first view prioritizes real work: new customer leads, drafts to continue, missing required content/media, failed operations, and recent editor activity. It must not recreate a claim-review queue.
 - Owner/admin/editor/viewer capabilities must match UI, RLS, and the editor guide. Do not describe review-only publishing restrictions that the database does not enforce.
 - Mobile uses a clear menu/drawer or comparably discoverable navigation. Medium desktop widths must not clip header actions.
 - Shared admin chrome and every reshaped workflow must not expose implementation history, migration, legacy-fallback, table, bucket, or rollback language. Put operational detail in runbooks and translate editor recovery into the next safe action; older modules are corrected when their approved reshape phase begins.
@@ -314,6 +316,7 @@ Current repair state:
 - Admin modules are route-lazy-loaded, and the header keeps actions wrapped below wide desktop widths.
 - Media list/new-record reliability is repaired in source; every initial file upload now starts private, and owner/admin promotion is locked to the selected row's original path/version with retain-on-uncertainty cleanup. Deployed browser proof remains required.
 - The Phase 1 Projects vertical prototype is page-shaped in source and on its authenticated branch Preview: one aggregate draft covers the Project, facts, materials, ordered media, maps, and hotspots; Overview, Facts, Materials, Media, and Maps are progressively disclosed instead of behaving like separate database forms. One sticky action bar owns Save, preview, Publish, and Hide, with at most three plain-language blockers that open the relevant section. Facts, materials, media blocks, maps, and points have keyboard-accessible up/down ordering without raw sort fields; redundant clean/live/hidden lifecycle writes are disabled.
+- The current follow-up removes visible Project proof-review controls and approval queues. Project, fact, and material review columns remain only as database compatibility fields and are normalized automatically on Save; required copy, references, media, and publish integrity remain enforced.
 - At medium desktop widths around 1116px, the Projects record list and editor remain a two-column task workspace with a sticky, independently scrolling list. On narrow screens, section headings and action groups wrap instead of squeezing or overflowing. Material-map tabs expose roving keyboard navigation and an associated tabpanel.
 - Project preview uses the same `src/components/projects/ProjectPageView.tsx` renderer as the public detail route, so the editor inspects the page they are preparing rather than a parallel admin approximation. Media fields combine a searchable thumbnail picker with private inline upload and alt capture; material-map points are placed directly on the image by pointer or keyboard rather than by exposing raw coordinates.
 - The bounded media picker must still resolve every image already referenced by the current draft, even when that asset is older than the latest picker window. Long-lived private previews refresh their signed URLs before expiry so a stable editing session does not lose its selected images.

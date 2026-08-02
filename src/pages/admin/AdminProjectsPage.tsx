@@ -5,7 +5,7 @@ import {
   collectProjectMediaAssetIds,
   createEmptyProjectAggregateDraft,
   mergeProjectMediaOptions,
-  normalizeProjectDraftOrder,
+  normalizeProjectDraftForSave,
   type ProjectAggregateDraft,
   type ProjectFinishOption,
   type ProjectLifecycleStatus,
@@ -564,7 +564,7 @@ function AdminProjectsContent() {
 
     try {
       const accessToken = await getAccessToken();
-      const requestDraft = normalizeProjectDraftOrder(draft);
+      const requestDraft = normalizeProjectDraftForSave(draft);
       const response = await fetch(projectEndpoint, {
         method: "POST",
         headers: {
@@ -850,7 +850,6 @@ function AdminProjectsContent() {
               finishes={finishes}
               userId={user?.id ?? null}
               canEdit={Boolean(canEdit)}
-              canManageClaims={canCleanUpStorage}
               canCleanUpStorage={canCleanUpStorage}
               isSaving={isSaving}
               error={editorError}

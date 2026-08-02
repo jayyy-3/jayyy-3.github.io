@@ -259,7 +259,7 @@ const emptyProject: ProjectDraftRecord = {
     quantityLabel: '',
     carbonStatus: '',
     carbonNote: '',
-    claimReviewStatus: 'needs_review',
+    claimReviewStatus: 'approved',
     heroMediaId: null,
     coverMediaId: null,
     sortOrder: 0,
@@ -333,6 +333,15 @@ export function normalizeProjectDraftOrder(draft: ProjectAggregateDraft): Projec
             return { ...hotspot, sortOrder };
         }),
     };
+}
+
+export function normalizeProjectDraftForSave(draft: ProjectAggregateDraft): ProjectAggregateDraft {
+    return normalizeProjectDraftOrder({
+        ...draft,
+        project: { ...draft.project, claimReviewStatus: 'approved' },
+        facts: draft.facts.map((fact) => ({ ...fact, claimStatus: 'approved' })),
+        materials: draft.materials.map((material) => ({ ...material, claimStatus: 'approved' })),
+    });
 }
 
 export function moveProjectDraftItem(
@@ -481,7 +490,7 @@ export function draftToProjectData(
     const stoneById = new Map(context.stones.map((stone) => [stone.id, stone]));
     const finishById = new Map(context.finishes.map((finish) => [finish.id, finish]));
     const materialByKey = new Map(
-        draft.materials.filter((material) => material.claimStatus === 'approved').map((material) => [material.key, material]),
+        draft.materials.map((material) => [material.key, material]),
     );
     const mapByKey = new Map(draft.maps.map((map) => [map.key, map]));
     const mediaUrl = (mediaId: number | null) => {
@@ -598,7 +607,6 @@ export function draftToProjectData(
     }
 
     const materials = draft.materials.flatMap((material) => {
-        if (material.claimStatus !== 'approved') return [];
         if (!material.stoneGroupId || !material.finishDefinitionId) return [];
         const stone = stoneById.get(material.stoneGroupId);
         const finish = finishById.get(material.finishDefinitionId);
@@ -680,15 +688,9 @@ export function getProjectPublishBlockers(
         add({ id: 'project-hero-alt', section: 'overview', message: 'Choose or upload a main image with a description.' });
     }
 
-    if (draft.project.claimReviewStatus !== 'approved') {
-        add({ id: 'project-review', section: 'overview', message: 'Approve the project proof review before publishing.' });
-    }
-
     const incompleteFact = draft.facts.find((fact) => !fact.factLabel.trim() || factValue(fact) === null);
     if (incompleteFact) {
         add({ id: `fact-${incompleteFact.key}`, section: 'facts', message: 'Complete the label and value for each project fact.' });
-    } else if (draft.facts.some((fact) => fact.claimStatus === 'needs_review')) {
-        add({ id: 'facts-review', section: 'facts', message: 'Finish the proof review for the project facts.' });
     }
 
     const stoneById = new Map(context.stones.map((stone) => [stone.id, stone]));
@@ -702,8 +704,6 @@ export function getProjectPublishBlockers(
     );
     if (incompleteMaterial) {
         add({ id: `material-${incompleteMaterial.key}`, section: 'materials', message: 'Complete the stone, finish and use for each material.' });
-    } else if (draft.materials.some((material) => material.claimStatus === 'needs_review')) {
-        add({ id: 'materials-review', section: 'materials', message: 'Finish the proof review for the material schedule.' });
     }
 
     const mapKeys = new Set(draft.maps.map((map) => map.key));
@@ -792,9 +792,7 @@ function buildProjectDetails(draft: ProjectAggregateDraft) {
         assign(label, value);
     };
 
-    draft.facts
-        .filter((fact) => fact.claimStatus === 'approved')
-        .forEach((fact) => assign(fact.factLabel.trim(), factValue(fact)));
+    draft.facts.forEach((fact) => assign(fact.factLabel.trim(), factValue(fact)));
     setIfMissing('Client', draft.project.client);
     setIfMissing('Landscape Architect', draft.project.landscapeArchitect);
     setIfMissing('Contractor', draft.project.contractor);

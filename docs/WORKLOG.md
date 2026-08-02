@@ -2,6 +2,37 @@
 
 Last updated: 2026-08-02
 
+## Entry - 2026-08-02 (Public Opacity Repair and Single-Editor Projects Simplification)
+
+### Scope
+- Traced the public Projects/navbar display failure to Tailwind not generating non-default percentage opacity utilities such as the header's `bg-black/88` and menu's `bg-black/96`. Added the complete integer opacity scale and a built-CSS smoke assertion for the critical public utilities.
+- Verified the local public Projects header and opened menu render with the intended opaque dark backgrounds at desktop and mobile widths, with no horizontal overflow or relevant console errors.
+- Removed Project proof-review controls and approval-dependent publish blockers. Client and protected server Save paths now normalize legacy project/fact/material review columns automatically; required copy, references, media, server promotion, conflict handling, audit, Auth, and RLS boundaries remain.
+- Removed the Dashboard Project claim-review queries and rewrote its visible workflow as Edit, Save, Publish. No Supabase migration or production write was required or performed.
+
+### Verification State
+- `npm run agent:admin-projects-aggregate`: pass.
+- `npm run build`, `npm run lint`, `npx tsc -b`, `npm run agent:smoke`: pass.
+- `npm run agent:admin-crud-coverage`, `npm run agent:admin-cms-predeploy`, isolated 11-route `npm run agent:admin-config-gate`, `npm run agent:check`, JSON parsing, and `git diff --check`: pass.
+- `npm run gate`: pass in the clean Node 20 Docker/Colima build for implementation commit `fa205e0`; the unrelated user-owned untracked `docs/SEO_EXTERNAL_AI_BRIEF.md` remained untouched and was reported by the gate.
+- Local visual verification: public Projects desktop/mobile navbar and menu backgrounds pass.
+- Draft PR `#11` implementation commit `610d4b2` deployed as immutable Preview `3b285f72-fafa-46c5-abc8-8ccda419b738` at `https://3b285f72.urblo.pages.dev`. No-write Cloudflare smoke passed all public/Admin routes, recursive assets, redirects, safe-failure form Functions, and the protected Projects endpoint. Strict owner login passed all nine authenticated Admin routes.
+- Deployed `/projects` readback found header `rgba(0, 0, 0, 0.88)`, opened menu `rgba(0, 0, 0, 0.96)`, equal `scrollWidth/clientWidth` at 1280px, and no relevant console warnings/errors.
+
+### Risks and Gaps
+- The Preview login runner proves route/auth shells, while source/behavior checks prove removal of Project review controls; neither is Jay's fool test or a content-write workflow.
+- Production remains on merge `25c05ebb` until Jay separately approves promotion of this follow-up.
+
+### Jay Correction: Match Stone Library Header Treatment
+- Jay rejected the first PR `#11` public-header result. The prior diagnosis focused on missing compiled opacity utilities but missed the route-level difference: Stone Library supplies a 102px black `DefaultLayout` support band behind the translucent header, while Projects had disabled that band and compensated with page-local white padding.
+- Projects listing and detail now use the same default layout band as Stone Library. The duplicate `pt-[102px]` values and obsolete detail loading offset are removed.
+- Local rendered checks pass at 1280px and 390px for Projects listing, opened navigation menu, and Project detail: support band is black and 102px high, main content begins at 102px, width has no overflow, and no relevant console warning/error appears.
+- Correction commit `9d93624` passed the clean Node 20 container gate and was pushed to draft PR `#11`. Cloudflare immutable Preview `b438de5b-b341-4fe5-bb49-bb944f7f8c30` at `https://b438de5b.urblo.pages.dev` passed every public/Admin route, recursive asset/redirect/Function boundary, blocked-Supabase static fallback, and all nine authenticated Admin routes.
+- In-app Browser verification against that immutable Preview confirmed Stone Library and Projects both use the translucent `rgba(0,0,0,0.88)` header at a 102px main offset; Projects listing/detail and the opened desktop/mobile menu have no horizontal overflow. The Preview is ready for Jay's production-promotion decision; no production deployment occurred.
+
+### Next Handoff
+- `NOW-ADMIN-UX-RESHAPE-001`: finish gates and immutable Preview, then request production-promotion approval.
+
 ## Entry - 2026-08-02 (Projects Production Runtime and Contract B)
 
 ### Scope
