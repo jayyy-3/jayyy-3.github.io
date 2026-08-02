@@ -173,7 +173,7 @@ Run:
 - `npm run agent:content-import:apply-sql` when changing guarded static-to-Supabase import or rollback SQL artifacts.
 - `npm run agent:public-supabase-readiness` when public content import/cutover safety is in scope.
 - `npm run agent:public-content-overlay` when the Published/static migration merge or canonical route keys change.
-- `npm run agent:admin-projects-aggregate` when changing `20260719015649_project_aggregate_drafts.sql`, `20260802103337_restrict_archived_project_tombstones.sql`, or `20260802103338_project_aggregate_write_lockdown.sql`, `private.project_drafts`, the service-role-only aggregate RPC, Project table/sequence privilege lockdown, Project public parent/child reads, or archived-slug tombstones.
+- `npm run agent:admin-projects-aggregate` when changing `20260719015649_project_aggregate_drafts.sql`, `20260802103337_restrict_archived_project_tombstones.sql`, or `20260802105537_project_aggregate_write_lockdown.sql`, `private.project_drafts`, the service-role-only aggregate RPC, Project table/sequence privilege lockdown, Project public parent/child reads, or archived-slug tombstones.
 
 Evidence to record:
 - Tables/relations changed.

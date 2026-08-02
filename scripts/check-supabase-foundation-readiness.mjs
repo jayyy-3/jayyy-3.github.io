@@ -22,7 +22,7 @@ const expectedMigrations = [
   '20260714050750_media_public_bucket_role_hardening.sql',
   '20260719015649_project_aggregate_drafts.sql',
   '20260802103337_restrict_archived_project_tombstones.sql',
-  '20260802103338_project_aggregate_write_lockdown.sql',
+  '20260802105537_project_aggregate_write_lockdown.sql',
 ];
 
 const publicContentTables = [

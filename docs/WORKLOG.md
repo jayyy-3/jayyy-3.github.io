@@ -2,6 +2,29 @@
 
 Last updated: 2026-08-02
 
+## Entry - 2026-08-02 (Projects Production Runtime and Contract B)
+
+### Scope
+- Merged PR `#9` at production merge `25c05ebb727974f60d2d205e6f66e99dccf53afc` and verified immutable Cloudflare deployment `877d13c4-1e28-45d7-a62a-afdd3b0e0dda`.
+- Verified the immutable URL, `urblo.com.au`, and `www.urblo.com.au` with deployment-bound route, asset, redirect, Function, and protected Projects endpoint smoke checks. Production owner login passed all nine authenticated Admin routes.
+- After Jay's separate migration-only approval, applied contract B as production version `20260802105537` and aligned source to `supabase/migrations/20260802105537_project_aggregate_write_lockdown.sql`.
+- Read back all six Project table and sequence privilege boundaries, legacy mutation-policy removal, RLS state, hardened public policies, retained service-role writes, and security advisor state. The operational Project edit freeze is lifted.
+
+### Verification Results
+- Authenticated direct insert/update/delete privileges: false on all six Project tables; select remains true.
+- Authenticated usage/select/update privileges: false on all six Project sequences.
+- Service-role insert/update/delete and sequence usage: true.
+- All six tables retain RLS; only admin/public SELECT policies remain, with public children bound to approved Published parents.
+- Security advisor: no new B-specific issue; existing leaked-password and intentional tombstone-RPC warnings remain.
+
+### Risks and Gaps
+- Jay's fool test remains the acceptance boundary and cannot be self-certified by an agent.
+- A Cloudflare-only rollback to the legacy direct-write Projects UI is invalid after B.
+- Real two-session/Postgres/Storage negative writes remain optional and require fresh approval.
+
+### Next Handoff
+- `NOW-ADMIN-UX-RESHAPE-001`: Jay runs the production Projects fool test.
+
 ## Entry - 2026-08-02 (Fresh Projects Preview And Minimum-Disclosure Migration C)
 
 ### Delivery Gate And Preview
@@ -12,7 +35,7 @@ Last updated: 2026-08-02
 
 ### Approved C Apply And Readback
 - Jay separately approved only the production minimum-disclosure migration C. Read-only preflight found project `npkidywzwddbnfrnxlmo` active/healthy on Postgres 17.6.1, A applied, C/B absent, and the old tombstone RPC returning all four archived QA slugs.
-- Applied migration `restrict_archived_project_tombstones` once. Supabase recorded production version `20260802103337`; source is aligned as `supabase/migrations/20260802103337_restrict_archived_project_tombstones.sql`, and the still-unapplied contract B is ordered after it as `supabase/migrations/20260802103338_project_aggregate_write_lockdown.sql`.
+- Applied migration `restrict_archived_project_tombstones` once. Supabase recorded production version `20260802103337`; source is aligned as `supabase/migrations/20260802103337_restrict_archived_project_tombstones.sql`, and the still-unapplied contract B is ordered after it as `supabase/migrations/20260802105537_project_aggregate_write_lockdown.sql`.
 - Function readback matches the reviewed C source: it is owned by `postgres`, remains `STABLE SECURITY DEFINER`, has an empty `search_path`, reads only `public.projects`, and no longer references `private.project_drafts`. `PUBLIC` has no execute privilege; `anon`, `authenticated`, and `service_role` retain intentional execute access.
 - The four archived QA Projects remain in their existing Archived state, but the RPC result changed from those four slugs to an empty list, exactly matching the intersection of archived canonical Projects and the five bundled public fallback slugs. No Project row, child row, draft, media record, Storage object, audit record, user, email, or runtime configuration was created or changed.
 - Security advisor output remains the known leaked-password-protection Auth warning plus the two expected generic warnings for the intentionally browser-callable, slug-only `SECURITY DEFINER` function. Performance findings are pre-existing and unchanged in scope; C introduced no table, policy, or index changes.
@@ -24,7 +47,7 @@ Last updated: 2026-08-02
 
 ### Problems Found And Source Repair
 - The approved Preview marker `admin-projects-ui-mrroa6p0` was not one of the five bundled static Project slugs. Its Hide/public-not-found result proved that a non-static archived CMS page disappears, but it did not exercise static-fallback tombstone suppression. Subsequent read-only production analysis found A's public `get_archived_project_slugs()` returns four QA slugs, including one never-published marker, so the minimum-disclosure concern is a concrete data-boundary defect.
-- Added source migration `supabase/migrations/20260802103337_restrict_archived_project_tombstones.sql`. It replaces the public function with the exact intersection of archived canonical Projects and the five slugs already public in `src/data/projectData.ts`, returns the allowlisted constant, and never reads `private.project_drafts`. The contract migration moved to `20260802103338_project_aggregate_write_lockdown.sql`. Both C and B remain unapplied and require separate, fresh production approvals/readback.
+- Added source migration `supabase/migrations/20260802103337_restrict_archived_project_tombstones.sql`. It replaces the public function with the exact intersection of archived canonical Projects and the five slugs already public in `src/data/projectData.ts`, returns the allowlisted constant, and never reads `private.project_drafts`. The contract migration moved to `20260802105537_project_aggregate_write_lockdown.sql`. Both C and B remain unapplied and require separate, fresh production approvals/readback.
 - Added defence in depth in `src/service/ProjectService.ts`: unknown RPC results cannot hide or enumerate anything outside the bundled public Project set. The overlay verifier now injects an unknown private-style slug and proves it is discarded.
 - A `revision_conflict` previously set a reload notice without disabling editor mutations; ordinary Discard could then clear the warning while retaining the stale revision/timestamp. The editor now locks fields and Save/Publish/Hide during conflict, hides ordinary Discard, and leaves Reload latest as the only recovery that fetches fresh tokens.
 - The Projects verifier now executes deterministic, no-network full-handler behavior: a stale Save preserves the structured 409 `revision_conflict`; a failed Publish copies a mocked private image create-only, verifies the copy, receives an RPC conflict, checks references, removes the exact nonce path, records `project.aggregate.publish_compensation`, and reports the cleanup summary. This closes source orchestration evidence, not real two-session/Postgres/Storage behavior; any live negative write needs fresh approval and should not intentionally force compensation-delete/audit failure in production.
@@ -64,7 +87,7 @@ Last updated: 2026-08-02
 - Read-only preflight found project `npkidywzwddbnfrnxlmo` active and healthy on Postgres 17.6.1. Migration A's objects were absent, no unrelated transaction was waiting, existing Project counts were 8 projects, 44 facts, 5 materials, 4 material maps, 17 media blocks, and 4 hotspots, with 5 Draft and 3 Archived projects. The focused foundation, Projects aggregate, public-readiness, and diff checks passed before apply.
 
 ### Apply And Readback
-- Applied migration name `project_aggregate_drafts` once. Supabase recorded production version `20260719015649`; the local file is aligned as `supabase/migrations/20260719015649_project_aggregate_drafts.sql`, and the unapplied contract step is ordered after it as `supabase/migrations/20260802103338_project_aggregate_write_lockdown.sql`.
+- Applied migration name `project_aggregate_drafts` once. Supabase recorded production version `20260719015649`; the local file is aligned as `supabase/migrations/20260719015649_project_aggregate_drafts.sql`, and the unapplied contract step is ordered after it as `supabase/migrations/20260802105537_project_aggregate_write_lockdown.sql`.
 - Readback confirms `private.project_drafts`, `admin_project_aggregate(...)`, `get_archived_project_slugs()`, both child lifecycle indexes, and the Facts/Materials lifecycle columns exist. The private draft table contains 0 rows. All six existing Project/child counts and the 5 Draft / 3 Archived status split are unchanged; Facts and Materials have zero parent-lifecycle mismatches.
 - The aggregate RPC is `SECURITY DEFINER`, has an empty `search_path`, returns `jsonb`, and is executable only by `service_role`. The tombstone RPC is also search-path pinned and deliberately executable by `anon`, `authenticated`, and `service_role`; its read-only call returned the 3 archived slugs without exposing archived records. Browser roles have no table privileges on `private.project_drafts`; the pre-existing authenticated schema usage remains necessary for private RLS helpers and does not grant draft-table access.
 - Contract B was not applied: all 18 legacy Project write policies remain, authenticated insert/update/delete privileges remain on all six Project tables, and authenticated sequence usage remains on all six Project sequences. The aggregate list read returned all 8 Projects and left the private draft table at 0 rows.
@@ -111,7 +134,7 @@ Last updated: 2026-08-02
 - Private-to-public Storage promotion is create-only with byte verification. A failed publish performs reference-aware compensation for public copies created by that request and reports retained objects when safe cleanup cannot be proven.
 
 ### Production And Acceptance Boundary
-- Projects database rollout is split into two source-only migrations. Expand migration `supabase/migrations/20260719015649_project_aggregate_drafts.sql` creates the private draft/RPC contract and writes the child lifecycle backfill. Contract migration `supabase/migrations/20260802103338_project_aggregate_write_lockdown.sql` later revokes legacy browser table/sequence writes and hardens public parent/child policies. Jay has not approved either migration and neither has been applied or read back in production.
+- Projects database rollout is split into two source-only migrations. Expand migration `supabase/migrations/20260719015649_project_aggregate_drafts.sql` creates the private draft/RPC contract and writes the child lifecycle backfill. Contract migration `supabase/migrations/20260802105537_project_aggregate_write_lockdown.sql` later revokes legacy browser table/sequence writes and hardens public parent/child policies. Jay has not approved either migration and neither has been applied or read back in production.
 - No Phase 1 production content/Storage write, branch preview, authenticated aggregate save/publish/public-readback/hide workflow, or production promotion occurred in this source milestone.
 - The full host-side local suite passed on 2026-07-14: build, lint, typecheck, agent smoke, Admin CMS predeploy, Admin config gate (11/11 routes), Harness check, Supabase/public/Cloudflare readiness, aggregate/CRUD coverage, plan-only admin CRUD/content-import checks, JSON parsing, and `git diff --check`. The preferred clean-container `npm run gate` remains the final post-commit pre-push check.
 - A read-only local Playwright implementation check used the real owner session plus a mocked aggregate GET endpoint, with POST requests forced to 405. It verified the 1116px side-by-side workspace, clean action states, and the inline dirty-navigation choice. It also exposed a 390px shell overflow; the mobile grid/nav containment was fixed, the page read back at `scrollWidth === innerWidth`, and the aggregate verifier now guards that containment. This is implementation evidence only, not the authenticated preview workflow or Jay's fool test.
@@ -121,7 +144,7 @@ Last updated: 2026-08-02
 ### Next Handoff
 - Commit the complete Phase 1 candidate, run the clean-container gate, push the branch preview, and run its no-write smoke before requesting approval for expand migration `supabase/migrations/20260719015649_project_aggregate_drafts.sql`.
 - After expand readback, request separate action-specific approval for tagged Project/Storage writes, then freeze all Project editing before the authenticated preview workflow. Keep the freeze through aggregate UI/endpoint production promotion and contract readback so legacy child-table writes cannot overlap the new aggregate path.
-- Request a fresh separate approval before applying contract migration `supabase/migrations/20260802103338_project_aggregate_write_lockdown.sql`; then read back table/sequence privileges, public policies, and security advisor state before lifting the freeze. After contract, a Cloudflare-only rollback to the legacy direct-write UI is invalid.
+- Request a fresh separate approval before applying contract migration `supabase/migrations/20260802105537_project_aggregate_write_lockdown.sql`; then read back table/sequence privileges, public policies, and security advisor state before lifting the freeze. After contract, a Cloudflare-only rollback to the legacy direct-write UI is invalid.
 
 ## Entry - 2026-07-14 (Admin UX Reshape Directive And Phase 0 Read-Only Audit)
 
