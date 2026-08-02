@@ -147,9 +147,9 @@ const functionPath = "functions/_lib/admin-projects.js";
 const migrationPath =
   "supabase/migrations/20260719015649_project_aggregate_drafts.sql";
 const tombstoneMigrationPath =
-  "supabase/migrations/20260719015650_restrict_archived_project_tombstones.sql";
+  "supabase/migrations/20260802103337_restrict_archived_project_tombstones.sql";
 const lockdownMigrationPath =
-  "supabase/migrations/20260719015651_project_aggregate_write_lockdown.sql";
+  "supabase/migrations/20260802103338_project_aggregate_write_lockdown.sql";
 
 const page = readRequired(pagePath);
 const shell = readRequired(shellPath);

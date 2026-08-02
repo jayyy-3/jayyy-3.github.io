@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lastUpdated": "2026-07-19",
+  "lastUpdated": "2026-08-02",
   "sourceOfTruth": {
     "currentState": "docs/HANDOFF.md",
     "taskQueue": "docs/agent/tasks.json",
@@ -18,8 +18,8 @@
     "adminAuthBrowserQa": "production_9_authenticated_routes_signout_protected_revisit_and_3_blocked_supabase_static_fallbacks_verified",
     "adminCmsHandoff": "revalidation_required_after_user_report_and_repair_deploy",
     "adminCrudLive": "api_level_verified_projects_owner_preview_happy_path_verified_remaining_ui_golden_workflows_missing",
-    "adminProjectsAggregateMigrations": "20260719015649_expand_applied_and_read_back_20260719015650_minimum_disclosure_source_only_fresh_approval_required_unapplied_20260719015651_contract_source_only_fresh_approval_required_unapplied",
-    "adminProjectsBranchPreview": "commit_9441811_deployment_1a3e0d4b_no_write_smoke_and_owner_login_passing_preview_secrets_only",
+    "adminProjectsAggregateMigrations": "20260719015649_expand_applied_and_read_back_20260802103337_minimum_disclosure_applied_and_read_back_20260802103338_contract_source_only_fresh_approval_required_unapplied",
+    "adminProjectsBranchPreview": "commit_a79a364_deployment_a20062a0_clean_node20_container_gate_no_write_smoke_and_owner_login_passing",
     "adminProjectsAuthenticatedPreview": "marker_admin-projects-ui-mrroa6p0_one_save_refresh_unsaved_preview_private_first_media_hotspot_55_55_publish_public_readback_hide_public_not_found_passed_final_project_archived_public_media_retained_private_source_removed",
     "adminStorageProof": "media_role_migration_and_policies_read_back_live_editor_owner_boundary_passed_zero_tagged_objects_remain",
     "supabaseAuthSmtp": "redirect_config_corrected_and_read_back_invite_delivery_observed_sender_ownership_unverified_golden_flow_not_repeated",
@@ -28,20 +28,20 @@
     "seoIndexability": "static_36_route_production_verified_cms_only_discovery_strategy_pending",
     "seoLegacyRedirects": "production_smoke_verified_2026_07_13",
     "settingsInviteProof": "qa_editor_active_via_direct_auth_activation_redirect_config_corrected_real_ui_invite_recovery_not_repeated",
-    "supabaseSecurityAdvisor": "one_auth_leaked_password_warning_plus_two_expected_browser_callable_archived_slug_security_definer_warnings_current_rpc_returns_four_qa_slugs_including_one_never_published_slug_source_repair_unapplied"
+    "supabaseSecurityAdvisor": "one_auth_leaked_password_warning_plus_two_expected_browser_callable_archived_slug_security_definer_warnings_minimum_disclosure_rpc_returns_expected_empty_static_fallback_intersection"
   },
   "localReproducibility": {
     "sourceHarness": "passing",
     "adminSourceCoverage": "passing",
-    "runtimeGates": "2026_07_19_projects_closeout_full_host_side_suite_and_node20_admin_predeploy_passing_docker_unavailable_previous_one_time_push_exception_not_reusable",
+    "runtimeGates": "2026_08_02_commit_a79a364_clean_node20_docker_gate_passing",
     "liveSecretsPresent": true,
     "liveReadiness": "browser_key_owner_and_distinct_editor_credentials_present_media_migration_applied_live_role_boundary_passed",
-    "adminUxReshape": "phase0_closed_phase1_projects_preview_happy_path_and_local_conflict_compensation_evidence_complete_minimum_disclosure_c_source_only_acceptance_pending_fresh_preview_c_readback_production_runtime_contract_b_and_jay_fool_test"
+    "adminUxReshape": "phase0_closed_phase1_projects_clean_gate_preview_owner_login_happy_path_conflict_compensation_and_minimum_disclosure_c_complete_acceptance_pending_production_runtime_contract_b_and_jay_fool_test"
   },
   "nextDecisions": [
     "Monitor or purge the four residual apex cache headers when Cloudflare account access is available; their current bytes and MIME types exactly match the immutable repair deployment and are non-blocking.",
     "After separate approval, verify Supabase Auth SMTP ownership and repeat invite/password/recovery against the corrected and read-back production callbacks.",
-    "Keep Project editing frozen. Run a fresh delivery gate and immutable Preview for the local conflict/compensation and tombstone fixes; then obtain separate approval/readback for `20260719015650_restrict_archived_project_tombstones.sql`, production runtime promotion, and `20260719015651_project_aggregate_write_lockdown.sql`. Any live negative write proof needs its own approval. Jay's fool test remains unverified.",
+    "Keep Project editing frozen. The fresh delivery gate, immutable Preview, owner login, and minimum-disclosure C readback are complete. Obtain separate approval for production runtime promotion, then separate approval/readback for `20260802103338_project_aggregate_write_lockdown.sql`. Any live negative write proof needs its own approval. Jay's fool test remains unverified.",
     "Decide whether final Turnstile proof is required before the next public launch checkpoint.",
     "Repeat the complete Settings invite/password workflow with the approved QA recipient after Auth callback configuration is corrected.",
     "Have a customer or editor review imported Draft CMS content before publishing items publicly.",
@@ -65,12 +65,12 @@
     "worklogReviewWarningLines": 8000
   },
   "lastVerified": {
-    "agentCheck": "2026-07-19",
+    "agentCheck": "2026-08-02",
     "build": "2026-07-19",
-    "containerGate": "2026-06-30",
+    "containerGate": "2026-08-02",
     "containerGateExceptionApproved": "2026-07-16",
     "hostEquivalentGate": "2026-07-19",
-    "cloudflarePreviewSmokeBranchPreview": "2026-07-19",
+    "cloudflarePreviewSmokeBranchPreview": "2026-08-02",
     "cloudflareReadiness": "2026-07-19",
     "gscSeoReview": "2026-06-12",
     "gscSitemapSubmission": "2026-06-12",
@@ -80,7 +80,7 @@
     "seoLegacyRedirectSource": "2026-06-12",
     "seoReadiness": "2026-07-13",
     "seoProductionReadback": "2026-06-12",
-    "gitDiffCheck": "2026-07-19",
+    "gitDiffCheck": "2026-08-02",
     "smoke": "2026-07-19",
     "typecheck": "2026-07-19",
     "cloudflarePreviewSmokeProduction": "2026-07-13",
@@ -89,7 +89,8 @@
     "adminMediaRoleBoundaryPlanOnly": "2026-07-14",
     "adminMediaRoleBoundaryProduction": "2026-07-14",
     "adminMediaRoleMigrationProduction": "2026-07-14",
-    "supabaseSecurityAdvisor": "2026-07-19",
+    "supabaseSecurityAdvisor": "2026-08-02",
+    "adminProjectsMinimumDisclosureProduction": "2026-08-02",
     "adminProjectsAggregateExpandProduction": "2026-07-19",
     "adminProjectsAuthenticatedPreviewWorkflow": "2026-07-19",
     "supabaseAuthUrlConfig": "2026-07-14",
@@ -99,7 +100,7 @@
     "adminAuthBrowserLocalConfigured": "2026-07-13",
     "adminConfigGateIsolated": "2026-07-19",
     "adminCmsPredeploy": "2026-07-19",
-    "adminProjectsAggregate": "2026-07-19",
+    "adminProjectsAggregate": "2026-08-02",
     "adminProjectsResponsiveImplementationCheck": "2026-07-14",
     "configuredBundleSplit": "2026-07-13"
   }

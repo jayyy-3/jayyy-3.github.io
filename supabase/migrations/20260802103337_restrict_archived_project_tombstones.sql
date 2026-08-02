@@ -1,4 +1,5 @@
--- Narrow the public Project tombstone endpoint to the five bundled fallback
+-- Production migration 20260802103337 narrows the public Project tombstone
+-- endpoint to the five bundled fallback
 -- slugs that are already public in src/data/projectData.ts. The expand
 -- migration could enumerate every archived canonical slug plus archived
 -- private-draft slugs even though the public runtime only needs tombstones for

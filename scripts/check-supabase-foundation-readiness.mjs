@@ -21,8 +21,8 @@ const expectedMigrations = [
   '202605290003_sample_request_atomic_insert.sql',
   '20260714050750_media_public_bucket_role_hardening.sql',
   '20260719015649_project_aggregate_drafts.sql',
-  '20260719015650_restrict_archived_project_tombstones.sql',
-  '20260719015651_project_aggregate_write_lockdown.sql',
+  '20260802103337_restrict_archived_project_tombstones.sql',
+  '20260802103338_project_aggregate_write_lockdown.sql',
 ];
 
 const publicContentTables = [
