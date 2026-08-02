@@ -23,6 +23,11 @@ Last updated: 2026-08-02
 - The Preview login runner proves route/auth shells, while source/behavior checks prove removal of Project review controls; neither is Jay's fool test or a content-write workflow.
 - Production remains on merge `25c05ebb` until Jay separately approves promotion of this follow-up.
 
+### Jay Correction: Match Stone Library Header Treatment
+- Jay rejected the first PR `#11` public-header result. The prior diagnosis focused on missing compiled opacity utilities but missed the route-level difference: Stone Library supplies a 102px black `DefaultLayout` support band behind the translucent header, while Projects had disabled that band and compensated with page-local white padding.
+- Projects listing and detail now use the same default layout band as Stone Library. The duplicate `pt-[102px]` values and obsolete detail loading offset are removed.
+- Local rendered checks pass at 1280px and 390px for Projects listing, opened navigation menu, and Project detail: support band is black and 102px high, main content begins at 102px, width has no overflow, and no relevant console warning/error appears. A fresh gate and immutable Preview remain required.
+
 ### Next Handoff
 - `NOW-ADMIN-UX-RESHAPE-001`: finish gates and immutable Preview, then request production-promotion approval.
 

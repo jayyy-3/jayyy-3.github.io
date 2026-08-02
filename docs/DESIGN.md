@@ -147,7 +147,7 @@ Header behavior:
 - On desktop, the visible primary nav and hamburger are one right-aligned control group. Do not distribute the primary nav as a centered middle column between the logo and menu button.
 - Mobile header keeps the same hamburger control but exposes the full navigation list in the opened menu.
 - The hamburger is a compact navigation affordance, not a promotional CTA; avoid adding pill labels or extra explanatory copy around it.
-- Header and opened-menu dark surfaces must compile to visibly opaque backgrounds at their specified opacity. The build smoke gate must fail if the non-default opacity utilities used by the public UI disappear from generated CSS.
+- Header and opened-menu dark surfaces keep their translucent blur treatment. White content routes that need the dark header, including Projects listing/detail and Stone Library, use the same 102px black `DefaultLayout` support band behind it rather than painting the header differently or adding page-local top padding.
 
 Hero behavior:
 - The first homepage viewport should feel full-screen on desktop and mobile.

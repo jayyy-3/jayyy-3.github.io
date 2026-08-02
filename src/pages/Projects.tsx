@@ -109,7 +109,7 @@ export default function Projects() {
   }, [activeSector, projects]);
 
   return (
-    <div className="bg-white pt-[102px]">
+    <div className="bg-white">
       <section className="border-b border-black/10">
         <div className="urblo-page-container py-12 md:py-16">
           <nav className="flex flex-wrap items-center gap-2 text-[12px] font-bold uppercase tracking-[0.14em] text-black/45">
