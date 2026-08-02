@@ -16,10 +16,11 @@ Last updated: 2026-08-02
 - `npm run agent:admin-crud-coverage`, `npm run agent:admin-cms-predeploy`, isolated 11-route `npm run agent:admin-config-gate`, `npm run agent:check`, JSON parsing, and `git diff --check`: pass.
 - `npm run gate`: pass in the clean Node 20 Docker/Colima build for implementation commit `fa205e0`; the unrelated user-owned untracked `docs/SEO_EXTERNAL_AI_BRIEF.md` remained untouched and was reported by the gate.
 - Local visual verification: public Projects desktop/mobile navbar and menu backgrounds pass.
-- Immutable Preview smoke remains to be recorded before promotion.
+- Draft PR `#11` implementation commit `610d4b2` deployed as immutable Preview `3b285f72-fafa-46c5-abc8-8ccda419b738` at `https://3b285f72.urblo.pages.dev`. No-write Cloudflare smoke passed all public/Admin routes, recursive assets, redirects, safe-failure form Functions, and the protected Projects endpoint. Strict owner login passed all nine authenticated Admin routes.
+- Deployed `/projects` readback found header `rgba(0, 0, 0, 0.88)`, opened menu `rgba(0, 0, 0, 0.96)`, equal `scrollWidth/clientWidth` at 1280px, and no relevant console warnings/errors.
 
 ### Risks and Gaps
-- Authenticated visual inspection of the simplified Admin UI still needs a configured immutable Preview; source verification is not Jay's fool test.
+- The Preview login runner proves route/auth shells, while source/behavior checks prove removal of Project review controls; neither is Jay's fool test or a content-write workflow.
 - Production remains on merge `25c05ebb` until Jay separately approves promotion of this follow-up.
 
 ### Next Handoff
