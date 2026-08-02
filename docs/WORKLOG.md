@@ -26,7 +26,9 @@ Last updated: 2026-08-02
 ### Jay Correction: Match Stone Library Header Treatment
 - Jay rejected the first PR `#11` public-header result. The prior diagnosis focused on missing compiled opacity utilities but missed the route-level difference: Stone Library supplies a 102px black `DefaultLayout` support band behind the translucent header, while Projects had disabled that band and compensated with page-local white padding.
 - Projects listing and detail now use the same default layout band as Stone Library. The duplicate `pt-[102px]` values and obsolete detail loading offset are removed.
-- Local rendered checks pass at 1280px and 390px for Projects listing, opened navigation menu, and Project detail: support band is black and 102px high, main content begins at 102px, width has no overflow, and no relevant console warning/error appears. A fresh gate and immutable Preview remain required.
+- Local rendered checks pass at 1280px and 390px for Projects listing, opened navigation menu, and Project detail: support band is black and 102px high, main content begins at 102px, width has no overflow, and no relevant console warning/error appears.
+- Correction commit `9d93624` passed the clean Node 20 container gate and was pushed to draft PR `#11`. Cloudflare immutable Preview `b438de5b-b341-4fe5-bb49-bb944f7f8c30` at `https://b438de5b.urblo.pages.dev` passed every public/Admin route, recursive asset/redirect/Function boundary, blocked-Supabase static fallback, and all nine authenticated Admin routes.
+- In-app Browser verification against that immutable Preview confirmed Stone Library and Projects both use the translucent `rgba(0,0,0,0.88)` header at a 102px main offset; Projects listing/detail and the opened desktop/mobile menu have no horizontal overflow. The Preview is ready for Jay's production-promotion decision; no production deployment occurred.
 
 ### Next Handoff
 - `NOW-ADMIN-UX-RESHAPE-001`: finish gates and immutable Preview, then request production-promotion approval.

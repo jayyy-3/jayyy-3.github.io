@@ -41,7 +41,7 @@
   "nextDecisions": [
     "Monitor or purge the four residual apex cache headers when Cloudflare account access is available; their current bytes and MIME types exactly match the immutable repair deployment and are non-blocking.",
     "After separate approval, verify Supabase Auth SMTP ownership and repeat invite/password/recovery against the corrected and read-back production callbacks.",
-    "Run fresh clean-container and immutable Preview gates for Jay's Stone-Library-matched Projects header correction in draft PR `#11`, then request production-promotion approval. After promotion Jay runs the production Projects fool test. Any live negative write proof needs its own approval.",
+    "Corrected draft PR `#11` passes clean-container and immutable Preview gates at `https://b438de5b.urblo.pages.dev`; request production-promotion approval. After promotion Jay runs the production Projects fool test. Any live negative write proof needs its own approval.",
     "Decide whether final Turnstile proof is required before the next public launch checkpoint.",
     "Repeat the complete Settings invite/password workflow with the approved QA recipient after Auth callback configuration is corrected.",
     "Have a customer or editor review imported Draft CMS content before publishing items publicly.",
