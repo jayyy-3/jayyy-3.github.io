@@ -33,7 +33,7 @@
   "localReproducibility": {
     "sourceHarness": "passing",
     "adminSourceCoverage": "passing",
-    "runtimeGates": "2026_08_02_commit_a79a364_clean_node20_docker_gate_passing",
+    "runtimeGates": "2026_08_02_commit_fa205e0_clean_node20_docker_gate_passing_for_public_opacity_and_single_editor_projects_followup",
     "liveSecretsPresent": true,
     "liveReadiness": "browser_key_owner_and_distinct_editor_credentials_present_media_migration_applied_live_role_boundary_passed",
     "adminUxReshape": "phase0_closed_phase1_runtime_live_current_local_followup_fixes_public_opacity_and_removes_projects_claim_approval_ui_host_gates_pass_acceptance_pending_preview_promotion_and_jay_fool_test"

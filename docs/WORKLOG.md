@@ -14,8 +14,9 @@ Last updated: 2026-08-02
 - `npm run agent:admin-projects-aggregate`: pass.
 - `npm run build`, `npm run lint`, `npx tsc -b`, `npm run agent:smoke`: pass.
 - `npm run agent:admin-crud-coverage`, `npm run agent:admin-cms-predeploy`, isolated 11-route `npm run agent:admin-config-gate`, `npm run agent:check`, JSON parsing, and `git diff --check`: pass.
+- `npm run gate`: pass in the clean Node 20 Docker/Colima build for implementation commit `fa205e0`; the unrelated user-owned untracked `docs/SEO_EXTERNAL_AI_BRIEF.md` remained untouched and was reported by the gate.
 - Local visual verification: public Projects desktop/mobile navbar and menu backgrounds pass.
-- Clean-container and immutable Preview gates remain to be recorded before promotion.
+- Immutable Preview smoke remains to be recorded before promotion.
 
 ### Risks and Gaps
 - Authenticated visual inspection of the simplified Admin UI still needs a configured immutable Preview; source verification is not Jay's fool test.
