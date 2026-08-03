@@ -2,6 +2,13 @@
 
 Last updated: 2026-08-02
 
+## Entry - 2026-08-03 (Projects Count and Production Data Normalization Candidate)
+
+- Production read-only list inspection explained the `All 9 / Saved 4 / Live 1 / Hidden 4` mismatch: four canonical imported Projects were Draft, West Side Place was Published, and all four Archived rows were exact QA markers. The public site still showed five because static fallback retained the four Draft counterparts and the one Published row overlaid its matching static slug.
+- Jay approved execution through completion, explicitly covering the UI release, publishing the four canonical Draft Projects, and permanent deletion of exactly the four confirmed archived QA Projects. This does not authorize other content, migration, Storage, user, or email writes.
+- Current source makes the default Projects list/count non-Archived, renames the filters to Projects/Drafts/Live, and exposes Archive only when archived rows exist. Row badges use Draft/Live/Archived. `npm run agent:admin-projects-aggregate` now rejects the old raw-All and Saved/Hidden filters.
+- Source build, lint, typecheck, Projects aggregate coverage, and Admin CRUD coverage pass. Local Vite could authenticate but cannot serve the Pages Function, so real list interaction remains for the immutable Cloudflare Preview; no production data write has run yet.
+
 ## Entry - 2026-08-02 (Jay Acceptance of Projects Phase 1)
 
 - After PR `#11` reached production and its deployment-bound technical checks passed, Jay used the production result and reported: `试了试没问题。OK`.

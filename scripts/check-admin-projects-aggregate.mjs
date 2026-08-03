@@ -532,6 +532,36 @@ requireMatches(
   pagePath,
   "medium-desktop master/detail workspace",
 );
+requireIncludes(
+  page,
+  'useState<ProjectListFilter>("projects")',
+  pagePath,
+  "active-project default list filter",
+);
+requireIncludes(
+  page,
+  'project.status === "archived"',
+  pagePath,
+  "archive exclusion from the default project list",
+);
+requireIncludes(
+  page,
+  'label={`Projects ${projectCounts.active}`}',
+  pagePath,
+  "active Project count instead of all database rows",
+);
+requireIncludes(
+  page,
+  'projectCounts.archived > 0',
+  pagePath,
+  "conditional Archive entry",
+);
+forbidMatches(
+  page,
+  /label=\{`All \$\{projects\.length\}`\}|label=\{`Saved \$\{|label=\{`Hidden \$\{/,
+  pagePath,
+  "misleading all-row or Saved/Hidden Project filters",
+);
 requireMatches(
   shell,
   /grid-cols-\[minmax\(0,1fr\)\][^"\n]*lg:grid-cols-\[264px_minmax\(0,1fr\)\]/,

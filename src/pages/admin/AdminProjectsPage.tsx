@@ -24,7 +24,7 @@ import ProjectEditor, {
 } from "./projects/ProjectEditor";
 import RequireAdmin from "./RequireAdmin";
 
-type ProjectListFilter = ProjectLifecycleStatus | "all";
+type ProjectListFilter = ProjectLifecycleStatus | "projects";
 
 interface ProjectListRow {
   id: number;
@@ -112,7 +112,7 @@ function AdminProjectsContent() {
   const [baseRevision, setBaseRevision] = useState(0);
   const [baseUpdatedAt, setBaseUpdatedAt] = useState<string | null>(null);
   const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState<ProjectListFilter>("all");
+  const [filter, setFilter] = useState<ProjectListFilter>("projects");
   const [isIndexLoading, setIsIndexLoading] = useState(true);
   const [isDraftLoading, setIsDraftLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -154,7 +154,8 @@ function AdminProjectsContent() {
   const filteredProjects = useMemo(() => {
     const query = search.trim().toLowerCase();
     return projects.filter((project) => {
-      if (filter !== "all" && project.status !== filter) return false;
+      if (filter === "projects" && project.status === "archived") return false;
+      if (filter !== "projects" && project.status !== filter) return false;
       if (!query) return true;
       return [project.title, project.slug, project.location]
         .filter(Boolean)
@@ -768,13 +769,14 @@ function AdminProjectsContent() {
             </label>
             <div className="mt-3 grid grid-cols-2 gap-2">
               <FilterButton
-                active={filter === "all"}
-                label={`All ${projects.length}`}
-                onClick={() => setFilter("all")}
+                active={filter === "projects"}
+                label={`Projects ${projectCounts.active}`}
+                onClick={() => setFilter("projects")}
+                wide
               />
               <FilterButton
                 active={filter === "draft"}
-                label={`Saved ${projectCounts.draft}`}
+                label={`Drafts ${projectCounts.draft}`}
                 onClick={() => setFilter("draft")}
               />
               <FilterButton
@@ -782,11 +784,15 @@ function AdminProjectsContent() {
                 label={`Live ${projectCounts.published}`}
                 onClick={() => setFilter("published")}
               />
-              <FilterButton
-                active={filter === "archived"}
-                label={`Hidden ${projectCounts.archived}`}
-                onClick={() => setFilter("archived")}
-              />
+              {projectCounts.archived > 0 ? (
+                <FilterButton
+                  active={filter === "archived"}
+                  label={`Archive ${projectCounts.archived}`}
+                  onClick={() => setFilter("archived")}
+                  quiet
+                  wide
+                />
+              ) : null}
             </div>
           </div>
 
@@ -1163,11 +1169,12 @@ function upsertProjectListRow(
 function summarizeProjects(projects: readonly ProjectListRow[]) {
   return projects.reduce(
     (counts, project) => ({
+      active: counts.active + (project.status === "archived" ? 0 : 1),
       draft: counts.draft + (project.status === "draft" ? 1 : 0),
       published: counts.published + (project.status === "published" ? 1 : 0),
       archived: counts.archived + (project.status === "archived" ? 1 : 0),
     }),
-    { draft: 0, published: 0, archived: 0 },
+    { active: 0, draft: 0, published: 0, archived: 0 },
   );
 }
 
@@ -1181,10 +1188,14 @@ function FilterButton({
   active,
   label,
   onClick,
+  quiet = false,
+  wide = false,
 }: {
   active: boolean;
   label: string;
   onClick: () => void;
+  quiet?: boolean;
+  wide?: boolean;
 }) {
   return (
     <button
@@ -1193,9 +1204,12 @@ function FilterButton({
       aria-pressed={active}
       className={[
         "min-h-9 rounded border px-2 text-[11px] font-bold uppercase tracking-[0.1em] transition",
+        wide ? "col-span-2" : "",
         active
           ? "border-black bg-black text-white"
-          : "border-black/12 bg-white text-black/52 hover:border-black",
+          : quiet
+            ? "border-transparent bg-black/[0.035] text-black/45 hover:border-black/20 hover:text-black"
+            : "border-black/12 bg-white text-black/52 hover:border-black",
       ].join(" ")}
     >
       {label}
@@ -1205,9 +1219,9 @@ function FilterButton({
 
 function ProjectListStatus({ status }: { status: ProjectLifecycleStatus }) {
   const labels: Record<ProjectLifecycleStatus, string> = {
-    draft: "Saved",
+    draft: "Draft",
     published: "Live",
-    archived: "Hidden",
+    archived: "Archived",
   };
   return (
     <span className="shrink-0 text-[10px] font-bold uppercase tracking-[0.12em] opacity-65">
