@@ -2,6 +2,12 @@
 
 Last updated: 2026-08-02
 
+## Entry - 2026-08-02 (Jay Acceptance of Projects Phase 1)
+
+- After PR `#11` reached production and its deployment-bound technical checks passed, Jay used the production result and reported: `试了试没问题。OK`.
+- This is the required Jay-owned user acceptance for the deployed Projects Phase 1 and single-editor follow-up; it is not an agent self-certification and does not close unrelated Admin golden workflows.
+- `NOW-ADMIN-UX-RESHAPE-001` remains `now` because the approved directive continues with Phase 2 replication, Phase 3 guide/Harness consolidation, and mandatory sunset deletion of `docs/ADMIN_UX_RESHAPE_PLAN.md`. The next module is Articles.
+
 ## Entry - 2026-08-02 (Public Opacity Repair and Single-Editor Projects Simplification)
 
 ### Scope
