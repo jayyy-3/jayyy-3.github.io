@@ -1,6 +1,16 @@
 # WORKLOG - Urblo Execution Log
 
-Last updated: 2026-08-02
+Last updated: 2026-08-03
+
+## Entry - 2026-08-03 (Projects Count and Production Data Normalization)
+
+- Production read-only list inspection explained the `All 9 / Saved 4 / Live 1 / Hidden 4` mismatch: four canonical imported Projects were Draft, West Side Place was Published, and all four Archived rows were exact QA markers. The public site still showed five because static fallback retained the four Draft counterparts and the one Published row overlaid its matching static slug.
+- Jay approved execution through completion, explicitly covering the UI release, publishing the four canonical Draft Projects, and permanent deletion of exactly the four confirmed archived QA Projects. This does not authorize other content, migration, Storage, user, or email writes.
+- Current source makes the default Projects list/count non-Archived, renames the filters to Projects/Drafts/Live, and exposes Archive only when archived rows exist. Row badges use Draft/Live/Archived. `npm run agent:admin-projects-aggregate` now rejects the old raw-All and Saved/Hidden filters.
+- Source build, lint, typecheck, Projects aggregate coverage, Admin CRUD coverage, Admin predeploy/config gates, Harness checks, Cloudflare Preview smoke, and the clean Node 20 container gate pass. The branch Preview at `https://codex-projects-clear-counts.urblo.pages.dev` authenticated as the production owner and showed exactly five real Projects by default, four Drafts, one Live item, and four QA-only Archive rows; Archive-to-Projects interaction and 390px no-overflow behavior passed.
+- The protected Admin UI published Australian Catholic University, Xavier College, and Artisan Park | YarraBend and read each back as Live. Moon Gate | Woolley Street correctly refused publication because its referenced Angola Black and New Grey Stone Library groups remain Draft and its two imported hotspots are not yet bound to Project materials. Publishing those Stone Library records was outside the approved Projects-only production-write scope, so the validation was not bypassed.
+- A guarded production transaction permanently deleted only Project IDs `1`, `2`, `3`, and `9` after rechecking their exact QA slugs and Archived state. Project children and one private QA aggregate draft were removed by the defined dependency contract; two QA Article block links were set to null by their existing foreign key. Media assets `1`, `2`, `3`, and `119` and all audit history were retained.
+- Production SQL readback now reports exactly five Projects: IDs `4`-`7` Published and Moon Gate ID `8` Draft; zero Archived Projects, zero QA parent/child/draft rows, four retained referenced media assets, and two safely cleared QA Article links. Authenticated Preview readback shows `Projects 5 / Drafts 1 / Live 4` with no Archive control or QA text. Public Preview still shows all five canonical Projects because Moon Gate continues through the explicit static fallback.
 
 ## Entry - 2026-08-02 (Jay Acceptance of Projects Phase 1)
 
