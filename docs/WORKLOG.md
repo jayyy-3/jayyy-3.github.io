@@ -7,7 +7,8 @@ Last updated: 2026-08-04
 - Removed origin from public Stone Library cards and detail specifications while retaining the underlying data and Admin field.
 - Removed origin from public free-text matching so a hidden field cannot produce unexplained search results, and removed origin disclosure from listing/detail route metadata.
 - Rebalanced the four remaining detail specification cards across responsive breakpoints.
-- Added public-readiness contract checks and updated the design/architecture disclosure boundary. Runtime, browser, Preview, and production evidence will be recorded before release closure.
+- Added public-readiness contract checks and updated the design/architecture disclosure boundary. Build, lint, typecheck, public/SEO readiness, smoke, Harness checks, and the clean Node 20 container gate pass.
+- Local and PR `#16` Cloudflare Preview browser checks passed on listing/detail at desktop and 390px: 13 cards rendered without country text, the detail showed only Type/Availability/Raw Block/Price Range, hidden-origin search returned zero for `China`, no horizontal overflow appeared, and no relevant browser warning/error was recorded. Preview route/asset/Function smoke passed at `https://codex-hide-stone-origin.urblo.pages.dev`.
 
 ## Entry - 2026-08-03 (Projects Count and Production Data Normalization)
 

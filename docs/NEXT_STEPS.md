@@ -14,7 +14,7 @@ PR `#11` simplifies the Project editor and Dashboard to a single-editor Edit/Sav
 
 The Projects cleanup has removed the raw-database `All 9` mismatch and is live through PR `#14` / merge `edd33465`. The default list/count excludes Archive, uses Projects/Drafts/Live, and shows Archive only when history exists. Three publish-ready canonical drafts are now Live and the four exact Archived QA Projects are permanently deleted; guarded production readback is five canonical Projects, four Live, one Draft, and zero Archived. Moon Gate remains Draft because its Stone Library dependencies and hotspot-material bindings do not yet satisfy the existing publish guard. The new immutable Cloudflare deployment URL remains unrecorded because current access would require a fresh OAuth grant; production asset switch plus authenticated Admin/public readback passed.
 
-Public Stone Library origin disclosure is removed in source from listing cards, detail specs, search matching, and route metadata while the underlying source/Supabase/Admin field remains intact. Release verification is tracked under `NOW-STONELIB-PUBLIC-ORIGIN-HIDE-001`.
+Public Stone Library origin disclosure is removed through PR `#16` from listing cards, detail specs, search matching, and route metadata while the underlying source/Supabase/Admin field remains intact. Local and Cloudflare Preview desktop/mobile checks plus route/asset/Function smoke pass; production confirmation follows merge.
 
 ## What Is Complete
 - Cloudflare Pages production hosting is complete for `https://urblo.com.au` and `https://www.urblo.com.au`.

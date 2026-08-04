@@ -1814,7 +1814,8 @@
       "notes": [
         "2026-08-04: Removed origin from public cards and detail specs without deleting or changing the source, typed view-model, Supabase, or Admin field.",
         "2026-08-04: Public free-text matching no longer uses origin, preventing hidden data from creating unexplained search results; route metadata also omits origin.",
-        "2026-08-04: Local desktop and 390px browser checks show four balanced spec cards, no Origin label or country value, no horizontal overflow, and no relevant console errors."
+        "2026-08-04: Local desktop and 390px browser checks show four balanced spec cards, no Origin label or country value, no horizontal overflow, and no relevant console errors.",
+        "2026-08-04: PR #16 Cloudflare Preview passed route/asset/Function smoke plus desktop and 390px listing/detail readback at https://codex-hide-stone-origin.urblo.pages.dev."
       ],
       "acceptance": [
         "Public Stone Library listing cards do not display origin.",
