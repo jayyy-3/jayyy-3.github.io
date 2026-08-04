@@ -172,7 +172,6 @@ export default function StoneLibraryDetailPage() {
 
             <SpecsPanel
               stoneType={detail.stoneType}
-              originLabel={detail.originLabel}
               rawBlockLabel={detail.rawBlockLabel}
               availabilityStatus={detail.status}
               availabilityLabel={detail.availabilityLabel}

@@ -87,6 +87,12 @@ function requireIncludes(text, needle, context) {
   }
 }
 
+function requireNotIncludes(text, needle, context) {
+  if (text.includes(needle)) {
+    failures.push(`${context}: must not include ${needle}`);
+  }
+}
+
 function requireRegex(text, pattern, context, label) {
   if (!pattern.test(text)) {
     failures.push(`${context}: missing ${label}`);
@@ -539,6 +545,9 @@ function checkPublicRuntimeBoundary() {
 
   const stoneService = readRequired('src/service/StoneLibraryService.ts');
   const stoneDetailPage = readRequired('src/pages/StoneLibraryDetailPage.tsx');
+  const stoneCard = readRequired('src/components/stone-library/StoneCard.tsx');
+  const stoneSpecs = readRequired('src/components/stone-library/SpecsPanel.tsx');
+  const seoRoutes = readRequired('src/data/seoRoutes.ts');
   requireIncludes(stoneService, 'getPublicStoneCards', 'StoneLibraryService merged public listing adapter');
   requireIncludes(stoneService, '(card) => card.stoneGroupId', 'StoneLibraryService stoneGroupId Published overlay');
   requireIncludes(stoneService, 'getPublishedStoneDetail', 'StoneLibraryService public detail adapter');
@@ -547,6 +556,13 @@ function checkPublicRuntimeBoundary() {
   requireIncludes(stoneService, ".eq('status', 'published')", 'StoneLibraryService published-only public detail reads');
   requireIncludes(stoneDetailPage, 'StoneLibraryService.getPublishedStoneDetail', 'StoneLibraryDetailPage published-first adapter');
   requireIncludes(stoneDetailPage, 'StoneLibraryService.getStoneDetail', 'StoneLibraryDetailPage static fallback');
+  requireNotIncludes(stoneCard, 'stone.originLabel', 'Public Stone Library card origin disclosure');
+  requireNotIncludes(stoneSpecs, 'originLabel', 'Public Stone Library specs origin disclosure');
+  requireNotIncludes(stoneSpecs, '>Origin<', 'Public Stone Library specs origin label');
+  requireNotIncludes(stoneDetailPage, 'originLabel={detail.originLabel}', 'Public Stone Library detail origin wiring');
+  requireNotIncludes(stoneService, '[card.name, card.stoneType, card.originLabel]', 'Public Stone Library hidden-origin search');
+  requireNotIncludes(seoRoutes, 'stone.origin?.countryDisplay', 'Public Stone Library detail SEO origin disclosure');
+  requireNotIncludes(seoRoutes, 'finishes, origins, and availability', 'Public Stone Library listing SEO origin disclosure');
   const articleService = readRequired('src/service/ArticleService.ts');
   const articlePage = readRequired('src/pages/ArticlePage.tsx');
   requireIncludes(articleService, 'mergeArticlesWithPublishedOverlay', 'ArticleService per-record Published overlay');

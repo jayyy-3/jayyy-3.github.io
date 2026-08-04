@@ -100,7 +100,7 @@ const staticRoutes: SeoRoute[] = [
         path: '/stone-library',
         title: 'Natural Stone Library for Public Realm Projects | Urblo',
         description:
-            'Explore Urblo natural stone types, finishes, origins, and availability for streetscape and civic landscape projects.',
+            'Explore Urblo natural stone types, finishes, applications, and availability for streetscape and civic landscape projects.',
         changeFrequency: 'monthly',
         priority: 0.9,
         breadcrumbs: [
@@ -192,13 +192,12 @@ const projectRoutes: SeoRoute[] = projects.map((project) =>
 
 const stoneRoutes: SeoRoute[] = stoneLibrary.stones.map((stone) => {
     const stoneType = stone.type?.display || stone.type?.source || 'natural stone';
-    const origin = stone.origin?.countryDisplay ? ` from ${stone.origin.countryDisplay}` : '';
 
     return route({
         path: `/stone-library/${stone.stoneGroupId}`,
         title: `${stone.displayName} ${stoneType} | Urblo Stone Library`,
         description: toMetaDescription(
-            `Review ${stone.displayName}${origin} in the Urblo Stone Library, including finish options, sourcing notes, and public realm application guidance.`,
+            `Review ${stone.displayName} in the Urblo Stone Library, including finish options, availability, and public realm application guidance.`,
         ),
         changeFrequency: 'monthly',
         priority: stone.status === 'active' ? 0.76 : 0.55,

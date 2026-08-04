@@ -43,7 +43,6 @@ export default function StoneCard({ stone }: StoneCardProps) {
           {stone.name}
         </h3>
         <p className="text-[14px] font-medium text-black/80">{stone.stoneType}</p>
-        <p className="text-[13px] font-medium text-[var(--urblo-text)]">{stone.originLabel}</p>
         <div className="flex items-center justify-between border-t border-black/10 pt-3">
           <p className="urblo-meta text-[10px] text-black/58">{stone.finishCount} finishes</p>
           <p className="urblo-meta text-[10px] text-black/58">
