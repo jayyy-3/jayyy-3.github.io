@@ -9,6 +9,7 @@ Last updated: 2026-08-04
 - Rebalanced the four remaining detail specification cards across responsive breakpoints.
 - Added public-readiness contract checks and updated the design/architecture disclosure boundary. Build, lint, typecheck, public/SEO readiness, smoke, Harness checks, and the clean Node 20 container gate pass.
 - Local and PR `#16` Cloudflare Preview browser checks passed on listing/detail at desktop and 390px: 13 cards rendered without country text, the detail showed only Type/Availability/Raw Block/Price Range, hidden-origin search returned zero for `China`, no horizontal overflow appeared, and no relevant browser warning/error was recorded. Preview route/asset/Function smoke passed at `https://codex-hide-stone-origin.urblo.pages.dev`.
+- PR `#16` merged to `main` as `160b4f1df66557f2591ca971f63ad1afb2513362` and deployed as immutable Cloudflare release `https://76ae7fe0.urblo.pages.dev`. Immutable/apex/`www` deployment-bound smoke passed. Production desktop and 390px listing/detail readback confirmed no Origin/country disclosure, four balanced detail specs, no horizontal overflow, and no relevant browser warning/error.
 
 ## Entry - 2026-08-03 (Projects Count and Production Data Normalization)
 
