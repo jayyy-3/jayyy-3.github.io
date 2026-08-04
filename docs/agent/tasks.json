@@ -1793,6 +1793,48 @@
       ]
     },
     {
+      "id": "NOW-STONELIB-PUBLIC-ORIGIN-HIDE-001",
+      "status": "done",
+      "priority": 11.45,
+      "summary": "Keep Stone Library origin internal while removing it from every public disclosure surface.",
+      "files": [
+        "src/components/stone-library/StoneCard.tsx",
+        "src/components/stone-library/SpecsPanel.tsx",
+        "src/pages/StoneLibraryDetailPage.tsx",
+        "src/service/StoneLibraryService.ts",
+        "src/data/seoRoutes.ts",
+        "scripts/check-public-supabase-readiness.mjs",
+        "docs/ARCHITECTURE.md",
+        "docs/DESIGN.md",
+        "docs/HANDOFF.md",
+        "docs/NEXT_STEPS.md",
+        "docs/WORKLOG.md",
+        "docs/agent/tasks.json"
+      ],
+      "notes": [
+        "2026-08-04: Removed origin from public cards and detail specs without deleting or changing the source, typed view-model, Supabase, or Admin field.",
+        "2026-08-04: Public free-text matching no longer uses origin, preventing hidden data from creating unexplained search results; route metadata also omits origin.",
+        "2026-08-04: Local desktop and 390px browser checks show four balanced spec cards, no Origin label or country value, no horizontal overflow, and no relevant console errors."
+      ],
+      "acceptance": [
+        "Public Stone Library listing cards do not display origin.",
+        "Public Stone Library detail specifications do not display origin.",
+        "Public Stone Library search and route metadata do not disclose or match origin.",
+        "Origin remains available to source data, Supabase, typed models, and the Admin editor."
+      ],
+      "verification": [
+        "npm run build",
+        "npm run lint",
+        "npx tsc -b",
+        "npm run agent:public-supabase-readiness",
+        "npm run agent:seo-readiness",
+        "npm run agent:smoke",
+        "npm run agent:check",
+        "git diff --check",
+        "Browser: /stone-library listing, hidden-origin search, /stone-library/alpine-white detail, and 390px layout"
+      ]
+    },
+    {
       "id": "NEXT-HOME-HERO-EDGE-REVEAL-001",
       "status": "done",
       "priority": 11.5,

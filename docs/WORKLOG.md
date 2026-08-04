@@ -1,6 +1,13 @@
 # WORKLOG - Urblo Execution Log
 
-Last updated: 2026-08-03
+Last updated: 2026-08-04
+
+## Entry - 2026-08-04 (Public Stone Library Origin Hidden)
+
+- Removed origin from public Stone Library cards and detail specifications while retaining the underlying data and Admin field.
+- Removed origin from public free-text matching so a hidden field cannot produce unexplained search results, and removed origin disclosure from listing/detail route metadata.
+- Rebalanced the four remaining detail specification cards across responsive breakpoints.
+- Added public-readiness contract checks and updated the design/architecture disclosure boundary. Runtime, browser, Preview, and production evidence will be recorded before release closure.
 
 ## Entry - 2026-08-03 (Projects Count and Production Data Normalization)
 

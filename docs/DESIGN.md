@@ -164,9 +164,12 @@ Priorities:
 - texture visibility
 - finish comparison
 - compact filters
-- fast scan of type, tone, origin, status, and price tier
+- fast scan of type, tone, status, finish range, and price tier
 - specs close to imagery
 - direct path to sample/contact behavior
+
+Public display rule:
+- Origin remains an internal sourcing/admin field but is intentionally omitted from public Stone Library cards, detail specifications, search matching, and route metadata.
 
 Interaction rules:
 - Click or explicit controls should change material state. Hover may preview only when it does not create ambiguity.

@@ -10,7 +10,6 @@ import type { StatusPillTone } from './StatusPill';
 
 interface SpecsPanelProps {
     stoneType: string;
-    originLabel: string;
     rawBlockLabel: string;
     availabilityStatus: StoneStatus;
     availabilityLabel: string;
@@ -54,7 +53,6 @@ function cutOrientationLabel(value: string): string {
 
 export default function SpecsPanel({
     stoneType,
-    originLabel,
     rawBlockLabel,
     availabilityStatus,
     availabilityLabel,
@@ -67,18 +65,12 @@ export default function SpecsPanel({
 }: SpecsPanelProps) {
     return (
         <section className="space-y-7">
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 <div className="rounded-[4px] border border-black/10 bg-white p-4 shadow-none">
                     <p className="urblo-meta text-black/55">
                         Type
                     </p>
                     <p className="mt-2 text-base text-black">{stoneType}</p>
-                </div>
-                <div className="rounded-[4px] border border-black/10 bg-white p-4 shadow-none">
-                    <p className="urblo-meta text-black/55">
-                        Origin
-                    </p>
-                    <p className="mt-2 text-base text-black">{originLabel}</p>
                 </div>
                 <div className="rounded-[4px] border border-black/10 bg-white p-4 shadow-none">
                     <p className="urblo-meta text-black/55">

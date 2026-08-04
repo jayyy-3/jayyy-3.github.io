@@ -427,7 +427,7 @@ function filterStoneCards(
                 return true;
             }
 
-            const searchable = [card.name, card.stoneType, card.originLabel]
+            const searchable = [card.name, card.stoneType]
                 .join(' ')
                 .toLowerCase();
 
@@ -639,7 +639,7 @@ class StoneLibraryService {
                 if (filters.stoneType && card.stoneType !== filters.stoneType) return false;
                 if (filters.finishKey && !card.availableFinishKeys.includes(filters.finishKey)) return false;
                 if (!query) return true;
-                return [card.name, card.stoneType, card.originLabel].join(' ').toLowerCase().includes(query);
+                return [card.name, card.stoneType].join(' ').toLowerCase().includes(query);
             })
             .sort((a, b) => a.name.localeCompare(b.name));
     }

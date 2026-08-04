@@ -346,6 +346,9 @@ Route state contract:
 - This is not the long-term CMS media contract. During Supabase migration, these assets should be represented as media records and moved to Supabase Storage or Cloudflare media storage according to final performance testing.
 
 ## Stone Library Detail Interaction Contract (`src/pages/StoneLibraryDetailPage.tsx`)
+- Public disclosure boundary:
+  - Origin remains in the source, typed view models, Supabase records, and Admin editor for internal sourcing use.
+  - Public Stone Library cards, detail specifications, free-text matching, and route metadata must not render or disclose origin.
 - State composition:
   - Effective active finish resolves by precedence: `lockedFinishKey` -> `defaultFinishKey`.
   - Each finish selection click increments a center-request token used by left media for one-shot visibility-check scroll handling.
