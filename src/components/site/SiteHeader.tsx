@@ -2,6 +2,18 @@ import { useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { siteLogoUrl, siteNavLinks, type SiteNavLink } from '../../data/siteChrome';
 
+export type SiteHeaderSurface = 'overlay' | 'light-page';
+
+const headerSurfaceClasses: Record<SiteHeaderSurface, string> = {
+  overlay: 'bg-black/50 backdrop-blur-xl backdrop-saturate-125',
+  'light-page': 'bg-black/70 backdrop-blur-xl backdrop-saturate-125',
+};
+
+const menuSurfaceClasses: Record<SiteHeaderSurface, string> = {
+  overlay: 'bg-black/70 backdrop-blur-2xl backdrop-saturate-125',
+  'light-page': 'bg-black/75 backdrop-blur-2xl backdrop-saturate-125',
+};
+
 function navItemActive(pathname: string, item: SiteNavLink) {
   if (!item.to) {
     return false;
@@ -47,7 +59,7 @@ function NavItem({
   return null;
 }
 
-export default function SiteHeader() {
+export default function SiteHeader({ surface = 'light-page' }: { surface?: SiteHeaderSurface }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
   const desktopMenuLabels = new Set(['Articles', 'Products']);
@@ -60,7 +72,10 @@ export default function SiteHeader() {
   const desktopMenuActive = desktopMenuLinks.some((item) => activeLookup.get(item.label));
 
   return (
-    <header className="absolute inset-x-0 top-0 z-50 border-b border-white/20 bg-black/88 text-white backdrop-blur-sm">
+    <header
+      data-header-surface={surface}
+      className={`absolute inset-x-0 top-0 z-50 border-b border-white/20 text-white transition-[background-color,border-color,backdrop-filter] duration-300 ${headerSurfaceClasses[surface]}`}
+    >
       <div className="urblo-edge-container flex h-[102px] items-center justify-between">
         <Link to="/" aria-label="Urblo home">
           <img src={siteLogoUrl} alt="Urblo logo" className="h-10 w-auto md:h-[45px]" />
@@ -104,7 +119,10 @@ export default function SiteHeader() {
       </div>
 
       {menuOpen ? (
-        <div className="border-t border-white/10 bg-black/96 px-6 py-6 lg:absolute lg:right-[clamp(20px,3.2vw,64px)] lg:top-[102px] lg:w-[260px] lg:border lg:border-white/12 lg:px-6 lg:py-5 lg:shadow-2xl">
+        <div
+          data-header-menu-surface={surface}
+          className={`border-t border-white/15 px-6 py-6 shadow-[0_24px_60px_rgba(0,0,0,0.24)] lg:absolute lg:right-[clamp(20px,3.2vw,64px)] lg:top-[102px] lg:w-[260px] lg:border lg:border-white/15 lg:px-6 lg:py-5 ${menuSurfaceClasses[surface]}`}
+        >
           <nav className="flex flex-col gap-4 text-lg font-light tracking-[0.02em] lg:hidden">
             {siteNavLinks.map((item) => (
               <NavItem

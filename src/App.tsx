@@ -270,7 +270,7 @@ function AnimatedRoutes() {
                 <Route
                     path="/capabilities"
                     element={
-                        <DefaultLayout showBanner={false}>
+                        <DefaultLayout showBanner={false} headerSurface="overlay">
                             {loadPage(<CapabilitiesPage />)}
                         </DefaultLayout>
                     }
@@ -297,7 +297,7 @@ function AnimatedRoutes() {
                 <Route
                     path="/articles/:slug"
                     element={
-                        <DefaultLayout showBanner={false}>
+                        <DefaultLayout showBanner={false} headerSurface="overlay">
                             {loadPage(<ArticlePage />, { headerOffset: true })}
                         </DefaultLayout>
                     }

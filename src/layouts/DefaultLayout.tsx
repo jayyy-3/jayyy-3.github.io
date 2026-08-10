@@ -1,16 +1,18 @@
 import type { ReactNode } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import type { SiteHeaderSurface } from '../components/site/SiteHeader';
 
 interface Props {
   children: ReactNode;
   bgImage?: string;
   showBanner?: boolean;
+  headerSurface?: SiteHeaderSurface;
 }
 
 function LayoutBanner({ bgImage }: { bgImage?: string }) {
   if (!bgImage) {
-    return <div className="h-[102px] bg-black" aria-hidden="true" />;
+    return <div className="h-[102px] bg-white" aria-hidden="true" />;
   }
 
   return (
@@ -22,10 +24,17 @@ function LayoutBanner({ bgImage }: { bgImage?: string }) {
   );
 }
 
-export default function DefaultLayout({ children, bgImage, showBanner = true }: Props) {
+export default function DefaultLayout({
+  children,
+  bgImage,
+  showBanner = true,
+  headerSurface,
+}: Props) {
+  const resolvedHeaderSurface = headerSurface ?? (bgImage ? 'overlay' : 'light-page');
+
   return (
     <div className="min-h-screen bg-white text-[var(--urblo-text)]">
-      <Header />
+      <Header surface={resolvedHeaderSurface} />
       {showBanner ? <LayoutBanner bgImage={bgImage} /> : null}
       <main className="min-h-[40vh]">{children}</main>
       <Footer />
