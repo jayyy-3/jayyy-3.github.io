@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lastUpdated": "2026-07-14",
+  "lastUpdated": "2026-08-10",
   "sourceOfTruth": "Machine-readable task queue for active and upcoming agent work. Human-readable roadmap lives in docs/NEXT_STEPS.md.",
   "tasks": [
     {
@@ -2464,6 +2464,7 @@
     "2026-08-02: After Jay's explicit production-promotion approval, PR `#11` merged as `59cded9bca05ccee69fafe0ab92e4486debf14f9` and deployed as immutable Cloudflare production `76de2abf-a27b-4ecb-9e1f-fe229af4c8ed`. The immutable URL, apex, and `www` passed deployment-bound routes/assets/redirects/Functions/protected-Projects smoke after the normal custom-domain switch window; production owner login passed blocked-Supabase static fallback and all nine Admin routes. Desktop/mobile production Projects readback confirmed the translucent header, shared 102px Stone Library treatment, opened menu, and no horizontal overflow.",
     "2026-08-02: Jay used the production Projects result and explicitly reported `试了试没问题。OK`, closing the Jay-owned Phase 1 user acceptance boundary. This is not agent self-certification and does not close unrelated Admin golden workflows. Keep `NOW-ADMIN-UX-RESHAPE-001` in `now` for Phase 2 replication beginning with Articles, Phase 3 canonical documentation/Harness absorption, and mandatory deletion of the temporary directive under its sunset clause.",
     "2026-08-03: Read-only production inspection explained `All 9 / Saved 4 / Live 1 / Hidden 4`: four canonical imports were Draft, West Side Place was Published, and four Archived rows were exact QA markers. Jay approved the bounded normalization. PR `#14` Preview passed smoke, authenticated Projects/Archive interaction, and 390px no-overflow checks. The protected UI published Australian Catholic University, Xavier College, and Artisan Park | YarraBend; Moon Gate correctly remains Draft because Angola Black/New Grey are not Published and its hotspots are not material-bound. A guarded transaction deleted only exact QA Project IDs 1, 2, 3, and 9. PR `#14` merged as `edd33465`; production asset switch and authenticated Admin/public readback are five canonical Projects, four Live, one Draft, zero Archived/QA rows, retained media/audit history, and five public Projects. The eight-hex immutable Cloudflare URL is unrecorded because local access would require a new unapproved OAuth grant, so strict custom-domain binding smoke remains an evidence follow-up rather than a UI/data blocker.",
+    "2026-08-10: The earlier 102px black support-band rule is superseded. Git history and rendered inspection showed that translucent black stacked over solid black looked opaque. The bounded Navbar follow-up introduces route-aware `overlay` and `light-page` glass surfaces, keeps a light shared 102px clearance for Projects/Stone Library, and adds source/built-CSS regression checks. This changes only public chrome; it does not reopen Jay's accepted Admin Projects workflow.",
         "Do not substitute another copy-only Clarify pass for structural work, and update behavior verification when the new UI invalidates literal string assertions.",
         "Jay owns the fool-test acceptance. Agent checks, screenshots, route shells, or self-review cannot certify that criterion."
       ],
@@ -2476,7 +2477,7 @@
         "Media upload and library selection are inline, private-first, and publish-time promotion is handled by an authenticated audited server path without exposing bucket language.",
     "Aggregate save is all-or-nothing and writes its audit event server-side.",
     "Projects exposes no proof-review or approval controls; an active editor can edit, Save, preview, Publish, and Hide without a second approval step, while required content/media validation remains.",
-    "Projects listing/detail use the same 102px black layout support band and translucent header/menu treatment as Stone Library, with no duplicate page-local top offset.",
+    "Projects listing/detail use the same light 102px layout clearance and deeper smoked-glass header/menu treatment as Stone Library, with no solid-black support band or duplicate page-local top offset.",
         "Draft content remains publicly invisible, no service-role key enters browser code, and existing RLS/security contracts remain intact.",
         "Jay completes the documented fool test unassisted in under five minutes; the agent does not self-certify it.",
         "The temporary directive is absorbed into canonical docs and deleted only after all reshape phases complete, following its sunset clause."
@@ -2495,6 +2496,44 @@
         "Browser: verify aggregate edit, one Save, unsaved draft preview, visual hotspot movement, inline media, publish, public readback, and archive on the preview deployment",
         "Jay: complete the unassisted under-five-minute fool test",
         "npm run agent:check",
+        "git diff --check"
+      ]
+    },
+    {
+      "id": "NOW-PUBLIC-NAVBAR-GLASS-RESTORE-001",
+      "status": "done",
+      "priority": 0.8,
+      "summary": "Restore the public Navbar's frosted-glass depth with explicit route-aware surfaces instead of a single dark layer over solid-black backing.",
+      "files": [
+        "src/components/site/SiteHeader.tsx",
+        "src/components/Header.tsx",
+        "src/components/homepage/HomepageHeader.tsx",
+        "src/layouts/DefaultLayout.tsx",
+        "src/App.tsx",
+        "scripts/agent-smoke.sh",
+        "docs/DESIGN.md",
+        "docs/ARCHITECTURE.md",
+        "docs/agent/verification.md"
+      ],
+      "notes": [
+        "2026-08-10: Git history located the regression mechanics: the shared header retained translucent black styling while the 2026-08-02 Projects/Stone Library alignment added a solid-black 102px backing, making the result look opaque. Jay approved the explicit two-surface solution after reviewing the expected outcome.",
+        "2026-08-10: Source implementation and local desktop/mobile rendered QA are complete. Image/video-first routes use lighter overlay glass; white-start routes use deeper smoked glass over light clearance; opened menus inherit the route mode with stronger blur. Release evidence is tracked in WORKLOG/HANDOFF and does not require any Supabase write."
+      ],
+      "acceptance": [
+        "Image/video-first openings preserve visible media beneath a lighter frosted header.",
+        "Projects, Stone Library, 404, and other white-start routes use readable deeper smoked glass without a solid-black support band.",
+        "Opened desktop and mobile menus inherit the route surface, remain translucent, and do not overflow horizontally.",
+        "Public smoke rejects loss of the two surface modes, restoration of a black 102px fallback, or missing compiled opacity utilities."
+      ],
+      "verification": [
+        "npm run build",
+        "npm run lint",
+        "npx tsc -b",
+        "npm run agent:smoke",
+        "npm run agent:check",
+        "npm run gate before push",
+        "npm run agent:cloudflare-preview-smoke -- --base-url https://<branch-preview>.urblo.pages.dev",
+        "Browser: desktop and 390px rendered checks across overlay and light-page routes, including opened menus and horizontal overflow",
         "git diff --check"
       ]
     },

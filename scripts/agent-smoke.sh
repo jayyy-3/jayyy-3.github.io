@@ -252,13 +252,35 @@ async function checkCta(contract) {
 
 await waitForServer()
 
+const siteHeaderSource = fs.readFileSync('src/components/site/SiteHeader.tsx', 'utf8')
+const defaultLayoutSource = fs.readFileSync('src/layouts/DefaultLayout.tsx', 'utf8')
+const appSource = fs.readFileSync('src/App.tsx', 'utf8')
+
+for (const contract of [
+  [siteHeaderSource, "export type SiteHeaderSurface = 'overlay' | 'light-page'", 'route-aware header surface modes'],
+  [siteHeaderSource, 'data-header-surface={surface}', 'rendered header surface marker'],
+  [defaultLayoutSource, 'headerSurface ?? (bgImage ?', 'layout-derived header surface'],
+  [defaultLayoutSource, 'h-[102px] bg-white', 'light-page header clearance'],
+  [appSource, '<DefaultLayout showBanner={false} headerSurface="overlay">', 'no-banner image hero override'],
+]) {
+  if (!contract[0].includes(contract[1])) {
+    throw new Error(`Missing public header contract: ${contract[2]}`)
+  }
+  console.log(`header contract ok: ${contract[2]}`)
+}
+
+if (defaultLayoutSource.includes('h-[102px] bg-black')) {
+  throw new Error('Public light-page header clearance regressed to a solid black support band')
+}
+
 const builtCss = fs.readdirSync('dist/assets')
   .filter((file) => file.endsWith('.css'))
   .map((file) => fs.readFileSync(`dist/assets/${file}`, 'utf8'))
   .join('\n')
 const requiredOpacityUtilities = [
-  'bg-black\\/88',
-  'bg-black\\/96',
+  'bg-black\\/50',
+  'bg-black\\/70',
+  'bg-black\\/75',
   'bg-white\\/82',
   'bg-white\\/92',
   'bg-white\\/98',

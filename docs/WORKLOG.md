@@ -1,6 +1,13 @@
 # WORKLOG - Urblo Execution Log
 
-Last updated: 2026-08-04
+Last updated: 2026-08-10
+
+## Entry - 2026-08-10 (Route-aware Public Navbar Glass Restoration)
+
+- Git history and rendered production styles showed that the public header was still a translucent black surface, but Projects and Stone Library placed it over a solid-black 102px support band. The two layers visually collapsed into opaque black; image-first and white-start routes also shared one tint despite needing different contrast.
+- Added explicit `overlay` and `light-page` surfaces to the shared header. Homepage, banner-image layouts, Capabilities, and Article detail use lighter overlay glass; Projects, Stone Library, ordinary white-start layouts, and 404 use deeper smoked glass over a light shared clearance. The opened menu inherits the route mode with stronger blur.
+- Replaced the retired solid-black layout fallback and extended smoke coverage to enforce the route-aware source contract, reject a black fallback band, and require all compiled opacity utilities.
+- Local rendered QA covered Homepage, Products, Capabilities, Projects, Stone Library, Article detail, 404, the opened desktop menu, and the opened 390px mobile menu. Computed styles matched the intended surface modes and blur, and no checked route had horizontal overflow. Preview/production verification is pending the release workflow.
 
 ## Entry - 2026-08-04 (Public Stone Library Origin Hidden)
 
