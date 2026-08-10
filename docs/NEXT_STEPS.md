@@ -16,7 +16,7 @@ The Projects cleanup has removed the raw-database `All 9` mismatch and is live t
 
 Public Stone Library origin disclosure is removed through PR `#16` / merge `160b4f1` from listing cards, detail specs, search matching, and route metadata while the underlying source/Supabase/Admin field remains intact. Immutable release `76ae7fe0`, apex, and `www` pass deployment-bound smoke; production desktop/mobile UI readback passes.
 
-The public Navbar follow-up restores an actual route-aware glass system instead of stacking one nearly opaque header over a solid-black support band. Image/video-first routes use lighter overlay glass; Projects, Stone Library, 404, and other white-start routes use deeper smoked glass over a light 102px clearance. The hamburger menu inherits the active surface with stronger blur. Local desktop/mobile browser checks cover both modes without overflow; Preview/production evidence is pending this release.
+The public Navbar route-aware glass restoration is deployed through PR `#18` / merge `93fd143c`. Image/video-first routes use lighter overlay glass; Projects, Stone Library, 404, and other white-start routes use deeper smoked glass over a light 102px clearance. The hamburger menu inherits the active surface with stronger blur. Clean container gate, immutable Preview `b15782a6`, deployment-bound apex/`www` smoke, and production desktop/390px browser checks pass without overflow.
 
 ## What Is Complete
 - Cloudflare Pages production hosting is complete for `https://urblo.com.au` and `https://www.urblo.com.au`.

@@ -2517,7 +2517,8 @@
       ],
       "notes": [
         "2026-08-10: Git history located the regression mechanics: the shared header retained translucent black styling while the 2026-08-02 Projects/Stone Library alignment added a solid-black 102px backing, making the result look opaque. Jay approved the explicit two-surface solution after reviewing the expected outcome.",
-        "2026-08-10: Source implementation and local desktop/mobile rendered QA are complete. Image/video-first routes use lighter overlay glass; white-start routes use deeper smoked glass over light clearance; opened menus inherit the route mode with stronger blur. Release evidence is tracked in WORKLOG/HANDOFF and does not require any Supabase write."
+        "2026-08-10: Source implementation and local desktop/mobile rendered QA are complete. Image/video-first routes use lighter overlay glass; white-start routes use deeper smoked glass over light clearance; opened menus inherit the route mode with stronger blur. Release evidence is tracked in WORKLOG/HANDOFF and does not require any Supabase write.",
+        "2026-08-10: Commit `242d84f` passed the clean Node 20 Docker gate; PR `#18` merged as `93fd143c`. Immutable Preview `b15782a6`, apex, and `www` passed byte/MIME-bound smoke after the normal propagation window. Production desktop and 390px browser readback confirmed both glass modes and the opened mobile menu without horizontal overflow."
       ],
       "acceptance": [
         "Image/video-first openings preserve visible media beneath a lighter frosted header.",
