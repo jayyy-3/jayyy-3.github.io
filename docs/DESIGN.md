@@ -147,9 +147,9 @@ Header behavior:
 - On desktop, the visible primary nav and hamburger are one right-aligned control group. Do not distribute the primary nav as a centered middle column between the logo and menu button.
 - Mobile header keeps the same hamburger control but exposes the full navigation list in the opened menu.
 - The hamburger is a compact navigation affordance, not a promotional CTA; avoid adding pill labels or extra explanatory copy around it.
-- Header and opened-menu surfaces are route-aware frosted glass, not one opaque treatment. Image/video-first routes use the lighter `overlay` surface so the opening media remains visible through the header; white-start routes such as Projects and Stone Library use the deeper `light-page` smoke surface for legibility.
+- Header and opened-menu surfaces are route-aware clear glass, not one opaque treatment. Preserve the original light `backdrop-blur-sm` character: underlying media should stay recognizable and sharp, with only slight softening. Do not substitute medium/heavy blur or saturation effects. Image/video-first routes use the lighter `overlay` surface so the opening media remains visible through the header; white-start routes such as Projects and Stone Library use the deeper `light-page` smoke surface for legibility.
 - White-start routes keep the shared 102px `DefaultLayout` clearance, but its backing stays light. Do not reintroduce a pure-black support band: stacking translucent black over solid black makes the glass appear opaque and was the root of the August 2026 regression.
-- The opened hamburger menu inherits the route surface and may use a slightly stronger tint/blur than the closed header. Desktop and mobile must preserve readable white navigation, visible background depth, and no horizontal overflow.
+- The opened hamburger menu inherits the route surface and may use a slightly stronger tint than the closed header, but keeps the same light blur. Desktop and mobile must preserve readable white navigation, visible background detail, and no horizontal overflow.
 
 Hero behavior:
 - The first homepage viewport should feel full-screen on desktop and mobile.

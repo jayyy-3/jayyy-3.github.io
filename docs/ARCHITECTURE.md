@@ -263,7 +263,7 @@ Routing uses clean paths through `BrowserRouter`. Cloudflare Pages direct refres
 
 Route state contract:
 - `src/components/site/SiteHeader.tsx` exposes two explicit surface modes: `overlay` for image/video-first openings and `light-page` for white-start content. `HomepageHeader` selects `overlay`; `DefaultLayout` derives `overlay` when `bgImage` is present, otherwise `light-page`, with an explicit `headerSurface` override for page-owned image heroes such as Capabilities and Article detail.
-- `DefaultLayout` retains a shared 102px clearance for bannerless white-start routes, but the clearance is light rather than solid black. The header and opened menu own their translucent tint, blur, and saturation; route components must not add duplicate top offsets or recreate the retired black support band.
+- `DefaultLayout` retains a shared 102px clearance for bannerless white-start routes, but the clearance is light rather than solid black. The header and opened menu own their translucent tint and the original light `backdrop-blur-sm`; route components must not add duplicate top offsets, heavier blur/saturation, or recreate the retired black support band.
 - Shared route-level loading states use `src/components/RouteState.tsx` instead of plain text placeholders.
 - Route states on no-banner routes use the `headerOffset` prop so loading, not-found, and error copy clears the absolute site header.
 - Unknown public URLs render `src/pages/NotFoundPage.tsx`, not the homepage.
