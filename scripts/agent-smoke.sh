@@ -273,6 +273,10 @@ if (defaultLayoutSource.includes('h-[102px] bg-black')) {
   throw new Error('Public light-page header clearance regressed to a solid black support band')
 }
 
+if (!siteHeaderSource.includes('backdrop-blur-sm') || /backdrop-blur-(?:md|lg|xl|2xl|3xl)/.test(siteHeaderSource)) {
+  throw new Error('Public header glass must retain the original light blur instead of heavy frosted blur')
+}
+
 const builtCss = fs.readdirSync('dist/assets')
   .filter((file) => file.endsWith('.css'))
   .map((file) => fs.readFileSync(`dist/assets/${file}`, 'utf8'))

@@ -5,13 +5,13 @@ import { siteLogoUrl, siteNavLinks, type SiteNavLink } from '../../data/siteChro
 export type SiteHeaderSurface = 'overlay' | 'light-page';
 
 const headerSurfaceClasses: Record<SiteHeaderSurface, string> = {
-  overlay: 'bg-black/50 backdrop-blur-xl backdrop-saturate-125',
-  'light-page': 'bg-black/70 backdrop-blur-xl backdrop-saturate-125',
+  overlay: 'bg-black/50 backdrop-blur-sm',
+  'light-page': 'bg-black/70 backdrop-blur-sm',
 };
 
 const menuSurfaceClasses: Record<SiteHeaderSurface, string> = {
-  overlay: 'bg-black/70 backdrop-blur-2xl backdrop-saturate-125',
-  'light-page': 'bg-black/75 backdrop-blur-2xl backdrop-saturate-125',
+  overlay: 'bg-black/70 backdrop-blur-sm',
+  'light-page': 'bg-black/75 backdrop-blur-sm',
 };
 
 function navItemActive(pathname: string, item: SiteNavLink) {
