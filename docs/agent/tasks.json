@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lastUpdated": "2026-08-11",
+  "lastUpdated": "2026-08-12",
   "sourceOfTruth": "Machine-readable task queue for active and upcoming agent work. Human-readable roadmap lives in docs/NEXT_STEPS.md.",
   "tasks": [
     {
@@ -2557,7 +2557,8 @@
         "docs/WORKLOG.md"
       ],
       "notes": [
-        "2026-08-11: Twelve supplied marks were normalized and added to the existing four-mark roster. Local desktop/390px Browser QA plus host build, lint, typecheck, and smoke pass; commit/Preview/promotion wait for Jay's visual approval."
+        "2026-08-11: Twelve supplied marks were normalized and added to the existing four-mark roster. Local desktop/390px Browser QA plus host build, lint, typecheck, and smoke pass.",
+        "2026-08-12: Jay accepted the local result. Commit 0bcd446 passed the clean Node 20 container gate; immutable Preview 6da30082 passed deployed smoke and desktop/390px Browser readback. Production promotion remains."
       ],
       "acceptance": [
         "The existing white single-row homepage marquee composition remains visually unchanged apart from the expanded partner roster.",
