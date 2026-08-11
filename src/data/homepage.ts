@@ -357,8 +357,56 @@ export const homepageData = {
       image: '/media/launch/homepage/partners/wamara.png',
     },
     {
-      alt: 'Symal logo',
+      alt: 'Symal',
       image: '/media/launch/homepage/partners/symal.png',
+    },
+    {
+      alt: 'Normark',
+      image: '/media/launch/homepage/partners/normark.png',
+    },
+    {
+      alt: 'PTA Landscapes',
+      image: '/media/launch/homepage/partners/pta-landscapes.png',
+    },
+    {
+      alt: 'McConnell Dowell',
+      image: '/media/launch/homepage/partners/mcconnell-dowell.png',
+    },
+    {
+      alt: 'Outlines',
+      image: '/media/launch/homepage/partners/outlines.png',
+    },
+    {
+      alt: 'Glascott',
+      image: '/media/launch/homepage/partners/glascott.png',
+    },
+    {
+      alt: 'HDM',
+      image: '/media/launch/homepage/partners/hdm.png',
+    },
+    {
+      alt: 'AECOM',
+      image: '/media/launch/homepage/partners/aecom.png',
+    },
+    {
+      alt: 'SYNQ Projects',
+      image: '/media/launch/homepage/partners/synq-projects.png',
+    },
+    {
+      alt: 'Complex',
+      image: '/media/launch/homepage/partners/complex.png',
+    },
+    {
+      alt: 'Stratis',
+      image: '/media/launch/homepage/partners/stratis.png',
+    },
+    {
+      alt: 'T.C.L',
+      image: '/media/launch/homepage/partners/tcl.png',
+    },
+    {
+      alt: 'Rush Wright Associates',
+      image: '/media/launch/homepage/partners/rush-wright-associates.png',
     },
   ] satisfies HomepageLogo[],
   videoCta: {
