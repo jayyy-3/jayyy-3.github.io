@@ -1,6 +1,6 @@
 # HANDOFF - Current Agent State
 
-Last updated: 2026-08-02
+Last updated: 2026-08-12
 
 ## Read First
 Use this file as the short current-state entry. Detailed evidence lives in `docs/WORKLOG.md`; task execution state lives in `docs/agent/tasks.json`; compact machine state lives in `docs/agent/status.json`.
@@ -16,6 +16,8 @@ Recommended startup order:
 
 ## Current Production State
 Urblo is now running on Cloudflare Pages with Supabase-backed forms and an Urblo-owned `/admin` CMS.
+
+PR `#21` candidate `0bcd446` adds the 12 supplied partner marks to the existing homepage marquee without changing its white-strip composition. Source uses two equal groups for a seamless loop, one accessible copy, and a reduced-motion fallback. Jay accepted the local desktop/390px result; the clean Node 20 container gate, immutable Preview `https://6da30082.urblo.pages.dev` smoke, and deployed desktop/390px readback pass. Production promotion remains pending.
 
 Working process is governed by `docs/OPERATING_PROTOCOL.md`: branch -> local container gate (`npm run gate`) -> Cloudflare preview smoke -> promote to `main`, plus the design review -> implement -> remember loop.
 

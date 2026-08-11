@@ -1,6 +1,6 @@
 # NEXT_STEPS - Urblo Roadmap
 
-Last updated: 2026-08-10
+Last updated: 2026-08-12
 
 ## Purpose
 This is the human-readable roadmap. The machine-readable source of truth is `docs/agent/tasks.json`; the compact current-state snapshot is `docs/agent/status.json`; historical proof lives in `docs/WORKLOG.md`.
@@ -17,6 +17,8 @@ The Projects cleanup has removed the raw-database `All 9` mismatch and is live t
 Public Stone Library origin disclosure is removed through PR `#16` / merge `160b4f1` from listing cards, detail specs, search matching, and route metadata while the underlying source/Supabase/Admin field remains intact. Immutable release `76ae7fe0`, apex, and `www` pass deployment-bound smoke; production desktop/mobile UI readback passes.
 
 The public Navbar route-aware surface structure was deployed through PR `#18` / merge `93fd143c`, but Jay rejected its heavy 24px/40px blur after production review. PR `#19` / merge `36e69e5f` restores the original clear `backdrop-blur-sm` material: 4px blur without extra saturation for Header/menu, while retaining the lighter image-page/deeper white-page tints and light 102px clearance. Clean container gate, immutable Preview `ac951868`, deployment-bound apex/`www` smoke, and production desktop/390px readback pass.
+
+PR `#21` adds the 12 supplied partner marks to the existing homepage white marquee, preserving the section composition while correcting the loop to two equal groups, hiding the duplicate accessibility copy, and adding a reduced-motion fallback. Jay accepted the local result; commit `0bcd446`, the clean Node 20 container gate, immutable Preview `6da30082` smoke, and deployed desktop/390px readback pass. Production promotion remains.
 
 ## What Is Complete
 - Cloudflare Pages production hosting is complete for `https://urblo.com.au` and `https://www.urblo.com.au`.

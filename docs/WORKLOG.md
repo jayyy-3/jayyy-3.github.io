@@ -1,6 +1,15 @@
 # WORKLOG - Urblo Execution Log
 
-Last updated: 2026-08-10
+Last updated: 2026-08-12
+
+## Entry - 2026-08-11 (Homepage Partner Logo Marquee Expansion)
+
+- Processed the 12 supplied partner marks into controlled PNG assets under `public/media/launch/homepage/partners`, using explicit brand filenames and bounded crops for oversized source canvases. Exact-hash comparison found no duplicate in the supplied batch or against the four existing marks.
+- Added all 12 marks to the existing homepage white logo strip without changing its section height, item sizing, direction, or surrounding Manifesto/video composition.
+- Replaced the three-copy/`-50%` mismatch with two equal 7,832px desktop groups and extended the duration from 30 seconds to 120 seconds so the 4x roster keeps the previous per-logo pace. The duplicate group is hidden from assistive technology; reduced-motion users receive an unanimated horizontally scrollable row.
+- Local Browser QA passed at the default desktop viewport and 390x844: the marquee rendered between Manifesto and Video CTA, its transform advanced over time, both loop groups remained equal width, all 16 accessible brand names appeared exactly once, the mobile document stayed at `scrollWidth = clientWidth = 390`, and the console had no warning/error.
+- `npm run build`, `npm run lint`, and `npx tsc -b` pass. `npm run agent:smoke` initially could not bind its Preview port inside the sandbox, then passed unchanged outside the sandbox, including the nested Admin Projects aggregate check. The known Browserslist staleness notice remains.
+- Jay accepted the local desktop/390px result. Commit `0bcd446` passed the clean Node 20 Docker/Colima gate and was pushed to Draft PR `#21`. Cloudflare immutable Preview `https://6da30082.urblo.pages.dev` passed all public/Admin routes, recursively discovered asset MIME/body checks, redirects, form Function safe-failure checks, and the protected Projects boundary. Deployed desktop/390px Browser readback confirmed the partner region, all 16 unique accessible brand names, zero relevant console warnings/errors, and no 390px horizontal overflow. Production promotion remains pending.
 
 ## Entry - 2026-08-10 (Route-aware Public Navbar Glass Restoration)
 

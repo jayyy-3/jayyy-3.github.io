@@ -1504,12 +1504,12 @@ function ManifestoSection() {
   );
 }
 
-function LogoCarouselItem({ logo }: { logo: HomepageLogo }) {
+function LogoCarouselItem({ logo, decorative = false }: { logo: HomepageLogo; decorative?: boolean }) {
   return (
     <div className="flex h-[110px] w-[240px] shrink-0 items-center justify-center px-8 md:w-[320px] lg:w-[360px] xl:w-[489.5px]">
       <img
         src={logo.image}
-        alt={logo.alt}
+        alt={decorative ? '' : logo.alt}
         className="max-h-[52px] w-auto max-w-full object-contain"
         {...lazyImageProps}
       />
@@ -1519,14 +1519,25 @@ function LogoCarouselItem({ logo }: { logo: HomepageLogo }) {
 
 function LogoCarouselSection() {
   const logos = homepageData.logoCarousel;
-  const marqueeLogos = [...logos, ...logos, ...logos];
 
   return (
-    <section className="overflow-hidden bg-white py-16 md:py-20">
-      <div className="overflow-hidden">
+    <section aria-label="Project partners" className="overflow-hidden bg-white py-16 md:py-20">
+      <div className="logo-carousel-viewport overflow-hidden">
         <div className="animate-marquee flex w-max items-center">
-          {marqueeLogos.map((logo, index) => (
-            <LogoCarouselItem key={`${logo.alt}-${index}`} logo={logo} />
+          {[0, 1].map((groupIndex) => (
+            <div
+              key={groupIndex}
+              aria-hidden={groupIndex === 1 ? true : undefined}
+              className="flex shrink-0 items-center"
+            >
+              {logos.map((logo) => (
+                <LogoCarouselItem
+                  key={`${groupIndex}-${logo.alt}`}
+                  logo={logo}
+                  decorative={groupIndex === 1}
+                />
+              ))}
+            </div>
           ))}
         </div>
       </div>
