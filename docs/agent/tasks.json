@@ -2542,7 +2542,7 @@
     },
     {
       "id": "NEXT-HOMEPAGE-LOGO-MARQUEE-001",
-      "status": "next",
+      "status": "done",
       "priority": 4,
       "summary": "Ship the expanded homepage partner-logo marquee after Jay reviews the local desktop/mobile result.",
       "files": [
@@ -2558,7 +2558,8 @@
       ],
       "notes": [
         "2026-08-11: Twelve supplied marks were normalized and added to the existing four-mark roster. Local desktop/390px Browser QA plus host build, lint, typecheck, and smoke pass.",
-        "2026-08-12: Jay accepted the local result. Commit 0bcd446 passed the clean Node 20 container gate; immutable Preview 6da30082 passed deployed smoke and desktop/390px Browser readback. Production promotion remains."
+        "2026-08-12: Jay accepted the local result. Commit 0bcd446 passed the clean Node 20 container gate; immutable Preview 6da30082 passed deployed smoke and desktop/390px Browser readback.",
+        "2026-08-12: Evidence commit 6218a53 passed the clean gate and immutable Preview a928c861. PR #21 merged as b1e8b315 and deployed as immutable production 8f2af15d; immutable/apex/www/Pages-alias binding smoke and production desktop/390px Browser readback pass."
       ],
       "acceptance": [
         "The existing white single-row homepage marquee composition remains visually unchanged apart from the expanded partner roster.",
