@@ -18,7 +18,7 @@ Public Stone Library origin disclosure is removed through PR `#16` / merge `160b
 
 The public Navbar route-aware surface structure was deployed through PR `#18` / merge `93fd143c`, but Jay rejected its heavy 24px/40px blur after production review. PR `#19` / merge `36e69e5f` restores the original clear `backdrop-blur-sm` material: 4px blur without extra saturation for Header/menu, while retaining the lighter image-page/deeper white-page tints and light 102px clearance. Clean container gate, immutable Preview `ac951868`, deployment-bound apex/`www` smoke, and production desktop/390px readback pass.
 
-PR `#21` adds the 12 supplied partner marks to the existing homepage white marquee, preserving the section composition while correcting the loop to two equal groups, hiding the duplicate accessibility copy, and adding a reduced-motion fallback. Jay accepted the local result; commit `0bcd446`, the clean Node 20 container gate, immutable Preview `6da30082` smoke, and deployed desktop/390px readback pass. Production promotion remains.
+PR `#21` merged as `b1e8b315` and deployed the 12 supplied partner marks into the existing homepage white marquee, preserving the section composition while correcting the loop to two equal groups, hiding the duplicate accessibility copy, and adding a reduced-motion fallback. Jay accepted the local result; the clean Node 20 container gate, immutable Preview checks, production deployment `8f2af15d`, apex/`www`/Pages-alias binding smoke, and production desktop/390px readback pass. This item is complete.
 
 ## What Is Complete
 - Cloudflare Pages production hosting is complete for `https://urblo.com.au` and `https://www.urblo.com.au`.

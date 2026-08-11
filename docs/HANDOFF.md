@@ -17,7 +17,7 @@ Recommended startup order:
 ## Current Production State
 Urblo is now running on Cloudflare Pages with Supabase-backed forms and an Urblo-owned `/admin` CMS.
 
-PR `#21` candidate `0bcd446` adds the 12 supplied partner marks to the existing homepage marquee without changing its white-strip composition. Source uses two equal groups for a seamless loop, one accessible copy, and a reduced-motion fallback. Jay accepted the local desktop/390px result; the clean Node 20 container gate, immutable Preview `https://6da30082.urblo.pages.dev` smoke, and deployed desktop/390px readback pass. Production promotion remains pending.
+PR `#21` merged as `b1e8b315` and deployed the 12 supplied partner marks into the existing homepage marquee without changing its white-strip composition. Source uses two equal groups for a seamless loop, one accessible copy, and a reduced-motion fallback. Jay accepted the local desktop/390px result; the clean Node 20 container gate, immutable Preview checks, and production deployment `https://8f2af15d.urblo.pages.dev` pass. The immutable URL, apex, `www`, and moving Pages alias pass deployment-bound smoke; production desktop/390px readback confirms movement, equal group widths, all 16 accessible names, no relevant console errors, and no horizontal overflow.
 
 Working process is governed by `docs/OPERATING_PROTOCOL.md`: branch -> local container gate (`npm run gate`) -> Cloudflare preview smoke -> promote to `main`, plus the design review -> implement -> remember loop.
 
