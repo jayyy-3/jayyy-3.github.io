@@ -46,6 +46,7 @@
         "docs/agent/tasks.json"
       ],
       "notes": [
+        "2026-08-12: After Jay's separate migration-only approval, `project_materials_stone_library_source` was applied to production as version `20260812062636`. Column/FK/index/trigger/function grants read back correctly; Moon Gate material 4 links to variant 5 and material 5 to variant 13, all involved content remains Draft, invalid links are zero, and Advisors added no migration-specific security warning. Runtime promotion remains separately approval-gated.",
         "2026-08-12: Follow-up commit `f7b8d70` passed the clean Docker Node 20 gate and immutable Cloudflare Preview `https://0e8e4fa0.urblo.pages.dev` passed the complete no-write smoke. No production migration, content status change, runtime promotion, or email occurred; stop for separate migration approval.",
         "2026-06-05: Added compact `docs/agent/status.json` as the current-state API for agents, separating production/local/decision state from long historical evidence.",
         "2026-06-05: Added `docs/agent/harness-gc.md` to define Harness GC purpose, policy/state/evidence/knowledge boundaries, command behavior, check categories, and current agent script coverage.",
