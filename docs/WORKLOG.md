@@ -12458,3 +12458,11 @@ Last updated: 2026-08-12
 
 ### Next Handoff
 - Exact task IDs from `NEXT_STEPS.md` to run next.
+## 2026-08-12 — Project material points use Stone Library as source (local candidate)
+
+- Scope: aligned Admin Project material schedules, visual map points, draft preview, public Project material cards, and Stone Library deep links around one canonical `stone_group_id + stone_variant_id + finish_definition_id` reference.
+- Runtime: Admin loads published Stone variants, finish capabilities, finish-image links, and every referenced finish media row; Stone/Variant/Finish controls are dependent, Project-specific material/point image and point-title inputs are removed, and normalized saves clear the legacy overrides. Project map photos, coordinates, application, and project notes remain Project-owned.
+- Public: Project hotspots and Featured Materials load current Published Stone Library detail (with static availability fallback), resolve the selected variant/finish image and alt, and deep-link with `variant`/`finish` query state. Project-owned legacy images no longer win.
+- Database candidate: `supabase/migrations/20260812053204_project_materials_stone_library_source.sql` adds indexed `project_materials.stone_variant_id`, backfills only uniquely supported legacy stone/finish pairs, and adds a private publish-synchronization trigger that rejects cross-stone or unsupported variant/finish combinations. Legacy image/title columns are retained for rollback. The migration is source-only and has not been applied to production.
+- Verification so far: `npm run build`, `npm run lint`, `npx tsc -b`, and `npm run agent:admin-projects-aggregate` pass. In-app Browser local QA at desktop and 390×844 verified Moon Gate point switching, canonical stone/finish imagery, Stone Library deep-link selection, no console warnings/errors, and no horizontal mobile overflow. This is implementation evidence, not a production write or user acceptance.
+- Next: finish Harness/contract checks and clean-container gate, then request separate approval before any production migration apply/readback. Production Project edits remain untouched.

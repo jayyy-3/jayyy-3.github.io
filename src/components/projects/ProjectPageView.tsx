@@ -1,4 +1,4 @@
-import type { MouseEvent as ReactMouseEvent } from 'react';
+import { useEffect, useState, type MouseEvent as ReactMouseEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, ArrowUpRight } from 'lucide-react';
 import type {
@@ -7,6 +7,7 @@ import type {
   ProjectMediaBlock,
 } from '../../data/projectData';
 import StoneLibraryService from '../../service/StoneLibraryService';
+import type { StoneDetailVM } from '../../types/stone-library';
 import ProjectHotspotImage from './ProjectHotspotImage';
 
 interface ProjectPageViewProps {
@@ -37,16 +38,23 @@ function toFallbackLabel(value: string) {
     .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
-function resolveProjectMaterial(material: ProjectMaterial) {
-  const stone = StoneLibraryService.getStoneDetail(material.stoneGroupId);
+function projectMaterialKey(material: ProjectMaterial) {
+  return `${material.stoneGroupId}:${material.stoneVariantId || ''}`;
+}
+
+function resolveProjectMaterial(
+  material: ProjectMaterial,
+  publishedDetails: ReadonlyMap<string, StoneDetailVM>,
+) {
+  const stone = publishedDetails.get(projectMaterialKey(material))
+    || StoneLibraryService.getStoneDetail(material.stoneGroupId, material.stoneVariantId);
   const finish = stone?.finishes.find((entry) => entry.finishKey === material.finishKey);
 
   return {
     stoneName: stone?.name || toFallbackLabel(material.stoneGroupId),
     finishLabel: finish?.label || toFallbackLabel(material.finishKey),
-    image: material.image || finish?.imageUrl || stone?.finishes[0]?.imageUrl,
+    image: finish?.imageUrl || stone?.finishes[0]?.imageUrl,
     imageAlt:
-      material.imageAlt ||
       finish?.imageAlt ||
       `${stone?.name || material.stoneGroupId} ${finish?.label || material.finishKey} finish preview`,
   };
@@ -305,6 +313,46 @@ function ProjectMedia({ project }: { project: ProjectData }) {
 }
 
 function FeaturedMaterials({ project }: { project: ProjectData }) {
+  const [publishedDetails, setPublishedDetails] = useState<ReadonlyMap<string, StoneDetailVM>>(
+    () => new Map(),
+  );
+
+  useEffect(() => {
+    let active = true;
+    const uniqueMaterials = [
+      ...new Map((project.materials ?? []).map((material) => [projectMaterialKey(material), material])).values(),
+    ];
+    if (!uniqueMaterials.length) {
+      setPublishedDetails(new Map());
+      return () => {
+        active = false;
+      };
+    }
+
+    Promise.all(
+      uniqueMaterials.map(async (material) => ({
+        key: projectMaterialKey(material),
+        detail: await StoneLibraryService.getPublishedStoneDetail(
+          material.stoneGroupId,
+          material.stoneVariantId,
+        ),
+      })),
+    )
+      .then((results) => {
+        if (!active) return;
+        setPublishedDetails(new Map(
+          results.flatMap((result) => result.detail ? [[result.key, result.detail] as const] : []),
+        ));
+      })
+      .catch(() => {
+        if (active) setPublishedDetails(new Map());
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [project.materials]);
+
   if (!project.materials?.length) {
     return null;
   }
@@ -323,12 +371,15 @@ function FeaturedMaterials({ project }: { project: ProjectData }) {
 
         <div className="divide-y divide-black/10 border-t border-black">
           {project.materials.map((material) => {
-            const resolved = resolveProjectMaterial(material);
+            const resolved = resolveProjectMaterial(material, publishedDetails);
+            const params = new URLSearchParams();
+            if (material.stoneVariantId) params.set('variant', material.stoneVariantId);
+            params.set('finish', material.finishKey);
 
             return (
               <Link
                 key={`${material.stoneGroupId}-${material.finishKey}-${material.application}`}
-                to={`/stone-library/${material.stoneGroupId}`}
+                to={`/stone-library/${material.stoneGroupId}?${params.toString()}`}
                 className="group grid gap-4 py-5 md:grid-cols-[140px_0.9fr_1.1fr] md:items-start"
               >
                 <div className="overflow-hidden bg-black">

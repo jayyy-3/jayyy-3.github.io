@@ -618,6 +618,7 @@ Fields:
 - `id bigint identity primary key`
 - `project_id bigint not null references projects(id) on delete cascade`
 - `stone_group_id bigint references stone_groups(id)`
+- `stone_variant_id bigint references stone_variants(id)`; canonical Stone Library variant selected for this Project use
 - `finish_definition_id bigint references finish_definitions(id)`
 - `application text not null`
 - `note text`
@@ -628,6 +629,8 @@ Fields:
 - `published_at timestamptz`
 - `archived_at timestamptz`
 - shared audit fields
+
+`stone_group_id + stone_variant_id + finish_definition_id` is the canonical material reference. The Project editor filters finishes through `stone_finish_capabilities`; the protected publish path rejects a variant from another stone or a finish with capability `no`. `media_asset_id` remains only as a compatibility/rollback field and is not written or rendered by the reshaped Project editor.
 
 ### `project_material_maps`
 Purpose: one or more clickable project images.
@@ -662,6 +665,8 @@ Fields:
 
 Constraints:
 - Unique `project_material_map_id, hotspot_key`.
+
+`label` and `preview_media_id` remain compatibility/rollback columns. New Project drafts normalize them empty/null, and public material cards resolve name and image from the linked Stone Library variant/finish instead.
 
 ### `private.project_drafts`
 Purpose: private page-shaped working copy for one Project aggregate, including records that have no canonical public row yet.

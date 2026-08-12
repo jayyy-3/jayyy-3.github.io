@@ -45,6 +45,7 @@ export interface ProjectHotspot {
     title?: string;
     description?: string;
     stoneGroupId: string;
+    stoneVariantId?: string;
     finishKey: string;
     application: string;
     note: string;
@@ -62,6 +63,7 @@ export interface ProjectMaterialMap {
 
 export interface ProjectMaterial {
     stoneGroupId: string;
+    stoneVariantId?: string;
     finishKey: string;
     application: string;
     note: string;

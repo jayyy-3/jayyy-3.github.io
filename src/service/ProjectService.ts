@@ -58,7 +58,11 @@ type ProjectMediaRow = {
 };
 
 type StoneGroupRef = {
-  stone_group_key: string;
+    stone_group_key: string;
+};
+
+type StoneVariantRef = {
+  variant_key: string;
 };
 
 type FinishDefinitionRef = {
@@ -72,8 +76,8 @@ type ProjectMaterialRow = {
   sort_order: number | null;
   status: string;
   stone_groups?: StoneGroupRef | StoneGroupRef[] | null;
+  stone_variants?: StoneVariantRef | StoneVariantRef[] | null;
   finish_definitions?: FinishDefinitionRef | FinishDefinitionRef[] | null;
-  media_assets?: MediaRef | MediaRef[] | null;
 };
 
 type ProjectMaterialMapRow = {
@@ -96,7 +100,6 @@ type ProjectHotspotRow = {
   note: string | null;
   sort_order: number | null;
   status: string;
-  preview_media?: MediaRef | MediaRef[] | null;
 };
 
 function firstRelation<T>(value: T | T[] | null | undefined): T | null {
@@ -123,29 +126,25 @@ export { normalizePublicProjectFactValue } from '../lib/projectFactValue.ts';
 
 function mapProjectMaterial(
   row: ProjectMaterialRow,
-  supabase: SupabaseClient,
 ): ProjectMaterial | null {
   const stone = firstRelation(row.stone_groups);
   const finish = firstRelation(row.finish_definitions);
   if (!stone?.stone_group_key || !finish?.finish_key) return null;
 
-  const media = firstRelation(row.media_assets);
-  const image = resolvePublicMediaUrl(media, supabase);
+  const variant = firstRelation(row.stone_variants);
 
   return {
     stoneGroupId: stone.stone_group_key,
+    stoneVariantId: variant?.variant_key,
     finishKey: finish.finish_key,
     application: row.application,
     note: row.note || '',
-    image: image || undefined,
-    imageAlt: media?.alt || undefined,
   };
 }
 
 function mapProjectHotspot(
   row: ProjectHotspotRow,
   materialRowsById: Map<number, ProjectMaterialRow>,
-  supabase: SupabaseClient,
 ): ProjectHotspot | null {
   if (!row.project_material_id) return null;
 
@@ -154,21 +153,18 @@ function mapProjectHotspot(
   const finish = firstRelation(material?.finish_definitions);
   if (!material || !stone?.stone_group_key || !finish?.finish_key) return null;
 
-  const previewMedia = firstRelation(row.preview_media) || firstRelation(material.media_assets);
-  const previewImage = resolvePublicMediaUrl(previewMedia, supabase);
+  const variant = firstRelation(material.stone_variants);
 
   return {
     id: row.hotspot_key,
     x: Number(row.x_percent),
     y: Number(row.y_percent),
-    title: row.label || undefined,
     description: row.note || undefined,
     stoneGroupId: stone.stone_group_key,
+    stoneVariantId: variant?.variant_key,
     finishKey: finish.finish_key,
     application: row.application || material.application,
     note: row.note || material.note || '',
-    image: previewImage || undefined,
-    imageAlt: previewMedia?.alt || undefined,
   };
 }
 
@@ -190,7 +186,7 @@ function mapProjectMaterialMap(
     hotspots: hotspots
       .slice()
       .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
-      .map((hotspot) => mapProjectHotspot(hotspot, materialRowsById, supabase))
+      .map((hotspot) => mapProjectHotspot(hotspot, materialRowsById))
       .filter((hotspot): hotspot is ProjectHotspot => Boolean(hotspot)),
   };
 }
@@ -261,7 +257,7 @@ function mapProjectRow(
     .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
   const materialRowsById = new Map(sortedMaterialRows.map((material) => [material.id, material]));
   const mappedMaterials = sortedMaterialRows
-    .map((material) => mapProjectMaterial(material, supabase))
+    .map((material) => mapProjectMaterial(material))
     .filter((material): material is ProjectMaterial => Boolean(material));
   const hotspotsByMapId = new Map<number, ProjectHotspotRow[]>();
 
@@ -494,16 +490,11 @@ export async function getPublishedProjects(
         stone_groups!project_materials_stone_group_id_fkey (
           stone_group_key
         ),
+        stone_variants!project_materials_stone_variant_id_fkey (
+          variant_key
+        ),
         finish_definitions!project_materials_finish_definition_id_fkey (
           finish_key
-        ),
-        media_assets!project_materials_media_asset_id_fkey (
-          status,
-          source_kind,
-          source_url,
-          bucket,
-          object_path,
-          alt
         )
       `)
       .in('project_id', ids)
@@ -563,14 +554,7 @@ export async function getPublishedProjects(
           note,
           sort_order,
           status,
-          preview_media:media_assets!project_hotspots_preview_media_id_fkey (
-            status,
-            source_kind,
-            source_url,
-            bucket,
-            object_path,
-            alt
-          )
+          preview_media_id
         `)
         .in('project_material_map_id', materialMapIds)
         .eq('status', 'published')

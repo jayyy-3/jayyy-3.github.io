@@ -11,6 +11,9 @@ import {
   type ProjectLifecycleStatus,
   type ProjectMediaOption,
   type ProjectStoneOption,
+  type ProjectStoneVariantOption,
+  type ProjectStoneFinishCapabilityOption,
+  type ProjectStoneFinishImageOption,
 } from "../../features/projects/projectAggregate";
 import {
   isProjectApiResponse,
@@ -64,6 +67,31 @@ interface FinishOptionRow {
   status: string;
 }
 
+interface StoneVariantOptionRow {
+  id: number;
+  stone_group_id: number;
+  variant_key: string;
+  display_name: string | null;
+  status: string;
+  sort_order: number;
+}
+
+interface FinishCapabilityOptionRow {
+  stone_variant_id: number;
+  finish_definition_id: number;
+  capability: "yes" | "no" | "tbc";
+}
+
+interface FinishImageOptionRow {
+  stone_group_id: number | null;
+  stone_variant_id: number | null;
+  finish_definition_id: number | null;
+  media_asset_id: number;
+  image_role: "primary" | "secondary" | "detail" | "swatch";
+  status: string;
+  sort_order: number;
+}
+
 interface MediaOptionRow {
   id: number;
   bucket: string | null;
@@ -105,7 +133,10 @@ function AdminProjectsContent() {
     profile?.role === "owner" || profile?.role === "admin";
   const [projects, setProjects] = useState<ProjectListRow[]>([]);
   const [stones, setStones] = useState<ProjectStoneOption[]>([]);
+  const [stoneVariants, setStoneVariants] = useState<ProjectStoneVariantOption[]>([]);
   const [finishes, setFinishes] = useState<ProjectFinishOption[]>([]);
+  const [finishCapabilities, setFinishCapabilities] = useState<ProjectStoneFinishCapabilityOption[]>([]);
+  const [finishImages, setFinishImages] = useState<ProjectStoneFinishImageOption[]>([]);
   const [media, setMedia] = useState<ProjectMediaOption[]>([]);
   const [draft, setDraft] = useState<ProjectAggregateDraft | null>(null);
   const [baseline, setBaseline] = useState<ProjectAggregateDraft | null>(null);
@@ -165,12 +196,13 @@ function AdminProjectsContent() {
 
   const loadIndex = useCallback(async () => {
     if (!supabase) return;
+    const client = supabase;
     setIsIndexLoading(true);
     setIndexError(null);
 
     try {
       const accessToken = await getAccessToken();
-      const [projectListResponse, stonesResult, finishesResult, mediaResult] =
+      const [projectListResponse, stonesResult, variantsResult, finishesResult, capabilitiesResult, finishImagesResult, mediaResult] =
         await Promise.all([
           fetch(projectEndpoint, {
             method: "GET",
@@ -179,17 +211,31 @@ function AdminProjectsContent() {
               Authorization: `Bearer ${accessToken}`,
             },
           }),
-          supabase
+          client
             .from("stone_groups")
             .select("id,stone_group_key,display_name,status")
             .order("display_name", { ascending: true })
             .returns<StoneOptionRow[]>(),
-          supabase
+          client
+            .from("stone_variants")
+            .select("id,stone_group_id,variant_key,display_name,status,sort_order")
+            .order("sort_order", { ascending: true })
+            .returns<StoneVariantOptionRow[]>(),
+          client
             .from("finish_definitions")
             .select("id,finish_key,display_name,status")
             .order("sort_order", { ascending: true })
             .returns<FinishOptionRow[]>(),
-          supabase
+          client
+            .from("stone_finish_capabilities")
+            .select("stone_variant_id,finish_definition_id,capability")
+            .returns<FinishCapabilityOptionRow[]>(),
+          client
+            .from("stone_finish_images")
+            .select("stone_group_id,stone_variant_id,finish_definition_id,media_asset_id,image_role,status,sort_order")
+            .order("sort_order", { ascending: true })
+            .returns<FinishImageOptionRow[]>(),
+          client
             .from("media_assets")
             .select(mediaOptionSelect)
             .neq("status", "archived")
@@ -199,10 +245,27 @@ function AdminProjectsContent() {
         ]);
       const projectList = await readProjectListApiResponse(projectListResponse);
       const loadError =
-        stonesResult.error || finishesResult.error || mediaResult.error;
+        stonesResult.error || variantsResult.error || finishesResult.error || capabilitiesResult.error || finishImagesResult.error || mediaResult.error;
       if (loadError) throw new Error(loadError.message);
 
-      const mediaOptions = (mediaResult.data ?? []).map(rowToMediaOption);
+      const finishImageMediaIds = [...new Set(
+        (finishImagesResult.data ?? []).map((row) => row.media_asset_id),
+      )];
+      const finishImageMediaResults = await Promise.all(
+        chunkValues(finishImageMediaIds, referencedMediaBatchSize).map((batch) =>
+          client
+            .from("media_assets")
+            .select(mediaOptionSelect)
+            .in("id", batch)
+            .returns<MediaOptionRow[]>(),
+        ),
+      );
+      const finishImageMediaError = finishImageMediaResults.find((result) => result.error)?.error;
+      if (finishImageMediaError) throw new Error(finishImageMediaError.message);
+      const mediaOptions = mergeProjectMediaOptions(
+        (mediaResult.data ?? []).map(rowToMediaOption),
+        finishImageMediaResults.flatMap((result) => (result.data ?? []).map(rowToMediaOption)),
+      );
       const nextProjects = projectList.projects.map((project) => ({
         id: project.id,
         slug: project.slug,
@@ -222,12 +285,40 @@ function AdminProjectsContent() {
           status: row.status,
         })),
       );
+      setStoneVariants(
+        (variantsResult.data ?? []).map((row) => ({
+          id: row.id,
+          stoneGroupId: row.stone_group_id,
+          key: row.variant_key,
+          label: row.display_name || "Standard",
+          status: row.status,
+          sortOrder: row.sort_order,
+        })),
+      );
       setFinishes(
         (finishesResult.data ?? []).map((row) => ({
           id: row.id,
           key: row.finish_key,
           label: row.display_name,
           status: row.status,
+        })),
+      );
+      setFinishCapabilities(
+        (capabilitiesResult.data ?? []).map((row) => ({
+          stoneVariantId: row.stone_variant_id,
+          finishDefinitionId: row.finish_definition_id,
+          capability: row.capability,
+        })),
+      );
+      setFinishImages(
+        (finishImagesResult.data ?? []).map((row) => ({
+          stoneGroupId: row.stone_group_id,
+          stoneVariantId: row.stone_variant_id,
+          finishDefinitionId: row.finish_definition_id,
+          mediaAssetId: row.media_asset_id,
+          imageRole: row.image_role,
+          status: row.status,
+          sortOrder: row.sort_order,
         })),
       );
       setMedia(mediaOptions);
@@ -853,7 +944,10 @@ function AdminProjectsContent() {
               isDirty={isDirty}
               media={media}
               stones={stones}
+              stoneVariants={stoneVariants}
               finishes={finishes}
+              finishCapabilities={finishCapabilities}
+              finishImages={finishImages}
               userId={user?.id ?? null}
               canEdit={Boolean(canEdit)}
               canCleanUpStorage={canCleanUpStorage}

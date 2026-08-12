@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lastUpdated": "2026-08-03",
+  "lastUpdated": "2026-08-12",
   "sourceOfTruth": {
     "currentState": "docs/HANDOFF.md",
     "taskQueue": "docs/agent/tasks.json",
@@ -18,7 +18,7 @@
     "adminAuthBrowserQa": "production_9_authenticated_routes_signout_protected_revisit_and_3_blocked_supabase_static_fallbacks_verified",
     "adminCmsHandoff": "revalidation_required_after_user_report_and_repair_deploy",
     "adminCrudLive": "api_level_verified_projects_owner_preview_happy_path_verified_remaining_ui_golden_workflows_missing",
-    "adminProjectsAggregateMigrations": "20260719015649_expand_20260802103337_minimum_disclosure_and_20260802105537_write_lockdown_applied_and_read_back",
+    "adminProjectsAggregateMigrations": "20260719015649_expand_20260802103337_minimum_disclosure_and_20260802105537_write_lockdown_applied_and_read_back_20260812053204_stone_library_source_prepared_not_applied",
     "adminProjectsBranchPreview": "pr14_merge_edd33465_production_asset_switch_authenticated_5_projects_1_draft_4_live_zero_archive_and_public_five_readback_passed_immutable_url_unavailable_without_new_oauth_grant",
     "adminProjectsAuthenticatedPreview": "marker_admin-projects-ui-mrroa6p0_one_save_refresh_unsaved_preview_private_first_media_hotspot_55_55_publish_public_readback_hide_public_not_found_passed_final_project_archived_public_media_retained_private_source_removed",
     "adminStorageProof": "media_role_migration_and_policies_read_back_live_editor_owner_boundary_passed_zero_tagged_objects_remain",
@@ -36,10 +36,11 @@
     "runtimeGates": "2026_08_02_pr11_merge_59cded9b_immutable_76de2abf_apex_www_smoke_and_production_admin_auth_passing",
     "liveSecretsPresent": true,
     "liveReadiness": "browser_key_owner_and_distinct_editor_credentials_present_media_migration_applied_live_role_boundary_passed",
-    "adminUxReshape": "phase0_closed_projects_phase1_and_pr11_single_editor_followup_live_and_jay_accepted_phase2_articles_next_sunset_pending"
+    "adminUxReshape": "phase0_closed_projects_phase1_and_pr11_single_editor_followup_live_and_jay_accepted_project_stone_library_point_source_local_candidate_migration_approval_pending_phase2_articles_next_sunset_pending"
   },
   "nextDecisions": [
     "Monitor or purge the four residual apex cache headers when Cloudflare account access is available; their current bytes and MIME types exactly match the immutable repair deployment and are non-blocking.",
+    "After clean-container verification, request separate approval to apply/read back 20260812053204_project_materials_stone_library_source and inspect ambiguous legacy Project material variants before runtime deployment.",
     "After separate approval, verify Supabase Auth SMTP ownership and repeat invite/password/recovery against the corrected and read-back production callbacks.",
     "Keep Moon Gate Draft until separately approved Stone Library publication and hotspot-material binding work is complete; do not bypass the publish guard.",
     "Decide whether final Turnstile proof is required before the next public launch checkpoint.",

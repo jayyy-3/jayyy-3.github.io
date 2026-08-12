@@ -151,6 +151,8 @@ const tombstoneMigrationPath =
   "supabase/migrations/20260802103337_restrict_archived_project_tombstones.sql";
 const lockdownMigrationPath =
   "supabase/migrations/20260802105537_project_aggregate_write_lockdown.sql";
+const stoneLibrarySourceMigrationPath =
+  "supabase/migrations/20260812053204_project_materials_stone_library_source.sql";
 
 const page = readRequired(pagePath);
 const shell = readRequired(shellPath);
@@ -168,6 +170,7 @@ const server = readRequired(functionPath);
 const migration = readRequired(migrationPath);
 const tombstoneMigration = readRequired(tombstoneMigrationPath);
 const lockdownMigration = readRequired(lockdownMigrationPath);
+const stoneLibrarySourceMigration = readRequired(stoneLibrarySourceMigrationPath);
 const browserProjectsSource = [
   page,
   shell,
@@ -598,11 +601,38 @@ requireIncludes(
   editorPath,
   "stable selected-map media identity",
 );
-requireIncludes(
+forbidMatches(
   editor,
-  "key={`hotspot-${selectedHotspot.key}`}",
+  /Point detail image|key=\{`hotspot-\$\{selectedHotspot\.key\}`\}/,
   editorPath,
-  "stable selected-hotspot media identity",
+  "Project-owned hotspot image override",
+);
+forbidMatches(
+  editor,
+  /Material detail image|Point title/,
+  editorPath,
+  "Project-owned material presentation controls",
+);
+requireIncludes(editor, 'label="Variant"', editorPath, "Stone Library variant selector");
+requireIncludes(editor, "finishCapabilities.some", editorPath, "variant-supported finish filtering");
+requireIncludes(editor, "stone-library-material-preview", editorPath, "canonical Stone Library preview card");
+requireIncludes(
+  stoneLibrarySourceMigration,
+  "add column if not exists stone_variant_id",
+  stoneLibrarySourceMigrationPath,
+  "Project material Stone Library variant reference",
+);
+requireIncludes(
+  stoneLibrarySourceMigration,
+  "candidates.candidate_count = 1",
+  stoneLibrarySourceMigrationPath,
+  "unambiguous-only legacy variant backfill",
+);
+requireIncludes(
+  stoneLibrarySourceMigration,
+  "project_material_stone_library_mismatch",
+  stoneLibrarySourceMigrationPath,
+  "publish-time Stone Library relationship validation",
 );
 forbidMatches(
   editor,
@@ -1568,8 +1598,8 @@ referencedMediaDraft.mediaBlocks = [
 referencedMediaDraft.hotspots = [{ previewMediaId: 706 }];
 assert.deepEqual(
   collectProjectMediaAssetIds(referencedMediaDraft),
-  [701, 702, 703, 704, 705, 706],
-  "Every distinct media id referenced anywhere in a Project draft must be fetched exactly",
+  [701, 702, 704, 705],
+  "Project media fetches must ignore retired material and hotspot image overrides",
 );
 
 const currentMediaOptions = [
@@ -1651,6 +1681,7 @@ behaviorDraft.materials.push({
   key: "material:new:proof",
   id: null,
   stoneGroupId: 1,
+  stoneVariantId: 11,
   finishDefinitionId: 1,
   application: "Paving",
   note: "Material note",
@@ -1709,7 +1740,14 @@ const behaviorContext = {
   stones: [
     { id: 1, key: "bluestone", label: "Bluestone", status: "published" },
   ],
+  stoneVariants: [
+    { id: 11, stoneGroupId: 1, key: "bluestone", label: "Standard", status: "published", sortOrder: 0 },
+  ],
   finishes: [{ id: 1, key: "sawn", label: "Sawn", status: "published" }],
+  finishCapabilities: [
+    { stoneVariantId: 11, finishDefinitionId: 1, capability: "yes" },
+  ],
+  finishImages: [],
 };
 
 const orderDraft = structuredClone(behaviorDraft);
