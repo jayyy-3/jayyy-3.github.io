@@ -1,7 +1,8 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { ProjectHotspot } from '../../data/projectData';
 import StoneLibraryService from '../../service/StoneLibraryService';
+import type { StoneDetailVM } from '../../types/stone-library';
 
 interface ProjectHotspotImageProps {
     image: string;
@@ -18,16 +19,20 @@ function toFallbackLabel(value: string): string {
         .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
-function resolveHotspot(hotspot: ProjectHotspot) {
-    const stone = StoneLibraryService.getStoneDetail(hotspot.stoneGroupId);
+function materialKey(hotspot: ProjectHotspot) {
+    return `${hotspot.stoneGroupId}:${hotspot.stoneVariantId || ''}`;
+}
+
+function resolveHotspot(hotspot: ProjectHotspot, publishedDetails: ReadonlyMap<string, StoneDetailVM>) {
+    const stone = publishedDetails.get(materialKey(hotspot))
+        || StoneLibraryService.getStoneDetail(hotspot.stoneGroupId, hotspot.stoneVariantId);
     const finish = stone?.finishes.find((entry) => entry.finishKey === hotspot.finishKey);
 
     return {
         stoneName: stone?.name || toFallbackLabel(hotspot.stoneGroupId),
         finishLabel: finish?.label || toFallbackLabel(hotspot.finishKey),
-        previewImage: hotspot.image || finish?.imageUrl || stone?.finishes[0]?.imageUrl,
+        previewImage: finish?.imageUrl || stone?.finishes[0]?.imageUrl,
         previewAlt:
-            hotspot.imageAlt ||
             finish?.imageAlt ||
             `${stone?.name || hotspot.stoneGroupId} ${finish?.label || hotspot.finishKey} finish preview`,
     };
@@ -42,6 +47,45 @@ export default function ProjectHotspotImage({
     hotspots,
 }: ProjectHotspotImageProps) {
     const [activeHotspotId, setActiveHotspotId] = useState(hotspots[0]?.id ?? '');
+    const [publishedDetails, setPublishedDetails] = useState<ReadonlyMap<string, StoneDetailVM>>(
+        () => new Map(),
+    );
+
+    useEffect(() => {
+        let active = true;
+        const uniqueMaterials = [
+            ...new Map(hotspots.map((hotspot) => [materialKey(hotspot), hotspot])).values(),
+        ];
+        if (!uniqueMaterials.length) {
+            setPublishedDetails(new Map());
+            return () => {
+                active = false;
+            };
+        }
+
+        Promise.all(
+            uniqueMaterials.map(async (hotspot) => ({
+                key: materialKey(hotspot),
+                detail: await StoneLibraryService.getPublishedStoneDetail(
+                    hotspot.stoneGroupId,
+                    hotspot.stoneVariantId,
+                ),
+            })),
+        )
+            .then((results) => {
+                if (!active) return;
+                setPublishedDetails(new Map(
+                    results.flatMap((result) => result.detail ? [[result.key, result.detail] as const] : []),
+                ));
+            })
+            .catch(() => {
+                if (active) setPublishedDetails(new Map());
+            });
+
+        return () => {
+            active = false;
+        };
+    }, [hotspots]);
 
     const activeHotspot = useMemo(() => {
         return hotspots.find((hotspot) => hotspot.id === activeHotspotId) ?? hotspots[0];
@@ -57,8 +101,11 @@ export default function ProjectHotspotImage({
     }
 
     const activeIndex = hotspots.findIndex((hotspot) => hotspot.id === activeHotspot.id);
-    const activeMaterial = resolveHotspot(activeHotspot);
-    const activeHref = `/stone-library/${activeHotspot.stoneGroupId}`;
+    const activeMaterial = resolveHotspot(activeHotspot, publishedDetails);
+    const activeParams = new URLSearchParams();
+    if (activeHotspot.stoneVariantId) activeParams.set('variant', activeHotspot.stoneVariantId);
+    activeParams.set('finish', activeHotspot.finishKey);
+    const activeHref = `/stone-library/${activeHotspot.stoneGroupId}?${activeParams.toString()}`;
     const activeCopy = activeHotspot.description || activeHotspot.note;
 
     const inspector = (
@@ -79,7 +126,7 @@ export default function ProjectHotspotImage({
                         Point {String(activeIndex + 1).padStart(2, '0')}
                     </p>
                     <h3 className="mt-2 text-[24px] font-semibold leading-tight text-black">
-                        {activeHotspot.title || activeMaterial.stoneName}
+                        {activeMaterial.stoneName}
                     </h3>
                     <p className="mt-2 text-[12px] font-bold uppercase tracking-[0.14em] text-black/50">
                         {activeMaterial.stoneName} / {activeMaterial.finishLabel}
@@ -128,8 +175,8 @@ export default function ProjectHotspotImage({
 
                         {hotspots.map((hotspot) => {
                             const active = hotspot.id === activeHotspot.id;
-                            const material = resolveHotspot(hotspot);
-                            const label = hotspot.title || `${material.stoneName} / ${material.finishLabel}`;
+                            const material = resolveHotspot(hotspot, publishedDetails);
+                            const label = `${material.stoneName} / ${material.finishLabel}`;
 
                             return (
                                 <button
@@ -173,7 +220,7 @@ export default function ProjectHotspotImage({
 
                 <div className="grid gap-2 sm:grid-cols-2 lg:hidden">
                     {hotspots.map((hotspot) => {
-                        const material = resolveHotspot(hotspot);
+                        const material = resolveHotspot(hotspot, publishedDetails);
                         const active = hotspot.id === activeHotspot.id;
 
                         return (
@@ -190,7 +237,7 @@ export default function ProjectHotspotImage({
                                     {material.finishLabel}
                                 </span>
                                 <span className="mt-1 block text-[15px] font-semibold">
-                                    {hotspot.title || material.stoneName}
+                                    {material.stoneName}
                                 </span>
                             </button>
                         );

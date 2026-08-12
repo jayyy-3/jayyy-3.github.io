@@ -107,6 +107,13 @@ Evidence to record:
 - Any normalization, fallback, or missing-data behavior.
 - Affected runtime pages.
 
+For Project Stone Library material-point changes, also verify:
+- Stone → Variant → supported Finish filtering in `/admin/projects`.
+- Project material/point title or image overrides are absent from the editor and normalized saves.
+- Public hotspot and Featured Materials cards resolve Published Stone Library imagery and deep-link the selected variant/finish.
+- Draft Project editing exposes and labels non-Archived Stone Library records and imagery; publish validation still rejects any selected Stone, Variant, Finish, finish-image link, or linked media asset that is not Published.
+- `npm run agent:admin-projects-aggregate` covers the aggregate compatibility contract before any separately approved migration apply.
+
 ### Route, Navigation, or CTA Contract
 Use when changing `src/App.tsx`, shared header/footer links, route params, mailto/tel behavior, or form behavior.
 

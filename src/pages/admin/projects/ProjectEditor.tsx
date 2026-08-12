@@ -35,12 +35,16 @@ import {
   type ProjectFinishOption,
   type ProjectHotspotDraft,
   type ProjectLifecycleStatus,
+  type ProjectMaterialDraft,
   type ProjectMediaBlockDraft,
   type ProjectMediaOption,
   type ProjectMoveDirection,
   type ProjectOrderedCollection,
   type ProjectPublishBlocker,
   type ProjectStoneOption,
+  type ProjectStoneVariantOption,
+  type ProjectStoneFinishCapabilityOption,
+  type ProjectStoneFinishImageOption,
 } from "../../../features/projects/projectAggregate";
 import InlineMediaField from "./InlineMediaField";
 import ProjectDraftPreview from "./ProjectDraftPreview";
@@ -53,7 +57,10 @@ interface ProjectEditorProps {
   isDirty: boolean;
   media: readonly ProjectMediaOption[];
   stones: readonly ProjectStoneOption[];
+  stoneVariants: readonly ProjectStoneVariantOption[];
   finishes: readonly ProjectFinishOption[];
+  finishCapabilities: readonly ProjectStoneFinishCapabilityOption[];
+  finishImages: readonly ProjectStoneFinishImageOption[];
   userId: string | null;
   canEdit: boolean;
   canCleanUpStorage: boolean;
@@ -82,7 +89,10 @@ export default function ProjectEditor({
   isDirty,
   media,
   stones,
+  stoneVariants,
   finishes,
+  finishCapabilities,
+  finishImages,
   userId,
   canEdit,
   canCleanUpStorage,
@@ -115,8 +125,8 @@ export default function ProjectEditor({
     () => new Set(),
   );
   const context = useMemo<ProjectAggregateMappingContext>(
-    () => ({ media, stones, finishes }),
-    [finishes, media, stones],
+    () => ({ media, stones, stoneVariants, finishes, finishCapabilities, finishImages }),
+    [finishCapabilities, finishImages, finishes, media, stoneVariants, stones],
   );
   const blockers = useMemo(
     () => getProjectPublishBlockers(draft, context),
@@ -347,6 +357,10 @@ export default function ProjectEditor({
   function addMaterial() {
     setOpenSection("materials");
     const key = createProjectDraftKey("material");
+    const stone = stones.find((entry) => entry.status !== "archived") ?? null;
+    const variants = stoneVariants.filter((variant) => variant.stoneGroupId === stone?.id && variant.status !== "archived");
+    const variant = variants[0] ?? null;
+    const finishId = finishCapabilities.find((capability) => capability.stoneVariantId === variant?.id && capability.capability !== "no")?.finishDefinitionId ?? null;
     onChange({
       ...draft,
       materials: [
@@ -354,11 +368,9 @@ export default function ProjectEditor({
         {
           key,
           id: null,
-          stoneGroupId:
-            stones.find((stone) => stone.status === "published")?.id ?? null,
-          finishDefinitionId:
-            finishes.find((finish) => finish.status === "published")?.id ??
-            null,
+          stoneGroupId: stone?.id ?? null,
+          stoneVariantId: variant?.id ?? null,
+          finishDefinitionId: finishId,
           application: "",
           note: "",
           mediaAssetId: null,
@@ -800,16 +812,33 @@ export default function ProjectEditor({
                           label="Stone"
                           value={material.stoneGroupId}
                           options={stones}
-                          onChange={(value) =>
+                          onChange={(value) => {
+                            const variants = stoneVariants.filter((variant) => variant.stoneGroupId === value && variant.status !== "archived");
+                            const variantId = variants[0]?.id ?? null;
+                            const finishId = finishCapabilities.find((capability) => capability.stoneVariantId === variantId && capability.capability !== "no")?.finishDefinitionId ?? null;
                             updateCollection("materials", material.key, {
                               stoneGroupId: value,
-                            })
-                          }
+                              stoneVariantId: variantId,
+                              finishDefinitionId: finishId,
+                            });
+                          }}
+                        />
+                        <OptionField
+                          label="Variant"
+                          value={material.stoneVariantId}
+                          options={stoneVariants.filter((variant) => variant.stoneGroupId === material.stoneGroupId)}
+                          onChange={(value) => {
+                            const finishId = finishCapabilities.find((capability) => capability.stoneVariantId === value && capability.capability !== "no")?.finishDefinitionId ?? null;
+                            updateCollection("materials", material.key, {
+                              stoneVariantId: value,
+                              finishDefinitionId: finishId,
+                            });
+                          }}
                         />
                         <OptionField
                           label="Finish"
                           value={material.finishDefinitionId}
-                          options={finishes}
+                          options={finishes.filter((finish) => finishCapabilities.some((capability) => capability.stoneVariantId === material.stoneVariantId && capability.finishDefinitionId === finish.id && capability.capability !== "no"))}
                           onChange={(value) =>
                             updateCollection("materials", material.key, {
                               finishDefinitionId: value,
@@ -840,27 +869,7 @@ export default function ProjectEditor({
                           className={textareaClass}
                         />
                       </label>
-                      <div className="mt-4">
-                        <InlineMediaField
-                          label="Material detail image"
-                          value={material.mediaAssetId}
-                          assets={media}
-                          userId={userId}
-                          canCleanUpStorage={canCleanUpStorage}
-                          disabled={mediaFieldDisabled(
-                            `material-${material.key}`,
-                          )}
-                          instanceKey={`material-${material.key}`}
-                          onPendingChange={handleMediaPendingChange}
-                          onBusyChange={handleMediaBusyChange}
-                          onChange={(value) =>
-                            updateCollection("materials", material.key, {
-                              mediaAssetId: value,
-                            })
-                          }
-                          onAssetCreated={onAssetCreated}
-                        />
-                      </div>
+                      <StoneLibraryMaterialPreview material={material} context={context} />
                     </article>
                   ))}
                 </div>
@@ -1293,17 +1302,6 @@ export default function ProjectEditor({
                                 </select>
                               </label>
                               <TextField
-                                label="Point title"
-                                value={selectedHotspot.label}
-                                onChange={(value) =>
-                                  updateCollection(
-                                    "hotspots",
-                                    selectedHotspot.key,
-                                    { label: value },
-                                  )
-                                }
-                              />
-                              <TextField
                                 label="Where it is used"
                                 value={selectedHotspot.application}
                                 onChange={(value) =>
@@ -1329,28 +1327,10 @@ export default function ProjectEditor({
                                   className={textareaClass}
                                 />
                               </label>
-                              <InlineMediaField
-                                key={`hotspot-${selectedHotspot.key}`}
-                                label="Point detail image"
-                                value={selectedHotspot.previewMediaId}
-                                assets={media}
-                                userId={userId}
-                                canCleanUpStorage={canCleanUpStorage}
-                                disabled={mediaFieldDisabled(
-                                  `hotspot-${selectedHotspot.key}`,
-                                )}
-                                instanceKey={`hotspot-${selectedHotspot.key}`}
-                                onPendingChange={handleMediaPendingChange}
-                                onBusyChange={handleMediaBusyChange}
-                                onChange={(value) =>
-                                  updateCollection(
-                                    "hotspots",
-                                    selectedHotspot.key,
-                                    { previewMediaId: value },
-                                  )
-                                }
-                                onAssetCreated={onAssetCreated}
-                              />
+                              {(() => {
+                                const material = draft.materials.find((entry) => entry.key === selectedHotspot.projectMaterialKey);
+                                return material ? <StoneLibraryMaterialPreview material={material} context={context} /> : null;
+                              })()}
                             </div>
                           ) : (
                             <p className="mt-3 border border-dashed border-black/20 bg-white p-4 text-sm leading-6 text-black/50">
@@ -1651,12 +1631,12 @@ function OptionField({
 }: {
   label: string;
   value: number | null;
-  options: readonly (ProjectStoneOption | ProjectFinishOption)[];
+  options: readonly (ProjectStoneOption | ProjectStoneVariantOption | ProjectFinishOption)[];
   onChange: (value: number | null) => void;
 }) {
   const disabled = useContext(ProjectMutationDisabledContext);
   const visibleOptions = options.filter(
-    (option) => option.status === "published" || option.id === value,
+    (option) => option.status !== "archived" || option.id === value,
   );
   return (
     <label className="block text-xs font-bold uppercase tracking-[0.12em] text-black/48">
@@ -1673,13 +1653,62 @@ function OptionField({
         {visibleOptions.map((option) => (
           <option key={option.id} value={option.id}>
             {option.label}
-            {option.status === "published"
-              ? ""
-              : " (not available for publishing)"}
+            {option.status === "published" ? " (Live)" : option.status === "draft" ? " (Draft)" : " (not available for publishing)"}
           </option>
         ))}
       </select>
     </label>
+  );
+}
+
+function StoneLibraryMaterialPreview({
+  material,
+  context,
+}: {
+  material: ProjectMaterialDraft;
+  context: ProjectAggregateMappingContext;
+}) {
+  const stone = context.stones.find((entry) => entry.id === material.stoneGroupId);
+  const variant = context.stoneVariants.find((entry) => entry.id === material.stoneVariantId);
+  const finish = context.finishes.find((entry) => entry.id === material.finishDefinitionId);
+  const image = context.finishImages
+    .filter((entry) => entry.status !== "archived")
+    .filter((entry) => entry.stoneGroupId === stone?.id)
+    .filter((entry) => entry.stoneVariantId === variant?.id || entry.stoneVariantId === null)
+    .filter((entry) => entry.finishDefinitionId === finish?.id || entry.finishDefinitionId === null)
+    .sort((left, right) => {
+      const leftExact = Number(left.stoneVariantId === variant?.id) + Number(left.finishDefinitionId === finish?.id);
+      const rightExact = Number(right.stoneVariantId === variant?.id) + Number(right.finishDefinitionId === finish?.id);
+      if (leftExact !== rightExact) return rightExact - leftExact;
+      if (left.imageRole !== right.imageRole) return left.imageRole === "primary" ? -1 : 1;
+      return left.sortOrder - right.sortOrder;
+    })[0];
+  const mediaAsset = context.media.find((asset) => asset.id === image?.mediaAssetId);
+  const imageUrl = mediaAsset?.previewUrl || mediaAsset?.sourceUrl || "";
+
+  if (!stone || !variant || !finish) {
+    return (
+      <p className="mt-4 border border-amber-300 bg-amber-50 p-3 text-sm font-medium leading-6 text-amber-900">
+        Choose the Stone Library stone, variant and finish for this material.
+      </p>
+    );
+  }
+
+  return (
+    <div className="mt-4 grid grid-cols-[88px_minmax(0,1fr)] gap-4 border border-black/10 bg-white p-3" data-testid="stone-library-material-preview">
+      <div className="overflow-hidden bg-black/[0.05]">
+        {imageUrl ? <img src={imageUrl} alt={mediaAsset?.alt || `${stone.label} ${finish.label}`} className="aspect-square w-full object-cover" /> : null}
+      </div>
+      <div className="min-w-0 self-center">
+        <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-black/42">From Stone Library</p>
+        <p className="mt-1 text-base font-semibold text-black">{stone.label}</p>
+        <p className="mt-1 text-sm text-black/58">{variant.label} · {finish.label}</p>
+        <p className="mt-1 text-xs font-semibold text-black/45">
+          Stone {stone.status === "published" ? "Live" : "Draft"} · Variant {variant.status === "published" ? "Live" : "Draft"} · Finish {finish.status === "published" ? "Live" : "Draft"}
+        </p>
+        {!imageUrl ? <p className="mt-2 text-xs font-semibold text-amber-800">This finish has no usable Stone Library image yet.</p> : null}
+      </div>
+    </div>
   );
 }
 

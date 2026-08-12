@@ -324,6 +324,7 @@ async function loadCanonicalAggregate(supabase, projectId) {
         key: persistedKey("material", row.id),
         id: row.id,
         stoneGroupId: row.stone_group_id,
+        stoneVariantId: row.stone_variant_id,
         finishDefinitionId: row.finish_definition_id,
         application: row.application,
         note: row.note || "",
@@ -597,6 +598,7 @@ function validateFactFields(row, index) {
 
 function validateMaterialFields(row, index) {
   validateOptionalId(row.stoneGroupId, `materials[${index}].stoneGroupId`);
+  validateOptionalId(row.stoneVariantId, `materials[${index}].stoneVariantId`);
   validateOptionalId(
     row.finishDefinitionId,
     `materials[${index}].finishDefinitionId`,
@@ -764,6 +766,7 @@ export function assertPublishDraft(draft) {
     draft.materials.some(
       (row) =>
         !positiveIntegerOrNull(row.stoneGroupId) ||
+        !positiveIntegerOrNull(row.stoneVariantId) ||
         !positiveIntegerOrNull(row.finishDefinitionId) ||
         !stringValue(row.application),
     )
@@ -815,12 +818,17 @@ async function assertPublishedReferenceRows(supabase, draft) {
   const finishIds = uniquePositiveIds(
     draft.materials.map((row) => row.finishDefinitionId),
   );
-  const [stones, finishes] = await Promise.all([
+  const variantIds = uniquePositiveIds(
+    draft.materials.map((row) => row.stoneVariantId),
+  );
+  const [stones, variants, finishes] = await Promise.all([
     loadStatuses(supabase, "stone_groups", stoneIds),
+    loadStatuses(supabase, "stone_variants", variantIds),
     loadStatuses(supabase, "finish_definitions", finishIds),
   ]);
   if (
     stoneIds.some((id) => stones.get(id) !== "published") ||
+    variantIds.some((id) => variants.get(id) !== "published") ||
     finishIds.some((id) => finishes.get(id) !== "published")
   ) {
     throw new AdminProjectsError(
@@ -828,6 +836,67 @@ async function assertPublishedReferenceRows(supabase, draft) {
       "publish_blocked",
       "Every material must use a published stone and finish.",
       { blockers: ["Every material must use a published stone and finish."] },
+    );
+  }
+  if (!draft.materials.length) return;
+
+  const { data: capabilities, error } = await supabase
+    .from("stone_finish_capabilities")
+    .select("stone_variant_id,finish_definition_id,capability")
+    .in("stone_variant_id", variantIds)
+    .in("finish_definition_id", finishIds);
+  if (error) {
+    throw upstreamError("reference_load_failed", "Project references could not be checked.");
+  }
+  const allowedPairs = new Set((capabilities || [])
+    .filter((row) => row.capability !== "no")
+    .map((row) => `${row.stone_variant_id}:${row.finish_definition_id}`));
+  if (draft.materials.some((row) => !allowedPairs.has(`${row.stoneVariantId}:${row.finishDefinitionId}`))) {
+    throw new AdminProjectsError(
+      409,
+      "publish_blocked",
+      "Choose a finish that is available for the selected Stone Library variant.",
+      { blockers: ["Choose a finish that is available for the selected Stone Library variant."] },
+    );
+  }
+  const { data: variantRows, error: variantError } = await supabase
+    .from("stone_variants")
+    .select("id,stone_group_id")
+    .in("id", variantIds);
+  if (variantError) {
+    throw upstreamError("reference_load_failed", "Project references could not be checked.");
+  }
+  const variantStoneById = new Map((variantRows || []).map((row) => [Number(row.id), Number(row.stone_group_id)]));
+  if (draft.materials.some((row) => variantStoneById.get(row.stoneVariantId) !== row.stoneGroupId)) {
+    throw new AdminProjectsError(
+      409,
+      "publish_blocked",
+      "Choose a variant that belongs to the selected Stone Library stone.",
+      { blockers: ["Choose a variant that belongs to the selected Stone Library stone."] },
+    );
+  }
+
+  const { data: finishImages, error: finishImageError } = await supabase
+    .from("stone_finish_images")
+    .select("stone_group_id,stone_variant_id,finish_definition_id,status,media_assets!stone_finish_images_media_asset_id_fkey(status)")
+    .in("finish_definition_id", finishIds);
+  if (finishImageError) {
+    throw upstreamError("reference_load_failed", "Stone Library images could not be checked.");
+  }
+  const hasPublishedFinishImage = (material) => (finishImages || []).some((image) => {
+    const media = Array.isArray(image.media_assets) ? image.media_assets[0] : image.media_assets;
+    return image.status === "published"
+      && Number(image.stone_group_id) === material.stoneGroupId
+      && (image.stone_variant_id === null || Number(image.stone_variant_id) === material.stoneVariantId)
+      && (image.finish_definition_id === null || Number(image.finish_definition_id) === material.finishDefinitionId)
+      && media?.status === "published";
+  });
+  if (draft.materials.some((material) => !hasPublishedFinishImage(material))) {
+    throw new AdminProjectsError(
+      409,
+      "publish_blocked",
+      "Every material must have a published Stone Library finish image.",
+      { blockers: ["Make each selected Stone Library finish image Live before publishing the Project."] },
     );
   }
 }
@@ -864,12 +933,10 @@ async function loadReferencedMedia(supabase, draft) {
   const ids = uniquePositiveIds([
     draft.project.heroMediaId,
     draft.project.coverMediaId,
-    ...draft.materials.map((row) => row.mediaAssetId),
     ...draft.maps.map((row) => row.mediaAssetId),
     ...draft.mediaBlocks
       .filter((row) => usesDirectMediaAsset(row.mediaRole))
       .map((row) => row.mediaAssetId),
-    ...draft.hotspots.map((row) => row.previewMediaId),
   ]);
   if (!ids.length) return [];
 

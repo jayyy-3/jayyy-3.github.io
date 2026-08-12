@@ -46,6 +46,8 @@
         "docs/agent/tasks.json"
       ],
       "notes": [
+        "2026-08-12: After Jay's separate migration-only approval, `project_materials_stone_library_source` was applied to production as version `20260812062636`. Column/FK/index/trigger/function grants read back correctly; Moon Gate material 4 links to variant 5 and material 5 to variant 13, all involved content remains Draft, invalid links are zero, and Advisors added no migration-specific security warning. Runtime promotion remains separately approval-gated.",
+        "2026-08-12: Follow-up commit `f7b8d70` passed the clean Docker Node 20 gate and immutable Cloudflare Preview `https://0e8e4fa0.urblo.pages.dev` passed the complete no-write smoke. No production migration, content status change, runtime promotion, or email occurred; stop for separate migration approval.",
         "2026-06-05: Added compact `docs/agent/status.json` as the current-state API for agents, separating production/local/decision state from long historical evidence.",
         "2026-06-05: Added `docs/agent/harness-gc.md` to define Harness GC purpose, policy/state/evidence/knowledge boundaries, command behavior, check categories, and current agent script coverage.",
         "2026-06-05: Added `npm run agent:harness-gc`, `npm run agent:harness-gc:fix`, and `npm run agent:harness-gc:review`. Default mode is read-only; review mode writes `.tmp/harness-gc-review.md`; fix mode is limited to low-risk top-level date refreshes.",
@@ -2446,6 +2448,8 @@
         "supabase/migrations/"
       ],
       "notes": [
+        "2026-08-12: Read-only production inspection confirmed Moon Gate's Angola Black / Polished and New Grey / Flamed Stone Library variants, capabilities, finish images, and media exist as Draft. Project editing now admits and labels all non-Archived Stone Library choices and previews, while Project publishing requires the full selected Stone/Variant/Finish/image/media chain to be Published. The unapplied migration backfills unique non-Archived variants without changing content status and still requires separate production approval.",
+        "2026-08-12: Jay confirmed the Project material-point contract: Stone Library owns stone/variant/finish identity, finish image/alt, and detail link; Project owns the map photo, point position, application, and project note. Local source now implements dependent Stone/Variant/supported-Finish selection, read-only Stone Library previews, current Published-detail public resolution, and retirement of Project-owned material/hotspot image/title overrides. Compatibility migration `20260812053204_project_materials_stone_library_source.sql` is prepared but unapplied and requires separate production approval.",
         "2026-07-14: Registered from Jay's approved docs/ADMIN_UX_RESHAPE_PLAN.md directive. The plan is the temporary design authority until its sunset clause is completed.",
         "2026-07-14: Phase 0 is closed. Production Auth Site URL/exact invite-recovery redirects and Media role migration/policy readback are complete; the separately approved live proof passed for marker `media-role-1784006428939-3520f05f`, and an independent `storage.objects` readback found zero objects for both attempted markers. Promoted into `now`; the decision-gated Turnstile task moved to `next` to preserve the max-three rule.",
         "2026-07-14: Phase 1 Projects is implemented as a local source candidate: one page-shaped aggregate draft and action bar, shared public/draft rendering, accessible content ordering, a 1116px master/detail workspace, visual hotspots, inline private-first media, exact retrieval/refresh of every referenced image beyond the bounded picker window, a protected Pages Function, an atomic service-role-only aggregate RPC, and archived-slug fallback suppression. Present hardening includes PGRST/HTTP error mapping, server-enforced Editor claim normalization, transaction-locked exact actor-role recheck, required first-adoption canonical `baseUpdatedAt` tokens, pre-mutation Save/Publish/Hide conflict detection, transaction-local media/taxonomy reference rechecks, and reference-aware compensation for newly created public copies after a failed publish.",
@@ -2469,6 +2473,7 @@
         "Jay owns the fool-test acceptance. Agent checks, screenshots, route shells, or self-review cannot certify that criterion."
       ],
       "acceptance": [
+        "Project material points select a Stone Library stone, its variant, and only a finish supported by that variant; material name, image/alt, and deep link come from Stone Library while Project retains placement, application, and project note.",
         "Projects is edited as one page-shaped aggregate draft with one Save action, no parallel child Save buttons, and no confirm dialogs.",
         "Draft preview reuses the public Project rendering and reflects current unsaved editor state.",
         "Facts, materials, media, maps, and hotspots appear as sections in public-page order; child publish states and database-shaped controls are not exposed.",

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, Navigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom';
 import FinishAccordion from '../components/stone-library/FinishAccordion';
 import FinishLightbox from '../components/stone-library/FinishLightbox';
 import ImageStage from '../components/stone-library/ImageStage';
@@ -17,9 +17,10 @@ function statusLabel(status: 'active' | 'tbc'): string {
 
 export default function StoneLibraryDetailPage() {
   const { stoneGroupId = '' } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  const [selectedVariantId, setSelectedVariantId] = useState('');
-  const [lockedFinishKey, setLockedFinishKey] = useState<string | null>(null);
+  const [selectedVariantId, setSelectedVariantId] = useState(() => searchParams.get('variant') || '');
+  const [lockedFinishKey, setLockedFinishKey] = useState<string | null>(() => searchParams.get('finish'));
   const [centerRequestToken, setCenterRequestToken] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [lightboxFrameIndex, setLightboxFrameIndex] = useState(0);
@@ -89,12 +90,17 @@ export default function StoneLibraryDetailPage() {
   function handleVariantChange(variantId: string) {
     setSelectedVariantId(variantId);
     setLockedFinishKey(null);
+    setSearchParams({ variant: variantId }, { replace: true });
     setIsLightboxOpen(false);
     setLightboxFrameIndex(0);
   }
 
   function handleFinishSelect(finishKey: string) {
     setLockedFinishKey(finishKey);
+    const next = new URLSearchParams();
+    if (selectedVariantId) next.set('variant', selectedVariantId);
+    next.set('finish', finishKey);
+    setSearchParams(next, { replace: true });
     setLightboxFrameIndex(0);
     setCenterRequestToken((current) => current + 1);
   }

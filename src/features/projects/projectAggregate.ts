@@ -58,6 +58,7 @@ export interface ProjectMaterialDraft {
     key: string;
     id: number | null;
     stoneGroupId: number | null;
+    stoneVariantId: number | null;
     finishDefinitionId: number | null;
     application: string;
     note: string;
@@ -151,6 +152,7 @@ export interface ProjectMaterialRowSource {
     id: number;
     project_id: number;
     stone_group_id: number | null;
+    stone_variant_id: number | null;
     finish_definition_id: number | null;
     application: string;
     note: string | null;
@@ -223,6 +225,31 @@ export interface ProjectStoneOption {
     status: string;
 }
 
+export interface ProjectStoneVariantOption {
+    id: number;
+    stoneGroupId: number;
+    key: string;
+    label: string;
+    status: string;
+    sortOrder: number;
+}
+
+export interface ProjectStoneFinishCapabilityOption {
+    stoneVariantId: number;
+    finishDefinitionId: number;
+    capability: 'yes' | 'no' | 'tbc';
+}
+
+export interface ProjectStoneFinishImageOption {
+    stoneGroupId: number | null;
+    stoneVariantId: number | null;
+    finishDefinitionId: number | null;
+    mediaAssetId: number;
+    imageRole: 'primary' | 'secondary' | 'detail' | 'swatch';
+    status: string;
+    sortOrder: number;
+}
+
 export interface ProjectFinishOption {
     id: number;
     key: string;
@@ -233,7 +260,10 @@ export interface ProjectFinishOption {
 export interface ProjectAggregateMappingContext {
     media: readonly ProjectMediaOption[];
     stones: readonly ProjectStoneOption[];
+    stoneVariants: readonly ProjectStoneVariantOption[];
     finishes: readonly ProjectFinishOption[];
+    finishCapabilities: readonly ProjectStoneFinishCapabilityOption[];
+    finishImages: readonly ProjectStoneFinishImageOption[];
 }
 
 export interface ProjectPublishBlocker {
@@ -293,10 +323,8 @@ export function collectProjectMediaAssetIds(draft: ProjectAggregateDraft): numbe
 
     add(draft.project.heroMediaId);
     add(draft.project.coverMediaId);
-    draft.materials.forEach((material) => add(material.mediaAssetId));
     draft.maps.forEach((map) => add(map.mediaAssetId));
     draft.mediaBlocks.forEach((block) => add(block.mediaAssetId));
-    draft.hotspots.forEach((hotspot) => add(hotspot.previewMediaId));
 
     return [...mediaIds].sort((left, right) => left - right);
 }
@@ -340,7 +368,16 @@ export function normalizeProjectDraftForSave(draft: ProjectAggregateDraft): Proj
         ...draft,
         project: { ...draft.project, claimReviewStatus: 'approved' },
         facts: draft.facts.map((fact) => ({ ...fact, claimStatus: 'approved' })),
-        materials: draft.materials.map((material) => ({ ...material, claimStatus: 'approved' })),
+        materials: draft.materials.map((material) => ({
+            ...material,
+            mediaAssetId: null,
+            claimStatus: 'approved',
+        })),
+        hotspots: draft.hotspots.map((hotspot) => ({
+            ...hotspot,
+            label: '',
+            previewMediaId: null,
+        })),
     });
 }
 
@@ -430,6 +467,7 @@ export function rowsToProjectAggregateDraft(rows: ProjectAggregateSourceRows): P
             key: persistedKey('material', material.id),
             id: material.id,
             stoneGroupId: material.stone_group_id,
+            stoneVariantId: material.stone_variant_id,
             finishDefinitionId: material.finish_definition_id,
             application: material.application,
             note: material.note ?? '',
@@ -489,6 +527,7 @@ export function draftToProjectData(
     const mediaById = new Map(context.media.map((asset) => [asset.id, asset]));
     const stoneById = new Map(context.stones.map((stone) => [stone.id, stone]));
     const finishById = new Map(context.finishes.map((finish) => [finish.id, finish]));
+    const variantById = new Map(context.stoneVariants.map((variant) => [variant.id, variant]));
     const materialByKey = new Map(
         draft.materials.map((material) => [material.key, material]),
     );
@@ -515,26 +554,36 @@ export function draftToProjectData(
         draft.hotspots.flatMap((hotspot) => {
             if (hotspot.projectMaterialMapKey !== mapKey || !hotspot.projectMaterialKey) return [];
             const material = materialByKey.get(hotspot.projectMaterialKey);
-            if (!material?.stoneGroupId || !material.finishDefinitionId) return [];
+            if (!material?.stoneGroupId || !material.stoneVariantId || !material.finishDefinitionId) return [];
             const stone = stoneById.get(material.stoneGroupId);
+            const variant = variantById.get(material.stoneVariantId);
             const finish = finishById.get(material.finishDefinitionId);
-            if (!stone || !finish) return [];
+            if (!stone || !variant || !finish) return [];
+            const finishImage = context.finishImages
+                .filter((image) => image.status !== 'archived')
+                .filter((image) => image.stoneGroupId === stone.id)
+                .filter((image) => image.stoneVariantId === variant.id || image.stoneVariantId === null)
+                .filter((image) => image.finishDefinitionId === finish.id || image.finishDefinitionId === null)
+                .sort((left, right) => {
+                    const leftExact = Number(left.stoneVariantId === variant.id) + Number(left.finishDefinitionId === finish.id);
+                    const rightExact = Number(right.stoneVariantId === variant.id) + Number(right.finishDefinitionId === finish.id);
+                    if (leftExact !== rightExact) return rightExact - leftExact;
+                    if (left.imageRole !== right.imageRole) return left.imageRole === 'primary' ? -1 : 1;
+                    return left.sortOrder - right.sortOrder;
+                })[0];
 
             return [{
                 id: hotspot.key,
                 x: clampPercent(hotspot.xPercent),
                 y: clampPercent(hotspot.yPercent),
-                title: hotspot.label.trim() || undefined,
+                stoneVariantId: variant.key,
                 description: hotspot.note.trim() || undefined,
                 stoneGroupId: stone.key,
                 finishKey: finish.key,
                 application: hotspot.application.trim() || material.application.trim(),
                 note: hotspot.note.trim() || material.note.trim(),
-                image: mediaUrl(hotspot.previewMediaId || material.mediaAssetId) || undefined,
-                imageAlt: mediaAlt(
-                    hotspot.previewMediaId || material.mediaAssetId,
-                    `${projectTitle} material detail`,
-                ),
+                image: mediaUrl(finishImage?.mediaAssetId ?? null) || undefined,
+                imageAlt: mediaAlt(finishImage?.mediaAssetId ?? null, `${stone.label} ${finish.label} finish`),
             }];
         });
 
@@ -607,17 +656,17 @@ export function draftToProjectData(
     }
 
     const materials = draft.materials.flatMap((material) => {
-        if (!material.stoneGroupId || !material.finishDefinitionId) return [];
+        if (!material.stoneGroupId || !material.stoneVariantId || !material.finishDefinitionId) return [];
         const stone = stoneById.get(material.stoneGroupId);
+        const variant = context.stoneVariants.find((entry) => entry.id === material.stoneVariantId);
         const finish = finishById.get(material.finishDefinitionId);
-        if (!stone || !finish) return [];
+        if (!stone || !variant || !finish) return [];
         return [{
             stoneGroupId: stone.key,
+            stoneVariantId: variant.key,
             finishKey: finish.key,
             application: material.application.trim(),
             note: material.note.trim(),
-            image: mediaUrl(material.mediaAssetId) || undefined,
-            imageAlt: mediaAlt(material.mediaAssetId, `${stone.label} used at ${projectTitle}`),
         }];
     });
 
@@ -695,15 +744,29 @@ export function getProjectPublishBlockers(
 
     const stoneById = new Map(context.stones.map((stone) => [stone.id, stone]));
     const finishById = new Map(context.finishes.map((finish) => [finish.id, finish]));
+    const variantById = new Map(context.stoneVariants.map((variant) => [variant.id, variant]));
     const incompleteMaterial = draft.materials.find((material) =>
         !material.application.trim()
         || !material.stoneGroupId
+        || !material.stoneVariantId
         || !material.finishDefinitionId
         || stoneById.get(material.stoneGroupId)?.status !== 'published'
-        || finishById.get(material.finishDefinitionId)?.status !== 'published',
+        || variantById.get(material.stoneVariantId)?.status !== 'published'
+        || variantById.get(material.stoneVariantId)?.stoneGroupId !== material.stoneGroupId
+        || finishById.get(material.finishDefinitionId)?.status !== 'published'
+        || !context.finishCapabilities.some((capability) =>
+            capability.stoneVariantId === material.stoneVariantId
+            && capability.finishDefinitionId === material.finishDefinitionId
+            && capability.capability !== 'no')
+        || !context.finishImages.some((image) =>
+            image.status === 'published'
+            && image.stoneGroupId === material.stoneGroupId
+            && (image.stoneVariantId === material.stoneVariantId || image.stoneVariantId === null)
+            && (image.finishDefinitionId === material.finishDefinitionId || image.finishDefinitionId === null)
+            && mediaById.get(image.mediaAssetId)?.status === 'published')
     );
     if (incompleteMaterial) {
-        add({ id: `material-${incompleteMaterial.key}`, section: 'materials', message: 'Complete the stone, finish and use for each material.' });
+        add({ id: `material-${incompleteMaterial.key}`, section: 'materials', message: 'Complete the material and make its Stone Library stone, variant, finish and image Live.' });
     }
 
     const mapKeys = new Set(draft.maps.map((map) => map.key));

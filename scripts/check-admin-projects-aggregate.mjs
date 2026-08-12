@@ -151,6 +151,8 @@ const tombstoneMigrationPath =
   "supabase/migrations/20260802103337_restrict_archived_project_tombstones.sql";
 const lockdownMigrationPath =
   "supabase/migrations/20260802105537_project_aggregate_write_lockdown.sql";
+const stoneLibrarySourceMigrationPath =
+  "supabase/migrations/20260812053204_project_materials_stone_library_source.sql";
 
 const page = readRequired(pagePath);
 const shell = readRequired(shellPath);
@@ -168,6 +170,7 @@ const server = readRequired(functionPath);
 const migration = readRequired(migrationPath);
 const tombstoneMigration = readRequired(tombstoneMigrationPath);
 const lockdownMigration = readRequired(lockdownMigrationPath);
+const stoneLibrarySourceMigration = readRequired(stoneLibrarySourceMigrationPath);
 const browserProjectsSource = [
   page,
   shell,
@@ -185,6 +188,42 @@ requireIncludes(
   "/api/admin/projects",
   pagePath,
   "single aggregate endpoint",
+);
+requireIncludes(
+  editor,
+  'option.status !== "archived" || option.id === value',
+  editorPath,
+  "Draft and Live Stone Library options remain editable",
+);
+requireIncludes(
+  editor,
+  'entry.status !== "archived"',
+  editorPath,
+  "Draft Stone Library imagery is available to the Project editor",
+);
+requireIncludes(
+  stoneLibrarySourceMigration,
+  "variants.status <> 'archived'",
+  stoneLibrarySourceMigrationPath,
+  "unique Draft or Live variant backfill",
+);
+requireIncludes(
+  server,
+  'variants.get(id) !== "published"',
+  functionPath,
+  "publish-only Live variant enforcement",
+);
+requireIncludes(
+  server,
+  "Every material must have a published Stone Library finish image.",
+  functionPath,
+  "publish-only Live Stone Library image enforcement",
+);
+requireIncludes(
+  aggregate,
+  "mediaById.get(image.mediaAssetId)?.status === 'published'",
+  aggregatePath,
+  "client publish blocker for Draft Stone Library media",
 );
 requireIncludes(page, "baseRevision", pagePath, "private draft revision guard");
 requireIncludes(
@@ -598,11 +637,38 @@ requireIncludes(
   editorPath,
   "stable selected-map media identity",
 );
-requireIncludes(
+forbidMatches(
   editor,
-  "key={`hotspot-${selectedHotspot.key}`}",
+  /Point detail image|key=\{`hotspot-\$\{selectedHotspot\.key\}`\}/,
   editorPath,
-  "stable selected-hotspot media identity",
+  "Project-owned hotspot image override",
+);
+forbidMatches(
+  editor,
+  /Material detail image|Point title/,
+  editorPath,
+  "Project-owned material presentation controls",
+);
+requireIncludes(editor, 'label="Variant"', editorPath, "Stone Library variant selector");
+requireIncludes(editor, "finishCapabilities.some", editorPath, "variant-supported finish filtering");
+requireIncludes(editor, "stone-library-material-preview", editorPath, "canonical Stone Library preview card");
+requireIncludes(
+  stoneLibrarySourceMigration,
+  "add column if not exists stone_variant_id",
+  stoneLibrarySourceMigrationPath,
+  "Project material Stone Library variant reference",
+);
+requireIncludes(
+  stoneLibrarySourceMigration,
+  "candidates.candidate_count = 1",
+  stoneLibrarySourceMigrationPath,
+  "unambiguous-only legacy variant backfill",
+);
+requireIncludes(
+  stoneLibrarySourceMigration,
+  "project_material_stone_library_mismatch",
+  stoneLibrarySourceMigrationPath,
+  "publish-time Stone Library relationship validation",
 );
 forbidMatches(
   editor,
@@ -1568,8 +1634,8 @@ referencedMediaDraft.mediaBlocks = [
 referencedMediaDraft.hotspots = [{ previewMediaId: 706 }];
 assert.deepEqual(
   collectProjectMediaAssetIds(referencedMediaDraft),
-  [701, 702, 703, 704, 705, 706],
-  "Every distinct media id referenced anywhere in a Project draft must be fetched exactly",
+  [701, 702, 704, 705],
+  "Project media fetches must ignore retired material and hotspot image overrides",
 );
 
 const currentMediaOptions = [
@@ -1651,6 +1717,7 @@ behaviorDraft.materials.push({
   key: "material:new:proof",
   id: null,
   stoneGroupId: 1,
+  stoneVariantId: 11,
   finishDefinitionId: 1,
   application: "Paving",
   note: "Material note",
@@ -1705,11 +1772,40 @@ const behaviorContext = {
       status: "published",
       previewUrl: "/map.jpg",
     },
+    {
+      id: 3,
+      bucket: "urblo-public-media",
+      alt: "Bluestone sawn finish",
+      caption: null,
+      objectPath: "stone-library/bluestone-sawn.jpg",
+      sourceUrl: null,
+      sourceKind: "storage",
+      mediaType: "image",
+      status: "published",
+      previewUrl: "/bluestone-sawn.jpg",
+    },
   ],
   stones: [
     { id: 1, key: "bluestone", label: "Bluestone", status: "published" },
   ],
+  stoneVariants: [
+    { id: 11, stoneGroupId: 1, key: "bluestone", label: "Standard", status: "published", sortOrder: 0 },
+  ],
   finishes: [{ id: 1, key: "sawn", label: "Sawn", status: "published" }],
+  finishCapabilities: [
+    { stoneVariantId: 11, finishDefinitionId: 1, capability: "yes" },
+  ],
+  finishImages: [
+    {
+      stoneGroupId: 1,
+      stoneVariantId: 11,
+      finishDefinitionId: 1,
+      mediaAssetId: 3,
+      imageRole: "primary",
+      status: "published",
+      sortOrder: 0,
+    },
+  ],
 };
 
 const orderDraft = structuredClone(behaviorDraft);
