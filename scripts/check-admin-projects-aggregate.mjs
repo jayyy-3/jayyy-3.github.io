@@ -189,6 +189,42 @@ requireIncludes(
   pagePath,
   "single aggregate endpoint",
 );
+requireIncludes(
+  editor,
+  'option.status !== "archived" || option.id === value',
+  editorPath,
+  "Draft and Live Stone Library options remain editable",
+);
+requireIncludes(
+  editor,
+  'entry.status !== "archived"',
+  editorPath,
+  "Draft Stone Library imagery is available to the Project editor",
+);
+requireIncludes(
+  stoneLibrarySourceMigration,
+  "variants.status <> 'archived'",
+  stoneLibrarySourceMigrationPath,
+  "unique Draft or Live variant backfill",
+);
+requireIncludes(
+  server,
+  'variants.get(id) !== "published"',
+  functionPath,
+  "publish-only Live variant enforcement",
+);
+requireIncludes(
+  server,
+  "Every material must have a published Stone Library finish image.",
+  functionPath,
+  "publish-only Live Stone Library image enforcement",
+);
+requireIncludes(
+  aggregate,
+  "mediaById.get(image.mediaAssetId)?.status === 'published'",
+  aggregatePath,
+  "client publish blocker for Draft Stone Library media",
+);
 requireIncludes(page, "baseRevision", pagePath, "private draft revision guard");
 requireIncludes(
   page,
@@ -1736,6 +1772,18 @@ const behaviorContext = {
       status: "published",
       previewUrl: "/map.jpg",
     },
+    {
+      id: 3,
+      bucket: "urblo-public-media",
+      alt: "Bluestone sawn finish",
+      caption: null,
+      objectPath: "stone-library/bluestone-sawn.jpg",
+      sourceUrl: null,
+      sourceKind: "storage",
+      mediaType: "image",
+      status: "published",
+      previewUrl: "/bluestone-sawn.jpg",
+    },
   ],
   stones: [
     { id: 1, key: "bluestone", label: "Bluestone", status: "published" },
@@ -1747,7 +1795,17 @@ const behaviorContext = {
   finishCapabilities: [
     { stoneVariantId: 11, finishDefinitionId: 1, capability: "yes" },
   ],
-  finishImages: [],
+  finishImages: [
+    {
+      stoneGroupId: 1,
+      stoneVariantId: 11,
+      finishDefinitionId: 1,
+      mediaAssetId: 3,
+      imageRole: "primary",
+      status: "published",
+      sortOrder: 0,
+    },
+  ],
 };
 
 const orderDraft = structuredClone(behaviorDraft);

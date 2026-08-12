@@ -9,9 +9,10 @@ alter table public.project_materials
 create index if not exists project_materials_stone_variant_idx
   on public.project_materials (stone_variant_id);
 
--- Only backfill when exactly one published/non-negative Stone Library variant
--- supports the existing stone + finish pair. Ambiguous rows stay null for an
--- editor to resolve; the migration never guesses a variant.
+-- Backfill when exactly one non-archived/non-negative Stone Library variant
+-- supports the existing stone + finish pair. Draft Stone Library records are
+-- valid editing sources; publication readiness is enforced separately by the
+-- publish boundary. Ambiguous rows stay null so the migration never guesses.
 with candidates as (
   select
     materials.id as project_material_id,
@@ -20,7 +21,7 @@ with candidates as (
   from public.project_materials materials
   join public.stone_variants variants
     on variants.stone_group_id = materials.stone_group_id
-   and variants.status = 'published'
+   and variants.status <> 'archived'
   join public.stone_finish_capabilities capabilities
     on capabilities.stone_variant_id = variants.id
    and capabilities.finish_definition_id = materials.finish_definition_id

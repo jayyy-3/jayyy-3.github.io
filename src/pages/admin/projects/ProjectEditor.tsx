@@ -357,8 +357,8 @@ export default function ProjectEditor({
   function addMaterial() {
     setOpenSection("materials");
     const key = createProjectDraftKey("material");
-    const stone = stones.find((entry) => entry.status === "published") ?? null;
-    const variants = stoneVariants.filter((variant) => variant.stoneGroupId === stone?.id && variant.status === "published");
+    const stone = stones.find((entry) => entry.status !== "archived") ?? null;
+    const variants = stoneVariants.filter((variant) => variant.stoneGroupId === stone?.id && variant.status !== "archived");
     const variant = variants[0] ?? null;
     const finishId = finishCapabilities.find((capability) => capability.stoneVariantId === variant?.id && capability.capability !== "no")?.finishDefinitionId ?? null;
     onChange({
@@ -813,7 +813,7 @@ export default function ProjectEditor({
                           value={material.stoneGroupId}
                           options={stones}
                           onChange={(value) => {
-                            const variants = stoneVariants.filter((variant) => variant.stoneGroupId === value && variant.status === "published");
+                            const variants = stoneVariants.filter((variant) => variant.stoneGroupId === value && variant.status !== "archived");
                             const variantId = variants[0]?.id ?? null;
                             const finishId = finishCapabilities.find((capability) => capability.stoneVariantId === variantId && capability.capability !== "no")?.finishDefinitionId ?? null;
                             updateCollection("materials", material.key, {
@@ -1636,7 +1636,7 @@ function OptionField({
 }) {
   const disabled = useContext(ProjectMutationDisabledContext);
   const visibleOptions = options.filter(
-    (option) => option.status === "published" || option.id === value,
+    (option) => option.status !== "archived" || option.id === value,
   );
   return (
     <label className="block text-xs font-bold uppercase tracking-[0.12em] text-black/48">
@@ -1653,9 +1653,7 @@ function OptionField({
         {visibleOptions.map((option) => (
           <option key={option.id} value={option.id}>
             {option.label}
-            {option.status === "published"
-              ? ""
-              : " (not available for publishing)"}
+            {option.status === "published" ? " (Live)" : option.status === "draft" ? " (Draft)" : " (not available for publishing)"}
           </option>
         ))}
       </select>
@@ -1674,7 +1672,7 @@ function StoneLibraryMaterialPreview({
   const variant = context.stoneVariants.find((entry) => entry.id === material.stoneVariantId);
   const finish = context.finishes.find((entry) => entry.id === material.finishDefinitionId);
   const image = context.finishImages
-    .filter((entry) => entry.status === "published")
+    .filter((entry) => entry.status !== "archived")
     .filter((entry) => entry.stoneGroupId === stone?.id)
     .filter((entry) => entry.stoneVariantId === variant?.id || entry.stoneVariantId === null)
     .filter((entry) => entry.finishDefinitionId === finish?.id || entry.finishDefinitionId === null)
@@ -1705,7 +1703,10 @@ function StoneLibraryMaterialPreview({
         <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-black/42">From Stone Library</p>
         <p className="mt-1 text-base font-semibold text-black">{stone.label}</p>
         <p className="mt-1 text-sm text-black/58">{variant.label} · {finish.label}</p>
-        {!imageUrl ? <p className="mt-2 text-xs font-semibold text-amber-800">This finish has no published image yet.</p> : null}
+        <p className="mt-1 text-xs font-semibold text-black/45">
+          Stone {stone.status === "published" ? "Live" : "Draft"} · Variant {variant.status === "published" ? "Live" : "Draft"} · Finish {finish.status === "published" ? "Live" : "Draft"}
+        </p>
+        {!imageUrl ? <p className="mt-2 text-xs font-semibold text-amber-800">This finish has no usable Stone Library image yet.</p> : null}
       </div>
     </div>
   );

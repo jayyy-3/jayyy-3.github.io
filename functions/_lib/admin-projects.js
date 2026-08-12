@@ -875,6 +875,30 @@ async function assertPublishedReferenceRows(supabase, draft) {
       { blockers: ["Choose a variant that belongs to the selected Stone Library stone."] },
     );
   }
+
+  const { data: finishImages, error: finishImageError } = await supabase
+    .from("stone_finish_images")
+    .select("stone_group_id,stone_variant_id,finish_definition_id,status,media_assets!stone_finish_images_media_asset_id_fkey(status)")
+    .in("finish_definition_id", finishIds);
+  if (finishImageError) {
+    throw upstreamError("reference_load_failed", "Stone Library images could not be checked.");
+  }
+  const hasPublishedFinishImage = (material) => (finishImages || []).some((image) => {
+    const media = Array.isArray(image.media_assets) ? image.media_assets[0] : image.media_assets;
+    return image.status === "published"
+      && Number(image.stone_group_id) === material.stoneGroupId
+      && (image.stone_variant_id === null || Number(image.stone_variant_id) === material.stoneVariantId)
+      && (image.finish_definition_id === null || Number(image.finish_definition_id) === material.finishDefinitionId)
+      && media?.status === "published";
+  });
+  if (draft.materials.some((material) => !hasPublishedFinishImage(material))) {
+    throw new AdminProjectsError(
+      409,
+      "publish_blocked",
+      "Every material must have a published Stone Library finish image.",
+      { blockers: ["Make each selected Stone Library finish image Live before publishing the Project."] },
+    );
+  }
 }
 
 async function loadStatuses(supabase, table, ids) {
