@@ -23,8 +23,11 @@ import {
   type HomepageFeaturePanelId,
   type HomepageLogo,
   type HomepageMetric,
+  type HomepageProject,
 } from '../../data/homepage';
+import type { ProjectData } from '../../data/projectData';
 import { siteCtas } from '../../data/siteChrome';
+import ProjectService from '../../service/ProjectService';
 import AnimatedNumber from '../AnimatedNumber';
 
 const mobileInlineVideoAttributes = {
@@ -1082,8 +1085,28 @@ function MetricsSection() {
   );
 }
 
+function toHomepageProject(project: ProjectData): HomepageProject {
+  const railImage = project.listing.cover || project.hero?.image || project.images[0] || '';
+  const featureImage = project.hero?.image || project.images[1] || railImage;
+
+  return {
+    slug: project.slug,
+    title: project.listing.title || project.name,
+    location: project.listing.location,
+    category: project.listing.category,
+    year: project.listing.year,
+    summary: project.listing.summary || project.lead || project.story?.[0] || '',
+    image: railImage,
+    imageAlt: project.listing.imageAlt || project.name,
+    featureImage,
+    featureImageAlt: project.hero?.alt || project.listing.imageAlt || project.name,
+  };
+}
+
 function LatestProjectsSection() {
-  const projects = homepageData.latestProjects.projects;
+  const fallbackProjects = homepageData.latestProjects.projects;
+  const [sectionRef, loadProjectMedia] = useNearViewport<HTMLElement>('700px');
+  const [projects, setProjects] = useState<HomepageProject[]>(fallbackProjects);
   const [activeProjectIndex, setActiveProjectIndex] = useState(0);
   const activeProject = projects[activeProjectIndex] ?? projects[0];
   const activeFeatureImage = activeProject.featureImage ?? activeProject.image;
@@ -1099,7 +1122,28 @@ function LatestProjectsSection() {
   const [isDragging, setIsDragging] = useState(false);
   const [railState, setRailState] = useState({ canScrollPrev: false, canScrollNext: false });
   const reduceMotion = useReducedMotion() ?? false;
-  const [sectionRef, loadProjectMedia] = useNearViewport<HTMLElement>('700px');
+
+  useEffect(() => {
+    if (!loadProjectMedia) return undefined;
+
+    let active = true;
+    ProjectService.getAll()
+      .then((publishedProjects) => {
+        if (!active || !publishedProjects.length) return;
+        setProjects(publishedProjects.map(toHomepageProject));
+        setActiveProjectIndex(0);
+        window.requestAnimationFrame(() => {
+          if (railRef.current) railRef.current.scrollLeft = 0;
+        });
+      })
+      .catch(() => {
+        // Keep the controlled homepage project set when public CMS content is unavailable.
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [loadProjectMedia]);
 
   const updateRailState = useCallback(() => {
     const rail = railRef.current;
