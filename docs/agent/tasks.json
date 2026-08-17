@@ -2586,6 +2586,43 @@
       ]
     },
     {
+      "id": "NEXT-HOMEPAGE-PUBLISHED-PROJECTS-001",
+      "status": "next",
+      "priority": 1.5,
+      "summary": "Remove the Homepage five-Project cap by reading the complete Published Project collection in CMS order.",
+      "files": [
+        "src/components/homepage/HomepageSections.tsx",
+        "src/data/homepage.ts",
+        "docs/DESIGN.md",
+        "docs/ARCHITECTURE.md",
+        "docs/HANDOFF.md",
+        "docs/NEXT_STEPS.md",
+        "docs/WORKLOG.md"
+      ],
+      "notes": [
+        "2026-08-17: Root cause confirmed: Homepage used a separate static five-record list while /projects used the Published Project collection.",
+        "2026-08-17: Local implementation reads ProjectService only when the section nears the viewport, retains the five controlled records as failure fallback, and resets the rail to the first active CMS record after replacement.",
+        "2026-08-17: Local desktop/390px Browser QA reads all 15 current public Projects, reaches item 15 / 15, keeps the section at one viewport, and reports no horizontal document overflow or relevant console error. Host gates and the clean Docker Node 20 gate for commit ae9d3fa pass. Production is unchanged pending Preview acceptance."
+      ],
+      "acceptance": [
+        "Every Published Project returned by the public Project service is browsable in Homepage Latest Projects in CMS sort order.",
+        "The existing five controlled records remain visible if public CMS content cannot be read.",
+        "The one-viewport desktop/mobile composition, horizontal navigation, first-active-item visibility, and Project detail links remain intact.",
+        "Jay accepts the deployed Preview before production promotion."
+      ],
+      "verification": [
+        "npm run build",
+        "npm run lint",
+        "npx tsc -b",
+        "npm run agent:smoke",
+        "npm run agent:check",
+        "npm run gate before push",
+        "npm run agent:cloudflare-preview-smoke -- --base-url https://<branch-preview>.urblo.pages.dev",
+        "Browser: desktop and 390px count, first/last navigation, rail start, one-viewport height, console health, and horizontal overflow",
+        "git diff --check"
+      ]
+    },
+    {
       "id": "LATER-LAUNCH-DOCS-CONSOLIDATE-001",
       "status": "later",
       "priority": 21,
