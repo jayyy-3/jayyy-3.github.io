@@ -22,14 +22,14 @@ function ProjectsGridCard({ project }: { project: ProjectData }) {
   return (
     <Link
       to={`/projects/${project.slug}`}
-      className="group grid border-t border-black/12 pt-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--urblo-lime)] focus-visible:ring-offset-4"
+      className="group grid grid-rows-[auto_1fr] border-t border-black/12 pt-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--urblo-lime)] focus-visible:ring-offset-4"
     >
-      <div className="overflow-hidden bg-black">
+      <div className="aspect-[4/3] overflow-hidden bg-black">
         <ProjectResponsiveImage
           src={project.listing.cover}
           profile="card"
           alt={project.listing.imageAlt || project.listing.title}
-          className="aspect-[4/3] w-full object-cover transition duration-500 group-hover:scale-[1.025]"
+          className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.025]"
           loading="lazy"
         />
       </div>

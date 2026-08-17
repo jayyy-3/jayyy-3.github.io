@@ -26,6 +26,22 @@ import {
 } from '../src/service/ProjectService.ts';
 import { overlayPublishedContent } from '../src/service/publicContentOverlay.ts';
 
+const projectsListingSource = readFileSync(
+  new URL('../src/pages/Projects.tsx', import.meta.url),
+  'utf8',
+);
+
+assert.match(
+  projectsListingSource,
+  /grid grid-rows-\[auto_1fr\]/,
+  'Project Grid cards must reserve an intrinsic image row instead of stretching the black media frame',
+);
+assert.match(
+  projectsListingSource,
+  /aspect-\[4\/3\] overflow-hidden bg-black/,
+  'Project Grid cards must keep the media frame itself at 4:3 so uneven copy cannot expose black bars',
+);
+
 const fallbackAlpha = { slug: 'alpha', source: 'static' };
 const fallbackBeta = { slug: 'beta', source: 'static' };
 const publishedAlpha = { slug: ' Alpha ', source: 'published' };
