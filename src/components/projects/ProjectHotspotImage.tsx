@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import type { ProjectHotspot } from '../../data/projectData';
 import StoneLibraryService from '../../service/StoneLibraryService';
 import type { StoneDetailVM } from '../../types/stone-library';
+import ProjectResponsiveImage from './ProjectResponsiveImage';
 
 interface ProjectHotspotImageProps {
     image: string;
@@ -94,7 +95,12 @@ export default function ProjectHotspotImage({
     if (!activeHotspot) {
         return (
             <figure className="overflow-hidden bg-black">
-                <img src={image} alt={imageAlt} className="aspect-[16/10] w-full object-cover" />
+                <ProjectResponsiveImage
+                    src={image}
+                    profile="hotspot"
+                    alt={imageAlt}
+                    className="aspect-[16/10] w-full object-cover"
+                />
                 {caption ? <figcaption className="mt-4 text-[14px] leading-7 text-black/55">{caption}</figcaption> : null}
             </figure>
         );
@@ -166,8 +172,9 @@ export default function ProjectHotspotImage({
 
                 <figure>
                     <div className="relative overflow-hidden border-y border-black/10 bg-black">
-                        <img
+                        <ProjectResponsiveImage
                             src={image}
+                            profile="hotspot"
                             alt={imageAlt}
                             className="aspect-[4/3] w-full object-cover md:aspect-[16/10]"
                             loading="lazy"

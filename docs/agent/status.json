@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lastUpdated": "2026-08-12",
+  "lastUpdated": "2026-08-17",
   "sourceOfTruth": {
     "currentState": "docs/HANDOFF.md",
     "taskQueue": "docs/agent/tasks.json",
@@ -33,14 +33,14 @@
   "localReproducibility": {
     "sourceHarness": "passing",
     "adminSourceCoverage": "passing",
-    "runtimeGates": "2026_08_02_pr11_merge_59cded9b_immutable_76de2abf_apex_www_smoke_and_production_admin_auth_passing",
+    "runtimeGates": "2026_08_17_project_responsive_image_pr24_grid_black_bar_fix_c1920e1_host_and_clean_node20_container_gates_passing_immutable_preview_aa70ae54_smoke_desktop_list_mobile_readback_passing_jay_acceptance_pending",
     "liveSecretsPresent": true,
     "liveReadiness": "browser_key_owner_and_distinct_editor_credentials_present_media_migration_applied_live_role_boundary_passed",
     "adminUxReshape": "phase0_closed_projects_phase1_and_pr11_single_editor_followup_live_and_jay_accepted_project_stone_library_point_source_local_candidate_migration_approval_pending_phase2_articles_next_sunset_pending"
   },
   "nextDecisions": [
     "Monitor or purge the four residual apex cache headers when Cloudflare account access is available; their current bytes and MIME types exactly match the immutable repair deployment and are non-blocking.",
-    "Request separate approval to promote draft PR #23 runtime; production migration 20260812062636 is applied/read back, Moon Gate uniquely links to Draft variants 5 and 13, and commit f7b8d70 passed the clean Docker gate plus immutable Preview 0e8e4fa0 smoke.",
+    "Ask Jay to fool-test the production Project material-point workflow; migration 20260812062636 and runtime merge 0593389d / deployment b160e33f are live, deployment-bound smoke and nine authenticated Admin routes pass, and agent checks cannot self-certify acceptance.",
     "After separate approval, verify Supabase Auth SMTP ownership and repeat invite/password/recovery against the corrected and read-back production callbacks.",
     "Keep Moon Gate Draft until separately approved Stone Library publication and hotspot-material binding work is complete; do not bypass the publish guard.",
     "Decide whether final Turnstile proof is required before the next public launch checkpoint.",
@@ -66,24 +66,24 @@
     "worklogReviewWarningLines": 8000
   },
   "lastVerified": {
-    "agentCheck": "2026-08-03",
-    "build": "2026-08-03",
-    "containerGate": "2026-08-03",
+    "agentCheck": "2026-08-17",
+    "build": "2026-08-17",
+    "containerGate": "2026-08-17",
     "containerGateExceptionApproved": "2026-07-16",
     "hostEquivalentGate": "2026-07-19",
-    "cloudflarePreviewSmokeBranchPreview": "2026-08-03",
+    "cloudflarePreviewSmokeBranchPreview": "2026-08-17",
     "cloudflareReadiness": "2026-07-19",
     "gscSeoReview": "2026-06-12",
     "gscSitemapSubmission": "2026-06-12",
     "harnessGc": "2026-07-19",
     "harnessGcReview": "2026-07-19",
-    "lint": "2026-08-02",
+    "lint": "2026-08-17",
     "seoLegacyRedirectSource": "2026-06-12",
     "seoReadiness": "2026-07-13",
     "seoProductionReadback": "2026-06-12",
-    "gitDiffCheck": "2026-08-03",
-    "smoke": "2026-08-03",
-    "typecheck": "2026-08-03",
+    "gitDiffCheck": "2026-08-17",
+    "smoke": "2026-08-17",
+    "typecheck": "2026-08-17",
     "cloudflarePreviewSmokeProduction": "2026-08-02",
     "adminProjectsCountProduction": "2026-08-03",
     "adminAuthBrowserProduction": "2026-08-02",
@@ -101,11 +101,13 @@
     "adminReliabilityDeployment": "2026-07-13",
     "qaEditorProvisioning": "2026-07-13",
     "adminAuthBrowserLocalConfigured": "2026-07-13",
-    "adminConfigGateIsolated": "2026-08-03",
-    "adminCmsPredeploy": "2026-08-03",
-    "adminProjectsAggregate": "2026-08-03",
+    "adminConfigGateIsolated": "2026-08-17",
+    "adminCmsPredeploy": "2026-08-17",
+    "adminProjectsAggregate": "2026-08-17",
     "adminProjectsResponsiveImplementationCheck": "2026-07-14",
     "adminProjectsSingleEditorPreview": "2026-08-02",
-    "configuredBundleSplit": "2026-07-13"
+    "configuredBundleSplit": "2026-07-13",
+    "projectResponsiveImageLocal": "2026-08-17",
+    "projectResponsiveImagePreview": "2026-08-17"
   }
 }

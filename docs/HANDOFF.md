@@ -1,6 +1,6 @@
 # HANDOFF - Current Agent State
 
-Last updated: 2026-08-12
+Last updated: 2026-08-17
 
 ## Read First
 Use this file as the short current-state entry. Detailed evidence lives in `docs/WORKLOG.md`; task execution state lives in `docs/agent/tasks.json`; compact machine state lives in `docs/agent/status.json`.
@@ -16,6 +16,8 @@ Recommended startup order:
 
 ## Current Production State
 Urblo is now running on Cloudflare Pages with Supabase-backed forms and an Urblo-owned `/admin` CMS.
+
+Preview candidate: Project image delivery preserves CMS originals and serves public card/list/detail/hero/hotspot images through quality-first responsive Supabase WebP profiles. Draft PR `#24` includes Grid black-bar repair commit `c1920e1`, deployed as immutable Cloudflare Preview `aa70ae54-2d3b-4440-bf11-799114226fec` (`https://aa70ae54.urblo.pages.dev`); the complete route/asset/redirect/Function smoke passes. Desktop Preview readback confirms each first-row Grid image exactly matches its 348×261 media frame with no exposed black remainder, while List remains 120×90. The 390px Grid remains 342×257 without horizontal overflow, and warning/error logs are empty. Detail delivery still selects the quality-first responsive profiles verified on the prior bound Preview. The Admin upload copy says the original is retained and high-quality website versions are prepared automatically. Build, lint, typecheck, smoke, Admin predeploy/config, Harness, and the clean Node 20 container gate pass. No production content, Storage object, Supabase configuration, or production deployment has changed; Jay's visual acceptance remains before promotion.
 
 PR `#21` merged as `b1e8b315` and deployed the 12 supplied partner marks into the existing homepage marquee without changing its white-strip composition. Source uses two equal groups for a seamless loop, one accessible copy, and a reduced-motion fallback. Jay accepted the local desktop/390px result; the clean Node 20 container gate, immutable Preview checks, and production deployment `https://8f2af15d.urblo.pages.dev` pass. The immutable URL, apex, `www`, and moving Pages alias pass deployment-bound smoke; production desktop/390px readback confirms movement, equal group widths, all 16 accessible names, no relevant console errors, and no horizontal overflow.
 
@@ -79,7 +81,7 @@ Only three tasks should currently be treated as `now` execution work:
 - `NOW-ADMIN-RELIABILITY-UX-001`: P0 admin incident. The repaired build, MIME-aware asset verifier, immutable-reference binding, production auth/fallback checks, Auth URL correction/readback, Media migration/readback, and live role proof are complete, and a separate QA Editor is active. The task remains open for the editor golden workflows; do not mark it done from deployment, account existence, route-shell checks, or source checks alone.
 - `NOW-ADMIN-SETTINGS-CRUD-001`: Published settings public-consumer proof plus a real Settings invite/recovery proof. Exact production redirects are now configured and read back; custom Auth SMTP ownership and the approved end-to-end email/password workflows remain open.
 - `NOW-ADMIN-UX-RESHAPE-001`: the approved page-shaped `/admin/projects` Phase 1 runtime and PR `#11` single-editor follow-up are deployed and Jay-accepted in production. Keep the umbrella task open for Phase 2 replication, Phase 3 canonical-doc/harness absorption, and the directive's required sunset deletion; next module is Articles per the approved sequence.
-- `NOW-PROJECT-STONE-POINTS-001`: implementation is in progress on `codex/project-hotspots-stone-library-source`. The Admin material flow is Stone → Variant → supported Finish with a read-only Stone Library image; Project-owned material/hotspot image and title overrides are retired in runtime. Commit `f7b8d70` passed the clean Docker gate and immutable Preview `https://0e8e4fa0.urblo.pages.dev` passed no-write smoke. After Jay's separate approval, compatibility migration `20260812062636` was applied/read back on production and uniquely linked Moon Gate to Angola Black variant `5` and New Grey variant `13`; all involved content remains Draft and invalid links are zero. The database is ready, but the runtime is not merged or live; production promotion requires a separate approval.
+- `NOW-PROJECT-STONE-POINTS-001`: production migration `20260812062636` is applied/read back and uniquely links Draft Moon Gate materials to Angola Black variant `5` and New Grey variant `13`. PR `#23` merged as `0593389d` and Cloudflare production deployment `b160e33f-1ca2-4649-9acf-bd67a137f336` is live; immutable, apex, and `www` deployment-bound smoke plus all nine authenticated Admin routes pass. Draft editing now exposes Draft/Live Stone Library references and imagery while publication still requires the full Stone/Variant/Finish/image/media chain to be Live. Keep the task open only for Jay's fool test; agent release checks cannot self-certify it.
 
 Decision-gated in `next`: `NOW-FORMS-SUPABASE-001` retains only the final Turnstile proof; its persistence, SMTP2GO, lead privacy, and admin-visible workflow evidence are already complete.
 
@@ -133,7 +135,7 @@ CMS predeploy and handoff:
 Live-write checks require explicit approval and credentials. Do not run tagged live writes or invite emails without fresh approval for the target action.
 
 ## Next Recommended Action
-PR `#6` has restored the production no-write runtime and Harness baseline. Keep the four apex cache-header warnings visible until Cloudflare revalidation or an approved purge removes them, but do not confuse those exact-bytes/MIME warnings with the remaining CMS handoff blockers.
+Have Jay visually accept the immutable Project image-delivery Preview `https://aa70ae54.urblo.pages.dev`, especially the repaired archive thumbnails and full-width Project photography. If accepted, promote draft PR `#24` through the normal main/production release flow and repeat deployment-bound production smoke and desktop/390px readback. Do not rewrite or delete any existing Project original; production should continue using the current runtime until Jay accepts the Preview.
 
 Required delivery action: the count/data normalization and production UI readback are complete. If Cloudflare account access becomes available, record the immutable deployment URL for merge `edd33465` and run the strict custom-domain binding smoke; do not create a new OAuth grant solely to manufacture that evidence. Moon Gate can become the fifth Live CMS Project only after separately approving and completing its Stone Library dependencies and material-hotspot bindings; do not bypass the publish guard. Then begin Phase 2 with Articles, replicating the Jay-accepted Projects pattern without weakening content/media, auth, RLS, audit, or public-read boundaries. Keep `docs/ADMIN_UX_RESHAPE_PLAN.md` until every later phase is absorbed into canonical docs and its sunset clause is satisfied.
 

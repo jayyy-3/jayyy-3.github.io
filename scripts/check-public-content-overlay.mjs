@@ -1,6 +1,11 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { resolvePublicMediaUrl, toSafePublicMediaSourceUrl } from '../src/lib/publicMediaUrl.ts';
+import {
+  getProjectImageDelivery,
+  projectImageProfiles,
+  toProjectImageVariantUrl,
+} from '../src/lib/projectImageDelivery.ts';
 import { parsePublicEntitySeo, validatePublicEntitySeoDraft } from '../src/lib/publicEntitySeo.ts';
 import { parseProjectFactJsonDraft } from '../src/lib/projectFactValue.ts';
 import { toSafePublicContentDestination } from '../src/lib/publicContentLink.ts';
@@ -20,6 +25,22 @@ import {
   normalizePublicProjectFactValue,
 } from '../src/service/ProjectService.ts';
 import { overlayPublishedContent } from '../src/service/publicContentOverlay.ts';
+
+const projectsListingSource = readFileSync(
+  new URL('../src/pages/Projects.tsx', import.meta.url),
+  'utf8',
+);
+
+assert.match(
+  projectsListingSource,
+  /grid grid-rows-\[auto_1fr\]/,
+  'Project Grid cards must reserve an intrinsic image row instead of stretching the black media frame',
+);
+assert.match(
+  projectsListingSource,
+  /aspect-\[4\/3\] overflow-hidden bg-black/,
+  'Project Grid cards must keep the media frame itself at 4:3 so uneven copy cannot expose black bars',
+);
 
 const fallbackAlpha = { slug: 'alpha', source: 'static' };
 const fallbackBeta = { slug: 'beta', source: 'static' };
@@ -49,6 +70,45 @@ assert.equal(toSafePublicMediaSourceUrl('/media/example.jpg'), '/media/example.j
 assert.equal(toSafePublicMediaSourceUrl('https://cdn.example.com/example.jpg'), 'https://cdn.example.com/example.jpg');
 assert.equal(toSafePublicMediaSourceUrl('javascript:alert(1)'), undefined);
 assert.equal(toSafePublicMediaSourceUrl('//untrusted.example/example.jpg'), undefined);
+const projectStorageImage =
+  'https://project-ref.supabase.co/storage/v1/object/public/urblo-public-media/project-assets/example.png';
+assert.equal(
+  toProjectImageVariantUrl(projectStorageImage, 960, 82),
+  'https://project-ref.supabase.co/storage/v1/render/image/public/urblo-public-media/project-assets/example.png?width=960&quality=82&format=webp&resize=contain',
+  'Published Project media must use the Supabase render endpoint with a high-quality WebP profile',
+);
+assert.equal(
+  toProjectImageVariantUrl('/media/launch/projects/example.jpg', 960, 82),
+  null,
+  'Local curated imagery must remain untouched',
+);
+assert.equal(
+  toProjectImageVariantUrl(
+    'https://project-ref.supabase.co/storage/v1/object/public/another-bucket/example.png',
+    960,
+    82,
+  ),
+  null,
+  'Responsive Project delivery must not transform unrelated public buckets',
+);
+assert.equal(
+  toProjectImageVariantUrl(
+    'https://untrusted.example/storage/v1/object/public/urblo-public-media/example.png',
+    960,
+    82,
+  ),
+  null,
+  'Responsive Project delivery must not rewrite lookalike paths on unrelated hosts',
+);
+const heroDelivery = getProjectImageDelivery(projectStorageImage, 'hero');
+assert.equal(heroDelivery.optimized, true);
+assert.match(heroDelivery.src, /width=1920/);
+assert.match(heroDelivery.srcSet ?? '', /2500w/);
+assert.equal(heroDelivery.sizes, '100vw');
+assert.ok(
+  projectImageProfiles.hero.quality > projectImageProfiles.card.quality,
+  'Project hero delivery must retain a higher visual-quality setting than archive cards',
+);
 assert.equal(
   resolvePublicMediaUrl(
     {
