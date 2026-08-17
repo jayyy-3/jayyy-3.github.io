@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lastUpdated": "2026-08-12",
+  "lastUpdated": "2026-08-17",
   "sourceOfTruth": {
     "currentState": "docs/HANDOFF.md",
     "taskQueue": "docs/agent/tasks.json",
@@ -106,6 +106,7 @@
     "adminProjectsAggregate": "2026-08-03",
     "adminProjectsResponsiveImplementationCheck": "2026-07-14",
     "adminProjectsSingleEditorPreview": "2026-08-02",
-    "configuredBundleSplit": "2026-07-13"
+    "configuredBundleSplit": "2026-07-13",
+    "projectResponsiveImageLocal": "2026-08-17"
   }
 }

@@ -1,6 +1,14 @@
 # WORKLOG - Urblo Execution Log
 
-Last updated: 2026-08-12
+Last updated: 2026-08-17
+
+## Entry - 2026-08-17 (Quality-first Project Image Delivery)
+
+- Read-only production inspection found 72 unique published Project Storage images totalling 390.1MB at source: median 5.65MB, 48 above 5MB, and a maximum 9.83MB / 8832px. Thirteen CMS cover originals total 75.2MB even though desktop cards render around 348–401px and list thumbnails render at 120px. The inline Project uploader and publish promotion previously retained and publicly served the same original bytes with no responsive variants.
+- Preserved the original-upload contract and added `ProjectResponsiveImage` plus a pure delivery helper. Only published `urblo-public-media` object URLs use responsive Supabase transformations; local curated sources stay unchanged. Card/list profiles use quality 82, detail/hotspot quality 86, and heroes quality 88 with widths up to Supabase's 2500px limit. Transform failures fall back once to the retained original.
+- Updated the Project upload surface to say that the original is kept at full quality and that high-quality website versions are prepared automatically. The UI no longer frames optimization as an alarming original-to-small-file compression ratio.
+- Focused source checks pass: `npm run agent:public-content-overlay`, `npm run agent:admin-projects-aggregate`, `npm run lint`, and `npx tsc -b`. Local Browser QA at 1440x900 confirmed grid cards select a 960px WebP profile, switching to List selects 240px for a 120px thumbnail, and West Side Place hero selects 2500px at quality 88 with `fetchPriority=high`. At 390x844 the hero selects 960px and document width remains 390px; both viewports have no relevant console warning/error.
+- A representative 4.84MB West Side Place source produced a 179KB 960px quality-82 card response and a 1.39MB 2500px quality-88 hero response. The deliberately larger hero result preserves design inspection quality rather than targeting the smallest possible byte count. No production write, Storage mutation, configuration change, deployment, or original-file replacement occurred.
 
 ## Entry - 2026-08-11 (Homepage Partner Logo Marquee Expansion)
 

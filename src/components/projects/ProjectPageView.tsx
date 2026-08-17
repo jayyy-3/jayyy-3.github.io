@@ -9,6 +9,7 @@ import type {
 import StoneLibraryService from '../../service/StoneLibraryService';
 import type { StoneDetailVM } from '../../types/stone-library';
 import ProjectHotspotImage from './ProjectHotspotImage';
+import ProjectResponsiveImage from './ProjectResponsiveImage';
 
 interface ProjectPageViewProps {
   project: ProjectData;
@@ -167,10 +168,12 @@ function ProjectHero({ project }: { project: ProjectData }) {
 
   return (
     <figure className="bg-black">
-      <img
+      <ProjectResponsiveImage
         src={heroImage}
+        profile="hero"
         alt={heroAlt}
         className="h-[58svh] min-h-[420px] w-full object-cover md:h-[72svh]"
+        fetchPriority="high"
       />
       {project.hero?.caption ? (
         <figcaption className="urblo-page-container py-4 text-[13px] leading-6 text-white/62">
@@ -228,7 +231,13 @@ function NormalImageBlock({ block }: { block: Extract<ProjectMediaBlock, { type:
   return (
     <figure>
       <div className="overflow-hidden bg-black">
-        <img src={block.src} alt={block.alt} className="aspect-[16/9] w-full object-cover" loading="lazy" />
+        <ProjectResponsiveImage
+          src={block.src}
+          profile="detail"
+          alt={block.alt}
+          className="aspect-[16/9] w-full object-cover"
+          loading="lazy"
+        />
       </div>
       {block.label || block.caption ? (
         <figcaption className="grid gap-3 border-b border-black/10 py-5 md:grid-cols-[0.28fr_1fr]">

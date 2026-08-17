@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowUpRight, Grid2X2, List } from 'lucide-react';
+import ProjectResponsiveImage from '../components/projects/ProjectResponsiveImage';
 import type { ProjectData } from '../data/projectData';
 import ProjectService from '../service/ProjectService';
 
@@ -24,8 +25,9 @@ function ProjectsGridCard({ project }: { project: ProjectData }) {
       className="group grid border-t border-black/12 pt-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--urblo-lime)] focus-visible:ring-offset-4"
     >
       <div className="overflow-hidden bg-black">
-        <img
+        <ProjectResponsiveImage
           src={project.listing.cover}
+          profile="card"
           alt={project.listing.imageAlt || project.listing.title}
           className="aspect-[4/3] w-full object-cover transition duration-500 group-hover:scale-[1.025]"
           loading="lazy"
@@ -59,8 +61,9 @@ function ProjectsListRow({ project, index }: { project: ProjectData; index: numb
       className="group grid gap-5 border-t border-black/12 py-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--urblo-lime)] focus-visible:ring-offset-4 md:grid-cols-[120px_minmax(0,0.35fr)_minmax(0,1fr)_120px_40px] md:items-center"
     >
       <div className="overflow-hidden bg-black">
-        <img
+        <ProjectResponsiveImage
           src={project.listing.cover}
+          profile="list"
           alt={project.listing.imageAlt || project.listing.title}
           className="aspect-[4/3] w-full object-cover transition duration-500 group-hover:scale-[1.025]"
           loading="lazy"

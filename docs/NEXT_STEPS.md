@@ -1,6 +1,6 @@
 # NEXT_STEPS - Urblo Roadmap
 
-Last updated: 2026-08-12
+Last updated: 2026-08-17
 
 ## Purpose
 This is the human-readable roadmap. The machine-readable source of truth is `docs/agent/tasks.json`; the compact current-state snapshot is `docs/agent/status.json`; historical proof lives in `docs/WORKLOG.md`.
@@ -17,6 +17,8 @@ The Projects cleanup has removed the raw-database `All 9` mismatch and is live t
 Public Stone Library origin disclosure is removed through PR `#16` / merge `160b4f1` from listing cards, detail specs, search matching, and route metadata while the underlying source/Supabase/Admin field remains intact. Immutable release `76ae7fe0`, apex, and `www` pass deployment-bound smoke; production desktop/mobile UI readback passes.
 
 The public Navbar route-aware surface structure was deployed through PR `#18` / merge `93fd143c`, but Jay rejected its heavy 24px/40px blur after production review. PR `#19` / merge `36e69e5f` restores the original clear `backdrop-blur-sm` material: 4px blur without extra saturation for Header/menu, while retaining the lighter image-page/deeper white-page tints and light 102px clearance. Clean container gate, immutable Preview `ac951868`, deployment-bound apex/`www` smoke, and production desktop/390px readback pass.
+
+The current local Project image-delivery candidate preserves every CMS upload as the original visual master and gives the public archive, list, hero, detail, and hotspot surfaces separate responsive Supabase WebP profiles. Local Browser QA confirms desktop cards choose a 960px quality-82 image, the 120px list view chooses a 240px image, the desktop hero chooses the 2500px quality-88 profile, and a 390px hero chooses 960px without horizontal overflow. The Admin upload surface now reassures editors that the original remains full quality and avoids presenting byte reduction as the outcome. This candidate still needs the remaining source/container gates and branch Preview delivery before production promotion.
 
 PR `#21` merged as `b1e8b315` and deployed the 12 supplied partner marks into the existing homepage white marquee, preserving the section composition while correcting the loop to two equal groups, hiding the duplicate accessibility copy, and adding a reduced-motion fallback. Jay accepted the local result; the clean Node 20 container gate, immutable Preview checks, production deployment `8f2af15d`, apex/`www`/Pages-alias binding smoke, and production desktop/390px readback pass. This item is complete.
 

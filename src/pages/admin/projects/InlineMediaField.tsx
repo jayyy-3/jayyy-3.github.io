@@ -580,6 +580,9 @@ export default function InlineMediaField({
                   <p className="mt-1 text-xs text-black/48">
                     Or choose a file from your computer.
                   </p>
+                  <p className="mt-2 max-w-xl text-xs font-medium leading-5 text-black/62">
+                    Your original is kept at full quality. High-quality website versions are prepared automatically for each screen.
+                  </p>
                 </div>
               </div>
               <button
@@ -633,7 +636,7 @@ export default function InlineMediaField({
                       }
                       className="min-h-10 rounded bg-[var(--urblo-lime)] px-4 text-xs font-bold uppercase tracking-[0.12em] text-black transition hover:bg-black hover:text-white disabled:bg-black/15 disabled:text-black/35"
                     >
-                      {isUploading ? "Uploading…" : "Upload and use"}
+                      {isUploading ? "Keeping original…" : "Upload original"}
                     </button>
                     <button
                       type="button"

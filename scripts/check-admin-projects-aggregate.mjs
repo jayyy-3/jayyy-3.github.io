@@ -141,6 +141,8 @@ const previewPath = "src/pages/admin/projects/ProjectDraftPreview.tsx";
 const mediaPath = "src/pages/admin/projects/InlineMediaField.tsx";
 const hotspotPath = "src/pages/admin/projects/VisualHotspotEditor.tsx";
 const publicViewPath = "src/components/projects/ProjectPageView.tsx";
+const responsiveImagePath = "src/components/projects/ProjectResponsiveImage.tsx";
+const imageDeliveryPath = "src/lib/projectImageDelivery.ts";
 const publicRoutePath = "src/pages/ProjectDetails.tsx";
 const servicePath = "src/service/ProjectService.ts";
 const routePath = "functions/api/admin/projects.js";
@@ -163,6 +165,8 @@ const preview = readRequired(previewPath);
 const media = readRequired(mediaPath);
 const hotspot = readRequired(hotspotPath);
 const publicView = readRequired(publicViewPath);
+const responsiveImage = readRequired(responsiveImagePath);
+const imageDelivery = readRequired(imageDeliveryPath);
 const publicRoute = readRequired(publicRoutePath);
 const service = readRequired(servicePath);
 const route = readRequired(routePath);
@@ -809,6 +813,46 @@ requireIncludes(
   mediaPath,
   "10 MiB inline upload limit",
 );
+requireIncludes(
+  media,
+  "Your original is kept at full quality",
+  mediaPath,
+  "original-preservation upload reassurance",
+);
+requireIncludes(
+  media,
+  "High-quality website versions are prepared automatically",
+  mediaPath,
+  "automatic website-delivery explanation",
+);
+requireIncludes(
+  publicView,
+  "ProjectResponsiveImage",
+  publicViewPath,
+  "shared responsive Project imagery",
+);
+for (const profile of ['hero', 'detail']) {
+  requireIncludes(
+    publicView,
+    `profile=\"${profile}\"`,
+    publicViewPath,
+    `${profile} image delivery profile`,
+  );
+}
+requireIncludes(
+  responsiveImage,
+  "data-original-src",
+  responsiveImagePath,
+  "original-image fallback contract",
+);
+for (const token of [
+  "format', 'webp'",
+  "resize', 'contain'",
+  "widths: [960, 1440, 1920, 2500]",
+  "quality: 88",
+]) {
+  requireIncludes(imageDelivery, token, imageDeliveryPath, "high-quality responsive delivery contract");
+}
 requireIncludes(
   media,
   "onPendingChange",
