@@ -33,7 +33,7 @@
   "localReproducibility": {
     "sourceHarness": "passing",
     "adminSourceCoverage": "passing",
-    "runtimeGates": "2026_08_17_project_responsive_image_pr24_merge_d51fa26b_production_deployment_4242d7c5_immutable_apex_www_smoke_desktop_mobile_readback_and_jay_acceptance_passing",
+    "runtimeGates": "2026_08_17_homepage_all_15_published_projects_pr26_merge_f3fe5647_rail_reset_pr27_merge_ccab9c12_production_deployment_b85d8718_immutable_apex_www_smoke_desktop_mobile_return_path_and_jay_acceptance_passing",
     "liveSecretsPresent": true,
     "liveReadiness": "browser_key_owner_and_distinct_editor_credentials_present_media_migration_applied_live_role_boundary_passed",
     "adminUxReshape": "phase0_closed_projects_phase1_and_pr11_single_editor_followup_live_and_jay_accepted_project_stone_library_point_source_local_candidate_migration_approval_pending_phase2_articles_next_sunset_pending"
@@ -84,7 +84,7 @@
     "gitDiffCheck": "2026-08-17",
     "smoke": "2026-08-17",
     "typecheck": "2026-08-17",
-    "cloudflarePreviewSmokeProduction": "2026-08-02",
+    "cloudflarePreviewSmokeProduction": "2026-08-17",
     "adminProjectsCountProduction": "2026-08-03",
     "adminAuthBrowserProduction": "2026-08-02",
     "adminHandoffReadinessStrictExpectedFailure": "2026-07-13",
