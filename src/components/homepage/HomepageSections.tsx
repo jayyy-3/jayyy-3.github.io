@@ -1381,6 +1381,7 @@ function LatestProjectsSection() {
             <div
               ref={railRef}
               data-project-rail="homepage-latest-projects"
+              style={{ overflowAnchor: 'none' }}
               className={`homepage-project-rail-track flex h-full snap-x snap-mandatory gap-3 overflow-x-auto pr-1 select-none md:gap-4 xl:gap-6 ${
                 isDragging ? 'cursor-grabbing' : 'cursor-grab'
               }`}
