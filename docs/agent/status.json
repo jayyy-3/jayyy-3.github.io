@@ -33,7 +33,7 @@
   "localReproducibility": {
     "sourceHarness": "passing",
     "adminSourceCoverage": "passing",
-    "runtimeGates": "2026_08_17_project_responsive_image_commit_c383983_host_and_clean_node20_container_gates_passing_preview_pending",
+    "runtimeGates": "2026_08_17_project_responsive_image_pr24_commit_9209d65_host_and_clean_node20_container_gates_passing_immutable_preview_f9122a0d_smoke_desktop_mobile_readback_passing_jay_acceptance_pending",
     "liveSecretsPresent": true,
     "liveReadiness": "browser_key_owner_and_distinct_editor_credentials_present_media_migration_applied_live_role_boundary_passed",
     "adminUxReshape": "phase0_closed_projects_phase1_and_pr11_single_editor_followup_live_and_jay_accepted_project_stone_library_point_source_local_candidate_migration_approval_pending_phase2_articles_next_sunset_pending"
@@ -71,7 +71,7 @@
     "containerGate": "2026-08-17",
     "containerGateExceptionApproved": "2026-07-16",
     "hostEquivalentGate": "2026-07-19",
-    "cloudflarePreviewSmokeBranchPreview": "2026-08-03",
+    "cloudflarePreviewSmokeBranchPreview": "2026-08-17",
     "cloudflareReadiness": "2026-07-19",
     "gscSeoReview": "2026-06-12",
     "gscSitemapSubmission": "2026-06-12",
@@ -107,6 +107,7 @@
     "adminProjectsResponsiveImplementationCheck": "2026-07-14",
     "adminProjectsSingleEditorPreview": "2026-08-02",
     "configuredBundleSplit": "2026-07-13",
-    "projectResponsiveImageLocal": "2026-08-17"
+    "projectResponsiveImageLocal": "2026-08-17",
+    "projectResponsiveImagePreview": "2026-08-17"
   }
 }
