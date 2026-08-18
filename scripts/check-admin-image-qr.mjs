@@ -33,7 +33,7 @@ async function run() {
   const content = read('src/pages/admin/adminContent.ts');
   const server = read('functions/_lib/admin-image-qr.js');
   const publicRoute = read('functions/image/[slug].js');
-  const migration = read('supabase/migrations/20260818070944_image_qr_resources.sql');
+  const migration = read('supabase/migrations/20260818074046_image_qr_resources.sql');
 
   for (const value of [
     'multiple',
