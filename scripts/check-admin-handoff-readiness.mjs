@@ -281,7 +281,7 @@ function main() {
       'Start screen: Dashboard shows Recommended next action, What the website can show now, and the Content health queue.',
       'Find content: open the relevant module, then use search and status filters before selecting an item.',
       'Publish carefully: Published can appear on the public website. Publish only when the checklist is clear.',
-      'CMS coverage: Projects, Stone Library, Products, Articles, Media, Leads, Settings, and Change history are in the CMS.',
+      'CMS coverage: Projects, Stone Library, Products, Articles, Media, Image QR, Leads, Settings, and Change history are in the CMS.',
       'Imported content: Projects, Stone Library, Products, Articles, and Media candidates are already in the CMS as Draft items.',
       'Static fallback: Draft and Archived CMS versions remain hidden, but a matching legacy static page can stay visible during migration until CMS-only cutover is approved.',
     ],

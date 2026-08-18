@@ -1,6 +1,6 @@
 # HANDOFF - Current Agent State
 
-Last updated: 2026-08-17
+Last updated: 2026-08-18
 
 ## Read First
 Use this file as the short current-state entry. Detailed evidence lives in `docs/WORKLOG.md`; task execution state lives in `docs/agent/tasks.json`; compact machine state lives in `docs/agent/status.json`.
@@ -16,6 +16,8 @@ Recommended startup order:
 
 ## Current Production State
 Urblo is now running on Cloudflare Pages with Supabase-backed forms and an Urblo-owned `/admin` CMS.
+
+Image QR runtime is implemented on draft PR `#29` / branch `codex/admin-image-qr-library`. The scale follow-up replaces repeated full QR cards with a compact searchable/sortable list and focused details drawer, normalizes supplied filenames, and rejects same-name duplicate intake. Jay approved and supplied 18 Stone/Finish PNGs; the Preview workflow optimized all 18 from 9–13 MB originals to 123–375 KB WebP files at 2560×1707, created 18 active resources/audits, and retained one pre-existing `silver ash` resource for 19 total active rows. Final commit `fa9fe7d` passes the clean Node 20 gate; immutable Preview `https://285f55f9.urblo.pages.dev` passes full no-write smoke and authenticated readback of all 19 resources. QR values are canonical `https://urblo.com.au/image/:slug` addresses rather than Preview-domain links. The database/Storage import is complete, but the runtime is not promoted to production; Jay's Preview usability test and separate production promotion remain open.
 
 Project image delivery is live through PR `#24` / merge `d51fa26b` / immutable Cloudflare deployment `4242d7c5-e78e-4f70-b6c2-51e9b9bb7dc8`. CMS originals remain untouched while public card/list/detail/hero/hotspot images use quality-first responsive Supabase WebP profiles. Jay accepted the final Preview after the Grid black-bar repair. Immutable/apex/`www` route, asset byte/MIME, redirect, Function, and browser-secret-boundary smoke passes. Production readback confirms the first five desktop Grid images exactly match their 348×261 frames with no exposed black remainder, the desktop West Side Place hero selects 2500px quality-88, and the 390px hero selects 960px quality-88 without horizontal overflow or console warnings/errors. The Admin upload copy says the original is retained and high-quality website versions are prepared automatically. No Project content, Storage object, Supabase configuration, database row, migration, or email changed during release.
 
@@ -137,7 +139,7 @@ CMS predeploy and handoff:
 Live-write checks require explicit approval and credentials. Do not run tagged live writes or invite emails without fresh approval for the target action.
 
 ## Next Recommended Action
-The Project image-delivery release is complete and Jay-accepted. Preserve the original-master/responsive-delivery contract and the Grid frame regression check in future Project work. Continue the approved Admin UX sequence with Phase 2 Articles; production writes, migrations, invitations, and live email proofs still require their own approval.
+Draft PR `#29` commit `fa9fe7d` passes the clean Node 20 container gate and immutable Preview `https://285f55f9.urblo.pages.dev` passes full no-write smoke. Jay-approved import created the supplied 18 active resources, bringing the library to 19 including one pre-existing item; authenticated desktop/390px list and details-drawer QA passed, and canonical QR values point to `urblo.com.au`. Give Jay the Preview for the fool test. Do not promote the runtime to production until he accepts it.
 
 Required delivery action: the count/data normalization and production UI readback are complete. If Cloudflare account access becomes available, record the immutable deployment URL for merge `edd33465` and run the strict custom-domain binding smoke; do not create a new OAuth grant solely to manufacture that evidence. Moon Gate can become the fifth Live CMS Project only after separately approving and completing its Stone Library dependencies and material-hotspot bindings; do not bypass the publish guard. Then begin Phase 2 with Articles, replicating the Jay-accepted Projects pattern without weakening content/media, auth, RLS, audit, or public-read boundaries. Keep `docs/ADMIN_UX_RESHAPE_PLAN.md` until every later phase is absorbed into canonical docs and its sunset clause is satisfied.
 

@@ -3,6 +3,7 @@ import {
     BookOpenText,
     Boxes,
     FileText,
+    QrCode,
     Image,
     LayoutDashboard,
     Mailbox,
@@ -15,6 +16,7 @@ export type AdminModuleKey =
     | 'dashboard'
     | 'leads'
     | 'media'
+    | 'image-qr'
     | 'stone-library'
     | 'projects'
     | 'products'
@@ -59,6 +61,15 @@ export const adminModules: AdminModuleDefinition[] = [
         handoffLabel: 'Media library',
         group: 'content',
         Icon: Image,
+    },
+    {
+        key: 'image-qr',
+        label: 'Image QR',
+        path: '/admin/image-qr',
+        summary: 'Upload optimized images and manage stable links with downloadable QR codes.',
+        handoffLabel: 'One image, one QR',
+        group: 'content',
+        Icon: QrCode,
     },
     {
         key: 'stone-library',

@@ -43,6 +43,7 @@ const routes = [
   '/admin/unauthorized',
   '/admin/leads',
   '/admin/media',
+  '/admin/image-qr',
   '/admin/settings',
   '/admin/stone-library',
   '/admin/projects',
@@ -326,4 +327,5 @@ NODE
 node scripts/check-forms-api.mjs
 node scripts/check-contact-form-ui-source.mjs
 node scripts/check-capabilities-page-source.mjs
+npm run agent:admin-image-qr
 npm run agent:admin-projects-aggregate

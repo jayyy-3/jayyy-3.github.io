@@ -5,6 +5,7 @@ echo "Admin CMS predeploy gate."
 echo "No deployment, Supabase writes, browser login, or live content changes are attempted."
 
 npm run agent:admin-crud-coverage
+npm run agent:admin-image-qr
 npm run agent:admin-projects-aggregate
 npm run build
 npm run lint

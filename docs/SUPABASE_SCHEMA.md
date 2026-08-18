@@ -9,6 +9,8 @@ It is both the schema design contract and the current implementation checkpoint 
 
 The Phase 1 Projects page-shaped aggregate runtime adds protected `/api/admin/projects`, one private aggregate draft/revision contract, one service-role-only transactional RPC, server-orchestrated media promotion, public material/map/hotspot consumption, and an archived-slug suppression read. Expand A, minimum-disclosure C, and contract B `supabase/migrations/20260802105537_project_aggregate_write_lockdown.sql` are applied/read back. The runtime is deployed at merge `25c05ebb`; Jay's fool test remains the user-acceptance boundary.
 
+Image QR adds server-only `image_qr_resources`, protected `/api/admin/image-qr`, and stable `/image/:slug` resolution. The table has RLS enabled, browser roles receive no table grants, and only `service_role` may read/write it; image files still use the existing private-first/public-delivery Storage buckets. Production migration `20260818074046_image_qr_resources.sql` was separately approved, applied, and read back on 2026-08-18; the table was empty immediately after application.
+
 ## Current Supabase Project
 
 The Supabase connector can access the Urblo project directly. Do not ask the user to manually create tables in the dashboard unless a connector or migration path is blocked.

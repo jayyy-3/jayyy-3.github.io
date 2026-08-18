@@ -22,6 +22,7 @@ const adminRoutes = [
   '/admin/unauthorized',
   '/admin/leads',
   '/admin/media',
+  '/admin/image-qr',
   '/admin/settings',
   '/admin/stone-library',
   '/admin/projects',
@@ -72,7 +73,7 @@ const redirectContracts = [
 ];
 
 const functionPaths = ['/api/enquiries', '/api/sample-requests'];
-const protectedFunctionPaths = ['/api/admin/projects'];
+const protectedFunctionPaths = ['/api/admin/projects', '/api/admin/image-qr'];
 const MAX_ASSET_GRAPH_SIZE = 200;
 const JAVASCRIPT_MEDIA_TYPES = new Set([
   'application/ecmascript',

@@ -28,6 +28,7 @@ const requiredFiles = [
   'scripts/check-admin-auth-browser.mjs',
   'scripts/check-admin-config-gate.mjs',
   'scripts/check-admin-handoff-readiness.mjs',
+  'scripts/check-admin-image-qr.mjs',
   'scripts/check-admin-media-role-boundary-live.mjs',
   'scripts/check-admin-projects-aggregate.mjs',
   'scripts/check-capabilities-page-source.mjs',
@@ -43,6 +44,7 @@ const requiredFiles = [
 const requiredPackageScripts = {
   'agent:check': 'node scripts/check-harness.mjs',
   'agent:admin-crud-coverage': 'node scripts/check-admin-crud-coverage.mjs',
+  'agent:admin-image-qr': 'node scripts/check-admin-image-qr.mjs',
   'agent:admin-config-gate': 'node scripts/check-admin-config-gate.mjs',
   'agent:admin-cms-predeploy': 'bash scripts/admin-cms-predeploy.sh',
   'agent:admin-auth-browser': 'node scripts/check-admin-auth-browser.mjs',
@@ -153,6 +155,9 @@ try {
   if (!smoke.includes('npm run agent:admin-projects-aggregate')) {
     failures.push('scripts/agent-smoke.sh must run the Admin Projects aggregate behavior check.')
   }
+  if (!smoke.includes('npm run agent:admin-image-qr')) {
+    failures.push('scripts/agent-smoke.sh must run the Admin Image QR behavior check.')
+  }
 } catch (error) {
   failures.push(`Unable to read scripts/agent-smoke.sh: ${error.message}`)
 }
@@ -167,6 +172,9 @@ try {
   }
   if (!predeploy.includes('npm run agent:admin-projects-aggregate')) {
     failures.push('scripts/admin-cms-predeploy.sh must run the Admin Projects aggregate behavior verifier.')
+  }
+  if (!predeploy.includes('npm run agent:admin-image-qr')) {
+    failures.push('scripts/admin-cms-predeploy.sh must run the Admin Image QR behavior verifier.')
   }
 } catch (error) {
   failures.push(`Unable to read scripts/admin-cms-predeploy.sh: ${error.message}`)
@@ -223,7 +231,7 @@ const adminEditorGuideRequiredText = [
   'Customer Handoff Summary',
   'Give an editor the production admin address',
   'Daily editing starts on Dashboard.',
-  'The CMS currently covers Projects, Stone Library, Products, Articles, Media, Leads, Settings, and Change history.',
+  'The CMS currently covers Projects, Stone Library, Products, Articles, Media, Image QR, Leads, Settings, and Change history.',
   'Public pages read Published CMS content where the public adapter is active, with static fallback still kept for safety.',
   'Quick Start For Editors',
   'One-Page Editor Handoff',
@@ -231,7 +239,7 @@ const adminEditorGuideRequiredText = [
   'Account setup: a Website owner or CMS manager invites the editor from Settings, People and access, using the lowest useful role.',
   'Find content: open the relevant module, then use search and status filters before selecting an item.',
   'Publish carefully: Published can appear on the public website. Publish only when the checklist is clear.',
-  'CMS coverage: Projects, Stone Library, Products, Articles, Media, Leads, Settings, and Change history are in the CMS.',
+  'CMS coverage: Projects, Stone Library, Products, Articles, Media, Image QR, Leads, Settings, and Change history are in the CMS.',
   'First Handoff Walkthrough',
   'Filter to Draft so the editor sees content that is safe to review.',
   'Pass condition: the editor can explain where they start',
@@ -278,6 +286,7 @@ const adminEditorGuideRequiredModules = [
   'Products',
   'Articles',
   'Media',
+  'Image QR',
   'Leads',
   'Settings',
   'Change history',

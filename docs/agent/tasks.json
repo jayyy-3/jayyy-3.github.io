@@ -2440,6 +2440,10 @@
         "docs/agent/tasks.json",
         "docs/agent/verification.md",
         "functions/api/admin/",
+        "functions/image/",
+        "src/lib/imageQrOptimization.ts",
+        "src/pages/admin/AdminImageQrPage.tsx",
+        "scripts/check-admin-image-qr.mjs",
         "scripts/check-admin-crud-coverage.mjs",
         "src/components/projects/",
         "src/pages/ProjectDetails.tsx",
@@ -2449,6 +2453,9 @@
         "supabase/migrations/"
       ],
       "notes": [
+        "2026-08-18: Scale follow-up is implemented in commits `7b050cf` and `fa9fe7d`. The clean Node 20 gate passes, final immutable Preview `285f55f9` passes full smoke, and authenticated desktop/390px QA verifies the compact list, Name A–Z sort, focused detail/QR drawer, and canonical `urblo.com.au/image/:slug` QR value. Jay-approved live intake optimized all 18 supplied 6585×4390 PNGs to 2560×1707 WebP files at 123–375 KB, created 18 active resources/audits, and left one pre-existing `silver ash` resource untouched for 19 active total. No replace/Hide/Restore write ran. Runtime promotion and Jay usability acceptance remain open.",
+        "2026-08-18: Jay supplied 18 large Stone/Finish PNGs and approved the scale-oriented Image QR follow-up plus their live import. The selected UI replaces repeated full-size QR cards with a compact searchable/sortable resource list and focused details drawer, keeps the simple one-editor workflow, normalizes trailing Urblo filename suffixes into Stone · Finish names, and blocks same-name duplicates in a batch or existing library. Preview, live import evidence, and Jay usability acceptance remain required; the agent cannot self-certify the final result.",
+        "2026-08-18: Jay approved the Image QR product shape: bulk upload, quality-first pre-upload optimization, one direct-image QR per image, PNG/SVG download, rename, replacement without changing the QR, and simple Hide/Restore management with no review workflow. Local source adds `/admin/image-qr`, protected `/api/admin/image-qr`, stable `/image/:slug`, server-only RLS table migration `20260818074046_image_qr_resources.sql`, private-user-path staging, server image-signature validation, public create-only copies, and audit/cleanup handling. Jay separately approved the migration; production apply/readback passed with an empty table, RLS enabled, browser privileges denied, service-role CRUD, expected trigger/indexes, and no new security WARN. Draft PR `#29` immutable Preview `35044c9d` passed full no-write smoke. Tagged Storage/database proof and runtime promotion still require separate approval.",
         "2026-08-12: Read-only production inspection confirmed Moon Gate's Angola Black / Polished and New Grey / Flamed Stone Library variants, capabilities, finish images, and media exist as Draft. Project editing now admits and labels all non-Archived Stone Library choices and previews, while Project publishing requires the full selected Stone/Variant/Finish/image/media chain to be Published. The unapplied migration backfills unique non-Archived variants without changing content status and still requires separate production approval.",
         "2026-08-12: Jay confirmed the Project material-point contract: Stone Library owns stone/variant/finish identity, finish image/alt, and detail link; Project owns the map photo, point position, application, and project note. Local source now implements dependent Stone/Variant/supported-Finish selection, read-only Stone Library previews, current Published-detail public resolution, and retirement of Project-owned material/hotspot image/title overrides. Compatibility migration `20260812053204_project_materials_stone_library_source.sql` is prepared but unapplied and requires separate production approval.",
         "2026-07-14: Registered from Jay's approved docs/ADMIN_UX_RESHAPE_PLAN.md directive. The plan is the temporary design authority until its sunset clause is completed.",
@@ -2474,6 +2481,10 @@
         "Jay owns the fool-test acceptance. Agent checks, screenshots, route shells, or self-review cannot certify that criterion."
       ],
       "acceptance": [
+        "Image QR lets an editor add multiple images in one selection, see optimization progress and before/after size, and receive one independently managed QR resource per image.",
+        "Scanning or opening an active QR displays the image directly; replacing the image preserves the stable Urblo QR address.",
+        "Image QR defaults to a compact searchable/sortable resource list; opening one row keeps preview, rename, replace, copy/open link, PNG/SVG download, and Hide/Restore together in a focused details drawer without review or child-status workflows.",
+        "Image QR browser roles cannot read or write the server-only table directly; protected Functions verify session/profile, upload ownership, image signature, audit, and cleanup boundaries.",
         "Project material points select a Stone Library stone, its variant, and only a finish supported by that variant; material name, image/alt, and deep link come from Stone Library while Project retains placement, application, and project note.",
         "Projects is edited as one page-shaped aggregate draft with one Save action, no parallel child Save buttons, and no confirm dialogs.",
         "Draft preview reuses the public Project rendering and reflects current unsaved editor state.",
@@ -2494,6 +2505,7 @@
         "npx tsc -b",
         "npm run agent:smoke",
         "npm run agent:admin-projects-aggregate",
+        "npm run agent:admin-image-qr",
         "npm run agent:admin-crud-coverage (updated for behavior-level expectations; do not preserve obsolete UI strings)",
         "npm run agent:admin-cms-predeploy",
         "npm run agent:admin-config-gate",

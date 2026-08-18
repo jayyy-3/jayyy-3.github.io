@@ -17,7 +17,7 @@ Give an editor the production admin address, their invited login email, and the 
 
 Daily editing starts on Dashboard. Open the relevant module, find the item, make the change, Save, preview if needed, then Publish or Hide. Required fields are explained on screen; Projects no longer has a separate proof-review or approval step.
 
-The CMS currently covers Projects, Stone Library, Products, Articles, Media, Leads, Settings, and Change history. Imported Projects, Stone Library, Products, Articles, and Media candidates are already in the CMS as Draft items; they stay hidden until reviewed and Published.
+The CMS currently covers Projects, Stone Library, Products, Articles, Media, Image QR, Leads, Settings, and Change history. Imported Projects, Stone Library, Products, Articles, and Media candidates are already in the CMS as Draft items; they stay hidden until reviewed and Published.
 
 Public pages read Published CMS content where the public adapter is active, with static fallback still kept for safety. Draft and Archived content does not appear publicly.
 
@@ -45,7 +45,7 @@ Use this short version when handing the CMS to a new non-technical editor:
 6. Publish carefully: Published can appear on the public website. Publish only when the checklist is clear.
 7. Confirm live content: after publishing, use Open public page to check the website route.
 8. Hide content: Archive hides an item without deleting it.
-9. CMS coverage: Projects, Stone Library, Products, Articles, Media, Leads, Settings, and Change history are in the CMS.
+9. CMS coverage: Projects, Stone Library, Products, Articles, Media, Image QR, Leads, Settings, and Change history are in the CMS.
 10. Imported content: Projects, Stone Library, Products, Articles, and Media candidates are already in the CMS as Draft items.
 11. Static fallback: Draft and Archived CMS versions remain hidden, but a matching legacy static page can stay visible during migration until CMS-only cutover is approved.
 12. Escalate: ask a CMS manager for account access, Leads export, Settings, Change history, or any Publish blocker that the checklist does not explain.
@@ -140,6 +140,7 @@ If a module has a long editor, use its actions bar rather than hunting for a but
 | Products | Edit product families, models, images, search title/description, materials, and specs. | CMS-ready with Product website status, Model publish status, Website URL key / Model website key labels, media selectors, product/model publish checklists, Product actions, Model actions, and Stone Library link feedback. |
 | Articles | Edit article metadata, search title/description, and Article sections through section-type forms. | CMS-ready for metadata and section content with Article website status, Section publish status, Article actions, and Section actions; public detail prefers Published article sections and keeps sanitized original import HTML as fallback. |
 | Media | Upload/manage media, metadata, status, and manifest export. | Source repair now loads the full current library, preserves External media creation, and sends every initial file upload to the private library. Website owners/CMS managers can copy the selected record's original private path/version to public Storage with create-only/reference-safe safeguards; deployed write proof remains required. |
+| Image QR | Upload images that need a permanent scannable link. | Add one or many images; Urblo optimizes each one and creates its own QR. Download PNG/SVG, copy/open the image link, rename, replace without changing the QR, or Hide/Restore the link. There is no review workflow. |
 | Leads | Triage enquiries and sample requests, follow recommended next steps, assign owners, add internal notes, and export the current filtered queue with change history. | Workflow-ready for CMS managers with Lead workflow status, Lead workflow actions beside the recommended next step, owner/notes handoff guidance, and filtered visible-queue export. |
 | Settings | Edit global contact/footer details, homepage search metadata, the default share image, and CMS access. | Published values now use the public website's validation rules and refresh when an editor returns from Admin; deployed public readback, Auth SMTP, redirect allowlist, and live invite/recovery proof remain required. |
 | Change history | Inspect saved changes, exports, publish/archive actions, and sensitive operations. | Read-only visibility for Website owner and CMS manager roles. |
