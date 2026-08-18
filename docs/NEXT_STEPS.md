@@ -22,6 +22,8 @@ Project image delivery is complete through PR `#24` / merge `d51fa26b` / immutab
 
 Homepage Latest Projects is complete through PR `#26` / merge `f3fe5647`, rail-alignment PR `#27` / merge `ccab9c12`, and immutable production deployment `b85d8718-18ae-4180-8a2c-371c63e18a31`. It reads the complete Published Project collection in CMS order instead of the hand-maintained five-record list, while retaining those five as the no-CMS fallback and deferring the read until the section nears the viewport. Immutable/apex/`www` smoke passes. Production desktop/mobile Browser QA reads all 15 projects, reaches and opens `15 / 15`, returns to visible `01 / 15` at rail origin, preserves the one-viewport composition, and has no relevant console warning/error or horizontal page overflow.
 
+Image QR is now a local source candidate under the active Admin reshape: `/admin/image-qr` bulk-optimizes images, creates one stable direct-image QR per file, supports PNG/SVG download, rename, replace-without-changing-the-code, and Hide/Restore, and keeps service-role/database/Storage operations behind protected Functions. Migration `20260818070944_image_qr_resources.sql` is not applied and no production object or row has been created. The next gated action is a separate production-migration approval after local/container checks, followed by Preview and Jay's fool test before production promotion.
+
 PR `#21` merged as `b1e8b315` and deployed the 12 supplied partner marks into the existing homepage white marquee, preserving the section composition while correcting the loop to two equal groups, hiding the duplicate accessibility copy, and adding a reduced-motion fallback. Jay accepted the local result; the clean Node 20 container gate, immutable Preview checks, production deployment `8f2af15d`, apex/`www`/Pages-alias binding smoke, and production desktop/390px readback pass. This item is complete.
 
 ## What Is Complete
@@ -40,6 +42,7 @@ PR `#21` merged as `b1e8b315` and deployed the 12 supplied partner marks into th
 - Harness GC first pass is implemented.
 - PR `#6` merge `a2a7ae5` is deployed as `c7a910df-6dd3-440b-8971-a6120353ed19`; its immutable URL and both custom domains pass the deployment-bound MIME/body asset smoke, and production auth passes three blocked-Supabase static fallbacks plus all nine authenticated routes. Four unchanged apex assets retain stale cache-header warnings only after exact immutable bytes/MIME comparison.
 - Phase 0 of the approved Admin reshape is complete. Phase 1 Projects is deployed and Jay-accepted with one aggregate draft/action bar, shared public/draft rendering, visual hotspots, inline private-first media, a protected server aggregate path, and source-level security hardening. Phase 2 starts with Articles, then Products, Stone Library, Media, and light-touch Settings/Leads/Audit alignment in the approved order.
+- The Image QR source candidate is implemented locally as a deliberately simple single-user resource library; its production table migration, live upload/replace proof, and runtime promotion remain separately approval-gated.
 
 ## Active Now
 Only these task IDs should be treated as current executable work:
@@ -54,6 +57,7 @@ Only these task IDs should be treated as current executable work:
 
 ## Next Decisions
 - The tagged Projects Preview happy path is complete; separately approve any additional live failure-recovery or non-Projects golden-workflow writes before they run.
+- Separately approve applying `20260818070944_image_qr_resources.sql` before any Image QR Preview or production upload can succeed; source checks do not substitute for that database change or Jay's final usability test.
 - Configure Supabase Auth custom SMTP separately from the already verified Contact/Sample SMTP2GO Function path.
 - Production migration `20260714050750_media_public_bucket_role_hardening.sql`, its INSERT/UPDATE policy readback, and the separately approved tagged Editor/owner Storage proof are complete with zero tagged objects remaining.
 - Exact production invite and recovery callback URLs were added to the Supabase Auth redirect allowlist and read back on 2026-07-14.

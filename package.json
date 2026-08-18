@@ -6,6 +6,7 @@
   "scripts": {
     "agent:check": "node scripts/check-harness.mjs",
     "agent:admin-crud-coverage": "node scripts/check-admin-crud-coverage.mjs",
+    "agent:admin-image-qr": "node scripts/check-admin-image-qr.mjs",
     "agent:admin-projects-aggregate": "tsx scripts/check-admin-projects-aggregate.mjs",
     "agent:admin-config-gate": "node scripts/check-admin-config-gate.mjs",
     "agent:admin-cms-predeploy": "bash scripts/admin-cms-predeploy.sh",
@@ -46,6 +47,7 @@
     "@supabase/supabase-js": "^2.106.2",
     "@tailwindcss/typography": "^0.5.16",
     "lodash.throttle": "^4.1.1",
+    "qrcode.react": "4.2.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.16.0",

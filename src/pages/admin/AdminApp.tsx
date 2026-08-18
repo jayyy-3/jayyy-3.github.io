@@ -7,6 +7,7 @@ const AdminAuditPage = lazy(() => import('./AdminAuditPage'));
 const AdminAccountSetupPage = lazy(() => import('./AdminAccountSetupPage'));
 const AdminArticlesPage = lazy(() => import('./AdminArticlesPage'));
 const AdminDashboardPage = lazy(() => import('./AdminDashboardPage'));
+const AdminImageQrPage = lazy(() => import('./AdminImageQrPage'));
 const AdminLeadsPage = lazy(() => import('./AdminLeadsPage'));
 const AdminLoginPage = lazy(() => import('./AdminLoginPage'));
 const AdminMediaPage = lazy(() => import('./AdminMediaPage'));
@@ -27,6 +28,7 @@ export default function AdminApp() {
                     <Route path="unauthorized" element={<AdminUnauthorizedPage />} />
                     <Route path="leads" element={<AdminLeadsPage />} />
                     <Route path="media" element={<AdminMediaPage />} />
+                    <Route path="image-qr" element={<AdminImageQrPage />} />
                     <Route path="stone-library" element={<AdminStoneLibraryPage />} />
                     <Route path="projects" element={<AdminProjectsPage />} />
                     <Route path="projects/:projectId" element={<AdminProjectsPage />} />

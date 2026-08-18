@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lastUpdated": "2026-08-17",
+  "lastUpdated": "2026-08-18",
   "sourceOfTruth": {
     "currentState": "docs/HANDOFF.md",
     "taskQueue": "docs/agent/tasks.json",
@@ -36,9 +36,10 @@
     "runtimeGates": "2026_08_17_homepage_all_15_published_projects_pr26_merge_f3fe5647_rail_reset_pr27_merge_ccab9c12_production_deployment_b85d8718_immutable_apex_www_smoke_desktop_mobile_return_path_and_jay_acceptance_passing",
     "liveSecretsPresent": true,
     "liveReadiness": "browser_key_owner_and_distinct_editor_credentials_present_media_migration_applied_live_role_boundary_passed",
-    "adminUxReshape": "phase0_closed_projects_phase1_and_pr11_single_editor_followup_live_and_jay_accepted_project_stone_library_point_source_local_candidate_migration_approval_pending_phase2_articles_next_sunset_pending"
+    "adminUxReshape": "phase0_closed_projects_phase1_and_pr11_single_editor_followup_live_and_jay_accepted_image_qr_local_candidate_migration_unapplied_no_production_writes_phase2_articles_and_sunset_pending"
   },
   "nextDecisions": [
+    "After the Image QR local/container gate, separately approve production apply/readback of 20260818070944_image_qr_resources.sql before any tagged Image QR Storage/database workflow or runtime promotion.",
     "Monitor or purge the four residual apex cache headers when Cloudflare account access is available; their current bytes and MIME types exactly match the immutable repair deployment and are non-blocking.",
     "Ask Jay to fool-test the production Project material-point workflow; migration 20260812062636 and runtime merge 0593389d / deployment b160e33f are live, deployment-bound smoke and nine authenticated Admin routes pass, and agent checks cannot self-certify acceptance.",
     "After separate approval, verify Supabase Auth SMTP ownership and repeat invite/password/recovery against the corrected and read-back production callbacks.",

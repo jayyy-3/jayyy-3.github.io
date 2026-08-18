@@ -31,12 +31,15 @@ Before running live form/admin/preview checks, `npm run agent:live-readiness` ca
   - `/* /index.html 200`
 - `public/_routes.json` limits future Pages Functions invocation to:
   - `/api/*`
+  - `/image/*`
 - Static site requests should remain static and should not invoke Functions after API endpoints are added.
 - Current Pages Function routes:
   - `/api/enquiries`
   - `/api/sample-requests`
   - `/api/admin/invite-user`
   - `/api/admin/projects`
+  - `/api/admin/image-qr`
+  - `/image/:slug` (stable QR target; redirects directly to the current public image)
 
 ### Headers
 `public/_headers` adds conservative launch-safe headers:
@@ -134,6 +137,7 @@ Before custom domain cutover, test the generated `*.pages.dev` URL:
 - `/admin/login`
 - `/admin/leads`
 - `/admin/media`
+- `/admin/image-qr`
 - `/admin/settings`
 - `/admin/stone-library`
 - `/admin/projects`

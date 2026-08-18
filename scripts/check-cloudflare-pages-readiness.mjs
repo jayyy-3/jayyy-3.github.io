@@ -51,6 +51,7 @@ const previewRoutes = [
   '/admin/login',
   '/admin/leads',
   '/admin/media',
+  '/admin/image-qr',
   '/admin/settings',
   '/admin/stone-library',
   '/admin/projects',
@@ -123,8 +124,13 @@ function checkRouting() {
   if (routes.version !== 1) {
     failures.push('public/_routes.json: version must be 1');
   }
-  if (!Array.isArray(routes.include) || routes.include.length !== 1 || routes.include[0] !== '/api/*') {
-    failures.push('public/_routes.json: include must be exactly ["/api/*"] so static routes avoid Functions');
+  if (
+    !Array.isArray(routes.include) ||
+    routes.include.length !== 2 ||
+    routes.include[0] !== '/api/*' ||
+    routes.include[1] !== '/image/*'
+  ) {
+    failures.push('public/_routes.json: include must be exactly ["/api/*", "/image/*"] so only APIs and stable QR images invoke Functions');
   }
   if (!Array.isArray(routes.exclude) || routes.exclude.length !== 0) {
     failures.push('public/_routes.json: exclude must remain an empty array');
@@ -159,6 +165,9 @@ function checkFunctions() {
   const adminInvite = readRequired('functions/_lib/admin-invite.js');
   const adminProjectsRoute = readRequired('functions/api/admin/projects.js');
   const adminProjects = readRequired('functions/_lib/admin-projects.js');
+  const adminImageQrRoute = readRequired('functions/api/admin/image-qr.js');
+  const adminImageQr = readRequired('functions/_lib/admin-image-qr.js');
+  const publicImageQrRoute = readRequired('functions/image/[slug].js');
 
   for (const [label, text, handler] of [
     ['functions/api/enquiries.js', enquiries, 'handleEnquiryRequest'],
@@ -241,6 +250,30 @@ function checkFunctions() {
 
   if (/VITE_SUPABASE_(?:ANON|PUBLISHABLE)_KEY/.test(adminProjects)) {
     failures.push('functions/_lib/admin-projects.js: admin Projects Function must not use browser Supabase keys');
+  }
+
+  requireIncludes(adminImageQrRoute, 'export async function onRequest(context)', 'functions/api/admin/image-qr.js');
+  requireIncludes(adminImageQrRoute, "context.request.method === 'OPTIONS'", 'functions/api/admin/image-qr.js');
+  requireIncludes(adminImageQrRoute, 'handleAdminImageQrRequest', 'functions/api/admin/image-qr.js');
+  requireIncludes(publicImageQrRoute, 'handlePublicImageQrRequest', 'functions/image/[slug].js');
+  requireIncludes(publicImageQrRoute, "['GET', 'HEAD']", 'functions/image/[slug].js');
+  for (const contract of [
+    'SUPABASE_SERVICE_ROLE_KEY',
+    'getBearerToken',
+    'supabase.auth.getUser',
+    "from('image_qr_resources')",
+    "from('admin_audit_events')",
+    "image_qr.create",
+    "image_qr.replace",
+    'image_qr.${input.action}',
+    'image-qr-drafts/${userId}/',
+    "status: 302",
+    "'Cache-Control': 'no-store'",
+  ]) {
+    requireIncludes(adminImageQr, contract, 'functions/_lib/admin-image-qr.js');
+  }
+  if (/VITE_SUPABASE_(?:ANON|PUBLISHABLE)_KEY/.test(adminImageQr)) {
+    failures.push('functions/_lib/admin-image-qr.js: Image QR Functions must not use browser Supabase keys');
   }
 }
 

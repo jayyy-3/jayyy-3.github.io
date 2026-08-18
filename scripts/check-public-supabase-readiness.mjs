@@ -588,8 +588,13 @@ function checkCloudflareStaticBoundary() {
   if (routes.version !== 1) {
     failures.push('public/_routes.json: version must be 1');
   }
-  if (!Array.isArray(routes.include) || routes.include.length !== 1 || routes.include[0] !== '/api/*') {
-    failures.push('public/_routes.json: include must remain exactly ["/api/*"]');
+  if (
+    !Array.isArray(routes.include) ||
+    routes.include.length !== 2 ||
+    routes.include[0] !== '/api/*' ||
+    routes.include[1] !== '/image/*'
+  ) {
+    failures.push('public/_routes.json: include must remain exactly ["/api/*", "/image/*"]');
   }
   if (!Array.isArray(routes.exclude) || routes.exclude.length !== 0) {
     failures.push('public/_routes.json: exclude must remain an empty array');
