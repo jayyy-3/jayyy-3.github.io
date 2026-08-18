@@ -83,6 +83,8 @@ async function run() {
     '`image_qr.${input.action}`',
     "status: 302",
     "'Cache-Control': 'no-store'",
+    "const PUBLIC_SITE_ORIGIN = 'https://urblo.com.au'",
+    'imageUrl: `${PUBLIC_SITE_ORIGIN}/image/${encodeURIComponent(row.slug)}`',
   ]) requireIncludes(server, value, 'Image QR server boundary');
 
   requireIncludes(publicRoute, "['GET', 'HEAD']", 'Public image route methods');

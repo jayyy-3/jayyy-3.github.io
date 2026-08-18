@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 const DEFAULT_SUPABASE_URL = 'https://npkidywzwddbnfrnxlmo.supabase.co';
 const PRIVATE_MEDIA_BUCKET = 'urblo-admin-media';
 const PUBLIC_MEDIA_BUCKET = 'urblo-public-media';
+const PUBLIC_SITE_ORIGIN = 'https://urblo.com.au';
 const ALLOWED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/avif']);
 const ALLOWED_ROLES = new Set(['owner', 'admin', 'editor', 'viewer']);
 const MAX_OPTIMIZED_IMAGE_BYTES = 15 * 1024 * 1024;
@@ -419,8 +420,7 @@ async function requireAdminActor(supabase, accessToken) {
   return { user, profile };
 }
 
-function serializeResource(supabase, request, row) {
-  const origin = new URL(request.url).origin;
+function serializeResource(supabase, _request, row) {
   return {
     id: row.id,
     slug: row.slug,
@@ -432,7 +432,7 @@ function serializeResource(supabase, request, row) {
     sizeBytes: Number(row.size_bytes),
     createdAt: row.created_at,
     updatedAt: row.updated_at,
-    imageUrl: `${origin}/image/${encodeURIComponent(row.slug)}`,
+    imageUrl: `${PUBLIC_SITE_ORIGIN}/image/${encodeURIComponent(row.slug)}`,
     previewUrl: storagePublicUrl(supabase, row.object_path, row.updated_at),
   };
 }
