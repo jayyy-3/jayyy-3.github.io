@@ -22,7 +22,7 @@ Project image delivery is complete through PR `#24` / merge `d51fa26b` / immutab
 
 Homepage Latest Projects is complete through PR `#26` / merge `f3fe5647`, rail-alignment PR `#27` / merge `ccab9c12`, and immutable production deployment `b85d8718-18ae-4180-8a2c-371c63e18a31`. It reads the complete Published Project collection in CMS order instead of the hand-maintained five-record list, while retaining those five as the no-CMS fallback and deferring the read until the section nears the viewport. Immutable/apex/`www` smoke passes. Production desktop/mobile Browser QA reads all 15 projects, reaches and opens `15 / 15`, returns to visible `01 / 15` at rail origin, preserves the one-viewport composition, and has no relevant console warning/error or horizontal page overflow.
 
-Image QR is now a populated Preview candidate under the active Admin reshape. The scalable UI uses a compact searchable/sortable resource list and focused details drawer instead of repeating a full QR card for every image. Jay-approved intake added the supplied 18 Stone/Finish resources after automatic `Stone · Finish` naming and quality-first 2560×1707/WebP-90 optimization; all completed successfully and join one pre-existing item for 19 active resources. Draft PR `#29` commit `fa9fe7d` passes the clean Node 20 gate; immutable Preview `https://285f55f9.urblo.pages.dev` passes full no-write smoke plus authenticated desktop/390px readback, and QR values use canonical `urblo.com.au` addresses. Jay's Preview usability acceptance and production runtime promotion remain open.
+Image QR is live through PR `#29` / merge `19e2b41` / immutable Cloudflare deployment `d6816c71-b33e-46ae-860d-121a81c8bca0`. The scalable UI uses a compact searchable/sortable resource list and focused details drawer. Jay-approved intake added 18 automatically named, quality-first 2560×1707/WebP-90 Stone/Finish resources; with one pre-existing resource production reads 19 active / 0 hidden. Immutable/apex/`www` deployment-bound smoke passes, authenticated production Admin readback passes, and a canonical `urblo.com.au/image/:slug` resolver redirects directly to the expected 2560×1707 WebP image.
 
 PR `#21` merged as `b1e8b315` and deployed the 12 supplied partner marks into the existing homepage white marquee, preserving the section composition while correcting the loop to two equal groups, hiding the duplicate accessibility copy, and adding a reduced-motion fallback. Jay accepted the local result; the clean Node 20 container gate, immutable Preview checks, production deployment `8f2af15d`, apex/`www`/Pages-alias binding smoke, and production desktop/390px readback pass. This item is complete.
 
@@ -42,7 +42,7 @@ PR `#21` merged as `b1e8b315` and deployed the 12 supplied partner marks into th
 - Harness GC first pass is implemented.
 - PR `#6` merge `a2a7ae5` is deployed as `c7a910df-6dd3-440b-8971-a6120353ed19`; its immutable URL and both custom domains pass the deployment-bound MIME/body asset smoke, and production auth passes three blocked-Supabase static fallbacks plus all nine authenticated routes. Four unchanged apex assets retain stale cache-header warnings only after exact immutable bytes/MIME comparison.
 - Phase 0 of the approved Admin reshape is complete. Phase 1 Projects is deployed and Jay-accepted with one aggregate draft/action bar, shared public/draft rendering, visual hotspots, inline private-first media, a protected server aggregate path, and source-level security hardening. Phase 2 starts with Articles, then Products, Stone Library, Media, and light-touch Settings/Leads/Audit alignment in the approved order.
-- The Image QR candidate is deployed to Preview as a deliberately simple single-user resource library; its production table migration and approved 18-image import are complete, while Jay's usability acceptance and runtime promotion remain open.
+- Image QR is deployed to production as a deliberately simple single-user resource library; its migration, approved 18-image intake, canonical QR resolver, and production readback are complete.
 
 ## Active Now
 Only these task IDs should be treated as current executable work:
@@ -57,7 +57,7 @@ Only these task IDs should be treated as current executable work:
 
 ## Next Decisions
 - The tagged Projects Preview happy path is complete; separately approve any additional live failure-recovery or non-Projects golden-workflow writes before they run.
-- Jay-approved Image QR import is complete for the supplied 18 images. Obtain fresh approval for any additional replace/Hide/Restore write; the passing Preview and imported rows do not substitute for Jay's final usability test or authorize production runtime promotion.
+- Jay-approved Image QR import and runtime promotion are complete. Obtain fresh approval for any additional replace/Hide/Restore proof write; later usability acceptance remains user-owned.
 - Configure Supabase Auth custom SMTP separately from the already verified Contact/Sample SMTP2GO Function path.
 - Production migration `20260714050750_media_public_bucket_role_hardening.sql`, its INSERT/UPDATE policy readback, and the separately approved tagged Editor/owner Storage proof are complete with zero tagged objects remaining.
 - Exact production invite and recovery callback URLs were added to the Supabase Auth redirect allowlist and read back on 2026-07-14.
