@@ -84,7 +84,11 @@ export async function optimizeImageForQr(file: File): Promise<OptimizedQrImage> 
 }
 
 export function imageNameFromFile(fileName: string) {
-  return baseFileName(fileName).replace(/[-_]+/g, ' ').replace(/\s+/g, ' ').trim() || 'Urblo image';
+  return baseFileName(fileName)
+    .replace(/[_\s-]+urblo(?:[_\s-]+\d+)?$/i, '')
+    .replace(/_+/g, ' · ')
+    .replace(/\s+/g, ' ')
+    .trim() || 'Urblo image';
 }
 
 export function formatImageBytes(bytes: number) {

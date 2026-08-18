@@ -40,6 +40,11 @@ async function run() {
     'onDrop={handleDrop}',
     'optimizeImageForQr',
     'One image, one permanent QR',
+    'ImageQrRow',
+    'ImageQrDetails',
+    'Image details',
+    '<option value="name">Name A–Z</option>',
+    'already exists. Use Replace from its details.',
     "action: 'create'",
     "action: 'replace'",
     "runAction('rename'",
@@ -58,6 +63,8 @@ async function run() {
     "canvas.toBlob",
     "'image/webp'",
     'file.size <= webp.size',
+    ".replace(/[_\\s-]+urblo(?:[_\\s-]+\\d+)?$/i, '')",
+    ".replace(/_+/g, ' · ')",
   ]) requireIncludes(optimizer, value, 'imageQrOptimization');
 
   requireIncludes(app, "path=\"image-qr\"", 'AdminApp route');

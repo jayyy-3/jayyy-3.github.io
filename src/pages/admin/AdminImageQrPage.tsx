@@ -3,6 +3,7 @@ import type { ChangeEvent, DragEvent } from 'react';
 import {
   Archive,
   Check,
+  ChevronRight,
   Copy,
   Download,
   ExternalLink,
@@ -32,6 +33,7 @@ const privateMediaBucket = 'urblo-admin-media';
 
 type ResourceStatus = 'active' | 'hidden';
 type ResourceFilter = 'all' | ResourceStatus;
+type ResourceSort = 'newest' | 'name';
 
 interface ImageQrResource {
   id: string;
@@ -82,6 +84,8 @@ function AdminImageQrContent() {
   const [queue, setQueue] = useState<UploadQueueItem[]>([]);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<ResourceFilter>('all');
+  const [sort, setSort] = useState<ResourceSort>('newest');
+  const [selectedResourceId, setSelectedResourceId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -117,32 +121,48 @@ function AdminImageQrContent() {
 
   const filteredResources = useMemo(() => {
     const query = search.trim().toLowerCase();
-    return resources.filter((resource) => {
+    const matches = resources.filter((resource) => {
       if (filter !== 'all' && resource.status !== filter) return false;
       return !query || [resource.name, resource.slug].some((value) => value.toLowerCase().includes(query));
     });
-  }, [filter, resources, search]);
+    return [...matches].sort((left, right) => (
+      sort === 'name'
+        ? left.name.localeCompare(right.name, undefined, { sensitivity: 'base' })
+        : new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime()
+    ));
+  }, [filter, resources, search, sort]);
+
+  const selectedResource = selectedResourceId
+    ? resources.find((resource) => resource.id === selectedResourceId) ?? null
+    : null;
 
   async function acceptFiles(files: File[]) {
     if (!canEdit || !user || !files.length || isUploading) return;
     setIsUploading(true);
     setError(null);
     setNotice(null);
-    const queued = files.map<UploadQueueItem>((file) => ({
-      id: crypto.randomUUID(),
-      fileName: file.name,
-      name: imageNameFromFile(file.name),
-      state: 'optimizing',
-      originalBytes: file.size,
-      optimizedBytes: null,
-      message: 'Preparing a clear, web-friendly image…',
-    }));
+    const knownNames = new Set(resources.map((resource) => resource.name.trim().toLowerCase()));
+    const queued = files.map<UploadQueueItem>((file) => {
+      const name = imageNameFromFile(file.name);
+      const duplicate = knownNames.has(name.toLowerCase());
+      knownNames.add(name.toLowerCase());
+      return {
+        id: crypto.randomUUID(),
+        fileName: file.name,
+        name,
+        state: duplicate ? 'error' : 'optimizing',
+        originalBytes: file.size,
+        optimizedBytes: null,
+        message: duplicate ? `“${name}” already exists. Use Replace from its details.` : `Preparing as “${name}”…`,
+      };
+    });
     setQueue(queued);
 
     let completed = 0;
     for (let index = 0; index < files.length; index += 1) {
       const file = files[index];
       const queuedItem = queued[index];
+      if (queuedItem.state === 'error') continue;
       try {
         const optimized = await optimizeImageForQr(file);
         updateQueueItem(setQueue, queuedItem.id, {
@@ -198,15 +218,12 @@ function AdminImageQrContent() {
         ) : null
       }
     >
-      <div className="mx-auto max-w-[1500px] space-y-6">
-        <section className="grid gap-5 border border-black/10 bg-white p-5 md:p-7 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-center">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[0.16em] text-black/45">One image, one permanent QR</p>
-            <h2 className="mt-3 max-w-3xl text-2xl font-light leading-tight text-black md:text-[34px]">
-              Drop in the images. Urblo prepares the size, link and QR automatically.
-            </h2>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-black/58">
-              Images stay clear for design review, with a maximum long edge of 2560 px. Replacing an image later keeps the same QR.
+      <div className="mx-auto max-w-[1500px] space-y-5">
+        <section className="grid gap-4 border border-black/10 bg-white p-4 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-center lg:p-5">
+          <div className="max-w-2xl">
+            <p className="text-base font-semibold text-black">One image, one permanent QR</p>
+            <p className="mt-1 text-sm leading-6 text-black/55">
+              Urblo optimizes large files without crushing the detail. Replacing an image later keeps the same QR.
             </p>
           </div>
           <div
@@ -220,19 +237,21 @@ function AdminImageQrContent() {
             }}
             onDrop={handleDrop}
             className={[
-              'flex min-h-44 flex-col items-center justify-center border border-dashed px-5 text-center transition',
+              'flex min-h-24 items-center justify-center gap-4 border border-dashed px-5 text-left transition',
               isDragging ? 'border-black bg-[rgba(0,255,25,0.1)]' : 'border-black/20 bg-[#f7f8f4]',
               !canEdit ? 'opacity-55' : '',
             ].join(' ')}
             data-testid="image-qr-dropzone"
           >
-            <span className="grid h-11 w-11 place-items-center rounded-full bg-black text-white">
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-black text-white">
               <UploadCloud className="h-5 w-5" />
             </span>
-            <p className="mt-3 text-sm font-semibold text-black">Drop several images here</p>
-            <button type="button" onClick={() => fileInputRef.current?.click()} disabled={!canEdit || isUploading} className="mt-3 text-xs font-bold uppercase tracking-[0.12em] underline underline-offset-4 disabled:text-black/30">
-              {isUploading ? 'Working…' : 'Choose files'}
-            </button>
+            <div>
+              <p className="text-sm font-semibold text-black">Drop several images here</p>
+              <button type="button" onClick={() => fileInputRef.current?.click()} disabled={!canEdit || isUploading} className="mt-1 text-xs font-bold uppercase tracking-[0.12em] underline underline-offset-4 disabled:text-black/30">
+                {isUploading ? 'Working…' : 'Choose files'}
+              </button>
+            </div>
           </div>
           <input
             ref={fileInputRef}
@@ -250,7 +269,7 @@ function AdminImageQrContent() {
         {notice ? <Message tone="success">{notice}</Message> : null}
 
         <section className="border border-black/10 bg-white">
-          <div className="grid gap-4 border-b border-black/10 p-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-center md:p-5">
+          <div className="grid gap-3 border-b border-black/10 p-4 lg:grid-cols-[minmax(260px,1fr)_auto_auto] lg:items-center lg:p-5">
             <label className="relative block max-w-xl">
               <span className="sr-only">Search Image QR resources</span>
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-black/40" />
@@ -263,23 +282,27 @@ function AdminImageQrContent() {
                 </button>
               ))}
             </div>
+            <label className="flex min-h-9 items-center gap-2 text-xs font-semibold text-black/55">
+              <span>Sort</span>
+              <select value={sort} onChange={(event) => setSort(event.target.value as ResourceSort)} className="min-h-9 rounded border border-black/15 bg-white px-2 text-xs font-semibold text-black outline-none focus:border-black">
+                <option value="newest">Newest</option>
+                <option value="name">Name A–Z</option>
+              </select>
+            </label>
           </div>
 
           {isLoading ? (
             <EmptyState title="Loading Image QR…" detail="Getting the current image resources." />
           ) : filteredResources.length ? (
-            <div className="grid gap-4 bg-[#f5f6f2] p-4 md:grid-cols-2 2xl:grid-cols-3">
-              {filteredResources.map((resource) => (
-                <ImageQrCard
-                  key={resource.id}
-                  resource={resource}
-                  userId={user?.id ?? null}
-                  canEdit={canEdit}
-                  onUpdate={updateResource}
-                  onError={setError}
-                  onNotice={setNotice}
-                />
-              ))}
+            <div>
+              <div className="hidden grid-cols-[96px_minmax(0,1fr)_150px_110px_28px] gap-4 border-b border-black/10 bg-[#f7f8f4] px-5 py-2.5 text-[10px] font-bold uppercase tracking-[0.12em] text-black/42 md:grid">
+                <span>Image</span><span>Name</span><span>Updated</span><span>Status</span><span />
+              </div>
+              <div className="divide-y divide-black/10">
+                {filteredResources.map((resource) => (
+                  <ImageQrRow key={resource.id} resource={resource} onOpen={() => setSelectedResourceId(resource.id)} />
+                ))}
+              </div>
             </div>
           ) : (
             <EmptyState
@@ -289,14 +312,48 @@ function AdminImageQrContent() {
           )}
         </section>
       </div>
+
+      {selectedResource ? (
+        <ImageQrDetails
+          resource={selectedResource}
+          userId={user?.id ?? null}
+          canEdit={canEdit}
+          onClose={() => setSelectedResourceId(null)}
+          onUpdate={updateResource}
+          onError={setError}
+          onNotice={setNotice}
+        />
+      ) : null}
     </AdminShell>
   );
 }
 
-function ImageQrCard({
+function ImageQrRow({ resource, onOpen }: { resource: ImageQrResource; onOpen: () => void }) {
+  const isActive = resource.status === 'active';
+  return (
+    <button type="button" onClick={onOpen} className="grid w-full gap-3 px-4 py-3 text-left transition hover:bg-[#f7f8f4] focus-visible:bg-[#f7f8f4] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-black md:grid-cols-[96px_minmax(0,1fr)_150px_110px_28px] md:items-center md:gap-4 md:px-5">
+      <span className="block aspect-[4/3] w-24 overflow-hidden bg-[#eceee8]">
+        <img src={resource.previewUrl} alt="" className="h-full w-full object-cover" loading="lazy" />
+      </span>
+      <span className="min-w-0">
+        <span className="block truncate text-sm font-semibold text-black md:text-base">{resource.name}</span>
+        <span className="mt-1 block text-xs text-black/46">{resource.width} × {resource.height} · {formatImageBytes(resource.sizeBytes)}</span>
+      </span>
+      <span className="hidden text-xs text-black/52 md:block">{formatUpdatedDate(resource.updatedAt)}</span>
+      <span className="flex items-center gap-2 text-xs font-semibold text-black/60">
+        <span className={isActive ? 'h-2 w-2 rounded-full bg-[#00e619]' : 'h-2 w-2 rounded-full bg-black/35'} />
+        {isActive ? 'Ready' : 'Hidden'}
+      </span>
+      <ChevronRight className="hidden h-4 w-4 text-black/35 md:block" />
+    </button>
+  );
+}
+
+function ImageQrDetails({
   resource,
   userId,
   canEdit,
+  onClose,
   onUpdate,
   onError,
   onNotice,
@@ -304,6 +361,7 @@ function ImageQrCard({
   resource: ImageQrResource;
   userId: string | null;
   canEdit: boolean;
+  onClose: () => void;
   onUpdate: (resource: ImageQrResource) => void;
   onError: (message: string | null) => void;
   onNotice: (message: string | null) => void;
@@ -315,6 +373,13 @@ function ImageQrCard({
   const [copyState, setCopyState] = useState<'idle' | 'copied'>('idle');
 
   useEffect(() => setName(resource.name), [resource.name]);
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') onClose();
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
 
   async function runAction(action: 'rename' | 'hide' | 'restore', extra: Record<string, unknown> = {}) {
     setIsBusy(true);
@@ -365,11 +430,22 @@ function ImageQrCard({
 
   const isActive = resource.status === 'active';
   return (
-    <article className="min-w-0 border border-black/10 bg-white p-5" data-testid="image-qr-card">
-      <div className="relative aspect-[4/3] overflow-hidden bg-[#eceee8]">
-        <img src={resource.previewUrl} alt="" className="h-full w-full object-contain" />
-        <span className={isActive ? activeStatus : hiddenStatus}>{isActive ? 'Ready' : 'Hidden'}</span>
-      </div>
+    <div className="fixed inset-0 z-[70] bg-black/30" onMouseDown={(event) => { if (event.currentTarget === event.target) onClose(); }}>
+      <aside role="dialog" aria-modal="true" aria-labelledby="image-qr-details-title" className="ml-auto flex h-full w-full max-w-[560px] flex-col overflow-hidden bg-[#f5f6f2] shadow-2xl">
+        <div className="flex items-center justify-between border-b border-black/10 bg-white px-5 py-4">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.13em] text-black/42">Image details</p>
+            <h2 id="image-qr-details-title" className="mt-1 max-w-[400px] truncate text-lg font-semibold text-black">{resource.name}</h2>
+          </div>
+          <button type="button" onClick={onClose} className={iconButton} aria-label="Close image details"><X className="h-4 w-4" /></button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+          <article className="border border-black/10 bg-white p-4 sm:p-5">
+            <div className="relative aspect-[4/3] overflow-hidden bg-[#eceee8]">
+              <img src={resource.previewUrl} alt="" className="h-full w-full object-contain" />
+              <span className={isActive ? activeStatus : hiddenStatus}>{isActive ? 'Ready' : 'Hidden'}</span>
+            </div>
 
       <div className="mt-4 flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
@@ -422,7 +498,10 @@ function ImageQrCard({
           </button>
         </div>
       ) : null}
-    </article>
+          </article>
+        </div>
+      </aside>
+    </div>
   );
 }
 
@@ -590,6 +669,16 @@ function downloadBlob(blob: Blob, name: string) {
 
 function errorMessage(error: unknown) {
   return error instanceof Error ? error.message : 'Something went wrong. Try again.';
+}
+
+function formatUpdatedDate(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'Unknown';
+  return new Intl.DateTimeFormat('en-AU', {
+    day: 'numeric',
+    month: 'short',
+    year: date.getFullYear() === new Date().getFullYear() ? undefined : 'numeric',
+  }).format(date);
 }
 
 const inputClass = 'min-h-11 w-full rounded border border-black/15 bg-white px-3 text-sm font-medium outline-none transition focus:border-black focus:ring-2 focus:ring-black/10';
