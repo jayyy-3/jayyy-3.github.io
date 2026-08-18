@@ -39,7 +39,7 @@
     "adminUxReshape": "phase0_closed_projects_phase1_and_pr11_single_editor_followup_live_and_jay_accepted_image_qr_local_candidate_migration_unapplied_no_production_writes_phase2_articles_and_sunset_pending"
   },
   "nextDecisions": [
-    "Image QR commit 842c11e passed the clean Node 20 container gate and production migration 20260818074046_image_qr_resources is applied/read back; deploy Preview/no-write smoke, then separately approve any tagged Storage/database workflow and runtime promotion.",
+    "Image QR draft PR #29 Preview 35044c9d passed full no-write smoke and production migration 20260818074046 is applied/read back with zero rows; separately approve any tagged Storage/database workflow and runtime promotion.",
     "Monitor or purge the four residual apex cache headers when Cloudflare account access is available; their current bytes and MIME types exactly match the immutable repair deployment and are non-blocking.",
     "Ask Jay to fool-test the production Project material-point workflow; migration 20260812062636 and runtime merge 0593389d / deployment b160e33f are live, deployment-bound smoke and nine authenticated Admin routes pass, and agent checks cannot self-certify acceptance.",
     "After separate approval, verify Supabase Auth SMTP ownership and repeat invite/password/recovery against the corrected and read-back production callbacks.",
