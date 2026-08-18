@@ -28,6 +28,7 @@
     "seoIndexability": "static_36_route_production_verified_cms_only_discovery_strategy_pending",
     "seoLegacyRedirects": "production_smoke_verified_2026_07_13",
     "settingsInviteProof": "qa_editor_active_via_direct_auth_activation_redirect_config_corrected_real_ui_invite_recovery_not_repeated",
+    "adminImageQr": "pr29_fa9fe7d_preview_285f55f9_18_supplied_images_imported_19_total_active_rows_canonical_urblo_qr_links_runtime_promotion_and_jay_acceptance_pending",
     "supabaseSecurityAdvisor": "one_auth_leaked_password_warning_plus_two_expected_browser_callable_archived_slug_security_definer_warnings_minimum_disclosure_rpc_returns_expected_empty_static_fallback_intersection"
   },
   "localReproducibility": {
@@ -36,10 +37,10 @@
     "runtimeGates": "2026_08_17_homepage_all_15_published_projects_pr26_merge_f3fe5647_rail_reset_pr27_merge_ccab9c12_production_deployment_b85d8718_immutable_apex_www_smoke_desktop_mobile_return_path_and_jay_acceptance_passing",
     "liveSecretsPresent": true,
     "liveReadiness": "browser_key_owner_and_distinct_editor_credentials_present_media_migration_applied_live_role_boundary_passed",
-    "adminUxReshape": "phase0_closed_projects_phase1_and_pr11_single_editor_followup_live_and_jay_accepted_image_qr_local_candidate_migration_unapplied_no_production_writes_phase2_articles_and_sunset_pending"
+    "adminUxReshape": "phase0_closed_projects_phase1_and_pr11_single_editor_followup_live_and_jay_accepted_image_qr_preview_candidate_migration_applied_18_image_import_complete_19_total_runtime_promotion_and_jay_acceptance_pending_phase2_articles_and_sunset_pending"
   },
   "nextDecisions": [
-    "Image QR draft PR #29 Preview 35044c9d passed full no-write smoke and production migration 20260818074046 is applied/read back with zero rows; separately approve any tagged Storage/database workflow and runtime promotion.",
+    "Image QR draft PR #29 commit fa9fe7d Preview 285f55f9 passed full smoke and authenticated 19-row readback after the approved 18-image import; ask Jay to test the compact list/details workflow, then obtain production runtime promotion approval.",
     "Monitor or purge the four residual apex cache headers when Cloudflare account access is available; their current bytes and MIME types exactly match the immutable repair deployment and are non-blocking.",
     "Ask Jay to fool-test the production Project material-point workflow; migration 20260812062636 and runtime merge 0593389d / deployment b160e33f are live, deployment-bound smoke and nine authenticated Admin routes pass, and agent checks cannot self-certify acceptance.",
     "After separate approval, verify Supabase Auth SMTP ownership and repeat invite/password/recovery against the corrected and read-back production callbacks.",
@@ -67,24 +68,24 @@
     "worklogReviewWarningLines": 8000
   },
   "lastVerified": {
-    "agentCheck": "2026-08-17",
-    "build": "2026-08-17",
+    "agentCheck": "2026-08-18",
+    "build": "2026-08-18",
     "containerGate": "2026-08-18",
     "containerGateExceptionApproved": "2026-07-16",
     "hostEquivalentGate": "2026-07-19",
-    "cloudflarePreviewSmokeBranchPreview": "2026-08-17",
+    "cloudflarePreviewSmokeBranchPreview": "2026-08-18",
     "cloudflareReadiness": "2026-07-19",
     "gscSeoReview": "2026-06-12",
     "gscSitemapSubmission": "2026-06-12",
     "harnessGc": "2026-07-19",
     "harnessGcReview": "2026-07-19",
-    "lint": "2026-08-17",
+    "lint": "2026-08-18",
     "seoLegacyRedirectSource": "2026-06-12",
     "seoReadiness": "2026-07-13",
     "seoProductionReadback": "2026-06-12",
-    "gitDiffCheck": "2026-08-17",
-    "smoke": "2026-08-17",
-    "typecheck": "2026-08-17",
+    "gitDiffCheck": "2026-08-18",
+    "smoke": "2026-08-18",
+    "typecheck": "2026-08-18",
     "cloudflarePreviewSmokeProduction": "2026-08-17",
     "adminProjectsCountProduction": "2026-08-03",
     "adminAuthBrowserProduction": "2026-08-02",
