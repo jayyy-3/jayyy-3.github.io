@@ -1,6 +1,6 @@
 # HANDOFF - Current Agent State
 
-Last updated: 2026-08-18
+Last updated: 2026-08-21
 
 ## Read First
 Use this file as the short current-state entry. Detailed evidence lives in `docs/WORKLOG.md`; task execution state lives in `docs/agent/tasks.json`; compact machine state lives in `docs/agent/status.json`.
@@ -16,6 +16,8 @@ Recommended startup order:
 
 ## Current Production State
 Urblo is now running on Cloudflare Pages with Supabase-backed forms and an Urblo-owned `/admin` CMS.
+
+Capability module `04 / Multi-material assemblies` now uses Jay's supplied factory quality-review photograph through PR `#31` / merge `2e5f9b8` / immutable Cloudflare deployment `bf83bbc2-9c9f-4e1c-8e98-d32f0547c701`. The later `The Urblo advantage` image remains unchanged through a separate asset reference. The immutable deployment, apex, and `www` pass deployment-bound smoke; production desktop/mobile Browser QA confirms one new module image, one retained later image, the intended crop, no horizontal mobile overflow, and no warning/error logs.
 
 Image QR is live through PR `#29` / merge `19e2b41` / immutable Cloudflare deployment `d6816c71-b33e-46ae-860d-121a81c8bca0`. The workspace uses a compact searchable/sortable list and focused details drawer, normalizes supplied filenames, rejects same-name duplicate intake, and keeps permanent QR values on canonical `https://urblo.com.au/image/:slug` addresses. Jay-approved intake created 18 active Stone/Finish resources and retained one pre-existing `silver ash` resource for 19 active / 0 hidden. The immutable deployment, apex, and `www` pass deployment-bound route/asset/MIME/redirect/Function/secret-boundary smoke after normal edge convergence. Authenticated production Admin readback shows all 19 resources, and `Zen Grey · Honed` canonical resolver redirected directly to its 2560×1707 Supabase WebP image. No replace/Hide/Restore write occurred during release.
 
