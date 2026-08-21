@@ -73,6 +73,7 @@ const requiredAssets = [
   '/media/launch/capabilities/factory-preassembly.jpg',
   '/media/launch/capabilities/west-side-place-aerial.jpg',
   '/media/launch/capabilities/site-install-review.jpg',
+  '/media/launch/capabilities/multi-material-quality-review.jpg',
   '/media/launch/capabilities/curved-stone-preassembly.jpg',
   '/media/launch/capabilities/moon-gate-framed-view.jpg',
   '/media/launch/our-story/natalie-ma-2026.jpg',

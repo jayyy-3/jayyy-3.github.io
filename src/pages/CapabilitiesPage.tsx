@@ -100,8 +100,8 @@ const capabilityModules: CapabilityModule[] = [
       'Every interface, tolerance and finish is resolved together, so project teams are not left coordinating separate stone, timber, steel and install scopes late in the program.',
     disciplines: ['timber interfaces', 'metal frames', 'armrests', 'concealed steel'],
     applications: ['Seat systems', 'Urban furniture', 'Integrated plinths', 'Assembly packages'],
-    image: '/media/launch/capabilities/site-install-review.jpg',
-    alt: 'Urblo site review during stone installation',
+    image: '/media/launch/capabilities/multi-material-quality-review.jpg',
+    alt: 'Urblo quality review of a curved stone assembly during factory pre-assembly',
     Icon: Hammer,
   },
   {
