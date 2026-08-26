@@ -53,7 +53,6 @@ try {
 }
 let serverProcess = null;
 let serverStartupError = null;
-let serverReady = false;
 
 main().catch((error) => {
   console.error(error instanceof Error ? error.message : error);
@@ -159,8 +158,6 @@ function startPreview(outDir) {
   );
 
   child.stdout.on('data', (chunk) => {
-    const text = chunk.toString();
-    if (text.includes('Local:')) serverReady = true;
     process.stdout.write(chunk);
   });
   child.stderr.on('data', (chunk) => process.stderr.write(chunk));
@@ -203,7 +200,7 @@ async function waitForServer(baseUrl) {
     }
     try {
       const response = await fetch(`${baseUrl}/`);
-      if (response.ok && (!serverProcess || serverReady)) {
+      if (response.ok) {
         return;
       }
     } catch {
