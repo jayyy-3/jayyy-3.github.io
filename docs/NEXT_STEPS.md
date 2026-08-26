@@ -1,6 +1,6 @@
 # NEXT_STEPS - Urblo Roadmap
 
-Last updated: 2026-08-18
+Last updated: 2026-08-26
 
 ## Purpose
 This is the human-readable roadmap. The machine-readable source of truth is `docs/agent/tasks.json`; the compact current-state snapshot is `docs/agent/status.json`; historical proof lives in `docs/WORKLOG.md`.
@@ -27,7 +27,7 @@ Image QR is live through PR `#29` / merge `19e2b41` / immutable Cloudflare deplo
 PR `#21` merged as `b1e8b315` and deployed the 12 supplied partner marks into the existing homepage white marquee, preserving the section composition while correcting the loop to two equal groups, hiding the duplicate accessibility copy, and adding a reduced-motion fallback. Jay accepted the local result; the clean Node 20 container gate, immutable Preview checks, production deployment `8f2af15d`, apex/`www`/Pages-alias binding smoke, and production desktop/390px readback pass. This item is complete.
 
 ## What Is Complete
-- Cloudflare Pages production hosting is complete for `https://urblo.com.au` and `https://www.urblo.com.au`.
+- Cloudflare Pages production compute is migrated to the Urblo-owned account/project `urblo-site`; current main is deployed at `https://42cabb15.urblo-site.pages.dev`, both production domains pass exact immutable-reference smoke, the `.au` registry delegates to the new Urblo-owned nameservers, and the new Active zone contains all 24 intended website/mail/verification/qa records. Only normal expiry of some old recursive DNS caches remains to observe.
 - Contact and Sample Request persistence is complete, including server-side audit rows, SMTP2GO notification proof, and browser-key private-row denial.
 - The original Supabase foundation, baseline seeds, table RLS, Storage bucket/listing hardening, admin helper hardening, admin profile uniqueness, Editor-versus-public-bucket role migration/readback, and separately approved live role proof are complete.
 - First admin bootstrap is complete for `info@urblo.com.au`.
@@ -56,6 +56,7 @@ Only these task IDs should be treated as current executable work:
 `NOW-FORMS-SUPABASE-001` is now `next`: only the configuration/approval-gated Turnstile proof remains, so it yielded the active slot to the approved Admin reshape.
 
 ## Next Decisions
+- Allow remaining recursive DNS caches to expire naturally; Google Public DNS already returns `mckenzie.ns.cloudflare.com` / `norman.ns.cloudflare.com`, the new zone is Active, and final apex/`www` proxy state is confirmed. Do not delete the old Hunter-account project or unrelated Hunter resources during the rollback observation window.
 - The tagged Projects Preview happy path is complete; separately approve any additional live failure-recovery or non-Projects golden-workflow writes before they run.
 - Jay-approved Image QR import and runtime promotion are complete. Obtain fresh approval for any additional replace/Hide/Restore proof write; later usability acceptance remains user-owned.
 - Configure Supabase Auth custom SMTP separately from the already verified Contact/Sample SMTP2GO Function path.
