@@ -47,6 +47,7 @@ Forms:
 - Contact and Sample Request persistence is verified in Supabase.
 - Server-side audit rows are verified for valid lead submissions.
 - SMTP2GO delivery is verified for Contact and Sample Request; stored `notification_status = sent` was confirmed for tagged live proof rows.
+- The Urblo-owned Cloudflare project received a fresh post-migration production proof on 2026-08-26: marker `urblo-live-20260826-cf-migration-01` created Contact `#10`, Sample Request `#6`, item `#6`, and audit events `#354/#355`; both API responses and stored lead rows report `sent`.
 - Browser-key privacy boundary is verified: anonymous reads cannot see private lead rows.
 - Final Turnstile proof remains the only active forms follow-up.
 

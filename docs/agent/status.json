@@ -12,8 +12,8 @@
   "production": {
     "cloudflarePages": "urblo_owned_account_urblo_site_pr33_main_aec4dce_deployed_7e668551_github_actions_preview_and_main_cicd_verified_full_strict_apex_www_exact_immutable_smoke_passed_registry_nameservers_changed_new_zone_active_24_records_verified",
     "productionDomains": "verified",
-    "formsPersistence": "verified",
-    "smtp2go": "verified",
+    "formsPersistence": "verified_fresh_post_cloudflare_migration_marker_urblo_live_20260826_cf_migration_01_enquiry_10_sample_6_item_6_audit_354_355",
+    "smtp2go": "verified_fresh_post_cloudflare_migration_both_stored_notification_status_sent",
     "turnstile": "not_configured",
     "adminAuthBrowserQa": "production_9_authenticated_routes_signout_protected_revisit_and_3_blocked_supabase_static_fallbacks_verified",
     "adminCmsHandoff": "revalidation_required_after_user_report_and_repair_deploy",
@@ -111,6 +111,7 @@
     "configuredBundleSplit": "2026-07-13",
     "projectResponsiveImageLocal": "2026-08-17",
     "projectResponsiveImagePreview": "2026-08-17",
-    "projectResponsiveImageProduction": "2026-08-17"
+    "projectResponsiveImageProduction": "2026-08-17",
+    "cloudflareOwnedFormsProduction": "2026-08-26"
   }
 }

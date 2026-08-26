@@ -28,7 +28,7 @@ PR `#21` merged as `b1e8b315` and deployed the 12 supplied partner marks into th
 
 ## What Is Complete
 - Cloudflare Pages production compute and CI/CD are migrated to the Urblo-owned account/project `urblo-site`; PR `#33` / main `aec4dce` is deployed at `https://7e668551.urblo-site.pages.dev`, both production domains pass exact immutable-reference smoke, the `.au` registry delegates to the new Urblo-owned nameservers, and the new Active zone contains all 24 intended website/mail/verification/qa records. GitHub Actions deploys branches as Preview and `main` as production using a minimal account-owned Pages token. Only normal expiry of some old recursive DNS caches remains to observe.
-- Contact and Sample Request persistence is complete, including server-side audit rows, SMTP2GO notification proof, and browser-key private-row denial.
+- Contact and Sample Request persistence is complete, including server-side audit rows, SMTP2GO notification proof, and browser-key private-row denial. Fresh post-migration production marker `urblo-live-20260826-cf-migration-01` proved the Urblo-owned Cloudflare project end to end: Contact `#10`, Sample Request `#6` / item `#6`, audit events `#354/#355`, and both stored notification states `sent`.
 - The original Supabase foundation, baseline seeds, table RLS, Storage bucket/listing hardening, admin helper hardening, admin profile uniqueness, Editor-versus-public-bucket role migration/readback, and separately approved live role proof are complete.
 - First admin bootstrap is complete for `info@urblo.com.au`.
 - A separate active QA Editor is provisioned; password sign-in and its own Editor-profile RLS readback pass. This is test readiness, not invite-flow completion.
