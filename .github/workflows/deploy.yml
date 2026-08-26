@@ -46,6 +46,9 @@ jobs:
       - name: Run smoke checks
         run: npm run agent:smoke
 
+      - name: Install Firefox for admin checks
+        run: npx playwright install --with-deps firefox
+
       - name: Verify admin browser configuration
         run: npm run agent:admin-config-gate
 
