@@ -1,13 +1,13 @@
 # Urblo Cloudflare Pages Deployment Runbook
 
-Last updated: 2026-07-14
+Last updated: 2026-08-26
 
 ## Purpose
 This runbook captures the repo-side Cloudflare Pages deployment contract and the manual account steps required to operate and verify production safely.
 
 It records the current Cloudflare Pages project, production verification state, and remaining account-level work.
 
-Current account checkpoint: `urblo.com.au` is readable in Hunter's Cloudflare account (`077afae2c6f4e77badadf21e49e58eb7`), the zone ID is `544d6bf99e48f4b36d7abb24f053ab17`, and the `urblo` Pages project exists with default domain `urblo.pages.dev`. GitHub source is connected to `jayyy-3/jayyy-3.github.io`. Admin repair PR `#3` deployed as `6d193af5-cf8e-4541-a1e2-c73164d1a290` / merge `46d46b4`; Harness PR `#5` then exposed cached SPA HTML under three hashed asset URLs that the former status-only smoke had accepted. Cache repair PR `#6` is now deployed as `c7a910df-6dd3-440b-8971-a6120353ed19` / merge `a2a7ae5`. Its immutable URL plus `urblo.com.au` and `www.urblo.com.au` pass the deployment-bound MIME/body smoke, and production admin auth passes three blocked-Supabase public fallbacks plus all nine authenticated routes. Four unchanged apex assets still expose the removed long-lived cache header, but their bytes and MIME match the immutable deployment exactly; the latest `www` readback was warning-free. Contact/Sample Request persistence and SMTP2GO notification delivery remain verified. SMTP2GO CNAME records for return-path, DKIM, and tracking are DNS-only; Google MX/SPF/TXT records and `qa.urblo.com.au` were not changed.
+Current account checkpoint: production compute has moved from Hunter's Cloudflare account (`077afae2c6f4e77badadf21e49e58eb7`) to the Urblo-owned account (`cb91e0806b808258d6d9c852c8d0f060`). The active Pages project is `urblo-site`, default domain `urblo-site.pages.dev`; current `main` commit `004445b3b654ec6db0dbcd78a0a7c65b83665d09` is deployed at `https://42cabb15.urblo-site.pages.dev`. Both custom domains report `Active / SSL enabled` and pass exact immutable-reference smoke against that deployment. New zone ID is `83a74774485d2ee76f6c8bd0d90a0f03`. On 2026-08-26 the `.au` registry accepted nameservers `mckenzie.ns.cloudflare.com` and `norman.ns.cloudflare.com`; the new Cloudflare zone is Active with all 24 intended records. Authoritative readback covers the expected website, Google Workspace, SPF, DMARC, Google DKIM, SMTP2GO, SendGrid, Squarespace, and `qa` records. Google Public DNS returns the new delegation; some other recursive resolvers may briefly retain the old pair until cache expiry. The old Hunter-account Pages project and zone were not deleted.
 
 Repo-side readiness is checked by `npm run agent:cloudflare-readiness`. This command verifies the build contract, SPA fallback, Pages Functions routing scope, headers, API handler files, environment placeholders, and this runbook without touching Cloudflare account state.
 
@@ -155,10 +155,10 @@ Legacy URLs such as `/products/primeBlock` and `/articles/Modular-Mastery-How-Pr
 
 Run the deployed preview smoke runner:
 - `npm run agent:cloudflare-preview-smoke -- --base-url https://<preview>.pages.dev`
-- For production promotion/readback, bind the custom origin to the exact immutable deployment: `npm run agent:cloudflare-preview-smoke -- --base-url https://urblo.com.au --reference-url https://<8-hex-deployment>.urblo.pages.dev`.
-- Current verified production command: `npm run agent:cloudflare-preview-smoke -- --base-url https://urblo.com.au --reference-url https://c7a910df.urblo.pages.dev`; repeat with `https://www.urblo.com.au` as the base URL for the second custom domain.
+- For production promotion/readback, bind the custom origin to the exact immutable deployment: `npm run agent:cloudflare-preview-smoke -- --base-url https://urblo.com.au --reference-url https://<8-hex-deployment>.<urblo|urblo-site>.pages.dev`.
+- Current verified production command: `npm run agent:cloudflare-preview-smoke -- --base-url https://urblo.com.au --reference-url https://42cabb15.urblo-site.pages.dev`; repeat with `https://www.urblo.com.au` as the base URL for the second custom domain.
 
-The `--base-url` value must be a real `http`/`https` origin with no path, query, or hash. Copied placeholders are rejected before any route, asset, redirect, or Function request runs. Apex, `www`, and the moving `urblo.pages.dev` production alias are recognized after removing FQDN trailing dots and require `--reference-url`; it must be a different HTTPS origin matching the exact immutable `https://<8-hex-deployment>.urblo.pages.dev` alias. Production/default/branch aliases and self-comparison are rejected before network verification.
+The `--base-url` value must be a real `http`/`https` origin with no path, query, or hash. Copied placeholders are rejected before any route, asset, redirect, or Function request runs. Apex, `www`, and the moving `urblo.pages.dev` / `urblo-site.pages.dev` production aliases are recognized after removing FQDN trailing dots and require `--reference-url`; it must be a different HTTPS origin matching an exact immutable `https://<8-hex-deployment>.<urblo|urblo-site>.pages.dev` alias. Production/default/branch aliases and self-comparison are rejected before network verification.
 
 This runner does not require secrets. It checks:
 - non-redirecting direct refresh for public routes, unknown-route fallback, and `/admin/*` route shells, with every SPA route required to reference the same entry assets as `/` so a redirect-to-home or route-specific stale shell cannot escape the asset graph;
@@ -199,12 +199,14 @@ Current `/functions/api` endpoints:
 
 ### 5. Custom Domain Cutover
 Current custom-domain state:
-- `urblo.com.au` is attached to the `urblo` Pages project.
-- `www.urblo.com.au` is attached to the `urblo` Pages project.
+- `urblo.com.au` is attached to the Urblo-account `urblo-site` Pages project.
+- `www.urblo.com.au` is attached to the Urblo-account `urblo-site` Pages project.
 - Both custom domains are active in the Cloudflare Pages domain API.
-- Apex website DNS record is now `CNAME urblo.com.au -> urblo.pages.dev`, proxied, TTL auto.
-- `www` website DNS record is now `CNAME www.urblo.com.au -> urblo.pages.dev`, proxied, TTL auto.
-- Google Workspace MX records, apex TXT/SPF/verification records, NS records, and `qa.urblo.com.au` were not changed.
+- Apex website DNS record is `CNAME urblo.com.au -> urblo-site.pages.dev`, proxied/flattened, TTL auto.
+- `www` website DNS record is proxied `CNAME www.urblo.com.au -> urblo-site.pages.dev`, TTL auto.
+- Google Workspace MX, apex TXT/SPF/verification, DMARC, Google DKIM, SMTP2GO, SendGrid, Squarespace, and `qa.urblo.com.au` records were copied and read back from the new authoritative zone.
+- `.au` registry delegation changed from `ian.ns.cloudflare.com` / `raegan.ns.cloudflare.com` to `mckenzie.ns.cloudflare.com` / `norman.ns.cloudflare.com` on 2026-08-26. DNSSEC remained unsigned/off during the move.
+- The new zone is Active. Ordinary recursive resolvers may still return the old delegation until their cached NS TTL expires; Google Public DNS already returns the new pair.
 - The former status-only smoke passes were invalidated by the 2026-07-13 cached-HTML asset incident. PR `#6` deployment `c7a910df-6dd3-440b-8971-a6120353ed19` now passes fresh MIME/body-aware smoke on both `urblo.com.au` and `www.urblo.com.au`, bound to `https://c7a910df.urblo.pages.dev`. The apex run reports four stale long-lived cache-header warnings after exact immutable bytes/MIME comparison; the latest `www` run reports none.
 - SMTP2GO DNS-only CNAME records are present:
   - `em905485.urblo.com.au -> return.smtp2go.net`, record id `999d935aa8b2323d0d1b613aa5bcc276`.
@@ -217,8 +219,8 @@ Original website DNS backup for rollback:
 - `qa.urblo.com.au` remains `A qa.urblo.com.au -> 159.198.65.164`, proxied, TTL auto, and can be used as an old-site reference while it remains unchanged.
 
 Rollback DNS action if the launch must be reversed:
-- Overwrite apex record `9bc69b26cbeef071e02f4a1bd5f715e7` back to `type = A`, `name = urblo.com.au`, `content = 159.198.65.164`, `proxied = true`, `ttl = 1`.
-- Overwrite `www` record `4ce8ffa7ee003ae79acac67096ca33ab` back to `type = CNAME`, `name = www.urblo.com.au`, `content = urblo.com.au`, `proxied = true`, `ttl = 1`.
+- For a runtime rollback, deploy or reattach a known-good Urblo build inside the Urblo-owned account; do not restore Hunter control as the normal rollback path.
+- For an emergency legacy-host rollback, create or overwrite the new-zone apex as proxied `A urblo.com.au -> 159.198.65.164` and `www` as proxied `CNAME www.urblo.com.au -> urblo.com.au`, TTL auto. The old Hunter-account record IDs are historical evidence only and are not valid in the new zone.
 - Do not touch MX, TXT, SPF, NS, or `qa` records during rollback.
 
 ### 6. Rollback
@@ -275,22 +277,22 @@ Admin CRUD/live lead workflow QA has been run for the current non-Storage path:
 - The failed pre-migration marker `admin-live-1780496442071-f27c2b7d` left partial public-facing QA rows; those rows were archived non-destructively and audit rows `73`-`77` recorded the cleanup.
 
 ## Current Account State
-Repo-side Cloudflare Pages preparation is complete, account read access is verified for the production zone, and the Hunter-account Pages project `urblo` now exists with a successful production deployment.
+Repo-side Cloudflare Pages preparation is complete. The current production project is Urblo-owned; the Hunter-account project remains only as temporary rollback evidence and must not be treated as the deployment authority.
 
 Current project:
-- Account: Hunter (`077afae2c6f4e77badadf21e49e58eb7`)
-- Project: `urblo`
-- Project ID: `3c4c5af3-a2a8-4058-bc0e-0ee6e8cfcaca`
-- Default domain: `urblo.pages.dev`
+- Account: Support@urblo.com.au (`cb91e0806b808258d6d9c852c8d0f060`)
+- Project: `urblo-site`
+- Default domain: `urblo-site.pages.dev`
+- Zone ID: `83a74774485d2ee76f6c8bd0d90a0f03`
 - Production branch: `main`
-- Build command: `npm run build`
+- Deployment mode: Direct Upload via Wrangler after the repository gate
+- Build command: `npm run build` locally before upload
 - Output directory: `dist`
 - Root directory: `/`
-- Latest verified admin-repair runtime deployment: `c7a910df-6dd3-440b-8971-a6120353ed19`
-- Latest verified admin-repair runtime URL: `https://c7a910df.urblo.pages.dev`
-- Production URL: `https://urblo.pages.dev`
+- Latest verified runtime URL: `https://42cabb15.urblo-site.pages.dev`
+- Production URL: `https://urblo-site.pages.dev`
 - Deployment status: `success`
-- Runtime deployment commit: `a2a7ae5`
+- Runtime deployment commit: `004445b3b654ec6db0dbcd78a0a7c65b83665d09`
 
 The Supabase Auth Site URL/exact invite-recovery Redirect URL entries, Media Storage role migration/readback, and separately approved Editor/owner tagged proof are complete. The next account-level work is the approved Projects reshape followed by all twelve production editor golden workflows against one deployment. Turnstile remains a separate forms decision.
 

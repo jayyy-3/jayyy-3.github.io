@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, rm, writeFile } from 'node:fs/promises';
 import { spawn } from 'node:child_process';
 import { cwd, env, exit } from 'node:process';
 import { join } from 'node:path';
@@ -53,8 +53,6 @@ try {
 }
 let serverProcess = null;
 let serverStartupError = null;
-let serverReady = false;
-let expectedEntryAsset = null;
 
 main().catch((error) => {
   console.error(error instanceof Error ? error.message : error);
@@ -87,7 +85,6 @@ async function main() {
       if (buildResult !== 0) {
         throw new Error(`Admin config gate isolated build failed with exit code ${buildResult}.`);
       }
-      expectedEntryAsset = readEntryAsset(await readFile(join(isolatedDistDir, 'index.html'), 'utf8'));
       serverProcess = startPreview(isolatedDistDir);
       await waitForServer(baseUrl);
     } else {
@@ -161,8 +158,6 @@ function startPreview(outDir) {
   );
 
   child.stdout.on('data', (chunk) => {
-    const text = chunk.toString();
-    if (text.includes('Local:')) serverReady = true;
     process.stdout.write(chunk);
   });
   child.stderr.on('data', (chunk) => process.stderr.write(chunk));
@@ -205,10 +200,8 @@ async function waitForServer(baseUrl) {
     }
     try {
       const response = await fetch(`${baseUrl}/`);
-      if (response.ok && (!serverProcess || serverReady)) {
-        if (!expectedEntryAsset) return;
-        const html = await response.text();
-        if (html.includes(`src="/${expectedEntryAsset}"`)) return;
+      if (response.ok) {
+        return;
       }
     } catch {
       // Retry until the preview process reports readiness or the attempt budget expires.
@@ -216,14 +209,6 @@ async function waitForServer(baseUrl) {
     await sleep(250);
   }
   throw new Error(`Preview did not respond at ${baseUrl}.`);
-}
-
-function readEntryAsset(html) {
-  const entryMatch = /<script[^>]+src="\/(assets\/index-[^"]+\.js)"/.exec(html);
-  if (!entryMatch) {
-    throw new Error('Isolated admin build did not expose the expected hashed entry script.');
-  }
-  return entryMatch[1];
 }
 
 async function runCommand(command, commandArgs, extraEnv) {

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lastUpdated": "2026-08-18",
+  "lastUpdated": "2026-08-26",
   "sourceOfTruth": {
     "currentState": "docs/HANDOFF.md",
     "taskQueue": "docs/agent/tasks.json",
@@ -10,7 +10,7 @@
     "harnessGc": "docs/agent/harness-gc.md"
   },
   "production": {
-    "cloudflarePages": "repair_deployment_and_custom_domain_asset_integrity_verified_with_residual_apex_cache_header_warnings",
+    "cloudflarePages": "urblo_owned_account_urblo_site_current_main_deployed_apex_www_exact_immutable_smoke_passed_registry_nameservers_changed_new_zone_active_24_records_verified_google_public_dns_new_delegation_some_recursive_cache_expiry_pending",
     "productionDomains": "verified",
     "formsPersistence": "verified",
     "smtp2go": "verified",
@@ -86,9 +86,9 @@
     "gitDiffCheck": "2026-08-18",
     "smoke": "2026-08-18",
     "typecheck": "2026-08-18",
-    "cloudflarePreviewSmokeProduction": "2026-08-18",
+    "cloudflarePreviewSmokeProduction": "2026-08-26",
     "adminProjectsCountProduction": "2026-08-03",
-    "adminAuthBrowserProduction": "2026-08-02",
+    "adminAuthBrowserProduction": "2026-08-26",
     "adminHandoffReadinessStrictExpectedFailure": "2026-07-13",
     "adminMediaRoleBoundaryPlanOnly": "2026-07-14",
     "adminMediaRoleBoundaryProduction": "2026-07-14",

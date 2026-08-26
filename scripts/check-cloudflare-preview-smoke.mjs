@@ -146,7 +146,12 @@ function parseArgs(argv) {
 
   options.baseUrl = normalizeBaseUrlOrigin(options.baseUrl, '--base-url');
   const targetHostname = new URL(options.baseUrl).hostname.toLowerCase().replace(/\.+$/, '');
-  const movingProductionHosts = new Set(['urblo.com.au', 'www.urblo.com.au', 'urblo.pages.dev']);
+  const movingProductionHosts = new Set([
+    'urblo.com.au',
+    'www.urblo.com.au',
+    'urblo.pages.dev',
+    'urblo-site.pages.dev',
+  ]);
   assert(
     options.referenceUrl || !movingProductionHosts.has(targetHostname),
     '--reference-url is required for production custom/default domains so the moving origin is bound to one immutable deployment',
@@ -155,8 +160,9 @@ function parseArgs(argv) {
     options.referenceUrl = normalizeBaseUrlOrigin(options.referenceUrl, '--reference-url');
     const reference = new URL(options.referenceUrl);
     assert(
-      reference.protocol === 'https:' && /^[0-9a-f]{8}\.urblo\.pages\.dev$/i.test(reference.hostname),
-      '--reference-url must be the exact immutable https://<8-hex-deployment>.urblo.pages.dev origin',
+      reference.protocol === 'https:' &&
+        /^[0-9a-f]{8}\.(?:urblo|urblo-site)\.pages\.dev$/i.test(reference.hostname),
+      '--reference-url must be an exact immutable https://<8-hex-deployment>.<urblo|urblo-site>.pages.dev origin',
     );
     assert(
       options.referenceUrl !== options.baseUrl,

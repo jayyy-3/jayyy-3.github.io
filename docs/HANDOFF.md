@@ -1,6 +1,6 @@
 # HANDOFF - Current Agent State
 
-Last updated: 2026-08-21
+Last updated: 2026-08-26
 
 ## Read First
 Use this file as the short current-state entry. Detailed evidence lives in `docs/WORKLOG.md`; task execution state lives in `docs/agent/tasks.json`; compact machine state lives in `docs/agent/status.json`.
@@ -30,9 +30,11 @@ PR `#21` merged as `b1e8b315` and deployed the 12 supplied partner marks into th
 Working process is governed by `docs/OPERATING_PROTOCOL.md`: branch -> local container gate (`npm run gate`) -> Cloudflare preview smoke -> promote to `main`, plus the design review -> implement -> remember loop.
 
 Cloudflare:
-- Production domains `https://urblo.com.au` and `https://www.urblo.com.au` are attached to the Cloudflare Pages project `urblo`.
-- Apex and `www` website DNS point to `urblo.pages.dev`.
-- Google MX/SPF/TXT, NS records, and `qa.urblo.com.au` were not changed.
+- Production compute is now in the Urblo-owned Cloudflare account `cb91e0806b808258d6d9c852c8d0f060`, Pages project `urblo-site`, with default domain `urblo-site.pages.dev`.
+- Current `main` commit `004445b3b654ec6db0dbcd78a0a7c65b83665d09` is deployed at immutable URL `https://42cabb15.urblo-site.pages.dev`; the immutable URL, apex, and `www` pass deployment-bound route, recursive asset byte/MIME, redirect, Function, protected-function, and browser-secret-boundary smoke.
+- `urblo.com.au` and `www.urblo.com.au` are attached to `urblo-site` and report `Active / SSL enabled`. Apex and `www` website DNS target `urblo-site.pages.dev` in the new zone.
+- On 2026-08-26 the `.au` registry accepted the delegation change from Hunter-account nameservers `ian` / `raegan` to Urblo-account nameservers `mckenzie` / `norman`. The new zone is `Active`, all 24 intended records are present, apex/`www` are proxied, and authoritative readback covers the expected website, Google Workspace, SPF, DMARC, Google DKIM, SMTP2GO, SendGrid, Squarespace, and `qa` records. Google Public DNS has observed the new delegation; some ordinary recursive caches may temporarily return the old pair until their TTL expires.
+- The Hunter-account `urblo` Pages project and old zone were not deleted. Treat them as temporary rollback evidence only; unrelated Hunter-account R2 buckets and Workers are not Urblo resources and must not be changed.
 - Admin reliability PR `#3` is merged. Cloudflare production deployment `6d193af5-cf8e-4541-a1e2-c73164d1a290` for merge commit `46d46b4` passed the then-current status-only smoke; that result was later invalidated by the cached-HTML asset incident.
 - Harness PR `#5` is merged as `cb0ec9a`; immutable deployment `https://4aef2ba1.urblo.pages.dev` passes the new static-fallback fault injection and all nine authenticated admin route checks.
 - Cache repair PR `#6` is merged as `a2a7ae5` and deployed as `c7a910df-6dd3-440b-8971-a6120353ed19` at `https://c7a910df.urblo.pages.dev`. Its immutable URL, `https://urblo.com.au`, and `https://www.urblo.com.au` pass the MIME/body-aware smoke bound to that exact deployment. The apex readback retains warnings for four unchanged assets with stale long-lived response headers, but their bytes and MIME exactly match the immutable deployment; the latest `www` readback had no such warning.
