@@ -9,7 +9,7 @@ Last updated: 2026-08-17
 - Updated the Project upload surface to say that the original is kept at full quality and that high-quality website versions are prepared automatically. The UI no longer frames optimization as an alarming original-to-small-file compression ratio.
 - Focused source checks pass: `npm run agent:public-content-overlay`, `npm run agent:admin-projects-aggregate`, `npm run lint`, and `npx tsc -b`. Local Browser QA at 1440x900 confirmed grid cards select a 960px WebP profile, switching to List selects 240px for a 120px thumbnail, and West Side Place hero selects 2500px at quality 88 with `fetchPriority=high`. At 390x844 the hero selects 960px and document width remains 390px; both viewports have no relevant console warning/error.
 - A representative 4.84MB West Side Place source produced a 179KB 960px quality-82 card response and a 1.39MB 2500px quality-88 hero response. The deliberately larger hero result preserves design inspection quality rather than targeting the smallest possible byte count. No production write, Storage mutation, configuration change, deployment, or original-file replacement occurred.
-- Commit `c383983` passes build, lint, typecheck, both Project/public-content source verifiers, Admin CMS predeploy, smoke, Admin config gate, Harness checks, and the clean Node 20 Docker/Colima gate. The gate's only working-tree warning is for the pre-existing user-owned untracked `docs/SEO_EXTERNAL_AI_BRIEF.md` and `output/pdf/Invoice-INV-2026-08-001-Urblo.pdf`; neither file is staged or committed. Branch Preview delivery remains pending.
+- Commit `c383983` passes build, lint, typecheck, both Project/public-content source verifiers, Admin CMS predeploy, smoke, Admin config gate, Harness checks, and the clean Node 20 Docker/Colima gate. The gate's only working-tree warning is for two pre-existing user-owned untracked files; neither file is staged or committed. Branch Preview delivery remains pending.
 
 ## Entry - 2026-08-11 (Homepage Partner Logo Marquee Expansion)
 
@@ -70,7 +70,7 @@ Last updated: 2026-08-17
 - `npm run agent:admin-projects-aggregate`: pass.
 - `npm run build`, `npm run lint`, `npx tsc -b`, `npm run agent:smoke`: pass.
 - `npm run agent:admin-crud-coverage`, `npm run agent:admin-cms-predeploy`, isolated 11-route `npm run agent:admin-config-gate`, `npm run agent:check`, JSON parsing, and `git diff --check`: pass.
-- `npm run gate`: pass in the clean Node 20 Docker/Colima build for implementation commit `fa205e0`; the unrelated user-owned untracked `docs/SEO_EXTERNAL_AI_BRIEF.md` remained untouched and was reported by the gate.
+- `npm run gate`: pass in the clean Node 20 Docker/Colima build for implementation commit `fa205e0`; an unrelated user-owned untracked brief remained untouched and was reported by the gate.
 - Local visual verification: public Projects desktop/mobile navbar and menu backgrounds pass.
 - Draft PR `#11` implementation commit `610d4b2` deployed as immutable Preview `3b285f72-fafa-46c5-abc8-8ccda419b738` at `https://3b285f72.urblo.pages.dev`. No-write Cloudflare smoke passed all public/Admin routes, recursive assets, redirects, safe-failure form Functions, and the protected Projects endpoint. Strict owner login passed all nine authenticated Admin routes.
 - Deployed `/projects` readback found header `rgba(0, 0, 0, 0.88)`, opened menu `rgba(0, 0, 0, 0.96)`, equal `scrollWidth/clientWidth` at 1280px, and no relevant console warnings/errors.
