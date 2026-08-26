@@ -34,12 +34,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install Firefox for admin checks
-        run: npx playwright install --with-deps firefox
-
-      - name: Verify admin browser configuration
-        run: npm run agent:admin-config-gate
-
       - name: Build
         run: npm run build
 
@@ -51,6 +45,9 @@ jobs:
 
       - name: Run smoke checks
         run: npm run agent:smoke
+
+      - name: Verify admin predeploy contracts
+        run: npm run agent:admin-cms-predeploy
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
