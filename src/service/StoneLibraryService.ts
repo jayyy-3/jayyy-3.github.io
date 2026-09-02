@@ -3,6 +3,7 @@ import { getFinishBehaviorMeta } from '../data/finishBehaviorMeta';
 import {
     getStoneDefaultImage,
     getStoneFinishImageResolution,
+    requiresFinishSpecificImages,
 } from '../data/stoneFinishImages';
 import { getPublicContentClient } from '../lib/publicContentClient';
 import { resolvePublicMediaUrl, type PublicMediaLocation } from '../lib/publicMediaUrl';
@@ -794,6 +795,7 @@ class StoneLibraryService {
                 if (!finish) return null;
 
                 const { finishId, finishVariantId } = splitFinishKey(finish.finish_key);
+                const requiresFinishSpecificImage = requiresFinishSpecificImages(activeVariant.variant_key);
                 const matchingImages = imageRows.filter((image) => {
                     const matchesFinish =
                         image.finish_definition_id === finish.id ||
@@ -801,7 +803,9 @@ class StoneLibraryService {
                     const matchesVariant =
                         image.stone_variant_id === activeVariant.id ||
                         image.stone_variant_id === null;
-                    return matchesFinish && matchesVariant;
+                    const matchesImagePolicy =
+                        !requiresFinishSpecificImage || image.finish_definition_id === finish.id;
+                    return matchesFinish && matchesVariant && matchesImagePolicy;
                 });
                 const primaryImage =
                     matchingImages.find((image) => image.finish_definition_id === finish.id && image.image_role === 'primary') ||
@@ -824,7 +828,9 @@ class StoneLibraryService {
 
                 const staticFallback = getStoneFinishImageResolution(activeVariant.variant_key, finish.finish_key);
                 const defaultFallback = getStoneDefaultImage(activeVariant.variant_key);
-                const fallbackImage = staticFallback.asset || defaultFallback;
+                const fallbackImage =
+                    staticFallback.asset ||
+                    (staticFallback.role === 'reference' ? defaultFallback : undefined);
                 const hasFinishSpecificImage = Boolean(
                     primaryMediaUrl && primaryImage?.finish_definition_id === finish.id,
                 );
@@ -848,8 +854,7 @@ class StoneLibraryService {
                         : behavior,
                     imageUrl:
                         primaryMediaUrl ||
-                        fallbackImage?.imageUrl ||
-                        placeholderStoneImage(group.display_name),
+                        fallbackImage?.imageUrl,
                     thumbUrl: fallbackImage?.thumbUrl,
                     imageAlt:
                         primaryMedia?.alt ||
@@ -936,14 +941,17 @@ class StoneLibraryService {
                     return finish;
                 }
 
+                if (finish.imageRole === 'placeholder') {
+                    return finish;
+                }
+
                 const fallbackImage = getStoneDefaultImage(activeVariant.stoneVariantId);
                 const imageRole: StoneFinishImageRole = fallbackImage?.imageUrl
                     ? 'reference'
                     : 'placeholder';
                 return {
                     ...finish,
-                    imageUrl:
-                        fallbackImage?.imageUrl || placeholderStoneImage(stone.displayName),
+                    imageUrl: fallbackImage?.imageUrl,
                     imageAlt: fallbackImage?.alt || `${stone.displayName} finish preview`,
                     imageRole,
                 };

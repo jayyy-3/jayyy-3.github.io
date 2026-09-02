@@ -36,9 +36,12 @@ const requiredFiles = [
   'scripts/check-doc-paths.mjs',
   'scripts/check-harness.mjs',
   'scripts/check-harness-gc.mjs',
+  'scripts/check-homepage-hero-video.mjs',
   'scripts/check-live-readiness.mjs',
+  'scripts/check-product-model-image-mapping.mjs',
   'scripts/check-public-content-overlay.mjs',
   'scripts/check-seo-readiness.mjs',
+  'scripts/check-stone-library-detail-integrity.mjs',
   'scripts/check-supabase-foundation-readiness.mjs',
 ]
 const requiredPackageScripts = {
@@ -61,7 +64,10 @@ const requiredPackageScripts = {
   'agent:forms-live': 'node scripts/check-forms-api-live.mjs',
   'agent:forms-ui': 'node scripts/check-contact-form-ui-source.mjs',
   'agent:capabilities-ui': 'node scripts/check-capabilities-page-source.mjs',
+  'agent:homepage-video': 'node scripts/check-homepage-hero-video.mjs',
+  'agent:product-model-images': 'node scripts/check-product-model-image-mapping.mjs',
   'agent:seo-readiness': 'node scripts/check-seo-readiness.mjs',
+  'agent:stone-library-detail': 'node scripts/check-stone-library-detail-integrity.mjs',
   'agent:harness-gc': 'node scripts/check-harness-gc.mjs',
   'agent:harness-gc:fix': 'node scripts/check-harness-gc.mjs --fix',
   'agent:harness-gc:review': 'node scripts/check-harness-gc.mjs --review',
@@ -151,6 +157,15 @@ try {
   }
   if (!smoke.includes('node scripts/check-capabilities-page-source.mjs')) {
     failures.push('scripts/agent-smoke.sh must run the Capabilities page source contract check.')
+  }
+  if (!smoke.includes('node scripts/check-homepage-hero-video.mjs')) {
+    failures.push('scripts/agent-smoke.sh must run the Homepage hero video compatibility check.')
+  }
+  if (!smoke.includes('node scripts/check-product-model-image-mapping.mjs')) {
+    failures.push('scripts/agent-smoke.sh must run the Product model image mapping check.')
+  }
+  if (!smoke.includes('node scripts/check-stone-library-detail-integrity.mjs')) {
+    failures.push('scripts/agent-smoke.sh must run the Stone Library detail integrity check.')
   }
   if (!smoke.includes('npm run agent:admin-projects-aggregate')) {
     failures.push('scripts/agent-smoke.sh must run the Admin Projects aggregate behavior check.')

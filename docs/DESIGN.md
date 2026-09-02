@@ -156,7 +156,7 @@ Header behavior:
 
 Hero behavior:
 - The first homepage viewport should feel full-screen on desktop and mobile.
-- Desktop video is acceptable when it does not slow first meaningfully visible content; mobile should use a poster or optimized mobile-specific media until a smaller video variant is approved.
+- Desktop video is acceptable when it does not slow first meaningfully visible content; mobile uses an optimized portrait MP4 with the poster retained as the immediate fallback. In embedded browsers such as WeChat, autoplay should be attempted when policy allows it, but a rejected play promise must expose one restrained, accessible tap-to-play control instead of leaving a silently frozen hero.
 - The homepage hero poster should be available immediately as a visual fallback, and heavy non-hero homepage media should not request during initial hero load.
 - The homepage hero and global header may use the edge-aligned container instead of the standard page container when the first viewport needs a full-bleed editorial composition.
 - Homepage hero title motion should be restrained, sequential, and reduced-motion aware. Letter-by-letter left-to-right reveals are acceptable when they clarify hierarchy rather than delaying access to content.
@@ -179,9 +179,12 @@ Public display rule:
 Interaction rules:
 - Click or explicit controls should change material state. Hover may preview only when it does not create ambiguity.
 - Active finish state must remain stable across left and right controls.
+- Query-parameter changes for Finish or Variant are in-page state changes and must preserve the user's vertical reading position.
+- Stones with meaningful variants use one right-side selection rail. Put the parent choice first (`Cut direction` for cut variants), followed immediately by Finish, so the dependency remains visible beside the imagery on desktop and mobile.
 - Secondary frames are supporting inspection media for the selected finish, not new finish states.
 - Secondary frame thumbnails should appear only when approved source images exist; do not show placeholder secondary frames.
 - Finish imagery must disclose whether the active image is finish-specific, a reference/default view, or pending. Never let fallback imagery read as a confirmed finish photo.
+- A cover/reference image may not silently stand in for multiple finishes. When a finish has no truthful image, show an explicit quiet pending state and omit Zoom rather than repeating another finish's photograph.
 - Image overlay labels on Stone Library media, including list-card status badges and detail-stage provenance labels, must stay readable across light, dark, and patterned stone: use dark translucent backplates with white text, and reserve Urblo lime for small confirmed/interactive signals rather than broad label fills.
 - Availability/status pills outside imagery should stay light: use a thin Urblo lime outline/wash and medium-weight type for confirmed available states, muted white/neutral pills for upcoming or unavailable states, and avoid heavy black status blocks or full lime badge fills in selectors or data tables.
 - Mobile layout must prioritize readable finish names and image inspection over decorative layout.

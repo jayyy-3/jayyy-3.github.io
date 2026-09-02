@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useLayoutEffect } from 'react';
+import { lazy, Suspense, useEffect, useLayoutEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import {
@@ -145,14 +145,18 @@ function upsertJsonLd(id: string, structuredData: Record<string, unknown>[]) {
 function ScrollRestoration() {
     const location = useLocation();
     const navigationType = useNavigationType();
+    const previousPathnameRef = useRef(location.pathname);
 
     useLayoutEffect(() => {
-        if (navigationType === 'POP') {
+        const pathnameChanged = previousPathnameRef.current !== location.pathname;
+        previousPathnameRef.current = location.pathname;
+
+        if (!pathnameChanged || navigationType === 'POP') {
             return;
         }
 
         window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-    }, [location.pathname, location.search, navigationType]);
+    }, [location.pathname, navigationType]);
 
     return null;
 }

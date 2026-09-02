@@ -305,7 +305,11 @@ const stoneFinishImages: Record<string, VariantImageMap> = {
     'blueocean': {
         default: {
             imageUrl: '/media/launch/stone-library/fallbacks/blueocean-sawn.jpg',
-            alt: 'Blueocean stone surface',
+            alt: 'Blueocean sawn finish',
+        },
+        sawn: {
+            imageUrl: '/media/launch/stone-library/fallbacks/blueocean-sawn.jpg',
+            alt: 'Blueocean sawn finish',
         },
     },
     'honey-comb': {
@@ -399,14 +403,28 @@ const stoneFinishImages: Record<string, VariantImageMap> = {
             'Tuscany/Tuscany_Vein Cut_Urblo.jpeg',
             'Tuscany vein cut surface',
         ),
+        honed: productImage(
+            'Tuscany/Tuscany_Vein Cut_Urblo.jpeg',
+            'Tuscany vein cut honed finish',
+        ),
     },
     'tuscany--cross-cut': {
         default: productImage(
             'Tuscany/Tuscany_Cross Cut_Urblo.jpeg',
             'Tuscany cross cut surface',
         ),
+        honed: productImage(
+            'Tuscany/Tuscany_Cross Cut_Urblo.jpeg',
+            'Tuscany cross cut honed finish',
+        ),
     },
 };
+
+const finishSpecificOnlyVariants = new Set(['blueocean']);
+
+export function requiresFinishSpecificImages(stoneVariantId: string): boolean {
+    return finishSpecificOnlyVariants.has(stoneVariantId);
+}
 
 function baseFinishKey(finishKey: FinishKey): FinishKey {
     return finishKey.split('__')[0] ?? finishKey;
@@ -458,6 +476,10 @@ export function getStoneFinishImageResolution(
     }
     if (groupMap?.[finishBaseKey]) {
         return { asset: groupMap[finishBaseKey], role: 'finish-specific' };
+    }
+
+    if (requiresFinishSpecificImages(stoneVariantId)) {
+        return { role: 'placeholder' };
     }
 
     return {

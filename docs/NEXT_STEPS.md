@@ -10,6 +10,8 @@ Use this file to choose direction. Use `docs/agent/tasks.json` to execute.
 ## Current Objective
 Urblo is operating as a Cloudflare Pages + Supabase site with real forms, but the production `/admin` handoff remains reopened after a direct not-working report and a 2026-07-13 code/UX audit. PR `#9` promoted the page-shaped Projects Phase 1 runtime to production at merge `25c05ebb` / immutable deployment `877d13c4-1e28-45d7-a62a-afdd3b0e0dda`; deployment-bound smoke passed on the immutable URL, apex, and `www`, and production owner login passed all nine Admin routes. Expand A, minimum-disclosure C, and write-lockdown B are applied/read back. The operational edit freeze is lifted, and Jay tested the production result on 2026-08-02 and reported no issue/OK. Projects Phase 1 is user-accepted; the broader Admin handoff and later reshape phases remain open.
 
+The active public-catalog repair branch `codex/fix-mobile-product-stone-integrity` addresses Jay's 2026-09-02 findings before any production promotion: WeChat-tolerant Homepage video playback with a truthful tap recovery, reviewed Product model/render mappings across all six current families, Stone Finish query changes that preserve reading position, a right-side `Cut direction → Finish` rail, Tuscany Honed-only truth for both cuts, and Blueocean Sawn-only imagery with explicit pending states for finishes that have no source photo. Static source and local UI are implemented; clean gate, Cloudflare Preview, Jay acceptance, and approval-gated CMS Draft synchronization remain.
+
 PR `#11` simplifies the Project editor and Dashboard to a single-editor Edit/Save/Preview/Publish/Hide workflow: legacy claim-review columns are normalized automatically and no longer appear as approval controls or Dashboard queues. Its first public-header repair made the translucent header render over the white Projects page, but Jay rejected that visual result. Commit `9d93624` gives Projects listing/detail the same 102px black `DefaultLayout` support band as Stone Library and removes the duplicate page-local offset. After Jay's approval, the PR merged as `59cded9b` and deployed as immutable production `76de2abf-a27b-4ecb-9e1f-fe229af4c8ed`; immutable/apex/`www` smoke, production owner login, desktop/mobile Projects display checks, and Jay's direct production acceptance pass.
 
 The Projects cleanup has removed the raw-database `All 9` mismatch and is live through PR `#14` / merge `edd33465`. The default list/count excludes Archive, uses Projects/Drafts/Live, and shows Archive only when history exists. Three publish-ready canonical drafts are now Live and the four exact Archived QA Projects are permanently deleted; guarded production readback is five canonical Projects, four Live, one Draft, and zero Archived. Moon Gate remains Draft because its Stone Library dependencies and hotspot-material bindings do not yet satisfy the existing publish guard. The new immutable Cloudflare deployment URL remains unrecorded because current access would require a fresh OAuth grant; production asset switch plus authenticated Admin/public readback passed.
@@ -48,6 +50,8 @@ PR `#21` merged as `b1e8b315` and deployed the 12 supplied partner marks into th
 
 ## Active Now
 Only these task IDs should be treated as current executable work:
+
+- `NOW-PUBLIC-CATALOG-INTEGRITY-001`: implement and Preview the Homepage WeChat video, Product model imagery, and Stone detail truth/interaction repairs. Source writes are local only; do not update Supabase Draft rows without Jay's separate approval.
 
 - `NOW-ADMIN-RELIABILITY-UX-001`: P0. Reliability fixes and the first Projects task-workspace redesign are deployed through PR `#3`; Harness hardening is deployed through PR `#5`; the cache repair, deployment binding, and production auth/fallback proof are deployed through PR `#6`; a separate QA Editor is active; production Auth callbacks are corrected/read back; and the Storage migration plus live Editor/owner role boundary have passed. Complete the browser golden workflow before closing the incident.
 - `NOW-ADMIN-SETTINGS-CRUD-001`: Published settings public readback plus a real invite/password/recovery proof. The previous invite callback fell back to localhost; production Site URL and the exact callbacks are now corrected and read back. Custom Auth SMTP ownership and a separately approved complete UI email/password workflow remain open.
@@ -133,15 +137,18 @@ These scripts are intentionally documented so harness GC can check command cover
 - `npm run agent:first-admin-bootstrap`
 - `npm run agent:forms-live`
 - `npm run agent:forms-ui`
+- `npm run agent:homepage-video`
 - `npm run agent:harness-gc`
 - `npm run agent:harness-gc:fix`
 - `npm run agent:harness-gc:review`
 - `npm run agent:init`
 - `npm run agent:live-readiness`
 - `npm run agent:public-content-overlay`
+- `npm run agent:product-model-images`
 - `npm run agent:public-supabase-readiness`
 - `npm run agent:seo-readiness`
 - `npm run agent:smoke`
+- `npm run agent:stone-library-detail`
 - `npm run agent:supabase-foundation-readiness`
 
 ## Last Verified

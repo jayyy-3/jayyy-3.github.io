@@ -363,9 +363,9 @@ export default function ImageStage({
                                             loading="eager"
                                         />
                                     ) : (
-                                        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-black to-[#33363f] px-3 text-center">
-                                            <p className="urblo-meta text-[10px] text-[var(--urblo-lime)]">
-                                                Image soon
+                                        <div className="absolute inset-0 flex items-center justify-center bg-[#242424] px-3 text-center">
+                                            <p className="urblo-meta max-w-32 text-[10px] leading-5 text-white/70">
+                                                Finish image pending
                                             </p>
                                         </div>
                                     )}
@@ -424,7 +424,9 @@ export default function ImageStage({
                         {activeFinish.label}
                         {activeFinish.imageRole === 'finish-specific'
                             ? ''
-                            : ' - confirm sample'}
+                            : activeFinish.imageRole === 'reference'
+                                ? ' - confirm sample'
+                                : ' - image pending'}
                     </span>
                 ) : null}
             </div>

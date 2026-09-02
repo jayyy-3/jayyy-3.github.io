@@ -1662,7 +1662,7 @@
             {
               "finishId": "polished",
               "finishVariantId": null,
-              "capability": "yes",
+              "capability": "no",
               "sources": [
                 "samples",
                 "spec"
@@ -1711,7 +1711,7 @@
             {
               "finishId": "sandblasted",
               "finishVariantId": null,
-              "capability": "yes",
+              "capability": "no",
               "sources": [
                 "samples"
               ]
@@ -1754,7 +1754,7 @@
             {
               "finishId": "polished",
               "finishVariantId": null,
-              "capability": "yes",
+              "capability": "no",
               "sources": [
                 "samples",
                 "spec"
@@ -1803,7 +1803,7 @@
             {
               "finishId": "sandblasted",
               "finishVariantId": null,
-              "capability": "yes",
+              "capability": "no",
               "sources": [
                 "samples"
               ]

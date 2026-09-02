@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, MoveHorizontal } from 'lucide-react';
+import { ChevronLeft, ChevronRight, MoveHorizontal, Play } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Autoplay, Navigation, Pagination } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -37,6 +37,18 @@ const mobileInlineVideoAttributes = {
   'x5-video-player-fullscreen': 'false',
   'x5-video-orientation': 'portrait',
 } as const;
+
+type WeixinJSBridgeLike = {
+  invoke?: (
+    method: string,
+    params: Record<string, never>,
+    callback: () => void,
+  ) => void;
+};
+
+function getWeixinJSBridge() {
+  return (window as Window & { WeixinJSBridge?: WeixinJSBridgeLike }).WeixinJSBridge;
+}
 
 function Reveal({
   children,
@@ -344,72 +356,118 @@ function HeroStatementLine({
 function HeroSection() {
   const reduceMotion = useReducedMotion() ?? false;
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const videoPlaybackActiveRef = useRef(false);
+  const [videoNeedsGesture, setVideoNeedsGesture] = useState(false);
+
+  const primeMobileVideo = useCallback(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    video.muted = true;
+    video.defaultMuted = true;
+    video.playsInline = true;
+    video.autoplay = true;
+    video.setAttribute('muted', '');
+    video.setAttribute('autoplay', '');
+    video.setAttribute('playsinline', '');
+    video.setAttribute('webkit-playsinline', '');
+    video.setAttribute('x5-playsinline', 'true');
+    video.setAttribute('x5-video-player-type', 'h5-page');
+    video.setAttribute('x5-video-player-fullscreen', 'false');
+    video.setAttribute('x5-video-orientation', 'portrait');
+  }, []);
+
+  const attemptVideoPlay = useCallback(() => {
+    const video = videoRef.current;
+    if (!video || !videoPlaybackActiveRef.current) return;
+
+    primeMobileVideo();
+    const playPromise = video.play();
+    if (playPromise) {
+      playPromise.catch(() => {
+        if (videoPlaybackActiveRef.current) {
+          setVideoNeedsGesture(true);
+        }
+      });
+    }
+  }, [primeMobileVideo]);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return undefined;
 
-    let disposed = false;
+    videoPlaybackActiveRef.current = true;
 
-    const primeMobileVideo = () => {
-      video.muted = true;
-      video.defaultMuted = true;
-      video.playsInline = true;
-      video.autoplay = true;
-      video.setAttribute('muted', '');
-      video.setAttribute('autoplay', '');
-      video.setAttribute('playsinline', '');
-      video.setAttribute('webkit-playsinline', '');
-      video.setAttribute('x5-playsinline', 'true');
-      video.setAttribute('x5-video-player-type', 'h5-page');
-      video.setAttribute('x5-video-player-fullscreen', 'false');
-      video.setAttribute('x5-video-orientation', 'portrait');
-    };
+    const requestWeChatBridgePlayback = () => {
+      const bridge = getWeixinJSBridge();
+      if (typeof bridge?.invoke !== 'function') return false;
 
-    const playVideo = () => {
-      if (disposed) return;
-      primeMobileVideo();
-      const playPromise = video.play();
-      if (playPromise) {
-        playPromise.catch(() => {
-          // Some mobile browsers defer background video until the first user gesture.
-        });
+      try {
+        bridge.invoke('getNetworkType', {}, attemptVideoPlay);
+        return true;
+      } catch {
+        attemptVideoPlay();
+        return false;
       }
     };
 
     const playWhenVisible = () => {
       if (document.visibilityState === 'visible') {
-        playVideo();
+        attemptVideoPlay();
       }
     };
 
+    const handleWeixinJSBridgeReady = () => {
+      if (!requestWeChatBridgePlayback()) {
+        attemptVideoPlay();
+      }
+    };
+
+    const handlePlaying = () => setVideoNeedsGesture(false);
+    const handlePause = () => {
+      if (document.visibilityState === 'visible' && video.currentTime > 0 && !video.ended) {
+        setVideoNeedsGesture(true);
+      }
+    };
+
+    const handleVideoError = () => setVideoNeedsGesture(true);
+
     primeMobileVideo();
-    playVideo();
+    attemptVideoPlay();
+    requestWeChatBridgePlayback();
 
-    const retryTimers = [250, 900, 1800].map((delay) => window.setTimeout(playVideo, delay));
+    const retryTimers = [250, 900, 1800].map((delay) =>
+      window.setTimeout(attemptVideoPlay, delay),
+    );
 
-    video.addEventListener('loadeddata', playVideo, { once: true });
-    video.addEventListener('loadedmetadata', playVideo, { once: true });
-    video.addEventListener('canplay', playVideo, { once: true });
-    window.addEventListener('pointerdown', playVideo, { capture: true, passive: true });
-    window.addEventListener('touchstart', playVideo, { capture: true, passive: true });
-    window.addEventListener('pageshow', playVideo);
+    video.addEventListener('loadeddata', attemptVideoPlay, { once: true });
+    video.addEventListener('loadedmetadata', attemptVideoPlay, { once: true });
+    video.addEventListener('canplay', attemptVideoPlay, { once: true });
+    video.addEventListener('playing', handlePlaying);
+    video.addEventListener('pause', handlePause);
+    video.addEventListener('error', handleVideoError);
+    window.addEventListener('pointerdown', attemptVideoPlay, { capture: true, passive: true });
+    window.addEventListener('touchstart', attemptVideoPlay, { capture: true, passive: true });
+    window.addEventListener('pageshow', attemptVideoPlay);
     document.addEventListener('visibilitychange', playWhenVisible);
-    document.addEventListener('WeixinJSBridgeReady', playVideo);
+    document.addEventListener('WeixinJSBridgeReady', handleWeixinJSBridgeReady);
 
     return () => {
-      disposed = true;
+      videoPlaybackActiveRef.current = false;
       retryTimers.forEach((timer) => window.clearTimeout(timer));
-      video.removeEventListener('loadeddata', playVideo);
-      video.removeEventListener('loadedmetadata', playVideo);
-      video.removeEventListener('canplay', playVideo);
-      window.removeEventListener('pointerdown', playVideo, { capture: true });
-      window.removeEventListener('touchstart', playVideo, { capture: true });
-      window.removeEventListener('pageshow', playVideo);
+      video.removeEventListener('loadeddata', attemptVideoPlay);
+      video.removeEventListener('loadedmetadata', attemptVideoPlay);
+      video.removeEventListener('canplay', attemptVideoPlay);
+      video.removeEventListener('playing', handlePlaying);
+      video.removeEventListener('pause', handlePause);
+      video.removeEventListener('error', handleVideoError);
+      window.removeEventListener('pointerdown', attemptVideoPlay, { capture: true });
+      window.removeEventListener('touchstart', attemptVideoPlay, { capture: true });
+      window.removeEventListener('pageshow', attemptVideoPlay);
       document.removeEventListener('visibilitychange', playWhenVisible);
-      document.removeEventListener('WeixinJSBridgeReady', playVideo);
+      document.removeEventListener('WeixinJSBridgeReady', handleWeixinJSBridgeReady);
     };
-  }, []);
+  }, [attemptVideoPlay, primeMobileVideo]);
 
   return (
     <section
@@ -432,6 +490,18 @@ function HeroSection() {
         <source src={homepageData.hero.videoUrl} type="video/mp4" media="(min-width: 768px)" />
       </video>
       <div className="absolute inset-0 bg-black/40" />
+
+      {videoNeedsGesture ? (
+        <button
+          type="button"
+          onClick={attemptVideoPlay}
+          className="absolute left-1/2 top-1/2 z-20 flex -translate-x-1/2 -translate-y-1/2 items-center gap-2 rounded-full border border-white/45 bg-black/50 px-4 py-2 text-[11px] font-medium uppercase tracking-[0.14em] text-white shadow-[0_12px_30px_rgba(0,0,0,0.22)] backdrop-blur-sm transition-colors hover:bg-black/65 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--urblo-lime)] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+          aria-label="Play homepage background video"
+        >
+          <Play aria-hidden="true" className="h-3.5 w-3.5 fill-current" />
+          Play video
+        </button>
+      ) : null}
 
       <div className="urblo-edge-container relative flex min-h-[100svh] items-end pb-[22px] pt-32 md:pb-[30px] lg:pb-[38px]">
         <h1

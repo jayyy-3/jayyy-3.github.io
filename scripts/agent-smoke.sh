@@ -339,5 +339,8 @@ NODE
 node scripts/check-forms-api.mjs
 node scripts/check-contact-form-ui-source.mjs
 node scripts/check-capabilities-page-source.mjs
+node scripts/check-homepage-hero-video.mjs
+node scripts/check-product-model-image-mapping.mjs
+node scripts/check-stone-library-detail-integrity.mjs
 npm run agent:admin-image-qr
 npm run agent:admin-projects-aggregate

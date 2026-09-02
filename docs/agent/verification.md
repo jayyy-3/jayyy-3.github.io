@@ -1,6 +1,6 @@
 # Agent Verification Matrix
 
-Last updated: 2026-08-02
+Last updated: 2026-09-02
 
 ## Purpose
 Use this matrix to choose the smallest verification set that proves a change is safe. Runtime changes still need the full build/lint/typecheck gate unless a task explicitly defines a temporary exception.
@@ -60,6 +60,9 @@ Run:
 - `npm run agent:smoke`
 - `npm run agent:capabilities-ui` when changing `/capabilities`, shared CTA data, Capability Statement assets, or the email-gated PDF download form.
 - `npm run agent:seo-readiness` when changing public SEO metadata, `robots.txt`, `sitemap.xml`, structured data, public route slugs, or the SEO route registry.
+- `npm run agent:homepage-video` when changing the Homepage hero playback code or mobile MP4.
+- `npm run agent:product-model-images` when changing Product model labels, keys, or render mappings.
+- `npm run agent:stone-library-detail` when changing Finish/Variant selection, Stone detail scroll behavior, Tuscany capability truth, or finish-image fallback rules.
 
 Evidence to record:
 - Affected routes.
@@ -75,6 +78,9 @@ Run:
 - `npm run lint`
 - `npx tsc -b`
 - `npm run agent:smoke`
+- `npm run agent:homepage-video`
+- `npm run agent:product-model-images`
+- `npm run agent:stone-library-detail`
 - `npm run agent:check`
 - `git diff --check`
 
