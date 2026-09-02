@@ -17,7 +17,7 @@ Recommended startup order:
 ## Current Production State
 Urblo is now running on Cloudflare Pages with Supabase-backed forms and an Urblo-owned `/admin` CMS.
 
-The 2026-09-02 Homepage Acknowledge repair is approved for production promotion: it replaces the legacy near-opaque `/88` panel with the accepted Homepage Header material (`bg-black/50` plus 4px `backdrop-blur-sm`) and adds a source regression guard. Local desktop/390px production-build QA, the clean Node 20 gate, and immutable Cloudflare Preview smoke pass; Jay reviewed the result and explicitly accepted it with `没问题`. PR `#34` merge and final production-bound smoke remain.
+The 2026-09-02 Homepage Acknowledge repair is live through PR `#34` / merge `e298d06` / immutable Cloudflare deployment `737e702b`. It replaces the legacy near-opaque `/88` panel with the accepted Homepage Header material (`bg-black/50` plus 4px `backdrop-blur-sm`) and adds a source regression guard. Local desktop/390px QA, the clean Node 20 gate, Jay's explicit Preview acceptance, and immutable/apex/`www` deployment-bound smoke all pass.
 
 Capability module `04 / Multi-material assemblies` now uses Jay's supplied factory quality-review photograph through PR `#31` / merge `2e5f9b8` / immutable Cloudflare deployment `bf83bbc2-9c9f-4e1c-8e98-d32f0547c701`. The later `The Urblo advantage` image remains unchanged through a separate asset reference. The immutable deployment, apex, and `www` pass deployment-bound smoke; production desktop/mobile Browser QA confirms one new module image, one retained later image, the intended crop, no horizontal mobile overflow, and no warning/error logs.
 
