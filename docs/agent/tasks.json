@@ -2540,13 +2540,16 @@
         "2026-08-10: Source implementation and local desktop/mobile rendered QA are complete. Image/video-first routes use lighter overlay glass; white-start routes use deeper smoked glass over light clearance; opened menus inherit the route mode with stronger blur. Release evidence is tracked in WORKLOG/HANDOFF and does not require any Supabase write.",
         "2026-08-10: Commit `242d84f` passed the clean Node 20 Docker gate; PR `#18` merged as `93fd143c`. Immutable Preview `b15782a6`, apex, and `www` passed byte/MIME-bound smoke after the normal propagation window. Production desktop and 390px browser readback confirmed both glass modes and the opened mobile menu without horizontal overflow.",
         "2026-08-10: Jay rejected PR `#18`'s 24px Header / 40px menu blur as too frosted. Git history confirmed the original clear-glass material used `backdrop-blur-sm` from March through the shared-header unification, without added saturation. The correction retains the approved route-aware tints/light clearance, restores 4px blur for Header/menu, and adds a smoke guard against medium/heavy blur. PR `#18` technical deployment evidence is not user acceptance.",
-        "2026-08-10: The clear-glass correction passed the clean Node 20 gate, immutable Preview `ac951868` smoke/rendered QA, and merged through PR `#19` as `36e69e5f`. Apex and `www` passed byte/MIME-bound smoke after edge convergence; production desktop/390px readback confirms 4px Header/menu blur, no added saturation, and no horizontal overflow."
+        "2026-08-10: The clear-glass correction passed the clean Node 20 gate, immutable Preview `ac951868` smoke/rendered QA, and merged through PR `#19` as `36e69e5f`. Apex and `www` passed byte/MIME-bound smoke after edge convergence; production desktop/390px readback confirms 4px Header/menu blur, no added saturation, and no horizontal overflow.",
+        "2026-09-02: Follow-up source repair aligns the first-visit Homepage Acknowledge panel with the accepted Homepage Header material (`bg-black/50` plus 4px `backdrop-blur-sm`). The previous `/88` token became a real near-opaque background only after Tailwind's opacity scale was expanded; source smoke now rejects that regression.",
+        "2026-09-02: Local desktop/390px production-build QA, the clean Node 20 gate, and full immutable Cloudflare Preview smoke pass. Jay reviewed the result and explicitly accepted it with `没问题`, authorizing PR `#34` production promotion; final production-bound smoke remains."
       ],
       "acceptance": [
         "Image/video-first openings preserve visible media beneath a lighter frosted header.",
         "Projects, Stone Library, 404, and other white-start routes use readable deeper smoked glass without a solid-black support band.",
         "Opened desktop and mobile menus inherit the route surface, remain translucent, and do not overflow horizontally.",
-        "Public smoke rejects loss of the two surface modes, restoration of a black 102px fallback, or missing compiled opacity utilities."
+        "Public smoke rejects loss of the two surface modes, restoration of a black 102px fallback, or missing compiled opacity utilities.",
+        "The Homepage Acknowledge panel preserves visible hero detail through the same lighter clear-glass material and cannot regress to the legacy `/88` black block."
       ],
       "verification": [
         "npm run build",

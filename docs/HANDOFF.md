@@ -1,6 +1,6 @@
 # HANDOFF - Current Agent State
 
-Last updated: 2026-08-26
+Last updated: 2026-09-02
 
 ## Read First
 Use this file as the short current-state entry. Detailed evidence lives in `docs/WORKLOG.md`; task execution state lives in `docs/agent/tasks.json`; compact machine state lives in `docs/agent/status.json`.
@@ -16,6 +16,8 @@ Recommended startup order:
 
 ## Current Production State
 Urblo is now running on Cloudflare Pages with Supabase-backed forms and an Urblo-owned `/admin` CMS.
+
+The 2026-09-02 Homepage Acknowledge repair is approved for production promotion: it replaces the legacy near-opaque `/88` panel with the accepted Homepage Header material (`bg-black/50` plus 4px `backdrop-blur-sm`) and adds a source regression guard. Local desktop/390px production-build QA, the clean Node 20 gate, and immutable Cloudflare Preview smoke pass; Jay reviewed the result and explicitly accepted it with `没问题`. PR `#34` merge and final production-bound smoke remain.
 
 Capability module `04 / Multi-material assemblies` now uses Jay's supplied factory quality-review photograph through PR `#31` / merge `2e5f9b8` / immutable Cloudflare deployment `bf83bbc2-9c9f-4e1c-8e98-d32f0547c701`. The later `The Urblo advantage` image remains unchanged through a separate asset reference. The immutable deployment, apex, and `www` pass deployment-bound smoke; production desktop/mobile Browser QA confirms one new module image, one retained later image, the intended crop, no horizontal mobile overflow, and no warning/error logs.
 
