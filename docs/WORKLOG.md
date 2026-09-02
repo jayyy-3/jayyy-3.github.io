@@ -12556,7 +12556,8 @@ Last updated: 2026-08-17
 - Source now uses the accepted Homepage Header overlay material: `bg-black/50` with the existing light `backdrop-blur-sm` (4px). Position, copy, timing, close interaction, border, and shadow remain unchanged.
 - Public smoke now requires the clear tint/light blur pair and rejects the legacy `/88` class. `docs/DESIGN.md` records the first-visit panel as part of the Homepage clear-glass family.
 - Local production-build Browser QA passed at 1280×900 and 390×844. In both viewports the panel and Homepage Header compute to `rgba(0, 0, 0, 0.5)` with `blur(4px)`; mobile measures 342px wide with 24px gutters and no horizontal overflow. Close fades and unmounts correctly, and both viewports have no warning/error logs. The temporary 30-second QA timeout was restored to the production 3-second behavior before final gates.
-- Host build, lint, typecheck, smoke, Harness check, and diff check pass. Clean container gate, Cloudflare Preview smoke, and Jay's visual acceptance remain pending. Production is unchanged.
+- Host build, lint, typecheck, smoke, Harness check, diff check, and the clean Node 20 container gate pass. GitHub Actions run `33593905108` deployed exact commit `d30fc07` to immutable Cloudflare Preview `https://943e1bb7.urblo-site.pages.dev`; full route/asset/MIME/redirect/Function/browser-secret smoke passes. The remote first visit mounted the panel and confirmed the expected compiled bundle; local production-build QA remains the durable desktop/mobile computed-style and interaction evidence because the intended three-second timeout closes during remote automation capture.
+- Jay's visual acceptance and a separate production-promotion instruction remain pending. Production is unchanged; no Supabase row, Storage object, Auth user, migration, email, DNS record, or custom-domain configuration changed.
 
 ## 2026-08-26 — Cloudflare ownership migration
 
