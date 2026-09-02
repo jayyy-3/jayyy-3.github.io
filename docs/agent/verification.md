@@ -2,7 +2,7 @@
 
 Last updated: 2026-09-02
 
-Current public catalog candidate: draft PR `#36`, commit `e1bdc3c`, immutable Cloudflare Preview `https://085a75df.urblo-site.pages.dev`. Clean Node 20 gate, Preview smoke, desktop/390px Homepage/Product/Tuscany/BlueOcean checks, canonical 12-card Stone listing, seven distinct BlueOcean finish assets, and `/stone-library/steel-blue` → `/stone-library/blueocean` 301 pass. Jay acceptance and iOS/Android WeChat real-device playback remain external acceptance boundaries; production CMS writes are not approved.
+Current public catalog release: PR `#36`, merge `5731651`, immutable Cloudflare production `https://764dedbc.urblo-site.pages.dev`. Clean Node 20 gate, immutable/apex/`www` deployment-bound smoke, production desktop/390px Homepage/Product/Tuscany/BlueOcean checks, canonical 12-card Stone listing, seven distinct BlueOcean finish assets, and `/stone-library/steel-blue` → `/stone-library/blueocean` 301 pass. Jay accepted Preview and approved runtime promotion. iOS/Android WeChat real-device playback remains an external device check; production CMS writes are not approved.
 
 ## Purpose
 Use this matrix to choose the smallest verification set that proves a change is safe. Runtime changes still need the full build/lint/typecheck gate unless a task explicitly defines a temporary exception.
