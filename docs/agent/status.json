@@ -41,7 +41,7 @@
     "publicCatalogIntegrity": "branch_codex_fix_mobile_product_stone_integrity_local_source_and_browser_checks_passing_full_gate_preview_and_jay_acceptance_pending_no_live_data_write"
   },
   "nextDecisions": [
-    "Run a fresh clean Node 20 gate and Cloudflare branch Preview after the approved Steel Blue → BlueOcean canonical merge, then obtain Jay's rendered acceptance and iOS/Android WeChat real-device result before production promotion or any approval-gated CMS merge/delete.",
+    "Have Jay review draft PR #36 / immutable Preview https://085a75df.urblo-site.pages.dev and confirm iOS/Android WeChat playback; then list and request separate approval for exact production CMS corrections and the Steel Blue/BlueOcean duplicate-row merge-delete before promotion.",
     "After Preview acceptance, request separate approval for the exact imported Product model and Tuscany finish-capability Draft corrections; do not write production Supabase from source approval alone.",
     "Image QR PR #29 merge 19e2b41 is live as deployment d6816c71; 19 active resources, canonical QR redirect, and immutable/apex/www deployment-bound smoke pass. Treat later usability feedback as user-owned rather than reopening deployment proof.",
     "Monitor or purge the four residual apex cache headers when Cloudflare account access is available; their current bytes and MIME types exactly match the immutable repair deployment and are non-blocking.",
