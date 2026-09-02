@@ -254,7 +254,7 @@
       "unit": "pcs"
     },
     {
-      "stoneVariantId": "steel-blue",
+      "stoneVariantId": "blueocean",
       "finishId": "sawn",
       "finishVariantId": null,
       "sizeWidthMm": 100,
@@ -263,7 +263,7 @@
       "unit": "pcs"
     },
     {
-      "stoneVariantId": "steel-blue",
+      "stoneVariantId": "blueocean",
       "finishId": "sawn",
       "finishVariantId": null,
       "sizeWidthMm": 400,
@@ -354,24 +354,6 @@
     },
     {
       "stoneVariantId": "honey-comb",
-      "finishId": "sawn",
-      "finishVariantId": null,
-      "sizeWidthMm": 400,
-      "sizeLengthMm": 600,
-      "qty": 2,
-      "unit": "pcs"
-    },
-    {
-      "stoneVariantId": "blueocean",
-      "finishId": "sawn",
-      "finishVariantId": null,
-      "sizeWidthMm": 100,
-      "sizeLengthMm": 100,
-      "qty": 10,
-      "unit": "pcs"
-    },
-    {
-      "stoneVariantId": "blueocean",
       "finishId": "sawn",
       "finishVariantId": null,
       "sizeWidthMm": 400,
@@ -488,7 +470,7 @@
       "unit": "pcs"
     },
     {
-      "stoneVariantId": "steel-blue",
+      "stoneVariantId": "blueocean",
       "finishId": "honed",
       "finishVariantId": null,
       "sizeWidthMm": 100,
@@ -497,7 +479,7 @@
       "unit": "pcs"
     },
     {
-      "stoneVariantId": "steel-blue",
+      "stoneVariantId": "blueocean",
       "finishId": "honed",
       "finishVariantId": null,
       "sizeWidthMm": 400,
@@ -611,24 +593,6 @@
       "sizeWidthMm": 100,
       "sizeLengthMm": 100,
       "qty": 10,
-      "unit": "pcs"
-    },
-    {
-      "stoneVariantId": "blueocean",
-      "finishId": "honed",
-      "finishVariantId": null,
-      "sizeWidthMm": 100,
-      "sizeLengthMm": 100,
-      "qty": 10,
-      "unit": "pcs"
-    },
-    {
-      "stoneVariantId": "blueocean",
-      "finishId": "honed",
-      "finishVariantId": null,
-      "sizeWidthMm": 400,
-      "sizeLengthMm": 600,
-      "qty": 2,
       "unit": "pcs"
     },
     {
@@ -848,24 +812,6 @@
       "unit": "pcs"
     },
     {
-      "stoneVariantId": "steel-blue",
-      "finishId": "bush_hammered",
-      "finishVariantId": null,
-      "sizeWidthMm": 100,
-      "sizeLengthMm": 100,
-      "qty": 10,
-      "unit": "pcs"
-    },
-    {
-      "stoneVariantId": "steel-blue",
-      "finishId": "bush_hammered",
-      "finishVariantId": null,
-      "sizeWidthMm": 400,
-      "sizeLengthMm": 600,
-      "qty": 2,
-      "unit": "pcs"
-    },
-    {
       "stoneVariantId": "blueocean",
       "finishId": "bush_hammered",
       "finishVariantId": null,
@@ -902,24 +848,6 @@
       "unit": "pcs"
     },
     {
-      "stoneVariantId": "steel-blue",
-      "finishId": "rock_face",
-      "finishVariantId": null,
-      "sizeWidthMm": 100,
-      "sizeLengthMm": 200,
-      "qty": 10,
-      "unit": "pcs"
-    },
-    {
-      "stoneVariantId": "steel-blue",
-      "finishId": "rock_face",
-      "finishVariantId": null,
-      "sizeWidthMm": 400,
-      "sizeLengthMm": 600,
-      "qty": 2,
-      "unit": "pcs"
-    },
-    {
       "stoneVariantId": "blueocean",
       "finishId": "rock_face",
       "finishVariantId": null,
@@ -938,24 +866,6 @@
       "unit": "pcs"
     },
     {
-      "stoneVariantId": "steel-blue",
-      "finishId": "rippling",
-      "finishVariantId": "fine",
-      "sizeWidthMm": 100,
-      "sizeLengthMm": 100,
-      "qty": 10,
-      "unit": "pcs"
-    },
-    {
-      "stoneVariantId": "steel-blue",
-      "finishId": "rippling",
-      "finishVariantId": "fine",
-      "sizeWidthMm": 400,
-      "sizeLengthMm": 600,
-      "qty": 2,
-      "unit": "pcs"
-    },
-    {
       "stoneVariantId": "blueocean",
       "finishId": "rippling",
       "finishVariantId": "fine",
@@ -968,24 +878,6 @@
       "stoneVariantId": "blueocean",
       "finishId": "rippling",
       "finishVariantId": "fine",
-      "sizeWidthMm": 400,
-      "sizeLengthMm": 600,
-      "qty": 2,
-      "unit": "pcs"
-    },
-    {
-      "stoneVariantId": "steel-blue",
-      "finishId": "rippling",
-      "finishVariantId": "rough",
-      "sizeWidthMm": 100,
-      "sizeLengthMm": 100,
-      "qty": 10,
-      "unit": "pcs"
-    },
-    {
-      "stoneVariantId": "steel-blue",
-      "finishId": "rippling",
-      "finishVariantId": "rough",
       "sizeWidthMm": 400,
       "sizeLengthMm": 600,
       "qty": 2,
@@ -1707,116 +1599,6 @@
         "stoneVariantId": "harcourt--similar",
         "finishId": "polished",
         "finishVariantId": null,
-        "sizeWidthMm": 400,
-        "sizeLengthMm": 600,
-        "qty": 2,
-        "unit": "pcs"
-      }
-    ],
-    "steel-blue": [
-      {
-        "stoneVariantId": "steel-blue",
-        "finishId": "sawn",
-        "finishVariantId": null,
-        "sizeWidthMm": 100,
-        "sizeLengthMm": 100,
-        "qty": 10,
-        "unit": "pcs"
-      },
-      {
-        "stoneVariantId": "steel-blue",
-        "finishId": "sawn",
-        "finishVariantId": null,
-        "sizeWidthMm": 400,
-        "sizeLengthMm": 600,
-        "qty": 2,
-        "unit": "pcs"
-      },
-      {
-        "stoneVariantId": "steel-blue",
-        "finishId": "honed",
-        "finishVariantId": null,
-        "sizeWidthMm": 100,
-        "sizeLengthMm": 100,
-        "qty": 10,
-        "unit": "pcs"
-      },
-      {
-        "stoneVariantId": "steel-blue",
-        "finishId": "honed",
-        "finishVariantId": null,
-        "sizeWidthMm": 400,
-        "sizeLengthMm": 600,
-        "qty": 2,
-        "unit": "pcs"
-      },
-      {
-        "stoneVariantId": "steel-blue",
-        "finishId": "bush_hammered",
-        "finishVariantId": null,
-        "sizeWidthMm": 100,
-        "sizeLengthMm": 100,
-        "qty": 10,
-        "unit": "pcs"
-      },
-      {
-        "stoneVariantId": "steel-blue",
-        "finishId": "bush_hammered",
-        "finishVariantId": null,
-        "sizeWidthMm": 400,
-        "sizeLengthMm": 600,
-        "qty": 2,
-        "unit": "pcs"
-      },
-      {
-        "stoneVariantId": "steel-blue",
-        "finishId": "rock_face",
-        "finishVariantId": null,
-        "sizeWidthMm": 100,
-        "sizeLengthMm": 200,
-        "qty": 10,
-        "unit": "pcs"
-      },
-      {
-        "stoneVariantId": "steel-blue",
-        "finishId": "rock_face",
-        "finishVariantId": null,
-        "sizeWidthMm": 400,
-        "sizeLengthMm": 600,
-        "qty": 2,
-        "unit": "pcs"
-      },
-      {
-        "stoneVariantId": "steel-blue",
-        "finishId": "rippling",
-        "finishVariantId": "fine",
-        "sizeWidthMm": 100,
-        "sizeLengthMm": 100,
-        "qty": 10,
-        "unit": "pcs"
-      },
-      {
-        "stoneVariantId": "steel-blue",
-        "finishId": "rippling",
-        "finishVariantId": "fine",
-        "sizeWidthMm": 400,
-        "sizeLengthMm": 600,
-        "qty": 2,
-        "unit": "pcs"
-      },
-      {
-        "stoneVariantId": "steel-blue",
-        "finishId": "rippling",
-        "finishVariantId": "rough",
-        "sizeWidthMm": 100,
-        "sizeLengthMm": 100,
-        "qty": 10,
-        "unit": "pcs"
-      },
-      {
-        "stoneVariantId": "steel-blue",
-        "finishId": "rippling",
-        "finishVariantId": "rough",
         "sizeWidthMm": 400,
         "sizeLengthMm": 600,
         "qty": 2,

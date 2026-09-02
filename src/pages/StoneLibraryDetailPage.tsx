@@ -30,7 +30,7 @@ export default function StoneLibraryDetailPage() {
   useEffect(() => {
     let isCurrent = true;
     setStatus('loading');
-    setDetail(null);
+    setDetail((current) => current?.stoneGroupId === stoneGroupId ? current : null);
 
     StoneLibraryService.getPublishedStoneDetail(stoneGroupId, selectedVariantId || undefined)
       .then((publishedDetail) => {
@@ -53,7 +53,7 @@ export default function StoneLibraryDetailPage() {
     };
   }, [stoneGroupId, selectedVariantId]);
 
-  if (status === 'loading') {
+  if (status === 'loading' && !detail) {
     return (
       <RouteState
         eyebrow="Loading"
@@ -85,9 +85,14 @@ export default function StoneLibraryDetailPage() {
 
   const effectiveFinishKey = lockedFinishKey || detail.defaultFinishKey;
   const activeFinish = detail.finishes.find((finish) => finish.finishKey === effectiveFinishKey) || detail.finishes[0];
+  const isRefreshingVariant = status === 'loading';
+  const variantLabel = detail.variants.every((variant) => variant.variantType === 'cut_orientation')
+    ? 'Cut direction'
+    : 'Variant';
   const mailSubject = encodeURIComponent('Stone Enquiry: ' + detail.name);
 
   function handleVariantChange(variantId: string) {
+    setStatus('loading');
     setSelectedVariantId(variantId);
     setLockedFinishKey(null);
     setSearchParams({ variant: variantId }, { replace: true });
@@ -153,12 +158,6 @@ export default function StoneLibraryDetailPage() {
       <main className="bg-[rgba(239,239,239,0.26)] pb-14">
         <section className="py-9 md:py-11">
           <div className="urblo-page-container space-y-8">
-            <VariantSwitch
-              variants={detail.variants}
-              activeVariantId={detail.activeVariantId}
-              onChange={handleVariantChange}
-            />
-
             <div className="grid min-w-0 gap-5 lg:grid-cols-[minmax(0,1.58fr)_minmax(310px,0.92fr)] lg:items-start">
               <ImageStage
                 stoneName={detail.name}
@@ -169,11 +168,31 @@ export default function StoneLibraryDetailPage() {
                 onOpenLightbox={handleOpenLightbox}
               />
 
-              <FinishAccordion
-                finishes={detail.finishes}
-                activeFinishKey={activeFinish?.finishKey || null}
-                onSelect={handleFinishSelect}
-              />
+              <section
+                aria-label="Stone selection"
+                aria-busy={isRefreshingVariant}
+                className="min-w-0 space-y-5"
+              >
+                <VariantSwitch
+                  variants={detail.variants}
+                  activeVariantId={selectedVariantId || detail.activeVariantId}
+                  label={variantLabel}
+                  disabled={isRefreshingVariant}
+                  onChange={handleVariantChange}
+                />
+
+                <FinishAccordion
+                  finishes={detail.finishes}
+                  activeFinishKey={activeFinish?.finishKey || null}
+                  onSelect={handleFinishSelect}
+                />
+
+                {isRefreshingVariant ? (
+                  <p className="urblo-meta text-[10px] text-black/55" role="status">
+                    Updating cut and finish options
+                  </p>
+                ) : null}
+              </section>
             </div>
 
             <SpecsPanel

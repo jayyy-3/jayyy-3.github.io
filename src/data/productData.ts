@@ -56,10 +56,10 @@ export const products: Product[] = [
         shortDesc: 'Crafted for modern landscapes, this modular series seamlessly integrates natural stone and timber, offering versatile configurations from minimalist benches to ergonomic seating. The signature tapered profile and recessed base channel (LED-ready) blend functionality with sleek design, while embedded wood elements add warmth to urban rigidity. Whether illuminating pathways or framing plazas, TerraLine adapts to any space with tailored elegance.',
         models: [
             {key: 'core', label: 'Core', img: '/products/terraLine/core.png'},
-            {key: 'timberRise', label: 'Timber Rise', img: '/products/terraLine/timberRise.png'},
-            {key: 'timberFlush', label: 'Timber Flush', img: '/products/terraLine/timberFlush.png'},
-            {key: 'timberRiseP', label: 'Timber Rise +', img: '/products/terraLine/timberRiseP.png'},
-            {key: 'timberFlushP', label: 'Timber Flush +', img: '/products/terraLine/timberFlushP.png'},
+            {key: 'timberRise', label: 'Timber Rise', img: '/products/terraLine/timberFlush.png'},
+            {key: 'timberFlush', label: 'Timber Flush', img: '/products/terraLine/timberFlushP.png'},
+            {key: 'timberRiseP', label: 'Timber Rise +', img: '/products/terraLine/timberRise.png'},
+            {key: 'timberFlushP', label: 'Timber Flush +', img: '/products/terraLine/timberRiseP.png'},
         ],
         defaultMaterials: {
             body: 'new-grey',
@@ -104,8 +104,8 @@ export const products: Product[] = [
         models: [
             {key: 'core', label: 'Core', img: '/products/primeCurve/core.png'},
             {key: 'timberRise', label: 'Timber Rise', img: '/products/primeCurve/timberRise.png'},
-            {key: 'timberFlush', label: 'Timber Flush', img: '/products/primeCurve/timberFlush.png'},
-            {key: 'timberRiseP', label: 'Timber Rise +', img: '/products/primeCurve/timberRiseP.png'},
+            {key: 'timberFlush', label: 'Timber Flush', img: '/products/primeCurve/timberRiseP.png'},
+            {key: 'timberRiseP', label: 'Timber Rise +', img: '/products/primeCurve/timberFlush.png'},
             {key: 'timberFlushP', label: 'Timber Flush +', img: '/products/primeCurve/timberFlushP.png'},
         ],
         defaultMaterials: {
@@ -127,10 +127,10 @@ export const products: Product[] = [
         shortDesc: 'Fluid curves meet TerraLine’s iconic taper and grooves. Precision-carved stone arcs with LED-ready channels, paired with sweeping timber accents for ergonomic comfort. Adapts seamlessly from sculptural park seats to waterfront rings—durable, dynamic, and designed to connect.',
         models: [
             {key: 'core', label: 'Core', img: '/products/terraArc/core.png'},
-            {key: 'timberRise', label: 'Timber Rise', img: '/products/terraArc/timberRise.png'},
-            {key: 'timberFlush', label: 'Timber Flush', img: '/products/terraArc/timberFlush.png'},
-            {key: 'timberRiseP', label: 'Timber Rise +', img: '/products/terraArc/timberRiseP.png'},
-            {key: 'timberFlushP', label: 'Timber Flush +', img: '/products/terraArc/timberFlushP.png'},
+            {key: 'timberRise', label: 'Timber Rise', img: '/products/terraArc/timberFlush.png'},
+            {key: 'timberFlush', label: 'Timber Flush', img: '/products/terraArc/timberRise.png'},
+            {key: 'timberRiseP', label: 'Timber Rise +', img: '/products/terraArc/timberFlushP.png'},
+            {key: 'timberFlushP', label: 'Timber Flush +', img: '/products/terraArc/timberRiseP.png'},
         ],
         defaultMaterials: {
             body: 'new-grey',

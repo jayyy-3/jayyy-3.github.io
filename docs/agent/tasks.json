@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lastUpdated": "2026-08-12",
+  "lastUpdated": "2026-09-02",
   "sourceOfTruth": "Machine-readable task queue for active and upcoming agent work. Human-readable roadmap lives in docs/NEXT_STEPS.md.",
   "tasks": [
     {
@@ -2639,6 +2639,72 @@
         "npm run gate before push",
         "npm run agent:cloudflare-preview-smoke -- --base-url https://<branch-preview>.urblo.pages.dev",
         "Browser: desktop and 390px count, first/last navigation, rail start, one-viewport height, console health, and horizontal overflow",
+        "git diff --check"
+      ]
+    },
+    {
+      "id": "NOW-PUBLIC-CATALOG-INTEGRITY-001",
+      "status": "now",
+      "priority": 1,
+      "summary": "Repair Homepage mobile WeChat video playback, Product model render mappings, and Stone detail/canonical-record integrity.",
+      "files": [
+        "public/media/launch/home/urblo-hero-mobile.mp4",
+        "src/components/homepage/HomepageSections.tsx",
+        "src/data/productData.ts",
+        "src/App.tsx",
+        "src/pages/StoneLibraryDetailPage.tsx",
+        "src/components/stone-library/VariantSwitch.tsx",
+        "src/components/stone-library/ImageStage.tsx",
+        "src/data/stoneFinishImages.ts",
+        "src/service/StoneLibraryService.ts",
+        "data/clean/stone_finish_capabilities.csv",
+        "data/clean/stone_groups.csv",
+        "data/clean/stone_library.json",
+        "data/clean/stone_variants.csv",
+        "data/clean/sample_items.csv",
+        "data/clean/sample_catalog.json",
+        "public/_redirects",
+        "public/sitemap.xml",
+        "scripts/check-homepage-hero-video.mjs",
+        "scripts/check-product-model-image-mapping.mjs",
+        "scripts/check-stone-library-detail-integrity.mjs",
+        "docs/DESIGN.md",
+        "docs/ARCHITECTURE.md",
+        "docs/NEXT_STEPS.md",
+        "docs/HANDOFF.md",
+        "docs/WORKLOG.md",
+        "docs/agent/status.json",
+        "docs/agent/tasks.json",
+        "docs/agent/verification.md"
+      ],
+      "notes": [
+        "2026-09-02: Read-only audit identified a mobile MP4 profile regression plus silent play rejection, three Product families with reviewed render-path mismatches, query-only Stone selection triggering global top restoration, Tuscany finish claims beyond the available imagery, and one Blueocean Sawn default repeated across eight finishes.",
+        "2026-09-02: Local implementation and focused source/render checks pass without any Supabase, Storage, Cloudflare, Auth, email, or production write. Imported Product/Tuscany Draft synchronization remains a separate approval-gated action.",
+        "2026-09-02: Jay confirmed Steel Blue and BlueOcean are one material. Local source now retains the canonical blueocean key with the former Steel Blue data/images, removes the duplicate steel-blue record and obsolete fallback, and preserves old inbound links through a 301 redirect. Matching production CMS merge/delete work remains approval-gated.",
+        "2026-09-02: Commit e1bdc3c passes the clean Node 20 container gate; draft PR #36 deployed immutable Preview https://085a75df.urblo-site.pages.dev. Full deployed smoke, desktop/390px Browser checks, one-BlueOcean/zero-Steel-Blue listing readback, seven distinct BlueOcean finish assets, and the retired-route 301 pass. Jay and real-device WeChat acceptance remain open.",
+        "Jay acceptance belongs to the deployed Preview and cannot be self-certified by the agent. iOS and Android WeChat remain real-device acceptance surfaces even when local Chromium and source/codec checks pass."
+      ],
+      "acceptance": [
+        "Homepage mobile video uses the locked WeChat-tolerant encoding and plays automatically when policy allows; rejection exposes one accessible tap recovery that disappears after playback starts.",
+        "Every current Product option shows the reviewed Core/Rise/Flush/backrest geometry, with an automated contract preventing path remapping regressions.",
+        "Finish and Variant query changes preserve page reading position; Tuscany places Cut direction beside Finish and exposes only Honed for both cuts.",
+        "BlueOcean is one canonical record using the former Steel Blue specifications and complete finish photography; no duplicate Steel Blue record or obsolete BlueOcean fallback remains, and the retired route redirects.",
+        "Clean container gate and Cloudflare Preview smoke pass, and Jay accepts the rendered Preview before production promotion.",
+        "Any matching production CMS Draft correction, merge, or deletion is listed exactly and receives separate approval before write."
+      ],
+      "verification": [
+        "npm run agent:homepage-video",
+        "npm run agent:product-model-images",
+        "npm run agent:stone-library-detail",
+        "npm run build",
+        "npm run lint",
+        "npx tsc -b",
+        "npm run agent:smoke",
+        "npm run agent:check",
+        "npm run gate before push",
+        "npm run agent:cloudflare-preview-smoke -- --base-url https://<branch-preview>.urblo-site.pages.dev",
+        "Browser: desktop and 390px Homepage/Products/Tuscany/Blueocean interaction, console health, and horizontal overflow",
+        "iOS WeChat and Android WeChat real-device playback acceptance",
         "git diff --check"
       ]
     },

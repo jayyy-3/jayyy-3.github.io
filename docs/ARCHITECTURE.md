@@ -301,7 +301,7 @@ Route state contract:
 - `src/App.tsx` updates route-level title, description, robots, canonical, Open Graph, Twitter metadata, and client-side JSON-LD through a small native document-head updater driven by `src/data/seoRoutes.ts`. Resolved Published CMS detail pages then let `src/components/PublicContentSeo.tsx` replace that route-level JSON-LD with entity-specific Article or WebPage data plus Organization, WebSite, and BreadcrumbList data derived from the validated runtime record.
 - Current Phase 1 SEO indexability foundation:
   - `public/robots.txt` is a real static crawler file, allows the public site, disallows `/admin` and `/api`, and points to `https://urblo.com.au/sitemap.xml`.
-  - `public/sitemap.xml` is a real static XML sitemap with 36 approved public canonical URLs covering Home, core public listing pages, 5 Projects, 13 Stone Library groups, 6 Products, and 4 Articles.
+  - `public/sitemap.xml` is a real static XML sitemap with 35 approved public canonical URLs covering Home, core public listing pages, 5 Projects, 12 canonical Stone Library groups, 6 Products, and 4 Articles. The retired `/stone-library/steel-blue` duplicate redirects to canonical BlueOcean and is excluded.
   - Client-side JSON-LD is intentionally conservative: Organization, WebSite, BreadcrumbList, Article, and generic WebPage only. Product/Service schema remains deferred until pricing, availability, and claim scope can be represented safely.
   - `npm run agent:seo-readiness` verifies the source-side SEO contract: robots/sitemap are static files rather than SPA fallback HTML, sitemap URLs match current public data, admin/API/private paths are excluded, `src/App.tsx` is wired to the SEO registry, and detail routes do not regress to the old generic title source.
 - Important limitation: because the current public app is still a Vite React SPA, the first network response for route deep links is still the shared app shell. Phase 1 improves discoverability, canonical URL declaration after hydration, route metadata consistency, sitemap submission readiness, and structured data after JavaScript executes. CMS-only sitemap/route discovery and any server-rendered or pre-rendered detail HTML decision are tracked under `NEXT-SEO-CONTENT-GROWTH-001`, after the Phase 2 redirect cleanup.
@@ -325,12 +325,12 @@ Route state contract:
 - Shared site logo path: `public/media/launch/identity/urblo-logo.png`, referenced by `src/data/siteChrome.ts` and `src/data/homepage.ts`.
 - Homepage hero poster path: `public/media/launch/home/hero-poster.jpg`.
 - Homepage hero video path: `public/media/launch/home/urblo-hero.mp4`.
-- Homepage mobile hero video path: `public/media/launch/home/urblo-hero-mobile.mp4`; the mobile MP4 is encoded as H.264, 540x960, 30fps, no-audio, fast-start media for better mobile/WeChat/X5 compatibility.
+- Homepage mobile hero video path: `public/media/launch/home/urblo-hero-mobile.mp4`; the mobile MP4 is encoded as H.264 Constrained Baseline level 3.1, yuv420p, 540x960, 30fps, no-audio, fast-start media for better mobile/WeChat/X5 compatibility.
 - Current homepage video asset is a web-ready H.264 1280x720, 30fps, no-audio, fast-start export from the client-provided `Lark20260611-213730.mp4`; the 74MB source file was not committed.
 - Homepage hero uses `100svh` so the first viewport reads as a full-screen hero across desktop and mobile.
-- Homepage hero preloads the poster from `index.html`, uses the poster as the section background fallback, uses the 540x960 mobile MP4 for `media="(max-width: 767px)"`, and uses `preload="auto"` for the desktop/tablet MP4 constrained through `media="(min-width: 768px)"`. The hero video element keeps `playsinline`, `webkit-playsinline`, and Tencent X5 inline playback attributes, and retries playback on media readiness, user gesture, page visibility, page show, and `WeixinJSBridgeReady`.
+- Homepage hero preloads the poster from `index.html`, uses the poster as the section background fallback, uses the 540x960 mobile MP4 for `media="(max-width: 767px)"`, and uses `preload="auto"` for the desktop/tablet MP4 constrained through `media="(min-width: 768px)"`. The hero keeps inline/X5 attributes, handles both an already-present Weixin bridge and the later `WeixinJSBridgeReady` event, retries on lifecycle/media readiness, and turns a rejected play promise into an explicit user-gesture recovery control that disappears after `playing`.
 - Homepage below-the-fold heavy media, including the partner banner, Product Showcase background, Latest Projects imagery, Manifesto background, and Video CTA image, must stay deferred until the relevant section is near the viewport so those assets do not compete with first-viewport video loading.
-- The current desktop MP4 is about 4.6MB and the current mobile MP4 is about 2.3MB. Cloudflare Stream/R2 remains optional if the client later wants adaptive delivery, analytics, or non-repo video management.
+- The current desktop MP4 is about 4.6MB and the current mobile MP4 is about 2.91MB. `npm run agent:homepage-video` locks the mobile codec profile, constraint flags, level, pixel format assumptions, dimensions, frame rate, no-audio, fast-start atom order, source recovery path, and a 4MB delivery ceiling. Cloudflare Stream/R2 remains optional if the client later wants adaptive delivery, analytics, or non-repo video management.
 - Route banners are local launch media referenced from `src/App.tsx` through the `ROUTE_BANNERS` map. `/capabilities` now owns a full-bleed page hero sourced from the 2026 Capability Statement PDF instead of using a shared route banner.
 - Capability Statement PDF download path: `public/downloads/urblo-capability-statement-2026.pdf`.
 - Capability Statement web imagery path: `public/media/launch/capabilities`; these assets must be visually audited for orientation and crop quality before use.
@@ -343,7 +343,7 @@ Route state contract:
 - Legacy project listing/detail media now uses controlled files under `public/media/launch/projects`.
 - Stone Library primary and secondary finish imagery is mapped from `data/Product` through `src/data/stoneFinishImages.ts`; controlled fallback media lives under `public/media/launch/stone-library/fallbacks`.
 - Stone Library finish imagery carries `FinishVM.imageRole` as `finish-specific`, `reference`, or `placeholder`; the UI must disclose reference/placeholder imagery instead of implying a fallback is finish-specific.
-- Stone Library current image status: Alpine White, Angola Black, Golden Crust Light/Dark, Honey Comb, Ivory Sand, Juparana, New Grey, Steel Blue, Tan Brown, and Zen Grey have finish-specific images. Tuscany Vein Cut and Cross Cut use variant-level shared-drive images as defaults rather than pretending to have finish-specific honed/polished/sandblasted photos. Blueocean still uses the controlled local fallback, and Harcourt still uses TBC placeholders because no matching current-site shared-drive sources were found.
+- Stone Library current image status: Alpine White, Angola Black, BlueOcean, Golden Crust Light/Dark, Honey Comb, Ivory Sand, Juparana, New Grey, Tan Brown, and Zen Grey have finish-specific images. BlueOcean is the canonical `blueocean` record and retains the former Steel Blue specifications, sample options, and complete finish-image set; the duplicate old BlueOcean data and `steel-blue` record are retired, with the old public route redirected to BlueOcean. Tuscany Vein Cut and Cross Cut each expose only Honed and map that cut's approved image explicitly. Harcourt still uses TBC placeholders because no matching current-site shared-drive sources were found.
 - Article cover and inline cleanup media now uses controlled files under `public/media/launch/articles`.
 - Article email-export HTML is still stored as source material under `public/articles`, but `src/lib/articleMedia.ts` rewrites known Squarespace/Front/Google proxy images to local launch media and removes email campaign tracking links before DOMPurify sanitization.
 - Article claim-safety and mobile stopgap: `src/lib/articleMedia.ts` rewrites known high-risk newsletter phrases at runtime, unwraps dead links, and `src/index.css` constrains legacy newsletter tables/media to reduce mobile overflow until structured article blocks replace the raw newsletter HTML.
@@ -357,6 +357,7 @@ Route state contract:
   - Effective active finish resolves by precedence: `lockedFinishKey` -> `defaultFinishKey`.
   - Each finish selection click increments a center-request token used by left media for one-shot visibility-check scroll handling.
   - Variant changes reset locked finish state and close lightbox state.
+  - Global route scroll restoration reacts to pathname changes, not query-only Finish/Variant state changes. Variant refresh retains the current detail until replacement data resolves so layout collapse cannot pull the reader to the top.
 - Left media contract (`src/components/stone-library/ImageStage.tsx`):
   - Desktop/mobile: click (or keyboard activation) selects finish; hover/focus does not mutate active finish.
   - Width/layout computation and scroll decision are decoupled into separate single-pass flows to avoid race conditions.
@@ -370,6 +371,7 @@ Route state contract:
   - Clicking a secondary frame opens the lightbox on that frame while preserving the active finish key.
   - Missing secondary frames are omitted entirely and must not introduce placeholder thumbnails.
 - Right finish selector contract (`src/components/stone-library/FinishAccordion.tsx`):
+  - Variant-bearing stones place `VariantSwitch` in the same right-side selection rail before Finish; cut-orientation variants are labelled `Cut direction`.
   - Click (or keyboard activation on focused button) is the only state-changing selection action.
   - Selection updates active finish and triggers the left-stage visibility-check scroll policy.
   - Active finishes with secondary frames disclose the primary-plus-secondary frame count in the behavior panel.
@@ -417,6 +419,7 @@ Route state contract:
   - `ProductDetailPage` body-stone selector options come from `StoneLibraryService.getStoneGroupOptionsForProducts()` so product configuration uses stone-group choices rather than variant-level entries.
   - Product detail pages initialize configured default material selections, show selected model/material feedback, expose a prefilled configuration enquiry `mailto:`, and mark missing selector imagery as pending.
   - Product render imagery is treated as a geometry preview; selected body stone, frame finish, and battens are shown as separate material previews instead of pretending the render is composited live.
+  - Product model geometry is keyed semantically: Rise is proud of the stone, Flush is inset/level, and `+` adds a backrest. `npm run agent:product-model-images` locks every current product key, label, reviewed asset path, asset existence, and per-product image uniqueness; filenames alone are not treated as semantic truth.
 
 ### Project Data Contract
 - Static migration fallback: `src/data/projectData.ts`

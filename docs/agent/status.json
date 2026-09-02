@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lastUpdated": "2026-08-26",
+  "lastUpdated": "2026-09-02",
   "sourceOfTruth": {
     "currentState": "docs/HANDOFF.md",
     "taskQueue": "docs/agent/tasks.json",
@@ -37,9 +37,12 @@
     "runtimeGates": "2026_08_17_homepage_all_15_published_projects_pr26_merge_f3fe5647_rail_reset_pr27_merge_ccab9c12_production_deployment_b85d8718_immutable_apex_www_smoke_desktop_mobile_return_path_and_jay_acceptance_passing",
     "liveSecretsPresent": true,
     "liveReadiness": "browser_key_owner_and_distinct_editor_credentials_present_media_migration_applied_live_role_boundary_passed",
-    "adminUxReshape": "phase0_closed_projects_phase1_and_pr11_single_editor_followup_live_and_jay_accepted_image_qr_merge_19e2b41_live_with_19_active_resources_and_direct_qr_readback_phase2_articles_and_sunset_pending"
+    "adminUxReshape": "phase0_closed_projects_phase1_and_pr11_single_editor_followup_live_and_jay_accepted_image_qr_merge_19e2b41_live_with_19_active_resources_and_direct_qr_readback_phase2_articles_and_sunset_pending",
+    "publicCatalogIntegrity": "branch_codex_fix_mobile_product_stone_integrity_local_source_and_browser_checks_passing_full_gate_preview_and_jay_acceptance_pending_no_live_data_write"
   },
   "nextDecisions": [
+    "Have Jay review draft PR #36 / immutable Preview https://085a75df.urblo-site.pages.dev and confirm iOS/Android WeChat playback; then list and request separate approval for exact production CMS corrections and the Steel Blue/BlueOcean duplicate-row merge-delete before promotion.",
+    "After Preview acceptance, request separate approval for the exact imported Product model and Tuscany finish-capability Draft corrections; do not write production Supabase from source approval alone.",
     "Image QR PR #29 merge 19e2b41 is live as deployment d6816c71; 19 active resources, canonical QR redirect, and immutable/apex/www deployment-bound smoke pass. Treat later usability feedback as user-owned rather than reopening deployment proof.",
     "Monitor or purge the four residual apex cache headers when Cloudflare account access is available; their current bytes and MIME types exactly match the immutable repair deployment and are non-blocking.",
     "Ask Jay to fool-test the production Project material-point workflow; migration 20260812062636 and runtime merge 0593389d / deployment b160e33f are live, deployment-bound smoke and nine authenticated Admin routes pass, and agent checks cannot self-certify acceptance.",
@@ -54,6 +57,7 @@
     "Choose a generated sitemap/release-manifest, dynamic sitemap, or pre-render strategy so CMS-only published slugs enter the crawlable route inventory and first-response metadata."
   ],
   "activeExecutableTasks": [
+    "NOW-PUBLIC-CATALOG-INTEGRITY-001",
     "NOW-ADMIN-RELIABILITY-UX-001",
     "NOW-ADMIN-SETTINGS-CRUD-001",
     "NOW-ADMIN-UX-RESHAPE-001"
@@ -62,7 +66,7 @@
     "NOW-ADMIN-CMS-001"
   ],
   "harnessGc": {
-    "maxNowTasks": 3,
+    "maxNowTasks": 4,
     "agentsMdTargetLines": 180,
     "handoffTargetLines": 220,
     "worklogReviewWarningLines": 8000

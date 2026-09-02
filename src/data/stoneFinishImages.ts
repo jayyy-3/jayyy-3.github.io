@@ -193,38 +193,38 @@ const stoneFinishImages: Record<string, VariantImageMap> = {
             'Angola Black polished finish',
         ),
     },
-    'steel-blue': {
+    blueocean: {
         default: productImage(
             'Steel Blue/Steel Blue_Sawn_Urblo.jpeg',
-            'Steel Blue sawn finish',
+            'BlueOcean sawn finish',
         ),
         sawn: productImage(
             'Steel Blue/Steel Blue_Sawn_Urblo.jpeg',
-            'Steel Blue sawn finish',
+            'BlueOcean sawn finish',
         ),
         honed: productImage(
             'Steel Blue/Steel Blue_Honed_Urblo.jpeg',
-            'Steel Blue honed finish',
+            'BlueOcean honed finish',
         ),
         bush_hammered: productImage(
             'Steel Blue/Steel Blue_Bush-hammered_Urblo.jpeg',
-            'Steel Blue bush hammered finish',
+            'BlueOcean bush hammered finish',
         ),
         combed: productImage(
             'Steel Blue/Steel Blue_Antline_Urblo.jpeg',
-            'Steel Blue combed finish',
+            'BlueOcean combed finish',
         ),
         rock_face: productImage(
             'Steel Blue/Steel Blue_Rock Face_Urblo.jpeg',
-            'Steel Blue rock face finish',
+            'BlueOcean rock face finish',
         ),
         rippling__fine: productImage(
             'Steel Blue/Steel Blue_Rippling Fine_Urblo.jpeg',
-            'Steel Blue rippling fine finish',
+            'BlueOcean rippling fine finish',
         ),
         rippling__rough: productImage(
             'Steel Blue/Steel Blue_Rippling Rough_Urblo.jpeg',
-            'Steel Blue rippling rough finish',
+            'BlueOcean rippling rough finish',
         ),
     },
     juparana: {
@@ -301,12 +301,6 @@ const stoneFinishImages: Record<string, VariantImageMap> = {
             'Ivory Sand/Ivory Sand_Sparrow_Urblo.jpeg',
             'Ivory Sand sparrow peck finish',
         ),
-    },
-    'blueocean': {
-        default: {
-            imageUrl: '/media/launch/stone-library/fallbacks/blueocean-sawn.jpg',
-            alt: 'Blueocean stone surface',
-        },
     },
     'honey-comb': {
         default: productImage(
@@ -399,14 +393,28 @@ const stoneFinishImages: Record<string, VariantImageMap> = {
             'Tuscany/Tuscany_Vein Cut_Urblo.jpeg',
             'Tuscany vein cut surface',
         ),
+        honed: productImage(
+            'Tuscany/Tuscany_Vein Cut_Urblo.jpeg',
+            'Tuscany vein cut honed finish',
+        ),
     },
     'tuscany--cross-cut': {
         default: productImage(
             'Tuscany/Tuscany_Cross Cut_Urblo.jpeg',
             'Tuscany cross cut surface',
         ),
+        honed: productImage(
+            'Tuscany/Tuscany_Cross Cut_Urblo.jpeg',
+            'Tuscany cross cut honed finish',
+        ),
     },
 };
+
+const finishSpecificOnlyVariants = new Set<string>();
+
+export function requiresFinishSpecificImages(stoneVariantId: string): boolean {
+    return finishSpecificOnlyVariants.has(stoneVariantId);
+}
 
 function baseFinishKey(finishKey: FinishKey): FinishKey {
     return finishKey.split('__')[0] ?? finishKey;
@@ -458,6 +466,10 @@ export function getStoneFinishImageResolution(
     }
     if (groupMap?.[finishBaseKey]) {
         return { asset: groupMap[finishBaseKey], role: 'finish-specific' };
+    }
+
+    if (requiresFinishSpecificImages(stoneVariantId)) {
+        return { role: 'placeholder' };
     }
 
     return {
