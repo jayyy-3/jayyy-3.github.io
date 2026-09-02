@@ -57,7 +57,7 @@ Forms:
 
 SEO:
 - Phase 1 SEO indexability source is implemented: `public/robots.txt`, `public/sitemap.xml`, `src/data/seoRoutes.ts`, conservative client-side JSON-LD, and `npm run agent:seo-readiness`.
-- The sitemap currently covers 36 approved public canonical URLs: Home, public listing pages, 5 Projects, 13 Stone Library groups, 6 Products, and 4 Articles. `/admin` and `/api` are intentionally excluded.
+- The sitemap currently covers 35 approved public canonical URLs: Home, public listing pages, 5 Projects, 12 canonical Stone Library groups, 6 Products, and 4 Articles. `/admin`, `/api`, and the retired duplicate Steel Blue route are intentionally excluded.
 - Production readback after commit `4952e93` confirmed `https://urblo.com.au/robots.txt` returns static robots text and `https://urblo.com.au/sitemap.xml` returns static XML with 36 `<loc>` entries.
 - Google Search Console review on 2026-06-12 showed stale sitemap reads and mostly legacy WordPress/old-site URLs in indexing issues. Phase 2 SEO is documented in `docs/SEO_PHASE_2_PLAN.md`: refresh the sitemap, map valuable old URLs, add selective 301 redirects, then improve non-brand long-tail content.
 - `https://urblo.com.au/sitemap.xml` was submitted/refreshed in GSC on 2026-06-12. GSC showed the submitted date as 12 Jun 2026 and confirmed submission, but `Last read` still showed 3 Aug 2023 immediately after submission; monitor for Google's next processing pass.
@@ -93,7 +93,7 @@ Admin CMS:
 ## Active Executable Tasks
 Only the following tasks should currently be treated as `now` execution work:
 
-- `NOW-PUBLIC-CATALOG-INTEGRITY-001`: local implementation is assembled; run full gates, publish a branch Preview, complete desktop/390px rendered checks, obtain Jay acceptance, then request separate approval for exact CMS Draft corrections if required.
+- `NOW-PUBLIC-CATALOG-INTEGRITY-001`: the first branch Preview passed CI before Jay clarified that Steel Blue and BlueOcean are one material. Local source now keeps one canonical BlueOcean using the former Steel Blue data and images; rerun the clean gate, publish the replacement Preview, complete desktop/390px rendered checks, obtain Jay acceptance, then request separate approval for exact CMS Draft corrections and the duplicate-row merge/delete.
 
 - `NOW-ADMIN-RELIABILITY-UX-001`: P0 admin incident. The repaired build, MIME-aware asset verifier, immutable-reference binding, production auth/fallback checks, Auth URL correction/readback, Media migration/readback, and live role proof are complete, and a separate QA Editor is active. The task remains open for the editor golden workflows; do not mark it done from deployment, account existence, route-shell checks, or source checks alone.
 - `NOW-ADMIN-SETTINGS-CRUD-001`: Published settings public-consumer proof plus a real Settings invite/recovery proof. Exact production redirects are now configured and read back; custom Auth SMTP ownership and the approved end-to-end email/password workflows remain open.

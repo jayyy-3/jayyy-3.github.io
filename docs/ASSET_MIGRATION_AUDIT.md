@@ -78,9 +78,9 @@ Current runtime coverage across available/TBC Stone Library finish states:
 | Controlled default/fallback image | 14 | A local fallback or variant-level image exists for the stone/variant, but not for each individual finish. |
 | True missing image placeholder | 10 | No approved source image is committed/mapped in the repo yet, so the UI must not pretend to show a real stone finish. |
 
-Finish-specific coverage currently includes Alpine White, Angola Black, Golden Crust Light and Dark, Honey Comb, Ivory Sand, Juparana, New Grey, Steel Blue, Tan Brown, and Zen Grey. Juparana and Zen Grey also have approved secondary frames wired as active-finish support media with lightbox frame selection.
+Finish-specific coverage currently includes Alpine White, Angola Black, BlueOcean, Golden Crust Light and Dark, Honey Comb, Ivory Sand, Juparana, New Grey, Tan Brown, and Zen Grey. BlueOcean uses the complete former Steel Blue image set after the two names were confirmed to represent one material. Juparana and Zen Grey also have approved secondary frames wired as active-finish support media with lightbox frame selection.
 
-Controlled default/fallback coverage currently includes Blueocean and Tuscany. Blueocean remains a controlled fallback because no matching shared-drive source exists in the current-site scope. Tuscany uses cut-level source images for Vein Cut and Cross Cut, but those images are intentionally treated as variant-level defaults rather than finish-specific honed/polished/sandblasted photos.
+Tuscany uses cut-level source images for Vein Cut and Cross Cut. BlueOcean no longer uses the old incomplete fallback: it is the canonical name for the former Steel Blue source set.
 
 Visible placeholder groups after current-site source mapping:
 - Harcourt: all TBC finishes.
@@ -111,11 +111,11 @@ Current-website source status:
 
 | Status | Stone groups / variants | Action |
 |---|---|---|
-| Current mapped files match shared drive | Alpine White, Angola Black, Juparana primary frames, New Grey, Steel Blue, Zen Grey primary frames, Ivory Sand bush hammered and sparrow peck | No replacement needed before Supabase/Cloudflare setup. |
+| Current mapped files match shared drive | Alpine White, Angola Black, BlueOcean (files retain the former Steel Blue source filenames), Juparana primary frames, New Grey, Zen Grey primary frames, Ivory Sand bush hammered and sparrow peck | No replacement needed before Supabase/Cloudflare setup. |
 | Current mapped file reviewed and remapped | Ivory Sand honed previously mapped `Sandstone/Sandstone_Sawn_Urblo.jpeg`, while the shared drive had `Ivory Sand/Ivory Sand_Sawn_Urblo.jpeg` with a different checksum. | Visual review completed; runtime now uses the shared-drive Ivory Sand source. |
 | Placeholder but source candidate exists | Golden Crust Light and Dark, Tan Brown | Completed under `NEXT-STONELIB-IMG-001`; finish-specific images are now mapped. |
 | Controlled fallback but source candidate exists | Honey Comb; Tuscany vein cut; Tuscany cross cut | Honey Comb now uses finish-specific images. Tuscany now uses variant-level source images and still waits for finish-specific photos if honed/polished/sandblasted need to be visually distinct. |
-| No source candidate in current shared-drive scope | Blueocean; Harcourt | Keep current controlled fallback or placeholder behavior unless Urblo supplies approved source imagery. Harcourt remains TBC. |
+| No source candidate in current shared-drive scope | Harcourt | Keep placeholder behavior unless Urblo supplies approved source imagery. Harcourt remains TBC. |
 
 Current-website update list for `NEXT-STONELIB-IMG-001`:
 
@@ -138,7 +138,7 @@ Current-website update list for `NEXT-STONELIB-IMG-001`:
 | `Tan Brown/Tan Brown_Polished_副本.JPG` | Tan Brown | `polished` | Placeholder | Add normalized controlled asset and map finish-specific image. |
 | `Toscany_Vein Cut/Toscany_Vein Cut_Urblo.JPG` | Tuscany Vein Cut | `honed`, `polished`, `sandblasted` | Controlled default fallback | Use as a variant-level source only, or wait for finish-specific photos before mapping individual finish states. |
 | `Toscany_Cross Cut/Toscany_Cross Cut_Urblo.JPG` | Tuscany Cross Cut | `honed`, `polished`, `sandblasted` | Controlled default fallback | Use as a variant-level source only, or wait for finish-specific photos before mapping individual finish states. |
-| No matching shared-drive source | Blueocean | `sawn`, `honed`, `bush_hammered`, `combed`, `rippling`, `rock_face`, `rippling__fine`, `rippling__rough` | Controlled default fallback | Keep fallback until approved Blueocean finish sources are supplied. |
+| Superseded duplicate | Former Blueocean record | `sawn`, `honed`, `bush_hammered`, `combed`, `rippling`, `rock_face`, `rippling__fine`, `rippling__rough` | Controlled default fallback | Removed after confirmation that Steel Blue and BlueOcean are one material; canonical BlueOcean uses the former Steel Blue source set. |
 | No matching shared-drive source | Harcourt | all TBC finish states | Placeholder | Keep placeholder/TBC state until approved Harcourt source imagery is supplied. |
 
 Excluded from this launch audit by scope: Cloud Whisper, Mica Grey, Romeo's Vow, Rosy Mist, and Verdant Grey shared-drive folders because those products are not currently on the website Stone Library.
@@ -153,7 +153,7 @@ Excluded from this launch audit by scope: Cloud Whisper, Mica Grey, Romeo's Vow,
 | Ivory Sand | Runtime paths now use the shared-drive `Ivory Sand` filenames instead of the old `Sandstone` file paths; the honed image uses the shared-drive candidate after visual review. |
 | Tan Brown | Flamed, sawn, honed, and polished now use finish-specific images. |
 | Tuscany Vein Cut and Cross Cut | Each cut now uses its shared-drive variant-level image as the default image; finish tabs still share the cut-level image because no finish-specific photos were supplied. |
-| Blueocean | Still uses the controlled `blueocean-sawn` fallback because no matching current-site shared-drive source was found. |
+| BlueOcean | Uses the complete former Steel Blue finish-image set under the canonical BlueOcean name; the obsolete `blueocean-sawn` fallback is removed. |
 | Harcourt | Still uses placeholder/TBC imagery because no matching current-site shared-drive source was found. |
 
 The obsolete `Sandstone` image folder and unused Tuscany fallback files were removed so the build does not carry duplicate Stone Library assets.

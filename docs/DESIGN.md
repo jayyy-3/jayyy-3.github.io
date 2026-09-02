@@ -165,6 +165,8 @@ Hero behavior:
 ### Stone Library
 Stone Library is an inspection and specification aid, not a product marketing grid.
 
+BlueOcean is one material, not two adjacent names: its public presentation uses the former Steel Blue specifications and complete finish photography under the single `BlueOcean` name. Do not show a separate Steel Blue card or the former incomplete BlueOcean fallback record.
+
 Priorities:
 - texture visibility
 - finish comparison

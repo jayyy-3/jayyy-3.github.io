@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-const [appSource, detailSource, imageStageSource, imageSource, serviceSource, capabilityCsv, stoneLibrarySource] = await Promise.all([
+const [appSource, detailSource, imageStageSource, imageSource, serviceSource, capabilityCsv, stoneLibrarySource, sampleCatalogSource, redirectsSource, sitemapSource] = await Promise.all([
   readFile(new URL('../src/App.tsx', import.meta.url), 'utf8'),
   readFile(new URL('../src/pages/StoneLibraryDetailPage.tsx', import.meta.url), 'utf8'),
   readFile(new URL('../src/components/stone-library/ImageStage.tsx', import.meta.url), 'utf8'),
@@ -9,9 +9,13 @@ const [appSource, detailSource, imageStageSource, imageSource, serviceSource, ca
   readFile(new URL('../src/service/StoneLibraryService.ts', import.meta.url), 'utf8'),
   readFile(new URL('../data/clean/stone_finish_capabilities.csv', import.meta.url), 'utf8'),
   readFile(new URL('../data/clean/stone_library.json', import.meta.url), 'utf8'),
+  readFile(new URL('../data/clean/sample_catalog.json', import.meta.url), 'utf8'),
+  readFile(new URL('../public/_redirects', import.meta.url), 'utf8'),
+  readFile(new URL('../public/sitemap.xml', import.meta.url), 'utf8'),
 ]);
 
 const stoneLibrary = JSON.parse(stoneLibrarySource);
+const sampleCatalog = JSON.parse(sampleCatalogSource);
 const tuscany = stoneLibrary.stones.find((stone) => stone.stoneGroupId === 'tuscany');
 assert(tuscany, 'Tuscany must remain in the Stone Library source.');
 assert.deepEqual(
@@ -75,18 +79,48 @@ assert(
 );
 
 const blueoceanImageMap = imageSource.slice(
-  imageSource.indexOf("'blueocean': {"),
-  imageSource.indexOf("'honey-comb': {"),
+  imageSource.indexOf('blueocean: {'),
+  imageSource.indexOf('juparana: {'),
+);
+const blueocean = stoneLibrary.stones.find((stone) => stone.stoneGroupId === 'blueocean');
+assert(blueocean, 'BlueOcean must remain under the canonical blueocean route key.');
+assert.equal(blueocean.displayName, 'BlueOcean', 'BlueOcean must use the approved display name.');
+assert.equal(blueocean.origin.regionDisplay, 'Guangdong', 'BlueOcean must retain the former Steel Blue product data.');
+assert.equal(blueocean.price.tier, 1, 'BlueOcean must retain the former Steel Blue price tier.');
+assert.equal(
+  stoneLibrary.stones.some((stone) => stone.stoneGroupId === 'steel-blue'),
+  false,
+  'The duplicate Steel Blue Stone Library record must be removed.',
+);
+assert.deepEqual(
+  blueocean.variants.map((variant) => variant.stoneVariantId),
+  ['blueocean'],
+  'The retained product variant must use the canonical BlueOcean key.',
 );
 assert(blueoceanImageMap.includes('default:'), 'Blueocean must retain a default cover image.');
 assert(blueoceanImageMap.includes('sawn:'), 'Blueocean Sawn must have an explicit finish image.');
 assert(
-  imageSource.includes("const finishSpecificOnlyVariants = new Set(['blueocean'])"),
-  'Blueocean must not reuse its Sawn cover as every finish image.',
+  blueoceanImageMap.includes('Steel Blue/Steel Blue_Honed_Urblo.jpeg') &&
+    blueoceanImageMap.includes('Steel Blue/Steel Blue_Rock Face_Urblo.jpeg'),
+  'BlueOcean must use the complete former Steel Blue finish image set.',
 );
 assert(
+  !imageSource.includes("'steel-blue': {") && !imageSource.includes('fallbacks/blueocean-sawn.jpg'),
+  'Neither the duplicate Steel Blue map nor the old BlueOcean fallback may remain.',
+);
+assert(!sampleCatalog.byStoneVariant['steel-blue'], 'Sample catalog must not retain a Steel Blue variant bucket.');
+assert(
+  sampleCatalog.items.every((item) => item.stoneVariantId !== 'steel-blue'),
+  'Sample items must be re-keyed to BlueOcean.',
+);
+assert(
+  redirectsSource.includes('/stone-library/steel-blue /stone-library/blueocean 301'),
+  'The retired Steel Blue route must redirect to canonical BlueOcean.',
+);
+assert(!sitemapSource.includes('/stone-library/steel-blue'), 'The retired duplicate route must leave the sitemap.');
+assert(
   serviceSource.includes('requiresFinishSpecificImages(activeVariant.variant_key)'),
-  'CMS group-level reference images must not bypass the Blueocean finish-specific policy.',
+  'Published CMS image resolution must retain its finish-image boundary.',
 );
 assert(
   serviceSource.includes("if (finish.imageRole === 'placeholder')"),

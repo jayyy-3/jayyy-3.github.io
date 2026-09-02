@@ -1,6 +1,11 @@
 # Urblo Stone Data QA Report
 - Generated at: `2026-02-05T01:40:18+00:00`
 
+## Approved canonical override (2026-09-02)
+- Steel Blue and BlueOcean were confirmed to be the same material.
+- Runtime-clean data keeps one `blueocean` group using the former Steel Blue specifications, sample rows, capabilities, and finish images; the duplicate `steel-blue` group is removed.
+- The original source sheets below are retained as historical intake evidence, so their pre-override counts and difference notes are not the current runtime count.
+
 ## Stats
 - finish_options: `12`
 - sample_items: `114`

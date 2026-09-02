@@ -2646,7 +2646,7 @@
       "id": "NOW-PUBLIC-CATALOG-INTEGRITY-001",
       "status": "now",
       "priority": 1,
-      "summary": "Repair Homepage mobile WeChat video playback, Product model render mappings, and Stone detail selection/data integrity.",
+      "summary": "Repair Homepage mobile WeChat video playback, Product model render mappings, and Stone detail/canonical-record integrity.",
       "files": [
         "public/media/launch/home/urblo-hero-mobile.mp4",
         "src/components/homepage/HomepageSections.tsx",
@@ -2658,7 +2658,13 @@
         "src/data/stoneFinishImages.ts",
         "src/service/StoneLibraryService.ts",
         "data/clean/stone_finish_capabilities.csv",
+        "data/clean/stone_groups.csv",
         "data/clean/stone_library.json",
+        "data/clean/stone_variants.csv",
+        "data/clean/sample_items.csv",
+        "data/clean/sample_catalog.json",
+        "public/_redirects",
+        "public/sitemap.xml",
         "scripts/check-homepage-hero-video.mjs",
         "scripts/check-product-model-image-mapping.mjs",
         "scripts/check-stone-library-detail-integrity.mjs",
@@ -2674,15 +2680,16 @@
       "notes": [
         "2026-09-02: Read-only audit identified a mobile MP4 profile regression plus silent play rejection, three Product families with reviewed render-path mismatches, query-only Stone selection triggering global top restoration, Tuscany finish claims beyond the available imagery, and one Blueocean Sawn default repeated across eight finishes.",
         "2026-09-02: Local implementation and focused source/render checks pass without any Supabase, Storage, Cloudflare, Auth, email, or production write. Imported Product/Tuscany Draft synchronization remains a separate approval-gated action.",
+        "2026-09-02: Jay confirmed Steel Blue and BlueOcean are one material. Local source now retains the canonical blueocean key with the former Steel Blue data/images, removes the duplicate steel-blue record and obsolete fallback, and preserves old inbound links through a 301 redirect. Matching production CMS merge/delete work remains approval-gated.",
         "Jay acceptance belongs to the deployed Preview and cannot be self-certified by the agent. iOS and Android WeChat remain real-device acceptance surfaces even when local Chromium and source/codec checks pass."
       ],
       "acceptance": [
         "Homepage mobile video uses the locked WeChat-tolerant encoding and plays automatically when policy allows; rejection exposes one accessible tap recovery that disappears after playback starts.",
         "Every current Product option shows the reviewed Core/Rise/Flush/backrest geometry, with an automated contract preventing path remapping regressions.",
         "Finish and Variant query changes preserve page reading position; Tuscany places Cut direction beside Finish and exposes only Honed for both cuts.",
-        "Blueocean uses the real Sawn photograph only for Sawn; finishes without source imagery show an honest pending state with no duplicate image or Zoom action.",
+        "BlueOcean is one canonical record using the former Steel Blue specifications and complete finish photography; no duplicate Steel Blue record or obsolete BlueOcean fallback remains, and the retired route redirects.",
         "Clean container gate and Cloudflare Preview smoke pass, and Jay accepts the rendered Preview before production promotion.",
-        "Any matching production CMS Draft correction is listed exactly and receives separate approval before write."
+        "Any matching production CMS Draft correction, merge, or deletion is listed exactly and receives separate approval before write."
       ],
       "verification": [
         "npm run agent:homepage-video",

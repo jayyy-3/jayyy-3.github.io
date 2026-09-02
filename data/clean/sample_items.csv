@@ -27,8 +27,8 @@ zen-grey,sawn,,100,100,10,pcs,10 pcs,Diamond Sawn
 zen-grey,sawn,,400,600,2,pcs,2 pcs,Diamond Sawn
 angola-black,sawn,,100,100,10,pcs,10 pcs,Diamond Sawn
 angola-black,sawn,,400,600,2,pcs,2 pcs,Diamond Sawn
-steel-blue,sawn,,100,100,10,pcs,10 pcs,Diamond Sawn
-steel-blue,sawn,,400,600,2,pcs,2 pcs,Diamond Sawn
+blueocean,sawn,,100,100,10,pcs,10 pcs,Diamond Sawn
+blueocean,sawn,,400,600,2,pcs,2 pcs,Diamond Sawn
 golden-crust--light,sawn,,100,100,10,pcs,10 pcs,Diamond Sawn
 golden-crust--light,sawn,,400,600,2,pcs,2 pcs,Diamond Sawn
 golden-crust--dark,sawn,,100,100,10,pcs,10 pcs,Diamond Sawn
@@ -39,8 +39,6 @@ harcourt--similar,sawn,,100,100,10,pcs,10 pcs,Diamond Sawn
 harcourt--similar,sawn,,400,600,2,pcs,2 pcs,Diamond Sawn
 honey-comb,sawn,,100,100,10,pcs,10 pcs,Diamond Sawn
 honey-comb,sawn,,400,600,2,pcs,2 pcs,Diamond Sawn
-blueocean,sawn,,100,100,10,pcs,10 pcs,Diamond Sawn
-blueocean,sawn,,400,600,2,pcs,2pc,Diamond Sawn
 new-grey,honed,,100,100,10,pcs,10 pcs,Honed
 new-grey,honed,,400,600,2,pcs,2 pcs,Honed
 juparana,honed,,100,100,10,pcs,10 pcs,Honed
@@ -53,8 +51,8 @@ angola-black,honed,,100,100,10,pcs,10 pcs,Honed
 angola-black,honed,,400,600,2,pcs,2 pcs,Honed
 ivory-sand,honed,,100,100,10,pcs,10 pcs,Honed
 ivory-sand,honed,,400,600,2,pcs,2 pcs,Honed
-steel-blue,honed,,100,100,10,pcs,10 pcs,Honed
-steel-blue,honed,,400,600,2,pcs,2 pcs,Honed
+blueocean,honed,,100,100,10,pcs,10 pcs,Honed
+blueocean,honed,,400,600,2,pcs,2 pcs,Honed
 golden-crust--light,honed,,100,100,10,pcs,10 pcs,Honed
 golden-crust--light,honed,,400,600,2,pcs,2 pcs,Honed
 golden-crust--dark,honed,,100,100,10,pcs,10 pcs,Honed
@@ -67,8 +65,6 @@ honey-comb,honed,,100,100,10,pcs,10 pcs,Honed
 honey-comb,honed,,400,600,2,pcs,2 pcs,Honed
 tuscany--vein-cut,honed,,100,100,10,pcs,10 pcs,Honed
 tuscany--cross-cut,honed,,100,100,10,pcs,10 pcs,Honed
-blueocean,honed,,100,100,10,pcs,10 pcs,Honed
-blueocean,honed,,400,600,2,pcs,2pc,Honed
 new-grey,polished,,100,100,10,pcs,10 pcs,Polished
 new-grey,polished,,400,600,2,pcs,2 pcs,Polished
 juparana,polished,,100,100,10,pcs,10 pcs,Polished
@@ -93,23 +89,15 @@ angola-black,bush_hammered,,100,100,10,pcs,10 pcs,Bush Hammer (___)
 angola-black,bush_hammered,,400,600,2,pcs,2 pcs,Bush Hammer (___)
 ivory-sand,bush_hammered,,100,100,10,pcs,10 pcs,Bush Hammer (___)
 ivory-sand,bush_hammered,,400,600,2,pcs,2 pcs,Bush Hammer (___)
-steel-blue,bush_hammered,,100,100,10,pcs,10 pcs,Bush Hammer (___)
-steel-blue,bush_hammered,,400,600,2,pcs,2 pcs,Bush Hammer (___)
 blueocean,bush_hammered,,100,100,10,pcs,10 pcs,Bush Hammer (___)
-blueocean,bush_hammered,,400,600,2,pcs,2pc,Bush Hammer (___)
+blueocean,bush_hammered,,400,600,2,pcs,2 pcs,Bush Hammer (___)
 ivory-sand,sparrow_peck,,100,200,10,pcs,10 pcs,Sparrow peck
 ivory-sand,sparrow_peck,,400,600,2,pcs,2 pcs,Sparrow peck
-steel-blue,rock_face,,100,200,10,pcs,10 pcs,Rock Face (___)
-steel-blue,rock_face,,400,600,2,pcs,2 pcs,Rock Face (___)
 blueocean,rock_face,,100,200,10,pcs,10 pcs,Rock Face (___)
-blueocean,rock_face,,400,600,2,pcs,2pc,Rock Face (___)
-steel-blue,rippling,fine,100,100,10,pcs,10 pcs,Rippling Fine
-steel-blue,rippling,fine,400,600,2,pcs,2 pcs,Rippling Fine
+blueocean,rock_face,,400,600,2,pcs,2 pcs,Rock Face (___)
 blueocean,rippling,fine,100,100,10,pcs,10 pcs,Rippling Fine
-blueocean,rippling,fine,400,600,2,pcs,2pc,Rippling Fine
-steel-blue,rippling,rough,100,100,10,pcs,10 pcs,Rippling Rough
-steel-blue,rippling,rough,400,600,2,pcs,2 pcs,Rippling Rough
+blueocean,rippling,fine,400,600,2,pcs,2 pcs,Rippling Fine
 blueocean,rippling,rough,100,100,10,pcs,10 pcs,Rippling Rough
-blueocean,rippling,rough,400,600,2,pcs,2pc,Rippling Rough
+blueocean,rippling,rough,400,600,2,pcs,2 pcs,Rippling Rough
 tuscany--vein-cut,sandblasted,,100,100,10,pcs,10 pcs,Sandblasted (___)
 tuscany--cross-cut,sandblasted,,100,100,10,pcs,10 pcs,Sandblasted (___)
