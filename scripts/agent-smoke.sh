@@ -255,6 +255,7 @@ async function checkCta(contract) {
 await waitForServer()
 
 const siteHeaderSource = fs.readFileSync('src/components/site/SiteHeader.tsx', 'utf8')
+const welcomePopupSource = fs.readFileSync('src/components/WelcomePopup.tsx', 'utf8')
 const defaultLayoutSource = fs.readFileSync('src/layouts/DefaultLayout.tsx', 'utf8')
 const appSource = fs.readFileSync('src/App.tsx', 'utf8')
 
@@ -278,6 +279,16 @@ if (defaultLayoutSource.includes('h-[102px] bg-black')) {
 if (!siteHeaderSource.includes('backdrop-blur-sm') || /backdrop-blur-(?:md|lg|xl|2xl|3xl)/.test(siteHeaderSource)) {
   throw new Error('Public header glass must retain the original light blur instead of heavy frosted blur')
 }
+
+if (!welcomePopupSource.includes('bg-black/50') || !welcomePopupSource.includes('backdrop-blur-sm')) {
+  throw new Error('Homepage Acknowledge must use the clear overlay glass tint and light blur')
+}
+
+if (welcomePopupSource.includes('bg-black/88')) {
+  throw new Error('Homepage Acknowledge regressed to the legacy near-opaque black surface')
+}
+
+console.log('welcome popup glass ok: bg-black/50 + backdrop-blur-sm')
 
 const builtCss = fs.readdirSync('dist/assets')
   .filter((file) => file.endsWith('.css'))

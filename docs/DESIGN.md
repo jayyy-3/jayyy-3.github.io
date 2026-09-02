@@ -152,6 +152,7 @@ Header behavior:
 - Header and opened-menu surfaces are route-aware clear glass, not one opaque treatment. Preserve the original light `backdrop-blur-sm` character: underlying media should stay recognizable and sharp, with only slight softening. Do not substitute medium/heavy blur or saturation effects. Image/video-first routes use the lighter `overlay` surface so the opening media remains visible through the header; white-start routes such as Projects and Stone Library use the deeper `light-page` smoke surface for legibility.
 - White-start routes keep the shared 102px `DefaultLayout` clearance, but its backing stays light. Do not reintroduce a pure-black support band: stacking translucent black over solid black makes the glass appear opaque and was the root of the August 2026 regression.
 - The opened hamburger menu inherits the route surface and may use a slightly stronger tint than the closed header, but keeps the same light blur. Desktop and mobile must preserve readable white navigation, visible background detail, and no horizontal overflow.
+- The first-visit Homepage Acknowledge panel belongs to the same clear overlay-glass family as the Homepage Header: use the lighter 50% black tint with `backdrop-blur-sm`, so the hero remains visibly present beneath it. Do not restore the legacy near-opaque `/88` surface; once Tailwind emitted that utility it turned the panel into a black block.
 
 Hero behavior:
 - The first homepage viewport should feel full-screen on desktop and mobile.

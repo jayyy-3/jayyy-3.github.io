@@ -67,7 +67,7 @@ export default function WelcomePopup() {
             className={`pointer-events-none fixed left-1/2 top-[14vh] z-50 w-[calc(100%-48px)] max-w-[980px] -translate-x-1/2 transition-opacity duration-700 ease-in-out ${visible ? 'opacity-100' : 'opacity-0'}`}
         >
             <div
-                className="relative border border-white/20 bg-black/88 px-8 py-10 text-center text-[15px] leading-7 text-white shadow-[0_24px_60px_rgba(0,0,0,0.25)] backdrop-blur-sm"
+                className="relative border border-white/20 bg-black/50 px-8 py-10 text-center text-[15px] leading-7 text-white shadow-[0_24px_60px_rgba(0,0,0,0.25)] backdrop-blur-sm"
             >
                 <p>
                     We acknowledge and respect Aboriginal and Torres Strait Islander Peoples across Australia as the Traditional Custodians of the lands, waters, seas and skies. We recognize their unique ability to care for Country and their deep spiritual connection with Country. We honor Elders past, present and emerging, whose knowledge and wisdom will ensure the continuation of Aboriginal and Torres Strait Islander cultures, and the values which uphold them.

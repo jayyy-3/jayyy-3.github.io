@@ -12550,6 +12550,14 @@ Last updated: 2026-08-17
 - Jay explicitly approved production promotion with `上线`. PR `#31` squash-merged as `2e5f9b83d9441066c2dc31f79a3448fb226ad421`; Cloudflare production deployment `bf83bbc2-9c9f-4e1c-8e98-d32f0547c701` completed successfully.
 - The immutable deployment, `https://urblo.com.au`, and `https://www.urblo.com.au` pass deployment-bound route, recursive asset byte/MIME, redirect, Function, protected Admin Function, and browser-secret checks. Production Browser QA at 1280×900 and 390×844 confirmed exactly one new module image and one unchanged later image, complete 960×720 delivery, intended crop, zero mobile overflow, and no warning/error logs. No Supabase row, Storage object, CMS content, Auth user, migration, email, or custom-domain configuration changed during release.
 
+## 2026-09-02 — Homepage Acknowledge clear-glass repair candidate
+
+- Root cause: the first-visit Homepage Acknowledge panel still carried `bg-black/88` from May. Tailwind did not originally emit that non-standard opacity, but the August opacity-scale expansion made it a real 88% black layer; the unchanged class therefore surfaced later as an almost solid black block.
+- Source now uses the accepted Homepage Header overlay material: `bg-black/50` with the existing light `backdrop-blur-sm` (4px). Position, copy, timing, close interaction, border, and shadow remain unchanged.
+- Public smoke now requires the clear tint/light blur pair and rejects the legacy `/88` class. `docs/DESIGN.md` records the first-visit panel as part of the Homepage clear-glass family.
+- Local production-build Browser QA passed at 1280×900 and 390×844. In both viewports the panel and Homepage Header compute to `rgba(0, 0, 0, 0.5)` with `blur(4px)`; mobile measures 342px wide with 24px gutters and no horizontal overflow. Close fades and unmounts correctly, and both viewports have no warning/error logs. The temporary 30-second QA timeout was restored to the production 3-second behavior before final gates.
+- Host build, lint, typecheck, smoke, Harness check, and diff check pass. Clean container gate, Cloudflare Preview smoke, and Jay's visual acceptance remain pending. Production is unchanged.
+
 ## 2026-08-26 — Cloudflare ownership migration
 
 - Audited the Hunter Cloudflare account before migration. Urblo used the `urblo` Pages project and the `urblo.com.au` zone; unrelated R2 buckets `grace-backups` / `inkk` and Workers `inkk-blog-starter` / `inkk-dot` are not Urblo resources and were left untouched. No relevant Urblo KV, D1, Queue, Vectorize, Hyperdrive, Worker route, or Tunnel dependency was found.
