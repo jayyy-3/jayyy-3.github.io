@@ -12,11 +12,11 @@ Last updated: 2026-09-09
 
 ## 已观察的发布状态
 
-观察日期：2026-09-09。仓库版本：`03767bc6bdf5164a6b1644a4100378f9c2fa7ed5`。已验证运行时代码：`28cd2a1f4ad1dee293afd7d4f9f5dff3208ccd94`。
+观察日期：2026-09-09。仓库版本：`810fd9b0eed97fa2a5183b46549db8423700bda5`。已验证运行时代码：`810fd9b0eed97fa2a5183b46549db8423700bda5`。
 
-验证地址：https://98b6a225.urblo-site.pages.dev
+验证地址：https://31fd0c27.urblo-site.pages.dev
 
-PR #41 production immutable/apex/www passed automatically. PR #42/main docs-only run 34327122789 passed quality with zero deployments and the same runtime fingerprint.
+PR #43 passed isolated resets/QR journey, source/browser checks and Preview; main production immutable/apex/www readback passed. Expanded four-workflow tests are in progress locally.
 
 CMS handoff: **revalidation_required**。QR: material_page_deployed。
 

@@ -1619,6 +1619,7 @@ function safePublicSourceUrl(value) {
   if (
     !source ||
     source !== source.trim() ||
+    // eslint-disable-next-line no-control-regex -- Reject control characters in public source URLs.
     /[\u0000-\u001f\u007f\\]/.test(source) ||
     /%(?:0[0-9a-f]|1[0-9a-f]|7f|2e)/i.test(source)
   )

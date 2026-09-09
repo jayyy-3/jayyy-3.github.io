@@ -6,6 +6,9 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
 import { assertLocalOrigin, assertLocalContainer, LOCAL_API, LOCAL_APP, LOCAL_ACCOUNTS, LOCAL_PASSWORD } from './_lib/local-environment.mjs'
 import { fixturePng } from './_lib/local-fixtures.mjs'
+import { projectJourney } from './local-journeys/projects.mjs'
+import { articleJourney } from './local-journeys/articles.mjs'
+import { formsJourney } from './local-journeys/forms.mjs'
 import { runtimeFingerprint } from './_lib/verification.mjs'
 const args = process.argv.slice(2)
 if (args.length && (args.length !== 2 || args[0] !== '--base-url')) throw new Error('Only --base-url is supported')
@@ -16,6 +19,7 @@ mkdirSync(directory, { recursive: true })
 const report = { attemptId: id, environment: 'synthetic-local', baseUrl: LOCAL_APP, repositorySha: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(), runtimeFingerprint: runtimeFingerprint(), browserPath: 'Browser plugin not available; repository Playwright used', viewport: { width: 1440, height: 1000 }, checks: [], requests: [], errors: [] }
 const browser = await chromium.launch({ headless: true })
 const context = await browser.newContext({ viewport: report.viewport })
+context.setDefaultTimeout(15000)
 await context.route('**/*', route => {
   const url = new URL(route.request().url())
   if ([LOCAL_APP, LOCAL_API].includes(url.origin) || ['data:', 'blob:'].includes(url.protocol)) return route.continue()
@@ -30,9 +34,13 @@ page.on('response', response => {
 })
 async function check(name, work) {
   const record = { name, status: 'running' }; report.checks.push(record)
-  try { await work(); record.status = 'passed'; console.log(`PASS ${name}`) }
+  let timer
+  try {
+    await Promise.race([work(), new Promise((_, reject) => { timer = setTimeout(() => reject(new Error(`Journey timed out: ${name}`)), 90000) })])
+    record.status = 'passed'; console.log(`PASS ${name}`)
+  }
   catch (error) { record.status = 'failed'; record.error = error.message; await page.screenshot({ path: `${directory}/failure.png`, fullPage: true }); throw error }
-  finally { writeFileSync(`${directory}/result.json`, JSON.stringify(report, null, 2) + '\n') }
+  finally { clearTimeout(timer); writeFileSync(`${directory}/result.json`, JSON.stringify(report, null, 2) + '\n') }
 }
 async function login(role) {
   await page.goto(`${LOCAL_APP}/admin/login`)
@@ -97,6 +105,22 @@ try {
   await check('Unauthenticated QR mutations are denied', async () => {
     const response = await context.request.post(`${LOCAL_APP}/api/admin/image-qr`, { data: { action: 'hide', id: resource.id } })
     assert.equal(response.status(), 401)
+  })
+  await projectJourney({ page, context, check, id, directory })
+  await articleJourney({ page, context, check, id, directory })
+  await formsJourney({ page, context, check, id, directory })
+  await check('A valid local account without an admin profile cannot enter protected modules', async () => {
+    await page.getByRole('button', { name: 'Sign out', exact: true }).click()
+    await page.waitForURL(url => url.origin === LOCAL_APP && url.pathname === '/admin/login')
+    await page.getByLabel('Email', { exact: true }).fill(LOCAL_ACCOUNTS.outsider)
+    await page.getByLabel('Password', { exact: true }).fill(LOCAL_PASSWORD)
+    await page.getByRole('button', { name: 'Sign in', exact: true }).click()
+    await page.waitForURL(`${LOCAL_APP}/admin/unauthorized`)
+    for (const route of ['articles', 'projects', 'image-qr', 'leads']) {
+      await page.goto(`${LOCAL_APP}/admin/${route}`)
+      await page.waitForURL(`${LOCAL_APP}/admin/unauthorized`)
+      await expect(page.getByRole('button', { name: /New article|New project|Save article/ })).toHaveCount(0)
+    }
   })
   assert.deepEqual(report.errors, [])
   report.passed = true

@@ -2,13 +2,17 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { extname, join, relative } from 'node:path'
 import { cwd, exit } from 'node:process'
+import assert from 'node:assert/strict'
 
 const root = cwd()
 const badTextPatterns = [
   { pattern: /\/Users\//, label: 'machine-specific /Users path' },
-  { pattern: /New project/, label: 'external local archive path/name' },
+  { pattern: /New project[/\\]/, label: 'external local archive path/name' },
   { pattern: /urblo-react\//, label: 'repo directory embedded in path' },
 ]
+// A real UI action label is prose; the retired archive directory is a path.
+assert.equal(badTextPatterns.some(({ pattern }) => pattern.test('Click New project while loading.')), false)
+assert.equal(badTextPatterns.some(({ pattern }) => pattern.test('New project/docs/source.md')), true)
 
 const rootDocs = ['AGENTS.md', 'README.md']
 const docRoots = ['docs']

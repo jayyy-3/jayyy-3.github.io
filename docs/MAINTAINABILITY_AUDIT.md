@@ -52,3 +52,10 @@
 | M12 本地测试配置与素材 | 测试搭建问题，不是线上产品缺陷；关闭 email provider 导致本地登录 422，旧测试 PNG 无法解码 | 本地账号和图片不能进入真实编辑流程 | 开启本地 email/password provider、保持全局注册关闭，生成有正确 CRC 的 64px PNG；二维码完整流程通过 |
 
 纯记录验收已通过 PR #42 (`34326719464`) 和 main (`34327122789`)：两次 quality 成功，构建/浏览器/部署跳过。main 运行时指纹与前一版本一致：`03eec5670136b87337c146d89044c364c304b637ae851764041763af415212c9`。本地 `full-1788941176621` 证明真实数据库、Storage、Functions、连续两次 reset 和二维码保存/刷新/公开读回/隐藏恢复；其他后台流程仍待下一批补齐。
+
+## 第四批：行为基线
+
+- M13 / 已确认 Projects 状态竞争：已有项目加载中点击 New project 会增加加载代数，旧请求的 finally 因代数过期不再清除 loading；新建分支也没有清除 loading，编辑器永久停留在 Loading project。真实本地测试保留失败截图；新建分支显式结束旧 loading，并用延迟旧请求、立即新建、释放旧响应后仍为空表单的测试验证。无布局、文案、发布或权限契约变化。
+- Articles 的无效输入恢复、API 500 后保留输入/重试/刷新、父记录绑定的 section PATCH、保存锁阻止切换、延迟加载后正确显示、公开标题与正文已通过本地行为测试。测试不承诺普通手动切换会保留未保存编辑，现有行为不在本轮改动。
+- Contact/Sample Request 在本地真实 Functions/数据库入库并显示于 owner inbox，匿名读取被拒绝；通知状态为 not_required。没有发送外部邮件，真实 SMTP/Turnstile 验收仍独立。
+- Functions JavaScript 已纳入 ESLint recommended + Worker globals；两个有意检测控制字符的安全正则精确豁免 no-control-regex，未改变规则行为；删除一个未用 helper。
