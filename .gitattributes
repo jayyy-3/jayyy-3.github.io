@@ -1,0 +1,3 @@
+
+# Lossless evidence archives retain historical EOF spacing; integrity is SHA-256 checked.
+docs/archive/** whitespace=-blank-at-eof

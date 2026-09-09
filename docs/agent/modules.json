@@ -1,0 +1,167 @@
+{
+  "version": 1,
+  "modules": {
+    "harness": {
+      "paths": [
+        "AGENTS.md",
+        "docs/agent",
+        "scripts/agent-init.sh",
+        "scripts/check-harness.mjs"
+      ],
+      "rules": [
+        "docs/OPERATING_PROTOCOL.md",
+        "docs/MAINTAINABILITY_AUDIT.md"
+      ],
+      "checks": [
+        "agent:check",
+        "agent:harness-gc"
+      ]
+    },
+    "delivery": {
+      "paths": [
+        ".github/workflows/deploy.yml",
+        "Dockerfile.gate",
+        "scripts/container-gate.sh"
+      ],
+      "rules": [
+        "docs/CLOUDFLARE_DEPLOYMENT.md",
+        "docs/agent/verification.md"
+      ],
+      "checks": [
+        "agent:cloudflare-readiness",
+        "agent:cloudflare-preview-smoke"
+      ]
+    },
+    "qr": {
+      "paths": [
+        "src/pages/admin/AdminImageQrPage.tsx",
+        "src/pages/ImageQrPage.tsx",
+        "functions/_lib/admin-image-qr.js"
+      ],
+      "rules": [
+        "docs/ARCHITECTURE.md",
+        "docs/ADMIN_IA_ACCESS.md"
+      ],
+      "checks": [
+        "agent:admin-image-qr"
+      ]
+    },
+    "projects": {
+      "paths": [
+        "src/pages/admin/AdminProjectsPage.tsx",
+        "src/pages/admin/projects",
+        "functions/_lib/admin-projects.js",
+        "src/service/ProjectService.ts"
+      ],
+      "rules": [
+        "docs/ADMIN_IA_ACCESS.md",
+        "docs/ARCHITECTURE.md"
+      ],
+      "checks": [
+        "agent:admin-projects-aggregate",
+        "agent:public-content-overlay"
+      ]
+    },
+    "articles": {
+      "paths": [
+        "src/pages/admin/AdminArticlesPage.tsx",
+        "src/service/ArticleService.ts",
+        "src/pages/ArticlePage.tsx"
+      ],
+      "rules": [
+        "docs/ADMIN_IA_ACCESS.md",
+        "docs/brand-baseline.md"
+      ],
+      "checks": [
+        "agent:admin-crud-coverage",
+        "agent:public-content-overlay"
+      ]
+    },
+    "forms": {
+      "paths": [
+        "src/pages/ContactPage.tsx",
+        "functions/_lib/forms.js",
+        "src/pages/admin/AdminLeadsPage.tsx"
+      ],
+      "rules": [
+        "docs/ARCHITECTURE.md",
+        "docs/ADMIN_IA_ACCESS.md"
+      ],
+      "checks": [
+        "agent:forms-ui"
+      ]
+    },
+    "stone-library": {
+      "paths": [
+        "src/service/StoneLibraryService.ts",
+        "src/pages/admin/AdminStoneLibraryPage.tsx",
+        "src/pages/StoneLibraryDetailPage.tsx"
+      ],
+      "rules": [
+        "docs/DESIGN.md",
+        "docs/ARCHITECTURE.md"
+      ],
+      "checks": [
+        "agent:stone-library-detail",
+        "agent:public-content-overlay"
+      ]
+    },
+    "products": {
+      "paths": [
+        "src/pages/admin/AdminProductsPage.tsx",
+        "src/service/ProductService.ts"
+      ],
+      "rules": [
+        "docs/DESIGN.md",
+        "docs/ARCHITECTURE.md"
+      ],
+      "checks": [
+        "agent:product-model-images",
+        "agent:public-content-overlay"
+      ]
+    },
+    "media": {
+      "paths": [
+        "src/pages/admin/AdminMediaPage.tsx",
+        "src/lib/publicMediaUrl.ts"
+      ],
+      "rules": [
+        "docs/ADMIN_IA_ACCESS.md",
+        "docs/SUPABASE_SCHEMA.md"
+      ],
+      "checks": [
+        "agent:admin-crud-coverage",
+        "agent:admin-media-role-boundary-live"
+      ]
+    },
+    "auth-settings": {
+      "paths": [
+        "src/lib/supabaseClient.ts",
+        "src/lib/adminAuth.tsx",
+        "src/pages/admin/AdminSettingsPage.tsx"
+      ],
+      "rules": [
+        "docs/ADMIN_IA_ACCESS.md",
+        "docs/ADMIN_EDITOR_GUIDE.md"
+      ],
+      "checks": [
+        "agent:admin-config-gate",
+        "agent:admin-auth-browser"
+      ]
+    },
+    "public-ui": {
+      "paths": [
+        "src/App.tsx",
+        "src/components/site",
+        "src/layouts"
+      ],
+      "rules": [
+        "docs/DESIGN.md",
+        "docs/brand-baseline.md"
+      ],
+      "checks": [
+        "agent:smoke"
+      ]
+    }
+  }
+}
