@@ -43,3 +43,9 @@ Scope: approved maintainability plan batches 1–2; no UI changes, production da
 Residual work: verify the new workflow on its own PR; prove a record-only PR has zero deployments; apply main protection with administrator access; local isolated database/journeys and Articles/server refactor remain subsequent batches. Broader CMS acceptance remains unproven.
 
 - PR #41 first CI run `34324917881` passed all 22 source nodes, then stalled in browser process shutdown and was cancelled before deployment. Linux retained the Vite grandchild behind `npx`; the gate now launches Vite directly. The graph streams sanitized logs as checks run, enforces check time budgets and retains interruption evidence so cancellation cannot lose the active check log. CI cancellation correctly made `quality` fail.
+
+## 2026-09-09 — Record-only CI acceptance
+
+PR #41 passed repaired run `34326148845`, including 23 unique verification nodes, immutable Preview `https://84f83fa9.urblo-site.pages.dev` and stable `quality`, then merged as `28cd2a1`. The earlier cancelled run remains recorded above; Linux reproduction confirmed that `npx` left Vite serving after termination while the direct Node launcher stopped it.
+
+This entry deliberately changes only historical evidence. Its PR must run the docs graph and stable `quality`, with dependency installation but no website build, browser installation or Cloudflare deployment. The subsequent main run must also skip deployment. Runtime SHA/URL observations remain unchanged until fresh production readback is recorded; a newer record-only repository SHA does not invalidate an unchanged runtime fingerprint.
