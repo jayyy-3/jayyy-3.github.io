@@ -72,7 +72,10 @@ async function main() {
     await mkdir(gateRoot, { recursive: true });
     await mkdir(join(root, screenshotsDir), { recursive: true });
 
-    if (!args.baseUrl) {
+    if (!args.baseUrl && env.URBLO_VERIFIED_ENVLESS_DIST === '1') {
+      serverProcess = startPreview(join(root, 'dist'));
+      await waitForServer(baseUrl);
+    } else if (!args.baseUrl) {
       const buildResult = await runCommand(
         'npx',
         ['vite', 'build', '--outDir', isolatedDistDir, '--emptyOutDir'],

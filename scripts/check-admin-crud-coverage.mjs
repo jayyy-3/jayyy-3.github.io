@@ -1508,6 +1508,7 @@ function checkAdminLoadingAndSaveLockSafety() {
 }
 
 function checkProjectsAggregateContract() {
+  if (process.argv.includes('--self-only')) return;
   const result = spawnSync(
     execPath,
     [

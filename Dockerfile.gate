@@ -16,6 +16,8 @@ FROM node:20-bookworm-slim
 # Lets `npm run gate` prune superseded gate image layers safely.
 LABEL urblo.gate="true"
 
+RUN apt-get update && apt-get install -y --no-install-recommends git ca-certificates && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 # Install dependencies as a cached layer (re-runs only when the lockfile
@@ -28,10 +30,5 @@ RUN --mount=type=cache,target=/root/.npm npm ci
 # below — which is exactly what we want: the gates re-run on every real change.
 COPY . .
 
-# --- Quality gates ---
-# `npm run build` runs `tsc -b && vite build`, so the typecheck gate lives
-# inside the build step; a separate tsc run here would be a cached no-op.
-RUN npm run build
-RUN npm run lint
-RUN npm run agent:smoke
-RUN npm run agent:check
+# One dependency graph runs each check once in this env-less configuration.
+RUN npm run agent:verify -- --suite container

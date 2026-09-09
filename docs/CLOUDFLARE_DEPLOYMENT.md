@@ -306,3 +306,10 @@ Still pending after preview validation:
 - Cloudflare Pages redirects: https://developers.cloudflare.com/pages/configuration/redirects/
 - Cloudflare Pages Functions routing: https://developers.cloudflare.com/pages/functions/routing/
 - Cloudflare Pages headers: https://developers.cloudflare.com/pages/configuration/headers/
+
+
+## Maintenance release controls (2026-09-09)
+
+GitHub Actions is the sole active automatic release path. `urblo-site` uses direct upload. The legacy Hunter `urblo` Git integration has production automatic builds disabled and preview setting `none`; existing deployments remain rollback evidence. Do not re-enable it as a routine release path.
+
+PRs always produce `quality`. Record-only changes verify without deploying; runtime changes deploy their branch and require immutable smoke. `main` runtime changes also require apex/www smoke bound to the deployment URL. Failure leaves the workflow red and prints the last recorded verified runtime and this rollback procedure. CI uses Node 20 for verification and Node 22 for pinned Wrangler 4.130.0 deployment. Local Docker remains Node 20. The stable check must be enabled by a GitHub administrator as a required main-branch PR check; code alone cannot provide branch protection.

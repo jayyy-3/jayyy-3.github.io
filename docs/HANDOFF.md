@@ -12,18 +12,18 @@ Last updated: 2026-09-09
 
 ## 已观察的发布状态
 
-观察日期：2026-09-09。仓库版本：`2e7977bef6d270fea12481078f5a168ca01769a7`。已验证运行时代码：`018341a10dd149965dd950bb544931efcb813cf8`。
+观察日期：2026-09-09。仓库版本：`709af75165b366999ee24ef24c666e8243b6aa56`。已验证运行时代码：`709af75165b366999ee24ef24c666e8243b6aa56`。
 
-验证地址：https://33d09e60.urblo-site.pages.dev
+验证地址：https://78bdc657.urblo-site.pages.dev
 
-Repository SHA includes documentation-only PR #39. Runtime evidence was captured on PR #38; this is a timestamped observation, not a claim that a moving alias never changes.
+PR #40 state consolidation passed immutable/apex/www readback on 2026-09-09. No production business data changed.
 
 CMS handoff: **revalidation_required**。QR: material_page_deployed。
 
 ## 外部依赖
 
 - **github-protection / pending**：main reported protected=false; connected account has push but not admin. Prepare stable quality check before owner enables protection.
-- **legacy-integration / unverified**：Inspect old Cloudflare Git integration and keep rollback deployments while eliminating duplicate automatic builds.
+- **legacy-integration / complete**：2026-09-09 API readback: urblo-site is direct upload. Legacy Hunter urblo Git integration production_deployments_enabled=false and preview_deployment_setting=none; canonical rollback deployment retained.
 - **cms-acceptance / external**：Existing broader CMS golden workflows, real-device checks and content confirmation are not certified by maintenance.
 
 ## 接手入口
