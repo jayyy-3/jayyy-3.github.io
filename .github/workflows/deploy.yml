@@ -58,6 +58,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Verify isolated local database and real Functions
+        if: steps.plan.outputs.deploy == 'true'
+        run: npm run local:verify
       - name: Deploy verified runtime
         if: steps.plan.outputs.deploy == 'true'
         id: deployment
@@ -102,6 +105,9 @@ jobs:
           name: verification-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
             .tmp/verification/
+            .tmp/local/*/result.json
+            .tmp/local/*/*.log
+            .tmp/local/*/*.png
             /tmp/verification-plan.json
             /tmp/verification-result.json
           if-no-files-found: warn

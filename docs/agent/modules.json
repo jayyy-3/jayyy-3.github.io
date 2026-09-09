@@ -25,11 +25,14 @@
       ],
       "rules": [
         "docs/CLOUDFLARE_DEPLOYMENT.md",
-        "docs/agent/verification.md"
+        "docs/agent/verification.md",
+        "docs/LOCAL_DEVELOPMENT.md"
       ],
       "checks": [
         "agent:cloudflare-readiness",
-        "agent:cloudflare-preview-smoke"
+        "agent:cloudflare-preview-smoke",
+        "agent:doctor",
+        "local:verify"
       ]
     },
     "qr": {
@@ -43,7 +46,8 @@
         "docs/ADMIN_IA_ACCESS.md"
       ],
       "checks": [
-        "agent:admin-image-qr"
+        "agent:admin-image-qr",
+        "local:journeys"
       ]
     },
     "projects": {

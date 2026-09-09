@@ -56,9 +56,11 @@
       },
       "progress": {
         "state": "merged_pr_40_production_verified",
-        "verification": "implemented_pending_pr_ci",
+        "verification": "merged_pr_41_production_verified",
+        "recordOnlyCI": "pr_42_and_main_zero_deployments_verified",
         "legacyAutomaticBuilds": "disabled_and_read_back",
-        "localStack": "next",
+        "localStack": "qr_reset_twice_verified_pending_pr_ci",
+        "behaviorTests": "projects_articles_next",
         "refactor": "pending"
       }
     },

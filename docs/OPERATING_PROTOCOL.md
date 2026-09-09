@@ -10,7 +10,7 @@ Task authorization persists for that scope. Repository work, local synthetic tes
 ## Verification and release
 Use `docs/agent/verification.md` as the single profile matrix. Check selection must account for renamed/deleted files and build inputs; unknown changes fail closed to full verification. Every required check must pass. A retry is retained alongside the first failure, not rewritten as a clean first pass.
 
-During migration of the harness, the existing clean Node 20 `npm run gate` is the compatibility baseline before a push. It tests the working tree; commit exactly those changes before push. If Docker is unavailable, explicitly record host Node version and run equivalent build, lint, smoke, harness and diff checks; do not call that a container result.
+Use classified `agent:verify` for record-only changes; they do not deploy. For tooling/runtime changes, clean Node 20 `npm run gate` is the compatibility baseline before a push. It tests the working tree; commit exactly those changes before push. If Docker is unavailable, explicitly record host Node version and run equivalent build, lint, smoke, harness and diff checks; do not call that a container result.
 
 Runtime release is branch → local verification → immutable Cloudflare Preview → deployed smoke → approved merge → production immutable/apex/www readback. Evidence-only documentation changes use the docs profile once classified CI is deployed. Build/deployment configuration and public content never qualify solely because their file extension is Markdown or JSON.
 

@@ -12,11 +12,11 @@ Last updated: 2026-09-09
 
 ## 已观察的发布状态
 
-观察日期：2026-09-09。仓库版本：`709af75165b366999ee24ef24c666e8243b6aa56`。已验证运行时代码：`709af75165b366999ee24ef24c666e8243b6aa56`。
+观察日期：2026-09-09。仓库版本：`03767bc6bdf5164a6b1644a4100378f9c2fa7ed5`。已验证运行时代码：`28cd2a1f4ad1dee293afd7d4f9f5dff3208ccd94`。
 
-验证地址：https://78bdc657.urblo-site.pages.dev
+验证地址：https://98b6a225.urblo-site.pages.dev
 
-PR #40 state consolidation passed immutable/apex/www readback on 2026-09-09. No production business data changed.
+PR #41 production immutable/apex/www passed automatically. PR #42/main docs-only run 34327122789 passed quality with zero deployments and the same runtime fingerprint.
 
 CMS handoff: **revalidation_required**。QR: material_page_deployed。
 

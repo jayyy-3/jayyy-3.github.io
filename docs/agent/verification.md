@@ -9,11 +9,13 @@ Use `npm run agent:init -- --task <id>` to locate the task and scope. `npm run a
 | Record docs | state, paths, harness and classifier; foundation dependency | No |
 | Tooling | full source graph, build/lint and behavior checks | No, unless release/build input |
 | Runtime or unknown | full graph plus browser config gate | Yes, then immutable smoke |
-| Migration | runtime graph; isolated reset/journey proof when local stack lands | Yes; SQL application is a separate authorization boundary |
+| Migration | runtime graph; isolated reset/journey proof before deployment | Yes; SQL application is a separate authorization boundary |
 
 `npm run gate` runs the deduplicated source graph in clean Node 20. `agent:smoke`, `agent:admin-cms-predeploy`, `agent:check` remain compatible. Running separate aliases separately is a separate verification invocation; use the combined graph to avoid duplicate nodes. Configured and env-less builds are distinct configurations. No suite certifies live CMS golden workflows or production writes.
 
 The registry in `scripts/_lib/verification.mjs` owns dependencies; classification tests cover actual Git rename/delete/untracked records and runtime fingerprints. `quality` always resolves on PRs, including record-only PRs; runtime smoke failure makes it fail. Main branch protection needs repository administrator access.
+
+Runtime CI additionally runs `npm run local:verify` with Node 22 before deployment. That local configuration has its own build and real database; it is distinct from the configured production build. Projects/Articles representative journeys are the next coverage batch.
 
 ## Retained specialized verification and live boundaries
 

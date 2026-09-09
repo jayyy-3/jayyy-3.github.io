@@ -515,3 +515,7 @@ For UI/copy/IA changes, architecture and implementation decisions must be review
 - `docs/DESIGN.md` for visual rhythm, page composition, interaction tone, and responsive UI quality.
 
 Brand and design linkage is advisory in execution flow, but required in task notes for high-impact user-facing changes.
+
+## Isolated verification environment
+
+`supabase/config.toml` and the guarded local scripts define `urblo-isolated-v1` with synthetic Auth profiles, draft Articles and a generated test image. Local app execution uses actual Wrangler Pages Functions and local Storage/Postgres, with separate Vite envDir and generated local-only bindings; no production dotenv fallback is used. Preview remains production-backed/read-only. The historical helper-grant migration is conditional on the hosted-only helper existing, preserving its original privilege result. See `docs/LOCAL_DEVELOPMENT.md`.
