@@ -31,3 +31,6 @@ test-results/
 *.njsproj
 *.sln
 *.sw?
+
+# CLI version-cache metadata is local tooling state.
+supabase/.temp/

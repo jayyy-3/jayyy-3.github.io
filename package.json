@@ -44,7 +44,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "agent:state": "node scripts/render-agent-state.mjs",
+    "agent:state:check": "node scripts/check-agent-state.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.106.2",

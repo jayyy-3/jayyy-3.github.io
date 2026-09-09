@@ -449,7 +449,6 @@ try {
   failures.push(`Unable to read scripts/check-live-readiness.mjs: ${error.message}`)
 }
 const liveReadinessDocFiles = [
-  'docs/ARCHITECTURE.md',
   'docs/CLOUDFLARE_DEPLOYMENT.md',
   'docs/agent/verification.md',
 ]
@@ -465,6 +464,11 @@ for (const file of liveReadinessDocFiles) {
   } catch (error) {
     failures.push(`Unable to read ${file}: ${error.message}`)
   }
+}
+
+if (!failures.length) {
+  const stateCheck = spawnSync('node', ['scripts/check-agent-state.mjs'], { cwd: root, encoding: 'utf8' });
+  if (stateCheck.status !== 0) failures.push(stateCheck.stdout + stateCheck.stderr);
 }
 
 if (!failures.length) {

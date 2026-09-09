@@ -115,8 +115,136 @@ Last updated: 2026-08-02
   - `.vite/**` ignored in `eslint.config.js`.
 
 ## Agent Harness Contract
-
-`docs/agent/status.json` owns timestamped release/environment observations; `docs/agent/tasks.json` owns execution scope and blockers. HANDOFF, NEXT_STEPS and README summaries are generated. Use `docs/OPERATING_PROTOCOL.md`, `docs/agent/verification.md` and `docs/PROJECT_MAP.md` for workflow, checks and module discovery. Archived startup instructions and old release assertions are not active rules.
+- Root entry: `AGENTS.md`
+- Current state handoff: `docs/HANDOFF.md`
+- Machine-readable task queue: `docs/agent/tasks.json`
+- Verification matrix: `docs/agent/verification.md`
+- Harness checks:
+  - `npm run agent:check` => `node scripts/check-harness.mjs`
+  - `scripts/check-harness.mjs` verifies required harness files, active operational `agent:*` package scripts, Contact form UI source-check smoke integration, and delegates doc path/task checks plus the Supabase foundation source-readiness gate. The guarded script map includes the form, admin, Cloudflare, first-admin, live-readiness, content-import, SEO readiness, Supabase foundation readiness, and public Supabase readiness runners so launch verification commands cannot be silently removed from `package.json`.
+  - `scripts/check-doc-paths.mjs` rejects machine-specific paths and validates repo-relative path references in docs/task state.
+- Local container gate:
+  - `npm run gate` => `bash scripts/container-gate.sh`
+  - Builds `Dockerfile.gate`; the runtime gates plus `agent:check` run as image build steps, so a red gate fails the build. Working-process contract: `docs/OPERATING_PROTOCOL.md`.
+- Supabase foundation source readiness:
+  - `npm run agent:supabase-foundation-readiness` => `node scripts/check-supabase-foundation-readiness.mjs`
+  - Verifies the source contract for the 13 expected foundation/security migrations, 24 launch tables including `project_media`, RLS enablement, public-select policies, anonymous read-only grants, private-table anonymous revokes, 12 baseline finish rows, the default published site settings row, service-role-only Sample Request atomic RPC, Storage bucket/listing/public-write role hardening, private SECURITY DEFINER helper posture, and normalized admin profile email uniqueness.
+  - This is a source/no-secret verifier. It does not query Supabase, apply migrations, create rows, validate live Auth, or replace connector/live browser verification.
+- Content import dry run:
+  - `npm run agent:content-import` => `node scripts/check-content-import-readiness.mjs`
+  - Reads current static Stone Library JSON, Stone Library finish-image mappings, Projects data, Products data, Articles manifest, and referenced local media.
+  - Produces Supabase-shaped import candidates with natural keys, forces content rows to `draft`, extracts legacy newsletter HTML into draft structured article blocks, and fails before any database write if local media is missing, slugs duplicate, or project/material references use unknown stone or finish keys.
+  - Article block extraction currently creates draft `rich_text`, `image`, `cta`, and `project_spotlight` rows, links image blocks through `media_assets`, skips newsletter footer/contact/social artifacts, and flags claim-sensitive source copy for review instead of rewriting it.
+  - Can write a local ignored review artifact with `npm run agent:content-import -- --out .tmp/content-import-preview.json`; the artifact remains a draft/no-write payload and must not be applied as final published content without approval.
+  - `npm run agent:content-import:plan` writes both `.tmp/content-import-preview.json` and `.tmp/content-import-plan.md`, including import safety notes, preflight checks, table apply order, reverse rollback order, and verification expectations.
+  - `npm run agent:content-import:preflight-sql` also writes `.tmp/content-import-preflight.sql`, a read-only Supabase target preflight SQL artifact for row-count, status, RLS, policy, Data API table privilege, and sequence usage inspection before any approved import/apply step.
+  - `npm run agent:content-import:apply-sql` also writes `.tmp/content-import-apply.sql` and `.tmp/content-import-rollback.sql`. The apply artifact aborts unless `urblo.import_approved=true` is explicitly set inside the transaction, imports as draft only, contains no delete/publish operation, and now also aborts on existing parent natural-key matches unless `urblo.import_merge_approved=true` is explicitly set after reviewing merge/upsert behavior. The rollback artifact is also guarded, aborts unless `urblo.rollback_approved=true` is explicitly set, runs in reverse dependency order, and targets matching draft/import rows only.
+- Public Supabase readiness:
+  - `npm run agent:public-supabase-readiness` => `node scripts/check-public-supabase-readiness.mjs`
+  - Verifies the content import dry run has no warnings/blockers, all import rows with status remain `draft`, article block imports stay structured rather than placeholder/newsletter-artifact payloads, the generated guarded draft apply SQL keeps the import and merge approval gates manual, avoids destructive/publish statements, forces imported status to `draft`, the generated guarded rollback SQL keeps its destructive approval gate manual and follows reverse dependency order, the generated preflight SQL includes Data API table/sequence grant inspection for `anon`, `authenticated`, and `service_role`, public RLS policy source is published-only, anonymous grants are read-only, public runtime uses browser-key Supabase published reads with static fallback, and Cloudflare routes only invoke Functions under `/api/*`.
+  - This is a source/no-write verifier. It does not apply imported content, query Supabase, create a preview deployment, or replace live credential checks.
+  - `npm run agent:live-readiness` reports the guarded content import apply, merge/upsert, and public read cutover approval gates with `--content-import-approved`, `--content-merge-approved`, and `--content-public-cutover-approved`. These flags only document manual readiness and never apply SQL, publish content, or switch runtime reads.
+  - `npm run agent:public-content-overlay` executes the pure migration-overlay behavior contract: a Published CMS item replaces only the matching canonical static item, unmatched static items remain, and new Published items append. The admin predeploy gate runs this alongside the broader source boundary audit.
+- Agent startup:
+  - `npm run agent:init` => `bash scripts/agent-init.sh`
+  - Prints repo path, git status, recent commits, runtime versions, read order, and common commands.
+- Static smoke:
+  - `npm run agent:smoke` => `bash scripts/agent-smoke.sh`
+  - Serves `dist/` with Vite preview and checks the React shell for key clean routes, `public/articles/index.json`, and critical CTA contracts.
+  - Builds first only when `dist/` is missing; runtime tasks should still run `npm run build` before smoke.
+  - Runs `scripts/check-forms-api.mjs`, `scripts/check-contact-form-ui-source.mjs`, and `scripts/check-capabilities-page-source.mjs` after route/CTA shell checks so Contact submit routing, Capability Statement download routing, API mock behavior, Cloudflare Pages Function method boundaries, inline visitor states, and no-mailto main submit contracts stay covered without secrets.
+- Contact form UI source verification:
+  - `npm run agent:forms-ui` => `node scripts/check-contact-form-ui-source.mjs`
+  - Verifies Contact page source keeps the main submit flow on `/api/enquiries` and `/api/sample-requests`, includes inline validation/success/error/submitting states, preserves sample-request mode fields, keeps direct email/phone fallback channels, includes the optional `VITE_TURNSTILE_SITE_KEY` widget/token path, and does not use submit-flow `mailto:` or window navigation.
+  - This is a source-only verifier. It does not replace live Supabase form persistence, Turnstile, email, browser-responsive QA, or Cloudflare endpoint verification.
+- Capability Statement UI source verification:
+  - `npm run agent:capabilities-ui` => `node scripts/check-capabilities-page-source.mjs`
+  - Verifies `/capabilities` keeps the Founder-sourced Capability Statement structure, the five concrete capability modules, selected-project proof ledger, shared CTA data, static PDF/media assets, email-gated `/api/enquiries` download lead capture, Turnstile widget/token reuse, and no-mailto/window-navigation submit contract.
+  - This is a source-only verifier. It does not replace live Supabase lead persistence, final Turnstile proof, or browser-responsive QA.
+- SEO readiness:
+  - `npm run agent:seo-readiness` => `node scripts/check-seo-readiness.mjs`
+  - Verifies `public/robots.txt`, `public/sitemap.xml`, `src/data/seoRoutes.ts`, `src/App.tsx`, and the current static public data agree on the Phase 1 SEO indexability contract.
+  - Confirms sitemap URLs match the approved public route set, excludes `/admin` and `/api`, keeps clean canonical URLs only, and guards against the old generic detail-title source returning in `src/App.tsx`.
+  - This is a source/no-secret verifier. It does not query Google, submit the sitemap to Search Console, prove production deployment has completed, or replace a future pre-render/SSR decision.
+- Live form verification:
+  - `npm run agent:forms-live -- --allow-writes` => `node scripts/check-forms-api-live.mjs --allow-writes`
+  - Loads local environment values from `.env.local`, `.env`, `.dev.vars`, and the shell.
+  - Requires `--allow-writes`, Jay approval for tagged live form QA writes, and `SUPABASE_SERVICE_ROLE_KEY` or the compatibility alias `SUPABASE_SERVICE_KEY`.
+  - Default mode invokes the Pages Function handlers directly and suppresses Turnstile/email side effects unless `--turnstile-token` or `--allow-email` is supplied.
+  - Final notification proof can be forced with `--allow-email --require-email`; this asserts both valid live submissions store `notification_status = 'sent'` instead of quietly accepting `not_required` or `failed`.
+  - Final Turnstile proof can be forced with `--require-turnstile --turnstile-token <token>`; this now requires `VITE_TURNSTILE_SITE_KEY` before the live check starts and asserts both valid live submissions store `turnstile_success = true`.
+  - Optional HTTP mode uses `--base-url <origin>` to test a local or deployed Pages endpoint while still querying Supabase to verify durable rows.
+  - Valid live submissions must return a final `notificationStatus` that matches the stored lead row's `notification_status`, so email patch failures do not hide behind a successful insert.
+  - Valid live submissions must have audit rows with matching source-route metadata, and invalid live submissions must create neither rows nor matching audit events.
+  - Optional `--require-browser-boundary` requires `VITE_SUPABASE_PUBLISHABLE_KEY` or `VITE_SUPABASE_ANON_KEY` and verifies the created enquiry, sample request, and sample item rows are not anonymously readable through browser-key REST access.
+  - The command is write-gated and credential-gated; it intentionally fails when `--allow-writes` or service-role credentials are absent.
+- Cloudflare Pages readiness:
+  - `npm run agent:cloudflare-readiness` => `node scripts/check-cloudflare-pages-readiness.mjs`
+  - Verifies the repo-side Pages contract: `npm run build`, Vite root base, SPA fallback, `/api/*` Function routing scope, launch headers, API handler files, environment placeholders, and deployment runbook coverage.
+  - This command does not create a Cloudflare Pages project, set environment variables, validate a preview URL, change custom domains, or touch DNS.
+- Cloudflare preview smoke:
+  - `npm run agent:cloudflare-preview-smoke -- --base-url https://<preview>.pages.dev` => `node scripts/check-cloudflare-preview-smoke.mjs`
+  - Verifies non-redirecting deployed direct-refresh shells for public/admin routes, requires every route shell's entry asset identity to match `/`, verifies same-origin query-free deployed `/assets/*` paths, recursively discovered route chunks, JS/CSS MIME and body integrity (including cached SPA-shell false 200 denial), the deployed admin config-required/profile-gate bundle markers, legacy `_redirects` behavior, and no-write API safe-failure behavior. Public form checks cover `/api/enquiries` and `/api/sample-requests`, including malformed JSON; the protected Projects check requires unauthenticated GET and POST to `/api/admin/projects` to return structured `401` responses and its OPTIONS response to allow GET/POST plus authorization/content-type. `--reference-url https://<8-hex-deployment>.urblo.pages.dev` must be an independent immutable origin and is mandatory for apex, `www`, and `urblo.pages.dev` after FQDN trailing-dot normalization; it compares root entry/style identity and requires byte-for-byte plus MIME equality for the full discovered asset graph. Source readiness still forbids the removed year-long policy; if a deployed response retains that header, the smoke emits a cache warning only after the immutable comparison, otherwise it fails.
+  - Local Vite preview URLs are supported for route/asset/bundle validation; Cloudflare-only redirect and Function checks are skipped on local hosts.
+  - This command does not create a Pages project, set environment variables, submit valid form rows, verify Supabase persistence, change custom domains, or touch DNS.
+- Admin live readiness:
+  - `npm run agent:admin-live-readiness -- --admin-email <first-admin-email>` => `node scripts/check-admin-live-readiness.mjs`
+  - Loads local environment values from `.env.local`, `.env`, `.dev.vars`, and the shell.
+  - Requires `VITE_SUPABASE_PUBLISHABLE_KEY` or `VITE_SUPABASE_ANON_KEY`, plus `SUPABASE_SERVICE_ROLE_KEY` or `SUPABASE_SERVICE_KEY`.
+  - Reads `admin_profiles`, `site_settings`, and `finish_definitions` with the service key; also verifies the browser-safe key can read published public seed rows while `admin_profiles` stays unreadable or empty without an authenticated admin session.
+  - It does not create users, create profiles, mutate content, or delete rows.
+  - Defaults to requiring an active `owner` profile. Use `--required-role owner,admin` only when intentionally verifying a non-owner admin profile.
+- First-admin bootstrap:
+  - `npm run agent:first-admin-bootstrap` => `node scripts/bootstrap-first-admin.mjs`
+  - Default mode prints the approved bootstrap path and performs no Supabase calls, invites, profile writes, or deletes.
+  - `--verify-only --admin-email <first-admin-email>` requires a service-role key and checks whether the Supabase Auth user, exactly one active `admin_profiles` row linked to that Auth user with the planned role (`owner` by default or explicit `--role admin`), and baseline seed rows are ready.
+  - `--allow-writes --admin-email <first-admin-email> --confirm-email <first-admin-email>` is the guarded live mode for creating/upserting the first `admin_profiles` row for an existing Auth user. Add `--invite` only when Jay explicitly approves sending the Supabase Auth invitation. The write path refuses duplicate profile emails or an email already linked to another Auth user before the upsert.
+  - Live write mode also inserts an `admin_profile.bootstrap` audit event; if that audit insert fails, the command fails instead of silently treating the access-control change as fully verified.
+  - Existing active owner profiles block a new first-admin bootstrap unless `--allow-existing-owner` is intentionally supplied.
+- Live input readiness:
+  - `npm run agent:live-readiness` => `node scripts/check-live-readiness.mjs`
+  - Loads local environment values from `.env.local`, `.env`, `.dev.vars`, and the shell.
+  - Reports, without printing secret values, whether the inputs for local/deployed form persistence, final email proof, final Turnstile proof, form private-row browser-key proof, `agent:admin-live-readiness`, `agent:first-admin-bootstrap -- --allow-writes`, active-admin browser QA, unprofiled unauthorized browser QA, `agent:admin-crud-live -- --allow-writes`, owner/admin private Storage proof, the separate `agent:admin-media-role-boundary-live -- --allow-writes --strict` Editor/public-bucket proof, guarded content import apply/merge/cutover approval, and `agent:cloudflare-preview-smoke` are present.
+  - Accepts non-secret readiness overrides: `--base-url <origin>`, `--admin-email <email>`, `--form-writes-approved`, `--first-admin-writes-approved`, `--admin-writes-approved`, `--media-role-migration-verified`, `--media-role-writes-approved`, `--content-import-approved`, `--content-merge-approved`, `--content-public-cutover-approved`, and `--turnstile-token-provided`. Secret keys and admin/editor session credentials must still come from env files or the shell and must not be printed.
+  - Manual `--base-url` and `--admin-email` values are validated before they count as present. Copied placeholders such as `<preview-origin>` / `<first-admin-email>`, malformed emails, or preview URLs with path/query/hash remain missing in the readiness report.
+  - `--form-writes-approved` only represents Jay's approval to run tagged live form QA writes; it does not provide service-role credentials, browser-safe credentials, or a preview URL.
+  - `--first-admin-writes-approved` only represents Jay's approval to run the first-admin profile/invite write path; it does not provide a service-role key or replace the `--allow-writes` and `--confirm-email` guards on `agent:first-admin-bootstrap`.
+  - `--media-role-migration-verified` only records that `20260714050750_media_public_bucket_role_hardening.sql` was applied and its policies were read back in production. `--media-role-writes-approved` records Jay's approval for that exact tagged Editor/owner Storage proof rather than reusing general admin CRUD approval. Neither flag applies SQL, runs writes, or replaces distinct active Editor/owner credentials and the live role-boundary verifier.
+  - `--content-import-approved`, `--content-merge-approved`, and `--content-public-cutover-approved` only represent Jay's approval state for those guarded operations; they do not apply SQL, publish content, or switch public runtime reads.
+  - `--turnstile-token-provided` only represents that a valid target-environment token will be supplied to `agent:forms-live -- --require-turnstile`; it does not provide the public site key, server secret, or the actual token value.
+  - Default mode is report-only and exits 0 even when inputs are missing; `--strict` exits 1 when live inputs are missing or manually gated.
+  - This command does not query Supabase, create users, run live writes, create Cloudflare projects, or touch DNS.
+- Admin CRUD source coverage:
+  - `npm run agent:admin-crud-coverage` => `node scripts/check-admin-crud-coverage.mjs`
+  - Verifies `/admin` route registration, active module registration, `RequireAdmin` state coverage, browser-safe Supabase client wiring, launch-critical table references, dashboard content-health checks, role-gated mutation controls, publish/archive paths, structured Article block authoring guardrails, shared audit writer usage outside the Projects aggregate, Media/Leads export audit gates, and the non-destructive archive/removal contract.
+  - Also guards launch-critical admin UI state coverage: mutating screens must keep validation feedback and save paths, while content/media screens must keep publish/archive lifecycle save paths and published/archived state controls.
+  - Also scans admin source and the live admin verifier for destructive removal regressions: Supabase `.delete()` mutations, HTTP `DELETE` requests, destructive RPC names, and visible `Delete`/`Remove` controls are not allowed in the launch-critical CMS path.
+  - Also guards the admin auth shell source contract: protected routes must preserve encoded admin-only `next` targets, login must reject non-admin or login/unauthorized loop targets, and session bootstrap must validate Supabase sessions with `getUser()` before looking up an active `admin_profiles` row.
+  - Also scans browser source for actual service-role Supabase env/client usage patterns, guards the config-missing admin gate plus admin-route WelcomePopup suppression, and verifies the live admin CRUD verifier remains browser-key/RLS based rather than service-role based.
+  - Projects-specific source coverage delegates to `npm run agent:admin-projects-aggregate`; the general verifier must not preserve obsolete schema-shaped UI strings merely to keep earlier assertions green.
+  - This is a source-only verifier. It never mutates Supabase and does not replace live browser QA with a configured admin profile.
+- Admin Projects aggregate coverage:
+  - `npm run agent:admin-projects-aggregate` => `tsx scripts/check-admin-projects-aggregate.mjs` (Node 20-compatible TypeScript imports)
+  - Verifies the one-draft aggregate shape, one protected GET/POST endpoint, bearer/service-role boundary, revision guard, one sticky action bar, shared public/preview renderer, visual pointer hotspots, inline private media, public Project material/map/hotspot reads, server-side audit path, create-only Storage copy plus compensation, service-role-only aggregate RPC, private draft table, and non-destructive child archival.
+  - Includes executable mapping/blocker fixtures for preview/public parity and rejects direct browser child-table or Projects audit mutations. It is source-only: it does not apply or verify live migration state, copy Storage objects, publish content, prove an authenticated deployed workflow, or pass Jay's fool test.
+- Admin config-gate browser coverage:
+  - `npm run agent:admin-config-gate` => `node scripts/check-admin-config-gate.mjs`
+  - When no `--base-url` is supplied, creates a dedicated Vite build under `.tmp/admin-config-gate/dist` with every browser-safe Supabase key explicitly cleared, then runs a generated Playwright Firefox spec against `/admin`, `/admin/login`, `/admin/unauthorized`, `/admin/leads`, `/admin/media`, `/admin/settings`, `/admin/stone-library`, `/admin/projects`, `/admin/products`, `/admin/articles`, and `/admin/audit`.
+  - Verifies each route renders `Configuration required`, rejects the stable login-form marker plus private admin/module text, captures ignored screenshots under `.tmp/admin-config-gate/screenshots`, and does not require Supabase credentials or live writes. This prevents a previously configured `dist/` or local `.env` from turning the no-config test into a false failure.
+  - Use `--base-url <origin>` only for an origin intentionally built without browser-safe Supabase configuration.
+- Admin auth browser coverage:
+  - `npm run agent:admin-auth-browser` => `node scripts/check-admin-auth-browser.mjs`
+  - Loads local environment values from `.env.local`, `.env`, `.dev.vars`, and the shell without printing secret values.
+  - Default mode is plan-only and prints required variable names/sources. It does not sign in unless `--allow-login` is supplied.
+  - Live mode builds current source into an isolated configured bundle when no `--base-url` is supplied, enforces a 500,000-byte entry budget plus no eager Supabase vendor module preload, aborts the Supabase chunk and verifies Products/Projects/Articles retain static fallback, signs in through `/admin/login` with `URBLO_ADMIN_EMAIL` and `URBLO_ADMIN_PASSWORD`, uses the stable `admin-login-form` marker instead of display-copy matching, verifies authenticated admin route shells in Firefox, then signs out and reopens a protected route to prove the session is gone. It captures ignored screenshots under `.tmp/admin-auth-browser/screenshots` and creates no content rows, Storage objects, or audit events. `VITE_SUPABASE_URL` is optional because the browser client defaults to the Urblo project URL. The configured local and PR `#6` production runs on 2026-07-13 covered all 9 authenticated route shells, the three blocked-Supabase public fallbacks, Sign out, and the protected-route revisit.
+  - Unauthorized-profile mode uses `--allow-login --expect-unauthorized --strict` with `URBLO_UNPROFILED_EMAIL` and `URBLO_UNPROFILED_PASSWORD` for a valid Auth user that has no active `admin_profiles` row; it must land on `/admin/unauthorized`, then probe all launch-critical admin routes while signed in and keep them on `/admin/unauthorized` without rendering private admin module content. It still creates no rows or Storage objects.
+  - Use `--base-url <origin>` to run the same authenticated browser check against another preview origin after browser-safe Supabase config exists there.
+- Admin CRUD live verification:
+  - `npm run agent:admin-crud-live` => `node scripts/check-admin-crud-live.mjs`
+  - Default mode prints the live verification plan and performs no writes.
+  - Live write mode uses `npm run agent:admin-crud-live -- --allow-writes` after browser-safe Supabase config and a real owner/admin session are available.
+  - The command uses browser-key PostgREST/Auth requests, not a service-role key, so writes exercise RLS for the signed-in admin profile.
+  - The command creates tagged QA rows, verifies dashboard-health predicates against tagged QA rows before archive cleanup, publishes then archives public-facing parents where possible, verifies the exact tagged audit action/entity set, verifies those tagged archived public-content rows and private lead rows are not anonymously visible, and intentionally avoids physical deletes. `--include-storage` uploads a tiny private `urblo-admin-media` object, verifies signed-in admin readback, and verifies anonymous browser-key reads are denied through private and public Storage object endpoints for the final media upload policy proof.
 
 ## Route Interface Contract (`src/App.tsx`)
 
@@ -488,9 +616,12 @@ Route state contract:
   - `Space Grotesk` local WOFF2
 - Homepage runtime no longer depends on remote WordPress font CSS/TTF/WOFF assets.
 
-## Release evidence
-
-Timestamped release observations are maintained in `docs/agent/status.json`; verification history is indexed by `docs/WORKLOG.md`. Do not infer a current passing gate from old prose.
+## Last Runtime Quality Gate Status (Measured 2026-07-13)
+- `npm run build`: pass
+- `npm run lint`: pass
+- `npx tsc -b`: pass
+- `npm run agent:smoke`: pass
+- `npm run agent:check`: pass
 
 ## Known Architecture Risks
 - Cloudflare + Supabase is the approved launch target, and Supabase foundation schema/RLS plus baseline seeds are applied. Form endpoint source, basic deployed row/audit creation, SMTP2GO notification delivery, and browser-key private-row denial are verified; final form proof still needs Turnstile and admin lead workflow verification.

@@ -7,7 +7,7 @@ This runbook captures the repo-side Cloudflare Pages deployment contract and the
 
 It records the current Cloudflare Pages project, production verification state, and remaining account-level work.
 
-Current environment identifiers and timestamped release observations are owned by `docs/agent/status.json`. The Urblo-owned `urblo-site` Pages project is the active delivery target; this document describes stable setup and rollback procedures. Earlier account checkpoints are preserved in `docs/archive/2026-09-09/docs__CLOUDFLARE_DEPLOYMENT.md`.
+Current account checkpoint: production compute and CI/CD have moved from Hunter's Cloudflare account (`077afae2c6f4e77badadf21e49e58eb7`) to the Urblo-owned account (`cb91e0806b808258d6d9c852c8d0f060`). The active Pages project is `urblo-site`, default domain `urblo-site.pages.dev`; current `main` commit `aec4dce112873029de767239d7e7ee5ae88f7917` is deployed at `https://7e668551.urblo-site.pages.dev`. GitHub Actions deploys branches as Preview and `main` as production with a minimal account-owned Pages Write token. Both custom domains report `Active / SSL enabled`, use `Full (strict)`, and pass exact immutable-reference smoke against that deployment. New zone ID is `83a74774485d2ee76f6c8bd0d90a0f03`. On 2026-08-26 the `.au` registry accepted nameservers `mckenzie.ns.cloudflare.com` and `norman.ns.cloudflare.com`; the new Cloudflare zone is Active with all 24 intended records. Authoritative readback covers the expected website, Google Workspace, SPF, DMARC, Google DKIM, SMTP2GO, SendGrid, Squarespace, and `qa` records. Google Public DNS returns the new delegation; some other recursive resolvers may briefly retain the old pair until cache expiry. The old Hunter-account Pages project and zone were not deleted.
 
 Repo-side readiness is checked by `npm run agent:cloudflare-readiness`. This command verifies the build contract, SPA fallback, Pages Functions routing scope, headers, API handler files, environment placeholders, and this runbook without touching Cloudflare account state.
 
@@ -156,7 +156,7 @@ Legacy URLs such as `/products/primeBlock` and `/articles/Modular-Mastery-How-Pr
 Run the deployed preview smoke runner:
 - `npm run agent:cloudflare-preview-smoke -- --base-url https://<preview>.pages.dev`
 - For production promotion/readback, bind the custom origin to the exact immutable deployment: `npm run agent:cloudflare-preview-smoke -- --base-url https://urblo.com.au --reference-url https://<8-hex-deployment>.<urblo|urblo-site>.pages.dev`.
-- Read the immutable runtime reference from `docs/agent/status.json` and bind apex and `www` smoke to it; verify the moving deployment when starting a new release.
+- Current verified production command: `npm run agent:cloudflare-preview-smoke -- --base-url https://urblo.com.au --reference-url https://7e668551.urblo-site.pages.dev`; repeat with `https://www.urblo.com.au` as the base URL for the second custom domain.
 
 The `--base-url` value must be a real `http`/`https` origin with no path, query, or hash. Copied placeholders are rejected before any route, asset, redirect, or Function request runs. Apex, `www`, and the moving `urblo.pages.dev` / `urblo-site.pages.dev` production aliases are recognized after removing FQDN trailing dots and require `--reference-url`; it must be a different HTTPS origin matching an exact immutable `https://<8-hex-deployment>.<urblo|urblo-site>.pages.dev` alias. Production/default/branch aliases and self-comparison are rejected before network verification.
 
@@ -289,15 +289,15 @@ Current project:
 - Build command: `npm run build` locally before upload
 - Output directory: `dist`
 - Root directory: `/`
-- Latest verified runtime observation: `docs/agent/status.json`
+- Latest verified runtime URL: `https://7e668551.urblo-site.pages.dev`
 - Production URL: `https://urblo-site.pages.dev`
 - Deployment status: `success`
-- Runtime deployment commit: read the timestamped structured release observation.
+- Runtime deployment commit: `aec4dce112873029de767239d7e7ee5ae88f7917`
 
 The Supabase Auth Site URL/exact invite-recovery Redirect URL entries, Media Storage role migration/readback, and separately approved Editor/owner tagged proof are complete. The next account-level work is the approved Projects reshape followed by all twelve production editor golden workflows against one deployment. Turnstile remains a separate forms decision.
 
 Still pending after preview validation:
-- Production and Preview server Supabase bindings were configured/read back; Preview shares production data and maintenance QA is read-only. Local isolated tests own synthetic writes;
+- Cloudflare Pages production already has `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`; preview environment variables remain empty;
 - adding Turnstile variables if bot-protection proof is required before launch;
 - running the remaining Turnstile live form proof after those inputs exist;
 - running tagged admin workflow/content QA only after explicit approval and a real owner/admin session.

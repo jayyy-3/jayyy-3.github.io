@@ -1,125 +1,76 @@
 {
-  "version": 1,
+  "version": 2,
   "lastUpdated": "2026-09-09",
+  "currentTaskId": "NOW-MAINTAINABILITY-001",
   "sourceOfTruth": {
-    "currentState": "docs/HANDOFF.md",
+    "currentState": "docs/agent/status.json",
     "taskQueue": "docs/agent/tasks.json",
-    "verification": "docs/agent/verification.md",
-    "adminHandoffEvidence": "docs/agent/admin-handoff-evidence.json",
     "historicalEvidence": "docs/WORKLOG.md",
-    "harnessGc": "docs/agent/harness-gc.md"
+    "verification": "docs/agent/verification.md",
+    "adminHandoffEvidence": "docs/agent/admin-handoff-evidence.json"
+  },
+  "release": {
+    "observedAt": "2026-09-09",
+    "repositorySha": "2e7977bef6d270fea12481078f5a168ca01769a7",
+    "runtimeSha": "018341a10dd149965dd950bb544931efcb813cf8",
+    "verifiedRuntimeUrl": "https://33d09e60.urblo-site.pages.dev",
+    "ciRunId": 34319175514,
+    "note": "Repository SHA includes documentation-only PR #39. Runtime evidence was captured on PR #38; this is a timestamped observation, not a claim that a moving alias never changes.",
+    "evidenceRefs": [
+      "docs/archive/2026-09-09/worklog-01.md"
+    ]
   },
   "production": {
-    "cloudflarePages": "urblo_owned_account_urblo_site_pr33_main_aec4dce_deployed_7e668551_github_actions_preview_and_main_cicd_verified_full_strict_apex_www_exact_immutable_smoke_passed_registry_nameservers_changed_new_zone_active_24_records_verified",
-    "productionDomains": "verified",
-    "formsPersistence": "verified_fresh_post_cloudflare_migration_marker_urblo_live_20260826_cf_migration_01_enquiry_10_sample_6_item_6_audit_354_355",
-    "smtp2go": "verified_fresh_post_cloudflare_migration_both_stored_notification_status_sent",
+    "site": "live",
+    "adminCmsHandoff": "revalidation_required",
+    "qr": "material_page_deployed",
+    "forms": "persistence_and_smtp2go_verified",
     "turnstile": "not_configured",
-    "adminAuthBrowserQa": "production_9_authenticated_routes_signout_protected_revisit_and_3_blocked_supabase_static_fallbacks_verified",
-    "adminCmsHandoff": "revalidation_required_after_user_report_and_repair_deploy",
-    "adminCrudLive": "api_level_verified_projects_owner_preview_happy_path_verified_remaining_ui_golden_workflows_missing",
-    "adminProjectsAggregateMigrations": "20260719015649_expand_20260802103337_minimum_disclosure_and_20260802105537_write_lockdown_applied_and_read_back_20260812053204_stone_library_source_prepared_not_applied",
-    "adminProjectsBranchPreview": "pr14_merge_edd33465_production_asset_switch_authenticated_5_projects_1_draft_4_live_zero_archive_and_public_five_readback_passed_immutable_url_unavailable_without_new_oauth_grant",
-    "adminProjectsAuthenticatedPreview": "marker_admin-projects-ui-mrroa6p0_one_save_refresh_unsaved_preview_private_first_media_hotspot_55_55_publish_public_readback_hide_public_not_found_passed_final_project_archived_public_media_retained_private_source_removed",
-    "adminStorageProof": "media_role_migration_and_policies_read_back_live_editor_owner_boundary_passed_zero_tagged_objects_remain",
-    "supabaseAuthSmtp": "redirect_config_corrected_and_read_back_invite_delivery_observed_sender_ownership_unverified_golden_flow_not_repeated",
-    "contentImport": "draft_imported",
-    "publicContentCutover": "published_overlay_with_static_fallback_and_runtime_entity_metadata_deployed_authenticated_readback_pending",
-    "seoIndexability": "static_36_route_production_verified_cms_only_discovery_strategy_pending",
-    "seoLegacyRedirects": "production_smoke_verified_2026_07_13",
-    "settingsInviteProof": "qa_editor_active_via_direct_auth_activation_redirect_config_corrected_real_ui_invite_recovery_not_repeated",
-    "adminImageQr": "pr29_merge_19e2b41_production_deployment_d6816c71_18_supplied_images_imported_19_active_zero_hidden_canonical_qr_direct_image_and_deployment_bound_smoke_verified",
-    "supabaseSecurityAdvisor": "one_auth_leaked_password_warning_plus_two_expected_browser_callable_archived_slug_security_definer_warnings_minimum_disclosure_rpc_returns_expected_empty_static_fallback_intersection",
-    "imageQrMaterialMigration": "20260909054816_applied_readback_nullable_jsonb_server_only_rls_32_existing_rows_null"
+    "content": "published_cms_overlay_with_static_fallback"
   },
-  "localReproducibility": {
-    "sourceHarness": "passing",
-    "adminSourceCoverage": "passing",
-    "runtimeGates": "2026_08_17_homepage_all_15_published_projects_pr26_merge_f3fe5647_rail_reset_pr27_merge_ccab9c12_production_deployment_b85d8718_immutable_apex_www_smoke_desktop_mobile_return_path_and_jay_acceptance_passing",
-    "liveSecretsPresent": true,
-    "liveReadiness": "browser_key_owner_and_distinct_editor_credentials_present_media_migration_applied_live_role_boundary_passed",
-    "adminUxReshape": "phase0_closed_projects_phase1_and_pr11_single_editor_followup_live_and_jay_accepted_image_qr_merge_19e2b41_live_with_19_active_resources_and_direct_qr_readback_phase2_articles_and_sunset_pending",
-    "publicCatalogIntegrity": "branch_codex_fix_mobile_product_stone_integrity_local_source_and_browser_checks_passing_full_gate_preview_and_jay_acceptance_pending_no_live_data_write",
-    "imageQrMaterialPages": "production_pr38_018341a_33d09e60_immutable_apex_www_smoke_qr_pass_auth_retry_10_routes_pass_ui_save_reload_audit358_pass_staff_default_confirmation_remaining"
+  "environments": {
+    "production": {
+      "origin": "https://urblo.com.au",
+      "pagesProject": "urblo-site",
+      "accountId": "cb91e0806b808258d6d9c852c8d0f060",
+      "supabaseProject": "npkidywzwddbnfrnxlmo"
+    },
+    "preview": {
+      "pagesProject": "urblo-site",
+      "dataTarget": "production",
+      "testPolicy": "read_only",
+      "serverBindings": "configured_2026-09-09"
+    },
+    "local": {
+      "status": "isolated_stack_pending",
+      "testPolicy": "synthetic_local_only"
+    }
   },
-  "nextDecisions": [
-    "QR material pages shipped in PR #38 / 018341a / 33d09e60; staff confirm remaining default material assignments in Admin Image QR. No runtime promotion remains.",
-    "Public catalog runtime is live through PR #36 / merge 5731651 / immutable deployment https://764dedbc.urblo-site.pages.dev. Obtain Jay's iOS/Android WeChat result, then list and request separate approval for exact production CMS corrections and the Steel Blue/BlueOcean duplicate-row merge-delete.",
-    "After Preview acceptance, request separate approval for the exact imported Product model and Tuscany finish-capability Draft corrections; do not write production Supabase from source approval alone.",
-    "Image QR PR #29 merge 19e2b41 is live as deployment d6816c71; 19 active resources, canonical QR redirect, and immutable/apex/www deployment-bound smoke pass. Treat later usability feedback as user-owned rather than reopening deployment proof.",
-    "Monitor or purge the four residual apex cache headers when Cloudflare account access is available; their current bytes and MIME types exactly match the immutable repair deployment and are non-blocking.",
-    "Ask Jay to fool-test the production Project material-point workflow; migration 20260812062636 and runtime merge 0593389d / deployment b160e33f are live, deployment-bound smoke and nine authenticated Admin routes pass, and agent checks cannot self-certify acceptance.",
-    "After separate approval, verify Supabase Auth SMTP ownership and repeat invite/password/recovery against the corrected and read-back production callbacks.",
-    "Keep Moon Gate Draft until separately approved Stone Library publication and hotspot-material binding work is complete; do not bypass the publish guard.",
-    "Decide whether final Turnstile proof is required before the next public launch checkpoint.",
-    "Repeat the complete Settings invite/password workflow with the approved QA recipient after Auth callback configuration is corrected.",
-    "Have a customer or editor review imported Draft CMS content before publishing items publicly.",
-    "Decide whether and when to resume paused article claim cleanup.",
-    "Monitor GSC after the refreshed sitemap and Phase 2 redirect deployment so Google processing, discovered pages, and old URL decay are visible.",
-    "Plan Phase 3 SEO content growth around non-brand Product, Stone Library, Project, and Article search intent.",
-    "Choose a generated sitemap/release-manifest, dynamic sitemap, or pre-render strategy so CMS-only published slugs enter the crawlable route inventory and first-response metadata."
+  "externalDependencies": [
+    {
+      "id": "github-protection",
+      "status": "pending",
+      "detail": "main reported protected=false; connected account has push but not admin. Prepare stable quality check before owner enables protection."
+    },
+    {
+      "id": "legacy-integration",
+      "status": "unverified",
+      "detail": "Inspect old Cloudflare Git integration and keep rollback deployments while eliminating duplicate automatic builds."
+    },
+    {
+      "id": "cms-acceptance",
+      "status": "external",
+      "detail": "Existing broader CMS golden workflows, real-device checks and content confirmation are not certified by maintenance."
+    }
   ],
-  "activeExecutableTasks": [
-    "NOW-QR-MATERIAL-PAGES-001",
-    "NOW-PUBLIC-CATALOG-INTEGRITY-001",
-    "NOW-ADMIN-RELIABILITY-UX-001",
-    "NOW-ADMIN-SETTINGS-CRUD-001",
-    "NOW-ADMIN-UX-RESHAPE-001"
-  ],
-  "umbrellaTasks": [
-    "NOW-ADMIN-CMS-001"
-  ],
-  "harnessGc": {
-    "maxNowTasks": 4,
-    "agentsMdTargetLines": 180,
-    "handoffTargetLines": 220,
-    "worklogReviewWarningLines": 8000
-  },
-  "lastVerified": {
-    "agentCheck": "2026-08-26",
-    "build": "2026-08-26",
-    "containerGate": "2026-08-26",
-    "containerGateExceptionApproved": "2026-07-16",
-    "hostEquivalentGate": "2026-07-19",
-    "cloudflarePreviewSmokeBranchPreview": "2026-08-18",
-    "cloudflareReadiness": "2026-07-19",
-    "gscSeoReview": "2026-06-12",
-    "gscSitemapSubmission": "2026-06-12",
-    "harnessGc": "2026-07-19",
-    "harnessGcReview": "2026-07-19",
-    "lint": "2026-08-26",
-    "seoLegacyRedirectSource": "2026-06-12",
-    "seoReadiness": "2026-07-13",
-    "seoProductionReadback": "2026-06-12",
-    "gitDiffCheck": "2026-08-26",
-    "smoke": "2026-08-26",
-    "typecheck": "2026-08-26",
-    "cloudflarePreviewSmokeProduction": "2026-08-26",
-    "adminProjectsCountProduction": "2026-08-03",
-    "adminAuthBrowserProduction": "2026-08-26",
-    "adminHandoffReadinessStrictExpectedFailure": "2026-07-13",
-    "adminMediaRoleBoundaryPlanOnly": "2026-07-14",
-    "adminMediaRoleBoundaryProduction": "2026-07-14",
-    "adminMediaRoleMigrationProduction": "2026-07-14",
-    "supabaseSecurityAdvisor": "2026-08-02",
-    "adminProjectsMinimumDisclosureProduction": "2026-08-02",
-    "adminProjectsAggregateContractProduction": "2026-08-02",
-    "adminProjectsAggregateExpandProduction": "2026-07-19",
-    "adminProjectsAuthenticatedPreviewWorkflow": "2026-07-19",
-    "supabaseAuthUrlConfig": "2026-07-14",
-    "adminReliabilityReaudit": "2026-07-13",
-    "adminReliabilityDeployment": "2026-07-13",
-    "qaEditorProvisioning": "2026-07-13",
-    "adminAuthBrowserLocalConfigured": "2026-07-13",
-    "adminConfigGateIsolated": "2026-08-17",
-    "adminCmsPredeploy": "2026-08-17",
-    "adminProjectsAggregate": "2026-08-17",
-    "adminProjectsResponsiveImplementationCheck": "2026-07-14",
-    "adminProjectsSingleEditorPreview": "2026-08-02",
-    "configuredBundleSplit": "2026-07-13",
-    "projectResponsiveImageLocal": "2026-08-17",
-    "projectResponsiveImagePreview": "2026-08-17",
-    "projectResponsiveImageProduction": "2026-08-17",
-    "cloudflareOwnedFormsProduction": "2026-08-26"
+  "startup": {
+    "maxAgentsBytes": 6144,
+    "maxTotalBytes": 24576,
+    "files": [
+      "AGENTS.md",
+      "docs/OPERATING_PROTOCOL.md",
+      "docs/agent/status.json",
+      "docs/HANDOFF.md"
+    ]
   }
 }
