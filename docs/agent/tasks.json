@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lastUpdated": "2026-09-02",
+  "lastUpdated": "2026-09-09",
   "sourceOfTruth": "Machine-readable task queue for active and upcoming agent work. Human-readable roadmap lives in docs/NEXT_STEPS.md.",
   "tasks": [
     {
@@ -2731,6 +2731,36 @@
       "verification": [
         "npm run agent:check",
         "git diff --check"
+      ]
+    },
+    {
+      "id": "NOW-QR-MATERIAL-PAGES-001",
+      "status": "now",
+      "priority": 1,
+      "summary": "Replace existing image QR targets with the approved mobile material page and staff-controlled fixed stone/finish selection.",
+      "files": [
+        "src/pages/ImageQrPage.tsx",
+        "src/components/image-qr/ImageQrPageView.tsx",
+        "src/components/image-qr/ImageQrMaterialEditor.tsx",
+        "src/pages/admin/AdminImageQrPage.tsx",
+        "functions/_lib/admin-image-qr.js",
+        "functions/_lib/image-qr-materials.js",
+        "supabase/migrations/20260909050915_image_qr_material_selection.sql"
+      ],
+      "acceptance": [
+        "Preserve printed QR URLs and original product images; show a separate exact-finish surface and Stone Library facts.",
+        "Staff can preview and save a fixed stone/variant/finish; old records use defaults without a bulk write.",
+        "Hidden links remain unavailable; draft materials and internal resource data remain private.",
+        "Container and Preview gates pass before separately approved migration/runtime promotion; staff own material-default confirmation."
+      ],
+      "verification": [
+        "npm run agent:admin-image-qr",
+        "npm run agent:content-import",
+        "npm run agent:stone-library-detail",
+        "npm run gate",
+        "npm run agent:admin-cms-predeploy",
+        "npm run agent:admin-config-gate",
+        "npm run agent:cloudflare-preview-smoke -- --base-url <preview>"
       ]
     }
   ]

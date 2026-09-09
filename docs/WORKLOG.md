@@ -1,5 +1,10 @@
 # WORKLOG - Urblo Execution Log
 
+
+## 2026-09-09 — QR material pages implementation
+
+Scope: Jay selected design option 1 and approved implementation with defaults for existing QR resources, followed by staff adjustment. Implemented two-image mobile page, fixed-material loader, enlargement, library/enquiry actions and protected staff selector with preview, optimistic save and unsaved-change handling. Existing QR values and product objects are preserved; no live writes have occurred. Shared finish-image JSON preserves static/import image paths and secondary order. Brand/design alignment: product application and real finish evidence are separate, material facts remain qualified and compact. Host build/lint/typecheck, smoke, QR behavior, content-import and stone-detail checks passed during implementation. Admin predeploy and 12-route Chromium/Firefox config gates passed. Clean Node 20 container gate passed after making the REST-only test fixture reject socket use without requiring Node 22 WebSocket globals. In-app browser visual/interaction QA passed, including two image dialogs, zoom/Escape/focus restoration, exact library link and catalog metadata cleanup. Isolated staff-selector UI verified Tuscany Cross Cut/Honed preview and saved/clean state. Preview release evidence will follow. Production migration and authenticated UI golden save/refresh remain pending, and default associations require staff confirmation.
+
 Last updated: 2026-09-02
 
 ## Entry - 2026-08-17 (Quality-first Project Image Delivery)

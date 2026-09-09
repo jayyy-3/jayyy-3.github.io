@@ -1,5 +1,10 @@
 # NEXT_STEPS - Urblo Roadmap
 
+
+## QR material pages — current delivery
+
+The September 9 QR material-page change is implemented on `codex/qr-stone-pages`, pending Preview verification and production release. Existing `/image/:slug` links will open the selected mobile design: original product 3D image, a separate fixed-finish Stone Library surface image, compact material facts, enlargement, library deep link and enquiry. Existing rows need no backfill: known unambiguous names resolve a default, otherwise Zen Grey / Honed is used until staff save a choice. Staff must review defaults; they are not certified material matches. The additive `20260909050915_image_qr_material_selection.sql` migration is prepared but not applied; the current production resolver remains unchanged. Follow-up: staff manually confirm each QR material/variant/finish after release. No bulk content publication, image replacement or QR regeneration is needed.
+
 Last updated: 2026-09-02
 
 ## Purpose

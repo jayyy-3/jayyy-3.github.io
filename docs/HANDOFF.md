@@ -1,5 +1,10 @@
 # HANDOFF - Current Agent State
 
+
+## QR material pages — 2026-09-09
+
+The September 9 QR material-page change is implemented on `codex/qr-stone-pages`, pending Preview verification and production release. Existing `/image/:slug` links will open the selected mobile design: original product 3D image, a separate fixed-finish Stone Library surface image, compact material facts, enlargement, library deep link and enquiry. Existing rows need no backfill: known unambiguous names resolve a default, otherwise Zen Grey / Honed is used until staff save a choice. Staff must review defaults; they are not certified material matches. The additive `20260909050915_image_qr_material_selection.sql` migration is prepared but not applied; the current production resolver remains unchanged. Next: complete Preview smoke and review, obtain the release-specific approval for the additive migration/runtime promotion, then verify authenticated selection save/refresh and public readback. Broader CMS acceptance remains open.
+
 Last updated: 2026-09-02
 
 ## Read First

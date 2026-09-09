@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { defaultQrMaterialForName, listQrMaterialOptions, sameQrMaterial, validateQrMaterialShape } from './image-qr-materials.js';
 
 const DEFAULT_SUPABASE_URL = 'https://npkidywzwddbnfrnxlmo.supabase.co';
 const PRIVATE_MEDIA_BUCKET = 'urblo-admin-media';
@@ -35,6 +36,9 @@ export async function handleAdminImageQrRequest(request, env) {
     const actor = await requireAdminActor(supabase, accessToken);
 
     if (request.method === 'GET') {
+      if (new URL(request.url).searchParams.get('materials') === '1') {
+        return jsonResponse({ materials: await listQrMaterialOptions(supabase) });
+      }
       return jsonResponse(await listResources(supabase, request));
     }
     if (actor.profile.role === 'viewer') {
@@ -44,6 +48,9 @@ export async function handleAdminImageQrRequest(request, env) {
     const input = await parsePostInput(request);
     if (input.action === 'create') {
       return jsonResponse(await createResource(supabase, actor, input, request), { status: 201 });
+    }
+    if (input.action === 'assign-material') {
+      return jsonResponse(await assignMaterial(supabase, actor, input));
     }
     if (input.action === 'replace') {
       return jsonResponse(await replaceResource(supabase, actor, input, request));
@@ -67,40 +74,86 @@ export async function handleAdminImageQrRequest(request, env) {
   }
 }
 
-export async function handlePublicImageQrRequest(request, env, rawSlug) {
-  try {
-    const slug = normalizeSlug(rawSlug);
-    if (!slug) return publicTextResponse('Image not found', 404);
-    const supabase = createServiceClient(getSupabaseConfig(env));
-    const { data: resource, error } = await supabase
-      .from('image_qr_resources')
-      .select('slug,status,object_path,updated_at')
-      .eq('slug', slug)
-      .eq('status', 'active')
-      .maybeSingle();
-    if (error) throw error;
-    if (!resource) return publicTextResponse('Image not found', 404);
+async function publicResource(env, rawSlug) {
+  const slug = normalizeSlug(rawSlug);
+  if (!slug) return null;
+  const supabase = createServiceClient(getSupabaseConfig(env));
+  const { data: resource, error } = await supabase.from('image_qr_resources')
+    .select('*').eq('slug', slug).eq('status', 'active').maybeSingle();
+  if (error) throw error;
+  if (!resource) return null;
+  // Deliberately omit IDs, history, actor IDs, original paths and hidden rows.
+  return {
+    slug: resource.slug,
+    name: resource.name,
+    productImageUrl: storagePublicUrl(supabase, resource.object_path, resource.updated_at),
+    materialSelection: resource.material_selection || defaultQrMaterialForName(resource.name),
+  };
+}
 
-    const publicUrl = storagePublicUrl(supabase, resource.object_path, resource.updated_at);
-    return new Response(null, {
-      status: 302,
-      headers: {
-        Location: publicUrl,
-        'Cache-Control': 'no-store',
-        'X-Content-Type-Options': 'nosniff',
-        'Referrer-Policy': 'no-referrer',
-      },
-    });
+export async function handlePublicImageQrDataRequest(request, env, rawSlug) {
+  try {
+    const resource = await publicResource(env, rawSlug);
+    const response = jsonResponse(resource ? { resource } : { error: 'not_found', message: 'This image link is unavailable.' }, { status: resource ? 200 : 404 });
+    response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+    return request.method === 'HEAD' ? new Response(null, response) : response;
   } catch (error) {
     console.error('Public Image QR resolution failed.', error);
-    return publicTextResponse('Image temporarily unavailable', 503);
+    const response = jsonResponse({ error: 'unavailable', message: 'This image link is temporarily unavailable.' }, { status: 503 });
+    response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+    return request.method === 'HEAD' ? new Response(null, response) : response;
   }
+}
+
+export async function handlePublicImageQrRequest(request, env, rawSlug) {
+  try {
+    const resource = await publicResource(env, rawSlug);
+    if (!resource) return publicQrErrorPage(request, 404);
+    // ASSETS uses the root pretty path so Pages does not redirect /index.html.
+    const shell = await env.ASSETS.fetch(new Request(new URL('/', request.url), { method: 'GET' }));
+    if (!shell.ok || !(shell.headers.get('content-type') || '').includes('text/html')) throw new Error('QR page shell unavailable');
+    const payload = JSON.stringify(resource).replace(/</g, '\\u003c').replace(/>/g, '\\u003e').replace(/&/g, '\\u0026');
+    const html = (await shell.text()).replace('</head>', `<meta name="robots" content="noindex,nofollow"><script type="application/json" id="image-qr-data">${payload}</script></head>`);
+    return new Response(request.method === 'HEAD' ? null : html, { headers: {
+      'Content-Type': 'text/html; charset=utf-8',
+      'Cache-Control': 'no-store',
+      'X-Content-Type-Options': 'nosniff',
+      'X-Robots-Tag': 'noindex, nofollow',
+      'Referrer-Policy': 'strict-origin-when-cross-origin',
+    } });
+  } catch (error) {
+    console.error('Public Image QR resolution failed.', error);
+    return publicQrErrorPage(request, 503);
+  }
+}
+
+function publicQrErrorPage(request, status) {
+  const title = status === 404 ? 'This image link is unavailable' : 'Please try again shortly';
+  const html = `<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>${title} | Urblo</title><body style="margin:0;padding:32px;font-family:Arial,sans-serif;color:#000;background:#fff"><a href="/"><img src="/media/launch/identity/urblo-logo.png" alt="Urblo" width="72"></a><main style="max-width:480px;margin:64px auto"><h1>${title}</h1><p>${status === 404 ? 'The link may have been paused. Contact Urblo for help with this material.' : 'The material page could not load. Refresh this page or contact Urblo.'}</p><a href="/stone-library">Stone Library</a> · <a href="/contact">Contact Urblo</a></main></body></html>`;
+  return new Response(request.method === 'HEAD' ? null : html, { status, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow', 'X-Content-Type-Options': 'nosniff' } });
+}
+
+async function assignMaterial(supabase, actor, input) {
+  const current = await loadResource(supabase, input.id);
+  const options = await listQrMaterialOptions(supabase);
+  if (!options.some((option) => sameQrMaterial(option, input.selection))) {
+    throw new AdminImageQrError(400, 'invalid_material', 'Choose a public stone and a supported finish with a surface image.');
+  }
+  const { data: resource, error } = await supabase.from('image_qr_resources')
+    .update({ material_selection: input.selection, updated_by: actor.user.id })
+    .eq('id', input.id).eq('updated_at', input.expectedUpdatedAt).select('*').maybeSingle();
+  if (error) throw upstream('material_save_failed', 'The stone selection could not be saved. Try again.', error);
+  if (!resource) throw new AdminImageQrError(409, 'conflict', 'This resource changed elsewhere. Close these details and refresh the list before saving again.');
+  const auditError = await recordAudit(supabase, actor.user.id, 'image_qr.assign_material', resource, {
+    previousSelection: current.material_selection || null, selection: input.selection,
+  });
+  return { resource: serializeResource(supabase, null, resource), warning: auditError ? 'The selection was saved, but its change-history entry could not be recorded.' : null };
 }
 
 async function listResources(supabase, request) {
   const { data, error } = await supabase
     .from('image_qr_resources')
-    .select('id,slug,name,status,object_path,mime_type,width_px,height_px,size_bytes,created_at,updated_at')
+    .select('*')
     .order('updated_at', { ascending: false })
     .limit(500);
   if (error) throw upstream('resource_list_failed', 'The Image QR library could not be loaded.', error);
@@ -129,7 +182,7 @@ async function createResource(supabase, actor, input, request) {
       created_by: actor.user.id,
       updated_by: actor.user.id,
     })
-    .select('id,slug,name,status,object_path,mime_type,width_px,height_px,size_bytes,created_at,updated_at')
+    .select('*')
     .single();
 
   if (error || !resource) {
@@ -171,7 +224,7 @@ async function replaceResource(supabase, actor, input, request) {
       updated_by: actor.user.id,
     })
     .eq('id', current.id)
-    .select('id,slug,name,status,object_path,mime_type,width_px,height_px,size_bytes,created_at,updated_at')
+    .select('*')
     .single();
   if (error || !resource) {
     await removeStorageObject(supabase, PUBLIC_MEDIA_BUCKET, destinationPath);
@@ -231,7 +284,7 @@ async function updateResourceWithAudit(supabase, actor, current, changes, action
     .from('image_qr_resources')
     .update(changes)
     .eq('id', current.id)
-    .select('id,slug,name,status,object_path,mime_type,width_px,height_px,size_bytes,created_at,updated_at')
+    .select('*')
     .single();
   if (error || !resource) throw upstream('resource_update_failed', 'The QR resource could not be updated.', error);
   const auditError = await recordAudit(supabase, actor.user.id, action, resource, metadata);
@@ -261,7 +314,7 @@ async function restoreResource(supabase, resource, userId) {
 async function loadResource(supabase, id) {
   const { data, error } = await supabase
     .from('image_qr_resources')
-    .select('id,slug,name,status,object_path,mime_type,width_px,height_px,size_bytes,created_at,updated_at')
+    .select('*')
     .eq('id', id)
     .maybeSingle();
   if (error) throw upstream('resource_lookup_failed', 'The QR resource could not be loaded.', error);
@@ -342,11 +395,19 @@ async function parsePostInput(request) {
     throw new AdminImageQrError(400, 'invalid_json', 'Send a valid Image QR request.');
   }
   const action = String(body?.action || '').trim().toLowerCase();
+  if (action === 'assign-material') {
+    const selection = validateQrMaterialShape(body?.selection);
+    const expectedUpdatedAt = String(body?.expectedUpdatedAt || '');
+    if (!selection || !expectedUpdatedAt || !Number.isFinite(Date.parse(expectedUpdatedAt))) {
+      throw new AdminImageQrError(400, 'invalid_material', 'Choose a stone and finish, then try saving again.');
+    }
+    return { action, id: validateId(body?.id), selection, expectedUpdatedAt };
+  }
   if (action === 'create') return { action, name: validateName(body?.name), upload: validateUpload(body?.upload) };
   if (action === 'replace') return { action, id: validateId(body?.id), upload: validateUpload(body?.upload) };
   if (action === 'rename') return { action, id: validateId(body?.id), name: validateName(body?.name) };
   if (action === 'hide' || action === 'restore') return { action, id: validateId(body?.id) };
-  throw new AdminImageQrError(400, 'invalid_action', 'Choose create, replace, rename, hide or restore.');
+  throw new AdminImageQrError(400, 'invalid_action', 'Choose create, replace, rename, assign-material, hide or restore.');
 }
 
 function validateUpload(value) {
@@ -432,6 +493,8 @@ function serializeResource(supabase, _request, row) {
     sizeBytes: Number(row.size_bytes),
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+    materialSelection: row.material_selection || defaultQrMaterialForName(row.name),
+    materialIsDefault: !row.material_selection,
     imageUrl: `${PUBLIC_SITE_ORIGIN}/image/${encodeURIComponent(row.slug)}`,
     previewUrl: storagePublicUrl(supabase, row.object_path, row.updated_at),
   };

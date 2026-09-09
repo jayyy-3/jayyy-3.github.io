@@ -1,5 +1,10 @@
 # Agent Verification Matrix
 
+
+## QR material-page release verification
+
+`npm run agent:admin-image-qr` includes in-memory Function behavior checks for defaults, safe embedded JSON, public omission of internal fields, hidden/unknown links, HEAD/method behavior, role denial, invalid combinations, stale-save conflicts, persisted readback and stable slug/image selection across rename and Hide/Restore. No network or live writes are made by this verifier. `agent:content-import` and `agent:stone-library-detail` verify the shared finish-image catalog. Required release checks remain container gate, Admin predeploy/config, then immutable Preview smoke. Live material save/refresh requires the additive migration and release-specific approval; an in-memory pass is not live evidence.
+
 Last updated: 2026-09-02
 
 Current public catalog release: PR `#36`, merge `5731651`, immutable Cloudflare production `https://764dedbc.urblo-site.pages.dev`. Clean Node 20 gate, immutable/apex/`www` deployment-bound smoke, production desktop/390px Homepage/Product/Tuscany/BlueOcean checks, canonical 12-card Stone listing, seven distinct BlueOcean finish assets, and `/stone-library/steel-blue` → `/stone-library/blueocean` 301 pass. Jay accepted Preview and approved runtime promotion. iOS/Android WeChat real-device playback remains an external device check; production CMS writes are not approved.

@@ -1,0 +1,344 @@
+{
+  "new-grey": {
+    "default": {
+      "path": "New Grey/New Grey_Flamed_Urblo.jpeg",
+      "alt": "New Grey flamed finish"
+    },
+    "flamed": {
+      "path": "New Grey/New Grey_Flamed_Urblo.jpeg",
+      "alt": "New Grey flamed finish"
+    },
+    "sawn": {
+      "path": "New Grey/New Grey_Sawn_Urblo.jpeg",
+      "alt": "New Grey sawn finish"
+    },
+    "honed": {
+      "path": "New Grey/New Grey_Honed_Urblo.jpeg",
+      "alt": "New Grey honed finish"
+    },
+    "polished": {
+      "path": "New Grey/New Grey_Polished_Urblo.jpeg",
+      "alt": "New Grey polished finish"
+    }
+  },
+  "zen-grey": {
+    "default": {
+      "path": "Zen Grey/Zen Grey_Flamed_Urblo_1.jpeg",
+      "alt": "Zen Grey flamed finish",
+      "secondaryImages": [
+        {
+          "path": "Zen Grey/Zen Grey_Flamed_Urblo_2.jpeg",
+          "alt": "Zen Grey flamed finish alternate frame",
+          "label": "Secondary frame"
+        }
+      ]
+    },
+    "flamed": {
+      "path": "Zen Grey/Zen Grey_Flamed_Urblo_1.jpeg",
+      "alt": "Zen Grey flamed finish",
+      "secondaryImages": [
+        {
+          "path": "Zen Grey/Zen Grey_Flamed_Urblo_2.jpeg",
+          "alt": "Zen Grey flamed finish alternate frame",
+          "label": "Secondary frame"
+        }
+      ]
+    },
+    "sawn": {
+      "path": "Zen Grey/Zen Grey_Sawn_Urblo_1.jpeg",
+      "alt": "Zen Grey sawn finish",
+      "secondaryImages": [
+        {
+          "path": "Zen Grey/Zen Grey_Sawn_Urblo_2.jpeg",
+          "alt": "Zen Grey sawn finish alternate frame",
+          "label": "Secondary frame"
+        }
+      ]
+    },
+    "honed": {
+      "path": "Zen Grey/Zen Grey_Honed_Urblo_1.jpeg",
+      "alt": "Zen Grey honed finish",
+      "secondaryImages": [
+        {
+          "path": "Zen Grey/Zen Grey_Honed_Urblo_2.jpeg",
+          "alt": "Zen Grey honed finish alternate frame",
+          "label": "Secondary frame"
+        }
+      ]
+    },
+    "polished": {
+      "path": "Zen Grey/Zen Grey_Polished_Urblo_1.jpeg",
+      "alt": "Zen Grey polished finish",
+      "secondaryImages": [
+        {
+          "path": "Zen Grey/Zen Grey_Polished_Urblo_2.jpeg",
+          "alt": "Zen Grey polished finish alternate frame",
+          "label": "Secondary frame"
+        }
+      ]
+    }
+  },
+  "alpine-white": {
+    "default": {
+      "path": "Alpine White/Alpine White_Flamed_Urblo.jpeg",
+      "alt": "Alpine White flamed finish"
+    },
+    "flamed": {
+      "path": "Alpine White/Alpine White_Flamed_Urblo.jpeg",
+      "alt": "Alpine White flamed finish"
+    },
+    "sawn": {
+      "path": "Alpine White/Alpine White_Sawn_Urblo.jpeg",
+      "alt": "Alpine White sawn finish"
+    },
+    "honed": {
+      "path": "Alpine White/Alpine White_Honed_Urblo.jpeg",
+      "alt": "Alpine White honed finish"
+    },
+    "polished": {
+      "path": "Alpine White/Alpine White_Polished_Urblo.jpeg",
+      "alt": "Alpine White polished finish"
+    }
+  },
+  "angola-black": {
+    "default": {
+      "path": "Angola Black/Angola Black_Bush-hammered_Urblo.jpeg",
+      "alt": "Angola Black bush hammered finish"
+    },
+    "bush_hammered": {
+      "path": "Angola Black/Angola Black_Bush-hammered_Urblo.jpeg",
+      "alt": "Angola Black bush hammered finish"
+    },
+    "flamed": {
+      "path": "Angola Black/Angola Black_Bush-hammeredFlamed_Urblo.jpeg",
+      "alt": "Angola Black flamed finish"
+    },
+    "sawn": {
+      "path": "Angola Black/Angola Black_Bush-hammeredSawn_Urblo.jpeg",
+      "alt": "Angola Black sawn finish"
+    },
+    "honed": {
+      "path": "Angola Black/Angola Black_Bush-hammeredHoned_Urblo.jpeg",
+      "alt": "Angola Black honed finish"
+    },
+    "polished": {
+      "path": "Angola Black/Angola Black_Bush-hammeredPolished_Urblo.jpeg",
+      "alt": "Angola Black polished finish"
+    }
+  },
+  "blueocean": {
+    "default": {
+      "path": "Steel Blue/Steel Blue_Sawn_Urblo.jpeg",
+      "alt": "BlueOcean sawn finish"
+    },
+    "sawn": {
+      "path": "Steel Blue/Steel Blue_Sawn_Urblo.jpeg",
+      "alt": "BlueOcean sawn finish"
+    },
+    "honed": {
+      "path": "Steel Blue/Steel Blue_Honed_Urblo.jpeg",
+      "alt": "BlueOcean honed finish"
+    },
+    "bush_hammered": {
+      "path": "Steel Blue/Steel Blue_Bush-hammered_Urblo.jpeg",
+      "alt": "BlueOcean bush hammered finish"
+    },
+    "combed": {
+      "path": "Steel Blue/Steel Blue_Antline_Urblo.jpeg",
+      "alt": "BlueOcean combed finish"
+    },
+    "rock_face": {
+      "path": "Steel Blue/Steel Blue_Rock Face_Urblo.jpeg",
+      "alt": "BlueOcean rock face finish"
+    },
+    "rippling__fine": {
+      "path": "Steel Blue/Steel Blue_Rippling Fine_Urblo.jpeg",
+      "alt": "BlueOcean rippling fine finish"
+    },
+    "rippling__rough": {
+      "path": "Steel Blue/Steel Blue_Rippling Rough_Urblo.jpeg",
+      "alt": "BlueOcean rippling rough finish"
+    }
+  },
+  "juparana": {
+    "default": {
+      "path": "Juparana/Juparana_Flamed_Urblo_1.jpeg",
+      "alt": "Juparana flamed finish",
+      "secondaryImages": [
+        {
+          "path": "Juparana/Juparana_Flamed _Urblo_2.jpeg",
+          "alt": "Juparana flamed finish alternate frame",
+          "label": "Secondary frame"
+        }
+      ]
+    },
+    "flamed": {
+      "path": "Juparana/Juparana_Flamed_Urblo_1.jpeg",
+      "alt": "Juparana flamed finish",
+      "secondaryImages": [
+        {
+          "path": "Juparana/Juparana_Flamed _Urblo_2.jpeg",
+          "alt": "Juparana flamed finish alternate frame",
+          "label": "Secondary frame"
+        }
+      ]
+    },
+    "sawn": {
+      "path": "Juparana/Juparana_Sawn_Urblo_1.jpeg",
+      "alt": "Juparana sawn finish",
+      "secondaryImages": [
+        {
+          "path": "Juparana/Juparana_Sawn _Urblo_2.jpeg",
+          "alt": "Juparana sawn finish alternate frame",
+          "label": "Secondary frame"
+        }
+      ]
+    },
+    "honed": {
+      "path": "Juparana/Juparana_Honed_Urblo_1.jpeg",
+      "alt": "Juparana honed finish",
+      "secondaryImages": [
+        {
+          "path": "Juparana/Juparana_Honed _Urblo_2.jpeg",
+          "alt": "Juparana honed finish alternate frame",
+          "label": "Secondary frame"
+        }
+      ]
+    },
+    "polished": {
+      "path": "Juparana/Juparana_Polished_Urblo_1.jpeg",
+      "alt": "Juparana polished finish",
+      "secondaryImages": [
+        {
+          "path": "Juparana/Juparana_Polished_Urblo_2.jpeg",
+          "alt": "Juparana polished finish alternate frame",
+          "label": "Secondary frame"
+        }
+      ]
+    }
+  },
+  "ivory-sand": {
+    "default": {
+      "path": "Ivory Sand/Ivory Sand_Sawn_Urblo.jpeg",
+      "alt": "Ivory Sand honed finish"
+    },
+    "honed": {
+      "path": "Ivory Sand/Ivory Sand_Sawn_Urblo.jpeg",
+      "alt": "Ivory Sand honed finish"
+    },
+    "bush_hammered": {
+      "path": "Ivory Sand/Ivory Sand_Bush-hammered_Urblo.jpeg",
+      "alt": "Ivory Sand bush hammered finish"
+    },
+    "sparrow_peck": {
+      "path": "Ivory Sand/Ivory Sand_Sparrow_Urblo.jpeg",
+      "alt": "Ivory Sand sparrow peck finish"
+    }
+  },
+  "honey-comb": {
+    "default": {
+      "path": "Honey Comb/Honey Comb_Sawn_Urblo.jpeg",
+      "alt": "Honey Comb sawn finish"
+    },
+    "sawn": {
+      "path": "Honey Comb/Honey Comb_Sawn_Urblo.jpeg",
+      "alt": "Honey Comb sawn finish"
+    },
+    "honed": {
+      "path": "Honey Comb/Honey Comb_Honed_Urblo.jpeg",
+      "alt": "Honey Comb honed finish"
+    }
+  },
+  "golden-crust--light": {
+    "default": {
+      "path": "Golden Crust/Golden Crust Light_Flamed_Urblo.jpeg",
+      "alt": "Golden Crust Light flamed finish"
+    },
+    "flamed": {
+      "path": "Golden Crust/Golden Crust Light_Flamed_Urblo.jpeg",
+      "alt": "Golden Crust Light flamed finish"
+    },
+    "sawn": {
+      "path": "Golden Crust/Golden Crust Light_Sawn_Urblo.jpeg",
+      "alt": "Golden Crust Light sawn finish"
+    },
+    "honed": {
+      "path": "Golden Crust/Golden Crust Light_Honed_Urblo.jpeg",
+      "alt": "Golden Crust Light honed finish"
+    },
+    "polished": {
+      "path": "Golden Crust/Golden Crust Light_Polished_Urblo.jpeg",
+      "alt": "Golden Crust Light polished finish"
+    }
+  },
+  "golden-crust--dark": {
+    "default": {
+      "path": "Golden Crust/Golden Crust Dark_Flamed_Urblo.jpeg",
+      "alt": "Golden Crust Dark flamed finish"
+    },
+    "flamed": {
+      "path": "Golden Crust/Golden Crust Dark_Flamed_Urblo.jpeg",
+      "alt": "Golden Crust Dark flamed finish"
+    },
+    "sawn": {
+      "path": "Golden Crust/Golden Crust Dark_Sawn_Urblo.jpeg",
+      "alt": "Golden Crust Dark sawn finish"
+    },
+    "honed": {
+      "path": "Golden Crust/Golden Crust Dark_Honed_Urblo.jpeg",
+      "alt": "Golden Crust Dark honed finish"
+    },
+    "polished": {
+      "path": "Golden Crust/Golden Crust Dark_Polished_Urblo.jpeg",
+      "alt": "Golden Crust Dark polished finish"
+    }
+  },
+  "tan-brown": {
+    "default": {
+      "path": "Tan Brown/Tan Brown_Flamed_Urblo.jpeg",
+      "alt": "Tan Brown flamed finish"
+    },
+    "flamed": {
+      "path": "Tan Brown/Tan Brown_Flamed_Urblo.jpeg",
+      "alt": "Tan Brown flamed finish"
+    },
+    "sawn": {
+      "path": "Tan Brown/Tan Brown_Sawn_Urblo.jpeg",
+      "alt": "Tan Brown sawn finish"
+    },
+    "honed": {
+      "path": "Tan Brown/Tan Brown_Honed_Urblo.jpeg",
+      "alt": "Tan Brown honed finish"
+    },
+    "polished": {
+      "path": "Tan Brown/Tan Brown_Polished_Urblo.jpeg",
+      "alt": "Tan Brown polished finish"
+    }
+  },
+  "tuscany": {
+    "default": {
+      "path": "Tuscany/Tuscany_Vein Cut_Urblo.jpeg",
+      "alt": "Tuscany stone surface"
+    }
+  },
+  "tuscany--vein-cut": {
+    "default": {
+      "path": "Tuscany/Tuscany_Vein Cut_Urblo.jpeg",
+      "alt": "Tuscany vein cut surface"
+    },
+    "honed": {
+      "path": "Tuscany/Tuscany_Vein Cut_Urblo.jpeg",
+      "alt": "Tuscany vein cut honed finish"
+    }
+  },
+  "tuscany--cross-cut": {
+    "default": {
+      "path": "Tuscany/Tuscany_Cross Cut_Urblo.jpeg",
+      "alt": "Tuscany cross cut surface"
+    },
+    "honed": {
+      "path": "Tuscany/Tuscany_Cross Cut_Urblo.jpeg",
+      "alt": "Tuscany cross cut honed finish"
+    }
+  }
+}

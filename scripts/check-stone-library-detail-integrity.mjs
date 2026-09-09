@@ -5,7 +5,7 @@ const [appSource, detailSource, imageStageSource, imageSource, serviceSource, ca
   readFile(new URL('../src/App.tsx', import.meta.url), 'utf8'),
   readFile(new URL('../src/pages/StoneLibraryDetailPage.tsx', import.meta.url), 'utf8'),
   readFile(new URL('../src/components/stone-library/ImageStage.tsx', import.meta.url), 'utf8'),
-  readFile(new URL('../src/data/stoneFinishImages.ts', import.meta.url), 'utf8'),
+  readFile(new URL('../data/clean/stone_finish_images.json', import.meta.url), 'utf8'),
   readFile(new URL('../src/service/StoneLibraryService.ts', import.meta.url), 'utf8'),
   readFile(new URL('../data/clean/stone_finish_capabilities.csv', import.meta.url), 'utf8'),
   readFile(new URL('../data/clean/stone_library.json', import.meta.url), 'utf8'),
@@ -78,10 +78,7 @@ assert(
   'The selection rail must order Cut direction before Finish.',
 );
 
-const blueoceanImageMap = imageSource.slice(
-  imageSource.indexOf('blueocean: {'),
-  imageSource.indexOf('juparana: {'),
-);
+const blueoceanImageMap = JSON.parse(imageSource).blueocean;
 const blueocean = stoneLibrary.stones.find((stone) => stone.stoneGroupId === 'blueocean');
 assert(blueocean, 'BlueOcean must remain under the canonical blueocean route key.');
 assert.equal(blueocean.displayName, 'BlueOcean', 'BlueOcean must use the approved display name.');
@@ -97,15 +94,15 @@ assert.deepEqual(
   ['blueocean'],
   'The retained product variant must use the canonical BlueOcean key.',
 );
-assert(blueoceanImageMap.includes('default:'), 'Blueocean must retain a default cover image.');
-assert(blueoceanImageMap.includes('sawn:'), 'Blueocean Sawn must have an explicit finish image.');
+assert(Boolean(blueoceanImageMap.default), 'Blueocean must retain a default cover image.');
+assert(Boolean(blueoceanImageMap.sawn), 'Blueocean Sawn must have an explicit finish image.');
 assert(
-  blueoceanImageMap.includes('Steel Blue/Steel Blue_Honed_Urblo.jpeg') &&
-    blueoceanImageMap.includes('Steel Blue/Steel Blue_Rock Face_Urblo.jpeg'),
+  blueoceanImageMap.honed.path === 'Steel Blue/Steel Blue_Honed_Urblo.jpeg' &&
+    blueoceanImageMap.rock_face.path === 'Steel Blue/Steel Blue_Rock Face_Urblo.jpeg',
   'BlueOcean must use the complete former Steel Blue finish image set.',
 );
 assert(
-  !imageSource.includes("'steel-blue': {") && !imageSource.includes('fallbacks/blueocean-sawn.jpg'),
+  !JSON.parse(imageSource)['steel-blue'] && !imageSource.includes('fallbacks/blueocean-sawn.jpg'),
   'Neither the duplicate Steel Blue map nor the old BlueOcean fallback may remain.',
 );
 assert(!sampleCatalog.byStoneVariant['steel-blue'], 'Sample catalog must not retain a Steel Blue variant bucket.');
