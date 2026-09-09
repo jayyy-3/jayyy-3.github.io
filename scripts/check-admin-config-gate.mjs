@@ -151,8 +151,8 @@ function parseArgs(rawArgs) {
 function startPreview(outDir) {
   console.log(`Starting Vite preview on http://${host}:${port}`);
   const child = spawn(
-    'npx',
-    ['vite', 'preview', '--host', host, '--port', port, '--strictPort', '--outDir', outDir],
+    process.execPath,
+    [join(root, 'node_modules/vite/bin/vite.js'), 'preview', '--host', host, '--port', port, '--strictPort', '--outDir', outDir],
     {
       cwd: root,
       env,

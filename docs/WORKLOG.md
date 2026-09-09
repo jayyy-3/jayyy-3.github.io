@@ -41,3 +41,5 @@ Scope: approved maintainability plan batches 1–2; no UI changes, production da
 - CI now produces stable `quality` on PRs and main, skips deployment for records, automatically smokes immutable Preview and production domains. Wrangler is pinned at 4.130.0; its CLI requires Node 22, while build/container checks remain Node 20. GitHub administrator configuration remains external until `quality` exists and the owner applies protection.
 
 Residual work: verify the new workflow on its own PR; prove a record-only PR has zero deployments; apply main protection with administrator access; local isolated database/journeys and Articles/server refactor remain subsequent batches. Broader CMS acceptance remains unproven.
+
+- PR #41 first CI run `34324917881` passed all 22 source nodes, then stalled in browser process shutdown and was cancelled before deployment. Linux retained the Vite grandchild behind `npx`; the gate now launches Vite directly. The graph streams sanitized logs as checks run, enforces check time budgets and retains interruption evidence so cancellation cannot lose the active check log. CI cancellation correctly made `quality` fail.
