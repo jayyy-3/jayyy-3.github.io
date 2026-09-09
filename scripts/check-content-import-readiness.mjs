@@ -1752,155 +1752,41 @@ function productImageSourceUrl(relativePath) {
     return `data/Product/${relativePath}`;
 }
 
-function extractSecondaryProductImage(callExpression) {
-    if (!ts.isCallExpression(callExpression) || callExpression.expression.getText() !== 'secondaryProductImage') {
-        return null;
-    }
-
-    const relativePath = stringLiteralText(callExpression.arguments[0]);
-    const alt = stringLiteralText(callExpression.arguments[1]);
-    const label = stringLiteralText(callExpression.arguments[2]);
-
-    if (!relativePath) {
-        return null;
-    }
-
-    return {
-        imageUrl: productImageSourceUrl(relativePath),
-        alt,
-        label,
-    };
-}
-
-function extractStoneImageAsset(initializer) {
-    if (ts.isCallExpression(initializer) && initializer.expression.getText() === 'productImage') {
-        const relativePath = stringLiteralText(initializer.arguments[0]);
-        const alt = stringLiteralText(initializer.arguments[1]);
-        const secondaryImagesArg = initializer.arguments[3];
-        const secondaryImages = secondaryImagesArg && ts.isArrayLiteralExpression(secondaryImagesArg)
-            ? secondaryImagesArg.elements.map(extractSecondaryProductImage).filter(Boolean)
-            : [];
-
-        if (!relativePath) {
-            return null;
-        }
-
-        return {
-            imageUrl: productImageSourceUrl(relativePath),
-            alt,
-            secondaryImages,
-        };
-    }
-
-    if (ts.isObjectLiteralExpression(initializer)) {
-        const asset = {
-            imageUrl: null,
-            alt: null,
-            secondaryImages: [],
-        };
-
-        for (const property of initializer.properties) {
-            if (!ts.isPropertyAssignment(property)) continue;
-            const key = propertyNameText(property.name);
-
-            if (key === 'imageUrl') {
-                asset.imageUrl = stringLiteralText(property.initializer);
-            }
-            if (key === 'alt') {
-                asset.alt = stringLiteralText(property.initializer);
-            }
-        }
-
-        return asset.imageUrl ? asset : null;
-    }
-
-    return null;
-}
-
 function extractStaticStoneFinishImageRows(stoneVariantToGroup, validFinishKeys, blockers) {
-    const sourcePath = 'src/data/stoneFinishImages.ts';
-    const source = fs.readFileSync(path.join(root, sourcePath), 'utf8');
-    const sourceFile = ts.createSourceFile(sourcePath, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+    const sourcePath = 'data/clean/stone_finish_images.json';
+    const sources = readJson(sourcePath);
     const rows = [];
-
-    function visit(node) {
-        if (
-            ts.isVariableDeclaration(node) &&
-            ts.isIdentifier(node.name) &&
-            node.name.text === 'stoneFinishImages' &&
-            node.initializer &&
-            ts.isObjectLiteralExpression(node.initializer)
-        ) {
-            for (const variantProperty of node.initializer.properties) {
-                if (!ts.isPropertyAssignment(variantProperty) || !ts.isObjectLiteralExpression(variantProperty.initializer)) {
-                    continue;
-                }
-
-                const stoneVariantKey = propertyNameText(variantProperty.name);
-                if (!stoneVariantKey) continue;
-
-                const stoneGroupKey = stoneVariantToGroup.get(stoneVariantKey);
-                if (!stoneGroupKey) {
-                    const hasFinishSpecificRows = variantProperty.initializer.properties.some(
-                        (finishProperty) =>
-                            ts.isPropertyAssignment(finishProperty) &&
-                            propertyNameText(finishProperty.name) !== 'default',
-                    );
-                    if (hasFinishSpecificRows) {
-                        blockers.push(`Unknown stone variant image map ${stoneVariantKey} in ${sourcePath}`);
-                    }
-                    continue;
-                }
-
-                for (const finishProperty of variantProperty.initializer.properties) {
-                    if (!ts.isPropertyAssignment(finishProperty)) continue;
-                    const finishKey = propertyNameText(finishProperty.name);
-
-                    if (!finishKey || finishKey === 'default') continue;
-                    if (!validFinishKeys.has(finishKey)) {
-                        blockers.push(`Unknown finish image key ${finishKey} on ${stoneVariantKey} in ${sourcePath}`);
-                        continue;
-                    }
-
-                    const asset = extractStoneImageAsset(finishProperty.initializer);
-                    if (!asset?.imageUrl) {
-                        blockers.push(`Missing finish image asset for ${stoneVariantKey}/${finishKey} in ${sourcePath}`);
-                        continue;
-                    }
-
-                    rows.push({
-                        stone_group_key: stoneGroupKey,
-                        stone_variant_key: stoneVariantKey,
-                        finish_key: finishKey,
-                        media_source_url: asset.imageUrl,
-                        image_role: 'primary',
-                        sort_order: 0,
-                        status: 'draft',
-                        alt: asset.alt,
-                    });
-
-                    asset.secondaryImages.forEach((secondaryImage, secondaryIndex) => {
-                        if (!secondaryImage.imageUrl) return;
-
-                        rows.push({
-                            stone_group_key: stoneGroupKey,
-                            stone_variant_key: stoneVariantKey,
-                            finish_key: finishKey,
-                            media_source_url: secondaryImage.imageUrl,
-                            image_role: 'secondary',
-                            sort_order: secondaryIndex + 1,
-                            status: 'draft',
-                            alt: secondaryImage.alt,
-                        });
-                    });
-                }
-            }
+    for (const [stoneVariantKey, finishes] of Object.entries(sources)) {
+        const stoneGroupKey = stoneVariantToGroup.get(stoneVariantKey);
+        if (!stoneGroupKey) {
+            if (Object.keys(finishes).some((key) => key !== 'default')) blockers.push(`Unknown stone variant image map ${stoneVariantKey} in ${sourcePath}`);
+            continue;
         }
-
-        ts.forEachChild(node, visit);
+        for (const [finishKey, asset] of Object.entries(finishes)) {
+            if (finishKey === 'default') continue;
+            if (!validFinishKeys.has(finishKey)) {
+                blockers.push(`Unknown finish image key ${finishKey} on ${stoneVariantKey} in ${sourcePath}`);
+                continue;
+            }
+            if (!asset.path) {
+                blockers.push(`Missing finish image asset for ${stoneVariantKey}/${finishKey} in ${sourcePath}`);
+                continue;
+            }
+            [asset, ...(asset.secondaryImages || [])].forEach((image, index) => {
+                if (!image.path) return;
+                rows.push({
+                    stone_group_key: stoneGroupKey,
+                    stone_variant_key: stoneVariantKey,
+                    finish_key: finishKey,
+                    media_source_url: productImageSourceUrl(image.path),
+                    image_role: index === 0 ? 'primary' : 'secondary',
+                    sort_order: index,
+                    status: 'draft',
+                    alt: image.alt,
+                });
+            });
+        }
     }
-
-    visit(sourceFile);
     return rows;
 }
 

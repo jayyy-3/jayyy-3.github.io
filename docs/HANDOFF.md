@@ -1,6 +1,12 @@
 # HANDOFF - Current Agent State
 
-Last updated: 2026-09-02
+Last updated: 2026-09-09
+
+## QR material pages — 2026-09-09
+
+Connected Preview `https://71a78a56.urblo-site.pages.dev` at commit `1450afe` passed CI `34317589827`, general route/asset/MIME/redirect/Function smoke, dedicated QR HTML/JSON GET/HEAD/hidden404/original-image checks and all 10 authenticated Admin routes. Approved UI proof saved existing Zen Grey/Honed at 2026-09-09 06:12:15 UTC; full reload/reopen retained Saved selection and exact choices, public browser/API readback matched, and audit event `358` records `image_qr.assign_material`. Slug, object path and active status stayed unchanged. This closes the Preview blocker; production promotion/readback is next under existing approval.
+
+Migration `20260909054816_image_qr_material_selection.sql` is applied and read back with server-only RLS/grants intact. Preview has encrypted server key/URL bindings; production settings are unchanged. Existing printed QR URLs and product images stay fixed. Staff select stone → variant/cut direction → finish; unconfirmed rows retain labelled defaults and require staff confirmation. No broader CMS handoff acceptance is implied.
 
 ## Read First
 Use this file as the short current-state entry. Detailed evidence lives in `docs/WORKLOG.md`; task execution state lives in `docs/agent/tasks.json`; compact machine state lives in `docs/agent/status.json`.

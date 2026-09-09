@@ -26,6 +26,8 @@ import {
 } from '../../lib/imageQrOptimization';
 import { supabase } from '../../lib/supabaseClient';
 import AdminShell from './AdminShell';
+import ImageQrMaterialEditor from '../../components/image-qr/ImageQrMaterialEditor';
+import type { QrMaterialOption, QrMaterialSelection } from '../../types/image-qr';
 import RequireAdmin from './RequireAdmin';
 
 const endpoint = '/api/admin/image-qr';
@@ -48,6 +50,8 @@ interface ImageQrResource {
   updatedAt: string;
   imageUrl: string;
   previewUrl: string;
+  materialSelection: QrMaterialSelection;
+  materialIsDefault: boolean;
 }
 
 interface UploadQueueItem {
@@ -63,6 +67,7 @@ interface UploadQueueItem {
 interface ApiPayload {
   resource?: ImageQrResource;
   resources?: ImageQrResource[];
+  materials?: QrMaterialOption[];
   warning?: string | null;
   message?: string;
   error?: string;
@@ -221,9 +226,9 @@ function AdminImageQrContent() {
       <div className="mx-auto max-w-[1500px] space-y-5">
         <section className="grid gap-4 border border-black/10 bg-white p-4 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-center lg:p-5">
           <div className="max-w-2xl">
-            <p className="text-base font-semibold text-black">One image, one permanent QR</p>
+            <p className="text-base font-semibold text-black">One product image, one permanent QR</p>
             <p className="mt-1 text-sm leading-6 text-black/55">
-              Urblo optimizes large files without crushing the detail. Replacing an image later keeps the same QR.
+              Urblo optimizes large files without crushing the detail. Add its stone and finish to create a complete material page. Replacing the image keeps the same QR.
             </p>
           </div>
           <div
@@ -315,6 +320,7 @@ function AdminImageQrContent() {
 
       {selectedResource ? (
         <ImageQrDetails
+          key={selectedResource.id}
           resource={selectedResource}
           userId={user?.id ?? null}
           canEdit={canEdit}
@@ -337,6 +343,7 @@ function ImageQrRow({ resource, onOpen }: { resource: ImageQrResource; onOpen: (
       </span>
       <span className="min-w-0">
         <span className="block truncate text-sm font-semibold text-black md:text-base">{resource.name}</span>
+        {resource.materialIsDefault ? <span className="mt-1 inline-block text-xs text-amber-800">Default stone selection</span> : null}
         <span className="mt-1 block text-xs text-black/46">{resource.width} × {resource.height} · {formatImageBytes(resource.sizeBytes)}</span>
       </span>
       <span className="hidden text-xs text-black/52 md:block">{formatUpdatedDate(resource.updatedAt)}</span>
@@ -368,18 +375,40 @@ function ImageQrDetails({
 }) {
   const replaceInputRef = useRef<HTMLInputElement | null>(null);
   const [isRenaming, setIsRenaming] = useState(false);
+  const [materialDirty, setMaterialDirty] = useState(false);
+  const [detailNotice, setDetailNotice] = useState<string | null>(null);
   const [name, setName] = useState(resource.name);
   const [isBusy, setIsBusy] = useState(false);
   const [copyState, setCopyState] = useState<'idle' | 'copied'>('idle');
 
   useEffect(() => setName(resource.name), [resource.name]);
+  const requestClose = useCallback(() => {
+    if (isBusy) return;
+    if ((materialDirty || (isRenaming && name !== resource.name)) && !window.confirm('Discard your unsaved changes?')) return;
+    onClose();
+  }, [isBusy, materialDirty, isRenaming, name, resource.name, onClose]);
   useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
     function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') onClose();
+      if (event.key === 'Escape') requestClose();
+    }
+    function beforeUnload(event: BeforeUnloadEvent) {
+      if (materialDirty || isBusy || (isRenaming && name !== resource.name)) { event.preventDefault(); event.returnValue = ''; }
     }
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onClose]);
+    window.addEventListener('beforeunload', beforeUnload);
+    return () => { window.removeEventListener('keydown', handleKeyDown); window.removeEventListener('beforeunload', beforeUnload); document.body.style.overflow = previousOverflow; };
+  }, [requestClose, materialDirty, isBusy, isRenaming, name, resource.name]);
+
+  async function saveMaterial(selection: QrMaterialSelection) {
+    setDetailNotice(null);
+    const payload = await imageQrRequest({ method: 'POST', body: JSON.stringify({ action: 'assign-material', id: resource.id, expectedUpdatedAt: resource.updatedAt, selection }) });
+    if (!payload.resource) throw new Error('The updated resource was not returned.');
+    setMaterialDirty(false);
+    onUpdate(payload.resource);
+    setDetailNotice(payload.warning || 'Stone selection saved. The QR page is updated.');
+  }
 
   async function runAction(action: 'rename' | 'hide' | 'restore', extra: Record<string, unknown> = {}) {
     setIsBusy(true);
@@ -430,14 +459,14 @@ function ImageQrDetails({
 
   const isActive = resource.status === 'active';
   return (
-    <div className="fixed inset-0 z-[70] bg-black/30" onMouseDown={(event) => { if (event.currentTarget === event.target) onClose(); }}>
+    <div className="fixed inset-0 z-[70] bg-black/30" onMouseDown={(event) => { if (event.currentTarget === event.target) requestClose(); }}>
       <aside role="dialog" aria-modal="true" aria-labelledby="image-qr-details-title" className="ml-auto flex h-full w-full max-w-[560px] flex-col overflow-hidden bg-[#f5f6f2] shadow-2xl">
         <div className="flex items-center justify-between border-b border-black/10 bg-white px-5 py-4">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.13em] text-black/42">Image details</p>
             <h2 id="image-qr-details-title" className="mt-1 max-w-[400px] truncate text-lg font-semibold text-black">{resource.name}</h2>
           </div>
-          <button type="button" onClick={onClose} className={iconButton} aria-label="Close image details"><X className="h-4 w-4" /></button>
+          <button type="button" onClick={requestClose} disabled={isBusy} className={iconButton} aria-label="Close image details"><X className="h-4 w-4" /></button>
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 sm:p-6">
@@ -458,25 +487,36 @@ function ImageQrDetails({
           ) : (
             <div className="flex items-center gap-2">
               <h3 className="truncate text-lg font-semibold text-black">{resource.name}</h3>
-              {canEdit ? <button type="button" onClick={() => setIsRenaming(true)} className="shrink-0 text-black/40 transition hover:text-black" aria-label={`Rename ${resource.name}`}><Pencil className="h-4 w-4" /></button> : null}
+              {canEdit ? <button type="button" onClick={() => setIsRenaming(true)} className="shrink-0 text-black/40 transition hover:text-black" disabled={materialDirty || isBusy} aria-label={`Rename ${resource.name}`}><Pencil className="h-4 w-4" /></button> : null}
             </div>
           )}
           <p className="mt-1 text-xs text-black/46">{resource.width} × {resource.height} · {formatImageBytes(resource.sizeBytes)}</p>
         </div>
       </div>
 
+      <ImageQrMaterialEditor
+        key={`${resource.id}-${resource.updatedAt}`}
+        selection={resource.materialSelection}
+        isDefault={resource.materialIsDefault}
+        canEdit={canEdit && !isRenaming}
+        loadOptions={loadMaterialOptions}
+        onSave={saveMaterial}
+        onDirty={setMaterialDirty}
+        onSaving={setIsBusy}
+      />
+      {detailNotice ? <p role="status" className="mt-3 text-sm text-black/70">{detailNotice}</p> : null}
       {isActive ? (
         <div className="mt-5 grid gap-4 border-t border-black/10 pt-5 sm:grid-cols-[152px_minmax(0,1fr)] sm:items-center">
           <QrDownload value={resource.imageUrl} name={resource.name} />
           <div className="min-w-0">
-            <p className="text-xs font-bold uppercase tracking-[0.14em] text-black/45">Permanent image link</p>
+            <p className="text-xs font-bold uppercase tracking-[0.14em] text-black/45">Permanent QR page link</p>
             <p className="mt-2 truncate text-xs text-black/52">{resource.imageUrl}</p>
             <div className="mt-3 flex flex-wrap gap-2">
               <button type="button" onClick={() => void copyLink()} className={secondaryButton}>
                 {copyState === 'copied' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                 {copyState === 'copied' ? 'Copied' : 'Copy link'}
               </button>
-              <a href={resource.imageUrl} target="_blank" rel="noreferrer" className={secondaryButton}><ExternalLink className="h-4 w-4" />Open image</a>
+              <a href={`/image/${encodeURIComponent(resource.slug)}`} target="_blank" rel="noreferrer" className={secondaryButton}><ExternalLink className="h-4 w-4" />Open page</a>
             </div>
           </div>
         </div>
@@ -488,11 +528,11 @@ function ImageQrDetails({
 
       {canEdit ? (
         <div className="mt-5 flex flex-wrap gap-2 border-t border-black/10 pt-4">
-          <button type="button" onClick={() => replaceInputRef.current?.click()} disabled={isBusy} className={secondaryButton}>
+          <button type="button" onClick={() => replaceInputRef.current?.click()} disabled={isBusy || materialDirty} className={secondaryButton}>
             <FileUp className="h-4 w-4" />{isBusy ? 'Working…' : 'Replace image'}
           </button>
           <input ref={replaceInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/avif" className="sr-only" tabIndex={-1} onChange={(event) => { const file = event.target.files?.[0] ?? null; event.target.value = ''; void replaceImage(file); }} />
-          <button type="button" onClick={() => void runAction(isActive ? 'hide' : 'restore')} disabled={isBusy} className={secondaryButton}>
+          <button type="button" onClick={() => void runAction(isActive ? 'hide' : 'restore')} disabled={isBusy || materialDirty} className={secondaryButton}>
             {isActive ? <Archive className="h-4 w-4" /> : <RotateCcw className="h-4 w-4" />}
             {isActive ? 'Hide QR' : 'Restore QR'}
           </button>
@@ -605,11 +645,11 @@ async function uploadPrivateOptimizedImage(userId: string, optimized: OptimizedQ
   };
 }
 
-async function imageQrRequest(init: RequestInit) {
+async function imageQrRequest(init: RequestInit, query = '') {
   if (!supabase) throw new Error('Your admin session is not available. Sign in again.');
   const { data, error } = await supabase.auth.getSession();
   if (error || !data.session?.access_token) throw new Error('Your session has expired. Sign in again.');
-  const response = await fetch(endpoint, {
+  const response = await fetch(`${endpoint}${query}`, {
     ...init,
     headers: {
       Accept: 'application/json',
@@ -690,3 +730,8 @@ const filterButton = 'min-h-9 rounded border border-black/10 bg-white px-3 text-
 const activeFilterButton = 'min-h-9 rounded border border-black bg-black px-3 text-xs font-bold uppercase tracking-[0.1em] text-white';
 const activeStatus = 'absolute right-3 top-3 rounded-full bg-[rgba(0,255,25,0.9)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-black';
 const hiddenStatus = 'absolute right-3 top-3 rounded-full bg-black/75 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-white';
+
+async function loadMaterialOptions(): Promise<QrMaterialOption[]> {
+  const payload = await imageQrRequest({ method: 'GET' }, '?materials=1');
+  return payload.materials || [];
+}

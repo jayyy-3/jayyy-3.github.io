@@ -267,7 +267,9 @@ function checkFunctions() {
     "image_qr.replace",
     'image_qr.${input.action}',
     'image-qr-drafts/${userId}/',
-    "status: 302",
+    "'Cache-Control': 'no-store'",
+    'image-qr-data',
+    'handlePublicImageQrDataRequest',
     "'Cache-Control': 'no-store'",
   ]) {
     requireIncludes(adminImageQr, contract, 'functions/_lib/admin-image-qr.js');

@@ -9,6 +9,7 @@ import {
   handleAdminImageQrRequest,
   handlePublicImageQrRequest,
 } from '../functions/_lib/admin-image-qr.js';
+import { checkQrBehavior } from './check-image-qr-behavior.mjs';
 
 const root = cwd();
 const failures = [];
@@ -39,7 +40,7 @@ async function run() {
     'multiple',
     'onDrop={handleDrop}',
     'optimizeImageForQr',
-    'One image, one permanent QR',
+    'One product image, one permanent QR',
     'ImageQrRow',
     'ImageQrDetails',
     'Image details',
@@ -81,7 +82,9 @@ async function run() {
     "'image_qr.create'",
     "'image_qr.replace'",
     '`image_qr.${input.action}`',
-    "status: 302",
+    "id=\"image-qr-data\"",
+    "env.ASSETS.fetch",
+    "assign-material",
     "'Cache-Control': 'no-store'",
     "const PUBLIC_SITE_ORIGIN = 'https://urblo.com.au'",
     'imageUrl: `${PUBLIC_SITE_ORIGIN}/image/${encodeURIComponent(row.slug)}`',
@@ -118,6 +121,8 @@ async function run() {
     ' ',
   );
   assert.equal(invalidPublic.status, 404);
+
+  await checkQrBehavior();
 
   if (failures.length) {
     console.error('Admin Image QR checks failed:');

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lastUpdated": "2026-09-02",
+  "lastUpdated": "2026-09-09",
   "sourceOfTruth": "Machine-readable task queue for active and upcoming agent work. Human-readable roadmap lives in docs/NEXT_STEPS.md.",
   "tasks": [
     {
@@ -2731,6 +2731,38 @@
       "verification": [
         "npm run agent:check",
         "git diff --check"
+      ]
+    },
+    {
+      "id": "NOW-QR-MATERIAL-PAGES-001",
+      "status": "now",
+      "priority": 1,
+      "summary": "Replace existing image QR targets with the approved mobile material page and staff-controlled fixed stone/finish selection.",
+      "releaseEvidence": "Preview 71a78a56 / 1450afe passes full smoke, QR boundaries and 10 Admin routes; real same-material UI save/refresh/public readback and audit 358 pass. Migration and Preview bindings applied. Production promotion approved and next.",
+      "notes": ["2026-09-09: PR #38 / ade0723 deployed to immutable Preview 6707a2a6; local/container/Admin config/visual and general Preview smoke pass. Dedicated active QR returns 503 and owner GET returns server_not_configured: missing Preview server Supabase binding. Authenticated full route check is not passing. Additive migration and live same-material save/readback remain unapplied; obtain release-specific approval before configuration/schema changes and promotion."],
+      "files": [
+        "src/pages/ImageQrPage.tsx",
+        "src/components/image-qr/ImageQrPageView.tsx",
+        "src/components/image-qr/ImageQrMaterialEditor.tsx",
+        "src/pages/admin/AdminImageQrPage.tsx",
+        "functions/_lib/admin-image-qr.js",
+        "functions/_lib/image-qr-materials.js",
+        "supabase/migrations/20260909054816_image_qr_material_selection.sql"
+      ],
+      "acceptance": [
+        "Preserve printed QR URLs and original product images; show a separate exact-finish surface and Stone Library facts.",
+        "Staff can preview and save a fixed stone/variant/finish; old records use defaults without a bulk write.",
+        "Hidden links remain unavailable; draft materials and internal resource data remain private.",
+        "Container and Preview gates pass before separately approved migration/runtime promotion; staff own material-default confirmation."
+      ],
+      "verification": [
+        "npm run agent:admin-image-qr",
+        "npm run agent:content-import",
+        "npm run agent:stone-library-detail",
+        "npm run gate",
+        "npm run agent:admin-cms-predeploy",
+        "npm run agent:admin-config-gate",
+        "npm run agent:cloudflare-preview-smoke -- --base-url <preview>"
       ]
     }
   ]

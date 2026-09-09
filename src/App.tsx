@@ -16,6 +16,7 @@ import HomepageLayout from './layouts/HomepageLayout';
 import { PublicSiteSettingsProvider } from './lib/PublicSiteSettingsProvider';
 import { usePublicSiteSettings } from './lib/publicSiteSettings';
 
+const ImageQrPage = lazy(() => import('./pages/ImageQrPage'));
 const Home = lazy(() => import('./pages/Home'));
 const ProductsPage = lazy(() => import('./pages/ProductsPage'));
 const ProductDetailPage = lazy(() => import('./pages/ProductDetailPage'));
@@ -164,7 +165,7 @@ function ScrollRestoration() {
 function WelcomePopupGate() {
     const location = useLocation();
 
-    if (location.pathname.startsWith('/admin')) {
+    if (location.pathname.startsWith('/admin') || location.pathname.startsWith('/image/')) {
         return null;
     }
 
@@ -199,6 +200,7 @@ function AnimatedRoutes() {
             transition={{ duration: shouldReduceMotion ? 0.01 : 0.22, ease: [0.22, 1, 0.36, 1] }}
         >
             <Routes location={location}>
+                <Route path="/image/:slug" element={loadPage(<ImageQrPage />)} />
                 <Route
                     path="/"
                     element={
@@ -333,7 +335,7 @@ export default function App() {
 function AppRuntime() {
     const location = useLocation();
 
-    if (location.pathname.startsWith('/admin')) {
+    if (location.pathname.startsWith('/admin') || location.pathname.startsWith('/image/')) {
         return <AppRuntimeContent />;
     }
 
@@ -345,10 +347,11 @@ function AppRuntime() {
 }
 
 function AppRuntimeContent() {
+    const location = useLocation();
     return (
         <>
             <WelcomePopupGate />
-            <TitleUpdater />
+            {!location.pathname.startsWith('/image/') ? <TitleUpdater /> : null}
             <ScrollRestoration />
             <AnimatedRoutes />
         </>
