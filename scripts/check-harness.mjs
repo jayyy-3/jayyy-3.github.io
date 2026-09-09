@@ -47,7 +47,7 @@ const requiredFiles = [
 const requiredPackageScripts = {
   'agent:check': 'node scripts/check-harness.mjs',
   'agent:admin-crud-coverage': 'node scripts/check-admin-crud-coverage.mjs',
-  'agent:admin-image-qr': 'node scripts/check-admin-image-qr.mjs',
+  'agent:admin-image-qr': 'tsx scripts/check-admin-image-qr.mjs',
   'agent:admin-config-gate': 'node scripts/check-admin-config-gate.mjs',
   'agent:admin-cms-predeploy': 'bash scripts/admin-cms-predeploy.sh',
   'agent:admin-auth-browser': 'node scripts/check-admin-auth-browser.mjs',

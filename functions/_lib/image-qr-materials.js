@@ -1,5 +1,5 @@
-import stoneLibrary from '../../data/clean/stone_library.json' with { type: 'json' };
-import imageSources from '../../data/clean/stone_finish_images.json' with { type: 'json' };
+import stoneLibrary from '../../data/clean/stone_library.json';
+import imageSources from '../../data/clean/stone_finish_images.json';
 
 export const defaultQrMaterial = Object.freeze({ stoneGroupId: 'zen-grey', stoneVariantId: 'zen-grey', finishKey: 'honed' });
 const finishKey = (finish) => finish.finishVariantId ? `${finish.finishId}__${finish.finishVariantId}` : finish.finishId;
