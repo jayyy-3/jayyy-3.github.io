@@ -11,6 +11,8 @@ const badTask = structuredClone(bundle); badTask.status.currentTaskId = 'done-or
 assert(validateState(badTask).some((error) => error.includes('currentTaskId')));
 const badCms = structuredClone(bundle); badCms.status.production.adminCmsHandoff = 'verified';
 assert(validateState(badCms).some((error) => error.includes('CMS status')));
+const badContent = structuredClone(bundle); badContent.status.production.content = 'drafts_public';
+assert(validateState(badContent).some((error) => error.includes('fallback contract')));
 const badPreview = structuredClone(bundle); badPreview.status.environments.preview.testPolicy = 'write';
 assert(validateState(badPreview).some((error) => error.includes('read_only')));
 const dir = mkdtempSync(join(tmpdir(), 'urblo-state-test-'));

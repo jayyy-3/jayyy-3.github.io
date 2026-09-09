@@ -604,7 +604,7 @@ function checkCloudflareStaticBoundary() {
 function checkDocsContracts() {
   const architecture = readRequired('docs/ARCHITECTURE.md');
   const schema = readRequired('docs/SUPABASE_SCHEMA.md');
-  const handoff = readRequired('docs/HANDOFF.md');
+  const state = JSON.parse(readRequired('docs/agent/status.json'));
 
   for (const fragment of [
     'Public Stone Library listing and detail routes prefer Published Supabase content with static fallback',
@@ -643,7 +643,9 @@ function checkDocsContracts() {
     'Published Stone Library cards overlay matching static cards by `stoneGroupId`',
     'docs/ARCHITECTURE.md Stone Library public overlay contract',
   );
-  requireIncludes(handoff, 'content import/public-read cutover', 'docs/HANDOFF.md');
+  if (state.production.content !== 'published_cms_overlay_with_static_fallback') {
+    failures.push('Structured state must retain the Published CMS overlay with static fallback contract.');
+  }
 }
 
 const payload = getContentImportPayload();

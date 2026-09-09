@@ -41,6 +41,7 @@ export function validateState(bundle, root = process.cwd()) {
   for (const key of ['repositorySha', 'runtimeSha']) if (!/^[a-f0-9]{40}$/.test(status.release?.[key] || '')) errors.push(`Invalid ${key}`);
   if (!/^https:\/\/[a-f0-9]{8}\.urblo(?:-site)?\.pages\.dev$/.test(status.release?.verifiedRuntimeUrl || '')) errors.push('Release requires an immutable runtime URL.');
   if (status.environments?.preview?.dataTarget === 'production' && status.environments.preview.testPolicy !== 'read_only') errors.push('Shared production Preview must be read_only.');
+  if (status.production.content !== 'published_cms_overlay_with_static_fallback') errors.push('Public content fallback contract changed.');
   const cms = JSON.parse(readFileSync(join(root, 'docs/agent/admin-handoff-evidence.json'), 'utf8'));
   if (status.production.adminCmsHandoff !== cms.state) errors.push('CMS status contradicts structured production handoff evidence.');
   for (const [id, module] of Object.entries(modules.modules)) for (const path of [...module.paths, ...module.rules]) if (!existsSync(join(root, path))) errors.push(`Module ${id} has missing path ${path}`);
