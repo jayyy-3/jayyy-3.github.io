@@ -2746,7 +2746,7 @@
         "src/pages/admin/AdminImageQrPage.tsx",
         "functions/_lib/admin-image-qr.js",
         "functions/_lib/image-qr-materials.js",
-        "supabase/migrations/20260909050915_image_qr_material_selection.sql"
+        "supabase/migrations/20260909054816_image_qr_material_selection.sql"
       ],
       "acceptance": [
         "Preserve printed QR URLs and original product images; show a separate exact-finish surface and Stone Library facts.",

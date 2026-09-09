@@ -29,7 +29,8 @@
     "seoLegacyRedirects": "production_smoke_verified_2026_07_13",
     "settingsInviteProof": "qa_editor_active_via_direct_auth_activation_redirect_config_corrected_real_ui_invite_recovery_not_repeated",
     "adminImageQr": "pr29_merge_19e2b41_production_deployment_d6816c71_18_supplied_images_imported_19_active_zero_hidden_canonical_qr_direct_image_and_deployment_bound_smoke_verified",
-    "supabaseSecurityAdvisor": "one_auth_leaked_password_warning_plus_two_expected_browser_callable_archived_slug_security_definer_warnings_minimum_disclosure_rpc_returns_expected_empty_static_fallback_intersection"
+    "supabaseSecurityAdvisor": "one_auth_leaked_password_warning_plus_two_expected_browser_callable_archived_slug_security_definer_warnings_minimum_disclosure_rpc_returns_expected_empty_static_fallback_intersection",
+    "imageQrMaterialMigration": "20260909054816_applied_readback_nullable_jsonb_server_only_rls_32_existing_rows_null"
   },
   "localReproducibility": {
     "sourceHarness": "passing",
@@ -39,10 +40,10 @@
     "liveReadiness": "browser_key_owner_and_distinct_editor_credentials_present_media_migration_applied_live_role_boundary_passed",
     "adminUxReshape": "phase0_closed_projects_phase1_and_pr11_single_editor_followup_live_and_jay_accepted_image_qr_merge_19e2b41_live_with_19_active_resources_and_direct_qr_readback_phase2_articles_and_sunset_pending",
     "publicCatalogIntegrity": "branch_codex_fix_mobile_product_stone_integrity_local_source_and_browser_checks_passing_full_gate_preview_and_jay_acceptance_pending_no_live_data_write",
-    "imageQrMaterialPages": "pr38_ade0723_local_container_admin_config_visual_pass_ci_preview_6707a2a6_deployed_general_smoke_pass_qr_503_missing_preview_service_key_live_save_and_migration_blocked"
+    "imageQrMaterialPages": "pr38_migration_20260909054816_applied_preview_encrypted_bindings_configured_production_unchanged_redeploy_and_ui_save_readback_then_approved_promote_pending"
   },
   "nextDecisions": [
-    "Approve QR Preview server Supabase binding, additive material_selection migration and one same-material UI save/readback; promote only after authenticated QR and full Preview gates pass. PR #38 / ade0723 has no production writes; staff must confirm defaults.",
+    "QR release approved: migration applied and existing server key/URL securely configured for Preview with production unchanged. Redeploy, prove same-material UI save/refresh and public readback, pass full Preview gates, then promote. Staff own default confirmation.",
     "Public catalog runtime is live through PR #36 / merge 5731651 / immutable deployment https://764dedbc.urblo-site.pages.dev. Obtain Jay's iOS/Android WeChat result, then list and request separate approval for exact production CMS corrections and the Steel Blue/BlueOcean duplicate-row merge-delete.",
     "After Preview acceptance, request separate approval for the exact imported Product model and Tuscany finish-capability Draft corrections; do not write production Supabase from source approval alone.",
     "Image QR PR #29 merge 19e2b41 is live as deployment d6816c71; 19 active resources, canonical QR redirect, and immutable/apex/www deployment-bound smoke pass. Treat later usability feedback as user-owned rather than reopening deployment proof.",
