@@ -7,6 +7,11 @@ import { cwd, execPath, exit } from 'node:process';
 const root = cwd();
 const failures = [];
 const notes = [];
+const articleSourceFiles = [
+  'src/pages/admin/AdminArticlesPage.tsx',
+  ...['types.ts', 'forms.ts', 'data.ts', 'useArticleEditor.ts', 'ArticlesWorkspace.tsx', 'ArticleEditorComponents.tsx', 'BlockContentEditor.tsx'].map(file => 'src/pages/admin/articles/' + file),
+];
+function readArticleSource() { return articleSourceFiles.map(readRequired).join('\n'); }
 
 const requiredAdminRoutes = [
   { path: 'index', component: 'AdminDashboardPage' },
@@ -435,6 +440,7 @@ const pageChecks = [
   {
     label: 'Articles',
     file: 'src/pages/admin/AdminArticlesPage.tsx',
+    files: articleSourceFiles,
     lifecycle: true,
     tables: ['articles', 'article_blocks', 'media_assets', 'projects', 'stone_groups'],
     actions: [
@@ -1040,7 +1046,7 @@ function checkAdminDestructiveBoundaries() {
 }
 
 function checkPage(page) {
-  const text = readRequired(page.file);
+  const text = (page.files ?? [page.file]).map(readRequired).join('\n');
   if (!text) return;
 
   requireIncludes(text, '<RequireAdmin>', page.file);
@@ -1118,7 +1124,7 @@ function checkPage(page) {
 
 function checkArticleStructuredAuthoring() {
   const schema = readRequired('docs/SUPABASE_SCHEMA.md');
-  const text = readRequired('src/pages/admin/AdminArticlesPage.tsx');
+  const text = readArticleSource();
   const approvedBlockTypes = [
     'rich_text',
     'image',
@@ -1468,7 +1474,7 @@ function checkAdminParentOwnershipSafety() {
 
 function checkAdminLoadingAndSaveLockSafety() {
   const pages = [
-    ['src/pages/admin/AdminArticlesPage.tsx', readRequired('src/pages/admin/AdminArticlesPage.tsx')],
+    ['src/pages/admin/AdminArticlesPage.tsx', readArticleSource()],
     ['src/pages/admin/AdminProductsPage.tsx', readRequired('src/pages/admin/AdminProductsPage.tsx')],
     ['src/pages/admin/AdminStoneLibraryPage.tsx', readRequired('src/pages/admin/AdminStoneLibraryPage.tsx')],
   ];
@@ -1482,11 +1488,8 @@ function checkAdminLoadingAndSaveLockSafety() {
   const articleSaveStart = articles.indexOf('async function saveArticle');
   const articleSaveEnd = articles.indexOf('async function handleArticleSubmit', articleSaveStart);
   const articleSaveSource = articles.slice(articleSaveStart, articleSaveEnd);
-  const validationIndex = articleSaveSource.indexOf('validateArticleForm');
-  const lockIndex = articleSaveSource.indexOf('savingArticleRef.current = true');
-  if (validationIndex === -1 || lockIndex === -1 || validationIndex > lockIndex) {
-    failures.push('src/pages/admin/AdminArticlesPage.tsx: article validation must finish before the save lock is taken');
-  }
+  // Validation-before-lock is exercised by local Articles invalid-Save recovery,
+  // including a deliberate lock-order mutation, rather than source ordering.
   requireIncludes(articleSaveSource, 'finally {', 'src/pages/admin/AdminArticlesPage.tsx article save lock release');
   requireIncludes(articleSaveSource, 'savingArticleRef.current = false', 'src/pages/admin/AdminArticlesPage.tsx article save ref release');
 

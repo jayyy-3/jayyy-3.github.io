@@ -11,11 +11,11 @@
   },
   "release": {
     "observedAt": "2026-09-09",
-    "repositorySha": "810fd9b0eed97fa2a5183b46549db8423700bda5",
-    "runtimeSha": "810fd9b0eed97fa2a5183b46549db8423700bda5",
-    "verifiedRuntimeUrl": "https://31fd0c27.urblo-site.pages.dev",
-    "ciRunId": 34328859066,
-    "note": "PR #43 passed isolated resets/QR journey, source/browser checks and Preview; main production immutable/apex/www readback passed. Expanded four-workflow tests are in progress locally.",
+    "repositorySha": "97e4f284b25616bb9cb8c56229ed0380eb7de9ac",
+    "runtimeSha": "97e4f284b25616bb9cb8c56229ed0380eb7de9ac",
+    "verifiedRuntimeUrl": "https://c0006474.urblo-site.pages.dev",
+    "ciRunId": 34331232509,
+    "note": "PR #44 production passed the expanded isolated workflow suite and immutable/apex/www readback. Articles/shared-identity refactoring has passed local behavior and source gates; its separate release is pending.",
     "evidenceRefs": [
       "docs/WORKLOG.md"
     ]
@@ -53,7 +53,7 @@
     {
       "id": "github-protection",
       "status": "pending",
-      "detail": "main reported protected=false; connected account has push but not admin. Prepare stable quality check before owner enables protection."
+      "detail": "Stable quality check is deployed and passing. main requires administrator configuration; connected identity has push but no admin permission. See NEXT-DELIVERY-MAIN-PROTECTION-001."
     },
     {
       "id": "legacy-integration",

@@ -6,7 +6,7 @@
     {
       "id": "NOW-MAINTAINABILITY-001",
       "status": "now",
-      "phase": "implementation",
+      "phase": "verification",
       "priority": 0,
       "summary": "Implement the approved maintainability audit, generated state, classified verification, isolated local stack, behavioral tests and limited Articles refactor.",
       "modules": [
@@ -61,7 +61,7 @@
         "legacyAutomaticBuilds": "disabled_and_read_back",
         "localStack": "pr_43_production_verified",
         "behaviorTests": "four_workflows_and_unauthorized_account_passed_two_fresh_resets",
-        "refactor": "pending"
+        "refactor": "local_behaviors_mutation_and_clean_container_passed_preview_release_pending"
       }
     },
     {
@@ -689,6 +689,83 @@
       ],
       "historicalRecord": "docs/archive/2026-09-09/docs__agent__tasks.json#LATER-LAUNCH-DOCS-CONSOLIDATE-001",
       "phase": "planned"
+    },
+    {
+      "id": "NEXT-ADMIN-MODULE-BOUNDARIES-001",
+      "status": "next",
+      "phase": "planned",
+      "priority": 4,
+      "summary": "Apply the Articles behavior-first module boundary pattern to one concrete Products, Stone Library or Media change when scheduled; do not rewrite all editors by file size.",
+      "modules": [
+        "products",
+        "stone-library",
+        "media"
+      ],
+      "files": [
+        "src/pages/admin/AdminProductsPage.tsx",
+        "src/pages/admin/AdminStoneLibraryPage.tsx",
+        "src/pages/admin/AdminMediaPage.tsx"
+      ],
+      "acceptance": [
+        "Choose one frequently changed responsibility and add its real local success/failure workflow before extraction.",
+        "Preserve browser-key/RLS, media promotion/compensation, parent ownership, route/layout and audit contracts.",
+        "Record before/after behavior evidence and module entry points."
+      ],
+      "verification": [
+        "npm run local:verify",
+        "npm run gate"
+      ],
+      "evidenceRefs": [
+        "docs/MAINTAINABILITY_AUDIT.md",
+        "docs/PROJECT_MAP.md"
+      ]
+    },
+    {
+      "id": "NEXT-DELIVERY-MAIN-PROTECTION-001",
+      "status": "blocked",
+      "phase": "awaiting_external",
+      "priority": 1,
+      "summary": "A repository administrator must enable main PR protection and require the stable quality check; the connected GitHub identity has push access but no admin permission.",
+      "modules": [
+        "delivery"
+      ],
+      "files": [
+        ".github/workflows/deploy.yml",
+        "docs/CLOUDFLARE_DEPLOYMENT.md"
+      ],
+      "acceptance": [
+        "main requires a pull request and successful quality check; no additional human approval stage is introduced.",
+        "Read back protection using an administrator identity and record the effective configuration."
+      ],
+      "verification": [
+        "Read-only GitHub branch/ruleset API readback"
+      ],
+      "blocker": "Repository administrator access; already requested from Jay during this maintenance task."
+    },
+    {
+      "id": "LATER-AUTH-CLIENT-NAMESPACE-001",
+      "status": "later",
+      "phase": "planned",
+      "priority": 5,
+      "summary": "Investigate the duplicate GoTrue storage-name warning when an authenticated admin opens public content; no session corruption was observed in the local workflows.",
+      "modules": [
+        "harness"
+      ],
+      "files": [
+        "src/lib/publicContentClient.ts",
+        "src/lib/supabaseClient.ts"
+      ],
+      "acceptance": [
+        "Reproduce the warning with both clients and establish whether the stateless public client can affect the persisted admin session.",
+        "If a fix is justified, isolate its storage namespace without changing public fallback or admin session/recovery behavior."
+      ],
+      "verification": [
+        "npm run local:verify",
+        "npm run agent:admin-auth-browser -- --allow-login --strict (only in separately authorized live scope)"
+      ],
+      "evidenceRefs": [
+        "docs/WORKLOG.md"
+      ]
     }
   ]
 }

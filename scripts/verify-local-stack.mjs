@@ -25,6 +25,14 @@ function run(script, args = []) {
   if (result.status !== 0) throw new Error(`${script} failed; see ${attempt}/${report.steps.length}.log`)
   console.log(`PASS ${script} ${args.join(' ')}`)
 }
+async function stopApp() {
+  if (app?.pid) {
+    try { process.kill(-app.pid, 'SIGTERM') } catch { /* process already stopped */ }
+    await new Promise(resolve => setTimeout(resolve, 500))
+    try { process.kill(-app.pid, 'SIGKILL') } catch { /* process group already stopped */ }
+  }
+  app = null
+}
 try {
   run('check-local-boundary.mjs')
   run('local-stack.mjs', ['start'])
@@ -43,14 +51,12 @@ try {
   }
   if (!ready) throw new Error('Local Functions did not become ready')
   run('check-local-journeys.mjs')
+  await stopApp()
+  run('check-local-article-mutation.mjs')
   report.passed = true
 } catch (error) { report.error = error.message; console.error(error.message); process.exitCode = 1 }
 finally {
-  if (app?.pid) {
-    try { process.kill(-app.pid, 'SIGTERM') } catch { /* process already stopped */ }
-    await new Promise(resolve => setTimeout(resolve, 500))
-    try { process.kill(-app.pid, 'SIGKILL') } catch { /* process group already stopped */ }
-  }
+  await stopApp()
   report.finishedAt = new Date().toISOString()
   writeFileSync(`${attempt}/result.json`, JSON.stringify(report, null, 2) + '\n')
   console.log(`Local stack verification: ${attempt}/result.json`)

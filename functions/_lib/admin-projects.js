@@ -1,6 +1,5 @@
-import { createClient } from "@supabase/supabase-js";
+import { createServiceClient, readServiceConfig, readBearerToken, readAdminIdentity } from './admin-runtime.js';
 
-const DEFAULT_SUPABASE_URL = "https://npkidywzwddbnfrnxlmo.supabase.co";
 const PRIVATE_MEDIA_BUCKET = "urblo-admin-media";
 const PUBLIC_MEDIA_BUCKET = "urblo-public-media";
 const MAX_BODY_BYTES = 1_100_000;
@@ -1472,8 +1471,7 @@ export function mapRpcError(error, responseStatus = null) {
 }
 
 function getSupabaseConfig(env) {
-  const url = (env.SUPABASE_URL || DEFAULT_SUPABASE_URL).replace(/\/$/, "");
-  const serviceKey = env.SUPABASE_SERVICE_ROLE_KEY || env.SUPABASE_SERVICE_KEY;
+  const { url, serviceKey } = readServiceConfig(env);
   if (!serviceKey) {
     throw new AdminProjectsError(
       500,
@@ -1484,35 +1482,20 @@ function getSupabaseConfig(env) {
   return { url, serviceKey };
 }
 
-function createServiceClient(config) {
-  return createClient(config.url, config.serviceKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-      detectSessionInUrl: false,
-    },
-  });
-}
-
 function getBearerToken(request) {
-  const match = /^Bearer\s+(.+)$/i.exec(
-    request.headers.get("authorization") || "",
-  );
-  if (!match?.[1]) {
+  const token = readBearerToken(request);
+  if (token === null) {
     throw new AdminProjectsError(
       401,
       "missing_session",
       "Sign in before opening Projects.",
     );
   }
-  return match[1].trim();
+  return token;
 }
 
 async function requireAdminActor(supabase, accessToken) {
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser(accessToken);
+  const { user, userError: error, profile, profileError } = await readAdminIdentity(supabase, accessToken);
   if (error || !user) {
     throw new AdminProjectsError(
       401,
@@ -1520,12 +1503,6 @@ async function requireAdminActor(supabase, accessToken) {
       "Sign in again before opening Projects.",
     );
   }
-  const { data: profile, error: profileError } = await supabase
-    .from("admin_profiles")
-    .select("user_id,role,is_active")
-    .eq("user_id", user.id)
-    .eq("is_active", true)
-    .maybeSingle();
   if (
     profileError ||
     !profile ||

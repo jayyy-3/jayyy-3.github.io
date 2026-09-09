@@ -1,5 +1,9 @@
 import assert from 'node:assert/strict'
 import { classify, parseNameStatus, resolveChecks, suites } from './_lib/verification.mjs'
+import { sanitizeDiagnostic } from './_lib/browser-diagnostics.mjs'
+const sanitized = sanitizeDiagnostic({ status: 500, details: { authorization: 'Bearer private-value', access_token: 'private-token', password: 'private-password', message: 'API failed' } })
+assert.deepEqual(sanitized, { status: 500, details: { authorization: '[redacted]', access_token: '[redacted]', password: '[redacted]', message: 'API failed' } })
+assert.equal(sanitizeDiagnostic('Bearer private-value'), 'Bearer [redacted]')
 for (const path of ['README.md', 'AGENTS.md', 'docs/HANDOFF.md', 'docs/agent/tasks.json']) assert.equal(classify([path]).deploy, false, path)
 for (const path of ['src/App.tsx', 'public/articles/content.md', 'public/data.json', 'package.json', '.github/workflows/deploy.yml', 'vite.config.ts', 'unknown.txt', '.gitignore']) assert.equal(classify([path]).deploy, true, path)
 assert.equal(classify(['scripts/check-harness.mjs']).suite, 'container')

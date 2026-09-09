@@ -39,7 +39,8 @@
       "paths": [
         "src/pages/admin/AdminImageQrPage.tsx",
         "src/pages/ImageQrPage.tsx",
-        "functions/_lib/admin-image-qr.js"
+        "functions/_lib/admin-image-qr.js",
+        "functions/_lib/admin-runtime.js"
       ],
       "rules": [
         "docs/ARCHITECTURE.md",
@@ -55,7 +56,8 @@
         "src/pages/admin/AdminProjectsPage.tsx",
         "src/pages/admin/projects",
         "functions/_lib/admin-projects.js",
-        "src/service/ProjectService.ts"
+        "src/service/ProjectService.ts",
+        "functions/_lib/admin-runtime.js"
       ],
       "rules": [
         "docs/ADMIN_IA_ACCESS.md",
@@ -70,7 +72,9 @@
       "paths": [
         "src/pages/admin/AdminArticlesPage.tsx",
         "src/service/ArticleService.ts",
-        "src/pages/ArticlePage.tsx"
+        "src/pages/ArticlePage.tsx",
+        "src/pages/admin/articles",
+        "scripts/local-journeys/articles.mjs"
       ],
       "rules": [
         "docs/ADMIN_IA_ACCESS.md",
@@ -78,7 +82,8 @@
       ],
       "checks": [
         "agent:admin-crud-coverage",
-        "agent:public-content-overlay"
+        "agent:public-content-overlay",
+        "local:verify"
       ]
     },
     "forms": {

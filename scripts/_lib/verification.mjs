@@ -22,6 +22,7 @@ export const checks = {
   'stone-library': node('check-stone-library-detail-integrity.mjs'),
   qr: tsx('check-admin-image-qr.mjs'),
   projects: tsx('check-admin-projects-aggregate.mjs'),
+  'admin-runtime': tsx('check-admin-runtime.mjs'),
   coverage: node('check-admin-crud-coverage.mjs', ['--self-only'], ['projects']),
   'public-readiness': node('check-public-supabase-readiness.mjs'),
   overlay: tsx('check-public-content-overlay.mjs'),
@@ -31,7 +32,7 @@ export const checks = {
   browser: node('check-admin-config-gate.mjs', [], ['build']),
 }
 const smoke = ['routes', 'forms-api', 'forms-ui', 'capabilities', 'homepage-video', 'product-images', 'stone-library', 'qr', 'projects']
-const admin = ['coverage', 'qr', 'projects', 'build', 'lint', 'foundation', 'media-plan', 'public-readiness', 'overlay', 'cloudflare', 'harness', 'handoff']
+const admin = ['coverage', 'qr', 'projects', 'admin-runtime', 'build', 'lint', 'foundation', 'media-plan', 'public-readiness', 'overlay', 'cloudflare', 'harness', 'handoff']
 export const suites = {
   docs: ['state', 'paths', 'harness', 'classifier'],
   tooling: ['harness', 'classifier', 'lint'],
