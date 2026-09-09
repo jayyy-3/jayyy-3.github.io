@@ -549,6 +549,7 @@ function AdminProjectsContent() {
 
     if (projectIdParam === "new") {
       draftLoadGenerationRef.current += 1;
+      setIsDraftLoading(false);
       const emptyDraft = createEmptyProjectAggregateDraft();
       setDraft(emptyDraft);
       setBaseline(createEmptyProjectAggregateDraft());

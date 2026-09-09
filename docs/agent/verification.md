@@ -15,7 +15,7 @@ Use `npm run agent:init -- --task <id>` to locate the task and scope. `npm run a
 
 The registry in `scripts/_lib/verification.mjs` owns dependencies; classification tests cover actual Git rename/delete/untracked records and runtime fingerprints. `quality` always resolves on PRs, including record-only PRs; runtime smoke failure makes it fail. Main branch protection needs repository administrator access.
 
-Runtime CI additionally runs `npm run local:verify` with Node 22 before deployment. That local configuration has its own build and real database; it is distinct from the configured production build. Projects/Articles representative journeys are the next coverage batch.
+Runtime CI additionally runs `npm run local:verify` with Node 22 before deployment. That local configuration has its own build and real database; it is distinct from the configured production build. Synthetic journeys cover QR upload/material save/refresh/public readback; Projects private draft/publish/hide and delayed-load cancellation; Articles validation/API-failure recovery/parent-bound section saves/selection locks/public rendering; Contact/Sample Request persistence and owner inbox readback; and an unprofiled account boundary. External mail is disabled; notification-provider logic is separately covered by in-memory forms API checks.
 
 ## Retained specialized verification and live boundaries
 

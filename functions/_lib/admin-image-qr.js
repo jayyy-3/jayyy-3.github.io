@@ -416,6 +416,7 @@ function validateUpload(value) {
   const width = Number(value?.width);
   const height = Number(value?.height);
   const sizeBytes = Number(value?.sizeBytes);
+  // eslint-disable-next-line no-control-regex -- Reject control characters in untrusted Storage paths.
   if (!objectPath || objectPath.includes('..') || /[\u0000-\u001f\\]/.test(objectPath)) {
     throw new AdminImageQrError(400, 'invalid_upload_path', 'The temporary upload path is invalid.');
   }
@@ -549,17 +550,6 @@ function jsonResponse(body, init = {}) {
       'access-control-allow-methods': 'GET, POST, OPTIONS',
       'access-control-allow-headers': 'authorization, content-type',
       ...(init.headers || {}),
-    },
-  });
-}
-
-function publicTextResponse(message, status) {
-  return new Response(message, {
-    status,
-    headers: {
-      'content-type': 'text/plain; charset=utf-8',
-      'cache-control': status === 404 ? 'public, max-age=60' : 'no-store',
-      'x-content-type-options': 'nosniff',
     },
   });
 }

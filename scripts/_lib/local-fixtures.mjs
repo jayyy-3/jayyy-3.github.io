@@ -41,7 +41,7 @@ export async function seedLocalFixtures(credentials) {
     if (!rows.length) rows = await request('/rest/v1/articles', { method: 'POST', body: { slug, title: `Local Article ${letter.toUpperCase()}`, status: 'draft', author: 'Synthetic editor', excerpt: 'Synthetic local workflow fixture.', created_by: users.owner, updated_by: users.owner }, extraHeaders: { Prefer: 'return=representation' } })
     const article = rows[0]
     const blocks = await request(`/rest/v1/article_blocks?article_id=eq.${article.id}&select=*`)
-    if (!blocks.length) await request('/rest/v1/article_blocks', { method: 'POST', body: { article_id: article.id, block_type: 'rich_text', content: { html: `<p>Local body ${letter.toUpperCase()}</p>` }, status: 'published', created_by: users.owner, updated_by: users.owner } })
+    if (!blocks.length) await request('/rest/v1/article_blocks', { method: 'POST', body: { article_id: article.id, block_type: 'rich_text', content: { body: `Local body ${letter.toUpperCase()}` }, status: 'published', created_by: users.owner, updated_by: users.owner } })
     articles.push({ id: article.id, slug, title: article.title })
   }
   const path = 'synthetic/local-pixel.png'

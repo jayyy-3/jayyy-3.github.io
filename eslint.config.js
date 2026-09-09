@@ -5,7 +5,12 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
-  { ignores: ['dist', '.vite', '**/.vite/**', '.claude/worktrees/**'] },
+  { ignores: ['dist', '.vite', '**/.vite/**', '.claude/worktrees/**', '.tmp/**', '.wrangler/**'] },
+  {
+    files: ['functions/**/*.js'],
+    extends: [js.configs.recommended],
+    languageOptions: { ecmaVersion: 'latest', sourceType: 'module', globals: globals.worker },
+  },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ['**/*.{ts,tsx}'],
