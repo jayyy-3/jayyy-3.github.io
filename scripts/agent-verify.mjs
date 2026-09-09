@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-import { execFileSync, spawnSync } from 'node:child_process'
-import { mkdirSync, writeFileSync } from 'node:fs'
+import { execFileSync, spawn } from 'node:child_process'
+import { mkdirSync, writeFileSync, appendFileSync, cpSync, existsSync } from 'node:fs'
 import { loadEnv } from 'vite'
 import { randomUUID } from 'node:crypto'
 import { checks, changedPaths, classify, resolveChecks, runtimeFingerprint } from './_lib/verification.mjs'
@@ -38,6 +38,15 @@ function redact(text) {
   return text.replace(/Bearer\s+[^\s"']+/gi, 'Bearer [REDACTED]').replace(/eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/g, '[REDACTED JWT]')
 }
 console.log(`Verification: ${suite}; ${ids.length} unique checks; deployment ${report.deploy ? 'required' : 'not required'}`)
+let activeChild = null
+function terminateChild() {
+  if (!activeChild) return
+  try { process.kill(-activeChild.pid, 'SIGTERM') } catch { activeChild.kill('SIGTERM') }
+}
+for (const signal of ['SIGINT', 'SIGTERM']) process.once(signal, () => {
+  terminateChild()
+  report.interrupted = signal
+})
 for (const item of report.checks) {
   const started = Date.now()
   const [command, ...commandArgs] = item.command
@@ -45,12 +54,43 @@ for (const item of report.checks) {
   const buildEnv = loadEnv('production', process.cwd())
   const envless = ['VITE_SUPABASE_URL', 'VITE_SUPABASE_PUBLISHABLE_KEY', 'VITE_SUPABASE_ANON_KEY'].every(key => !buildEnv[key])
   const checkEnv = { ...process.env, URBLO_VERIFIED_ENVLESS_DIST: buildPassed && envless ? '1' : '0' }
-  const result = spawnSync(command, commandArgs, { env: checkEnv, encoding: 'utf8', maxBuffer: 32 * 1024 * 1024 })
-  item.durationMs = Date.now() - started
-  item.status = result.status === 0 ? 'passed' : 'failed'
-  item.exitCode = result.status
   item.log = `${evidenceDir}/${item.id}.log`
-  writeFileSync(item.log, redact([result.stdout, result.stderr, result.error?.message].filter(Boolean).join('\n')))
+  item.status = 'running'
+  writeFileSync(item.log, '')
+  writeFileSync(`${evidenceDir}/result.json`, JSON.stringify(report, null, 2) + '\n')
+  const result = await new Promise(resolve => {
+    const child = spawn(command, commandArgs, { env: checkEnv, detached: true, stdio: ['ignore', 'pipe', 'pipe'] })
+    activeChild = child
+    const pending = { stdout: '', stderr: '' }
+    for (const stream of ['stdout', 'stderr']) child[stream].on('data', chunk => {
+      pending[stream] += chunk.toString()
+      const end = pending[stream].lastIndexOf('\n')
+      if (end >= 0) {
+        appendFileSync(item.log, redact(pending[stream].slice(0, end + 1)))
+        pending[stream] = pending[stream].slice(end + 1)
+      }
+    })
+    let timedOut = false, forceTimer
+    const timeout = setTimeout(() => {
+      timedOut = true
+      appendFileSync(item.log, 'Check exceeded its time budget; terminating its process group.\n')
+      terminateChild()
+      forceTimer = setTimeout(() => { try { process.kill(-child.pid, 'SIGKILL') } catch { /* already stopped */ } }, 2000)
+    }, item.id === 'build' ? 300000 : 180000)
+    child.once('error', error => appendFileSync(item.log, redact(error.message) + '\n'))
+    child.once('close', (code, signal) => {
+      clearTimeout(timeout); clearTimeout(forceTimer)
+      for (const text of Object.values(pending)) if (text) appendFileSync(item.log, redact(text))
+      activeChild = null
+      resolve({ status: code, signal, timedOut })
+    })
+  })
+  item.durationMs = Date.now() - started
+  item.status = result.status === 0 && !result.timedOut && !report.interrupted ? 'passed' : 'failed'
+  item.exitCode = result.status
+  item.signal = result.signal
+  item.timedOut = result.timedOut
+  if (item.id === 'browser' && existsSync('.tmp/admin-config-gate/screenshots')) cpSync('.tmp/admin-config-gate/screenshots', `${evidenceDir}/browser-screenshots`, { recursive: true })
   console.log(`${item.status.toUpperCase()} ${item.id} (${item.durationMs} ms) — ${item.log}`)
   if (item.status === 'failed') break
 }
