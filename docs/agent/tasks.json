@@ -2738,6 +2738,7 @@
       "status": "now",
       "priority": 1,
       "summary": "Replace existing image QR targets with the approved mobile material page and staff-controlled fixed stone/finish selection.",
+      "notes": ["2026-09-09: PR #38 / ade0723 deployed to immutable Preview 6707a2a6; local/container/Admin config/visual and general Preview smoke pass. Dedicated active QR returns 503 and owner GET returns server_not_configured: missing Preview server Supabase binding. Authenticated full route check is not passing. Additive migration and live same-material save/readback remain unapplied; obtain release-specific approval before configuration/schema changes and promotion."],
       "files": [
         "src/pages/ImageQrPage.tsx",
         "src/components/image-qr/ImageQrPageView.tsx",

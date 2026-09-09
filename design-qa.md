@@ -26,4 +26,4 @@ In-app browser verified both image dialogs, zoom pressed state, Escape close and
 
 ## Release boundary
 
-Visual QA passes. Container/Preview deployment gates, additive migration application and live authenticated save/refresh evidence remain separate release obligations. Staff must confirm defaults; the reference does not establish factual matches for other QR product images.
+Visual QA passes. Clean Node 20 container and CI deployment gates plus general Preview smoke passed. Dedicated QR/authenticated Preview verification is blocked by the missing server Supabase binding; the additive migration and live authenticated save/refresh remain separate release obligations. Staff must confirm defaults; the reference does not establish factual matches for other QR product images.

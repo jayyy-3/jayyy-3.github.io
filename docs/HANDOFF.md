@@ -1,11 +1,14 @@
 # HANDOFF - Current Agent State
 
+Last updated: 2026-09-09
 
 ## QR material pages — 2026-09-09
 
-The September 9 QR material-page change is implemented on `codex/qr-stone-pages`, pending Preview verification and production release. Existing `/image/:slug` links will open the selected mobile design: original product 3D image, a separate fixed-finish Stone Library surface image, compact material facts, enlargement, library deep link and enquiry. Existing rows need no backfill: known unambiguous names resolve a default, otherwise Zen Grey / Honed is used until staff save a choice. Staff must review defaults; they are not certified material matches. The additive `20260909050915_image_qr_material_selection.sql` migration is prepared but not applied; the current production resolver remains unchanged. Next: complete Preview smoke and review, obtain the release-specific approval for the additive migration/runtime promotion, then verify authenticated selection save/refresh and public readback. Broader CMS acceptance remains open.
+QR material-page runtime is implemented in draft PR `#38`, code commit `ade0723`, immutable Preview `https://6707a2a6.urblo-site.pages.dev`. Clean Node 20 container gate, Admin predeploy, 12-route no-config Chromium/Firefox gate and CI build/lint/typecheck/smoke/predeploy/bundle/deploy all pass. General Preview route/asset/MIME/redirect/protected-boundary smoke passes. Dedicated QR verification is BLOCKED: the active public page/API returns 503, and authenticated `/api/admin/image-qr` returns `server_not_configured` because Preview lacks the server Supabase key. Authenticated route verification also fails on Projects data loading; do not call it a successful authenticated Preview. Local visual/interaction QA and in-memory save/readback pass. No production schema, content, Storage or Cloudflare configuration was changed.
 
-Last updated: 2026-09-02
+Next release actions require specific approval: configure the existing server Supabase connection for Cloudflare Preview, apply additive migration `20260909050915_image_qr_material_selection.sql`, verify a saved material through the authenticated UI and public readback, then promote only after those gates pass. The same-material Zen Grey/Honed confirmation can establish persistence without changing the rendered association. Staff must confirm other defaults.
+
+Existing QR URLs and product images stay unchanged. Staff choose stone → variant/cut direction → finish; the page reuses public Stone Library facts and the exact finish image. Unambiguous names receive matching defaults; other rows default to Zen Grey/Honed until staff confirm them.
 
 ## Read First
 Use this file as the short current-state entry. Detailed evidence lives in `docs/WORKLOG.md`; task execution state lives in `docs/agent/tasks.json`; compact machine state lives in `docs/agent/status.json`.
