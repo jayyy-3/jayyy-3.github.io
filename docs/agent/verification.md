@@ -1,18 +1,25 @@
-# Agent Verification Matrix
+# Verification entry points
 
+Use `npm run agent:init -- --task <id>` to locate the task and scope. `npm run agent:doctor -- --target local` (or preview/production) reports prerequisites without writes or secret output. `--strict` fails on missing prerequisites; default doctor mode is advisory.
+
+`npm run agent:verify -- --base <sha>` classifies all changes against the base, including working/staged/untracked paths. Without a base it uses the merge base with origin/main. `--plan` prints the graph without execution. `--out <path>` saves machine-readable results; every execution also retains a unique ignored `.tmp/verification/<attemptId>/` directory. Never use `--suite docs` to override classification before release.
+
+| Category | Checks | Deploy |
+| --- | --- | --- |
+| Record docs | state, paths, harness and classifier; foundation dependency | No |
+| Tooling | full source graph, build/lint and behavior checks | No, unless release/build input |
+| Runtime or unknown | full graph plus browser config gate | Yes, then immutable smoke |
+| Migration | runtime graph; isolated reset/journey proof when local stack lands | Yes; SQL application is a separate authorization boundary |
+
+`npm run gate` runs the deduplicated source graph in clean Node 20. `agent:smoke`, `agent:admin-cms-predeploy`, `agent:check` remain compatible. Running separate aliases separately is a separate verification invocation; use the combined graph to avoid duplicate nodes. Configured and env-less builds are distinct configurations. No suite certifies live CMS golden workflows or production writes.
+
+The registry in `scripts/_lib/verification.mjs` owns dependencies; classification tests cover actual Git rename/delete/untracked records and runtime fingerprints. `quality` always resolves on PRs, including record-only PRs; runtime smoke failure makes it fail. Main branch protection needs repository administrator access.
+
+## Retained specialized verification and live boundaries
 
 ## QR material-page release verification
 
 `npm run agent:admin-image-qr` includes in-memory Function behavior checks for defaults, safe embedded JSON, public omission of internal fields, hidden/unknown links, HEAD/method behavior, role denial, invalid combinations, stale-save conflicts, persisted readback and stable slug/image selection across rename and Hide/Restore. No network or live writes are made by this verifier. `agent:content-import` and `agent:stone-library-detail` verify the shared finish-image catalog. Required release checks remain container gate, Admin predeploy/config, then immutable Preview smoke. Live material save/refresh requires the additive migration and release-specific approval; an in-memory pass is not live evidence.
-
-Last updated: 2026-09-02
-
-Current public catalog release: PR `#36`, merge `5731651`, immutable Cloudflare production `https://764dedbc.urblo-site.pages.dev`. Clean Node 20 gate, immutable/apex/`www` deployment-bound smoke, production desktop/390px Homepage/Product/Tuscany/BlueOcean checks, canonical 12-card Stone listing, seven distinct BlueOcean finish assets, and `/stone-library/steel-blue` → `/stone-library/blueocean` 301 pass. Jay accepted Preview and approved runtime promotion. iOS/Android WeChat real-device playback remains an external device check; production CMS writes are not approved.
-
-## Purpose
-Use this matrix to choose the smallest verification set that proves a change is safe. Runtime changes still need the full build/lint/typecheck gate unless a task explicitly defines a temporary exception.
-
-`npm run gate` is the preferred way to run the runtime gate set: it wraps build (incl. `tsc -b`), lint, `agent:smoke`, and `agent:check` in a clean Node 20 container and runs `git diff --check` host-side. It validates the working tree, not the last commit — commit everything before pushing. See `docs/OPERATING_PROTOCOL.md`.
 
 ## Startup Check
 Use when resuming work or handing off between agents.
@@ -25,21 +32,6 @@ Run:
 This command is informational and does not replace verification gates. Use `--base-url <origin>` and `--admin-email <email>` only for non-secret manual inputs; the runner treats copied placeholders or malformed values as missing, and the base URL must be an `http`/`https` origin with no path/query/hash. For live form checks, use `--form-writes-approved` in readiness only after Jay has approved tagged live form QA writes; actual `npm run agent:forms-live` execution must also include `--allow-writes`. For the first-admin profile/invite write path, use `--first-admin-writes-approved` only after Jay has approved creating/upserting the first profile or sending an invite. For live admin CRUD writes, use `--admin-writes-approved` only after Jay has approved tagged live admin QA writes. For static-to-Supabase content import and public read cutover, use `--content-import-approved`, `--content-merge-approved`, and `--content-public-cutover-approved` only after Jay has approved the guarded draft import apply, any required merge/upsert behavior, and the public read-path switch. For final Turnstile proof, use `--turnstile-token-provided` only when a valid target-environment token will be supplied to `npm run agent:forms-live -- --allow-writes --require-turnstile --turnstile-token <token>`.
 
 The actual live runners use the same manual-input boundary: `agent:forms-live`, `agent:cloudflare-preview-smoke`, `agent:admin-auth-browser`, and `agent:admin-config-gate` reject placeholder or non-origin `--base-url` values before network or live-write work starts. `agent:admin-live-readiness`, active-admin/unprofiled browser QA, and admin CRUD live writes require real email-shaped inputs instead of copied placeholders.
-
-## Verification Profiles
-
-### Docs-Only
-Use when changing Markdown, JSON task state, or harness instructions without touching runtime source.
-
-Run:
-- `npm run agent:check`
-- `npm run agent:harness-gc` when current-state, task-state, README, AGENTS, or verification docs change.
-- `git diff --check`
-
-Evidence to record:
-- Which docs changed.
-- Whether any repo-path or harness checks failed.
-- Whether runtime gates were intentionally skipped.
 
 ### Harness GC
 Use when Jay asks to run Harness GC, when current-state docs feel noisy, after a major production proof, or before a new agent should rely on the Harness.
@@ -58,33 +50,15 @@ Evidence to record:
 - Which suggested cleanups require Jay's judgment rather than automatic mutation.
 
 ### Runtime UI
-Use when changing `src/**`, `public/**`, route behavior, visual layout, user-facing copy, or CTA behavior.
 
-Run:
-- `npm run build`
-- `npm run lint`
-- `npx tsc -b`
-- `npm run agent:smoke`
-- `npm run agent:capabilities-ui` when changing `/capabilities`, shared CTA data, Capability Statement assets, or the email-gated PDF download form.
-- `npm run agent:seo-readiness` when changing public SEO metadata, `robots.txt`, `sitemap.xml`, structured data, public route slugs, or the SEO route registry.
-- `npm run agent:homepage-video` when changing the Homepage hero playback code or mobile MP4.
-- `npm run agent:product-model-images` when changing Product model labels, keys, or render mappings.
-- `npm run agent:stone-library-detail` when changing Finish/Variant selection, Stone detail scroll behavior, Tuscany capability truth, or finish-image fallback rules.
-
-Evidence to record:
-- Affected routes.
-- Brand/design alignment note.
-- Residual visual or responsive risks.
+Run the classified graph, then rendered QA of affected routes against `docs/DESIGN.md` and `docs/brand-baseline.md`. Record responsive states and browser errors. Specialized checks below add coverage; do not repeat graph nodes in the same run.
 
 ### SEO Indexability
 Use when changing public metadata, public route slugs, `robots.txt`, `sitemap.xml`, structured data, canonical URL behavior, or the source list of pages intended for search indexing.
 
 Run:
 - `npm run agent:seo-readiness`
-- `npm run build`
-- `npm run lint`
-- `npx tsc -b`
-- `npm run agent:smoke`
+- `npm run agent:verify` (classified graph)
 - `npm run agent:homepage-video`
 - `npm run agent:product-model-images`
 - `npm run agent:stone-library-detail`
@@ -131,10 +105,7 @@ For Project Stone Library material-point changes, also verify:
 Use when changing `src/App.tsx`, shared header/footer links, route params, mailto/tel behavior, or form behavior.
 
 Run:
-- `npm run build`
-- `npm run lint`
-- `npx tsc -b`
-- `npm run agent:smoke`
+- `npm run agent:verify` (classified graph)
 
 Evidence to record:
 - Declared routes changed.
@@ -162,10 +133,7 @@ Run:
 - `npm run agent:cloudflare-preview-smoke -- --base-url https://<preview>.pages.dev` after a Pages preview URL exists
 - Production apex, `www`, and the moving `urblo.pages.dev` alias are matched after FQDN trailing-dot normalization and require an independent exact `--reference-url https://<8-hex-deployment>.urblo.pages.dev`; default/branch aliases and self-comparison are invalid references.
 - The deployed smoke must reject redirects on every direct SPA route, require every route to reference the same entry assets as `/`, reject absolute/cross-origin/query/fragment asset references, verify exact same-origin query-free recursively discovered asset URLs without cache-busting, require JavaScript/CSS MIME types, reject an SPA HTML shell returned with HTTP 200, and require byte-for-byte plus MIME equality with the immutable reference across the full graph. A residual long-lived response header is warning-only after that comparison; without it the header remains a failure. Status-only asset checks are insufficient.
-- `npm run build`
-- `npm run lint`
-- `npx tsc -b`
-- `npm run agent:smoke`
+- `npm run agent:verify` (classified graph)
 - `npm run agent:check`
 - `git diff --check`
 
@@ -207,10 +175,7 @@ Evidence to record:
 Use when adding or changing `/api/*` endpoints, form submission behavior, Turnstile verification, Supabase writes, transactional email, or lead-status workflow.
 
 Run:
-- `npm run build`
-- `npm run lint`
-- `npx tsc -b`
-- `npm run agent:smoke`
+- `npm run agent:verify` (classified graph)
 - `npm run agent:forms-ui` when changing Contact form UI state, submit routing, or sample-request mode.
 - `npm run agent:capabilities-ui` when changing the Capability Statement download form, PDF asset path, shared CTA data, or Turnstile reuse on `/capabilities`.
 - API-level positive and negative submission tests when endpoints exist.
@@ -234,16 +199,13 @@ Evidence to record:
 Use when adding or changing `/admin`, authenticated content CRUD, article block editing, media upload, or lead-management views.
 
 Run:
-- `npm run build`
-- `npm run lint`
-- `npx tsc -b`
-- `npm run agent:smoke`
+- `npm run agent:verify` (classified graph)
 - `npm run agent:admin-cms-predeploy` when preparing the current CMS UX stack for deployment; it runs the non-preview local admin/content/deployment gates and finishes with report-only handoff readiness. Run `npm run agent:smoke` and `npm run agent:admin-config-gate` separately for preview/browser gates.
 - `npm run agent:admin-crud-coverage` when changing admin routes, module screens, table coverage, audit writers, export controls, role gates, or launch-critical removal/archive behavior.
 - `npm run agent:admin-image-qr` when changing the Image QR page, browser image optimizer, stable image resolver, protected Image QR Function, routing scope, or `image_qr_resources` migration. The check is source/no-write and does not apply the migration or upload an object.
 - `npm run agent:admin-projects-aggregate` when changing the Projects vertical prototype. It verifies the one-draft shape, one protected endpoint, revision guard, one action bar, shared public/preview renderer, visual hotspots, inline private media, server audit transaction, create-only public-media copy/compensation, private draft table, and service-role-only aggregate RPC. It performs no Supabase writes, does not apply any migration, and does not prove live migration state.
 - Project verification must reject visible proof-review controls/permissions and prove that client/server Save normalization makes legacy review columns compatibility-only. Public smoke must verify the route-aware `overlay`/`light-page` header contract, reject a solid-black 102px fallback and medium/heavy backdrop blur, and confirm that critical non-default opacity utilities used by the navbar, menu, homepage controls, and detail surfaces exist in built CSS. Rendered Projects listing/detail QA must compare against Stone Library: both use the same light 102px layout clearance and deeper clear-glass header/menu, without page-local duplicate top padding; image/video-first routes must retain recognizable media detail beneath the lighter overlay glass.
-- `npm run agent:admin-config-gate` when changing admin route protection, config-missing behavior, or no-config browser QA coverage. Without `--base-url`, it must build an isolated temporary bundle with browser-safe Supabase variables explicitly cleared; it must not reuse the normal configured `dist/`.
+- `npm run agent:admin-config-gate` when changing admin route protection, config-missing behavior, or no-config browser QA coverage. Without `--base-url`, it uses an isolated temporary bundle with browser-safe Supabase variables explicitly cleared, or the graph’s freshly verified env-less `dist/`; it never reuses a configured `dist/`.
 - `npm run agent:admin-auth-browser` in plan-only mode when changing admin browser auth QA tooling; run `npm run agent:admin-auth-browser -- --allow-login --strict` only after browser-safe Supabase config and a real active admin email/password are available. Without `--base-url`, it must build current source into an isolated configured bundle, enforce the entry-size/no-eager-Supabase boundary, prove static public fallback with the Supabase chunk blocked, use stable semantic login markers, and revisit a protected route after Sign out.
 - `npm run agent:admin-auth-browser -- --allow-login --expect-unauthorized --strict` when a valid Auth user without an active `admin_profiles` row is available through `URBLO_UNPROFILED_EMAIL` and `URBLO_UNPROFILED_PASSWORD`; the check must keep all launch-critical admin route probes on `/admin/unauthorized` without private module content.
 - `npm run agent:first-admin-bootstrap` when changing first-admin bootstrap tooling. Use `--verify-only` only after a service-role key and first admin email are configured; write mode requires explicit approval.

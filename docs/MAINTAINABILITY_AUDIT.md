@@ -33,3 +33,12 @@
 - 原任务队列 55 项：41 done、7 next、4 now、3 later；status.activeExecutableTasks 仍含已 done QR ID。
 - 原 GC：0 failures / 5 warnings，未发现 README/CMS 以及 QR current-state 冲突。
 - 归档内容的字节完整性由 archive manifest 校验；启动预算、重复检查数、分类结果、失败证据和本地流程分别作为验收项。
+
+
+## 第二批进展（2026-09-09）
+
+- 已确认重复发布入口：现役 `urblo-site` 是 Direct Upload，但旧 `urblo` Git 集成仍为生产自动部署开启、Preview `all`。已按本轮授权关闭并读回 `false` / `none`，旧 canonical deployment 保留。重复构建这一项已解决。
+- 检查图本地验证：完整源码图 22 个唯一节点，浏览器图 23 个。原有单次 smoke + predeploy 会重复 Projects、QR、build、lint/typecheck；合并图内各节点仅一次。无配置浏览器复用同一次已验证构建；有配置与无配置是两个不同配置。
+- 首次失败留存：沙箱阻止 Vite 端口绑定；放行本地服务器后发现 Capabilities 仍检查旧 shell 文本。已替换为图依赖断言，之后源码与浏览器验证通过；每次尝试独立编号，不覆盖首个失败。
+- 文件分类已用真实临时 Git 仓库测试：源码重命名到 docs、删除源码、未知 untracked 文件不能走记录文档路径；记录文档不会改变运行时指纹。
+- GitHub `quality` 汇总与自动发布后读回已实现，等待该 PR 的真实 CI 和后续纯记录 PR 证明零部署。主分支保护仍需管理员一次配置。剩余本地隔离环境、真实编辑流程、Articles 拆分尚未完成，不能据此宣称整轮完成。

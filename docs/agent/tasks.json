@@ -35,8 +35,8 @@
         "External GitHub protection and duplicate integration findings are explicitly resolved or reported with evidence."
       ],
       "verification": [
-        "npm run agent:check",
-        "npm run agent:harness-gc",
+        "npm run agent:verify",
+        "npm run agent:doctor -- --target local",
         "npm run gate"
       ],
       "authorization": {
@@ -53,6 +53,13 @@
         "renewWhen": [
           "Scope expands, a new paid service is needed, or a destructive operation is proposed."
         ]
+      },
+      "progress": {
+        "state": "merged_pr_40_production_verified",
+        "verification": "implemented_pending_pr_ci",
+        "legacyAutomaticBuilds": "disabled_and_read_back",
+        "localStack": "next",
+        "refactor": "pending"
       }
     },
     {

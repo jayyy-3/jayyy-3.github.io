@@ -27,3 +27,19 @@ The concatenated archive parts reproduce the previous WORKLOG byte-for-byte. Int
 
 <a id="phase-0-tagged-media-role-boundary-proof"></a>
 Original evidence: [phase-0-tagged-media-role-boundary-proof](archive/2026-09-09/worklog-01.md#phase-0-tagged-media-role-boundary-proof).
+
+## 2026-09-09 — Maintenance state release and verification graph
+
+Scope: approved maintainability plan batches 1–2; no UI changes, production data writes, external email or DNS changes.
+
+- PR #40 (`01b284886f2d4233a23e74aa86c3b38d6a154022`) merged as `709af75165b366999ee24ef24c666e8243b6aa56`. CI run `34323595831` and immutable Preview `https://7a83ed7d.urblo-site.pages.dev` passed; production CI `34323951402` deployed `https://78bdc657.urblo-site.pages.dev`. Immutable, apex and www each passed bound route/asset/MIME/redirect/Function smoke.
+- First PR CI run `34323166603` failed on a stale HANDOFF phrase guard. The guard now validates the structured Published-overlay/static-fallback state, with a mutation test; full existing public runtime checks remained. Local Admin predeploy and clean Node 20 gate passed after repair.
+- `agent:verify` selects a dependency graph from Git rename/delete/untracked-aware changes. The 22-check source graph executes each node once. Build includes TypeScript. Runtime adds the browser config boundary; an already verified env-less build is reused, while configured builds require a separate env-less browser build. Old smoke/predeploy/check commands remain compatible.
+- Pure record docs select state/path/harness/classifier checks and no deployment. Tooling selects the complete source graph. Runtime/build/release/unknown paths require deployment and browser checks; migrations have their own category. Actual temporary-Git tests verify rename into docs, deletion, untracked files and fingerprint invalidation.
+- Each run saves a unique attempt directory under ignored `.tmp/verification/`, sanitized child output, exit codes, elapsed times, repository SHA and runtime fingerprint. A failed attempt is never overwritten by retry. First local graph run could not bind Vite inside the sandbox; the next uncovered one stale Capabilities smoke-wrapper string. That integration assertion now checks the graph; later full source and runtime/browser runs passed.
+- Cloudflare API readback found current `urblo-site` is direct upload, while legacy `urblo` Git integration still built all branches. Within the approved consolidation scope, disabled legacy production and preview automatic builds, read back false/none, and verified its canonical deployment pointer stayed unchanged. No rollback deployment was deleted. API schema: [Cloudflare project settings](https://developers.cloudflare.com/api/resources/pages/subresources/projects/).
+- CI now produces stable `quality` on PRs and main, skips deployment for records, automatically smokes immutable Preview and production domains. Wrangler is pinned at 4.130.0; its CLI requires Node 22, while build/container checks remain Node 20. GitHub administrator configuration remains external until `quality` exists and the owner applies protection.
+
+Residual work: verify the new workflow on its own PR; prove a record-only PR has zero deployments; apply main protection with administrator access; local isolated database/journeys and Articles/server refactor remain subsequent batches. Broader CMS acceptance remains unproven.
+
+- PR #41 first CI run `34324917881` passed all 22 source nodes, then stalled in browser process shutdown and was cancelled before deployment. Linux retained the Vite grandchild behind `npx`; the gate now launches Vite directly. The graph streams sanitized logs as checks run, enforces check time budgets and retains interruption evidence so cancellation cannot lose the active check log. CI cancellation correctly made `quality` fail.

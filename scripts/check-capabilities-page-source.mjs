@@ -4,7 +4,7 @@ import fs from 'node:fs';
 const pageSource = fs.readFileSync('src/pages/CapabilitiesPage.tsx', 'utf8');
 const ctaSource = fs.readFileSync('src/data/siteChrome.ts', 'utf8');
 const appSource = fs.readFileSync('src/App.tsx', 'utf8');
-const smokeSource = fs.readFileSync('scripts/agent-smoke.sh', 'utf8');
+const { resolveChecks } = await import('./_lib/verification.mjs');
 
 const failures = [];
 
@@ -43,7 +43,7 @@ requireIncludes(
 );
 requireIncludes('shared Capabilities navigation CTA', "label: siteCtas.capabilities.label", ctaSource);
 requireIncludes('capabilities route without generic route banner', 'path="/capabilities"', appSource);
-requireIncludes('capabilities source check smoke integration', 'node scripts/check-capabilities-page-source.mjs', smokeSource);
+if (!resolveChecks('smoke').includes('capabilities')) failures.push('Smoke graph must include capabilities');
 requireIncludes('public Turnstile widget reuse', 'TurnstileField');
 requireIncludes('public Turnstile site key reuse', 'turnstileSiteKey');
 requireIncludes('download lead project type', 'Capability statement download');

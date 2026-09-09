@@ -1,58 +1,119 @@
-name: Deploy to Cloudflare Pages
+name: Verify and release
 
 on:
+  pull_request:
   push:
-    branches:
-      - '**'
+    branches: [main]
   workflow_dispatch:
 
 permissions:
   contents: read
-  deployments: write
 
 concurrency:
-  group: cloudflare-pages-${{ github.ref }}
-  cancel-in-progress: true
+  group: urblo-release-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   verify-and-deploy:
     runs-on: ubuntu-latest
-    env:
-      VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-      VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
-
+    outputs:
+      deploy: ${{ steps.plan.outputs.deploy }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Classify complete change
+        id: plan
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          if [[ -n "$BASE_SHA" && ! "$BASE_SHA" =~ ^0+$ ]]; then
+            node scripts/agent-verify.mjs --base "$BASE_SHA" --plan --out /tmp/verification-plan.json
+          else
+            node scripts/agent-verify.mjs --suite runtime --plan --out /tmp/verification-plan.json
+          fi
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs'
+          const plan = JSON.parse(fs.readFileSync('/tmp/verification-plan.json'))
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `deploy=${plan.deploy}\nsuite=${plan.suite}\n`)
+          NODE
+      - name: Install browser runtimes
+        if: steps.plan.outputs.deploy == 'true'
+        run: npx playwright install --with-deps chromium firefox
+      - name: Run selected checks once
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          VERIFY_SUITE: ${{ steps.plan.outputs.suite }}
+        run: npm run agent:verify -- --suite "$VERIFY_SUITE" --out /tmp/verification-result.json
+      - name: Set up deployment runtime
+        if: steps.plan.outputs.deploy == 'true'
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build
-        run: npm run build
-
-      - name: Lint
-        run: npm run lint
-
-      - name: Type-check
-        run: npx tsc -b
-
-      - name: Run smoke checks
-        run: npm run agent:smoke
-
-      - name: Verify admin predeploy contracts
-        run: npm run agent:admin-cms-predeploy
-
-      - name: Deploy to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v3
+          node-version: 22
+      - name: Deploy verified runtime
+        if: steps.plan.outputs.deploy == 'true'
+        id: deployment
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          RELEASE_BRANCH: ${{ github.head_ref || github.ref_name }}
+        run: |
+          set -o pipefail
+          npx wrangler pages deploy dist --project-name=urblo-site --branch="$RELEASE_BRANCH" 2>&1 | tee /tmp/urblo-deployment.log
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs'
+          const log = fs.readFileSync('/tmp/urblo-deployment.log', 'utf8')
+          const url = log.match(/https:\/\/[0-9a-f]{8}\.urblo-site\.pages\.dev\b/)?.[0]
+          if (!url) throw new Error('Deployment did not return an immutable URL')
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `url=${url}\n`)
+          NODE
+      - name: Verify immutable deployment
+        if: steps.plan.outputs.deploy == 'true'
+        env:
+          IMMUTABLE_URL: ${{ steps.deployment.outputs.url }}
+        run: npm run agent:cloudflare-preview-smoke -- --base-url "$IMMUTABLE_URL"
+      - name: Verify production domains against immutable deployment
+        if: steps.plan.outputs.deploy == 'true' && github.ref == 'refs/heads/main'
+        env:
+          IMMUTABLE_URL: ${{ steps.deployment.outputs.url }}
+        run: |
+          npm run agent:cloudflare-preview-smoke -- --base-url https://urblo.com.au --reference-url "$IMMUTABLE_URL"
+          npm run agent:cloudflare-preview-smoke -- --base-url https://www.urblo.com.au --reference-url "$IMMUTABLE_URL"
+      - name: Report rollback reference on release failure
+        if: failure() && steps.deployment.outputs.url != ''
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs'
+          const { release } = JSON.parse(fs.readFileSync('docs/agent/status.json'))
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `Release verification failed. Last recorded verified runtime: ${release.verifiedRuntimeUrl} (${release.runtimeSha}). Follow docs/CLOUDFLARE_DEPLOYMENT.md rollback procedure; no automatic rollback was attempted.\n`)
+          NODE
+      - name: Preserve every check attempt
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-          command: pages deploy dist --project-name=urblo-site --branch=${{ github.ref_name }}
+          name: verification-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            .tmp/verification/
+            /tmp/verification-plan.json
+            /tmp/verification-result.json
+          if-no-files-found: warn
+          include-hidden-files: true
+
+  quality:
+    name: quality
+    if: always()
+    needs: verify-and-deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require checks and applicable deployment smoke
+        env:
+          RESULT: ${{ needs.verify-and-deploy.result }}
+        run: test "$RESULT" = success

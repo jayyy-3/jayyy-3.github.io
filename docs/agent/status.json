@@ -11,13 +11,13 @@
   },
   "release": {
     "observedAt": "2026-09-09",
-    "repositorySha": "2e7977bef6d270fea12481078f5a168ca01769a7",
-    "runtimeSha": "018341a10dd149965dd950bb544931efcb813cf8",
-    "verifiedRuntimeUrl": "https://33d09e60.urblo-site.pages.dev",
-    "ciRunId": 34319175514,
-    "note": "Repository SHA includes documentation-only PR #39. Runtime evidence was captured on PR #38; this is a timestamped observation, not a claim that a moving alias never changes.",
+    "repositorySha": "709af75165b366999ee24ef24c666e8243b6aa56",
+    "runtimeSha": "709af75165b366999ee24ef24c666e8243b6aa56",
+    "verifiedRuntimeUrl": "https://78bdc657.urblo-site.pages.dev",
+    "ciRunId": 34323951402,
+    "note": "PR #40 state consolidation passed immutable/apex/www readback on 2026-09-09. No production business data changed.",
     "evidenceRefs": [
-      "docs/archive/2026-09-09/worklog-01.md"
+      "docs/WORKLOG.md"
     ]
   },
   "production": {
@@ -54,8 +54,8 @@
     },
     {
       "id": "legacy-integration",
-      "status": "unverified",
-      "detail": "Inspect old Cloudflare Git integration and keep rollback deployments while eliminating duplicate automatic builds."
+      "status": "complete",
+      "detail": "2026-09-09 API readback: urblo-site is direct upload. Legacy Hunter urblo Git integration production_deployments_enabled=false and preview_deployment_setting=none; canonical rollback deployment retained."
     },
     {
       "id": "cms-acceptance",

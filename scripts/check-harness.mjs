@@ -151,49 +151,16 @@ try {
 }
 
 try {
-  const smoke = readFileSync(join(root, 'scripts/agent-smoke.sh'), 'utf8')
-  if (!smoke.includes('node scripts/check-contact-form-ui-source.mjs')) {
-    failures.push('scripts/agent-smoke.sh must run the Contact form UI source contract check.')
+  const { resolveChecks } = await import('./_lib/verification.mjs')
+  for (const [suite, required] of Object.entries({
+    smoke: ['forms-api', 'forms-ui', 'capabilities', 'homepage-video', 'product-images', 'stone-library', 'qr', 'projects'],
+    admin: ['overlay', 'media-plan', 'projects', 'qr'],
+  })) {
+    const selected = resolveChecks(suite)
+    for (const id of required) if (!selected.includes(id)) failures.push(`${suite} must include ${id}`)
+    if (new Set(selected).size !== selected.length) failures.push(`${suite} contains repeated checks`)
   }
-  if (!smoke.includes('node scripts/check-capabilities-page-source.mjs')) {
-    failures.push('scripts/agent-smoke.sh must run the Capabilities page source contract check.')
-  }
-  if (!smoke.includes('node scripts/check-homepage-hero-video.mjs')) {
-    failures.push('scripts/agent-smoke.sh must run the Homepage hero video compatibility check.')
-  }
-  if (!smoke.includes('node scripts/check-product-model-image-mapping.mjs')) {
-    failures.push('scripts/agent-smoke.sh must run the Product model image mapping check.')
-  }
-  if (!smoke.includes('node scripts/check-stone-library-detail-integrity.mjs')) {
-    failures.push('scripts/agent-smoke.sh must run the Stone Library detail integrity check.')
-  }
-  if (!smoke.includes('npm run agent:admin-projects-aggregate')) {
-    failures.push('scripts/agent-smoke.sh must run the Admin Projects aggregate behavior check.')
-  }
-  if (!smoke.includes('npm run agent:admin-image-qr')) {
-    failures.push('scripts/agent-smoke.sh must run the Admin Image QR behavior check.')
-  }
-} catch (error) {
-  failures.push(`Unable to read scripts/agent-smoke.sh: ${error.message}`)
-}
-
-try {
-  const predeploy = readFileSync(join(root, 'scripts/admin-cms-predeploy.sh'), 'utf8')
-  if (!predeploy.includes('npm run agent:public-content-overlay')) {
-    failures.push('scripts/admin-cms-predeploy.sh must run the public content overlay behavior check.')
-  }
-  if (!predeploy.includes('npm run agent:admin-media-role-boundary-live')) {
-    failures.push('scripts/admin-cms-predeploy.sh must run the plan-only Media role-boundary verifier.')
-  }
-  if (!predeploy.includes('npm run agent:admin-projects-aggregate')) {
-    failures.push('scripts/admin-cms-predeploy.sh must run the Admin Projects aggregate behavior verifier.')
-  }
-  if (!predeploy.includes('npm run agent:admin-image-qr')) {
-    failures.push('scripts/admin-cms-predeploy.sh must run the Admin Image QR behavior verifier.')
-  }
-} catch (error) {
-  failures.push(`Unable to read scripts/admin-cms-predeploy.sh: ${error.message}`)
-}
+} catch (error) { failures.push(`Verification graph: ${error.message}`) }
 
 try {
   const adminCrudCoverage = readFileSync(
@@ -466,12 +433,12 @@ for (const file of liveReadinessDocFiles) {
   }
 }
 
-if (!failures.length) {
+if (!failures.length && !process.argv.includes('--self-only')) {
   const stateCheck = spawnSync('node', ['scripts/check-agent-state.mjs'], { cwd: root, encoding: 'utf8' });
   if (stateCheck.status !== 0) failures.push(stateCheck.stdout + stateCheck.stderr);
 }
 
-if (!failures.length) {
+if (!failures.length && !process.argv.includes('--self-only')) {
   const result = spawnSync('node', ['scripts/check-doc-paths.mjs'], {
     cwd: root,
     encoding: 'utf8',
@@ -485,7 +452,7 @@ if (!failures.length) {
   }
 }
 
-if (!failures.length) {
+if (!failures.length && !process.argv.includes('--self-only')) {
   const result = spawnSync('node', ['scripts/check-supabase-foundation-readiness.mjs'], {
     cwd: root,
     encoding: 'utf8',
