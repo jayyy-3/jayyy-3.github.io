@@ -26,4 +26,4 @@ In-app browser verified both image dialogs, zoom pressed state, Escape close and
 
 ## Release boundary
 
-Visual QA passes. Clean Node 20 container and CI deployment gates plus general Preview smoke passed. Dedicated QR/authenticated Preview verification is blocked by the missing server Supabase binding; the additive migration and live authenticated save/refresh remain separate release obligations. Staff must confirm defaults; the reference does not establish factual matches for other QR product images.
+Visual QA passes. The Preview binding blocker was resolved with approved encrypted configuration. Migration, real same-material UI save/reload/public readback (audit 358), clean Node 20 container and CI gates, full Preview smoke and authenticated routes passed. Production PR #38 / 018341a / 33d09e60 passes immutable/apex/www smoke and dedicated QR checks; production browser confirms both actual images, facts/actions and no overflow. Production auth passed all 10 routes on a fresh retry after an initial Projects load error. Staff must confirm defaults; the reference does not establish factual matches for other QR product images.

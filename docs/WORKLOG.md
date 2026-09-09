@@ -1,6 +1,12 @@
 # WORKLOG - Urblo Execution Log
 
 
+## 2026-09-09 — QR material pages production release
+
+PR `#38` squash-merged as `018341a10dd149965dd950bb544931efcb813cf8`; production CI `34318437072` passed and deployed `https://33d09e60.urblo-site.pages.dev`. Immutable, apex and `www` passed deployment-bound route/asset/MIME/redirect/Function smoke and dedicated public QR checks. Production browser readback confirms both original application and exact Honed surface images loaded, expected facts/actions, and no horizontal overflow. The first production auth run recorded a Projects index-load error; a fresh complete run passed three blocked-Supabase public fallbacks and all 10 authenticated Admin routes. The initial transient failure is retained as evidence; its cause was not established.
+
+Brand/design alignment: implements Jay’s selected restrained two-image material page, distinguishes 3D application from actual finish photography, and retains qualified sourcing/price facts. Approved migration, encrypted Preview bindings and one same-material save are complete; no image replacement, Hide/Restore, bulk selection update, email or other content publish was performed. Staff confirmation of remaining defaults and broader CMS acceptance remain separate.
+
 ## 2026-09-09 — QR material pages implementation
 
 Connected Preview `https://71a78a56.urblo-site.pages.dev` at commit `1450afe` passed CI `34317589827`, general route/asset/MIME/redirect/Function smoke, dedicated QR HTML/JSON GET/HEAD/hidden404/original-image checks and all 10 authenticated Admin routes. Approved UI proof saved existing Zen Grey/Honed at 2026-09-09 06:12:15 UTC; full reload/reopen retained Saved selection and exact choices, public browser/API readback matched, and audit event `358` records `image_qr.assign_material`. Slug, object path and active status stayed unchanged. This closes the Preview blocker; production promotion/readback is next under existing approval.
