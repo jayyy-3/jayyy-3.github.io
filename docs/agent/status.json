@@ -11,14 +11,15 @@
   },
   "release": {
     "observedAt": "2026-09-09",
-    "repositorySha": "709af75165b366999ee24ef24c666e8243b6aa56",
-    "runtimeSha": "709af75165b366999ee24ef24c666e8243b6aa56",
-    "verifiedRuntimeUrl": "https://78bdc657.urblo-site.pages.dev",
-    "ciRunId": 34323951402,
-    "note": "PR #40 state consolidation passed immutable/apex/www readback on 2026-09-09. No production business data changed.",
+    "repositorySha": "03767bc6bdf5164a6b1644a4100378f9c2fa7ed5",
+    "runtimeSha": "28cd2a1f4ad1dee293afd7d4f9f5dff3208ccd94",
+    "verifiedRuntimeUrl": "https://98b6a225.urblo-site.pages.dev",
+    "ciRunId": 34326552945,
+    "note": "PR #41 production immutable/apex/www passed automatically. PR #42/main docs-only run 34327122789 passed quality with zero deployments and the same runtime fingerprint.",
     "evidenceRefs": [
       "docs/WORKLOG.md"
-    ]
+    ],
+    "runtimeFingerprint": "03eec5670136b87337c146d89044c364c304b637ae851764041763af415212c9"
   },
   "production": {
     "site": "live",
@@ -42,8 +43,11 @@
       "serverBindings": "configured_2026-09-09"
     },
     "local": {
-      "status": "isolated_stack_pending",
-      "testPolicy": "synthetic_local_only"
+      "status": "qr_isolated_workflow_verified",
+      "testPolicy": "synthetic_local_only",
+      "apiOrigin": "http://127.0.0.1:57321",
+      "appOrigin": "http://127.0.0.1:8788",
+      "projectId": "urblo-isolated-v1"
     }
   },
   "externalDependencies": [

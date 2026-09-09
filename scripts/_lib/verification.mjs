@@ -12,6 +12,7 @@ export const checks = {
   foundation: node('check-supabase-foundation-readiness.mjs'),
   harness: node('check-harness.mjs', ['--self-only'], ['state', 'paths', 'foundation']),
   classifier: node('check-verification.mjs'),
+  'local-boundary': node('check-local-boundary.mjs'),
   routes: { command: ['bash', 'scripts/agent-smoke-core.sh'], deps: ['build'] },
   'forms-api': node('check-forms-api.mjs'),
   'forms-ui': node('check-contact-form-ui-source.mjs'),
@@ -36,9 +37,9 @@ export const suites = {
   tooling: ['harness', 'classifier', 'lint'],
   smoke,
   admin,
-  container: [...smoke, ...admin, 'classifier'],
-  runtime: [...smoke, ...admin, 'classifier', 'browser'],
-  migrations: [...smoke, ...admin, 'classifier', 'browser'],
+  container: [...smoke, ...admin, 'classifier', 'local-boundary'],
+  runtime: [...smoke, ...admin, 'classifier', 'local-boundary', 'browser'],
+  migrations: [...smoke, ...admin, 'classifier', 'local-boundary', 'browser'],
 }
 export function resolveChecks(suite) {
   if (!suites[suite]) throw new Error(`Unknown verification suite: ${suite}`)
