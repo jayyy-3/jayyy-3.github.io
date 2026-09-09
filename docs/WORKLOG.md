@@ -3,6 +3,8 @@
 
 ## 2026-09-09 — QR material pages implementation
 
+Connected Preview `https://71a78a56.urblo-site.pages.dev` at commit `1450afe` passed CI `34317589827`, general route/asset/MIME/redirect/Function smoke, dedicated QR HTML/JSON GET/HEAD/hidden404/original-image checks and all 10 authenticated Admin routes. Approved UI proof saved existing Zen Grey/Honed at 2026-09-09 06:12:15 UTC; full reload/reopen retained Saved selection and exact choices, public browser/API readback matched, and audit event `358` records `image_qr.assign_material`. Slug, object path and active status stayed unchanged. This closes the Preview blocker; production promotion/readback is next under existing approval.
+
 Preview prerequisite resolved at 2026-09-09 06:04 UTC: after Jay completed dashboard login and explicitly authorized reading the existing Urblo service-role key, official Wrangler 4.130 single-variable commands wrote encrypted `SUPABASE_SERVICE_ROLE_KEY` and `SUPABASE_URL` to Preview. Readback confirmed exact production configuration equality and unchanged Preview settings apart from those two bindings. Temporary key files were removed. No key was printed, rotated or committed. Redeployment and UI golden save/readback are next.
 
 

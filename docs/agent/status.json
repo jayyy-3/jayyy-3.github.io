@@ -40,10 +40,10 @@
     "liveReadiness": "browser_key_owner_and_distinct_editor_credentials_present_media_migration_applied_live_role_boundary_passed",
     "adminUxReshape": "phase0_closed_projects_phase1_and_pr11_single_editor_followup_live_and_jay_accepted_image_qr_merge_19e2b41_live_with_19_active_resources_and_direct_qr_readback_phase2_articles_and_sunset_pending",
     "publicCatalogIntegrity": "branch_codex_fix_mobile_product_stone_integrity_local_source_and_browser_checks_passing_full_gate_preview_and_jay_acceptance_pending_no_live_data_write",
-    "imageQrMaterialPages": "pr38_migration_20260909054816_applied_preview_encrypted_bindings_configured_production_unchanged_redeploy_and_ui_save_readback_then_approved_promote_pending"
+    "imageQrMaterialPages": "pr38_preview_71a78a56_ci_smoke_qr_and_10_admin_routes_pass_real_ui_save_reload_public_readback_audit358_pass_approved_production_promotion_pending"
   },
   "nextDecisions": [
-    "QR release approved: migration applied and existing server key/URL securely configured for Preview with production unchanged. Redeploy, prove same-material UI save/refresh and public readback, pass full Preview gates, then promote. Staff own default confirmation.",
+    "Promote approved QR release after passing Preview 71a78a56 and real Zen Grey/Honed UI save/readback (audit 358), then verify immutable production/apex/www and update release evidence. Staff confirm other defaults.",
     "Public catalog runtime is live through PR #36 / merge 5731651 / immutable deployment https://764dedbc.urblo-site.pages.dev. Obtain Jay's iOS/Android WeChat result, then list and request separate approval for exact production CMS corrections and the Steel Blue/BlueOcean duplicate-row merge-delete.",
     "After Preview acceptance, request separate approval for the exact imported Product model and Tuscany finish-capability Draft corrections; do not write production Supabase from source approval alone.",
     "Image QR PR #29 merge 19e2b41 is live as deployment d6816c71; 19 active resources, canonical QR redirect, and immutable/apex/www deployment-bound smoke pass. Treat later usability feedback as user-owned rather than reopening deployment proof.",
