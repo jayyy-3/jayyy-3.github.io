@@ -31,7 +31,7 @@
       "notes": [
         "2026-09-10: Candidate implemented and isolated local baseline adoption passed for 12 stones/55 photos. No production writes. Release steps and approval inventory are in docs/STONE_LIBRARY_WORKSPACE_RELEASE.md."
       ],
-      "phase": "verification",
+      "phase": "release",
       "modules": [
         "stone-library",
         "projects",
@@ -48,7 +48,7 @@
           "Production migrations, baseline publication/Storage writes and tagged live workflows until the exact inventory is approved."
         ]
       },
-      "nextAction": "Finish current-main integration and clean verification; create read-only Preview and request the exact production release inventory approval.",
+      "nextAction": "Publish the gated review branch and run immutable Preview smoke, then obtain item-specific approval for the two production migrations, exact baseline adoption and live QA inventory.",
       "blocker": "Production migrations/adoption/live QA await item-specific release approval after local and Preview review."
     },
     {

@@ -8,9 +8,9 @@ Last updated: 2026-09-10
 
 **NOW-ADMIN-STONE-WORKSPACE-001** — Deliver the page-shaped Stone Library workspace and approved current-public-baseline adoption.
 
-阶段：verification。状态：now。
+阶段：release。状态：now。
 
-下一步：Finish current-main integration and clean verification; create read-only Preview and request the exact production release inventory approval.
+下一步：Publish the gated review branch and run immutable Preview smoke, then obtain item-specific approval for the two production migrations, exact baseline adoption and live QA inventory.
 
 ## 已观察的发布状态
 

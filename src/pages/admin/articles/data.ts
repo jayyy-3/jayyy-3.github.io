@@ -1,4 +1,4 @@
-import { loadStoneGroupOptionResult } from '../../../../service/stoneCatalogueOptions';
+import { loadStoneGroupOptionResult } from '../../../service/stoneCatalogueOptions';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { ArticleBlockRow, ArticleRow, MediaOptionRow, ProjectOptionRow } from './types';
 

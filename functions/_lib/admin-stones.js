@@ -35,7 +35,7 @@ function integer(value, name, nullable = false) {
     throw new StoneError(400, 'invalid_field', `${name} is invalid.`);
 }
 function string(value, name, max = 4000) {
-  if (typeof value !== 'string' || value.length > max || /[\u0000]/.test(value))
+  if (typeof value !== 'string' || value.length > max || value.includes(String.fromCharCode(0)))
     throw new StoneError(400, 'invalid_field', `${name} is invalid.`);
 }
 function array(value, name, max) {
@@ -296,7 +296,7 @@ export function mapStoneError(error) {
     if (code === 'stone_in_use') {
       try {
         details.references = JSON.parse(error.details);
-      } catch {}
+      } catch { /* Preserve the original error and retain uncertain files. */ }
     }
     return new StoneError(...mappings[code], details);
   }
@@ -459,7 +459,7 @@ function safeSource(value) {
     typeof value === 'string' &&
     ((value.startsWith('/') &&
       !value.startsWith('//') &&
-      !/[\\\u0000-\u0020]/.test(value)) ||
+      !value.includes('\\') && !Array.from(value).some(c => c.charCodeAt(0) <= 32)) ||
       /^https:\/\/[^\s@\\]+$/i.test(value))
   );
 }
@@ -714,7 +714,7 @@ export async function handleStoneRequest(request, env, dependencies = {}) {
       if (definiteRollback) {
         try {
           cleanup = await compensatePublicCopies(client, copies);
-        } catch {}
+        } catch { /* Preserve the original error and retain uncertain files. */ }
       }
       if (copies.length) {
         try {
@@ -727,7 +727,7 @@ export async function handleStoneRequest(request, env, dependencies = {}) {
               entity_id: String(body.stoneId),
               metadata: { requestId: body.requestId, ...cleanup },
             });
-        } catch {}
+        } catch { /* Preserve the original error and retain uncertain files. */ }
       }
       if (error instanceof StoneError) throw error;
       if (!commitAttempted)

@@ -47,7 +47,7 @@ begin
   execute format('drop policy %I on public.%I',policy_row.policyname,policy_row.tablename);
  end loop;
  foreach table_name in array array['stone_groups','stone_variants','stone_finish_capabilities','stone_finish_images',
-  'finish_definitions','media_assets','products','product_material_defaults','projects','project_materials','articles','article_blocks'] loop
+  'finish_definitions','media_assets','image_qr_resources','products','product_material_defaults','projects','project_materials','articles','article_blocks'] loop
   execute format('create trigger stone_reference_mutex before insert or update or delete on public.%I for each statement execute function private.stone_reference_mutex()',table_name);
   execute format('create constraint trigger stone_reference_guard after insert or update or delete on public.%I deferrable initially deferred for each row execute function private.stone_reference_guard()',table_name);
  end loop;

@@ -74,7 +74,15 @@ begin
  insert into public.article_blocks(article_id,block_type,content,status) values(aid,'rich_text',jsonb_build_object('body','Read /stone-library/fixture-stone for more'),'published');
  denied:=false;begin perform pg_temp.write_stone('archive',e,e->'draft');exception when check_violation then denied:=true;end;
  perform pg_temp.check(denied,'explicit Article URL blocks hiding');
+
+ insert into public.image_qr_resources(slug,name,object_path,mime_type,width_px,height_px,size_bytes,material_selection)
+ values('fixture-stone-qr','Fixture QR','fixture-qr.png','image/png',1,1,100,jsonb_build_object('stoneGroupId','fixture-stone','stoneVariantId','fixture-stone','finishKey','fixture-flamed'));
  update public.articles set status='draft' where id=aid;
+ denied:=false;begin perform pg_temp.write_stone('archive',e,e->'draft');exception when check_violation then denied:=true;end;
+ perform pg_temp.check(denied,'active Image QR material prevents hiding its stone');
+ update public.image_qr_resources set status='hidden' where slug='fixture-stone-qr';
+ perform pg_temp.check(private.stone_qr_default('Toscany · Cross Cut')->>'stoneVariantId'='tuscany--cross-cut' and private.stone_qr_default('Unknown')->>'stoneGroupId'='zen-grey','legacy QR defaults match source without rewriting resources');
+
  e:=pg_temp.write_stone('archive',e,e->'draft');
  perform pg_temp.check(e->>'status'='archived' and e->'draft'->'variants'->0->>'enabled'='true','hide retains a restorable complete draft');
  perform pg_temp.check(public.public_stone_catalogue()->'managedKeys' ? 'fixture-stone' and jsonb_array_length(public.public_stone_catalogue()->'stones')=0,'hidden stone has tombstone with no public content');

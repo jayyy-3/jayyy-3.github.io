@@ -104,7 +104,10 @@
       "paths": [
         "src/service/StoneLibraryService.ts",
         "src/pages/admin/AdminStoneLibraryPage.tsx",
-        "src/pages/StoneLibraryDetailPage.tsx"
+        "src/pages/StoneLibraryDetailPage.tsx",
+        "src/features/stone-library",
+        "functions/_lib/admin-stones.js",
+        "src/service/stoneCatalogueOptions.ts"
       ],
       "rules": [
         "docs/DESIGN.md",
@@ -112,7 +115,8 @@
       ],
       "checks": [
         "agent:stone-library-detail",
-        "agent:public-content-overlay"
+        "agent:public-content-overlay",
+        "agent:stone-workspace"
       ]
     },
     "products": {
