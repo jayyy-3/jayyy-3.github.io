@@ -10,7 +10,7 @@
 | Stone Library | StoneLibraryDetailPage → StoneLibraryService → static catalog / Published stone tables | variant/finish 匹配、真实 finish 图片、draft 不公开 |
 | QR | ImageQrPage / AdminImageQrPage → image-qr Functions → server-only image_qr_resources / Storage | 固定 slug、原始产品图、独立材质纹理、显式关联与默认值区分 |
 | Projects | AdminProjectsPage / ProjectEditor → admin-projects Function → aggregate RPC / six Project tables | 单次 aggregate Save、revision conflict、发布补偿、公开父记录约束 |
-| Articles | AdminArticlesPage → browser-key queries → articles / article_blocks；ArticleService → public renderer | 子记录绑定、切换防旧响应、草稿不可见、安全链接、审计语义 |
+| Articles | AdminArticlesPage → articles/ArticlesWorkspace → useArticleEditor → data → articles / article_blocks；ArticleService → public renderer | 子记录绑定、切换防旧响应、草稿不可见、安全链接、审计语义 |
 | Products | AdminProductsPage → browser-key queries → products / models / defaults / specs | 父子 ownership 谓词、加载锁、Published overlay |
 | Media | AdminMediaPage → browser-key Storage + metadata | private-first、原图保留、owner/admin promotion、失败保留与读回 |
 | Forms / Leads | ContactPage → enquiries/sample-requests Functions → private leads + audit；AdminLeadsPage → RLS | 原子 sample items、服务端校验、通知状态、私人数据匿名拒绝 |
@@ -34,3 +34,13 @@ Viewer 不能执行编辑动作；owner/admin/editor 的具体能力由模块与
 `docs/agent/modules.json` 是机器可读模块索引；agent:init 按任务打印相关入口。`docs/agent/verification.md` 管理检查类型；`docs/ARCHITECTURE.md` 管理稳定技术合同；`docs/ADMIN_IA_ACCESS.md` 管理后台角色与编辑流程。源码事实与旧文档冲突时先验证，再修正文档。
 
 历史架构与发布记录在 `docs/archive/2026-09-09/`，不属于默认启动材料。大文件仅是检查信号，不自动触发重写。
+
+## Articles 拆分后的修改入口
+
+| 要改什么 | 文件 | 必须验证 |
+| --- | --- | --- |
+| 字段、转换、校验、发布条件 | `src/pages/admin/articles/forms.ts`、`types.ts` | 无效输入恢复、发布内容安全 |
+| 查询、保存列、父子绑定 | `src/pages/admin/articles/data.ts` | parent-bound PATCH、刷新、RLS |
+| 加载、选择、保存锁、审计顺序 | `src/pages/admin/articles/useArticleEditor.ts` | 延迟切换、API 失败恢复、旧缺陷 mutation proof |
+| 页面与表单展示 | `src/pages/admin/articles/ArticlesWorkspace.tsx`、`ArticleEditorComponents.tsx`、`BlockContentEditor.tsx` | 原布局/标签/操作、实际浏览器流程 |
+| QR/Projects 共用身份读取 | `functions/_lib/admin-runtime.js` | 两模块独立错误/角色合同、无身份时零数据库调用 |

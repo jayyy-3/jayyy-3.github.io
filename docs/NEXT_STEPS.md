@@ -8,11 +8,14 @@ Last updated: 2026-09-09
 
 | ID | 状态 / 阶段 | 内容 | 阻塞 |
 |---|---|---|---|
-| NOW-MAINTAINABILITY-001 | now / implementation | Implement the approved maintainability audit, generated state, classified verification, isolated local stack, behavioral tests and limited Articles refactor. | — |
+| NOW-MAINTAINABILITY-001 | now / verification | Implement the approved maintainability audit, generated state, classified verification, isolated local stack, behavioral tests and limited Articles refactor. | — |
 | NOW-ADMIN-RELIABILITY-UX-001 | blocked / awaiting_external | Track outstanding production CMS handoff evidence after deployed incident repairs. | Broader production CMS golden workflows and user acceptance remain unverified; maintenance tests cannot certify them. |
 | NOW-ADMIN-UX-RESHAPE-001 | next / planned | Continue the separately scoped admin UX reshape after the maintenance refactoring; preserve deployed Projects and QR workflows. | — |
 | NOW-PUBLIC-CATALOG-INTEGRITY-001 | blocked / awaiting_external | Confirm remaining real-device catalog acceptance and separately authorized CMS corrections; runtime repairs are deployed. | Runtime shipped in PR #36. Real-device WeChat acceptance and exact production CMS corrections remain separate. |
+| NEXT-DELIVERY-MAIN-PROTECTION-001 | blocked / awaiting_external | A repository administrator must enable main PR protection and require the stable quality check; the connected GitHub identity has push access but no admin permission. | Repository administrator access; already requested from Jay during this maintenance task. |
 | NOW-FORMS-SUPABASE-001 | next / planned | Complete Supabase-backed Contact and Sample Request persistence, notifications, and admin lead workflow. | — |
+| NEXT-ADMIN-MODULE-BOUNDARIES-001 | next / planned | Apply the Articles behavior-first module boundary pattern to one concrete Products, Stone Library or Media change when scheduled; do not rewrite all editors by file size. | — |
+| LATER-AUTH-CLIENT-NAMESPACE-001 | later / planned | Investigate the duplicate GoTrue storage-name warning when an authenticated admin opens public content; no session corruption was observed in the local workflows. | — |
 | NOW-ADMIN-SETTINGS-CRUD-001 | blocked / awaiting_external | Implement the first owner/admin Site Settings and admin profile CRUD surface. | Fresh production Settings/Auth golden workflow and mail ownership proof remain separately scoped. |
 | NOW-ARTICLE-STRUCTURE-CLAIMS-001 | next / planned | Move article details from raw newsletter HTML to mobile-safe, claim-reviewed structured article templates. | — |
 | NEXT-SEO-GSC-LEGACY-001 | next / planned | Use Google Search Console evidence for Phase 2 SEO: sitemap refresh monitoring, legacy URL redirects, and non-brand long-tail content improvement. | — |

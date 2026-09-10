@@ -1,7 +1,6 @@
-import { createClient } from '@supabase/supabase-js';
+import { createServiceClient, readServiceConfig, readBearerToken, readAdminIdentity } from './admin-runtime.js';
 import { defaultQrMaterialForName, listQrMaterialOptions, sameQrMaterial, validateQrMaterialShape } from './image-qr-materials.js';
 
-const DEFAULT_SUPABASE_URL = 'https://npkidywzwddbnfrnxlmo.supabase.co';
 const PRIVATE_MEDIA_BUCKET = 'urblo-admin-media';
 const PUBLIC_MEDIA_BUCKET = 'urblo-public-media';
 const PUBLIC_SITE_ORIGIN = 'https://urblo.com.au';
@@ -449,33 +448,20 @@ function validateId(value) {
 }
 
 function getSupabaseConfig(env) {
-  const url = (env.SUPABASE_URL || DEFAULT_SUPABASE_URL).replace(/\/$/, '');
-  const serviceKey = env.SUPABASE_SERVICE_ROLE_KEY || env.SUPABASE_SERVICE_KEY;
+  const { url, serviceKey } = readServiceConfig(env);
   if (!serviceKey) throw new AdminImageQrError(500, 'server_not_configured', 'Image QR is not configured on this deployment.');
   return { url, serviceKey };
 }
 
-function createServiceClient(config) {
-  return createClient(config.url, config.serviceKey, {
-    auth: { autoRefreshToken: false, persistSession: false, detectSessionInUrl: false },
-  });
-}
-
 function getBearerToken(request) {
-  const match = /^Bearer\s+(.+)$/i.exec(request.headers.get('authorization') || '');
-  if (!match?.[1]) throw new AdminImageQrError(401, 'missing_session', 'Sign in before opening Image QR.');
-  return match[1].trim();
+  const token = readBearerToken(request);
+  if (token === null) throw new AdminImageQrError(401, 'missing_session', 'Sign in before opening Image QR.');
+  return token;
 }
 
 async function requireAdminActor(supabase, accessToken) {
-  const { data: { user }, error } = await supabase.auth.getUser(accessToken);
+  const { user, userError: error, profile, profileError } = await readAdminIdentity(supabase, accessToken);
   if (error || !user) throw new AdminImageQrError(401, 'invalid_session', 'Sign in again before opening Image QR.');
-  const { data: profile, error: profileError } = await supabase
-    .from('admin_profiles')
-    .select('user_id,role,is_active')
-    .eq('user_id', user.id)
-    .eq('is_active', true)
-    .maybeSingle();
   if (profileError || !profile || !ALLOWED_ROLES.has(profile.role)) {
     throw new AdminImageQrError(403, 'not_allowed', 'Active Image QR access is required.');
   }

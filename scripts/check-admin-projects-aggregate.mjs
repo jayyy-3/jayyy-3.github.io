@@ -912,9 +912,7 @@ requireIncludes(
 );
 
 for (const contract of [
-  "SUPABASE_SERVICE_ROLE_KEY",
   "getBearerToken",
-  "supabase.auth.getUser",
   "admin_project_aggregate",
 ]) {
   requireIncludes(
@@ -924,12 +922,7 @@ for (const contract of [
     `server contract ${contract}`,
   );
 }
-requireMatches(
-  server,
-  /\.from\(["']admin_profiles["']\)/,
-  functionPath,
-  "server admin profile lookup",
-);
+// Identity/configuration outcomes are covered by check-admin-runtime.mjs.
 requireIncludes(
   server,
   "p_expected_actor_role: expectedActorRole",

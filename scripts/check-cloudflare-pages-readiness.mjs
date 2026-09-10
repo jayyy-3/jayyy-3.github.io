@@ -164,9 +164,10 @@ function checkFunctions() {
   const adminInviteRoute = readRequired('functions/api/admin/invite-user.js');
   const adminInvite = readRequired('functions/_lib/admin-invite.js');
   const adminProjectsRoute = readRequired('functions/api/admin/projects.js');
-  const adminProjects = readRequired('functions/_lib/admin-projects.js');
+  const adminRuntime = readRequired('functions/_lib/admin-runtime.js');
+  const adminProjects = readRequired('functions/_lib/admin-projects.js') + '\n' + adminRuntime;
   const adminImageQrRoute = readRequired('functions/api/admin/image-qr.js');
-  const adminImageQr = readRequired('functions/_lib/admin-image-qr.js');
+  const adminImageQr = readRequired('functions/_lib/admin-image-qr.js') + '\n' + adminRuntime;
   const publicImageQrRoute = readRequired('functions/image/[slug].js');
 
   for (const [label, text, handler] of [

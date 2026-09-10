@@ -17,7 +17,7 @@ The local API is `http://127.0.0.1:57321`, Postgres uses port 57322, and capture
 
 ## Rebuild and verify
 
-Stop `local:dev`, then run `npm run local:verify`. It checks target guards, starts the stack, resets and reseeds twice, transactionally tests hosted-helper revocation, starts real Functions, and runs the QR upload/save/refresh/public/Hide/Restore/unauthenticated-denial journey. Each run preserves its own JSON/log/screenshot evidence under ignored `.tmp/local/`. The app process is stopped afterward; the isolated database remains available for investigation.
+Stop `local:dev`, then run `npm run local:verify`. It checks target guards, starts the stack, resets and reseeds twice, transactionally tests hosted-helper revocation, starts real Functions, and runs all four representative QR/Projects/Articles/forms workflows plus unprofiled-account denial. It then builds a local-only Article lock-order mutant and requires the same recovery assertion to detect that deliberately reintroduced defect. Each run preserves its own JSON/log/screenshot evidence under ignored `.tmp/local/`. The app process is stopped afterward; the isolated database remains available for investigation.
 
 - `npm run local:reset` replaces only this synthetic local database with migrations and fixtures.
 - `npm run local:journeys` repeats the current browser journey against an already running `local:dev`.
@@ -32,4 +32,4 @@ The historical helper-grant migration assumed hosted `public.rls_auto_enable()` 
 
 ## Verification boundary
 
-The current local journey proves the QR flow with a real local database, Storage and Pages Function. Broader Projects/Articles editing and deliberate failure recovery are the next test batch. Local evidence does not certify production SMTP ownership, real device scanning, CMS handoff or user acceptance. Required runtime CI runs this isolated proof before deploying Preview; no live business-data mutation is part of the workflow.
+The current local journeys prove QR material persistence/public readback, Projects private drafts/publish/hide and New cancellation, Articles parent binding/selection locks/validation/API-failure recovery/public rendering, and both Contact/Sample Request persistence plus owner-inbox readback. The notification provider is absent locally; provider behavior is separately covered with in-memory substitutes. A build-only mutation proves the replaced validation-order guard is still enforced behaviorally; it never edits repository source or reaches a production build. Local evidence does not certify production SMTP ownership, real device scanning, CMS handoff or user acceptance. Required runtime CI runs this isolated proof before deploying Preview; no live business-data mutation is part of the workflow.

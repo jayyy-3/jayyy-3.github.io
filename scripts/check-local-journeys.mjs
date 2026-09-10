@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { captureBrowserDiagnostics } from './_lib/browser-diagnostics.mjs'
 import assert from 'node:assert/strict'
 import { chromium } from 'playwright'
 import { expect } from 'playwright/test'
@@ -26,8 +27,8 @@ await context.route('**/*', route => {
   report.errors.push(`Blocked non-local request: ${url.origin}${url.pathname}`)
   return route.abort()
 })
+const finishDiagnostics = captureBrowserDiagnostics(context, report)
 const page = await context.newPage()
-page.on('pageerror', error => report.errors.push(error.message))
 page.on('response', response => {
   const url = new URL(response.url())
   if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/rest/')) report.requests.push({ method: response.request().method(), path: url.pathname, status: response.status() })
@@ -127,6 +128,7 @@ try {
 } catch (error) {
   report.passed = false; report.failure = error.message; console.error(error.message); process.exitCode = 1
 } finally {
+  await finishDiagnostics()
   report.finishedAt = new Date().toISOString()
   writeFileSync(`${directory}/result.json`, JSON.stringify(report, null, 2) + '\n')
   await browser.close()

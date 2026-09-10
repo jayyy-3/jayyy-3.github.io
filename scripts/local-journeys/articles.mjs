@@ -1,3 +1,4 @@
+import { assertArticleSaveUnlocked } from '../_lib/article-assertions.mjs'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { expect } from 'playwright/test'
@@ -26,7 +27,7 @@ export async function articleJourney({ page, context, check, id, directory }) {
     await field('Title').fill('   ')
     await page.getByRole('button', { name: 'Save article', exact: true }).click()
     await expect(page.getByText('Article title is required.', { exact: true })).toBeVisible()
-    await expect(page.getByRole('button', { name: 'Save article', exact: true })).toBeEnabled()
+    await assertArticleSaveUnlocked(page)
     await field('Title').fill(title)
     const pattern = '**/rest/v1/articles?*'
     const fail = route => route.request().method() === 'PATCH'
@@ -36,7 +37,7 @@ export async function articleJourney({ page, context, check, id, directory }) {
       await page.getByRole('button', { name: 'Save article', exact: true }).click()
       await expect(page.getByText('Synthetic article save failure', { exact: true })).toBeVisible()
       await expect(field('Title')).toHaveValue(title)
-      await expect(page.getByRole('button', { name: 'Save article', exact: true })).toBeEnabled()
+      await assertArticleSaveUnlocked(page)
       await page.screenshot({ path: `${directory}/article-failed-save.png`, fullPage: true })
     } finally { await page.unroute(pattern, fail) }
     const saved = await save('Save article', 'articles')

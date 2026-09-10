@@ -8,21 +8,21 @@ Last updated: 2026-09-09
 
 **NOW-MAINTAINABILITY-001** — Implement the approved maintainability audit, generated state, classified verification, isolated local stack, behavioral tests and limited Articles refactor.
 
-阶段：implementation。状态：now。
+阶段：verification。状态：now。
 
 ## 已观察的发布状态
 
-观察日期：2026-09-09。仓库版本：`810fd9b0eed97fa2a5183b46549db8423700bda5`。已验证运行时代码：`810fd9b0eed97fa2a5183b46549db8423700bda5`。
+观察日期：2026-09-09。仓库版本：`97e4f284b25616bb9cb8c56229ed0380eb7de9ac`。已验证运行时代码：`97e4f284b25616bb9cb8c56229ed0380eb7de9ac`。
 
-验证地址：https://31fd0c27.urblo-site.pages.dev
+验证地址：https://c0006474.urblo-site.pages.dev
 
-PR #43 passed isolated resets/QR journey, source/browser checks and Preview; main production immutable/apex/www readback passed. Expanded four-workflow tests are in progress locally.
+PR #44 production passed the expanded isolated workflow suite and immutable/apex/www readback. Articles/shared-identity refactoring has passed local behavior and source gates; its separate release is pending.
 
 CMS handoff: **revalidation_required**。QR: material_page_deployed。
 
 ## 外部依赖
 
-- **github-protection / pending**：main reported protected=false; connected account has push but not admin. Prepare stable quality check before owner enables protection.
+- **github-protection / pending**：Stable quality check is deployed and passing. main requires administrator configuration; connected identity has push but no admin permission. See NEXT-DELIVERY-MAIN-PROTECTION-001.
 - **legacy-integration / complete**：2026-09-09 API readback: urblo-site is direct upload. Legacy Hunter urblo Git integration production_deployments_enabled=false and preview_deployment_setting=none; canonical rollback deployment retained.
 - **cms-acceptance / external**：Existing broader CMS golden workflows, real-device checks and content confirmation are not certified by maintenance.
 

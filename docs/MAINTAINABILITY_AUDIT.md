@@ -59,3 +59,11 @@
 - Articles 的无效输入恢复、API 500 后保留输入/重试/刷新、父记录绑定的 section PATCH、保存锁阻止切换、延迟加载后正确显示、公开标题与正文已通过本地行为测试。测试不承诺普通手动切换会保留未保存编辑，现有行为不在本轮改动。
 - Contact/Sample Request 在本地真实 Functions/数据库入库并显示于 owner inbox，匿名读取被拒绝；通知状态为 not_required。没有发送外部邮件，真实 SMTP/Turnstile 验收仍独立。
 - Functions JavaScript 已纳入 ESLint recommended + Worker globals；两个有意检测控制字符的安全正则精确豁免 no-control-regex，未改变规则行为；删除一个未用 helper。
+
+## 第五批：有界重构结果
+
+Articles 入口由 2,226 行变成 11 行保护壳；类型、表单校验、数据访问、编辑状态和三个展示文件各自承担明确职责。保留了查询字段与顺序、父子过滤、审计顺序、旧响应防护和所有展示动作。12 个展示函数/返回区域 AST 比对一致；重构前后相同的 16 项真实本地流程通过。正常断言还成功检测到构建中故意恢复的校验前加锁缺陷，证明替换源码顺序检查没有丢掉该保护。
+
+QR/Projects 共用配置与身份读取，各模块仍保留独立角色、错误码、消息和响应合同。缺失配置/身份、后端错误、未知角色、Viewer 拒绝和三个编辑角色的行为测试通过。后端密钥禁止进入浏览器的源码边界保留。
+
+新诊断显示公开内容 client 与持久化 admin client 使用默认同名 Auth storage namespace，SDK 给出重复实例警告；本地没有观察到会话损坏。这是待调查风险，已列入 `LATER-AUTH-CLIENT-NAMESPACE-001`，不是本轮顺带修改认证的理由。Products、Stone Library、Media 的后续模块边界工作也已进入正式队列。
