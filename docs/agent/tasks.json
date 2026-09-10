@@ -5,7 +5,7 @@
   "tasks": [
     {
       "id": "NOW-ADMIN-STONE-WORKSPACE-001",
-      "status": "blocked",
+      "status": "now",
       "priority": 0,
       "summary": "Deliver the page-shaped Stone Library workspace and approved current-public-baseline adoption.",
       "files": [
@@ -36,7 +36,7 @@
         "2026-09-10: Candidate implemented and isolated local baseline adoption passed for 12 stones/55 photos. No production writes. Release steps and approval inventory are in docs/STONE_LIBRARY_WORKSPACE_RELEASE.md.",
         "2026-09-10: CI repair passed in run 34467099328 for 3771ad8, immutable Preview https://3bbca096.urblo-site.pages.dev. Production main/database remain unchanged."
       ],
-      "phase": "awaiting_external",
+      "phase": "release",
       "modules": [
         "stone-library",
         "projects",
@@ -48,14 +48,15 @@
         "source": "Jay requested implementation of the approved Stone Library workspace plan on 2026-09-10.",
         "included": [
           "Repository implementation, necessary module integration, isolated local tests and branch Preview.",
-          "Jay explicitly authorized repository push, draft PR/Preview, and repair of the failing CI check on 2026-09-10."
+          "Jay explicitly authorized repository push, draft PR/Preview, and repair of the failing CI check on 2026-09-10.",
+          "Jay approved publishing the reviewed release on 2026-09-10, including backup, both Stone migrations, exact 12-stone/55-photo adoption, runtime promotion and tagged editing/role verification."
         ],
         "excluded": [
-          "Production migrations, baseline publication/Storage writes and tagged live workflows until the exact inventory is approved."
+          "Unrelated content changes, real email/invitations, destructive deletion and self-certification of Jay\u2019s usability acceptance."
         ]
       },
-      "nextAction": "Obtain approval of the exact production release inventory, then execute backup/expand, Preview readback, controlled baseline adoption, runtime promotion/lockdown and approved tagged role workflows. Jay performs the five-minute usability acceptance.",
-      "blocker": "PR #47 source and immutable Preview checks passed. Production migrations, 12-stone/55-photo adoption and tagged workflows require approval of docs/STONE_LIBRARY_WORKSPACE_RELEASE.md."
+      "nextAction": "Execute the approved release sequence; preserve exact source and database evidence, then return the production editor for Jay\u2019s five-minute acceptance.",
+      "blocker": ""
     },
     {
       "id": "NOW-FORMS-SUPABASE-001",

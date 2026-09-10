@@ -1,6 +1,6 @@
 # Stone Library workspace release review
 
-Prepared 2026-09-10. Production is unchanged by this candidate. This document is the concrete approval scope; implementation approval does not approve these live writes.
+Prepared 2026-09-10. Jay approved the ordered production release scope below on 2026-09-10 (发布上线). Execution evidence and remaining acceptance are recorded in WORKLOG and structured state.
 
 ## Content inventory
 
@@ -46,3 +46,5 @@ Before adoption, the old runtime can be retained; expand is additive. After adop
 Local database and browser evidence is in `docs/WORKLOG.md`. Local fixtures use synthetic sessions and cannot establish production Auth/RLS or Jay's usability acceptance. Preview URL and final gate result are recorded there when available; live actions above remain pending explicit approval.
 
 Candidate Preview verified: `3771ad89dd09821ef5ced3d39ae6ebbd35bd7106`, CI `34467099328`, immutable `https://3bbca096.urblo-site.pages.dev`. All selected source checks, isolated database/Functions workflows and deployment smoke passed. Earlier immediate API 404 failures and the bounded consecutive-readiness repair are retained in `docs/WORKLOG.md`. This is no-write deployment verification; the ordered production actions above remain pending approval.
+
+Preflight readback: historical ID 1 was already archived by audit event 379 at 2026-09-10 06:41:20 UTC. The approved archive operation is retained as a no-op only after all non-state fields match; formal baseline records and historical content changes still fail closed. The approved plan file and SHA remain unchanged.

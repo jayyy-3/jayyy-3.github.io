@@ -81,8 +81,8 @@
     "summary": "Maintenance implementation, isolated behavior tests, Articles refactor and production verification completed; main protection remains administrator-blocked."
   },
   "stoneWorkspace": {
-    "status": "preview_verified_awaiting_live_approval",
-    "productionWrites": "none",
+    "status": "approved_release_in_progress",
+    "productionWrites": "expand_migration_applied",
     "plan": "docs/STONE_LIBRARY_WORKSPACE_RELEASE.md",
     "localEvidence": "Final current-main Node 20 Docker gate passed: 25 checks. SQL fixture: 30 assertions. Stone behavior/security: 13 groups. No-config browser: 12 routes. Local adoption: 12 stones and 55 verified photos.",
     "runtimeCandidateSha": "3771ad89dd09821ef5ced3d39ae6ebbd35bd7106",
@@ -96,6 +96,12 @@
     },
     "verifiedPreviewUrl": "https://3bbca096.urblo-site.pages.dev",
     "verifiedCiRunId": 34467099328,
-    "repairEvidence": "Clean Node 20 gate: 26 checks. CI source, isolated database/Functions, three consecutive API readiness probes and unchanged complete smoke passed. Earlier failed attempts remain in WORKLOG."
+    "repairEvidence": "Clean Node 20 gate: 26 checks. CI source, isolated database/Functions, three consecutive API readiness probes and unchanged complete smoke passed. Earlier failed attempts remain in WORKLOG.",
+    "approval": "2026-09-10 Jay: \u53d1\u5e03\u4e0a\u7ebf, in response to the exact backup/migration/adoption/promotion/tagged QA scope.",
+    "expandMigration": {
+      "source": "supabase/migrations/20260910064551_stone_library_workspace.sql",
+      "appliedVersion": "20260910105905",
+      "verified": true
+    }
   }
 }

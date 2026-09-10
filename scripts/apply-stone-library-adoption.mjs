@@ -3,6 +3,7 @@ import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { createHash, randomUUID } from 'node:crypto';
 import path from 'node:path';
 import { createClient } from '@supabase/supabase-js';
+import { normalizeAdoptionSnapshot as normal, reviewedStoneState } from './_lib/stone-adoption-snapshot.mjs';
 const args = process.argv.slice(2);
 const value = (flag, fallback) =>
   args.includes(flag) ? args[args.indexOf(flag) + 1] : fallback;
@@ -146,19 +147,6 @@ async function api(query = '', body) {
     );
   return result;
 }
-function normal(value, key = '') {
-  if (Array.isArray(value)) return value.map((v) => normal(v));
-  if (value && typeof value === 'object')
-    return Object.fromEntries(
-      Object.keys(value)
-        .sort()
-        .filter((k) => !['created_by', 'updated_by'].includes(k))
-        .map((k) => [k, normal(value[k], k)]),
-    );
-  if (key.endsWith('_at') && typeof value === 'string')
-    return new Date(value).toISOString();
-  return value;
-}
 async function readRows(table, columns = '*') {
   const { data, error } = await client.from(table).select(columns).order('id');
   if (error) throw new Error(`Could not read ${table} before adoption.`);
@@ -176,10 +164,8 @@ async function checkOriginal(item) {
     .select(Object.keys(g).join(','))
     .eq('id', item.id)
     .single();
-  if (
-    result.error ||
-    JSON.stringify(normal(result.data)) !== JSON.stringify(normal(g))
-  )
+  const state = reviewedStoneState(item, result.data);
+  if (result.error || state === 'changed')
     throw new Error(
       `Stone ID ${item.id} changed after the snapshot. Review it before proceeding.`,
     );
@@ -208,6 +194,7 @@ async function checkOriginal(item) {
       )
         throw new Error(`Stone ID ${item.id} ${key} changed after review.`);
     }
+  return state;
 }
 async function preservedState() {
   const tables = [
@@ -280,7 +267,13 @@ try {
   // The one published test is removed before the baseline photo/content work.
   for (const item of plan.historical.filter((i) => i.action === 'archive')) {
     if (receipt.stones[item.id]?.phase === 'complete') continue;
-    await checkOriginal(item);
+    const state = await checkOriginal(item);
+    if (state === 'already_archived') {
+      receipt.stones[item.id] = { phase: 'complete', retainedAlreadyArchived: true };
+      await persist();
+      console.log(`Retained already archived historical stone ID ${item.id}; no write.`);
+      continue;
+    }
     const current = await api(`?stoneId=${item.id}`);
     await writeStone(item.id, 'archive', current.draft, current, 'complete');
     console.log(`Archived exact historical stone ID ${item.id}.`);
