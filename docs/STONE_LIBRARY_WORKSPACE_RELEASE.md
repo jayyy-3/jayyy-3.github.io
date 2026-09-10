@@ -29,7 +29,7 @@ Preserve all six formal Product drafts and defaults, four formal Article drafts 
 
 Machine inventory: `docs/agent/stone-library-adoption-plan.json`. Exact file SHA-256: `b9a4e1f1c3fce163793263641139cc69c7620cce3853b2e03ed1a5a114784f9f`. `npm run agent:stone-adoption-plan` prints the plan without network or writes. Changed baseline rows or files cause live adoption to stop for review.
 
-## Ordered live actions requiring approval
+## Approved live sequence
 
 1. Freeze Stone editing; back up canonical Stone tables, private draft/history state and relevant media metadata. Apply **20260910064551_stone_library_workspace.sql** (expand, protected RPC, public catalogue, exact historical exclusions and static-reference registry). Read back grants/functions and run security checks.
 2. Deploy the already gated branch Preview. Verify real login, no-write catalogue/API behavior and service binding against the expanded database. Before expansion the new editor intentionally reports unavailable and cannot be functionally reviewed against production data.
@@ -43,8 +43,12 @@ Before adoption, the old runtime can be retained; expand is additive. After adop
 
 ## Verification record
 
-Local database and browser evidence is in `docs/WORKLOG.md`. Local fixtures use synthetic sessions and cannot establish production Auth/RLS or Jay's usability acceptance. Preview URL and final gate result are recorded there when available; live actions above remain pending explicit approval.
+Local database and browser evidence is in `docs/WORKLOG.md`. Local fixtures use synthetic sessions and cannot establish production Auth/RLS or Jay's usability acceptance. Preview URL and final gate result are recorded there when available; production actions 1–4 are complete; live Viewer proof and Jay acceptance remain open.
 
-Candidate Preview verified: `3771ad89dd09821ef5ced3d39ae6ebbd35bd7106`, CI `34467099328`, immutable `https://3bbca096.urblo-site.pages.dev`. All selected source checks, isolated database/Functions workflows and deployment smoke passed. Earlier immediate API 404 failures and the bounded consecutive-readiness repair are retained in `docs/WORKLOG.md`. This is no-write deployment verification; the ordered production actions above remain pending approval.
+Candidate Preview verified: `3771ad89dd09821ef5ced3d39ae6ebbd35bd7106`, CI `34467099328`, immutable `https://3bbca096.urblo-site.pages.dev`. All selected source checks, isolated database/Functions workflows and deployment smoke passed. Earlier immediate API 404 failures and the bounded consecutive-readiness repair are retained in `docs/WORKLOG.md`. This was no-write Preview evidence; the production completion below supersedes the earlier pending state.
 
 Preflight readback: historical ID 1 was already archived by audit event 379 at 2026-09-10 06:41:20 UTC. The approved archive operation is retained as a no-op only after all non-state fields match; formal baseline records and historical content changes still fail closed. The approved plan file and SHA remain unchanged.
+
+Production completed 2026-09-10: PR #47 merge `d612fcd23ada54b1bf94e75fcdb52e79875da074`, CI `34469804985`, immutable `https://24e7566f.urblo-site.pages.dev`, apex and www passed. Expand source `20260910064551` was applied by the connector as version `20260910105905`; lockdown source `20260910065803` as `20260910111627`. Both were read back. Twelve stones and 55 photos (media 196–250) adopted; original private files and previous content snapshots retained. Protected modules were unchanged. Stone browser DML is revoked and reference guards installed. Editing freeze is lifted.
+
+Tagged production Owner/Editor UI proof passed save/refresh, private upload, shared preview, publish/anonymous readback, draft privacy, pre-network failure recovery, mobile overflow, hide/restore and referenced New Grey rejection. Stone 17 and media 251 are archived; QA Storage objects retained. The failure simulation does not establish behavior under a real Storage-copy outage. Viewer live setup was blocked by automatic review of the QA profile role change; the profile remains Editor. Jay's five-minute acceptance and broader CMS handoff are not self-certified.

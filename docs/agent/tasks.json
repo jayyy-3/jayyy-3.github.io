@@ -21,7 +21,7 @@
       ],
       "acceptance": [
         "Autosaved private drafts, shared preview, atomic publication, exact finish images and reference-safe hide work through the protected endpoint.",
-        "Local gates and Preview review pass; production migrations/adoption/tagged QA require the exact release inventory approval.",
+        "Local gates, Preview and production deployment readback pass; approved migrations and exact 12-stone/55-photo adoption are complete.",
         "No unrelated Product/Article/Project/Image QR content changes; original drafts and historical samples retained.",
         "Jay completes the five-minute image replacement/publish test without documentation."
       ],
@@ -34,9 +34,10 @@
       ],
       "notes": [
         "2026-09-10: Candidate implemented and isolated local baseline adoption passed for 12 stones/55 photos. No production writes. Release steps and approval inventory are in docs/STONE_LIBRARY_WORKSPACE_RELEASE.md.",
-        "2026-09-10: CI repair passed in run 34467099328 for 3771ad8, immutable Preview https://3bbca096.urblo-site.pages.dev. Production main/database remain unchanged."
+        "2026-09-10: CI repair passed in run 34467099328 for 3771ad8, immutable Preview https://3bbca096.urblo-site.pages.dev. Production main/database remain unchanged.",
+        "2026-09-10: PR #47 deployed as d612fcd / 24e7566f, CI 34469804985 passed. Both migrations applied/read back; adoption complete. Owner/Editor real UI save/publish/privacy/recovery/hide/restore/reference proof passed. Tagged Stone 17 and media 251 archived; originals retained. Viewer role setup was rejected by automatic review; no role changed."
       ],
-      "phase": "release",
+      "phase": "awaiting_external",
       "modules": [
         "stone-library",
         "projects",
@@ -52,11 +53,11 @@
           "Jay approved publishing the reviewed release on 2026-09-10, including backup, both Stone migrations, exact 12-stone/55-photo adoption, runtime promotion and tagged editing/role verification."
         ],
         "excluded": [
-          "Unrelated content changes, real email/invitations, destructive deletion and self-certification of Jay\u2019s usability acceptance."
+          "Unrelated content changes, real email/invitations, destructive deletion and self-certification of Jay’s usability acceptance."
         ]
       },
-      "nextAction": "Execute the approved release sequence; preserve exact source and database evidence, then return the production editor for Jay\u2019s five-minute acceptance.",
-      "blocker": ""
+      "nextAction": "Jay performs the five-minute image replacement/publish acceptance in production. Complete live Viewer proof only after explicit approval for the named QA account role change; broader CMS handoff remains separate.",
+      "blocker": "Jay usability acceptance; automatic review requires specific approval to temporarily change QA Editor b0af7050-2565-4da5-ab26-3f2d5b2efc96 to Viewer and restore Editor."
     },
     {
       "id": "NOW-FORMS-SUPABASE-001",
