@@ -20,6 +20,8 @@ export const checks = {
   'homepage-video': node('check-homepage-hero-video.mjs'),
   'product-images': node('check-product-model-image-mapping.mjs'),
   'stone-library': node('check-stone-library-detail-integrity.mjs'),
+  'stone-workspace': { command: ['node', '--import', 'tsx', 'scripts/check-stone-workspace.mjs'], deps: [] },
+  'stone-adoption-snapshot': node('check-stone-adoption-snapshot.mjs'),
   qr: tsx('check-admin-image-qr.mjs'),
   projects: tsx('check-admin-projects-aggregate.mjs'),
   'admin-runtime': tsx('check-admin-runtime.mjs'),
@@ -27,20 +29,21 @@ export const checks = {
   'public-readiness': node('check-public-supabase-readiness.mjs'),
   overlay: tsx('check-public-content-overlay.mjs'),
   cloudflare: node('check-cloudflare-pages-readiness.mjs'),
+  'deployment-readiness': node('check-deployment-readiness.mjs'),
   'media-plan': node('check-admin-media-role-boundary-live.mjs'),
   handoff: node('check-admin-handoff-readiness.mjs', ['--base-url', 'https://urblo.com.au', '--admin-email', 'info@urblo.com.au']),
   browser: node('check-admin-config-gate.mjs', [], ['build']),
 }
-const smoke = ['routes', 'forms-api', 'forms-ui', 'capabilities', 'homepage-video', 'product-images', 'stone-library', 'qr', 'projects']
-const admin = ['coverage', 'qr', 'projects', 'admin-runtime', 'build', 'lint', 'foundation', 'media-plan', 'public-readiness', 'overlay', 'cloudflare', 'harness', 'handoff']
+const smoke = ['routes', 'forms-api', 'forms-ui', 'capabilities', 'homepage-video', 'product-images', 'stone-library', 'stone-workspace', 'stone-adoption-snapshot', 'qr', 'projects']
+const admin = ['stone-workspace', 'coverage', 'qr', 'projects', 'admin-runtime', 'build', 'lint', 'foundation', 'media-plan', 'public-readiness', 'overlay', 'cloudflare', 'harness', 'handoff']
 export const suites = {
   docs: ['state', 'paths', 'harness', 'classifier'],
   tooling: ['harness', 'classifier', 'lint'],
   smoke,
   admin,
-  container: [...smoke, ...admin, 'classifier', 'local-boundary'],
-  runtime: [...smoke, ...admin, 'classifier', 'local-boundary', 'browser'],
-  migrations: [...smoke, ...admin, 'classifier', 'local-boundary', 'browser'],
+  container: [...smoke, ...admin, 'classifier', 'local-boundary', 'deployment-readiness'],
+  runtime: [...smoke, ...admin, 'classifier', 'local-boundary', 'deployment-readiness', 'browser'],
+  migrations: [...smoke, ...admin, 'classifier', 'local-boundary', 'deployment-readiness', 'browser'],
 }
 export function resolveChecks(suite) {
   if (!suites[suite]) throw new Error(`Unknown verification suite: ${suite}`)

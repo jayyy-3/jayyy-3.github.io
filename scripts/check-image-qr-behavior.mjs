@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
 import { handleAdminImageQrRequest, handlePublicImageQrRequest, handlePublicImageQrDataRequest } from '../functions/_lib/admin-image-qr.js';
 import { onRequest as publicEndpoint } from '../functions/api/image-qr/[slug].js';
-import { defaultQrMaterialForName, staticQrMaterialOptions, validateQrMaterialShape } from '../functions/_lib/image-qr-materials.js';
+import { defaultQrMaterialForName, staticQrMaterialOptions, validateQrMaterialShape, listQrMaterialOptions } from '../functions/_lib/image-qr-materials.js';
 
 export async function checkQrBehavior() {
   const originalFetch = globalThis.fetch;
@@ -34,10 +34,7 @@ export async function checkQrBehavior() {
     const json = (value, status = 200) => new Response(JSON.stringify(value), { status, headers: { 'content-type': 'application/json' } });
     if (url.pathname === '/auth/v1/user') return json({ id: userId, email: 'qr@example.test', aud: 'authenticated' });
     if (url.pathname === '/rest/v1/admin_profiles') return json([{ user_id: userId, role, is_active: true }]);
-    if (url.pathname === '/rest/v1/stone_groups') {
-      assert.equal(url.searchParams.get('status'), 'eq.published', 'Only Published stone rows may be used');
-      return json([]);
-    }
+    if (url.pathname === '/rest/v1/rpc/public_stone_catalogue') return json({stones:[],managedKeys:[],finishes:[]});
     if (url.pathname === '/rest/v1/admin_audit_events') { writes++; audits.push(await request.json()); return json(null, 201); }
     if (url.pathname === '/rest/v1/image_qr_resources') {
       if (url.searchParams.has('slug') && url.searchParams.get('slug') !== `eq.${row.slug}`) return json([]);
@@ -67,8 +64,14 @@ export async function checkQrBehavior() {
       for (const secondary of asset.secondaryImages || []) assert(existsSync(`data/Product/${secondary.path}`));
     }
     const options = staticQrMaterialOptions();
+    const defaultsSql = readFileSync('supabase/migrations/20260910064551_stone_library_workspace.sql', 'utf8').split('private.stone_qr_default')[1];
+    const embeddedDefaults = defaultsSql.match(/jsonb_array_elements\('(.+)'::jsonb\)/)[1].replace(/''/g, "'");
+    assert.deepEqual(JSON.parse(embeddedDefaults), options, 'Database QR default references must match the deployed name-resolution catalogue');
     assert(options.length > 10);
     assert(!options.some((option) => option.stoneGroupId === 'ivory-sand' && option.finishKey === 'sawn'));
+    const hiddenOptions = await listQrMaterialOptions({rpc:async()=>({data:{stones:[],managedKeys:['zen-grey'],finishes:[]}})});
+    assert(!hiddenOptions.some(option => option.stoneGroupId === 'zen-grey'), 'Managed hidden QR material cannot revive a static option');
+    await assert.rejects(listQrMaterialOptions({rpc:async()=>({error:new Error('catalogue unavailable')})}));
     const first = await handlePublicImageQrRequest(publicRequest(), env, row.slug);
     assert.equal(first.status, 200);
     assert.match(first.headers.get('content-type'), /text\/html/);

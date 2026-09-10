@@ -1,3 +1,4 @@
+import { loadStoneCatalogueOptions } from '../../service/stoneCatalogueOptions';
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FileText, Plus, Search } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -51,45 +52,6 @@ interface ProjectListApiRow {
 
 interface ProjectListApiResponse {
   projects: ProjectListApiRow[];
-}
-
-interface StoneOptionRow {
-  id: number;
-  stone_group_key: string;
-  display_name: string;
-  status: string;
-}
-
-interface FinishOptionRow {
-  id: number;
-  finish_key: string;
-  display_name: string;
-  status: string;
-}
-
-interface StoneVariantOptionRow {
-  id: number;
-  stone_group_id: number;
-  variant_key: string;
-  display_name: string | null;
-  status: string;
-  sort_order: number;
-}
-
-interface FinishCapabilityOptionRow {
-  stone_variant_id: number;
-  finish_definition_id: number;
-  capability: "yes" | "no" | "tbc";
-}
-
-interface FinishImageOptionRow {
-  stone_group_id: number | null;
-  stone_variant_id: number | null;
-  finish_definition_id: number | null;
-  media_asset_id: number;
-  image_role: "primary" | "secondary" | "detail" | "swatch";
-  status: string;
-  sort_order: number;
 }
 
 interface MediaOptionRow {
@@ -202,6 +164,7 @@ function AdminProjectsContent() {
 
     try {
       const accessToken = await getAccessToken();
+      const stoneCatalogue = await loadStoneCatalogueOptions();
       const [projectListResponse, stonesResult, variantsResult, finishesResult, capabilitiesResult, finishImagesResult, mediaResult] =
         await Promise.all([
           fetch(projectEndpoint, {
@@ -211,30 +174,11 @@ function AdminProjectsContent() {
               Authorization: `Bearer ${accessToken}`,
             },
           }),
-          client
-            .from("stone_groups")
-            .select("id,stone_group_key,display_name,status")
-            .order("display_name", { ascending: true })
-            .returns<StoneOptionRow[]>(),
-          client
-            .from("stone_variants")
-            .select("id,stone_group_id,variant_key,display_name,status,sort_order")
-            .order("sort_order", { ascending: true })
-            .returns<StoneVariantOptionRow[]>(),
-          client
-            .from("finish_definitions")
-            .select("id,finish_key,display_name,status")
-            .order("sort_order", { ascending: true })
-            .returns<FinishOptionRow[]>(),
-          client
-            .from("stone_finish_capabilities")
-            .select("stone_variant_id,finish_definition_id,capability")
-            .returns<FinishCapabilityOptionRow[]>(),
-          client
-            .from("stone_finish_images")
-            .select("stone_group_id,stone_variant_id,finish_definition_id,media_asset_id,image_role,status,sort_order")
-            .order("sort_order", { ascending: true })
-            .returns<FinishImageOptionRow[]>(),
+          Promise.resolve({data:stoneCatalogue.stones,error:null}),
+          Promise.resolve({data:stoneCatalogue.variants,error:null}),
+          Promise.resolve({data:stoneCatalogue.finishes,error:null}),
+          Promise.resolve({data:stoneCatalogue.capabilities,error:null}),
+          Promise.resolve({data:stoneCatalogue.images,error:null}),
           client
             .from("media_assets")
             .select(mediaOptionSelect)

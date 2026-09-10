@@ -82,7 +82,9 @@ jobs:
         if: steps.plan.outputs.deploy == 'true'
         env:
           IMMUTABLE_URL: ${{ steps.deployment.outputs.url }}
-        run: npm run agent:cloudflare-preview-smoke -- --base-url "$IMMUTABLE_URL"
+        run: |
+          set -o pipefail
+          npm run agent:cloudflare-preview-smoke -- --base-url "$IMMUTABLE_URL" --wait-for-functions 2>&1 | tee /tmp/preview-smoke.log
       - name: Verify production domains against immutable deployment
         if: steps.plan.outputs.deploy == 'true' && github.ref == 'refs/heads/main'
         env:
@@ -110,6 +112,7 @@ jobs:
             .tmp/local/*/*.png
             /tmp/verification-plan.json
             /tmp/verification-result.json
+            /tmp/preview-smoke.log
           if-no-files-found: warn
           include-hidden-files: true
 

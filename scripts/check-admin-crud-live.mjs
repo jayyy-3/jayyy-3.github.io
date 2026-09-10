@@ -721,6 +721,8 @@ async function run() {
     return;
   }
 
+  throw new Error("This legacy direct-write verifier is retired for the Stone workspace. Use the approved endpoint-based Stone golden workflow; no login or content writes were attempted.");
+
   assertWriteConfig(config);
 
   const accessToken = await signIn(config);

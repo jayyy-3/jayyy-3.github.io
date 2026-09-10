@@ -30,6 +30,7 @@ export default function AdminApp() {
                     <Route path="media" element={<AdminMediaPage />} />
                     <Route path="image-qr" element={<AdminImageQrPage />} />
                     <Route path="stone-library" element={<AdminStoneLibraryPage />} />
+                    <Route path="stone-library/:stoneId" element={<AdminStoneLibraryPage />} />
                     <Route path="projects" element={<AdminProjectsPage />} />
                     <Route path="projects/:projectId" element={<AdminProjectsPage />} />
                     <Route path="products" element={<AdminProductsPage />} />

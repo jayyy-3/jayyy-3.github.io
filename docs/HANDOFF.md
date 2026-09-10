@@ -6,9 +6,11 @@ Last updated: 2026-09-10
 
 ## 正在执行
 
-当前没有正在执行的实现任务。最近完成：**NOW-MAINTAINABILITY-001** — Maintenance implementation, isolated behavior tests, Articles refactor and production verification completed; main protection remains administrator-blocked.
+**NOW-ADMIN-STONE-WORKSPACE-001** — Deliver the page-shaped Stone Library workspace and approved current-public-baseline adoption.
 
-从任务总览选择下一项；归档和候选任务不会自动变成已授权开发。
+阶段：release。状态：now。
+
+下一步：Execute the approved release sequence; preserve exact source and database evidence, then return the production editor for Jay’s five-minute acceptance.
 
 ## 已观察的发布状态
 

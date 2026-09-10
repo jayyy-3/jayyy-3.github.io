@@ -4,7 +4,6 @@ import imageSources from '../../data/clean/stone_finish_images.json';
 export const defaultQrMaterial = Object.freeze({ stoneGroupId: 'zen-grey', stoneVariantId: 'zen-grey', finishKey: 'honed' });
 const finishKey = (finish) => finish.finishVariantId ? `${finish.finishId}__${finish.finishVariantId}` : finish.finishId;
 const normalized = (value) => String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-const relation = (value) => Array.isArray(value) ? value[0] : value;
 
 export function hasStaticFinishImage(variant, finish) {
   return [imageSources[variant], imageSources[variant.split('--')[0]]].some((map) =>
@@ -49,44 +48,16 @@ export function validateQrMaterialShape(value) {
   return Object.fromEntries(keys.map((key) => [key, value[key]]));
 }
 
-function hasPublicMedia(row) {
-  const media = relation(row.media_assets);
-  if (media?.status !== 'published') return false;
-  if (media.source_kind === 'storage') return media.bucket === 'urblo-public-media' && Boolean(media.object_path);
-  return /^https?:\/\//.test(media.source_url || '') || /^\/(?!\/)/.test(media.source_url || '');
-}
-
-// Query only public content, even though this server also holds admin credentials.
-// Draft content never becomes a selectable/public QR material through this path.
+// The same managed catalogue drives QR selections, public pages and admin modules.
 export async function listQrMaterialOptions(supabase) {
-  const { data: groups, error } = await supabase.from('stone_groups')
-    .select('id,stone_group_key,display_name').eq('status', 'published');
-  if (error) throw error;
-  const options = staticQrMaterialOptions();
-  if (!groups?.length) return options;
-  const ids = groups.map((group) => group.id);
-  const [variantResult, imageResult] = await Promise.all([
-    supabase.from('stone_variants').select('id,stone_group_id,variant_key,display_name').in('stone_group_id', ids).eq('status', 'published').order('sort_order'),
-    supabase.from('stone_finish_images').select('stone_group_id,stone_variant_id,finish_definition_id,media_assets!stone_finish_images_media_asset_id_fkey(status,source_kind,source_url,bucket,object_path)')
-      .in('stone_group_id', ids).eq('status', 'published'),
-  ]);
-  if (variantResult.error || imageResult.error) throw variantResult.error || imageResult.error;
-  const variants = variantResult.data || [];
-  const images = (imageResult.data || []).filter(hasPublicMedia);
-  const caps = variants.length ? await supabase.from('stone_finish_capabilities')
-    .select('stone_variant_id,finish_definition_id,finish_definitions!stone_finish_capabilities_finish_definition_id_fkey(finish_key,display_name,status)')
-    .in('stone_variant_id', variants.map((variant) => variant.id)).eq('capability', 'yes') : { data: [] };
-  if (caps.error) throw caps.error;
-  const cmsOptions = groups.flatMap((group) => variants.filter((variant) => variant.stone_group_id === group.id).flatMap((variant) =>
-    (caps.data || []).filter((capability) => capability.stone_variant_id === variant.id).flatMap((capability) => {
-      const finish = relation(capability.finish_definitions);
-      if (!finish || finish.status !== 'published') return [];
-      const hasImage = images.some((image) => image.stone_group_id === group.id && (image.stone_variant_id === variant.id || image.stone_variant_id === null) && image.finish_definition_id === capability.finish_definition_id);
-      if (!hasImage && !hasStaticFinishImage(variant.variant_key, finish.finish_key)) return [];
-      return [{ stoneGroupId: group.stone_group_key, stoneVariantId: variant.variant_key, finishKey: finish.finish_key, stoneName: group.display_name, variantName: variant.display_name || 'Standard', finishName: finish.display_name }];
-    }),
-  ));
-  const publishedKeys = new Set(groups.map((group) => group.stone_group_key));
-  return [...options.filter((option) => !publishedKeys.has(option.stoneGroupId)), ...cmsOptions]
-    .sort((a, b) => a.stoneName.localeCompare(b.stoneName) || a.variantName.localeCompare(b.variantName));
+  const { data: catalogue, error } = await supabase.rpc('public_stone_catalogue');
+  if (error || !catalogue?.stones || !catalogue?.managedKeys || !catalogue?.finishes) throw error || new Error('Stone catalogue unavailable');
+  const options = catalogue.stones.flatMap(({draft}) => draft.variants.filter(v => v.enabled).flatMap(v => v.finishes.flatMap(f => {
+    const finish = catalogue.finishes.find(item => item.id === f.definitionId);
+    if (!finish || f.capability !== 'yes' || !f.images.some(image => image.role !== 'swatch')) return [];
+    return [{stoneGroupId:draft.stone.slug,stoneVariantId:v.slug,finishKey:finish.key,stoneName:draft.stone.name,variantName:v.label || 'Standard',finishName:finish.name}];
+  })));
+  const excluded = new Set([...catalogue.managedKeys, ...catalogue.stones.map(s => s.draft.stone.slug)]);
+  return [...staticQrMaterialOptions().filter(o => !excluded.has(o.stoneGroupId)), ...options]
+    .sort((a,b) => a.stoneName.localeCompare(b.stoneName) || a.variantName.localeCompare(b.variantName));
 }

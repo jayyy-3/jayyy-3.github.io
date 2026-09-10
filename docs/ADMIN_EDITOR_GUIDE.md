@@ -197,3 +197,12 @@ The CMS is not currently handoff-ready. Required closure:
 - Complete the real browser golden workflow: sign in, draft edit/save/refresh, private media copy/publish, public readback, archive behavior, settings public readback, invite/password setup, logout/login, password recovery, responsive navigation at mobile/1116px/wide widths, the Projects task workspace, the Dashboard operational queue, and this guide's usability with a non-technical editor.
 - Deploy and browser-test the Projects stable record route, task workspaces, all-editor dirty guards, blocker jumps, child-save isolation, searchable media, and save/refresh readback; then add paginated media and public preview before reusing the pattern in Products, Articles, and Stone Library.
 - Record fresh evidence and expiry in `docs/agent/admin-handoff-evidence.json`; do not infer readiness from route shells, source text, direct API writes, or this guide.
+
+## Stone Library: replace a finish image (new workspace candidate)
+
+1. Open **Stone Library**, search for the stone and open its card.
+2. Choose the shade or cut direction if present. Open the required finish and choose **Add or upload image**. Select an existing photograph or upload one with a short image description.
+3. Set the main image and order; remove the old link if it is being replaced. Wait for **All changes saved**. These edits remain a draft.
+4. Open **Preview** to inspect the same page layout used by the website. Choose **Publish**, then **View website** to confirm the result.
+
+An error keeps your edits on screen. Retry a connection failure; if another editor changed the stone, download your edits before reloading and reconciling them. **Previous versions** preserves earlier content separately. **Hide from website** keeps the draft/history and lists public pages that must be updated first. Changing Availability to Upcoming retains the stone page with a truthful supply status. This candidate requires the release steps in `docs/STONE_LIBRARY_WORKSPACE_RELEASE.md` before production use.

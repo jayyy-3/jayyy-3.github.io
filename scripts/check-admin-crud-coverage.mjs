@@ -249,97 +249,7 @@ const pageChecks = [
     ],
     exportGate: 'media_assets.export_manifest',
   },
-  {
-    label: 'Stone Library',
-    file: 'src/pages/admin/AdminStoneLibraryPage.tsx',
-    lifecycle: true,
-    tables: [
-      'stone_groups',
-      'stone_variants',
-      'finish_definitions',
-      'stone_finish_capabilities',
-      'stone_finish_images',
-      'media_assets',
-    ],
-    actions: [
-      'stone_group.create',
-      'stone_group.update',
-      'stone_group.publish',
-      'stone_group.archive',
-      'stone_variant.create',
-      'stone_variant.update',
-      'stone_variant.publish',
-      'stone_variant.archive',
-      'stone_finish_capability.create',
-      'stone_finish_capability.update',
-      'stone_finish_image.create',
-      'stone_finish_image.update',
-      'stone_finish_image.publish',
-      'stone_finish_image.archive',
-    ],
-    requiredText: [
-      'Current role is read-only for Stone Library',
-      'Needs confirmation is counted with Draft because it is not public-ready.',
-      'Stone Library publish checklist',
-      'Variant publish checklist',
-      'Stone family actions',
-      'Variant actions',
-      'Save keeps changes in the CMS. Publish only when the checklist is clear.',
-      'Needs confirmation stays private. Save the review notes, then publish only when the checklist is clear.',
-      'Published changes can appear in the public Stone Library after you save.',
-      'Publish locked:',
-      'Complete the Stone Library publish checklist before publishing this stone family.',
-      'Complete the variant publish checklist before publishing this variant.',
-      'Website URL key',
-      'CmsPublicPageLink',
-      'Available',
-      'Stone families',
-      'No stone families yet',
-      'Media from library',
-      'Media library item',
-      'Media library items available for finish images.',
-      'Published finish images require a selected finish and a Media library item that is Published in Media.',
-      'Publish is locked. Open Media and publish the selected Media library item before publishing this finish image.',
-      'Finish image public status',
-      'Finish image can appear on website',
-      'Ready, not published yet',
-      'Not ready for website',
-      'Open Media first',
-      'Finish images need a selected finish and Media library item that is Published in Media.',
-      'Viewers can inspect the Stone Library but cannot save changes.',
-      'Ask a CMS editor to update stone content.',
-      'Stone type proof note',
-      'Pricing note',
-      'Archive hides the CMS version. A matching legacy stone can remain visible during migration until CMS-only cutover.',
-      'Needs confirmation stays visible in the CMS, but is treated like Draft for public pages.',
-      'Published Stone Library content can appear in public stone listings and product material links.',
-    ],
-    forbiddenText: [
-      'TBC records stay explicit',
-      'Source type note',
-      'Price source',
-      'canonical finish definitions loaded from Supabase',
-      'Publication guardrails',
-      'Physical deletes remain hidden',
-      'Published finish images require a published media record',
-      'Admin/Editor',
-      'editor/admin',
-      'material records',
-      'Library records',
-      'No stone records yet',
-      'approved media records',
-      'media records available for linking',
-      'selected media record',
-      'media record that is Published in Media',
-      'public stone family record',
-      'family record',
-      'mutate Stone Library records',
-      'Media record',
-      'Media #',
-      '/ #',
-      'Published Stone Library records can appear',
-    ],
-  },
+  { label: 'Stone Library', file: 'src/pages/admin/AdminStoneLibraryPage.tsx', aggregate: true, tables: [] },
   {
     label: 'Projects',
     file: 'src/pages/admin/AdminProjectsPage.tsx',
@@ -1058,6 +968,7 @@ function checkPage(page) {
   }
 
   for (const table of page.tables) {
+    if(table==='stone_groups' && ['Products','Articles'].includes(page.label)){requireIncludes(text,'loadStoneGroupOptionResult',page.file+' published Stone selector');continue;}
     requireRegex(
       text,
       new RegExp(`(?:\\.from\\('${table}'\\)|table:\\s*'${table}')`),
@@ -1429,7 +1340,7 @@ function checkAdminMediaSafety() {
 
 function checkAdminParentOwnershipSafety() {
   const products = readRequired('src/pages/admin/AdminProductsPage.tsx');
-  const stones = readRequired('src/pages/admin/AdminStoneLibraryPage.tsx');
+  const stones = readRequired('supabase/migrations/20260910064551_stone_library_workspace.sql');
 
   const productOwnershipPredicates = products.match(/\.eq\('product_id', operation\.productId\)/g) ?? [];
   if (productOwnershipPredicates.length < 3) {
@@ -1448,35 +1359,14 @@ function checkAdminParentOwnershipSafety() {
     'src/pages/admin/AdminProductsPage.tsx saved-model identity guard',
   );
 
-  const stoneGroupPredicates = stones.match(/\.eq\('stone_group_id', operation\.groupId\)/g) ?? [];
-  const stoneVariantPredicates = stones.match(/\.eq\('stone_variant_id', operation\.variantId\)/g) ?? [];
-  if (stoneGroupPredicates.length < 2 || stoneVariantPredicates.length < 2) {
-    failures.push(
-      'src/pages/admin/AdminStoneLibraryPage.tsx: variant and finish-image updates must retain group/variant ownership predicates',
-    );
-  }
-  requireIncludes(
-    stones,
-    ".eq('finish_definition_id', operation.finishId)",
-    'src/pages/admin/AdminStoneLibraryPage.tsx capability finish ownership predicate',
-  );
-  requireIncludes(
-    stones,
-    'groupSelectionGenerationRef.current === groupGeneration',
-    'src/pages/admin/AdminStoneLibraryPage.tsx stale parent-bundle guard',
-  );
-  requireIncludes(
-    stones,
-    'variantSelectionGenerationRef.current === variantGeneration',
-    'src/pages/admin/AdminStoneLibraryPage.tsx stale variant-capability guard',
-  );
+  for(const marker of ['stone_variant_mismatch','stone_image_mismatch','stone_parent_mismatch','stone_conflict'])requireIncludes(stones,marker,'Stone aggregate ownership and version contract');
+
 }
 
 function checkAdminLoadingAndSaveLockSafety() {
   const pages = [
     ['src/pages/admin/AdminArticlesPage.tsx', readArticleSource()],
     ['src/pages/admin/AdminProductsPage.tsx', readRequired('src/pages/admin/AdminProductsPage.tsx')],
-    ['src/pages/admin/AdminStoneLibraryPage.tsx', readRequired('src/pages/admin/AdminStoneLibraryPage.tsx')],
   ];
 
   for (const [path, text] of pages) {
@@ -1496,8 +1386,6 @@ function checkAdminLoadingAndSaveLockSafety() {
   for (const [path, text, selector] of [
     [pages[0][0], pages[0][1], 'async function selectArticle'],
     [pages[1][0], pages[1][1], 'async function selectProduct'],
-    [pages[2][0], pages[2][1], 'async function selectGroup'],
-    [pages[2][0], pages[2][1], 'async function selectVariant'],
   ]) {
     const start = text.indexOf(selector);
     const nextFunction = text.indexOf('\n    function ', start + selector.length);
@@ -1533,6 +1421,12 @@ function checkProjectsAggregateContract() {
   notes.push('- Projects behavior: one aggregate endpoint, shared preview, visual hotspots, inline media');
 }
 
+function checkStoneWorkspaceContract(){
+  const result=spawnSync(execPath,['--import','tsx','scripts/check-stone-workspace.mjs'],{cwd:root,encoding:'utf8'});
+  if(result.status!==0)failures.push('Stone workspace behavior verifier failed: '+[result.stdout,result.stderr].filter(Boolean).join('\n'));
+  else notes.push('- Stone Library: serialized drafts, exact-request replay, atomic publish, protected references and public tombstones');
+}
+
 checkRoutes();
 checkBrowserSecretBoundaries();
 checkAdminDestructiveBoundaries();
@@ -1546,6 +1440,7 @@ checkAdminMediaSafety();
 checkAdminParentOwnershipSafety();
 checkAdminLoadingAndSaveLockSafety();
 checkProjectsAggregateContract();
+checkStoneWorkspaceContract();
 
 if (failures.length) {
   console.error('Admin CRUD coverage checks failed:');

@@ -6,10 +6,10 @@ import StoneLibraryService from '../service/StoneLibraryService';
 import type { StoneCardVM } from '../types/stone-library';
 
 export default function StoneLibraryPage() {
-  const [publicCards, setPublicCards] = useState<StoneCardVM[]>(() =>
-    StoneLibraryService.getStoneCards(),
-  );
+  const [publicCards, setPublicCards] = useState<StoneCardVM[]>([]);
 
+  const [loadState, setLoadState] = useState('loading');
+  const [retry, setRetry] = useState(0);
   const [search, setSearch] = useState('');
   const [stoneType, setStoneType] = useState('');
   const [finishKey, setFinishKey] = useState('');
@@ -30,19 +30,21 @@ export default function StoneLibraryPage() {
 
   useEffect(() => {
     let isCurrent = true;
+    setLoadState('loading');
     StoneLibraryService.getPublicStoneCards()
       .then((nextCards) => {
         if (!isCurrent) return;
         setPublicCards(nextCards);
+        setLoadState('ready');
       })
       .catch(() => {
-        // The initial static cards stay visible if the public CMS read fails.
+        if (isCurrent) { setPublicCards([]); setLoadState('error'); }
       });
 
     return () => {
       isCurrent = false;
     };
-  }, []);
+  }, [retry]);
 
   function clearFilters() {
     setSearch('');
@@ -78,7 +80,7 @@ export default function StoneLibraryPage() {
 
       <section className="bg-[rgba(239,239,239,0.32)] py-10 md:py-12">
         <div className="urblo-page-container">
-          {cards.length ? (
+          {loadState !== 'ready' ? <div role="status" className="py-12"><p>{loadState === 'loading' ? 'Loading stone information…' : 'Stone Library could not load.'}</p>{loadState === 'error' && <button className="urblo-button mt-4" onClick={() => setRetry((n) => n + 1)}>Try again</button>}</div> : cards.length ? (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {cards.map((card) => (
                 <StoneCard key={card.stoneGroupId} stone={card} />
