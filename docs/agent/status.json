@@ -81,9 +81,11 @@
     "summary": "Maintenance implementation, isolated behavior tests, Articles refactor and production verification completed; main protection remains administrator-blocked."
   },
   "stoneWorkspace": {
-    "status": "local_candidate",
+    "status": "locally_verified_push_blocked",
     "productionWrites": "none",
     "plan": "docs/STONE_LIBRARY_WORKSPACE_RELEASE.md",
-    "localEvidence": "12 baseline stones, 55 photo hashes, 28 SQL assertions, 13 behavior/security groups and local browser workflows verified before current-main integration."
+    "localEvidence": "Final current-main Node 20 Docker gate passed: 25 checks. SQL fixture: 30 assertions. Stone behavior/security: 13 groups. No-config browser: 12 routes. Local adoption: 12 stones and 55 verified photos.",
+    "runtimeCandidateSha": "482927dc0943b50b775dd961b7e4d9b9ae4974fc",
+    "pushBlocker": "HTTPS push credentials unavailable; GitHub connector Git tree write returned 403; automatic approval review rejected the SSH push because it requires explicit authorization to send code to the repository. No remote branch/PR/Preview or production writes were created."
   }
 }

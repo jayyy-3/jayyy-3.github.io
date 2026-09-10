@@ -129,3 +129,10 @@ Failures retained: the initial host smoke attempt could not reach its loopback s
 Production remains on its previously recorded verified runtime; no production migration, adoption or content/Storage write occurred. Next is immutable branch Preview smoke, then item-specific approval of `docs/STONE_LIBRARY_WORKSPACE_RELEASE.md`. The branch's editor depends on the expand migration and cannot function against the unexpanded production database until that step is approved.
 
 Integrated Node 20 Docker gate passed with 25 unique checks. The final QR default-registry assertion also passes; final committed source is gated again before push. Browser Back automation did not yield reliable completion evidence and is not counted as a passed browser case; in-app link/save-failure guards and queue flush behavior are verified.
+
+
+### Release boundary — push blocked, production unchanged
+
+Runtime candidate `482927dc0943b50b775dd961b7e4d9b9ae4974fc` on `codex/stone-library-workspace-review` passed the final clean Node 20 container gate (25 unique checks); the final SQL definitions passed all 30 disposable-database assertions. Existing no-config browser proof covers 12 routes. The independently reviewed original dirty workspace was preserved; the final candidate lives in an isolated worktree.
+
+HTTPS push failed because the local credentials could not be opened. Connected GitHub metadata reported user push permission, but the Git tree creation endpoint returned `403 Resource not accessible by integration`. An attempt to use the existing SSH identity for the same repository was rejected by automatic approval review: it requires explicit user authorization to send source to that destination. No authentication/security settings were changed and no remote branch, PR or Cloudflare Preview was created. Stop for that exact push authorization; do not claim deployment complete. The production migration/adoption/tagged-QA approval boundary in `docs/STONE_LIBRARY_WORKSPACE_RELEASE.md` remains separate.

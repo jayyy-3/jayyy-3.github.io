@@ -5,7 +5,7 @@
   "tasks": [
     {
       "id": "NOW-ADMIN-STONE-WORKSPACE-001",
-      "status": "now",
+      "status": "blocked",
       "priority": 0,
       "summary": "Deliver the page-shaped Stone Library workspace and approved current-public-baseline adoption.",
       "files": [
@@ -31,7 +31,7 @@
       "notes": [
         "2026-09-10: Candidate implemented and isolated local baseline adoption passed for 12 stones/55 photos. No production writes. Release steps and approval inventory are in docs/STONE_LIBRARY_WORKSPACE_RELEASE.md."
       ],
-      "phase": "release",
+      "phase": "awaiting_external",
       "modules": [
         "stone-library",
         "projects",
@@ -48,8 +48,8 @@
           "Production migrations, baseline publication/Storage writes and tagged live workflows until the exact inventory is approved."
         ]
       },
-      "nextAction": "Publish the gated review branch and run immutable Preview smoke, then obtain item-specific approval for the two production migrations, exact baseline adoption and live QA inventory.",
-      "blocker": "Production migrations/adoption/live QA await item-specific release approval after local and Preview review."
+      "nextAction": "Obtain explicit authorization for pushing codex/stone-library-workspace-review to the existing jayyy-3/jayyy-3.github.io repository using the existing SSH identity; then produce immutable Preview. After Preview review, obtain the separate production inventory approval.",
+      "blocker": "HTTPS push credentials unavailable; GitHub connector Git tree write returned 403; automatic approval review rejected the SSH push because it requires explicit authorization to send code to the repository. No remote branch/PR/Preview or production writes were created."
     },
     {
       "id": "NOW-FORMS-SUPABASE-001",

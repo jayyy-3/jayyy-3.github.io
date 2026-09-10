@@ -8,9 +8,9 @@ Last updated: 2026-09-10
 
 **NOW-ADMIN-STONE-WORKSPACE-001** — Deliver the page-shaped Stone Library workspace and approved current-public-baseline adoption.
 
-阶段：release。状态：now。
+阶段：awaiting_external。状态：blocked。
 
-下一步：Publish the gated review branch and run immutable Preview smoke, then obtain item-specific approval for the two production migrations, exact baseline adoption and live QA inventory.
+下一步：Obtain explicit authorization for pushing codex/stone-library-workspace-review to the existing jayyy-3/jayyy-3.github.io repository using the existing SSH identity; then produce immutable Preview. After Preview review, obtain the separate production inventory approval.
 
 ## 已观察的发布状态
 
