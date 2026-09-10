@@ -62,16 +62,18 @@ assert(scrollRestorationSource.includes('pathnameChanged'), 'Scroll restoration 
 assert(!scrollRestorationSource.includes('location.search'), 'Query-only selection changes must not reset page scroll.');
 
 assert(
-  detailSource.includes("setDetail((current) => current?.stoneGroupId === stoneGroupId ? current : null)"),
+  /setDetail\(\(current\) =>\s*current\?\.stoneGroupId === stoneGroupId \? current : null/.test(detailSource),
   'Variant refresh must retain the current detail while the replacement loads.',
 );
 assert(
   detailSource.includes("status === 'loading' && !detail"),
   'Only the initial Stone detail load may replace the page with the loading shell.',
 );
-const selectionRailIndex = detailSource.indexOf('aria-label="Stone selection"');
-const cutSelectorIndex = detailSource.indexOf('<VariantSwitch', selectionRailIndex);
-const finishSelectorIndex = detailSource.indexOf('<FinishAccordion', selectionRailIndex);
+const stoneViewSource = await readFile(new URL('../src/pages/StonePageView.tsx', import.meta.url), 'utf8');
+const stoneDraftSource = await readFile(new URL('../src/features/stone-library/stoneDraft.ts', import.meta.url), 'utf8');
+const selectionRailIndex = stoneViewSource.indexOf('aria-label="Stone selection"');
+const cutSelectorIndex = stoneViewSource.indexOf('<VariantSwitch', selectionRailIndex);
+const finishSelectorIndex = stoneViewSource.indexOf('<FinishAccordion', selectionRailIndex);
 assert(selectionRailIndex >= 0, 'Stone detail must expose one right-side selection rail.');
 assert(
   cutSelectorIndex > selectionRailIndex && finishSelectorIndex > cutSelectorIndex,
@@ -116,7 +118,7 @@ assert(
 );
 assert(!sitemapSource.includes('/stone-library/steel-blue'), 'The retired duplicate route must leave the sitemap.');
 assert(
-  serviceSource.includes('requiresFinishSpecificImages(activeVariant.variant_key)'),
+  stoneDraftSource.includes('mediaById.get(primary.mediaAssetId)') && !stoneDraftSource.includes('getStoneDefaultImage'),
   'Published CMS image resolution must retain its finish-image boundary.',
 );
 assert(

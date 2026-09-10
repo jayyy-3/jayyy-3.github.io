@@ -58,7 +58,9 @@
     "local:dev": "node scripts/local-app.mjs",
     "local:verify": "node scripts/verify-local-stack.mjs",
     "local:journeys": "node scripts/check-local-journeys.mjs",
-    "local:migrations": "node scripts/check-local-migrations.mjs"
+    "local:migrations": "node scripts/check-local-migrations.mjs",
+    "agent:stone-workspace": "node --import tsx scripts/check-stone-workspace.mjs",
+    "agent:stone-adoption-plan": "node scripts/apply-stone-library-adoption.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.106.2",

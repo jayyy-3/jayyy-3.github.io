@@ -47,14 +47,13 @@ function resolveProjectMaterial(
   material: ProjectMaterial,
   publishedDetails: ReadonlyMap<string, StoneDetailVM>,
 ) {
-  const stone = publishedDetails.get(projectMaterialKey(material))
-    || StoneLibraryService.getStoneDetail(material.stoneGroupId, material.stoneVariantId);
+  const stone = publishedDetails.get(projectMaterialKey(material));
   const finish = stone?.finishes.find((entry) => entry.finishKey === material.finishKey);
 
   return {
     stoneName: stone?.name || toFallbackLabel(material.stoneGroupId),
     finishLabel: finish?.label || toFallbackLabel(material.finishKey),
-    image: finish?.imageUrl || stone?.finishes[0]?.imageUrl,
+    image: finish?.imageUrl,
     imageAlt:
       finish?.imageAlt ||
       `${stone?.name || material.stoneGroupId} ${finish?.label || material.finishKey} finish preview`,

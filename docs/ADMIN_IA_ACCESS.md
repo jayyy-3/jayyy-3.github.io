@@ -209,3 +209,9 @@ Do not do before credentials:
 | `NOW-ADMIN-MEDIA-LEADS-001` | Media library, Storage policies, leads inbox, sample request workflow. |
 | `NOW-FORMS-SUPABASE-001` | Lead statuses, source route, notification, Turnstile assumptions. |
 | `NOW-CLOUDFLARE-PAGES-DEPLOY-001` | `/admin` route protection, Pages Functions, environment variables, rollback expectations. |
+
+## Stone Library aggregate workspace (candidate, 2026-09-10)
+
+`/admin/stone-library` is a thumbnail/search collection with historical records opt-in. `/admin/stone-library/new` allocates a private draft; `/admin/stone-library/:stoneId` is the single editor. Owner, Admin and Editor can save/publish/hide through `/api/admin/stone-library`; Viewer can read only. The Function validates the session/profile server-side before using the service-only RPC. Editor/Viewer usage responses omit lead references. Browser roles cannot invoke the actor-bearing RPC or write canonical Stone tables after lockdown.
+
+Private uploads remain originals; publishing creates verified public copies and commits canonical content, media metadata and audit atomically. Failed saves retain input and block navigation. A pending upload blocks leaving. Referenced public content blocks hiding or removal of required stone relationships. Draft and historical sample references are retained without blocking hide. Public catalogue requests never reveal origins, notes, draft snapshots or lead data. Rollout status and approval scope: `docs/STONE_LIBRARY_WORKSPACE_RELEASE.md`.

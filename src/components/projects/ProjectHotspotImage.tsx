@@ -25,14 +25,13 @@ function materialKey(hotspot: ProjectHotspot) {
 }
 
 function resolveHotspot(hotspot: ProjectHotspot, publishedDetails: ReadonlyMap<string, StoneDetailVM>) {
-    const stone = publishedDetails.get(materialKey(hotspot))
-        || StoneLibraryService.getStoneDetail(hotspot.stoneGroupId, hotspot.stoneVariantId);
+    const stone = publishedDetails.get(materialKey(hotspot));
     const finish = stone?.finishes.find((entry) => entry.finishKey === hotspot.finishKey);
 
     return {
         stoneName: stone?.name || toFallbackLabel(hotspot.stoneGroupId),
         finishLabel: finish?.label || toFallbackLabel(hotspot.finishKey),
-        previewImage: finish?.imageUrl || stone?.finishes[0]?.imageUrl,
+        previewImage: finish?.imageUrl,
         previewAlt:
             finish?.imageAlt ||
             `${stone?.name || hotspot.stoneGroupId} ${finish?.label || hotspot.finishKey} finish preview`,

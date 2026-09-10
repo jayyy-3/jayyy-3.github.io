@@ -507,7 +507,8 @@ function checkPublicRuntimeBoundary() {
   for (const file of cutoverServices) {
     const text = readRequired(file);
     requireIncludes(text, 'getPublicContentClient', file);
-    requireIncludes(text, ".eq('status', 'published')", file);
+    if(file==='src/service/StoneLibraryService.ts')requireIncludes(text,"client.rpc('public_stone_catalogue')",file+' published catalogue');
+    else requireIncludes(text, ".eq('status', 'published')", file);
   }
 
   const overlayHelper = readRequired('src/service/publicContentOverlay.ts');
@@ -549,13 +550,14 @@ function checkPublicRuntimeBoundary() {
   const stoneSpecs = readRequired('src/components/stone-library/SpecsPanel.tsx');
   const seoRoutes = readRequired('src/data/seoRoutes.ts');
   requireIncludes(stoneService, 'getPublicStoneCards', 'StoneLibraryService merged public listing adapter');
-  requireIncludes(stoneService, '(card) => card.stoneGroupId', 'StoneLibraryService stoneGroupId Published overlay');
-  requireIncludes(stoneService, 'getPublishedStoneDetail', 'StoneLibraryService public detail adapter');
-  requireIncludes(stoneService, ".from('stone_finish_capabilities')", 'StoneLibraryService public detail adapter');
-  requireIncludes(stoneService, ".from('stone_finish_images')", 'StoneLibraryService public detail adapter');
-  requireIncludes(stoneService, ".eq('status', 'published')", 'StoneLibraryService published-only public detail reads');
-  requireIncludes(stoneDetailPage, 'StoneLibraryService.getPublishedStoneDetail', 'StoneLibraryDetailPage published-first adapter');
-  requireIncludes(stoneDetailPage, 'StoneLibraryService.getStoneDetail', 'StoneLibraryDetailPage static fallback');
+  requireIncludes(stoneService, 'catalogue.managedKeys', 'Managed stones cannot reappear from static fallback');
+  requireIncludes(stoneService, 'getPublishedStoneDetail', 'Shared public detail resolver');
+  requireIncludes(stoneService, "client.rpc('public_stone_catalogue')", 'One published catalogue read');
+  const stoneWorkspaceSql=readRequired('supabase/migrations/20260910064551_stone_library_workspace.sql');
+  requireIncludes(stoneWorkspaceSql, "where g.status='published'", 'Catalogue published-parent boundary');
+  requireIncludes(stoneDetailPage, 'StoneLibraryService.getPublishedStoneDetail', 'Shared public catalogue detail');
+  requireNotIncludes(stoneDetailPage, 'StoneLibraryService.getStoneDetail', 'Detail page cannot bypass managed tombstones');
+  requireIncludes(stoneDetailPage, 'Try again', 'Production read failure has an explicit retry state');
   requireNotIncludes(stoneCard, 'stone.originLabel', 'Public Stone Library card origin disclosure');
   requireNotIncludes(stoneSpecs, 'originLabel', 'Public Stone Library specs origin disclosure');
   requireNotIncludes(stoneSpecs, '>Origin<', 'Public Stone Library specs origin label');
@@ -607,7 +609,7 @@ function checkDocsContracts() {
   const state = JSON.parse(readRequired('docs/agent/status.json'));
 
   for (const fragment of [
-    'Public Stone Library listing and detail routes prefer Published Supabase content with static fallback',
+    'Stone Library uses one published catalogue snapshot; managed keys never fall back to static content',
     'Public Product routes use Supabase published reads with static fallback',
     'Public Article routes prefer Published Supabase content with static fallback',
   ]) {
@@ -640,7 +642,7 @@ function checkDocsContracts() {
   );
   requireIncludes(
     architecture,
-    'Published Stone Library cards overlay matching static cards by `stoneGroupId`',
+    'Managed Stone Library keys never fall back to static content',
     'docs/ARCHITECTURE.md Stone Library public overlay contract',
   );
   if (state.production.content !== 'published_cms_overlay_with_static_fallback') {

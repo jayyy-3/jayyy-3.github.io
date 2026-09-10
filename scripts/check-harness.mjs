@@ -67,6 +67,8 @@ const requiredPackageScripts = {
   'agent:homepage-video': 'node scripts/check-homepage-hero-video.mjs',
   'agent:product-model-images': 'node scripts/check-product-model-image-mapping.mjs',
   'agent:seo-readiness': 'node scripts/check-seo-readiness.mjs',
+  'agent:stone-workspace': 'node --import tsx scripts/check-stone-workspace.mjs',
+  'agent:stone-adoption-plan': 'node scripts/apply-stone-library-adoption.mjs',
   'agent:stone-library-detail': 'node scripts/check-stone-library-detail-integrity.mjs',
   'agent:harness-gc': 'node scripts/check-harness-gc.mjs',
   'agent:harness-gc:fix': 'node scripts/check-harness-gc.mjs --fix',

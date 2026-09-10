@@ -1,7 +1,7 @@
 {
   "version": 2,
   "lastUpdated": "2026-09-10",
-  "currentTaskId": null,
+  "currentTaskId": "NOW-ADMIN-STONE-WORKSPACE-001",
   "sourceOfTruth": {
     "currentState": "docs/agent/status.json",
     "taskQueue": "docs/agent/tasks.json",
@@ -79,5 +79,11 @@
   "lastCompletedTask": {
     "id": "NOW-MAINTAINABILITY-001",
     "summary": "Maintenance implementation, isolated behavior tests, Articles refactor and production verification completed; main protection remains administrator-blocked."
+  },
+  "stoneWorkspace": {
+    "status": "local_candidate",
+    "productionWrites": "none",
+    "plan": "docs/STONE_LIBRARY_WORKSPACE_RELEASE.md",
+    "localEvidence": "12 baseline stones, 55 photo hashes, 28 SQL assertions, 13 behavior/security groups and local browser workflows verified before current-main integration."
   }
 }

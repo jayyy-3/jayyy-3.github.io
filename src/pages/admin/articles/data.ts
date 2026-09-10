@@ -1,5 +1,6 @@
+import { loadStoneGroupOptionResult } from '../../../../service/stoneCatalogueOptions';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { ArticleBlockRow, ArticleRow, MediaOptionRow, ProjectOptionRow, StoneOptionRow } from './types';
+import type { ArticleBlockRow, ArticleRow, MediaOptionRow, ProjectOptionRow } from './types';
 
 type ArticleWritePayload = Omit<ArticleRow, 'id' | 'updated_at' | 'created_at' | 'published_at'> & { published_at?: string | null; updated_by: string };
 type ArticleBlockWritePayload = Omit<ArticleBlockRow, 'id' | 'article_id' | 'updated_at' | 'published_at'> & { published_at?: string | null; updated_by: string };
@@ -32,11 +33,7 @@ export async function readArticleWorkspace(client: SupabaseClient) {
             .select('id,slug,title,status')
             .order('title', { ascending: true })
             .returns<ProjectOptionRow[]>(),
-        client
-            .from('stone_groups')
-            .select('id,stone_group_key,display_name,status')
-            .order('display_name', { ascending: true })
-            .returns<StoneOptionRow[]>(),
+        loadStoneGroupOptionResult(),
         client
             .from('media_assets')
             .select('id,alt,caption,object_path,source_url,media_type,status')

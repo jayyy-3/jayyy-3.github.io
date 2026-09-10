@@ -20,6 +20,7 @@ export const checks = {
   'homepage-video': node('check-homepage-hero-video.mjs'),
   'product-images': node('check-product-model-image-mapping.mjs'),
   'stone-library': node('check-stone-library-detail-integrity.mjs'),
+  'stone-workspace': { command: ['node', '--import', 'tsx', 'scripts/check-stone-workspace.mjs'], deps: [] },
   qr: tsx('check-admin-image-qr.mjs'),
   projects: tsx('check-admin-projects-aggregate.mjs'),
   'admin-runtime': tsx('check-admin-runtime.mjs'),
@@ -31,8 +32,8 @@ export const checks = {
   handoff: node('check-admin-handoff-readiness.mjs', ['--base-url', 'https://urblo.com.au', '--admin-email', 'info@urblo.com.au']),
   browser: node('check-admin-config-gate.mjs', [], ['build']),
 }
-const smoke = ['routes', 'forms-api', 'forms-ui', 'capabilities', 'homepage-video', 'product-images', 'stone-library', 'qr', 'projects']
-const admin = ['coverage', 'qr', 'projects', 'admin-runtime', 'build', 'lint', 'foundation', 'media-plan', 'public-readiness', 'overlay', 'cloudflare', 'harness', 'handoff']
+const smoke = ['routes', 'forms-api', 'forms-ui', 'capabilities', 'homepage-video', 'product-images', 'stone-library', 'stone-workspace', 'qr', 'projects']
+const admin = ['stone-workspace', 'coverage', 'qr', 'projects', 'admin-runtime', 'build', 'lint', 'foundation', 'media-plan', 'public-readiness', 'overlay', 'cloudflare', 'harness', 'handoff']
 export const suites = {
   docs: ['state', 'paths', 'harness', 'classifier'],
   tooling: ['harness', 'classifier', 'lint'],

@@ -435,7 +435,7 @@ Fields:
 - shared audit fields
 
 Public behavior:
-- Public Stone Library reads rows with `status = 'published'`.
+- Stone Library uses one published catalogue snapshot; managed keys never fall back to static content. `public_stone_catalogue()` exposes only public fields, with managed keys suppressing hidden/retired fallback entries. The workspace candidate adds private drafts, idempotent receipts and history, plus service-only atomic publish/archive and a separately applied direct-write/reference lockdown. See `docs/STONE_LIBRARY_WORKSPACE_RELEASE.md` for the two unapplied production migrations.
 - `tbc` can remain admin-visible until approved for public display.
 
 ### `stone_variants`

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 import ModelSelector from '../components/ModelSelector';
 import OptionSelector from '../components/OptionSelector';
@@ -34,7 +34,7 @@ export default function ProductDetailPage() {
   const selectedMaterials = useProductStore((state) => state.selectedMaterials);
   const setMaterial = useProductStore((state) => state.setMaterial);
 
-  const stoneOptions = useMemo(() => StoneLibraryService.getStoneGroupOptionsForProducts(), []);
+  const [stoneOptions, setStoneOptions] = useState<OptionItem[]>([]);
 
   useEffect(() => {
     if (!slug) {
@@ -47,8 +47,9 @@ export default function ProductDetailPage() {
     setProduct(null);
     setStatus('loading');
 
-    ProductService.getBySlug(slug)
-      .then((result) => {
+    Promise.all([ProductService.getBySlug(slug), StoneLibraryService.getPublicStoneGroupOptionsForProducts()])
+      .then(([result, options]) => {
+        setStoneOptions(options);
         if (!isCurrent) {
           return;
         }

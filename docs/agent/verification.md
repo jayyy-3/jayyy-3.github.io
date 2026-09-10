@@ -239,3 +239,11 @@ Evidence to record:
 Every completed task should leave a short verification note in `docs/WORKLOG.md` and should keep `docs/HANDOFF.md` current if it changes the next recommended action.
 
 The local doctor requires Node 22+ for Wrangler; the clean source gate uses Node 20. Preview diagnostics require an explicit `--base-url https://<preview>.urblo-site.pages.dev`; the doctor never substitutes the recorded production immutable deployment for a missing Preview target. `agent:init --json` distinguishes the current checkout from observed production, exposes next action and module paths, and supports an explicit idle repository state after completed work is archived.
+
+## Stone Library workspace candidate
+
+- `npm run agent:stone-workspace`: deterministic save-queue, request validation, media pagination, access/privacy, exact-image mapping, publication compensation and protected-boundary checks; included in smoke and CMS predeploy.
+- `scripts/fixtures/stone-workspace.sql`: disposable local database only, with both proposed migrations applied; transactional assertions cover draft isolation, ID preservation, replay/conflict, access and reference constraints. Never execute this fixture on production.
+- `scripts/fixtures/start-stone-browser.mjs`: loopback-only local UI fixture using a disposable PostgREST database and synthetic sessions. Browser save/refresh, private upload/preview/publish, >160 media pagination, failed-save navigation, lost-response replay and two-editor conflict were exercised. Synthetic sessions are not production Auth proof.
+- `npm run agent:stone-adoption-plan`: reviewed no-write inventory. Live flags require fresh item-specific approval for the exact plan SHA; see `docs/STONE_LIBRARY_WORKSPACE_RELEASE.md`.
+- Release gate: build → lint → tsc → smoke, CMS predeploy/config, harness/diff checks, clean Docker gate, immutable Preview smoke. Production migrations/adoption/tagged browser workflows and Jay's usability acceptance remain separate release requirements.

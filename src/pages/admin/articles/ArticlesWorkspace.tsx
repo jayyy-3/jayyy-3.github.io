@@ -434,6 +434,7 @@ export default function ArticlesWorkspace() {
                                 onChange={(value) => updateBlockField('linkedStoneGroupId', value)}
                                 options={[
                                     ['', 'No stone link'],
+                                    ...(blockForm.linkedStoneGroupId && !stoneOptions.some((stone) => String(stone.id) === blockForm.linkedStoneGroupId) ? [[blockForm.linkedStoneGroupId, 'Saved stone (not currently published)'] as [string, string]] : []),
                                     ...stoneOptions.map((stone) => [String(stone.id), stone.display_name] as [string, string]),
                                 ]}
                             />

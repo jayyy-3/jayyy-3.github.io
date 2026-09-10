@@ -4,6 +4,54 @@
   "archive": "docs/archive/2026-09-09/completed-tasks.json",
   "tasks": [
     {
+      "id": "NOW-ADMIN-STONE-WORKSPACE-001",
+      "status": "now",
+      "priority": 0,
+      "summary": "Deliver the page-shaped Stone Library workspace and approved current-public-baseline adoption.",
+      "files": [
+        "src/pages/admin/AdminStoneLibraryPage.tsx",
+        "functions/_lib/admin-stones.js",
+        "src/service/StoneLibraryService.ts",
+        "docs/STONE_LIBRARY_WORKSPACE_RELEASE.md",
+        "docs/agent/stone-library-adoption-plan.json"
+      ],
+      "acceptance": [
+        "Autosaved private drafts, shared preview, atomic publication, exact finish images and reference-safe hide work through the protected endpoint.",
+        "Local gates and Preview review pass; production migrations/adoption/tagged QA require the exact release inventory approval.",
+        "No unrelated Product/Article/Project/Image QR content changes; original drafts and historical samples retained.",
+        "Jay completes the five-minute image replacement/publish test without documentation."
+      ],
+      "verification": [
+        "npm run agent:stone-workspace",
+        "npm run agent:stone-adoption-plan",
+        "npm run gate",
+        "npm run agent:admin-cms-predeploy",
+        "npm run agent:admin-config-gate"
+      ],
+      "notes": [
+        "2026-09-10: Candidate implemented and isolated local baseline adoption passed for 12 stones/55 photos. No production writes. Release steps and approval inventory are in docs/STONE_LIBRARY_WORKSPACE_RELEASE.md."
+      ],
+      "phase": "verification",
+      "modules": [
+        "stone-library",
+        "projects",
+        "articles",
+        "qr",
+        "delivery"
+      ],
+      "authorization": {
+        "source": "Jay requested implementation of the approved Stone Library workspace plan on 2026-09-10.",
+        "included": [
+          "Repository implementation, necessary module integration, isolated local tests and branch Preview."
+        ],
+        "excluded": [
+          "Production migrations, baseline publication/Storage writes and tagged live workflows until the exact inventory is approved."
+        ]
+      },
+      "nextAction": "Finish current-main integration and clean verification; create read-only Preview and request the exact production release inventory approval.",
+      "blocker": "Production migrations/adoption/live QA await item-specific release approval after local and Preview review."
+    },
+    {
       "id": "NOW-FORMS-SUPABASE-001",
       "status": "next",
       "priority": 4,

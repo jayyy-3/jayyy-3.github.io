@@ -1650,6 +1650,7 @@ function OptionField({
         className={fieldClass}
       >
         <option value="">Choose {label.toLowerCase()}</option>
+        {value !== null && !visibleOptions.some((option) => option.id === value) && <option value={value}>Saved {label.toLowerCase()} (not currently published)</option>}
         {visibleOptions.map((option) => (
           <option key={option.id} value={option.id}>
             {option.label}

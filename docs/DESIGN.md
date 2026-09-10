@@ -425,3 +425,11 @@ Before shipping a user-facing page or component, check:
 - Stone Library finish image coverage remains active data work; secondary frame behavior is implemented for approved Juparana and Zen Grey source frames.
 - Future sample ordering needs a real form/backend decision before UI can imply submission.
 - The website still needs a clearer long-term content system for Project Spotlight, Material Mastery, Behind the Scenes, and Concrete vs Stone themes.
+
+## Stone Library workspace design decision — 2026-09-10
+
+Review: the previous three-column CRUD editor compressed the active form and exposed database relationships as the editing task. Replace it with a thumbnail/search collection and a focused page-shaped editor at `/admin/stone-library/:stoneId`. Preserve the restrained Admin visual system; use numbered sections and generous readable field widths. Keep one sticky action rail for save status, Preview, Publish, View website and Hide.
+
+Implementation: automatic draft saving after typing, explicit saved/saving/error state, navigation waits for saving, conflicts retain editable text and offer a download. Show a clear cut/shade variant selection and group every finish with its exact images, order and description. The searchable paginated media dialog supports private upload and existing image selection. Shared `StonePageView` renders both preview and public detail; missing photography remains a placeholder, never another finish's photograph. Origin and internal sources remain private. Historical versions are separate from the current draft.
+
+Remember: assess this flow by an editor replacing a finish photograph and publishing without documentation. Browser checks establish functional behavior; only Jay can accept usability. Cross-module scope is catalogue selection and reference protection, not a redesign of Products, Articles, Projects or Image QR.

@@ -5,6 +5,10 @@ const DEFAULT_SUPABASE_URL = 'https://npkidywzwddbnfrnxlmo.supabase.co';
 let publicContentClient: SupabaseClient | null | undefined;
 let publicContentClientPromise: Promise<SupabaseClient | null> | null = null;
 
+export function isPublicContentConfigured(): boolean {
+  return Boolean(import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY);
+}
+
 export async function getPublicContentClient(): Promise<SupabaseClient | null> {
   if (publicContentClient !== undefined) {
     return publicContentClient;

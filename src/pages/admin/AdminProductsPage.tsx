@@ -1,3 +1,4 @@
+import { loadStoneGroupOptionResult } from '../../service/stoneCatalogueOptions';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent, ReactNode } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
@@ -408,11 +409,7 @@ function AdminProductsContent() {
                     .order('sort_order', { ascending: true })
                     .order('name', { ascending: true })
                     .returns<ProductRow[]>(),
-                client
-                    .from('stone_groups')
-                    .select('id,stone_group_key,display_name,status')
-                    .order('display_name', { ascending: true })
-                    .returns<StoneOptionRow[]>(),
+                loadStoneGroupOptionResult(),
                 client
                     .from('media_assets')
                     .select('id,alt,caption,object_path,source_url,media_type,status')
@@ -1424,6 +1421,7 @@ function AdminProductsContent() {
                             onChange={(value) => updateMaterialDefaultField('stoneGroupId', value)}
                             options={[
                                 ['', 'No Stone Library link'],
+                                ...(materialDefaultForm.stoneGroupId && !stoneOptions.some((stone) => String(stone.id) === materialDefaultForm.stoneGroupId) ? [[materialDefaultForm.stoneGroupId, 'Saved stone (not currently published)'] as [string, string]] : []),
                                 ...stoneOptions.map((stone) => [String(stone.id), stone.display_name] as [string, string]),
                             ]}
                         />

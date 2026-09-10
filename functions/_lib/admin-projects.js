@@ -1235,11 +1235,12 @@ async function cleanupPublishedPrivateSources(
   return { warnings };
 }
 
-async function prepareMediaPromotions(
+export async function prepareMediaPromotions(
   supabase,
   media,
   newlyCreated,
   publishNonce,
+  destinationPrefix = "project-assets",
 ) {
   const promotions = [];
   let downloadedBytes = 0;
@@ -1295,7 +1296,7 @@ async function prepareMediaPromotions(
       );
     }
 
-    const destinationPath = destinationFor(asset, sourcePath, publishNonce);
+    const destinationPath = destinationFor(asset, sourcePath, publishNonce, destinationPrefix);
     const sourceDigest = await digestBlob(sourceBlob);
     const attemptedCopy = {
       mediaAssetId: asset.id,
@@ -1359,7 +1360,7 @@ async function prepareMediaPromotions(
   return promotions;
 }
 
-async function compensatePublicCopies(supabase, copies) {
+export async function compensatePublicCopies(supabase, copies) {
   const removed = [];
   const retained = [];
   for (const copy of copies) {
@@ -1615,7 +1616,7 @@ function safePublicSourceUrl(value) {
   }
 }
 
-function destinationFor(asset, sourcePath, publishNonce) {
+function destinationFor(asset, sourcePath, publishNonce, destinationPrefix = "project-assets") {
   const version = String(asset.updated_at || "unknown")
     .replace(/[^0-9A-Za-z]/g, "")
     .slice(0, 32);
@@ -1626,7 +1627,7 @@ function destinationFor(asset, sourcePath, publishNonce) {
   const fileName =
     rawName.replace(/[^0-9A-Za-z._-]/g, "-").replace(/^-+/, "") ||
     `asset-${asset.id}`;
-  return `project-assets/${asset.id}/${version}/${nonce}-${fileName}`;
+  return `${destinationPrefix}/${asset.id}/${version}/${nonce}-${fileName}`;
 }
 
 async function digestBlob(blob) {

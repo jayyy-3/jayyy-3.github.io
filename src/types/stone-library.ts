@@ -130,6 +130,7 @@ export interface StoneCardVM {
 }
 
 export interface StoneDetailVM {
+    summary?: string;
     stoneGroupId: string;
     name: string;
     status: StoneStatus;
