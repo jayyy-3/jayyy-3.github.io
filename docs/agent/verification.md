@@ -13,6 +13,8 @@ Use `npm run agent:init -- --task <id>` to locate the task and scope. `npm run a
 
 `npm run gate` runs the deduplicated source graph in clean Node 20. `agent:smoke`, `agent:admin-cms-predeploy`, `agent:check` remain compatible. Running separate aliases separately is a separate verification invocation; use the combined graph to avoid duplicate nodes. Configured and env-less builds are distinct configurations. No suite certifies live CMS golden workflows or production writes.
 
+Use `agent:verify --plan` to identify the applicable checks. For runtime/tooling changes, the required clean container gate supplies the source-graph evidence; add only checks it does not cover, such as the no-config browser gate. Do not first repeat the complete source graph on the host. Record-only changes run the classified docs graph. The sections below describe coverage and additional checks, not cumulative command lists. After a graph passes, do not rerun its covered checks through standalone aliases for the same tested inputs and environment. Recheck affected coverage when code, check inputs or configuration change, or a new failure warrants investigation. Configured builds, isolated database journeys, deployed smoke and required CI remain distinct checks. Run `git diff --check` once for the final patch.
+
 The registry in `scripts/_lib/verification.mjs` owns dependencies; classification tests cover actual Git rename/delete/untracked records and runtime fingerprints. `quality` always resolves on PRs, including record-only PRs; runtime smoke failure makes it fail. Main branch protection needs repository administrator access.
 
 Runtime CI additionally runs `npm run local:verify` with Node 22 before deployment. That local configuration has its own build and real database; it is distinct from the configured production build. Synthetic journeys cover QR upload/material save/refresh/public readback; Projects private draft/publish/hide and delayed-load cancellation; Articles validation/API-failure recovery/parent-bound section saves/selection locks/public rendering; Contact/Sample Request persistence and owner inbox readback; and an unprofiled account boundary. External mail is disabled; notification-provider logic is separately covered by in-memory forms API checks.
@@ -21,7 +23,7 @@ Runtime CI additionally runs `npm run local:verify` with Node 22 before deployme
 
 ## QR material-page release verification
 
-`npm run agent:admin-image-qr` includes in-memory Function behavior checks for defaults, safe embedded JSON, public omission of internal fields, hidden/unknown links, HEAD/method behavior, role denial, invalid combinations, stale-save conflicts, persisted readback and stable slug/image selection across rename and Hide/Restore. No network or live writes are made by this verifier. `agent:content-import` and `agent:stone-library-detail` verify the shared finish-image catalog. Required release checks remain container gate, Admin predeploy/config, then immutable Preview smoke. Live material save/refresh requires the additive migration and release-specific approval; an in-memory pass is not live evidence.
+`npm run agent:admin-image-qr` includes in-memory Function behavior checks for defaults, safe embedded JSON, public omission of internal fields, hidden/unknown links, HEAD/method behavior, role denial, invalid combinations, stale-save conflicts, persisted readback and stable slug/image selection across rename and Hide/Restore. No network or live writes are made by this verifier. `agent:content-import` and `agent:stone-library-detail` verify the shared finish-image catalog. Use the common release flow above; QR source checks are already included in the runtime graph. Live material save/refresh requires the additive migration and release-specific approval; an in-memory pass is not live evidence.
 
 ## Startup Check
 Use when resuming work or handing off between agents.
@@ -41,8 +43,6 @@ Use when Jay asks to run Harness GC, when current-state docs feel noisy, after a
 Run:
 - `npm run agent:harness-gc`
 - `npm run agent:harness-gc:review`
-- `npm run agent:check`
-- `git diff --check`
 
 Evidence to record:
 - Whether `docs/agent/status.json` still matches current production/local state.
@@ -58,14 +58,7 @@ Run the classified graph, then rendered QA of affected routes against `docs/DESI
 ### SEO Indexability
 Use when changing public metadata, public route slugs, `robots.txt`, `sitemap.xml`, structured data, canonical URL behavior, or the source list of pages intended for search indexing.
 
-Run:
-- `npm run agent:seo-readiness`
-- `npm run agent:verify` (classified graph)
-- `npm run agent:homepage-video`
-- `npm run agent:product-model-images`
-- `npm run agent:stone-library-detail`
-- `npm run agent:check`
-- `git diff --check`
+Additional check: `npm run agent:seo-readiness`. Homepage media, product images and Stone detail integrity are covered by the runtime graph.
 
 Evidence to record:
 - Sitemap URL count and covered page families.
@@ -79,17 +72,11 @@ Evidence to record:
 ### Data or Content Contract
 Use when changing `data/**`, `public/articles/**`, service-layer view models, or typed data contracts.
 
-Run:
-- `npm run build`
-- `npm run lint`
-- `npx tsc -b`
-- `npm run agent:check`
+Graph coverage includes build/typecheck, lint, harness, public-content readiness/overlay and Project aggregate checks. Verify normalization, Published/static merge rules, canonical keys, media resolution and draft/public boundaries as applicable.
+
+Additional checks:
 - `npm run agent:content-import` when changing static-to-Supabase import mapping or source content used by that dry run.
 - `npm run agent:content-import:apply-sql` when changing static-to-Supabase import or rollback SQL artifact generation.
-- `npm run agent:public-supabase-readiness` when changing public-content import status rules, structured article-block import assumptions, public read cutover assumptions, static/public route boundaries, or Supabase published-only policy checks.
-- `npm run agent:public-content-overlay` when changing a public Project, Product, Article, or Stone Library service adapter, canonical content key, Published/static merge rule, public media resolver, or list/detail/filter fallback behavior.
-- `npm run agent:admin-projects-aggregate` when changing the Project aggregate type/mapping, shared draft/public renderer, archived Project tombstone merge, or publish-blocker behavior.
-- `npm run agent:smoke` when route output changes.
 
 Evidence to record:
 - Source files changed.
@@ -106,8 +93,7 @@ For Project Stone Library material-point changes, also verify:
 ### Route, Navigation, or CTA Contract
 Use when changing `src/App.tsx`, shared header/footer links, route params, mailto/tel behavior, or form behavior.
 
-Run:
-- `npm run agent:verify` (classified graph)
+Use the common verification entry point above.
 
 Evidence to record:
 - Declared routes changed.
@@ -117,11 +103,7 @@ Evidence to record:
 ### Deployment or Tooling
 Use when changing `.github/**`, `package.json`, `vite.config.ts`, `tsconfig*.json`, ESLint config, or scripts.
 
-Run:
-- `npm run agent:check`
-- `npm run lint`
-- `npm run build` when bundling/deploy behavior might change.
-- Tool-specific dry run where available.
+Build, lint and harness checks are selected by the graph. Add a tool-specific dry run where applicable.
 
 Evidence to record:
 - Command output summary.
@@ -130,14 +112,10 @@ Evidence to record:
 ### Cloudflare Deployment
 Use when changing the Cloudflare Pages launch contract, Pages Functions routing, environment variables, redirects, headers, preview deployments, DNS cutover docs, or rollback docs.
 
-Run:
-- `npm run agent:cloudflare-readiness`
+Cloudflare source readiness is included in the graph. Additional deployed verification:
 - `npm run agent:cloudflare-preview-smoke -- --base-url https://<preview>.pages.dev` after a Pages preview URL exists
 - Production apex, `www`, and the moving `urblo.pages.dev` alias are matched after FQDN trailing-dot normalization and require an independent exact `--reference-url https://<8-hex-deployment>.urblo.pages.dev`; default/branch aliases and self-comparison are invalid references.
 - The deployed smoke must reject redirects on every direct SPA route, require every route to reference the same entry assets as `/`, reject absolute/cross-origin/query/fragment asset references, verify exact same-origin query-free recursively discovered asset URLs without cache-busting, require JavaScript/CSS MIME types, reject an SPA HTML shell returned with HTTP 200, and require byte-for-byte plus MIME equality with the immutable reference across the full graph. A residual long-lived response header is warning-only after that comparison; without it the header remains a failure. Status-only asset checks are insufficient.
-- `npm run agent:verify` (classified graph)
-- `npm run agent:check`
-- `git diff --check`
 
 Evidence to record:
 - Cloudflare project name/environment if known.
@@ -153,17 +131,11 @@ Evidence to record:
 ### Supabase Schema or Data Migration
 Use when adding Supabase schema, RLS policies, seed/migration scripts, public read contracts, or moving Projects, Stone Library, Articles, media, enquiries, or sample requests out of static files.
 
-Run:
-- `npm run build`
-- `npm run lint`
-- `npx tsc -b`
-- `npm run agent:check`
-- `npm run agent:supabase-foundation-readiness` when changing foundation migrations, baseline seeds, Storage policy source, helper grants, or service-role form RPC source.
-- Tool-specific migration dry run or local Supabase verification when available.
-- `npm run agent:content-import:apply-sql` when changing guarded static-to-Supabase import or rollback SQL artifacts.
-- `npm run agent:public-supabase-readiness` when public content import/cutover safety is in scope.
-- `npm run agent:public-content-overlay` when the Published/static migration merge or canonical route keys change.
-- `npm run agent:admin-projects-aggregate` when changing `20260719015649_project_aggregate_drafts.sql`, `20260802103337_restrict_archived_project_tombstones.sql`, or `20260802105537_project_aggregate_write_lockdown.sql`, `private.project_drafts`, the service-role-only aggregate RPC, Project table/sequence privilege lockdown, Project public parent/child reads, or archived-slug tombstones.
+Graph coverage includes build/typecheck, lint, harness, foundation grants/RLS, public-content readiness/overlay and Project aggregate checks. For Project migrations, verify private drafts, the service-role-only RPC, table/sequence write lockdown, public parent/child reads and archived-slug tombstones.
+
+Additional checks:
+- Tool-specific migration dry run or isolated local Supabase verification.
+- `npm run agent:content-import:apply-sql` when changing guarded static-to-Supabase import or rollback artifacts.
 
 Evidence to record:
 - Tables/relations changed.
@@ -176,12 +148,9 @@ Evidence to record:
 ### Backend API and Forms
 Use when adding or changing `/api/*` endpoints, form submission behavior, Turnstile verification, Supabase writes, transactional email, or lead-status workflow.
 
-Run:
-- `npm run agent:verify` (classified graph)
-- `npm run agent:forms-ui` when changing Contact form UI state, submit routing, or sample-request mode.
-- `npm run agent:capabilities-ui` when changing the Capability Statement download form, PDF asset path, shared CTA data, or Turnstile reuse on `/capabilities`.
-- API-level positive and negative submission tests when endpoints exist.
-- `npm run agent:admin-projects-aggregate` when changing the protected `/api/admin/projects` handler, bearer/profile authorization, request validation, service-role boundary, media promotion/compensation, or aggregate RPC invocation.
+Graph coverage includes form API/UI, Capability download and Project aggregate checks. These cover submission routing, request validation, authorization, service-role boundaries and media promotion/compensation. Add API-level positive and negative tests for changed behavior not already covered.
+
+Additional live checks:
 - `npm run agent:forms-live -- --allow-writes --allow-email --require-email` when verifying real notification delivery after SMTP2GO variables and Jay approval are available.
 - `npm run agent:forms-live -- --allow-writes --require-turnstile --turnstile-token <token>` when verifying real Turnstile handling after `VITE_TURNSTILE_SITE_KEY`, the Turnstile secret/token, and Jay approval are available.
 
@@ -200,14 +169,13 @@ Evidence to record:
 ### Admin CMS
 Use when adding or changing `/admin`, authenticated content CRUD, article block editing, media upload, or lead-management views.
 
-Run:
-- `npm run agent:verify` (classified graph)
-- `npm run agent:admin-cms-predeploy` when preparing the current CMS UX stack for deployment; it runs the non-preview local admin/content/deployment gates and finishes with report-only handoff readiness. Run `npm run agent:smoke` and `npm run agent:admin-config-gate` separately for preview/browser gates.
-- `npm run agent:admin-crud-coverage` when changing admin routes, module screens, table coverage, audit writers, export controls, role gates, or launch-critical removal/archive behavior.
-- `npm run agent:admin-image-qr` when changing the Image QR page, browser image optimizer, stable image resolver, protected Image QR Function, routing scope, or `image_qr_resources` migration. The check is source/no-write and does not apply the migration or upload an object.
-- `npm run agent:admin-projects-aggregate` when changing the Projects vertical prototype. It verifies the one-draft shape, one protected endpoint, revision guard, one action bar, shared public/preview renderer, visual hotspots, inline private media, server audit transaction, create-only public-media copy/compensation, private draft table, and service-role-only aggregate RPC. It performs no Supabase writes, does not apply any migration, and does not prove live migration state.
+The runtime graph includes admin CRUD coverage, QR, Projects, Stone, report-only handoff readiness and the no-config browser gate. Do not append CMS predeploy, smoke or these individual source checks after their graph coverage has passed.
+
+Coverage and additional acceptance:
+- Source coverage includes route/module registration, table references, audit/export controls, role boundaries and publish/archive paths. QR coverage includes image optimization, resolution, Function behavior and routing; it does not apply a migration or upload an object.
+- Project coverage includes one complete draft, a protected endpoint, revision guards, shared public/preview rendering, visual hotspots, private media, transactional audit, public-copy compensation and a service-role-only RPC. It does not establish applied migration state.
 - Project verification must reject visible proof-review controls/permissions and prove that client/server Save normalization makes legacy review columns compatibility-only. Public smoke must verify the route-aware `overlay`/`light-page` header contract, reject a solid-black 102px fallback and medium/heavy backdrop blur, and confirm that critical non-default opacity utilities used by the navbar, menu, homepage controls, and detail surfaces exist in built CSS. Rendered Projects listing/detail QA must compare against Stone Library: both use the same light 102px layout clearance and deeper clear-glass header/menu, without page-local duplicate top padding; image/video-first routes must retain recognizable media detail beneath the lighter overlay glass.
-- `npm run agent:admin-config-gate` when changing admin route protection, config-missing behavior, or no-config browser QA coverage. Without `--base-url`, it uses an isolated temporary bundle with browser-safe Supabase variables explicitly cleared, or the graph’s freshly verified env-less `dist/`; it never reuses a configured `dist/`.
+- The graph’s no-config browser check covers protected routes and configuration-missing behavior using an isolated bundle with browser-safe Supabase variables cleared, or its freshly verified env-less `dist/`; it never reuses a configured `dist/`. Real authenticated editing remains separate acceptance below.
 - `npm run agent:admin-auth-browser` in plan-only mode when changing admin browser auth QA tooling; run `npm run agent:admin-auth-browser -- --allow-login --strict` only after browser-safe Supabase config and a real active admin email/password are available. Without `--base-url`, it must build current source into an isolated configured bundle, enforce the entry-size/no-eager-Supabase boundary, prove static public fallback with the Supabase chunk blocked, use stable semantic login markers, and revisit a protected route after Sign out.
 - `npm run agent:admin-auth-browser -- --allow-login --expect-unauthorized --strict` when a valid Auth user without an active `admin_profiles` row is available through `URBLO_UNPROFILED_EMAIL` and `URBLO_UNPROFILED_PASSWORD`; the check must keep all launch-critical admin route probes on `/admin/unauthorized` without private module content.
 - `npm run agent:first-admin-bootstrap` when changing first-admin bootstrap tooling. Use `--verify-only` only after a service-role key and first admin email are configured; write mode requires explicit approval.
@@ -242,10 +210,10 @@ The local doctor requires Node 22+ for Wrangler; the clean source gate uses Node
 
 ## Stone Library workspace candidate
 
-- `npm run agent:stone-workspace`: deterministic save-queue, request validation, media pagination, access/privacy, exact-image mapping, publication compensation and protected-boundary checks; included in smoke and CMS predeploy.
-- `scripts/fixtures/stone-workspace.sql`: disposable local database only, with both proposed migrations applied; transactional assertions cover draft isolation, ID preservation, replay/conflict, access and reference constraints. Never execute this fixture on production.
+- Graph coverage: deterministic save-queue, request validation, media pagination, access/privacy, exact-image mapping, publication compensation and protected-boundary checks via `agent:stone-workspace`; no separate rerun is required.
+- `scripts/fixtures/stone-workspace.sql`: disposable local database only, with both Stone migrations applied; transactional assertions cover draft isolation, ID preservation, replay/conflict, access and reference constraints. Never execute this fixture on production.
 - `scripts/fixtures/start-stone-browser.mjs`: loopback-only local UI fixture using a disposable PostgREST database and synthetic sessions. Browser save/refresh, private upload/preview/publish, >160 media pagination, failed-save navigation, lost-response replay and two-editor conflict were exercised. Synthetic sessions are not production Auth proof.
 - `npm run agent:stone-adoption-plan`: reviewed no-write inventory. Live flags require fresh item-specific approval for the exact plan SHA; see `docs/STONE_LIBRARY_WORKSPACE_RELEASE.md`.
-- Release gate: build → lint → tsc → smoke, CMS predeploy/config, harness/diff checks, clean Docker gate, immutable Preview smoke. Production migrations/adoption/tagged browser workflows and Jay's usability acceptance remain separate release requirements.
+- Use the common release flow above. For a release involving migration or adoption, apply the approved plan and verify its production results. Tagged browser workflows must cover save/refresh, private-draft isolation, upload/preview, publish/public readback and reference-safe hide/restore. Jay's usability acceptance remains separate from technical verification.
 
 Deployment readiness behavior is covered by `node scripts/check-deployment-readiness.mjs` in the container/runtime graphs: bounded recovery and timeout, no credential/body forwarding, immutable-only GETs, immediate redirect/access/contract rejection and safe diagnostics. This adds no live writes or relaxation of the complete deployed smoke.
