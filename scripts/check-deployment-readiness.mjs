@@ -10,7 +10,7 @@ function fixture(responses) {
   return {
     logs, calls: () => calls,
     options: {
-      budgetMs: 15_000, now: () => time, sleep: async ms => { time += ms }, log: line => logs.push(line),
+      budgetMs: 30_000, now: () => time, sleep: async ms => { time += ms }, log: line => logs.push(line),
       fetchImpl: async (url, init) => {
         assert.equal(url, `${origin}/api/enquiries`)
         assert.equal(init.method, 'GET'); assert.equal(init.redirect, 'manual')
@@ -24,13 +24,17 @@ function fixture(responses) {
 }
 let test = fixture([() => html(503), () => html(200), ready])
 await waitForDeploymentFunctions(origin, test.options)
-assert.equal(test.calls(), 3)
-assert.equal(test.logs.length, 3)
+assert.equal(test.calls(), 5)
+assert.equal(test.logs.length, 5)
 assert.match(test.logs[0], /status=503.*cloudflare-error=1101.*cf-ray=abc123-MEL/)
 assert.ok(!test.logs.join('').includes('private-body-marker'))
 test = fixture([() => html(503)])
 await assert.rejects(waitForDeploymentFunctions(origin, test.options), /timed out/)
-assert.equal(test.calls(), 3, 'persistent failure stops at its budget')
+assert.equal(test.calls(), 6, 'persistent failure stops at its budget')
+test = fixture([ready, () => html(404), ready, ready, ready])
+await waitForDeploymentFunctions(origin, test.options)
+assert.equal(test.calls(), 5, 'an early success followed by an edge failure resets the stability window')
+assert.match(test.logs[2], /ready 1\/3/)
 for (const status of [302, 401, 403, 429]) {
   test = fixture([() => html(status), ready])
   await assert.rejects(waitForDeploymentFunctions(origin, test.options), /readiness failed/)
@@ -43,7 +47,7 @@ for (const body of ['invalid', JSON.stringify({ error: { code: 'wrong' } })]) {
 }
 test = fixture([new TypeError('private-network-detail'), ready])
 await waitForDeploymentFunctions(origin, test.options)
-assert.equal(test.calls(), 2)
+assert.equal(test.calls(), 4)
 assert.ok(!test.logs.join('').includes('private-network-detail'))
 for (const url of ['https://urblo.com.au', 'https://urblo-site.pages.dev', `${origin}/`, 'http://127.0.0.1:8788']) {
   test = fixture([ready])
