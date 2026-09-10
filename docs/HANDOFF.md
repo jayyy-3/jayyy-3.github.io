@@ -8,17 +8,17 @@ Last updated: 2026-09-10
 
 **NOW-ADMIN-STONE-WORKSPACE-001** — Deliver the page-shaped Stone Library workspace and approved current-public-baseline adoption.
 
-阶段：release。状态：now。
+阶段：awaiting_external。状态：now。
 
-下一步：Execute the approved release sequence; preserve exact source and database evidence, then return the production editor for Jay’s five-minute acceptance.
+下一步：Jay performs the five-minute image replacement/publish acceptance in production. Complete live Viewer proof only after explicit approval for the named QA account role change; broader CMS handoff remains separate.
 
 ## 已观察的发布状态
 
-观察日期：2026-09-10。仓库版本：`8a25265771424bb4680624a25cb3bfaa2564c3ae`。已验证运行时代码：`8a25265771424bb4680624a25cb3bfaa2564c3ae`。
+观察日期：2026-09-10。仓库版本：`d612fcd23ada54b1bf94e75fcdb52e79875da074`。已验证运行时代码：`d612fcd23ada54b1bf94e75fcdb52e79875da074`。
 
-验证地址：https://deef89f2.urblo-site.pages.dev
+验证地址：https://24e7566f.urblo-site.pages.dev
 
-PR #45 production passed isolated workflows, mutation proof and immutable/apex/www readback. Subsequent closeout changes are tooling/documentation only and do not deploy.
+PR #47 production passed isolated workflows and immutable/apex/www smoke. Approved Stone migrations and 12-stone/55-photo adoption completed. Tagged Owner/Editor UI workflows passed; Viewer live proof and Jay acceptance remain open. Subsequent evidence-only changes do not deploy.
 
 CMS handoff: **revalidation_required**。QR: material_page_deployed。
 

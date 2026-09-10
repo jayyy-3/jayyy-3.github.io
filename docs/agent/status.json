@@ -11,11 +11,11 @@
   },
   "release": {
     "observedAt": "2026-09-10",
-    "repositorySha": "8a25265771424bb4680624a25cb3bfaa2564c3ae",
-    "runtimeSha": "8a25265771424bb4680624a25cb3bfaa2564c3ae",
-    "verifiedRuntimeUrl": "https://deef89f2.urblo-site.pages.dev",
-    "ciRunId": 34445064304,
-    "note": "PR #45 production passed isolated workflows, mutation proof and immutable/apex/www readback. Subsequent closeout changes are tooling/documentation only and do not deploy.",
+    "repositorySha": "d612fcd23ada54b1bf94e75fcdb52e79875da074",
+    "runtimeSha": "d612fcd23ada54b1bf94e75fcdb52e79875da074",
+    "verifiedRuntimeUrl": "https://24e7566f.urblo-site.pages.dev",
+    "ciRunId": 34469804985,
+    "note": "PR #47 production passed isolated workflows and immutable/apex/www smoke. Approved Stone migrations and 12-stone/55-photo adoption completed. Tagged Owner/Editor UI workflows passed; Viewer live proof and Jay acceptance remain open. Subsequent evidence-only changes do not deploy.",
     "evidenceRefs": [
       "docs/WORKLOG.md"
     ]
@@ -77,15 +77,15 @@
     ]
   },
   "lastCompletedTask": {
-    "id": "NOW-MAINTAINABILITY-001",
-    "summary": "Maintenance implementation, isolated behavior tests, Articles refactor and production verification completed; main protection remains administrator-blocked."
+    "id": "NOW-ADMIN-STONE-WORKSPACE-001",
+    "summary": "Approved Stone implementation and production release completed; user acceptance and Viewer live proof remain open."
   },
   "stoneWorkspace": {
-    "status": "approved_release_in_progress",
-    "productionWrites": "expand_migration_applied",
+    "status": "deployed_awaiting_user_acceptance",
+    "productionWrites": "approved_release_completed",
     "plan": "docs/STONE_LIBRARY_WORKSPACE_RELEASE.md",
-    "localEvidence": "Final current-main Node 20 Docker gate passed: 25 checks. SQL fixture: 30 assertions. Stone behavior/security: 13 groups. No-config browser: 12 routes. Local adoption: 12 stones and 55 verified photos.",
-    "runtimeCandidateSha": "3771ad89dd09821ef5ced3d39ae6ebbd35bd7106",
+    "localEvidence": "Final clean Node 20 gate passed 27 checks; isolated Stone database and UI workflows passed.",
+    "runtimeCandidateSha": "d612fcd23ada54b1bf94e75fcdb52e79875da074",
     "pullRequest": "https://github.com/jayyy-3/jayyy-3.github.io/pull/47",
     "previewEvidence": {
       "candidateSha": "4cc8b977c3b2fcacaa9f5b79b40387ebaa02aecc",
@@ -97,11 +97,33 @@
     "verifiedPreviewUrl": "https://3bbca096.urblo-site.pages.dev",
     "verifiedCiRunId": 34467099328,
     "repairEvidence": "Clean Node 20 gate: 26 checks. CI source, isolated database/Functions, three consecutive API readiness probes and unchanged complete smoke passed. Earlier failed attempts remain in WORKLOG.",
-    "approval": "2026-09-10 Jay: \u53d1\u5e03\u4e0a\u7ebf, in response to the exact backup/migration/adoption/promotion/tagged QA scope.",
+    "approval": "2026-09-10 Jay: 发布上线, in response to the exact backup/migration/adoption/promotion/tagged QA scope.",
     "expandMigration": {
       "source": "supabase/migrations/20260910064551_stone_library_workspace.sql",
       "appliedVersion": "20260910105905",
       "verified": true
-    }
+    },
+    "lockdownMigration": {
+      "source": "supabase/migrations/20260910065803_stone_library_reference_lockdown.sql",
+      "appliedVersion": "20260910111627",
+      "verified": true
+    },
+    "adoption": {
+      "stones": 12,
+      "photos": 55,
+      "mediaIds": "196–250",
+      "privateOriginalsRetained": true,
+      "protectedModulesUnchanged": true
+    },
+    "productionUiEvidence": {
+      "deploymentSha": "d612fcd23ada54b1bf94e75fcdb52e79875da074",
+      "marker": "qa-stone-release-20260910-1110",
+      "owner": "passed",
+      "editor": "passed",
+      "viewer": "blocked_by_automatic_role_change_review; QA account remains editor",
+      "cleanup": "Stone 17 and media 251 archived; Storage originals/copies retained",
+      "pageErrors": 0
+    },
+    "publicContent": "The adopted twelve-stone catalogue is CMS-managed; other public modules retain Published overlays with static fallback."
   }
 }
