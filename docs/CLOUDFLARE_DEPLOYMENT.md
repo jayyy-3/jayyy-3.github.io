@@ -313,3 +313,7 @@ Still pending after preview validation:
 GitHub Actions is the sole active automatic release path. `urblo-site` uses direct upload. The legacy Hunter `urblo` Git integration has production automatic builds disabled and preview setting `none`; existing deployments remain rollback evidence. Do not re-enable it as a routine release path.
 
 PRs always produce `quality`. Record-only changes verify without deploying; runtime changes deploy their branch and require immutable smoke. `main` runtime changes also require apex/www smoke bound to the deployment URL. Failure leaves the workflow red and prints the last recorded verified runtime and this rollback procedure. CI uses Node 20 for verification and Node 22 for pinned Wrangler 4.130.0 deployment. Local Docker remains Node 20. The stable check must be enabled by a GitHub administrator as a required main-branch PR check; code alone cannot provide branch protection.
+
+### Remaining main protection configuration
+
+Read-only GitHub audit on 2026-09-10: main protected=false; the connected identity has push=true and admin=false. The stable `quality` check is live and passing. An administrator must configure the main rule to require pull requests and successful `quality`, with zero required human approvals so the approved workflow gains no extra approval stage. Keep force-push/deletion disabled. Read back the effective rule after applying it. This is tracked as `NEXT-DELIVERY-MAIN-PROTECTION-001`; the presence of this runbook or workflow does not mean the setting is applied.

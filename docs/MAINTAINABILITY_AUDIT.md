@@ -67,3 +67,11 @@ Articles 入口由 2,226 行变成 11 行保护壳；类型、表单校验、数
 QR/Projects 共用配置与身份读取，各模块仍保留独立角色、错误码、消息和响应合同。缺失配置/身份、后端错误、未知角色、Viewer 拒绝和三个编辑角色的行为测试通过。后端密钥禁止进入浏览器的源码边界保留。
 
 新诊断显示公开内容 client 与持久化 admin client 使用默认同名 Auth storage namespace，SDK 给出重复实例警告；本地没有观察到会话损坏。这是待调查风险，已列入 `LATER-AUTH-CLIENT-NAMESPACE-001`，不是本轮顺带修改认证的理由。Products、Stone Library、Media 的后续模块边界工作也已进入正式队列。
+
+## 接手验收与最终边界
+
+仓库独立启动演练返回 checkout SHA、已观察生产版本、当前任务/下一步、六个相关模块入口、验证命令和已有授权边界；不读取聊天历史或旧 WORKLOG。当前根指引 3,575 bytes，四份默认启动文件 12,096 bytes，加上本次任务的 init 输出 4,115 bytes，合计 16,211 bytes，低于 24 KiB 预算。该结果是命令与资料的接手演练，不是独立新人可用性研究。
+
+演练补齐两个实际工作流缺口：完成任务现在可归档并进入明确 idle 状态，不能用 idle 隐藏仍在执行的任务；本地 doctor 区分 Node 22+ Functions 与 Node 20 容器，并要求显式 Preview URL，避免用生产不可变 URL 冒充 Preview。临时无 Git/无聊天资料目录中的 idle init、无效/归档任务拒绝以及状态矛盾反例均通过。
+
+2026-09-10 最终权限读回仍为 push=true/admin=false、main protected=false。主分支保护已作为独立 blocked 外部任务记录，稳定 quality 已具备；其余维护实现不以等待该权限而继续显示“正在开发”。
