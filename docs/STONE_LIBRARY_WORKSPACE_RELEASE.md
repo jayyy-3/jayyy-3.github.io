@@ -44,3 +44,5 @@ Before adoption, the old runtime can be retained; expand is additive. After adop
 ## Verification record
 
 Local database and browser evidence is in `docs/WORKLOG.md`. Local fixtures use synthetic sessions and cannot establish production Auth/RLS or Jay's usability acceptance. Preview URL and final gate result are recorded there when available; live actions above remain pending explicit approval.
+
+Candidate Preview verified: `3771ad89dd09821ef5ced3d39ae6ebbd35bd7106`, CI `34467099328`, immutable `https://3bbca096.urblo-site.pages.dev`. All selected source checks, isolated database/Functions workflows and deployment smoke passed. Earlier immediate API 404 failures and the bounded consecutive-readiness repair are retained in `docs/WORKLOG.md`. This is no-write deployment verification; the ordered production actions above remain pending approval.

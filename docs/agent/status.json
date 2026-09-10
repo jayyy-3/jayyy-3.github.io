@@ -81,11 +81,11 @@
     "summary": "Maintenance implementation, isolated behavior tests, Articles refactor and production verification completed; main protection remains administrator-blocked."
   },
   "stoneWorkspace": {
-    "status": "preview_ci_repair",
+    "status": "preview_verified_awaiting_live_approval",
     "productionWrites": "none",
     "plan": "docs/STONE_LIBRARY_WORKSPACE_RELEASE.md",
     "localEvidence": "Final current-main Node 20 Docker gate passed: 25 checks. SQL fixture: 30 assertions. Stone behavior/security: 13 groups. No-config browser: 12 routes. Local adoption: 12 stones and 55 verified photos.",
-    "runtimeCandidateSha": "482927dc0943b50b775dd961b7e4d9b9ae4974fc",
+    "runtimeCandidateSha": "3771ad89dd09821ef5ced3d39ae6ebbd35bd7106",
     "pullRequest": "https://github.com/jayyy-3/jayyy-3.github.io/pull/47",
     "previewEvidence": {
       "candidateSha": "4cc8b977c3b2fcacaa9f5b79b40387ebaa02aecc",
@@ -93,6 +93,9 @@
       "attempts": "1 and 2 failed immediate API JSON smoke after source/local journeys passed",
       "independentSmokePassedUrl": "https://0f6ed478.urblo-site.pages.dev",
       "retryDeploymentUrl": "https://59d5be24.urblo-site.pages.dev"
-    }
+    },
+    "verifiedPreviewUrl": "https://3bbca096.urblo-site.pages.dev",
+    "verifiedCiRunId": 34467099328,
+    "repairEvidence": "Clean Node 20 gate: 26 checks. CI source, isolated database/Functions, three consecutive API readiness probes and unchanged complete smoke passed. Earlier failed attempts remain in WORKLOG."
   }
 }

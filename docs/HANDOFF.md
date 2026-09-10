@@ -8,9 +8,9 @@ Last updated: 2026-09-10
 
 **NOW-ADMIN-STONE-WORKSPACE-001** — Deliver the page-shaped Stone Library workspace and approved current-public-baseline adoption.
 
-阶段：verification。状态：now。
+阶段：awaiting_external。状态：blocked。
 
-下一步：Pass clean container checks and PR #47 CI with immutable Preview smoke, then obtain separate approval for the exact production migration/adoption inventory.
+下一步：Obtain approval of the exact production release inventory, then execute backup/expand, Preview readback, controlled baseline adoption, runtime promotion/lockdown and approved tagged role workflows. Jay performs the five-minute usability acceptance.
 
 ## 已观察的发布状态
 

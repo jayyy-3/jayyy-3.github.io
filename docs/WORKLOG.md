@@ -1,6 +1,6 @@
 # WORKLOG — current execution evidence
 
-Last updated: 2026-09-09
+Last updated: 2026-09-10
 
 Historical evidence is immutable and is not current task state. Current state is generated from `docs/agent/status.json` and `docs/agent/tasks.json`.
 
@@ -146,3 +146,7 @@ CI run `34464456956`, attempts 1 and 2, passed source checks and isolated real-d
 The repair adds an immutable-only, GET-only, 120-second readiness budget before strict smoke, with attempt/status/MIME/body-class/Cloudflare diagnostics retained as artifacts. Persistent errors, redirects, access/rate limits and invalid contracts still fail. Tests cover these failure boundaries and temporary recovery without network or writes. Clean gate and new CI evidence are pending at this checkpoint. No product UI or brand/claim change is made by this delivery repair.
 
 Follow-up evidence: the 26-check clean Node 20 gate passed for `929d54d`. CI `34466247487` passed its source and isolated database/Functions checks, deployed `https://21313b11.urblo-site.pages.dev`, and the initial readiness GET returned 405 JSON at IAD. Five seconds later strict smoke got 404 HTML at IAD. Thus one successful GET does not establish stable deployment routing. Thirty later local GET probes all returned the expected 405. The follow-up requires three consecutive successes five seconds apart within the same 120-second limit, resetting on temporary failure; a deterministic early-success→404→stable-success case covers this observation. Response diagnostics now include final target and redirect state. Root infrastructure cause remains unproven; no failure is suppressed in strict smoke.
+
+Closeout: the stability correction passed the clean Node 20 container graph (26 checks) and was pushed as `3771ad89dd09821ef5ced3d39ae6ebbd35bd7106`. CI `34467099328` passed all selected checks, isolated database/Functions workflows, deployment and strict smoke. Immutable Preview `https://3bbca096.urblo-site.pages.dev` returned three consecutive 405 JSON readiness responses five seconds apart at ORD, without redirects, followed by the unchanged full route/asset/redirect/API smoke. Both `verify-and-deploy` and `quality` are SUCCESS; PR #47 remains draft pending live release approval. The infrastructure cause of the earlier IAD 404 is not proven; stable readiness prevents a single early success being treated as deployment readiness, while all strict checks remain blocking. No further runtime test repetition is needed absent changes or new failures.
+
+Production main, migrations and business data remain unchanged. The expanded database, exact 12-stone/55-photo adoption and tagged Owner/Editor/Viewer workflows are separately approval-gated by the concrete release inventory. Cloud Preview cannot certify the new editor against production before expansion, and Jay's five-minute acceptance plus broader CMS handoff remain open. This record-only closeout retains runtime evidence from `3771ad8`; its documentation does not alter deployed inputs.

@@ -5,7 +5,7 @@
   "tasks": [
     {
       "id": "NOW-ADMIN-STONE-WORKSPACE-001",
-      "status": "now",
+      "status": "blocked",
       "priority": 0,
       "summary": "Deliver the page-shaped Stone Library workspace and approved current-public-baseline adoption.",
       "files": [
@@ -33,9 +33,10 @@
         "npm run agent:admin-config-gate"
       ],
       "notes": [
-        "2026-09-10: Candidate implemented and isolated local baseline adoption passed for 12 stones/55 photos. No production writes. Release steps and approval inventory are in docs/STONE_LIBRARY_WORKSPACE_RELEASE.md."
+        "2026-09-10: Candidate implemented and isolated local baseline adoption passed for 12 stones/55 photos. No production writes. Release steps and approval inventory are in docs/STONE_LIBRARY_WORKSPACE_RELEASE.md.",
+        "2026-09-10: CI repair passed in run 34467099328 for 3771ad8, immutable Preview https://3bbca096.urblo-site.pages.dev. Production main/database remain unchanged."
       ],
-      "phase": "verification",
+      "phase": "awaiting_external",
       "modules": [
         "stone-library",
         "projects",
@@ -53,8 +54,8 @@
           "Production migrations, baseline publication/Storage writes and tagged live workflows until the exact inventory is approved."
         ]
       },
-      "nextAction": "Pass clean container checks and PR #47 CI with immutable Preview smoke, then obtain separate approval for the exact production migration/adoption inventory.",
-      "blocker": "PR #47 immediate Preview API smoke failed twice; independent complete smoke of the first immutable Preview passed. Bounded readiness and diagnostics are being verified before another Preview."
+      "nextAction": "Obtain approval of the exact production release inventory, then execute backup/expand, Preview readback, controlled baseline adoption, runtime promotion/lockdown and approved tagged role workflows. Jay performs the five-minute usability acceptance.",
+      "blocker": "PR #47 source and immutable Preview checks passed. Production migrations, 12-stone/55-photo adoption and tagged workflows require approval of docs/STONE_LIBRARY_WORKSPACE_RELEASE.md."
     },
     {
       "id": "NOW-FORMS-SUPABASE-001",
