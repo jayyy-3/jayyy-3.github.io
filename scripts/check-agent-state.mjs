@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, mkdirSync, cpSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { spawnSync } from 'node:child_process';
 import { loadState, validateState, checkGenerated, verifyArchive, renderState } from './_lib/agent-state.mjs';
 const bundle = loadState();
 assert.deepEqual(validateState(bundle), []);
@@ -9,6 +10,16 @@ assert.deepEqual(checkGenerated(bundle), []);
 assert.deepEqual(verifyArchive(), []);
 const badTask = structuredClone(bundle); badTask.status.currentTaskId = 'done-or-missing';
 assert(validateState(badTask).some((error) => error.includes('currentTaskId')));
+const idle = structuredClone(bundle);
+idle.status.currentTaskId = null;
+idle.queue.tasks = idle.queue.tasks.filter(task => task.status !== 'now');
+assert.deepEqual(validateState(idle), []);
+assert.match(renderState(idle)['docs/HANDOFF.md'], /当前没有正在执行的实现任务/);
+assert.doesNotMatch(renderState(idle).readme, /\*\*null\*\*/);
+const hiddenWork = structuredClone(bundle);
+hiddenWork.status.currentTaskId = null;
+hiddenWork.queue.tasks.push({ id: 'UNDECLARED-WORK', status: 'now', phase: 'implementation', priority: 1, summary: 'Untracked execution', acceptance: [], verification: [] });
+assert(validateState(hiddenWork).some(error => error.includes('cannot hide')));
 const badCms = structuredClone(bundle); badCms.status.production.adminCmsHandoff = 'verified';
 assert(validateState(badCms).some((error) => error.includes('CMS status')));
 const badContent = structuredClone(bundle); badContent.status.production.content = 'drafts_public';
@@ -25,4 +36,21 @@ try {
   writeFileSync(join(dir, 'README.md'), readFileSync(join(dir, 'README.md'), 'utf8') + '\nCMS handoff passed.\n');
   assert(checkGenerated(bundle, dir).some((error) => error.includes('unverified')));
 } finally { rmSync(dir, { recursive: true, force: true }); }
+const idleDir = mkdtempSync(join(tmpdir(), 'urblo-idle-init-'));
+try {
+  mkdirSync(join(idleDir, 'docs/agent'), { recursive: true });
+  mkdirSync(join(idleDir, 'scripts/_lib'), { recursive: true });
+  writeFileSync(join(idleDir, 'package.json'), '{"type":"module"}');
+  for (const [file, data] of [['status.json', idle.status], ['tasks.json', idle.queue], ['modules.json', idle.modules]]) writeFileSync(join(idleDir, 'docs/agent', file), JSON.stringify(data));
+  for (const file of ['scripts/agent-init.mjs', 'scripts/_lib/agent-state.mjs']) cpSync(file, join(idleDir, file));
+  const result = spawnSync(process.execPath, ['scripts/agent-init.mjs', '--json'], { cwd: idleDir, encoding: 'utf8' });
+  assert.equal(result.status, 0, result.stderr);
+  const startup = JSON.parse(result.stdout);
+  assert.equal(startup.task, null);
+  assert.equal(startup.checkout.sha, null);
+  assert.ok(Array.isArray(startup.recommendedTasks));
+  const unknown = spawnSync(process.execPath, ['scripts/agent-init.mjs', '--task', 'done-or-missing'], { cwd: idleDir, encoding: 'utf8' });
+  assert.equal(unknown.status, 1);
+  assert.match(unknown.stderr, /do not silently resume history/);
+} finally { rmSync(idleDir, { recursive: true, force: true }); }
 console.log('State behavior passed: missing/done task, contradictory CMS, unsafe Preview policy and stale generated summaries are rejected; archive bytes retained.');

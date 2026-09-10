@@ -237,3 +237,5 @@ Evidence to record:
 
 ## Output Rule
 Every completed task should leave a short verification note in `docs/WORKLOG.md` and should keep `docs/HANDOFF.md` current if it changes the next recommended action.
+
+The local doctor requires Node 22+ for Wrangler; the clean source gate uses Node 20. Preview diagnostics require an explicit `--base-url https://<preview>.urblo-site.pages.dev`; the doctor never substitutes the recorded production immutable deployment for a missing Preview target. `agent:init --json` distinguishes the current checkout from observed production, exposes next action and module paths, and supports an explicit idle repository state after completed work is archived.

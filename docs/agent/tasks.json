@@ -1,69 +1,8 @@
 {
   "version": 2,
-  "lastUpdated": "2026-09-09",
+  "lastUpdated": "2026-09-10",
   "archive": "docs/archive/2026-09-09/completed-tasks.json",
   "tasks": [
-    {
-      "id": "NOW-MAINTAINABILITY-001",
-      "status": "now",
-      "phase": "verification",
-      "priority": 0,
-      "summary": "Implement the approved maintainability audit, generated state, classified verification, isolated local stack, behavioral tests and limited Articles refactor.",
-      "modules": [
-        "harness",
-        "delivery",
-        "qr",
-        "projects",
-        "articles",
-        "forms"
-      ],
-      "files": [
-        "AGENTS.md",
-        "docs/agent/status.json",
-        "docs/agent/tasks.json",
-        "docs/MAINTAINABILITY_AUDIT.md",
-        "docs/PROJECT_MAP.md",
-        "scripts"
-      ],
-      "acceptance": [
-        "Startup instructions fit 6 KiB; default startup material fits 24 KiB.",
-        "Generated summaries agree with the task queue and current release observations.",
-        "Documentation-only verification does not deploy; runtime and migration changes cannot bypass checks.",
-        "Isolated local migrations reset twice; QR/Projects/Articles representative browser workflows pass.",
-        "Articles layers are separated without changing UI, routes, roles or save semantics.",
-        "Physical delete controls remain out of the launch-critical CMS path.",
-        "External GitHub protection and duplicate integration findings are explicitly resolved or reported with evidence."
-      ],
-      "verification": [
-        "npm run agent:verify",
-        "npm run agent:doctor -- --target local",
-        "npm run gate"
-      ],
-      "authorization": {
-        "source": "Jay explicitly requested implementation of the complete maintainability plan in this task on 2026-09-09.",
-        "allowed": [
-          "Repository edits, tests, dependency tooling, isolated synthetic local data and local resets.",
-          "Separate branches/PRs, verified merges and existing-runtime deployment according to the approved plan.",
-          "Configure main PR/check protection and consolidate duplicate automatic deployment entrypoints after verified preparation."
-        ],
-        "excluded": [
-          "Production business-data or Storage mutations, real emails/invites, destructive cleanup, new paid services.",
-          "Changing public design, CMS publishing contracts, RLS role semantics or DNS."
-        ],
-        "renewWhen": [
-          "Scope expands, a new paid service is needed, or a destructive operation is proposed."
-        ]
-      },
-      "progress": {
-        "state": "merged_pr_40_production_verified",
-        "verification": "merged_pr_41_production_verified",
-        "recordOnlyCI": "pr_42_and_main_zero_deployments_verified",
-        "legacyAutomaticBuilds": "disabled_and_read_back",
-        "localStack": "pr_43_production_verified",
-        "behaviorTests": "four_workflows_and_unauthorized_account_passed_two_fresh_resets",
-        "refactor": "local_behaviors_mutation_and_clean_container_passed_preview_release_pending"
-      }
-    },
     {
       "id": "NOW-FORMS-SUPABASE-001",
       "status": "next",
@@ -584,7 +523,7 @@
       "acceptance": [
         "Projects and QR are deployed; preserve permanent URLs, aggregate drafts and existing role boundaries.",
         "Further UX changes require their own task acceptance; maintenance Articles refactoring does not redesign the UI.",
-        "Physical deletes for content records remain hidden and approval-gated."
+        "Physical deletes for content records remain hidden and approval-gated. Physical delete controls remain out of the launch-critical CMS path."
       ],
       "verification": [
         "npm run build",

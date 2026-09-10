@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "lastUpdated": "2026-09-09",
-  "currentTaskId": "NOW-MAINTAINABILITY-001",
+  "lastUpdated": "2026-09-10",
+  "currentTaskId": null,
   "sourceOfTruth": {
     "currentState": "docs/agent/status.json",
     "taskQueue": "docs/agent/tasks.json",
@@ -10,12 +10,12 @@
     "adminHandoffEvidence": "docs/agent/admin-handoff-evidence.json"
   },
   "release": {
-    "observedAt": "2026-09-09",
-    "repositorySha": "97e4f284b25616bb9cb8c56229ed0380eb7de9ac",
-    "runtimeSha": "97e4f284b25616bb9cb8c56229ed0380eb7de9ac",
-    "verifiedRuntimeUrl": "https://c0006474.urblo-site.pages.dev",
-    "ciRunId": 34331232509,
-    "note": "PR #44 production passed the expanded isolated workflow suite and immutable/apex/www readback. Articles/shared-identity refactoring has passed local behavior and source gates; its separate release is pending.",
+    "observedAt": "2026-09-10",
+    "repositorySha": "8a25265771424bb4680624a25cb3bfaa2564c3ae",
+    "runtimeSha": "8a25265771424bb4680624a25cb3bfaa2564c3ae",
+    "verifiedRuntimeUrl": "https://deef89f2.urblo-site.pages.dev",
+    "ciRunId": 34445064304,
+    "note": "PR #45 production passed isolated workflows, mutation proof and immutable/apex/www readback. Subsequent closeout changes are tooling/documentation only and do not deploy.",
     "evidenceRefs": [
       "docs/WORKLOG.md"
     ]
@@ -75,5 +75,9 @@
       "docs/agent/status.json",
       "docs/HANDOFF.md"
     ]
+  },
+  "lastCompletedTask": {
+    "id": "NOW-MAINTAINABILITY-001",
+    "summary": "Maintenance implementation, isolated behavior tests, Articles refactor and production verification completed; main protection remains administrator-blocked."
   }
 }

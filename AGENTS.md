@@ -26,8 +26,8 @@
 
 ## Delivery
 - Use the smallest applicable profile in `docs/agent/verification.md`. Unknown/build/security-sensitive changes require full verification. A failing required check blocks promotion.
-- Until classified verification lands, `npm run gate` remains the full clean Node 20 compatibility gate before push. Commit the tested tree before pushing.
-- Runtime delivery: branch checks → immutable Preview and smoke → approved merge → immutable/apex/www readback. Pure evidence docs will not deploy after the classified CI migration.
+- Record-only changes use the classified docs graph. Tooling/runtime changes use `npm run gate` for clean Node 20 verification before push. Commit the tested tree before pushing.
+- Runtime delivery: branch checks → immutable Preview and smoke → approved merge → immutable/apex/www readback. Pure evidence docs run their required checks without deploying.
 - Report code verification, deployment verification, and user acceptance separately. Route-shell or direct-API checks do not establish a working editor journey.
 - CMS handoff remains `revalidation_required` until the existing strict production golden-workflow audit passes. Local tests cannot promote that status.
 

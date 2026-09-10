@@ -44,3 +44,13 @@ Viewer 不能执行编辑动作；owner/admin/editor 的具体能力由模块与
 | 加载、选择、保存锁、审计顺序 | `src/pages/admin/articles/useArticleEditor.ts` | 延迟切换、API 失败恢复、旧缺陷 mutation proof |
 | 页面与表单展示 | `src/pages/admin/articles/ArticlesWorkspace.tsx`、`ArticleEditorComponents.tsx`、`BlockContentEditor.tsx` | 原布局/标签/操作、实际浏览器流程 |
 | QR/Projects 共用身份读取 | `functions/_lib/admin-runtime.js` | 两模块独立错误/角色合同、无身份时零数据库调用 |
+
+## 环境与发布边界
+
+| 环境 | 应用 / 数据 | 可执行测试 | 凭据与重置 |
+| --- | --- | --- | --- |
+| 本地 | Wrangler 8788 / Supabase 57321，合成账号和素材 | 四条写入流程、权限拒绝、失败恢复、mutation proof | Node 22+；独立 envDir 和本地绑定，拒绝云端地址和继承生产凭据，可重复 reset |
+| Preview | 分支 Pages deployment / 生产 Supabase | 只读路由、资源 MIME/字节、无身份拒绝 | 本轮不得执行业务数据或 Storage 写入 |
+| 生产 | main Pages deployment / 生产 Supabase | 绑定不可变版本的 apex/www 读回 | 数据、邀请、邮件、DNS 等写入需要任务明确授权 |
+
+发布顺序：分支 → 分类检查 → Node 20 容器质量门（工具/运行时）→ 本地隔离流程（运行时 CI）→ 不可变 Preview smoke → 合并 → 生产不可变版本及 apex/www 读回。纯记录文档只运行文档检查和稳定 quality，不部署；构建/配置/未知路径不能进入该快捷路径。
