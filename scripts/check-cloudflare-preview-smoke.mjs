@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { exit } from 'node:process';
 import { normalizeBaseUrlOrigin } from './_lib/live-input-validation.mjs';
+import { responseDiagnostic, waitForDeploymentFunctions } from './_lib/deployment-readiness.mjs';
 
 const publicRoutes = [
   '/',
@@ -89,10 +90,16 @@ function parseArgs(argv) {
     skipRedirects: false,
     skipFunctions: false,
     timeoutMs: 12_000,
+    waitForFunctions: false,
   };
 
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
+
+    if (arg === '--wait-for-functions') {
+      options.waitForFunctions = true;
+      continue;
+    }
 
     if (arg === '--base-url') {
       options.baseUrl = argv[index + 1] || '';
@@ -474,13 +481,12 @@ async function checkRedirects(options) {
 
 async function expectJson(response, context) {
   const contentType = response.headers.get('content-type') || '';
-  assert(contentType.includes('application/json'), `${context} returned non-JSON content type: ${contentType}`);
-
   const text = await response.text();
+  assert(contentType.includes('application/json'), `${context} returned non-JSON content: ${responseDiagnostic(response, text)}`);
   try {
     return JSON.parse(text);
   } catch {
-    throw new Error(`${context} returned invalid JSON: ${text.slice(0, 160)}`);
+    throw new Error(`${context} returned invalid JSON: ${responseDiagnostic(response, text)}`);
   }
 }
 
@@ -593,6 +599,11 @@ async function checkFunctions(options) {
 
 async function run() {
   const options = parseArgs(process.argv.slice(2));
+
+  if (options.waitForFunctions) {
+    assert(!options.skipFunctions, '--wait-for-functions cannot be combined with --skip-functions');
+    await waitForDeploymentFunctions(options.baseUrl);
+  }
 
   console.log('Cloudflare preview smoke starting.');
   console.log(`Base URL: ${options.baseUrl}`);

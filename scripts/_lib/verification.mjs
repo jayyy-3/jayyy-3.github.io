@@ -28,6 +28,7 @@ export const checks = {
   'public-readiness': node('check-public-supabase-readiness.mjs'),
   overlay: tsx('check-public-content-overlay.mjs'),
   cloudflare: node('check-cloudflare-pages-readiness.mjs'),
+  'deployment-readiness': node('check-deployment-readiness.mjs'),
   'media-plan': node('check-admin-media-role-boundary-live.mjs'),
   handoff: node('check-admin-handoff-readiness.mjs', ['--base-url', 'https://urblo.com.au', '--admin-email', 'info@urblo.com.au']),
   browser: node('check-admin-config-gate.mjs', [], ['build']),
@@ -39,9 +40,9 @@ export const suites = {
   tooling: ['harness', 'classifier', 'lint'],
   smoke,
   admin,
-  container: [...smoke, ...admin, 'classifier', 'local-boundary'],
-  runtime: [...smoke, ...admin, 'classifier', 'local-boundary', 'browser'],
-  migrations: [...smoke, ...admin, 'classifier', 'local-boundary', 'browser'],
+  container: [...smoke, ...admin, 'classifier', 'local-boundary', 'deployment-readiness'],
+  runtime: [...smoke, ...admin, 'classifier', 'local-boundary', 'deployment-readiness', 'browser'],
+  migrations: [...smoke, ...admin, 'classifier', 'local-boundary', 'deployment-readiness', 'browser'],
 }
 export function resolveChecks(suite) {
   if (!suites[suite]) throw new Error(`Unknown verification suite: ${suite}`)

@@ -8,7 +8,7 @@ Last updated: 2026-09-10
 
 | ID | 状态 / 阶段 | 内容 | 阻塞 |
 |---|---|---|---|
-| NOW-ADMIN-STONE-WORKSPACE-001 | blocked / awaiting_external | Deliver the page-shaped Stone Library workspace and approved current-public-baseline adoption. | HTTPS push credentials unavailable; GitHub connector Git tree write returned 403; automatic approval review rejected the SSH push because it requires explicit authorization to send code to the repository. No remote branch/PR/Preview or production writes were created. |
+| NOW-ADMIN-STONE-WORKSPACE-001 | now / verification | Deliver the page-shaped Stone Library workspace and approved current-public-baseline adoption. | PR #47 immediate Preview API smoke failed twice; independent complete smoke of the first immutable Preview passed. Bounded readiness and diagnostics are being verified before another Preview. |
 | NOW-ADMIN-RELIABILITY-UX-001 | blocked / awaiting_external | Track outstanding production CMS handoff evidence after deployed incident repairs. | Broader production CMS golden workflows and user acceptance remain unverified; maintenance tests cannot certify them. |
 | NOW-ADMIN-UX-RESHAPE-001 | next / planned | Continue the separately scoped admin UX reshape after the maintenance refactoring; preserve deployed Projects and QR workflows. | — |
 | NOW-PUBLIC-CATALOG-INTEGRITY-001 | blocked / awaiting_external | Confirm remaining real-device catalog acceptance and separately authorized CMS corrections; runtime repairs are deployed. | Runtime shipped in PR #36. Real-device WeChat acceptance and exact production CMS corrections remain separate. |
