@@ -21,6 +21,7 @@ import {
 import {
   getArchivedProjectSlugs,
   getPublishedProjects,
+  findStoneProjectUsages,
   mergeProjectsWithPublishedOverlay,
   normalizePublicProjectFactValue,
 } from '../src/service/ProjectService.ts';
@@ -394,6 +395,48 @@ assert.equal(
   'CMS Moon Gate',
   'A Published CMS overlay must remain visible even if a stale tombstone contains the same slug',
 );
+
+const staticStoneUsages = findStoneProjectUsages(mergeProjectsWithPublishedOverlay([]), ' Angola-Black ');
+const staticMoonGateUsage = staticStoneUsages.find(
+  (usage) => usage.project.slug === 'moon-gate-woolley-street',
+);
+assert.ok(staticMoonGateUsage, 'Stone reverse references must include static fallback Projects');
+assert.deepEqual(staticMoonGateUsage.finishKeys, ['polished'], 'Stone reverse references must de-duplicate finishes');
+assert.deepEqual(
+  staticMoonGateUsage.pointRef,
+  { hotspotId: 'angola-black-marker', blockId: 'moon-gate-material-map' },
+  'Stone reverse references must point at the first matching hotspot-image point',
+);
+const pointOnlyUsage = findStoneProjectUsages([
+  { slug: 'material-only', materials: [{ stoneGroupId: 'zen-grey', finishKey: 'honed', application: 'Paving', note: '' }] },
+  {
+    slug: 'point-only',
+    mediaBlocks: [
+      { id: 'plain', type: 'normal_image', src: '/a.jpg', alt: 'a' },
+      {
+        id: 'map',
+        type: 'hotspot_image',
+        image: '/b.jpg',
+        imageAlt: 'b',
+        title: 'Map',
+        hotspots: [
+          { id: 'hotspot:7', x: 10, y: 10, stoneGroupId: 'ZEN-GREY', finishKey: 'flamed', application: 'Steps', note: '' },
+          { id: 'hotspot:8', x: 20, y: 20, stoneGroupId: 'zen-grey', finishKey: 'flamed', application: 'Steps', note: '' },
+        ],
+      },
+    ],
+  },
+  { slug: 'unrelated', materials: [{ stoneGroupId: 'new-grey', finishKey: 'flamed', application: 'Seats', note: '' }] },
+], 'zen-grey');
+assert.deepEqual(
+  pointOnlyUsage.map((usage) => [usage.project.slug, usage.finishKeys, usage.applications, usage.pointRef]),
+  [
+    ['material-only', ['honed'], ['Paving'], null],
+    ['point-only', ['flamed'], ['Steps'], { hotspotId: 'hotspot:7', blockId: 'map' }],
+  ],
+  'Stone reverse references must match materials or points canonically, keep Project order and skip unrelated Projects',
+);
+assert.deepEqual(findStoneProjectUsages(mergedProjects, ''), [], 'A blank Stone key has no Project references');
 
 const archivedSlugReadFailure = await getArchivedProjectSlugs(createProjectClient({}, {
   data: null,

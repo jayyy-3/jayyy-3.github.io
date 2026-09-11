@@ -1,6 +1,6 @@
 # WORKLOG — current execution evidence
 
-Last updated: 2026-09-10
+Last updated: 2026-09-11
 
 Historical evidence is immutable and is not current task state. Current state is generated from `docs/agent/status.json` and `docs/agent/tasks.json`.
 
@@ -178,3 +178,14 @@ Viewer live proof remains open: automatic review rejected changing existing QA p
 ## 2026-09-10 — remove duplicate verification instructions
 
 Jay approved cleanup and release of the verification documentation. Removed standalone command lists already covered by the classified graph, clarified reuse for unchanged inputs/environment, and retained additional browser, migration, deployed-smoke and live-authorization requirements. No verification scripts, CI or runtime behavior changed. Validation uses the classified docs profile and final diff check; CI results are recorded on the pull request.
+
+## 2026-09-11 — Stone/Project references phase 1
+
+Task `NOW-STONE-PROJECT-REFS-001`, plan `docs/plans/TMP-stone-project-bidirectional-refs.md` §2. Scope: public Project material-point cards, Stone detail `Used in projects`, and `?point=` deep links. No admin, Function, RPC, migration, production data or email change.
+
+- `ProjectHotspotImage` now renders quiet 28px points, a per-point card (Published finish thumbnail, stone, finish, where it is used, two-line note, `View stone` with variant/finish), a text legend and the deep-link pin/scroll; the sticky inspector and mobile button list are removed. `ProjectService.getAll()` shares one in-flight request without TTL caching; `getProjectsUsingStone()` / `findStoneProjectUsages()` match materials and hotspot points by canonical Stone key over the merged Published + static collection and return `[]` on failure.
+- `scripts/check-public-content-overlay.mjs` gained reverse-lookup assertions (static Moon Gate reference, point-only and material-only matches, canonical keys, order, de-duplication, blank key). No existing assertion changed.
+- Clean Node 20 `npm run gate` passed all 27 container nodes (attempt `88435e16-e5b6-4b52-97aa-92b74ddc6e90`); host no-config browser gate passed 12 routes. `agent:verify --plan` classifies the change as runtime with deployment.
+- Rendered QA on local Vite (static fallback, no Supabase env), 1280×860 and 375×812: Moon Gate points show no card by default; hover opens a card that stays open while the pointer moves onto it; the x=61% point opens right-aligned below and the y=80% point opens above; Esc and an outside pointer-down close; click pins and survives pointer leave; Tab reaches the card's `View stone` link (`/stone-library/angola-black?finish=polished`; static data has no variant); at 375px tap opens/closes, cards clamp to 24–284px inside the frame and document width stays 375px. `/stone-library/angola-black` shows `Used in projects` with Moon Gate; default Flamed leaves the Polished chip plain and selecting Polished highlights it; `See placement` opens `/projects/moon-gate-woolley-street?point=angola-black-marker`, scrolls to the image and pins the Angola Black card. `/stone-library/zen-grey` renders no section. The Admin Stone preview passes `preview` and never requests usages (source check; browser proof needs an authenticated session). No console errors.
+
+Residual: ordering with several matching Projects is only exercised by source logic until more Projects reference one Stone; Stone detail pages now issue the Project collection reads (measured in phase 3).

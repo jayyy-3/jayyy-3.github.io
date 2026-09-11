@@ -1,8 +1,62 @@
 {
   "version": 2,
-  "lastUpdated": "2026-09-10",
+  "lastUpdated": "2026-09-11",
   "archive": "docs/archive/2026-09-09/completed-tasks.json",
   "tasks": [
+    {
+      "id": "NOW-STONE-PROJECT-REFS-001",
+      "status": "now",
+      "priority": 0,
+      "summary": "Link Stone Library and Projects both ways: quiet public material-point cards with deep links, Stone \"Used in projects\", and material points on any Project media image in a reshaped admin editor.",
+      "files": [
+        "src/components/projects/ProjectHotspotImage.tsx",
+        "src/components/projects/ProjectPageView.tsx",
+        "src/pages/ProjectDetails.tsx",
+        "src/service/ProjectService.ts",
+        "src/components/stone-library/StoneProjectsSection.tsx",
+        "src/pages/StonePageView.tsx",
+        "src/pages/StoneLibraryDetailPage.tsx",
+        "src/pages/admin/projects/ProjectEditor.tsx",
+        "src/pages/admin/AdminProjectsPage.tsx",
+        "src/features/projects/projectAggregate.ts",
+        "scripts/check-admin-projects-aggregate.mjs",
+        "scripts/local-journeys/projects.mjs"
+      ],
+      "acceptance": [
+        "Public material points are quiet by default; hover/focus opens a card, tap toggles, Esc/outside closes, cards stay inside the image, View stone deep-links variant and finish; a legend works at 375px.",
+        "/projects/<slug>?point=<id> scrolls to the image and pins that point.",
+        "Stone detail shows Used in projects only when referenced, ordered/highlighted by the current finish, with See placement deep links; the admin preview does not render it; Featured Materials remains.",
+        "Admin Projects has no Maps section: four expandable sections with a section rail and blocker dots; any media image can enable/disable points (disable deletes after confirmation), image replacement keeps points with a notice, and removing a point image cascades.",
+        "The point panel can create a material in place; Materials show point counts; older projects with maps open clean and persist on Save; publish blockers never reference maps.",
+        "No Function/RPC/migration change (git diff main -- functions supabase is empty); each phase PR has green CI, gate, Preview smoke and clean diff check; check-script changes are justified and every forbid assertion is kept."
+      ],
+      "verification": [
+        "npm run agent:verify -- --plan",
+        "npm run gate",
+        "npm run local:start && npm run local:verify (Phase 2)",
+        "npm run agent:cloudflare-preview-smoke -- --base-url <branch Preview>",
+        "git diff --check"
+      ],
+      "notes": [
+        "2026-09-11: Phase 1 (public point cards, Stone Used in projects, ?point= deep links) implemented on claude/stone-project-refs-phase1-public. Plan: docs/plans/TMP-stone-project-bidirectional-refs.md (temporary; Claude deletes it after acceptance)."
+      ],
+      "phase": "implementation",
+      "modules": [
+        "projects",
+        "stone-library"
+      ],
+      "authorization": {
+        "source": "Jay approved the Stone Library ⇄ Projects bidirectional references plan on 2026-09-11.",
+        "included": [
+          "Branch implementation, isolated local tests, git push, pull requests, Cloudflare branch Preview and deployed smoke, docs/agent state updates."
+        ],
+        "excluded": [
+          "Merge to main, production data or Storage writes, real email, DNS, credentials and any migration apply."
+        ]
+      },
+      "nextAction": "Finish the three stacked phase PRs to Preview smoke, then stop for Claude acceptance and Jay merge approval.",
+      "blocker": ""
+    },
     {
       "id": "NOW-ADMIN-STONE-WORKSPACE-001",
       "status": "now",

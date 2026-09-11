@@ -688,16 +688,93 @@ export function mergeProjectsWithPublishedOverlay(
   );
 }
 
+export interface StoneProjectUsage {
+  project: ProjectData;
+  /** Finishes of this stone used by the project, de-duplicated in first-seen order. */
+  finishKeys: string[];
+  /** Application copy for this stone in the project, de-duplicated. */
+  applications: string[];
+  /** First material point showing this stone, for `/projects/:slug?point=` deep links. */
+  pointRef: { hotspotId: string; blockId: string } | null;
+}
+
+function pushUnique(values: string[], value: string | undefined) {
+  const normalized = value?.trim();
+  if (normalized && !values.includes(normalized)) values.push(normalized);
+}
+
+/**
+ * Reverse Stone Library → Project lookup over the merged public collection. Both the
+ * material schedule and hotspot-image points count, because static fallback records may
+ * only describe a stone in one of them. Keeps the input project order.
+ */
+export function findStoneProjectUsages(
+  projects: readonly ProjectData[],
+  stoneGroupId: string,
+): StoneProjectUsage[] {
+  const stoneKey = toCanonicalContentKey(stoneGroupId);
+  if (!stoneKey) return [];
+  const matches = (candidate: string | undefined) =>
+    Boolean(candidate) && toCanonicalContentKey(candidate as string) === stoneKey;
+
+  return projects.flatMap((project) => {
+    const finishKeys: string[] = [];
+    const applications: string[] = [];
+    let pointRef: StoneProjectUsage['pointRef'] = null;
+    let used = false;
+
+    for (const material of project.materials ?? []) {
+      if (!matches(material.stoneGroupId)) continue;
+      used = true;
+      pushUnique(finishKeys, material.finishKey);
+      pushUnique(applications, material.application);
+    }
+
+    for (const block of project.mediaBlocks ?? []) {
+      if (block.type !== 'hotspot_image') continue;
+      for (const hotspot of block.hotspots) {
+        if (!matches(hotspot.stoneGroupId)) continue;
+        used = true;
+        pushUnique(finishKeys, hotspot.finishKey);
+        pushUnique(applications, hotspot.application);
+        pointRef ??= { hotspotId: hotspot.id, blockId: block.id };
+      }
+    }
+
+    return used ? [{ project, finishKeys, applications, pointRef }] : [];
+  });
+}
+
+async function loadAllProjects(): Promise<ProjectData[]> {
+  const supabase = await getPublicContentClient();
+  if (!supabase) return mergeProjectsWithPublishedOverlay([]);
+
+  const [publishedProjects, archivedProjectSlugs] = await Promise.all([
+    getPublishedProjects(supabase),
+    getArchivedProjectSlugs(supabase),
+  ]);
+  return mergeProjectsWithPublishedOverlay(publishedProjects, archivedProjectSlugs);
+}
+
+let allProjectsPending: Promise<ProjectData[]> | null = null;
+
 class ProjectService {
   static async getAll(): Promise<ProjectData[]> {
-    const supabase = await getPublicContentClient();
-    if (!supabase) return mergeProjectsWithPublishedOverlay([]);
+    // Deduplicate concurrent page requests, never cache a previous publication.
+    if (!allProjectsPending) {
+      allProjectsPending = loadAllProjects().finally(() => {
+        allProjectsPending = null;
+      });
+    }
+    return allProjectsPending;
+  }
 
-    const [publishedProjects, archivedProjectSlugs] = await Promise.all([
-      getPublishedProjects(supabase),
-      getArchivedProjectSlugs(supabase),
-    ]);
-    return mergeProjectsWithPublishedOverlay(publishedProjects, archivedProjectSlugs);
+  static async getProjectsUsingStone(stoneGroupId: string): Promise<StoneProjectUsage[]> {
+    try {
+      return findStoneProjectUsages(await ProjectService.getAll(), stoneGroupId);
+    } catch {
+      return [];
+    }
   }
 
   static async getBySlug(slug: string): Promise<ProjectData | undefined> {
