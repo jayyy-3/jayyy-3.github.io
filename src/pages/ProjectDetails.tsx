@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import ProjectPageView from '../components/projects/ProjectPageView';
 import RouteState from '../components/RouteState';
 import PublicContentSeo from '../components/PublicContentSeo';
@@ -8,6 +8,8 @@ import ProjectService from '../service/ProjectService';
 
 export default function ProjectDetails() {
   const { slug = '' } = useParams();
+  const [params] = useSearchParams();
+  const focusHotspotId = params.get('point');
   const [projects, setProjects] = useState<ProjectData[]>([]);
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const project = projects.find((item) => item.slug === slug);
@@ -87,7 +89,7 @@ export default function ProjectDetails() {
           seo={project.seo}
         />
       ) : null}
-      <ProjectPageView project={project} allProjects={projects} />
+      <ProjectPageView project={project} allProjects={projects} focusHotspotId={focusHotspotId} />
     </>
   );
 }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import RouteState from '../components/RouteState';
+import ProjectService, { type StoneProjectUsage } from '../service/ProjectService';
 import StoneLibraryService from '../service/StoneLibraryService';
 import StonePageView from './StonePageView';
 import type { StoneDetailVM } from '../types/stone-library';
@@ -11,6 +12,22 @@ export default function StoneLibraryDetailPage() {
   const [detail, setDetail] = useState<StoneDetailVM | null>(null);
   const [status, setStatus] = useState('loading');
   const [retry, setRetry] = useState(0);
+  const [usages, setUsages] = useState<StoneProjectUsage[]>([]);
+  useEffect(() => {
+    // Reverse Project references load independently and never block the detail state.
+    let active = true;
+    setUsages([]);
+    ProjectService.getProjectsUsingStone(stoneGroupId)
+      .then((next) => {
+        if (active) setUsages(next);
+      })
+      .catch(() => {
+        if (active) setUsages([]);
+      });
+    return () => {
+      active = false;
+    };
+  }, [stoneGroupId]);
   useEffect(() => {
     let active = true;
     setStatus('loading');
@@ -78,6 +95,7 @@ export default function StoneLibraryDetailPage() {
       key={stoneGroupId}
       detail={detail}
       initialFinish={params.get('finish')}
+      projectUsages={usages}
       onVariantChange={(id) => setParams({ variant: id }, { replace: true })}
       onFinishChange={(next) => setParams(next, { replace: true })}
     />

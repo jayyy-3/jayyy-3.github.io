@@ -4,9 +4,11 @@ import FinishAccordion from '../components/stone-library/FinishAccordion';
 import FinishLightbox from '../components/stone-library/FinishLightbox';
 import ImageStage from '../components/stone-library/ImageStage';
 import SpecsPanel from '../components/stone-library/SpecsPanel';
+import StoneProjectsSection from '../components/stone-library/StoneProjectsSection';
 import StatusPill from '../components/stone-library/StatusPill';
 import VariantSwitch from '../components/stone-library/VariantSwitch';
 import PublicContentSeo from '../components/PublicContentSeo';
+import type { StoneProjectUsage } from '../service/ProjectService';
 import type { StoneDetailVM } from '../types/stone-library';
 
 function statusLabel(status: 'active' | 'tbc') {
@@ -19,6 +21,7 @@ export default function StonePageView({
   refreshing = false,
   preview = false,
   initialFinish = null,
+  projectUsages = [],
 }: {
   detail: StoneDetailVM;
   onVariantChange: (id: string) => void;
@@ -26,6 +29,8 @@ export default function StonePageView({
   refreshing?: boolean;
   preview?: boolean;
   initialFinish?: string | null;
+  /** Public reverse references; the admin preview never passes or renders them. */
+  projectUsages?: StoneProjectUsage[];
 }) {
   const selectedVariantId = detail.activeVariantId;
   const [lockedFinishKey, setLockedFinishKey] = useState<string | null>(
@@ -45,6 +50,10 @@ export default function StonePageView({
     ? 'Cut direction'
     : 'Variant';
   const mailSubject = encodeURIComponent('Stone Enquiry: ' + detail.name);
+  const finishLabelByKey = new Map<string, string>([
+    ...detail.finishCapabilities.map((finish) => [finish.finishKey, finish.label] as const),
+    ...detail.finishes.map((finish) => [finish.finishKey, finish.label] as const),
+  ]);
 
   function handleVariantChange(variantId: string) {
     onVariantChange(variantId);
@@ -166,6 +175,14 @@ export default function StonePageView({
               cutOptions={detail.cutOptions}
             />
           </div>
+          {!preview ? (
+            <StoneProjectsSection
+              stoneName={detail.name}
+              usages={projectUsages}
+              activeFinishKey={activeFinish?.finishKey ?? null}
+              finishLabelByKey={finishLabelByKey}
+            />
+          ) : null}
         </section>
 
         <section className="border-y border-black/10 bg-white">

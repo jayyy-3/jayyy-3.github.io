@@ -257,6 +257,11 @@ Route state contract:
   - Supports previous/next finish navigation with buttons and arrow keys.
   - Supports 1x/2x zoom with 2x drag-pan and body-scroll lock while open.
   - Supports primary/secondary frame selection within the active finish without changing finish state.
+- Used in projects contract (`src/components/stone-library/StoneProjectsSection.tsx`):
+  - `StoneLibraryDetailPage` loads `ProjectService.getProjectsUsingStone(stoneGroupId)` in its own effect keyed by Stone only; it never blocks or resets the detail loading state, and failures render nothing.
+  - Data is filtered client-side from the merged Published + static fallback Project collection, so static records such as Moon Gate count.
+  - `StonePageView` renders the section after the specifications and before Enquiry only when `preview` is false and at least one Project matches; there is no empty state. The Admin Stone workspace preview neither requests nor renders it.
+  - Project cards link to `/projects/:slug`; finish chips highlight the active finish and matching Projects sort first (stable within each group). A separate `See placement` link deep-links `?point=` when a matching point exists, avoiding nested links.
 
 ## Data Contracts
 
@@ -305,6 +310,8 @@ Route state contract:
   - The adapter also reads `get_archived_project_slugs()`. Applied/read-back migration C restricts output to archived canonical rows intersecting the five bundled public fallback slugs, while `ProjectService` applies the same allowlist as defence in depth. Once the aggregate runtime is promoted, an allowlisted archived slug suppresses its matching bundled fallback. A read failure keeps the availability-first static fallback, and a Published CMS row wins over a stale tombstone.
   - Unmatched non-archived static Projects remain visible during migration, new Published Projects append, and a missing public client or Published-query error leaves the static fallback collection intact.
   - `getBySlug(slug)` resolves the merged collection by normalized canonical slug.
+  - Concurrent `getAll()` calls share one in-flight request that is cleared when it settles; there is no TTL cache, so a later page mount always reads the current publication.
+  - `getProjectsUsingStone(stoneGroupId)` is the public Stone → Project reverse lookup over that merged collection (`findStoneProjectUsages`). It matches `materials[]` and `hotspot_image` points by canonical Stone key, returns each Project with de-duplicated finish keys, application copy and the first matching point (`{ hotspotId, blockId }`) in `getAll()` order, and returns `[]` on any read failure.
   - Published `project_facts.fact_value_json` is treated as untrusted JSON. Only a string or an array containing strings is exposed to the public Project detail; other shapes normalize to a safe empty value instead of leaking arbitrary objects into the view model.
 - Listing page: `src/pages/Projects.tsx`
   - Calls `ProjectService.getAll()` and uses page-owned opening content below the shared 102px light `DefaultLayout` clearance used by Stone Library; the shared `light-page` header supplies the deeper smoked-glass contrast.
@@ -315,11 +322,13 @@ Route state contract:
   - Uses `mediaBlocks` when present and falls back to `images` as normal image blocks for older records.
 - Project media block contract:
   - `normal_image`: full-width responsive image proof with optional label/caption.
-  - `hotspot_image`: full-width responsive project image with material/finish hotspot inspector.
+  - `hotspot_image`: full-width responsive project image with quiet material points, per-point cards and a text legend.
   - `youtube_video`: optional one-per-project video block rendered with `youtube-nocookie` when project data or future Supabase content provides a YouTube ID. Current static project data has no live YouTube block because no client-approved Urblo project video is configured.
 - Project hotspot component: `src/components/projects/ProjectHotspotImage.tsx`
-  - Desktop interaction: hover/focus/click changes the active material inspector.
-  - Mobile interaction: tap/focus changes the active material inspector directly below the project image; no hover-only dependency.
+  - Default state is a clean image with small unnumbered point buttons; there is no side inspector. Hover or focus opens that point's card transiently; click/tap pins it and a second tap on the same point closes it. A pointer-down outside the figure or `Esc` closes any open card.
+  - Each card follows its point button in DOM order (button → card link in Tab order) and shows the Published finish image, Stone name, finish, `Where it is used`, an optional two-line note and `View stone` → `/stone-library/{stoneGroupId}?variant=…&finish=…`. Cards open away from the nearest edges (left of the point past 55% x, above it past 60% y) and are clamped to the image width.
+  - A legend below the image lists `NN Stone · Finish` buttons that pin the matching point; it is the no-hover fallback and indexable text.
+  - Deep link: `/projects/:slug?point=<encoded hotspot id>` makes `ProjectPageView` pass `focusHotspotId` to the block containing that point, which pins it once on mount and scrolls its figure (`id="project-media-{block.id}"`) to the viewport centre. Preview mode ignores the parameter. CMS hotspot ids are `hotspot_key` values and contain `:`, so links must URL-encode them.
   - Hotspot coordinates are stored as image-percentage positions in `src/data/projectData.ts`.
   - Hotspots are material-placement records keyed by `stoneGroupId`, `stoneVariantId`, and `finishKey`. Project owns placement and application; the published Stone catalogue owns names, valid relationships, exact finish image/alt and links. Admin selectors share that catalogue; saved unavailable selections remain visible for correction. Managed keys do not revive static data, and no alternate finish image fills a missing finish.
 - Legacy wrapper: `src/components/projects/ProjectMaterialMap.tsx` now delegates to `ProjectHotspotImage` so older imports keep the same runtime behavior.

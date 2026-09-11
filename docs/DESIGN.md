@@ -197,6 +197,12 @@ Interaction rules:
 - Mobile layout must prioritize readable finish names and image inspection over decorative layout.
 - Placeholder usage must be visible enough to be honest but quiet enough not to dominate the tool.
 
+Used in projects:
+- A Stone detail page shows `Used in projects` after the specifications and before Enquiry only when at least one public Project uses that Stone; never render an empty placeholder.
+- Each card uses the Project archive card language: 4:3 cover, location/year meta, title, and one small chip per finish used. The chip for the currently selected finish takes the thin lime outline/wash, and Projects using that finish sort first without otherwise reordering.
+- `See placement` is a separate text link under the card (never nested inside the card link) that opens the Project at the matching point.
+- The Admin Stone preview does not show or request this section.
+
 ### Projects
 Projects are proof assets.
 
@@ -214,6 +220,7 @@ Current archive/detail rhythm:
 - `/projects/:slug` should follow a case-study sequence: breadcrumb, oversized title, previous/next project navigation, full-width hero, Project Information with facts grid, narrative, ordered full-width media blocks, material schedule/Featured Materials where data supports it, optional video, and a final shared CTA.
 - Detail media is full-width and responsive. Do not use the old half-width/offset detail image treatment for project case studies.
 - Project photography uses a quality-first responsive delivery contract. Preserve the uploaded original as the visual master; public archive cards, list thumbnails, detail blocks, heroes, and hotspot maps request distinct Supabase-rendered WebP sizes instead of downloading that master everywhere. Card/list profiles may be lighter, while hero/detail/map profiles retain higher quality and up to the platform's 2500px transform limit for large and high-density screens. Do not present aggressive byte reduction as the editor outcome: reassure the uploader that the original is retained and that high-quality website versions are prepared automatically.
+- Material points on `hotspot_image` blocks follow the Project Material Map pattern below: quiet points with per-point cards and a legend, not a sticky material inspector. The Featured Materials schedule remains the complete material list.
 - Project detail media blocks are ordered proof modules: `normal_image`, `hotspot_image`, and optional `youtube_video`. A project may have no YouTube video; do not add unrelated or placeholder video content just to fill the module.
 - YouTube blocks should render near the end of the ordered media sequence when configured, use privacy-friendly `youtube-nocookie` embeds, and keep captions/facts outside the iframe.
 
@@ -244,11 +251,13 @@ Current source state:
 Project Material Map pattern:
 - Use real project photography as an inspection surface, not a decorative gimmick.
 - Hotspots should identify material and finish placement first; avoid broad conceptual markers unless they are tied to a material/application fact.
-- Desktop may use hover as preview, but click/focus must also work.
-- Mobile must use tap/focus behavior and show the selected material inspector close to the image.
+- Points are quiet by default: a small white marker with a thin lime ring and no number, label or side panel, so the photograph stays the subject.
+- Hover or keyboard focus opens one small card beside its point; click/tap pins it and a second tap closes it. `Esc` or a tap outside the image closes it. Hover is never the only way in.
+- The card names the stone, finish and where it is used, shows the Published finish image as a small thumbnail, may add a two-line project note, and ends with `View stone` deep-linking the exact variant/finish. It opens away from the nearest image edges and never leaves the frame.
+- A one-line legend of `NN Stone · Finish` buttons sits under the image as the touch/no-hover fallback and readable text record; it pins the matching point.
+- `/projects/:slug?point=<id>` opens the page scrolled to that image with the point's card pinned.
 - Hotspot coordinates are stored as x/y percentages and must remain visually aligned through responsive image resizing.
 - Keep marker count low enough for the image to remain inspectable.
-- Hotspot inspectors should name title, stone, finish, application, project note/description, optional preview image, and next action when useful.
 - Separate confirmed project facts from MVP-inferred narrative until the designer/project team confirms the content.
 
 Project typography:
@@ -433,3 +442,17 @@ Review: the previous three-column CRUD editor compressed the active form and exp
 Implementation: automatic draft saving after typing, explicit saved/saving/error state, navigation waits for saving, conflicts retain editable text and offer a download. Show a clear cut/shade variant selection and group every finish with its exact images, order and description. The searchable paginated media dialog supports private upload and existing image selection. Shared `StonePageView` renders both preview and public detail; missing photography remains a placeholder, never another finish's photograph. Origin and internal sources remain private. Historical versions are separate from the current draft.
 
 Remember: assess this flow by an editor replacing a finish photograph and publishing without documentation. Browser checks establish functional behavior; only Jay can accept usability. Cross-module scope is catalogue selection and reference protection, not a redesign of Products, Articles, Projects or Image QR.
+
+## Project material points and stone usage — 2026-09-11
+
+Review: Project material maps paired small hover labels with a sticky right-side inspector, which competed with the photograph and hid the Stone Library relationship in one direction only. Editors also had to build a separate map before it could appear as a page image.
+
+Jay's decisions:
+- Only Page images and video (Media sequence) images carry material points; the Hero image does not.
+- Turning points off for an image deletes its points after a confirmation.
+- Stone pages order and highlight `Used in projects` cards by the currently selected finish.
+- The separate `Material maps and points` admin section is removed completely, without a read-only legacy list. No database migration is part of this change.
+
+Implementation: public points are quiet until hovered, focused or tapped; a small card names stone, finish and use and links to the exact Stone Library finish, with a legend fallback and `?point=` deep links. Stone detail pages list the Projects using that stone.
+
+Remember: the photograph and the stone stay primary. Cards and chips are signals, never permanent overlays; lime marks state only.

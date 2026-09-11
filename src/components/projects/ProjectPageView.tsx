@@ -15,6 +15,8 @@ interface ProjectPageViewProps {
   project: ProjectData;
   allProjects: ProjectData[];
   previewMode?: boolean;
+  /** Public `?point=` deep link; ignored in preview mode. */
+  focusHotspotId?: string | null;
 }
 
 function renderDetailValue(value: string | string[]) {
@@ -272,8 +274,21 @@ function YoutubeVideoBlock({ block }: { block: Extract<ProjectMediaBlock, { type
   );
 }
 
-function ProjectMedia({ project }: { project: ProjectData }) {
+function ProjectMedia({
+  project,
+  focusHotspotId,
+}: {
+  project: ProjectData;
+  focusHotspotId: string | null;
+}) {
   const blocks = defaultMediaBlocks(project);
+  const focusBlockId = focusHotspotId
+    ? blocks.find(
+        (block) =>
+          block.type === 'hotspot_image' &&
+          block.hotspots.some((hotspot) => hotspot.id === focusHotspotId),
+      )?.id ?? null
+    : null;
 
   if (!blocks.length) {
     return null;
@@ -307,6 +322,8 @@ function ProjectMedia({ project }: { project: ProjectData }) {
                     intro={block.intro}
                     caption={block.caption}
                     hotspots={block.hotspots}
+                    anchorId={`project-media-${block.id}`}
+                    focusHotspotId={block.id === focusBlockId ? focusHotspotId : null}
                   />
                 </div>
               );
@@ -466,6 +483,7 @@ export default function ProjectPageView({
   project,
   allProjects,
   previewMode = false,
+  focusHotspotId = null,
 }: ProjectPageViewProps) {
   return (
     <div
@@ -476,7 +494,7 @@ export default function ProjectPageView({
       <ProjectOpening project={project} allProjects={allProjects} />
       <ProjectHero project={project} />
       <ProjectInformation project={project} />
-      <ProjectMedia project={project} />
+      <ProjectMedia project={project} focusHotspotId={previewMode ? null : focusHotspotId} />
       <FeaturedMaterials project={project} />
       <ProjectCta project={project} />
     </div>
