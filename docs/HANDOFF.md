@@ -8,9 +8,9 @@ Last updated: 2026-09-11
 
 **NOW-STONE-PROJECT-REFS-001** — Link Stone Library and Projects both ways: quiet public material-point cards with deep links, Stone "Used in projects", and material points on any Project media image in a reshaped admin editor.
 
-阶段：implementation。状态：now。
+阶段：awaiting_external。状态：now。
 
-下一步：Finish the three stacked phase PRs to Preview smoke, then stop for Claude acceptance and Jay merge approval.
+下一步：Jay approves and merges #50 → #51 → #52 in order; then production immutable/apex/www readback.
 
 ## 已观察的发布状态
 
