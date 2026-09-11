@@ -10,7 +10,7 @@ Last updated: 2026-09-11
 
 阶段：awaiting_external。状态：now。
 
-下一步：Claude acceptance, then Jay merge approval
+下一步：Jay approves and merges #50 → #51 → #52 in order; then production immutable/apex/www readback.
 
 ## 已观察的发布状态
 

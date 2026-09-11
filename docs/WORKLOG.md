@@ -181,7 +181,7 @@ Jay approved cleanup and release of the verification documentation. Removed stan
 
 ## 2026-09-11 — Stone/Project references phase 1
 
-Task `NOW-STONE-PROJECT-REFS-001`, plan `docs/plans/TMP-stone-project-bidirectional-refs.md` §2. Scope: public Project material-point cards, Stone detail `Used in projects`, and `?point=` deep links. No admin, Function, RPC, migration, production data or email change.
+Task `NOW-STONE-PROJECT-REFS-001`, temporary plan file §2 (docs/plans, removed after Claude acceptance). Scope: public Project material-point cards, Stone detail `Used in projects`, and `?point=` deep links. No admin, Function, RPC, migration, production data or email change.
 
 - `ProjectHotspotImage` now renders quiet 28px points, a per-point card (Published finish thumbnail, stone, finish, where it is used, two-line note, `View stone` with variant/finish), a text legend and the deep-link pin/scroll; the sticky inspector and mobile button list are removed. `ProjectService.getAll()` shares one in-flight request without TTL caching; `getProjectsUsingStone()` / `findStoneProjectUsages()` match materials and hotspot points by canonical Stone key over the merged Published + static collection and return `[]` on failure.
 - `scripts/check-public-content-overlay.mjs` gained reverse-lookup assertions (static Moon Gate reference, point-only and material-only matches, canonical keys, order, de-duplication, blank key). No existing assertion changed.
@@ -220,3 +220,15 @@ Task `NOW-STONE-PROJECT-REFS-001`, plan §4, branch `claude/stone-project-refs-p
 - Task phase is `awaiting_external`: Claude acceptance, then Jay's merge approval for #50 → #51 → the phase 3 PR. The temporary plan file stays for Claude to delete after acceptance.
 
 Delivery: PR [#52](https://github.com/jayyy-3/jayyy-3.github.io/pull/52) (base: phase 2 branch) at the phase 3 cleanup commit passed CI run `34598051213`, including isolated `local:verify` journeys, immutable Preview `https://b03a03ab.urblo-site.pages.dev` and its deployed smoke; `quality` passed. A separate `agent:cloudflare-preview-smoke` also passed, and headless public deep-link checks at 1280/375 match phases 1–2. This evidence commit changes only records; the runtime inputs are those verified by that run. Not merged.
+
+## 2026-09-11 — Stone/Project references Claude acceptance
+
+Task `NOW-STONE-PROJECT-REFS-001`. Claude reviewed stacked PRs #50 → #51 → #52 against the plan's acceptance checklist; no code change was required. The temporary plan file under docs/plans is removed in this record-only commit.
+
+- Source review of every changed runtime file on `f71b95b`: public point cards, Stone `Used in projects`, `?point=` deep links, aggregate helpers, four-section editor with `sections/`, legacy map adoption, inline confirmations, and the check-script changes with their reasons. `git diff --stat main -- functions supabase` is empty. All previously existing forbid assertions remain.
+- Host verification on `f71b95b` (Node 22): `npm run build`, `npm run lint`, `npx tsc -b`, `agent:admin-projects-aggregate`, `agent:stone-library-detail`, `agent:public-content-overlay`, `agent:admin-crud-coverage`, `agent:check` and `git diff --check` passed. One `agent:admin-crud-coverage` attempt failed only because this worktree lacked `tsx` in `node_modules`; it passed after `npm install`.
+- Read-only Preview `https://6454b862.urblo-site.pages.dev` (production data) in the in-app browser. Desktop: Angola Black `See placement` opened `/projects/moon-gate-woolley-street?point=angola-black-marker`, scrolled to the image and pinned the Angola Black card (finish thumbnail, stone, Polished, where it is used, note, `View stone`); `Esc` closed it; no side inspector; legend present. Mobile 375×812: the deep-linked card stayed within 24–284px and the document width stayed 375px; tapping Point 2 opened the New Grey card and a second tap closed it; `Esc` closed cards. `/stone-library/angola-black?finish=polished` rendered `Seen on site` with the Moon Gate card, the Polished chip highlighted and the `See placement` link; `/stone-library/zen-grey` rendered no section. No console errors.
+- Admin: reviewed the phase 2/3 local QA screenshots (1116 full editor, legacy map adoption opening with `All changes saved`, 375 block) and the CI `local:verify` 17/17 result including the points journey. Authenticated editing on Preview is out of scope (production data).
+- Minor, not blocking: a card opened above a low point on 375px can extend over the block's intro text; the admin preview no longer shows a legacy map's retired intro while the public page still does until the next Save clears it; publishing a points image end to end remains unexercised locally because the isolated database seeds no Stone Library records.
+
+Result: accepted. Merge order #50 → #51 → #52 awaits Jay's approval; production apex/www readback follows the merge.
