@@ -45,7 +45,8 @@
         "2026-09-11: Phase 1 PR #50 (1fba735) CI 34594618314 passed; Preview https://27097513.urblo-site.pages.dev smoke and read-only QA passed. Awaiting acceptance; not merged.",
         "2026-09-11: Phase 2 (four-section editor, section rail, points on any page image, legacy map adoption, inline confirmations) implemented on claude/stone-project-refs-phase2-admin, stacked on phase 1. Local stack has no Stone Library records, so the local journey stops at the publish blocker.",
         "2026-09-11: Phase 2 PR #51 (d368738) CI 34597059624 passed, including local:verify and Preview https://f267fac3.urblo-site.pages.dev smoke; separate preview smoke and read-only public regression passed.",
-        "2026-09-11: Phase 3 cleanup on claude/stone-project-refs-phase3-cleanup: ProjectMaterialMap wrapper retired, editor split into projects/sections, docs closed out. Stone page Project reads measured at 6 requests / ~217 ms median in parallel with the catalogue (threshold >6 or >400 ms not met), so no Stone-projects RPC follow-up task."
+        "2026-09-11: Phase 3 cleanup on claude/stone-project-refs-phase3-cleanup: ProjectMaterialMap wrapper retired, editor split into projects/sections, docs closed out. Stone page Project reads measured at 6 requests / ~217 ms median in parallel with the catalogue (threshold >6 or >400 ms not met), so no Stone-projects RPC follow-up task.",
+        "2026-09-11: Phase 3 PR #52 CI 34598051213 passed; Preview https://b03a03ab.urblo-site.pages.dev smoke passed. All three stacked PRs await Claude acceptance and Jay merge approval."
       ],
       "phase": "awaiting_external",
       "modules": [
@@ -62,7 +63,7 @@
         ]
       },
       "nextAction": "Claude acceptance, then Jay merge approval",
-      "blocker": "Stacked PRs #50 (phase 1), #51 (phase 2) and the phase 3 cleanup PR are not merged; merge in order after acceptance."
+      "blocker": "Stacked PRs #50 (phase 1), #51 (phase 2) and #52 (phase 3) are not merged; merge in order after acceptance."
     },
     {
       "id": "NOW-ADMIN-STONE-WORKSPACE-001",
