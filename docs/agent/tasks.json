@@ -38,7 +38,8 @@
         "git diff --check"
       ],
       "notes": [
-        "2026-09-11: Phase 1 (public point cards, Stone Used in projects, ?point= deep links) implemented on claude/stone-project-refs-phase1-public. Plan: docs/plans/TMP-stone-project-bidirectional-refs.md (temporary; Claude deletes it after acceptance)."
+        "2026-09-11: Phase 1 (public point cards, Stone Used in projects, ?point= deep links) implemented on claude/stone-project-refs-phase1-public. Plan: docs/plans/TMP-stone-project-bidirectional-refs.md (temporary; Claude deletes it after acceptance).",
+        "2026-09-11: Phase 1 PR #50 (1fba735) CI 34594618314 passed; Preview https://27097513.urblo-site.pages.dev smoke and read-only QA passed. Awaiting acceptance; not merged."
       ],
       "phase": "implementation",
       "modules": [
