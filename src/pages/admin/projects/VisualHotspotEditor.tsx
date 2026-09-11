@@ -104,7 +104,7 @@ export default function VisualHotspotEditor({
         <div>
           <MapPin className="mx-auto h-6 w-6 text-black/35" />
           <p className="mt-3 text-sm font-semibold text-black/60">
-            Choose the map image first.
+            Choose the image first.
           </p>
         </div>
       </div>

@@ -4,6 +4,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import type {
@@ -20,15 +21,27 @@ import {
   ExternalLink,
   Eye,
   ImagePlus,
+  MapPin,
+  MapPinOff,
   Plus,
   Save,
   Trash2,
+  Video,
 } from "lucide-react";
 import {
+  countHotspotsForMaterial,
   createProjectDraftKey,
+  disableMediaBlockPoints,
+  enableMediaBlockPoints,
+  getProjectBlockerSections,
   getProjectPublishBlockers,
+  hotspotsForBlock,
+  mediaBlockImageId,
   moveProjectDraftItem,
+  removeMediaBlock,
+  setMediaBlockImage,
   slugify,
+  defaultMaterialPointImageTitle,
   type ProjectAggregateDraft,
   type ProjectAggregateMappingContext,
   type ProjectEditorSection,
@@ -77,12 +90,30 @@ interface ProjectEditorProps {
   showReload: boolean;
 }
 
+type PendingRemoval =
+  | { kind: "points"; key: string; count: number }
+  | { kind: "block"; key: string; count: number }
+  | { kind: "material"; key: string; count: number };
+
+const newMaterialOptionValue = "__new_material__";
 const fieldClass =
   "mt-2 min-h-11 w-full rounded border border-black/15 bg-white px-3 text-sm font-medium outline-none transition focus:border-black focus:ring-2 focus:ring-black/10 disabled:cursor-not-allowed disabled:bg-black/[0.04] disabled:text-black/45";
 const textareaClass = `${fieldClass} min-h-28 py-3 leading-6`;
 const actionButtonClass =
   "inline-flex min-h-11 items-center justify-center gap-2 rounded border px-4 text-xs font-bold uppercase tracking-[0.12em] transition disabled:cursor-not-allowed";
+const secondaryButtonClass =
+  "inline-flex min-h-9 items-center gap-2 rounded border border-black/15 bg-white px-3 text-[11px] font-bold uppercase tracking-[0.12em] text-black transition hover:border-black disabled:cursor-not-allowed disabled:bg-black/[0.04] disabled:text-black/30";
 const ProjectMutationDisabledContext = createContext(false);
+
+const editorSections: readonly {
+  id: ProjectEditorSection;
+  title: string;
+}[] = [
+  { id: "overview", title: "Hero and overview" },
+  { id: "facts", title: "Project information" },
+  { id: "media", title: "Page images and video" },
+  { id: "materials", title: "Material schedule" },
+];
 
 export default function ProjectEditor({
   draft,
@@ -109,13 +140,19 @@ export default function ProjectEditor({
   showReload,
 }: ProjectEditorProps) {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const [openSection, setOpenSection] = useState<ProjectEditorSection | null>(
-    "overview",
-  );
-  const [selectedMapKey, setSelectedMapKey] = useState<string | null>(
-    draft.maps[0]?.key ?? null,
-  );
-  const [selectedHotspotKey, setSelectedHotspotKey] = useState<string | null>(
+  const [collapsedSections, setCollapsedSections] = useState<
+    Set<ProjectEditorSection>
+  >(() => new Set());
+  const [selectedPointKeys, setSelectedPointKeys] = useState<
+    Record<string, string>
+  >({});
+  const [materialEditorPointKey, setMaterialEditorPointKey] = useState<
+    string | null
+  >(null);
+  const [replacedImageBlockKeys, setReplacedImageBlockKeys] = useState<
+    Set<string>
+  >(() => new Set());
+  const [pendingRemoval, setPendingRemoval] = useState<PendingRemoval | null>(
     null,
   );
   const [pendingMediaKeys, setPendingMediaKeys] = useState<Set<string>>(
@@ -132,41 +169,23 @@ export default function ProjectEditor({
     () => getProjectPublishBlockers(draft, context),
     [context, draft],
   );
+  const blockerSections = useMemo(
+    () => getProjectBlockerSections(draft, context),
+    [context, draft],
+  );
   const hasYoutubeVideo = draft.mediaBlocks.some(
     (block) => block.mediaRole === "youtube_video",
   );
-  const selectedMap = useMemo(
-    () =>
-      draft.maps.find((map) => map.key === selectedMapKey) ??
-      draft.maps[0] ??
-      null,
-    [draft.maps, selectedMapKey],
-  );
-  const mapHotspots = useMemo(
-    () =>
-      selectedMap
-        ? draft.hotspots.filter(
-            (hotspot) => hotspot.projectMaterialMapKey === selectedMap.key,
-          )
-        : [],
-    [draft.hotspots, selectedMap],
-  );
-  const selectedHotspot =
-    mapHotspots.find((hotspot) => hotspot.key === selectedHotspotKey) ??
-    mapHotspots[0] ??
-    null;
-  const selectedMapIndex = selectedMap
-    ? draft.maps.findIndex((map) => map.key === selectedMap.key)
-    : -1;
-  const selectedHotspotIndex = selectedHotspot
-    ? mapHotspots.findIndex((hotspot) => hotspot.key === selectedHotspot.key)
-    : -1;
-  const selectedMapImage =
-    media.find((asset) => asset.id === selectedMap?.mediaAssetId) ?? null;
   const hasPendingMedia = pendingMediaKeys.size > 0;
   const hasActiveMediaRequest = busyMediaKeys.size > 0;
   const mutationDisabled = !canEdit || isSaving || showReload;
   const editorFieldsDisabled = mutationDisabled || hasPendingMedia;
+  const sectionCounts: Record<ProjectEditorSection, number | null> = {
+    overview: null,
+    facts: draft.facts.length,
+    media: draft.mediaBlocks.length,
+    materials: draft.materials.length,
+  };
 
   const handleMediaPendingChange = useCallback(
     (instanceKey: string, pending: boolean) => {
@@ -213,26 +232,6 @@ export default function ProjectEditor({
     );
   }
 
-  useEffect(() => {
-    if (!draft.maps.length) {
-      setSelectedMapKey(null);
-      setSelectedHotspotKey(null);
-      return;
-    }
-    if (!draft.maps.some((map) => map.key === selectedMapKey))
-      setSelectedMapKey(draft.maps[0].key);
-  }, [draft.maps, selectedMapKey]);
-
-  useEffect(() => {
-    if (!mapHotspots.length) {
-      setSelectedHotspotKey(null);
-      return;
-    }
-    if (!mapHotspots.some((hotspot) => hotspot.key === selectedHotspotKey)) {
-      setSelectedHotspotKey(mapHotspots[0].key);
-    }
-  }, [mapHotspots, selectedHotspotKey]);
-
   function submitSave(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (canEdit && isDirty && !isSaving && !hasPendingMedia && !showReload)
@@ -247,31 +246,22 @@ export default function ProjectEditor({
     onChange(moveProjectDraftItem(draft, collection, key, direction));
   }
 
-  function handleMapTabKeyDown(
-    event: ReactKeyboardEvent<HTMLButtonElement>,
-    currentIndex: number,
-  ) {
-    if (hasPendingMedia || draft.maps.length < 2) return;
+  function toggleSection(section: ProjectEditorSection) {
+    setCollapsedSections((current) => {
+      const next = new Set(current);
+      if (next.has(section)) next.delete(section);
+      else next.add(section);
+      return next;
+    });
+  }
 
-    let nextIndex = currentIndex;
-    if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
-      nextIndex = (currentIndex - 1 + draft.maps.length) % draft.maps.length;
-    } else if (event.key === "ArrowRight" || event.key === "ArrowDown") {
-      nextIndex = (currentIndex + 1) % draft.maps.length;
-    } else if (event.key === "Home") {
-      nextIndex = 0;
-    } else if (event.key === "End") {
-      nextIndex = draft.maps.length - 1;
-    } else {
-      return;
-    }
-
-    event.preventDefault();
-    const nextMap = draft.maps[nextIndex];
-    setSelectedMapKey(nextMap.key);
-    requestAnimationFrame(() =>
-      document.getElementById(mapTabId(nextMap.key))?.focus(),
-    );
+  function expandSection(section: ProjectEditorSection) {
+    setCollapsedSections((current) => {
+      if (!current.has(section)) return current;
+      const next = new Set(current);
+      next.delete(section);
+      return next;
+    });
   }
 
   function updateProject<Key extends keyof ProjectAggregateDraft["project"]>(
@@ -291,8 +281,7 @@ export default function ProjectEditor({
   }
 
   function updateCollection<
-    Collection extends
-      "facts" | "materials" | "maps" | "mediaBlocks" | "hotspots",
+    Collection extends "facts" | "materials" | "mediaBlocks" | "hotspots",
   >(
     collection: Collection,
     key: string,
@@ -311,30 +300,60 @@ export default function ProjectEditor({
     });
   }
 
-  function removeCollectionRow(
-    collection: "facts" | "materials" | "mediaBlocks",
-    key: string,
-  ) {
-    if (collection === "materials") {
-      onChange({
-        ...draft,
-        materials: draft.materials.filter((row) => row.key !== key),
-        hotspots: draft.hotspots.map((hotspot) =>
-          hotspot.projectMaterialKey === key
-            ? { ...hotspot, projectMaterialKey: null }
-            : hotspot,
-        ),
-      });
-      return;
-    }
+  function removeFact(key: string) {
+    onChange({ ...draft, facts: draft.facts.filter((row) => row.key !== key) });
+  }
+
+  function removeMaterialNow(key: string) {
+    setPendingRemoval(null);
     onChange({
       ...draft,
-      [collection]: draft[collection].filter((row) => row.key !== key),
+      materials: draft.materials.filter((row) => row.key !== key),
+      hotspots: draft.hotspots.map((hotspot) =>
+        hotspot.projectMaterialKey === key
+          ? { ...hotspot, projectMaterialKey: null }
+          : hotspot,
+      ),
     });
   }
 
+  function requestMaterialRemoval(key: string) {
+    const count = countHotspotsForMaterial(draft, key);
+    if (count === 0) removeMaterialNow(key);
+    else setPendingRemoval({ kind: "material", key, count });
+  }
+
+  function requestBlockRemoval(block: ProjectMediaBlockDraft) {
+    const count = hotspotsForBlock(draft, block.key).length;
+    if (count === 0) {
+      setPendingRemoval(null);
+      onChange(removeMediaBlock(draft, block.key));
+    } else {
+      setPendingRemoval({ kind: "block", key: block.key, count });
+    }
+  }
+
+  function requestPointsRemoval(block: ProjectMediaBlockDraft) {
+    const count = hotspotsForBlock(draft, block.key).length;
+    if (count === 0) {
+      setPendingRemoval(null);
+      onChange(disableMediaBlockPoints(draft, block.key));
+    } else {
+      setPendingRemoval({ kind: "points", key: block.key, count });
+    }
+  }
+
+  function confirmPendingRemoval() {
+    if (!pendingRemoval) return;
+    const { kind, key } = pendingRemoval;
+    setPendingRemoval(null);
+    if (kind === "material") removeMaterialNow(key);
+    else if (kind === "block") onChange(removeMediaBlock(draft, key));
+    else onChange(disableMediaBlockPoints(draft, key));
+  }
+
   function addFact() {
-    setOpenSection("facts");
+    expandSection("facts");
     const key = createProjectDraftKey("fact");
     onChange({
       ...draft,
@@ -351,41 +370,36 @@ export default function ProjectEditor({
         },
       ],
     });
-    scrollAfterRender("project-facts");
+    scrollAfterRender("project-additional-facts");
   }
 
-  function addMaterial() {
-    setOpenSection("materials");
-    const key = createProjectDraftKey("material");
+  function buildMaterial(): ProjectMaterialDraft {
     const stone = stones.find((entry) => entry.status !== "archived") ?? null;
     const variants = stoneVariants.filter((variant) => variant.stoneGroupId === stone?.id && variant.status !== "archived");
     const variant = variants[0] ?? null;
     const finishId = finishCapabilities.find((capability) => capability.stoneVariantId === variant?.id && capability.capability !== "no")?.finishDefinitionId ?? null;
-    onChange({
-      ...draft,
-      materials: [
-        ...draft.materials,
-        {
-          key,
-          id: null,
-          stoneGroupId: stone?.id ?? null,
-          stoneVariantId: variant?.id ?? null,
-          finishDefinitionId: finishId,
-          application: "",
-          note: "",
-          mediaAssetId: null,
-          claimStatus: "approved",
-          sortOrder: draft.materials.length,
-        },
-      ],
-    });
+    return {
+      key: createProjectDraftKey("material"),
+      id: null,
+      stoneGroupId: stone?.id ?? null,
+      stoneVariantId: variant?.id ?? null,
+      finishDefinitionId: finishId,
+      application: "",
+      note: "",
+      mediaAssetId: null,
+      claimStatus: "approved",
+      sortOrder: draft.materials.length,
+    };
+  }
+
+  function addMaterial() {
+    expandSection("materials");
+    onChange({ ...draft, materials: [...draft.materials, buildMaterial()] });
     scrollAfterRender("project-materials");
   }
 
-  function addMediaBlock(
-    role: ProjectMediaBlockDraft["mediaRole"] = "normal_image",
-  ) {
-    setOpenSection("media");
+  function addMediaBlock(role: "normal_image" | "youtube_video") {
+    expandSection("media");
     const key = createProjectDraftKey("media");
     onChange({
       ...draft,
@@ -396,8 +410,7 @@ export default function ProjectEditor({
           id: null,
           mediaRole: role,
           mediaAssetId: null,
-          projectMaterialMapKey:
-            role === "hotspot_image" ? (draft.maps[0]?.key ?? null) : null,
+          projectMaterialMapKey: null,
           blockTitle: "",
           youtubeUrl: "",
           label: "",
@@ -406,66 +419,53 @@ export default function ProjectEditor({
         },
       ],
     });
-    scrollAfterRender("project-media");
+    scrollAfterRender(mediaBlockId(key));
   }
 
-  function addMap() {
-    setOpenSection("maps");
-    const key = createProjectDraftKey("map");
-    onChange({
-      ...draft,
-      maps: [
-        ...draft.maps,
-        {
-          key,
-          id: null,
-          mediaAssetId: null,
-          title: "",
-          intro: "",
-          sortOrder: draft.maps.length,
-        },
-      ],
-    });
-    setSelectedMapKey(key);
-    setSelectedHotspotKey(null);
-    scrollAfterRender("project-maps");
+  function enablePoints(block: ProjectMediaBlockDraft) {
+    setPendingRemoval(null);
+    onChange(enableMediaBlockPoints(draft, block.key));
   }
 
-  function removeMap(mapKey: string) {
-    onChange({
-      ...draft,
-      maps: draft.maps.filter((map) => map.key !== mapKey),
-      mediaBlocks: draft.mediaBlocks.filter(
-        (block) => block.projectMaterialMapKey !== mapKey,
-      ),
-      hotspots: draft.hotspots.filter(
-        (hotspot) => hotspot.projectMaterialMapKey !== mapKey,
-      ),
-    });
+  function changeBlockImage(block: ProjectMediaBlockDraft, value: number | null) {
+    const hasPoints =
+      block.mediaRole === "hotspot_image" &&
+      hotspotsForBlock(draft, block.key).length > 0;
+    onChange(setMediaBlockImage(draft, block.key, value));
+    if (hasPoints && value !== mediaBlockImageId(draft, block)) {
+      setReplacedImageBlockKeys((current) => new Set(current).add(block.key));
+    }
   }
 
-  function addHotspot(position: { xPercent: number; yPercent: number }) {
-    if (!selectedMap) return;
-    const material = draft.materials[0] ?? null;
+  function selectPoint(blockKey: string, hotspotKey: string) {
+    setSelectedPointKeys((current) => ({ ...current, [blockKey]: hotspotKey }));
+  }
+
+  function addHotspot(
+    block: ProjectMediaBlockDraft,
+    position: { xPercent: number; yPercent: number },
+  ) {
+    if (block.mediaRole !== "hotspot_image" || !block.projectMaterialMapKey) return;
+    const onlyMaterial = draft.materials.length === 1 ? draft.materials[0] : null;
     const key = createProjectDraftKey("hotspot");
     const next: ProjectHotspotDraft = {
       key,
       id: null,
-      projectMaterialMapKey: selectedMap.key,
-      projectMaterialKey: material?.key ?? null,
+      projectMaterialMapKey: block.projectMaterialMapKey,
+      projectMaterialKey: onlyMaterial?.key ?? null,
       xPercent: position.xPercent,
       yPercent: position.yPercent,
       label: "",
-      application: material?.application ?? "",
+      application: "",
       note: "",
       previewMediaId: null,
-      sortOrder: mapHotspots.length,
+      sortOrder: hotspotsForBlock(draft, block.key).length,
     };
     onChange({
       ...draft,
       hotspots: [...draft.hotspots, next],
     });
-    setSelectedHotspotKey(key);
+    selectPoint(block.key, key);
   }
 
   function removeHotspot(key: string) {
@@ -475,19 +475,327 @@ export default function ProjectEditor({
     });
   }
 
+  function choosePointMaterial(hotspot: ProjectHotspotDraft, value: string) {
+    if (value === newMaterialOptionValue) {
+      const material = buildMaterial();
+      onChange({
+        ...draft,
+        materials: [...draft.materials, material],
+        hotspots: draft.hotspots.map((entry) =>
+          entry.key === hotspot.key
+            ? { ...entry, projectMaterialKey: material.key }
+            : entry,
+        ),
+      });
+      setMaterialEditorPointKey(hotspot.key);
+      return;
+    }
+    updateCollection("hotspots", hotspot.key, {
+      projectMaterialKey: value || null,
+    });
+  }
+
+  function handlePointTabKeyDown(
+    event: ReactKeyboardEvent<HTMLButtonElement>,
+    blockKey: string,
+    points: readonly ProjectHotspotDraft[],
+    currentIndex: number,
+  ) {
+    if (points.length < 2) return;
+    let nextIndex = currentIndex;
+    if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+      nextIndex = (currentIndex - 1 + points.length) % points.length;
+    } else if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+      nextIndex = (currentIndex + 1) % points.length;
+    } else if (event.key === "Home") {
+      nextIndex = 0;
+    } else if (event.key === "End") {
+      nextIndex = points.length - 1;
+    } else {
+      return;
+    }
+    event.preventDefault();
+    const nextPoint = points[nextIndex];
+    selectPoint(blockKey, nextPoint.key);
+    requestAnimationFrame(() =>
+      document.getElementById(pointTabId(nextPoint.key))?.focus(),
+    );
+  }
+
   function jumpToBlocker(blocker: ProjectPublishBlocker) {
     setIsPreviewOpen(false);
     openAndScroll(blocker.section);
   }
 
   function openAndScroll(section: ProjectEditorSection) {
-    setOpenSection(section);
+    expandSection(section);
     requestAnimationFrame(() =>
       requestAnimationFrame(() => {
         document
           .getElementById(sectionId(section))
           ?.scrollIntoView({ behavior: "smooth", block: "start" });
       }),
+    );
+  }
+
+  function materialOptionLabel(material: ProjectMaterialDraft, index: number) {
+    const stone = stones.find((entry) => entry.id === material.stoneGroupId);
+    const finish = finishes.find((entry) => entry.id === material.finishDefinitionId);
+    const name = [stone?.label, finish?.label].filter(Boolean).join(" · ");
+    const use = material.application.trim();
+    if (name && use) return `${name} — ${use}`;
+    return name || use || `Material ${index + 1}`;
+  }
+
+  function renderMaterialFields(material: ProjectMaterialDraft) {
+    return (
+      <MaterialFields
+        material={material}
+        stones={stones}
+        stoneVariants={stoneVariants}
+        finishes={finishes}
+        finishCapabilities={finishCapabilities}
+        context={context}
+        onChange={(changes) =>
+          updateCollection("materials", material.key, changes)
+        }
+      />
+    );
+  }
+
+  function renderPendingRemoval(kind: PendingRemoval["kind"], key: string) {
+    if (!pendingRemoval || pendingRemoval.kind !== kind || pendingRemoval.key !== key)
+      return null;
+    const count = pendingRemoval.count;
+    const points = `${count} material ${count === 1 ? "point" : "points"}`;
+    const copy: Record<PendingRemoval["kind"], { message: string; confirmLabel: string; keepLabel: string }> = {
+      points: {
+        message: `Turn off material points? This deletes ${points}; the image stays on the page.`,
+        confirmLabel: "Delete points",
+        keepLabel: "Keep points",
+      },
+      block: {
+        message: `Remove this image and its ${points}?`,
+        confirmLabel: "Remove image",
+        keepLabel: "Keep image",
+      },
+      material: {
+        message: `${count} ${count === 1 ? "point" : "points"} will lose their material. You can reconnect them on the image.`,
+        confirmLabel: "Remove material",
+        keepLabel: "Keep material",
+      },
+    };
+    return (
+      <InlineConfirm
+        message={copy[kind].message}
+        confirmLabel={copy[kind].confirmLabel}
+        keepLabel={copy[kind].keepLabel}
+        onConfirm={confirmPendingRemoval}
+        onKeep={() => setPendingRemoval(null)}
+      />
+    );
+  }
+
+  function renderPointsArea(block: ProjectMediaBlockDraft, blockIndex: number) {
+    const points = hotspotsForBlock(draft, block.key);
+    const selected =
+      points.find((point) => point.key === selectedPointKeys[block.key]) ??
+      points[0] ??
+      null;
+    const selectedIndex = selected
+      ? points.findIndex((point) => point.key === selected.key)
+      : -1;
+    const selectedMaterial = selected?.projectMaterialKey
+      ? draft.materials.find((material) => material.key === selected.projectMaterialKey) ?? null
+      : null;
+    const imageId = mediaBlockImageId(draft, block);
+    const image = media.find((asset) => asset.id === imageId) ?? null;
+    const materialEditorOpen =
+      Boolean(selected && selectedMaterial) &&
+      materialEditorPointKey === selected?.key;
+
+    return (
+      <div className="mt-5 border-t border-black/10 pt-5">
+        <div className="grid gap-5 2xl:grid-cols-[minmax(0,1.4fr)_minmax(320px,0.8fr)]">
+          <VisualHotspotEditor
+            imageUrl={image?.previewUrl || image?.sourceUrl || ""}
+            imageAlt={
+              image?.alt ||
+              `${draft.project.title || "Project"} image ${blockIndex + 1}`
+            }
+            hotspots={points}
+            selectedKey={selected?.key ?? null}
+            disabled={isSaving || showReload}
+            readOnly={!canEdit || hasPendingMedia || showReload}
+            selectionDisabled={hasPendingMedia || showReload}
+            onAdd={(position) => addHotspot(block, position)}
+            onSelect={(key) => selectPoint(block.key, key)}
+            onMove={(key, position) =>
+              updateCollection("hotspots", key, position)
+            }
+          />
+          <div className="min-w-0">
+            {points.length ? (
+              <div
+                className="flex flex-wrap gap-2"
+                role="tablist"
+                aria-label={`Material points on block ${blockIndex + 1}`}
+              >
+                {points.map((point, index) => (
+                  <button
+                    key={point.key}
+                    id={pointTabId(point.key)}
+                    type="button"
+                    role="tab"
+                    aria-selected={selected?.key === point.key}
+                    aria-controls={pointPanelId(block.key)}
+                    tabIndex={selected?.key === point.key ? 0 : -1}
+                    onClick={() => selectPoint(block.key, point.key)}
+                    onKeyDown={(event) =>
+                      handlePointTabKeyDown(event, block.key, points, index)
+                    }
+                    disabled={hasPendingMedia || showReload}
+                    className={[
+                      "min-h-9 rounded border px-3 text-[11px] font-bold uppercase tracking-[0.11em] transition",
+                      selected?.key === point.key
+                        ? "border-black bg-black text-white"
+                        : "border-black/15 bg-white text-black/58 hover:border-black",
+                      !point.projectMaterialKey ? "ring-1 ring-amber-400" : "",
+                    ].join(" ")}
+                  >
+                    Point {index + 1}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+
+            {selected ? (
+              <div
+                id={pointPanelId(block.key)}
+                role="tabpanel"
+                aria-labelledby={pointTabId(selected.key)}
+                className="mt-4 space-y-4"
+              >
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <h4 className="text-sm font-semibold text-black">
+                    Selected point {selectedIndex + 1}
+                  </h4>
+                  <div className="flex items-center gap-2">
+                    <OrderControls
+                      itemLabel={`point ${selectedIndex + 1}`}
+                      isFirst={selectedIndex === 0}
+                      isLast={selectedIndex === points.length - 1}
+                      onMoveUp={() => moveItem("hotspots", selected.key, "up")}
+                      onMoveDown={() =>
+                        moveItem("hotspots", selected.key, "down")
+                      }
+                    />
+                    <RemoveButton
+                      label="Remove point"
+                      onClick={() => removeHotspot(selected.key)}
+                    />
+                  </div>
+                </div>
+                <label className="block text-xs font-bold uppercase tracking-[0.12em] text-black/48">
+                  Material
+                  <select
+                    disabled={editorFieldsDisabled}
+                    value={selected.projectMaterialKey ?? ""}
+                    onChange={(event) =>
+                      choosePointMaterial(selected, event.target.value)
+                    }
+                    className={fieldClass}
+                  >
+                    <option value="">Choose a material</option>
+                    {draft.materials.map((material, index) => (
+                      <option key={material.key} value={material.key}>
+                        {materialOptionLabel(material, index)}
+                      </option>
+                    ))}
+                    <option value={newMaterialOptionValue}>
+                      ＋ Add new material…
+                    </option>
+                  </select>
+                </label>
+                <TextField
+                  label="Where it is used"
+                  value={selected.application}
+                  onChange={(value) =>
+                    updateCollection("hotspots", selected.key, {
+                      application: value,
+                    })
+                  }
+                  placeholder={
+                    selectedMaterial?.application.trim() ||
+                    "Seating pods and low elements"
+                  }
+                />
+                <label className="block text-xs font-bold uppercase tracking-[0.12em] text-black/48">
+                  Point note
+                  <textarea
+                    disabled={editorFieldsDisabled}
+                    value={selected.note}
+                    onChange={(event) =>
+                      updateCollection("hotspots", selected.key, {
+                        note: event.target.value,
+                      })
+                    }
+                    className={textareaClass}
+                  />
+                </label>
+                {selectedMaterial ? (
+                  <div>
+                    {materialEditorOpen ? (
+                      <div className="border border-black/10 bg-white p-4">
+                        <p className="text-xs font-semibold leading-5 text-black/52">
+                          Material details apply everywhere this material is used.
+                        </p>
+                        {renderMaterialFields(selectedMaterial)}
+                      </div>
+                    ) : (
+                      <StoneLibraryMaterialPreview
+                        material={selectedMaterial}
+                        context={context}
+                      />
+                    )}
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setMaterialEditorPointKey(
+                          materialEditorOpen ? null : selected.key,
+                        )
+                      }
+                      className={`${secondaryButtonClass} mt-3`}
+                    >
+                      {materialEditorOpen
+                        ? "Close material details"
+                        : "Edit material details"}
+                    </button>
+                  </div>
+                ) : null}
+              </div>
+            ) : (
+              <p className="border border-dashed border-black/20 bg-white p-4 text-sm leading-6 text-black/50">
+                {imageId
+                  ? "Click the image to add the first point."
+                  : "Choose the image first, then click it to add points."}
+              </p>
+            )}
+          </div>
+        </div>
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={() => requestPointsRemoval(block)}
+            disabled={editorFieldsDisabled}
+            className={`${secondaryButtonClass} hover:border-red-700 hover:text-red-700`}
+          >
+            <MapPinOff className="h-4 w-4" />
+            Turn off material points
+          </button>
+        </div>
+        {renderPendingRemoval("points", block.key)}
+      </div>
     );
   }
 
@@ -498,18 +806,45 @@ export default function ProjectEditor({
         className="pb-28"
         data-testid="project-aggregate-editor"
       >
+        <nav
+          aria-label="Project editor sections"
+          className="sticky top-3 z-30 mb-5 flex max-w-full gap-1 overflow-x-auto border border-black/10 bg-white/95 p-1.5 shadow-[0_8px_24px_rgba(0,0,0,0.06)] backdrop-blur"
+          data-testid="project-section-rail"
+        >
+          {editorSections.map((section) => (
+            <button
+              key={section.id}
+              type="button"
+              onClick={() => openAndScroll(section.id)}
+              className="inline-flex min-h-9 shrink-0 items-center gap-2 whitespace-nowrap rounded px-3 text-[11px] font-bold uppercase tracking-[0.12em] text-black/62 transition hover:bg-black/[0.05] hover:text-black"
+            >
+              {section.title}
+              {sectionCounts[section.id] !== null ? (
+                <span className="tabular-nums text-black/38">
+                  {sectionCounts[section.id]}
+                </span>
+              ) : null}
+              {blockerSections.has(section.id) ? (
+                <>
+                  <span
+                    className="h-2 w-2 rounded-full bg-amber-500"
+                    aria-hidden="true"
+                  />
+                  <span className="sr-only">Needs attention before publishing</span>
+                </>
+              ) : null}
+            </button>
+          ))}
+        </nav>
+
         <ProjectMutationDisabledContext.Provider value={editorFieldsDisabled}>
           <div className="min-w-0 space-y-5">
             <ProjectSection
               id="project-overview"
               title="Hero and overview"
               summary="The opening image and story people see first."
-              open={openSection === "overview"}
-              onToggle={() =>
-                setOpenSection((current) =>
-                  current === "overview" ? null : "overview",
-                )
-              }
+              open={!collapsedSections.has("overview")}
+              onToggle={() => toggleSection("overview")}
             >
               <div className="grid gap-4 xl:grid-cols-2">
                 <label className="block text-xs font-bold uppercase tracking-[0.12em] text-black/48">
@@ -620,6 +955,18 @@ export default function ProjectEditor({
                 />
               </div>
 
+              <p className="text-xs font-semibold text-black/42">
+                Page address: /projects/{draft.project.slug || "project-name"}
+              </p>
+            </ProjectSection>
+
+            <ProjectSection
+              id="project-facts"
+              title="Project information"
+              summary="Team, delivery and other facts shown together on the public page."
+              open={!collapsedSections.has("facts")}
+              onToggle={() => toggleSection("facts")}
+            >
               <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                 <TextField
                   label="Client"
@@ -678,212 +1025,93 @@ export default function ProjectEditor({
                 />
               ) : null}
 
-              <p className="text-xs font-semibold text-black/42">
-                Page address: /projects/{draft.project.slug || "project-name"}
-              </p>
-            </ProjectSection>
-
-            <ProjectSection
-              id="project-facts"
-              title="Facts"
-              summary="Short, scannable facts shown near the opening story."
-              action={<AddButton label="Add fact" onClick={addFact} />}
-              open={openSection === "facts"}
-              onToggle={() =>
-                setOpenSection((current) =>
-                  current === "facts" ? null : "facts",
-                )
-              }
-            >
-              {draft.facts.length ? (
-                <div className="space-y-3">
-                  {draft.facts.map((fact, index) => (
-                    <article
-                      key={fact.key}
-                      className="grid gap-3 border border-black/10 bg-[#f8f9f5] p-4 min-[1200px]:grid-cols-[minmax(180px,0.7fr)_minmax(260px,1.3fr)_auto] min-[1200px]:items-start"
-                    >
-                      <TextField
-                        label={`Fact ${index + 1}`}
-                        value={fact.factLabel}
-                        onChange={(value) =>
-                          updateCollection("facts", fact.key, {
-                            factLabel: value,
-                          })
-                        }
-                        placeholder="Stone"
-                      />
-                      <FactValueField
-                        label="Value"
-                        value={factValueForEditor(
-                          fact.factValueJson,
-                          fact.factValue,
-                        )}
-                        multiline={Array.isArray(fact.factValueJson)}
-                        onChange={(value) =>
-                          updateCollection(
-                            "facts",
-                            fact.key,
-                            Array.isArray(fact.factValueJson) ||
-                              value.includes("\n")
-                              ? {
-                                  factValue: "",
-                                  factValueJson: value
-                                    .split("\n")
-                                    .map((item) => item.trim())
-                                    .filter(Boolean),
-                                }
-                              : { factValue: value, factValueJson: null },
-                          )
-                        }
-                        placeholder="Bluestone"
-                      />
-                      <div className="flex items-center justify-end gap-2">
-                        <OrderControls
-                          itemLabel={`fact ${index + 1}`}
-                          isFirst={index === 0}
-                          isLast={index === draft.facts.length - 1}
-                          onMoveUp={() => moveItem("facts", fact.key, "up")}
-                          onMoveDown={() =>
-                            moveItem("facts", fact.key, "down")
-                          }
-                        />
-                        <RemoveButton
-                          label="Remove fact"
-                          onClick={() =>
-                            removeCollectionRow("facts", fact.key)
-                          }
-                        />
-                      </div>
-                    </article>
-                  ))}
+              <div
+                id="project-additional-facts"
+                className="scroll-mt-28 border-t border-black/10 pt-5"
+              >
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <h3 className="text-base font-semibold text-black">
+                      Additional facts
+                    </h3>
+                    <p className="mt-1 text-sm leading-6 text-black/54">
+                      Anything else worth stating, such as Sector or Area.
+                    </p>
+                  </div>
+                  <AddButton label="Add fact" onClick={addFact} />
                 </div>
-              ) : (
-                <EmptyCopy>
-                  Add a fact such as Stone, Finish, Quantity or Sector.
-                </EmptyCopy>
-              )}
-            </ProjectSection>
-
-            <ProjectSection
-              id="project-materials"
-              title="Material schedule"
-              summary="Connect each stone and finish to where it appears in the project."
-              action={<AddButton label="Add material" onClick={addMaterial} />}
-              open={openSection === "materials"}
-              onToggle={() =>
-                setOpenSection((current) =>
-                  current === "materials" ? null : "materials",
-                )
-              }
-            >
-              {draft.materials.length ? (
-                <div className="space-y-4">
-                  {draft.materials.map((material, index) => (
-                    <article
-                      key={material.key}
-                      className="border border-black/10 bg-[#f8f9f5] p-4"
-                    >
-                      <div className="flex flex-wrap items-start justify-between gap-3">
-                        <h3 className="text-base font-semibold text-black">
-                          Material {index + 1}
-                        </h3>
-                        <div className="flex items-center gap-2">
+                {draft.facts.length ? (
+                  <div className="mt-4 space-y-3">
+                    {draft.facts.map((fact, index) => (
+                      <article
+                        key={fact.key}
+                        className="grid gap-3 border border-black/10 bg-[#f8f9f5] p-4 min-[1200px]:grid-cols-[minmax(180px,0.7fr)_minmax(260px,1.3fr)_auto] min-[1200px]:items-start"
+                      >
+                        <TextField
+                          label={`Fact ${index + 1}`}
+                          value={fact.factLabel}
+                          onChange={(value) =>
+                            updateCollection("facts", fact.key, {
+                              factLabel: value,
+                            })
+                          }
+                          placeholder="Sector"
+                        />
+                        <FactValueField
+                          label="Value"
+                          value={factValueForEditor(
+                            fact.factValueJson,
+                            fact.factValue,
+                          )}
+                          multiline={Array.isArray(fact.factValueJson)}
+                          onChange={(value) =>
+                            updateCollection(
+                              "facts",
+                              fact.key,
+                              Array.isArray(fact.factValueJson) ||
+                                value.includes("\n")
+                                ? {
+                                    factValue: "",
+                                    factValueJson: value
+                                      .split("\n")
+                                      .map((item) => item.trim())
+                                      .filter(Boolean),
+                                  }
+                                : { factValue: value, factValueJson: null },
+                            )
+                          }
+                          placeholder="Civic landscape"
+                        />
+                        <div className="flex items-center justify-end gap-2">
                           <OrderControls
-                            itemLabel={`material ${index + 1}`}
+                            itemLabel={`fact ${index + 1}`}
                             isFirst={index === 0}
-                            isLast={index === draft.materials.length - 1}
-                            onMoveUp={() =>
-                              moveItem("materials", material.key, "up")
-                            }
+                            isLast={index === draft.facts.length - 1}
+                            onMoveUp={() => moveItem("facts", fact.key, "up")}
                             onMoveDown={() =>
-                              moveItem("materials", material.key, "down")
+                              moveItem("facts", fact.key, "down")
                             }
                           />
                           <RemoveButton
-                            label="Remove material"
-                            onClick={() =>
-                              removeCollectionRow("materials", material.key)
-                            }
+                            label="Remove fact"
+                            onClick={() => removeFact(fact.key)}
                           />
                         </div>
-                      </div>
-                      <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                        <OptionField
-                          label="Stone"
-                          value={material.stoneGroupId}
-                          options={stones}
-                          onChange={(value) => {
-                            const variants = stoneVariants.filter((variant) => variant.stoneGroupId === value && variant.status !== "archived");
-                            const variantId = variants[0]?.id ?? null;
-                            const finishId = finishCapabilities.find((capability) => capability.stoneVariantId === variantId && capability.capability !== "no")?.finishDefinitionId ?? null;
-                            updateCollection("materials", material.key, {
-                              stoneGroupId: value,
-                              stoneVariantId: variantId,
-                              finishDefinitionId: finishId,
-                            });
-                          }}
-                        />
-                        <OptionField
-                          label="Variant"
-                          value={material.stoneVariantId}
-                          options={stoneVariants.filter((variant) => variant.stoneGroupId === material.stoneGroupId)}
-                          onChange={(value) => {
-                            const finishId = finishCapabilities.find((capability) => capability.stoneVariantId === value && capability.capability !== "no")?.finishDefinitionId ?? null;
-                            updateCollection("materials", material.key, {
-                              stoneVariantId: value,
-                              finishDefinitionId: finishId,
-                            });
-                          }}
-                        />
-                        <OptionField
-                          label="Finish"
-                          value={material.finishDefinitionId}
-                          options={finishes.filter((finish) => finishCapabilities.some((capability) => capability.stoneVariantId === material.stoneVariantId && capability.finishDefinitionId === finish.id && capability.capability !== "no"))}
-                          onChange={(value) =>
-                            updateCollection("materials", material.key, {
-                              finishDefinitionId: value,
-                            })
-                          }
-                        />
-                        <TextField
-                          label="Where it is used"
-                          value={material.application}
-                          onChange={(value) =>
-                            updateCollection("materials", material.key, {
-                              application: value,
-                            })
-                          }
-                          placeholder="Seating pods and low elements"
-                        />
-                      </div>
-                      <label className="mt-4 block text-xs font-bold uppercase tracking-[0.12em] text-black/48">
-                        Material note
-                        <textarea
-                          disabled={editorFieldsDisabled}
-                          value={material.note}
-                          onChange={(event) =>
-                            updateCollection("materials", material.key, {
-                              note: event.target.value,
-                            })
-                          }
-                          className={textareaClass}
-                        />
-                      </label>
-                      <StoneLibraryMaterialPreview material={material} context={context} />
-                    </article>
-                  ))}
-                </div>
-              ) : (
-                <EmptyCopy>
-                  Add the stone and finish combinations used in this project.
-                </EmptyCopy>
-              )}
+                      </article>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="mt-3 text-sm font-semibold leading-6 text-black/45">
+                    No additional facts yet.
+                  </p>
+                )}
+              </div>
             </ProjectSection>
 
             <ProjectSection
               id="project-media"
-              title="Project media"
-              summary="Build the image and video sequence in public-page order."
+              title="Page images and video"
+              summary="Images and video in public-page order. Mark materials directly on any image."
               action={
                 <div className="flex flex-wrap gap-2">
                   <AddButton
@@ -898,182 +1126,184 @@ export default function ProjectEditor({
                   />
                 </div>
               }
-              open={openSection === "media"}
-              onToggle={() =>
-                setOpenSection((current) =>
-                  current === "media" ? null : "media",
-                )
-              }
+              open={!collapsedSections.has("media")}
+              onToggle={() => toggleSection("media")}
             >
               {draft.mediaBlocks.length ? (
                 <div className="space-y-4">
-                  {draft.mediaBlocks.map((block, index) => (
-                    <article
-                      key={block.key}
-                      className="border border-black/10 bg-[#f8f9f5] p-4"
-                    >
-                      <div className="flex flex-wrap items-start justify-between gap-3">
-                        <div>
-                          <p className="text-[11px] font-bold uppercase tracking-[0.13em] text-black/42">
-                            Block {index + 1}
-                          </p>
-                          <select
-                            disabled={editorFieldsDisabled}
-                            value={normalizeEditorMediaRole(block.mediaRole)}
-                            onChange={(event) => {
-                              const mediaRole = event.target
-                                .value as ProjectMediaBlockDraft["mediaRole"];
-                              updateCollection("mediaBlocks", block.key, {
-                                mediaRole,
-                                mediaAssetId:
-                                  mediaRole === "normal_image"
-                                    ? block.mediaAssetId
-                                    : null,
-                                projectMaterialMapKey:
-                                  mediaRole === "hotspot_image"
-                                    ? (block.projectMaterialMapKey ??
-                                      draft.maps[0]?.key ??
-                                      null)
-                                    : null,
-                              });
-                            }}
-                            className={`${fieldClass} min-w-48`}
-                            aria-label={`Block ${index + 1} type`}
-                          >
-                            <option value="normal_image">Image</option>
-                            <option value="hotspot_image">
-                              Interactive material image
-                            </option>
-                            <option
-                              value="youtube_video"
-                              disabled={
-                                hasYoutubeVideo &&
-                                block.mediaRole !== "youtube_video"
-                              }
-                            >
-                              YouTube video
-                            </option>
-                          </select>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <OrderControls
-                            itemLabel={`media block ${index + 1}`}
-                            isFirst={index === 0}
-                            isLast={index === draft.mediaBlocks.length - 1}
-                            onMoveUp={() =>
-                              moveItem("mediaBlocks", block.key, "up")
-                            }
-                            onMoveDown={() =>
-                              moveItem("mediaBlocks", block.key, "down")
-                            }
-                          />
-                          <RemoveButton
-                            label="Remove block"
-                            onClick={() =>
-                              removeCollectionRow("mediaBlocks", block.key)
-                            }
-                          />
-                        </div>
-                      </div>
+                  {draft.mediaBlocks.map((block, index) => {
+                    const isVideo = block.mediaRole === "youtube_video";
+                    const hasPoints = block.mediaRole === "hotspot_image";
+                    const pointCount = hasPoints
+                      ? hotspotsForBlock(draft, block.key).length
+                      : 0;
+                    const imageId = isVideo ? null : mediaBlockImageId(draft, block);
 
-                      {block.mediaRole === "youtube_video" ? (
-                        <div className="mt-4 grid gap-4 md:grid-cols-2">
-                          <TextField
-                            label="Video title"
-                            value={block.blockTitle}
-                            onChange={(value) =>
-                              updateCollection("mediaBlocks", block.key, {
-                                blockTitle: value,
-                              })
-                            }
-                          />
-                          <TextField
-                            label="YouTube link"
-                            value={block.youtubeUrl}
-                            onChange={(value) =>
-                              updateCollection("mediaBlocks", block.key, {
-                                youtubeUrl: value,
-                              })
-                            }
-                          />
+                    return (
+                      <article
+                        key={block.key}
+                        id={mediaBlockId(block.key)}
+                        className="scroll-mt-28 border border-black/10 bg-[#f8f9f5] p-4"
+                      >
+                        <div className="flex flex-wrap items-start justify-between gap-3">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="text-[11px] font-bold uppercase tracking-[0.13em] text-black/52">
+                              Block {index + 1} · {isVideo ? "Video" : "Image"}
+                            </h3>
+                            {hasPoints ? (
+                              <span className="inline-flex min-h-6 items-center gap-1 rounded border border-[var(--urblo-lime)] bg-[rgba(0,255,25,0.12)] px-2 text-[10px] font-bold uppercase tracking-[0.12em] text-black">
+                                <MapPin className="h-3 w-3" />
+                                {pointCount} material{" "}
+                                {pointCount === 1 ? "point" : "points"}
+                              </span>
+                            ) : null}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <OrderControls
+                              itemLabel={`media block ${index + 1}`}
+                              isFirst={index === 0}
+                              isLast={index === draft.mediaBlocks.length - 1}
+                              onMoveUp={() =>
+                                moveItem("mediaBlocks", block.key, "up")
+                              }
+                              onMoveDown={() =>
+                                moveItem("mediaBlocks", block.key, "down")
+                              }
+                            />
+                            <RemoveButton
+                              label="Remove block"
+                              onClick={() => requestBlockRemoval(block)}
+                            />
+                          </div>
                         </div>
-                      ) : block.mediaRole === "hotspot_image" ? (
-                        <div className="mt-4 grid gap-4 md:grid-cols-2">
-                          <label className="block text-xs font-bold uppercase tracking-[0.12em] text-black/48">
-                            Material map
-                            <select
-                              disabled={editorFieldsDisabled}
-                              value={block.projectMaterialMapKey ?? ""}
-                              onChange={(event) =>
+                        {renderPendingRemoval("block", block.key)}
+
+                        {isVideo ? (
+                          <div className="mt-4 grid gap-4 md:grid-cols-[72px_minmax(0,1fr)_minmax(0,1fr)] md:items-end">
+                            <div
+                              className="hidden aspect-square place-items-center border border-black/10 bg-white text-black/45 md:grid"
+                              aria-hidden="true"
+                            >
+                              <Video className="h-6 w-6" />
+                            </div>
+                            <TextField
+                              label="Video title"
+                              value={block.blockTitle}
+                              onChange={(value) =>
                                 updateCollection("mediaBlocks", block.key, {
-                                  projectMaterialMapKey:
-                                    event.target.value || null,
+                                  blockTitle: value,
                                 })
                               }
-                              className={fieldClass}
-                            >
-                              <option value="">Choose a material map</option>
-                              {draft.maps.map((map, mapIndex) => (
-                                <option key={map.key} value={map.key}>
-                                  {map.title || `Map ${mapIndex + 1}`}
-                                </option>
-                              ))}
-                            </select>
-                          </label>
-                          <TextField
-                            label="Block title"
-                            value={block.blockTitle}
-                            onChange={(value) =>
-                              updateCollection("mediaBlocks", block.key, {
-                                blockTitle: value,
-                              })
-                            }
-                          />
-                        </div>
-                      ) : (
-                        <div className="mt-4">
-                          <InlineMediaField
-                            label="Block image"
-                            value={block.mediaAssetId}
-                            assets={media}
-                            userId={userId}
-                            canCleanUpStorage={canCleanUpStorage}
-                            disabled={mediaFieldDisabled(`media-${block.key}`)}
-                            instanceKey={`media-${block.key}`}
-                            onPendingChange={handleMediaPendingChange}
-                            onBusyChange={handleMediaBusyChange}
-                            onChange={(value) =>
-                              updateCollection("mediaBlocks", block.key, {
-                                mediaAssetId: value,
-                              })
-                            }
-                            onAssetCreated={onAssetCreated}
-                          />
-                        </div>
-                      )}
-
-                      <div className="mt-4 grid gap-4 md:grid-cols-2">
-                        <TextField
-                          label="Small label"
-                          value={block.label}
-                          onChange={(value) =>
-                            updateCollection("mediaBlocks", block.key, {
-                              label: value,
-                            })
-                          }
-                        />
-                        <TextField
-                          label="Caption"
-                          value={block.caption}
-                          onChange={(value) =>
-                            updateCollection("mediaBlocks", block.key, {
-                              caption: value,
-                            })
-                          }
-                        />
-                      </div>
-                    </article>
-                  ))}
+                            />
+                            <TextField
+                              label="YouTube link"
+                              value={block.youtubeUrl}
+                              onChange={(value) =>
+                                updateCollection("mediaBlocks", block.key, {
+                                  youtubeUrl: value,
+                                })
+                              }
+                            />
+                            <div className="md:col-span-3">
+                              <TextField
+                                label="Caption"
+                                value={block.caption}
+                                onChange={(value) =>
+                                  updateCollection("mediaBlocks", block.key, {
+                                    caption: value,
+                                  })
+                                }
+                              />
+                            </div>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:items-start">
+                              <InlineMediaField
+                                key={`media-${block.key}`}
+                                label={hasPoints ? "Image with material points" : "Image"}
+                                value={imageId}
+                                assets={media}
+                                userId={userId}
+                                canCleanUpStorage={canCleanUpStorage}
+                                disabled={mediaFieldDisabled(`media-${block.key}`)}
+                                instanceKey={`media-${block.key}`}
+                                onPendingChange={handleMediaPendingChange}
+                                onBusyChange={handleMediaBusyChange}
+                                onChange={(value) => changeBlockImage(block, value)}
+                                onAssetCreated={onAssetCreated}
+                              />
+                              <div className="grid gap-4">
+                                {hasPoints ? (
+                                  <TextField
+                                    label="Title above the image"
+                                    value={block.blockTitle}
+                                    onChange={(value) =>
+                                      updateCollection("mediaBlocks", block.key, {
+                                        blockTitle: value,
+                                      })
+                                    }
+                                    placeholder={defaultMaterialPointImageTitle}
+                                  />
+                                ) : (
+                                  <TextField
+                                    label="Small label"
+                                    value={block.label}
+                                    onChange={(value) =>
+                                      updateCollection("mediaBlocks", block.key, {
+                                        label: value,
+                                      })
+                                    }
+                                    placeholder="Detail"
+                                  />
+                                )}
+                                <TextField
+                                  label="Caption"
+                                  value={block.caption}
+                                  onChange={(value) =>
+                                    updateCollection("mediaBlocks", block.key, {
+                                      caption: value,
+                                    })
+                                  }
+                                />
+                              </div>
+                            </div>
+                            {hasPoints &&
+                            pointCount > 0 &&
+                            replacedImageBlockKeys.has(block.key) ? (
+                              <p
+                                className="mt-3 border border-amber-300 bg-amber-50 p-3 text-sm font-medium leading-6 text-amber-900"
+                                role="status"
+                              >
+                                Points keep their positions. Check they still
+                                sit on the right materials.
+                              </p>
+                            ) : null}
+                            {hasPoints ? (
+                              renderPointsArea(block, index)
+                            ) : (
+                              <div className="mt-4 flex flex-wrap items-center gap-3">
+                                <button
+                                  type="button"
+                                  onClick={() => enablePoints(block)}
+                                  disabled={editorFieldsDisabled || !imageId}
+                                  className={secondaryButtonClass}
+                                >
+                                  <MapPin className="h-4 w-4" />
+                                  Mark materials on this image
+                                </button>
+                                {!imageId ? (
+                                  <span className="text-xs font-semibold text-black/45">
+                                    Choose the image first.
+                                  </span>
+                                ) : null}
+                              </div>
+                            )}
+                          </>
+                        )}
+                      </article>
+                    );
+                  })}
                 </div>
               ) : (
                 <EmptyCopy>
@@ -1083,269 +1313,68 @@ export default function ProjectEditor({
             </ProjectSection>
 
             <ProjectSection
-              id="project-maps"
-              title="Material maps and points"
-              summary="Show exactly where each material appears in a project photograph."
-              action={<AddButton label="Add material map" onClick={addMap} />}
-              open={openSection === "maps"}
-              onToggle={() =>
-                setOpenSection((current) =>
-                  current === "maps" ? null : "maps",
-                )
-              }
+              id="project-materials"
+              title="Material schedule"
+              summary="Every stone and finish used in the project, and where it appears."
+              action={<AddButton label="Add material" onClick={addMaterial} />}
+              open={!collapsedSections.has("materials")}
+              onToggle={() => toggleSection("materials")}
             >
-              {draft.maps.length ? (
-                <>
-                  <div
-                    className="flex flex-wrap gap-2"
-                    role="tablist"
-                    aria-label="Material maps"
-                  >
-                    {draft.maps.map((map, index) => (
-                      <button
-                        key={map.key}
-                        id={mapTabId(map.key)}
-                        type="button"
-                        role="tab"
-                        aria-selected={selectedMap?.key === map.key}
-                        aria-controls={mapPanelId(map.key)}
-                        tabIndex={selectedMap?.key === map.key ? 0 : -1}
-                        onClick={() => setSelectedMapKey(map.key)}
-                        onKeyDown={(event) =>
-                          handleMapTabKeyDown(event, index)
-                        }
-                        disabled={
-                          hasPendingMedia && selectedMap?.key !== map.key
-                        }
-                        className={[
-                          "min-h-10 rounded border px-3 text-xs font-bold uppercase tracking-[0.11em] transition",
-                          selectedMap?.key === map.key
-                            ? "border-black bg-black text-white"
-                            : "border-black/15 bg-white text-black/58 hover:border-black",
-                        ].join(" ")}
+              {draft.materials.length ? (
+                <div className="space-y-4">
+                  {draft.materials.map((material, index) => {
+                    const pointCount = countHotspotsForMaterial(draft, material.key);
+                    return (
+                      <article
+                        key={material.key}
+                        className="border border-black/10 bg-[#f8f9f5] p-4"
                       >
-                        {map.title || `Map ${index + 1}`}
-                      </button>
-                    ))}
-                  </div>
-
-                  {selectedMap ? (
-                    <article
-                      id={mapPanelId(selectedMap.key)}
-                      role="tabpanel"
-                      aria-labelledby={mapTabId(selectedMap.key)}
-                      className="mt-4 border border-black/10 bg-[#f8f9f5] p-4"
-                    >
-                      <div className="flex flex-wrap items-start justify-between gap-3">
-                        <h3 className="text-base font-semibold text-black">
-                          Map details
-                        </h3>
-                        <div className="flex items-center gap-2">
-                          <OrderControls
-                            itemLabel={`map ${selectedMapIndex + 1}`}
-                            isFirst={selectedMapIndex === 0}
-                            isLast={selectedMapIndex === draft.maps.length - 1}
-                            onMoveUp={() =>
-                              moveItem("maps", selectedMap.key, "up")
-                            }
-                            onMoveDown={() =>
-                              moveItem("maps", selectedMap.key, "down")
-                            }
-                          />
-                          <RemoveButton
-                            label="Remove map"
-                            onClick={() => removeMap(selectedMap.key)}
-                          />
-                        </div>
-                      </div>
-                      <div className="mt-4 grid gap-4 md:grid-cols-2">
-                        <TextField
-                          label="Map title"
-                          value={selectedMap.title}
-                          onChange={(value) =>
-                            updateCollection("maps", selectedMap.key, {
-                              title: value,
-                            })
-                          }
-                        />
-                        <TextField
-                          label="Short introduction"
-                          value={selectedMap.intro}
-                          onChange={(value) =>
-                            updateCollection("maps", selectedMap.key, {
-                              intro: value,
-                            })
-                          }
-                        />
-                      </div>
-                      <div className="mt-4">
-                        <InlineMediaField
-                          key={`map-${selectedMap.key}`}
-                          label="Map image"
-                          value={selectedMap.mediaAssetId}
-                          assets={media}
-                          userId={userId}
-                          canCleanUpStorage={canCleanUpStorage}
-                          disabled={mediaFieldDisabled(
-                            `map-${selectedMap.key}`,
-                          )}
-                          instanceKey={`map-${selectedMap.key}`}
-                          onPendingChange={handleMediaPendingChange}
-                          onBusyChange={handleMediaBusyChange}
-                          onChange={(value) =>
-                            updateCollection("maps", selectedMap.key, {
-                              mediaAssetId: value,
-                            })
-                          }
-                          onAssetCreated={onAssetCreated}
-                        />
-                      </div>
-                      <div className="mt-5 grid gap-5 2xl:grid-cols-[minmax(0,1.5fr)_minmax(300px,0.7fr)]">
-                        <VisualHotspotEditor
-                          imageUrl={
-                            selectedMapImage?.previewUrl ||
-                            selectedMapImage?.sourceUrl ||
-                            ""
-                          }
-                          imageAlt={
-                            selectedMapImage?.alt ||
-                            `${draft.project.title || "Project"} material map`
-                          }
-                          hotspots={mapHotspots}
-                          selectedKey={selectedHotspot?.key ?? null}
-                          disabled={isSaving || showReload}
-                          readOnly={!canEdit || hasPendingMedia || showReload}
-                          selectionDisabled={hasPendingMedia || showReload}
-                          onAdd={addHotspot}
-                          onSelect={setSelectedHotspotKey}
-                          onMove={(key, position) =>
-                            updateCollection("hotspots", key, position)
-                          }
-                        />
-                        <div>
-                          <div className="flex flex-wrap items-center justify-between gap-3">
-                            <h3 className="text-sm font-semibold text-black">
-                              Selected point
+                        <div className="flex flex-wrap items-start justify-between gap-3">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="text-base font-semibold text-black">
+                              Material {index + 1}
                             </h3>
-                            {selectedHotspot ? (
-                              <div className="flex items-center gap-2">
-                                <OrderControls
-                                  itemLabel={`point ${selectedHotspotIndex + 1}`}
-                                  isFirst={selectedHotspotIndex === 0}
-                                  isLast={
-                                    selectedHotspotIndex ===
-                                    mapHotspots.length - 1
-                                  }
-                                  onMoveUp={() =>
-                                    moveItem(
-                                      "hotspots",
-                                      selectedHotspot.key,
-                                      "up",
-                                    )
-                                  }
-                                  onMoveDown={() =>
-                                    moveItem(
-                                      "hotspots",
-                                      selectedHotspot.key,
-                                      "down",
-                                    )
-                                  }
-                                />
-                                <RemoveButton
-                                  label="Remove point"
-                                  onClick={() =>
-                                    removeHotspot(selectedHotspot.key)
-                                  }
-                                />
-                              </div>
-                            ) : null}
+                            <span
+                              className={[
+                                "inline-flex min-h-6 items-center rounded border px-2 text-[10px] font-bold uppercase tracking-[0.12em]",
+                                pointCount
+                                  ? "border-black/15 bg-white text-black/62"
+                                  : "border-dashed border-black/20 bg-transparent text-black/45",
+                              ].join(" ")}
+                            >
+                              {pointCount
+                                ? `Used at ${pointCount} ${pointCount === 1 ? "point" : "points"}`
+                                : "Not placed on any image yet"}
+                            </span>
                           </div>
-                          {selectedHotspot ? (
-                            <div className="mt-3 space-y-4">
-                              <label className="block text-xs font-bold uppercase tracking-[0.12em] text-black/48">
-                                Material
-                                <select
-                                  disabled={editorFieldsDisabled}
-                                  value={
-                                    selectedHotspot.projectMaterialKey ?? ""
-                                  }
-                                  onChange={(event) => {
-                                    const materialKey =
-                                      event.target.value || null;
-                                    const material = draft.materials.find(
-                                      (item) => item.key === materialKey,
-                                    );
-                                    updateCollection(
-                                      "hotspots",
-                                      selectedHotspot.key,
-                                      {
-                                        projectMaterialKey: materialKey,
-                                        application:
-                                          selectedHotspot.application ||
-                                          material?.application ||
-                                          "",
-                                      },
-                                    );
-                                  }}
-                                  className={fieldClass}
-                                >
-                                  <option value="">Choose a material</option>
-                                  {draft.materials.map((material, index) => (
-                                    <option
-                                      key={material.key}
-                                      value={material.key}
-                                    >
-                                      {material.application ||
-                                        `Material ${index + 1}`}
-                                    </option>
-                                  ))}
-                                </select>
-                              </label>
-                              <TextField
-                                label="Where it is used"
-                                value={selectedHotspot.application}
-                                onChange={(value) =>
-                                  updateCollection(
-                                    "hotspots",
-                                    selectedHotspot.key,
-                                    { application: value },
-                                  )
-                                }
-                              />
-                              <label className="block text-xs font-bold uppercase tracking-[0.12em] text-black/48">
-                                Point note
-                                <textarea
-                                  disabled={editorFieldsDisabled}
-                                  value={selectedHotspot.note}
-                                  onChange={(event) =>
-                                    updateCollection(
-                                      "hotspots",
-                                      selectedHotspot.key,
-                                      { note: event.target.value },
-                                    )
-                                  }
-                                  className={textareaClass}
-                                />
-                              </label>
-                              {(() => {
-                                const material = draft.materials.find((entry) => entry.key === selectedHotspot.projectMaterialKey);
-                                return material ? <StoneLibraryMaterialPreview material={material} context={context} /> : null;
-                              })()}
-                            </div>
-                          ) : (
-                            <p className="mt-3 border border-dashed border-black/20 bg-white p-4 text-sm leading-6 text-black/50">
-                              Click the map image to add the first point.
-                            </p>
-                          )}
+                          <div className="flex items-center gap-2">
+                            <OrderControls
+                              itemLabel={`material ${index + 1}`}
+                              isFirst={index === 0}
+                              isLast={index === draft.materials.length - 1}
+                              onMoveUp={() =>
+                                moveItem("materials", material.key, "up")
+                              }
+                              onMoveDown={() =>
+                                moveItem("materials", material.key, "down")
+                              }
+                            />
+                            <RemoveButton
+                              label="Remove material"
+                              onClick={() => requestMaterialRemoval(material.key)}
+                            />
+                          </div>
                         </div>
-                      </div>
-                    </article>
-                  ) : null}
-                </>
+                        {renderPendingRemoval("material", material.key)}
+                        {renderMaterialFields(material)}
+                      </article>
+                    );
+                  })}
+                </div>
               ) : (
                 <EmptyCopy>
-                  Add a material map, choose its image, then click the image to
-                  place points.
+                  Add the stone and finish combinations used in this project,
+                  or add them while marking an image.
                 </EmptyCopy>
               )}
             </ProjectSection>
@@ -1521,7 +1550,7 @@ function ProjectSection({
   children: ReactNode;
 }) {
   return (
-    <section id={id} className="scroll-mt-28 border border-black/10 bg-white">
+    <section id={id} className="scroll-mt-20 border border-black/10 bg-white">
       <div className="flex flex-col gap-4 px-4 py-4 sm:flex-row sm:items-start sm:justify-between sm:px-5 sm:py-5">
         <div className="min-w-0">
           <h2 className="text-xl font-semibold text-black">{title}</h2>
@@ -1551,6 +1580,130 @@ function ProjectSection({
         {children}
       </div>
     </section>
+  );
+}
+
+function MaterialFields({
+  material,
+  stones,
+  stoneVariants,
+  finishes,
+  finishCapabilities,
+  context,
+  onChange,
+}: {
+  material: ProjectMaterialDraft;
+  stones: readonly ProjectStoneOption[];
+  stoneVariants: readonly ProjectStoneVariantOption[];
+  finishes: readonly ProjectFinishOption[];
+  finishCapabilities: readonly ProjectStoneFinishCapabilityOption[];
+  context: ProjectAggregateMappingContext;
+  onChange: (changes: Partial<ProjectMaterialDraft>) => void;
+}) {
+  const disabled = useContext(ProjectMutationDisabledContext);
+  return (
+    <>
+      <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <OptionField
+          label="Stone"
+          value={material.stoneGroupId}
+          options={stones}
+          onChange={(value) => {
+            const variants = stoneVariants.filter((variant) => variant.stoneGroupId === value && variant.status !== "archived");
+            const variantId = variants[0]?.id ?? null;
+            const finishId = finishCapabilities.find((capability) => capability.stoneVariantId === variantId && capability.capability !== "no")?.finishDefinitionId ?? null;
+            onChange({
+              stoneGroupId: value,
+              stoneVariantId: variantId,
+              finishDefinitionId: finishId,
+            });
+          }}
+        />
+        <OptionField
+          label="Variant"
+          value={material.stoneVariantId}
+          options={stoneVariants.filter((variant) => variant.stoneGroupId === material.stoneGroupId)}
+          onChange={(value) => {
+            const finishId = finishCapabilities.find((capability) => capability.stoneVariantId === value && capability.capability !== "no")?.finishDefinitionId ?? null;
+            onChange({
+              stoneVariantId: value,
+              finishDefinitionId: finishId,
+            });
+          }}
+        />
+        <OptionField
+          label="Finish"
+          value={material.finishDefinitionId}
+          options={finishes.filter((finish) => finishCapabilities.some((capability) => capability.stoneVariantId === material.stoneVariantId && capability.finishDefinitionId === finish.id && capability.capability !== "no"))}
+          onChange={(value) => onChange({ finishDefinitionId: value })}
+        />
+        <TextField
+          label="Where it is used"
+          value={material.application}
+          onChange={(value) => onChange({ application: value })}
+          placeholder="Seating pods and low elements"
+        />
+      </div>
+      <label className="mt-4 block text-xs font-bold uppercase tracking-[0.12em] text-black/48">
+        Material note
+        <textarea
+          disabled={disabled}
+          value={material.note}
+          onChange={(event) => onChange({ note: event.target.value })}
+          className={textareaClass}
+        />
+      </label>
+      <StoneLibraryMaterialPreview material={material} context={context} />
+    </>
+  );
+}
+
+function InlineConfirm({
+  message,
+  confirmLabel,
+  keepLabel,
+  onConfirm,
+  onKeep,
+}: {
+  message: string;
+  confirmLabel: string;
+  keepLabel: string;
+  onConfirm: () => void;
+  onKeep: () => void;
+}) {
+  const disabled = useContext(ProjectMutationDisabledContext);
+  const keepRef = useRef<HTMLButtonElement | null>(null);
+
+  useEffect(() => {
+    keepRef.current?.focus();
+  }, []);
+
+  return (
+    <div
+      className="mt-4 flex flex-col gap-3 border border-red-200 bg-red-50 p-3 sm:flex-row sm:items-center sm:justify-between"
+      role="alert"
+    >
+      <p className="text-sm font-semibold leading-6 text-red-900">{message}</p>
+      <div className="flex flex-wrap gap-2">
+        <button
+          ref={keepRef}
+          type="button"
+          onClick={onKeep}
+          className="inline-flex min-h-9 items-center rounded border border-black/15 bg-white px-3 text-[11px] font-bold uppercase tracking-[0.12em] text-black transition hover:border-black"
+        >
+          {keepLabel}
+        </button>
+        <button
+          type="button"
+          onClick={onConfirm}
+          disabled={disabled}
+          className="inline-flex min-h-9 items-center gap-2 rounded border border-red-700 bg-red-700 px-3 text-[11px] font-bold uppercase tracking-[0.12em] text-white transition hover:bg-red-800 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <Trash2 className="h-4 w-4" />
+          {confirmLabel}
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -1741,7 +1894,7 @@ function AddButton({
       type="button"
       onClick={onClick}
       disabled={disabled || mutationDisabled}
-      className="inline-flex min-h-9 items-center gap-2 rounded border border-black/15 bg-white px-3 text-[11px] font-bold uppercase tracking-[0.12em] text-black transition hover:border-black disabled:cursor-not-allowed disabled:bg-black/[0.04] disabled:text-black/30"
+      className={secondaryButtonClass}
     >
       {icon === "image" ? (
         <ImagePlus className="h-4 w-4" />
@@ -1855,23 +2008,24 @@ function LifecycleLabel({ status }: { status: ProjectLifecycleStatus }) {
   );
 }
 
-function normalizeEditorMediaRole(
-  role: ProjectMediaBlockDraft["mediaRole"],
-): "normal_image" | "hotspot_image" | "youtube_video" {
-  if (role === "hotspot_image" || role === "youtube_video") return role;
-  return "normal_image";
-}
-
 function sectionId(section: ProjectEditorSection) {
   return `project-${section}`;
 }
 
-function mapTabId(key: string) {
-  return `project-map-tab-${key.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
+function safeDomKey(key: string) {
+  return key.replace(/[^a-zA-Z0-9_-]/g, "-");
 }
 
-function mapPanelId(key: string) {
-  return `project-map-panel-${key.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
+function mediaBlockId(key: string) {
+  return `project-media-block-${safeDomKey(key)}`;
+}
+
+function pointTabId(key: string) {
+  return `project-point-tab-${safeDomKey(key)}`;
+}
+
+function pointPanelId(blockKey: string) {
+  return `project-point-panel-${safeDomKey(blockKey)}`;
 }
 
 function scrollAfterRender(id: string) {

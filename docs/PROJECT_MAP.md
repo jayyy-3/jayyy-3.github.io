@@ -9,7 +9,7 @@
 | 公共站点 | App → layouts/components → 四个 public service adapters | 干净路径、元数据、静态 fallback、按需 Supabase 加载 |
 | Stone Library | StoneLibraryDetailPage → StoneLibraryService → static catalog / Published stone tables | variant/finish 匹配、真实 finish 图片、draft 不公开 |
 | QR | ImageQrPage / AdminImageQrPage → image-qr Functions → server-only image_qr_resources / Storage | 固定 slug、原始产品图、独立材质纹理、显式关联与默认值区分 |
-| Projects | AdminProjectsPage / ProjectEditor → admin-projects Function → aggregate RPC / six Project tables | 单次 aggregate Save、revision conflict、发布补偿、公开父记录约束 |
+| Projects | AdminProjectsPage / ProjectEditor（四区块；材料点直接打在媒体图片上）→ admin-projects Function → aggregate RPC / six Project tables | 单次 aggregate Save、revision conflict、发布补偿、公开父记录约束 |
 | Articles | AdminArticlesPage → articles/ArticlesWorkspace → useArticleEditor → data → articles / article_blocks；ArticleService → public renderer | 子记录绑定、切换防旧响应、草稿不可见、安全链接、审计语义 |
 | Products | AdminProductsPage → browser-key queries → products / models / defaults / specs | 父子 ownership 谓词、加载锁、Published overlay |
 | Media | AdminMediaPage → browser-key Storage + metadata | private-first、原图保留、owner/admin promotion、失败保留与读回 |

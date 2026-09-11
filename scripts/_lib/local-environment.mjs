@@ -50,7 +50,7 @@ export function assertLocalDocker() {
 }
 export function assertLocalContainer() {
   assertLocalConfig(); assertLocalDocker()
-  const inspect = JSON.parse(docker(['inspect', `supabase_db_${LOCAL_PROJECT}`]))[0]
+  const inspect = JSON.parse(docker(['inspect', '--type', 'container', `supabase_db_${LOCAL_PROJECT}`]))[0]
   if (realpathSync(inspect.Config.Labels?.['com.supabase.cli.workdir'] ?? '/') !== realpathSync(process.cwd())) throw new Error('Local container belongs to a different checkout; stop it there first')
   if (inspect.Config.Labels?.['com.supabase.cli.project'] !== LOCAL_PROJECT) throw new Error('Local database container identity mismatch')
   if (!inspect.State.Running) throw new Error('Local database is stopped')
@@ -61,7 +61,7 @@ export function supabaseCommand(args) {
   assertLocalConfig(); assertLocalDocker()
   if (args[0] === 'start') {
     let existing
-    try { existing = JSON.parse(docker(['inspect', `supabase_db_${LOCAL_PROJECT}`]))[0] } catch (error) { if (!String(error.stderr).includes('No such')) throw error }
+    try { existing = JSON.parse(docker(['inspect', '--type', 'container', `supabase_db_${LOCAL_PROJECT}`]))[0] } catch (error) { if (!String(error.stderr).includes('No such')) throw error }
     if (existing && realpathSync(existing.Config.Labels?.['com.supabase.cli.workdir'] ?? '/') !== realpathSync(process.cwd())) throw new Error('Local container belongs to a different checkout; refusing startup')
   }
   return execFileSync(process.execPath, ['node_modules/supabase/dist/supabase.js', ...args], {

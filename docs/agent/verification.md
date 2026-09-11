@@ -17,7 +17,7 @@ Use `agent:verify --plan` to identify the applicable checks. For runtime/tooling
 
 The registry in `scripts/_lib/verification.mjs` owns dependencies; classification tests cover actual Git rename/delete/untracked records and runtime fingerprints. `quality` always resolves on PRs, including record-only PRs; runtime smoke failure makes it fail. Main branch protection needs repository administrator access.
 
-Runtime CI additionally runs `npm run local:verify` with Node 22 before deployment. That local configuration has its own build and real database; it is distinct from the configured production build. Synthetic journeys cover QR upload/material save/refresh/public readback; Projects private draft/publish/hide and delayed-load cancellation; Articles validation/API-failure recovery/parent-bound section saves/selection locks/public rendering; Contact/Sample Request persistence and owner inbox readback; and an unprofiled account boundary. External mail is disabled; notification-provider logic is separately covered by in-memory forms API checks.
+Runtime CI additionally runs `npm run local:verify` with Node 22 before deployment. That local configuration has its own build and real database; it is distinct from the configured production build. Synthetic journeys cover QR upload/material save/refresh/public readback; Projects private draft/publish/hide, delayed-load cancellation and material points on a page image (enable, add point and material, Save/refresh, turn off); Articles validation/API-failure recovery/parent-bound section saves/selection locks/public rendering; Contact/Sample Request persistence and owner inbox readback; and an unprofiled account boundary. External mail is disabled; notification-provider logic is separately covered by in-memory forms API checks.
 
 ## Retained specialized verification and live boundaries
 
@@ -88,6 +88,7 @@ For Project Stone Library material-point changes, also verify:
 - Project material/point title or image overrides are absent from the editor and normalized saves.
 - Public hotspot and Featured Materials cards resolve Published Stone Library imagery and deep-link the selected variant/finish.
 - Draft Project editing exposes and labels non-Archived Stone Library records and imagery; publish validation still rejects any selected Stone, Variant, Finish, finish-image link, or linked media asset that is not Published.
+- Any page image block can turn material points on and off (off deletes its points after an inline confirmation), replacing a points image keeps point positions with a notice, and an older project whose map has no image block opens with that block adopted and no unsaved state.
 - `npm run agent:admin-projects-aggregate` covers the aggregate compatibility contract before any separately approved migration apply.
 
 ### Route, Navigation, or CTA Contract
