@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "lastUpdated": "2026-09-11",
+  "lastUpdated": "2026-09-12",
   "archive": "docs/archive/2026-09-09/completed-tasks.json",
   "tasks": [
     {
@@ -47,7 +47,8 @@
         "2026-09-11: Phase 2 PR #51 (d368738) CI 34597059624 passed, including local:verify and Preview https://f267fac3.urblo-site.pages.dev smoke; separate preview smoke and read-only public regression passed.",
         "2026-09-11: Phase 3 cleanup on claude/stone-project-refs-phase3-cleanup: ProjectMaterialMap wrapper retired, editor split into projects/sections, docs closed out. Stone page Project reads measured at 6 requests / ~217 ms median in parallel with the catalogue (threshold >6 or >400 ms not met), so no Stone-projects RPC follow-up task.",
         "2026-09-11: Phase 3 PR #52 CI 34598051213 passed; Preview https://b03a03ab.urblo-site.pages.dev smoke passed. All three stacked PRs await Claude acceptance and Jay merge approval.",
-        "2026-09-11: Claude acceptance passed on f71b95b (source review, host checks, read-only Preview 6454b862 desktop/mobile QA). Temporary plan file removed. Merge #50 → #51 → #52 in order awaits Jay."
+        "2026-09-11: Claude acceptance passed on f71b95b (source review, host checks, read-only Preview 6454b862 desktop/mobile QA). Temporary plan file removed. Merge #50 → #51 → #52 in order awaits Jay.",
+        "2026-09-12: Jay approved merge and release. #50 → aa4f299, #51 → 3957622, #52 → 7de1af7 merged in order; production CI 34606801956 deployed immutable https://905e7161.urblo-site.pages.dev and passed immutable/apex/www smoke; separate apex/www readback against that reference and read-only live feature checks passed."
       ],
       "phase": "awaiting_external",
       "modules": [
@@ -63,8 +64,8 @@
           "Merge to main, production data or Storage writes, real email, DNS, credentials and any migration apply."
         ]
       },
-      "nextAction": "Jay approves and merges #50 → #51 → #52 in order; then production immutable/apex/www readback.",
-      "blocker": "Stacked PRs #50 (phase 1), #51 (phase 2) and #52 (phase 3) are accepted but not merged; merge in order."
+      "nextAction": "Jay tries the Projects editor in production: mark materials on one project image, Save, Publish and check the public point card and the Stone page Used in projects.",
+      "blocker": "Jay usability acceptance of the Projects points editor in production."
     },
     {
       "id": "NOW-ADMIN-STONE-WORKSPACE-001",

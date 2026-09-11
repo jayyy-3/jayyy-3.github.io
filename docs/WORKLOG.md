@@ -1,6 +1,6 @@
 # WORKLOG — current execution evidence
 
-Last updated: 2026-09-11
+Last updated: 2026-09-12
 
 Historical evidence is immutable and is not current task state. Current state is generated from `docs/agent/status.json` and `docs/agent/tasks.json`.
 
@@ -232,3 +232,11 @@ Task `NOW-STONE-PROJECT-REFS-001`. Claude reviewed stacked PRs #50 → #51 → #
 - Minor, not blocking: a card opened above a low point on 375px can extend over the block's intro text; the admin preview no longer shows a legacy map's retired intro while the public page still does until the next Save clears it; publishing a points image end to end remains unexercised locally because the isolated database seeds no Stone Library records.
 
 Result: accepted. Merge order #50 → #51 → #52 awaits Jay's approval; production apex/www readback follows the merge.
+
+## 2026-09-12 — Stone/Project references production release
+
+Jay approved "merge。上线" in chat after Claude acceptance. Stacked PRs were merged in order with head-SHA guards: #50 (`0e7644f`) → merge `aa4f299`; #51 retargeted to main (`d368738`) → merge `3957622`; #52 retargeted to main (`704ee3a`, including Claude's acceptance record and plan-file removal) → merge `7de1af716fe54fcd7566a17b3693ecb838fb4722`. Main runs for `aa4f299` (`34606532052`) and `7de1af7` (`34606801956`) passed. The concurrency group cancelled the queued intermediate runs `34606707277` and `34606716889` before they started, which is expected.
+
+Production CI `34606801956` deployed immutable `https://905e7161.urblo-site.pages.dev` and passed isolated `local:verify`, deployed smoke and production domain verification against that immutable reference. A separate `agent:cloudflare-preview-smoke --reference-url https://905e7161.urblo-site.pages.dev` also passed for `https://urblo.com.au` and `https://www.urblo.com.au`. Read-only live checks on urblo.com.au in headless Chromium: `/stone-library/angola-black` lists Moon Gate with `See placement` → `?point=angola-black-marker`; `/stone-library/zen-grey` has no section; `/projects/moon-gate-woolley-street?point=new-grey-seating` scrolls to the image and pins the New Grey card at 1280 and 375; `/admin/projects` redirects to `/admin/login`; no page errors.
+
+No migration, Function/RPC change, production data, Storage write or email. Authenticated production editing was not exercised by the agent. Jay's usability check of marking materials on a real project image and publishing it remains open, and is also the first end-to-end publish of a points image with Live Stone Library data.
