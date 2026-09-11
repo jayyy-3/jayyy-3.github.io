@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FileText, Plus, Search } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
+  adoptLegacyMaterialMaps,
   collectProjectMediaAssetIds,
   createEmptyProjectAggregateDraft,
   mergeProjectMediaOptions,
@@ -1045,12 +1046,18 @@ function isProjectListApiResponse(
   );
 }
 
+// Loaded and returned drafts become both the editor draft and its clean baseline, so
+// adopting older standalone material maps here never shows as an unsaved change; the
+// next Save persists the adopted image blocks.
 function withResponseStatus(
   draft: ProjectAggregateDraft,
   status: ProjectLifecycleStatus,
   projectId: number,
 ): ProjectAggregateDraft {
-  return { ...draft, project: { ...draft.project, id: projectId, status } };
+  return adoptLegacyMaterialMaps({
+    ...draft,
+    project: { ...draft.project, id: projectId, status },
+  });
 }
 
 function objectString(value: unknown, key: string) {

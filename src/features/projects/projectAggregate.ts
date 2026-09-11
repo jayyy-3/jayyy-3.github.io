@@ -19,7 +19,10 @@ export type ProjectMediaRole =
     | 'hotspot_image'
     | 'youtube_video';
 
-export type ProjectEditorSection = 'overview' | 'facts' | 'materials' | 'media' | 'maps';
+export type ProjectEditorSection = 'overview' | 'facts' | 'media' | 'materials';
+
+/** Public fallback title for an image with material points when its block has no title. */
+export const defaultMaterialPointImageTitle = 'Stone and finish placement';
 
 export interface ProjectDraftRecord {
     id: number | null;
@@ -364,6 +367,13 @@ export function normalizeProjectDraftOrder(draft: ProjectAggregateDraft): Projec
 }
 
 export function normalizeProjectDraftForSave(draft: ProjectAggregateDraft): ProjectAggregateDraft {
+    const pointBlockByMapKey = new Map(
+        draft.mediaBlocks.flatMap((block) =>
+            block.mediaRole === 'hotspot_image' && block.projectMaterialMapKey
+                ? [[block.projectMaterialMapKey, block] as const]
+                : []),
+    );
+    const materialByKey = new Map(draft.materials.map((material) => [material.key, material]));
     return normalizeProjectDraftOrder({
         ...draft,
         project: { ...draft.project, claimReviewStatus: 'approved' },
@@ -373,12 +383,162 @@ export function normalizeProjectDraftForSave(draft: ProjectAggregateDraft): Proj
             mediaAssetId: null,
             claimStatus: 'approved',
         })),
+        // A map is the hidden child of the image block that carries its points: the block
+        // title is the one editable title and the retired map introduction is cleared.
+        maps: draft.maps.map((map) => {
+            const block = pointBlockByMapKey.get(map.key);
+            if (!block) return map;
+            return {
+                ...map,
+                title: block.blockTitle.trim() || defaultMaterialPointImageTitle,
+                intro: '',
+            };
+        }),
+        // An empty point use inherits its material's wording, which Publish requires.
         hotspots: draft.hotspots.map((hotspot) => ({
             ...hotspot,
+            application: hotspot.application.trim()
+                || (hotspot.projectMaterialKey ? materialByKey.get(hotspot.projectMaterialKey)?.application.trim() : '')
+                || hotspot.application,
             label: '',
             previewMediaId: null,
         })),
     });
+}
+
+/** Image shown by a media block: a points block uses its map's image. */
+export function mediaBlockImageId(draft: ProjectAggregateDraft, block: ProjectMediaBlockDraft): number | null {
+    if (block.mediaRole === 'hotspot_image') {
+        return draft.maps.find((map) => map.key === block.projectMaterialMapKey)?.mediaAssetId ?? null;
+    }
+    return block.mediaAssetId;
+}
+
+function pointMapKeyForBlock(draft: ProjectAggregateDraft, blockKey: string): string | null {
+    const block = draft.mediaBlocks.find((entry) => entry.key === blockKey);
+    return block?.mediaRole === 'hotspot_image' ? block.projectMaterialMapKey : null;
+}
+
+/**
+ * Points on one media block in legend order. Draft array order is authoritative: reordering
+ * swaps array positions and Save derives each point's sortOrder from it.
+ */
+export function hotspotsForBlock(draft: ProjectAggregateDraft, blockKey: string): ProjectHotspotDraft[] {
+    const mapKey = pointMapKeyForBlock(draft, blockKey);
+    if (!mapKey) return [];
+    return draft.hotspots.filter((hotspot) => hotspot.projectMaterialMapKey === mapKey);
+}
+
+export function countHotspotsForMaterial(draft: ProjectAggregateDraft, materialKey: string): number {
+    return draft.hotspots.filter((hotspot) => hotspot.projectMaterialKey === materialKey).length;
+}
+
+/** Turns an image block into a points block backed by a new map using the same image. */
+export function enableMediaBlockPoints(draft: ProjectAggregateDraft, blockKey: string): ProjectAggregateDraft {
+    const block = draft.mediaBlocks.find((entry) => entry.key === blockKey);
+    if (!block || block.mediaRole === 'hotspot_image' || block.mediaRole === 'youtube_video') return draft;
+    const map: ProjectMaterialMapDraft = {
+        key: createProjectDraftKey('map'),
+        id: null,
+        mediaAssetId: block.mediaAssetId,
+        title: block.blockTitle,
+        intro: '',
+        sortOrder: draft.maps.length,
+    };
+    return {
+        ...draft,
+        maps: [...draft.maps, map],
+        mediaBlocks: draft.mediaBlocks.map((entry) =>
+            entry.key === blockKey
+                ? { ...entry, mediaRole: 'hotspot_image', mediaAssetId: null, projectMaterialMapKey: map.key }
+                : entry),
+    };
+}
+
+/** Deletes a block's points and map, returning it to a plain image with the same picture. */
+export function disableMediaBlockPoints(draft: ProjectAggregateDraft, blockKey: string): ProjectAggregateDraft {
+    const mapKey = pointMapKeyForBlock(draft, blockKey);
+    if (!mapKey) return draft;
+    const map = draft.maps.find((entry) => entry.key === mapKey);
+    return normalizeProjectDraftOrder({
+        ...draft,
+        maps: draft.maps.filter((entry) => entry.key !== mapKey),
+        hotspots: draft.hotspots.filter((hotspot) => hotspot.projectMaterialMapKey !== mapKey),
+        mediaBlocks: draft.mediaBlocks.map((entry) =>
+            entry.key === blockKey
+                ? { ...entry, mediaRole: 'normal_image', mediaAssetId: map?.mediaAssetId ?? null, projectMaterialMapKey: null }
+                : entry),
+    });
+}
+
+/** Replaces a block's image; points keep their percentage positions. */
+export function setMediaBlockImage(
+    draft: ProjectAggregateDraft,
+    blockKey: string,
+    mediaAssetId: number | null,
+): ProjectAggregateDraft {
+    const mapKey = pointMapKeyForBlock(draft, blockKey);
+    if (mapKey) {
+        return {
+            ...draft,
+            maps: draft.maps.map((map) => (map.key === mapKey ? { ...map, mediaAssetId } : map)),
+        };
+    }
+    return {
+        ...draft,
+        mediaBlocks: draft.mediaBlocks.map((block) => (block.key === blockKey ? { ...block, mediaAssetId } : block)),
+    };
+}
+
+/** Removes a media block; a points block also removes its map and points. */
+export function removeMediaBlock(draft: ProjectAggregateDraft, blockKey: string): ProjectAggregateDraft {
+    if (!draft.mediaBlocks.some((block) => block.key === blockKey)) return draft;
+    const mapKey = pointMapKeyForBlock(draft, blockKey);
+    return normalizeProjectDraftOrder({
+        ...draft,
+        mediaBlocks: draft.mediaBlocks.filter((block) => block.key !== blockKey),
+        maps: mapKey ? draft.maps.filter((map) => map.key !== mapKey) : draft.maps,
+        hotspots: mapKey ? draft.hotspots.filter((hotspot) => hotspot.projectMaterialMapKey !== mapKey) : draft.hotspots,
+    });
+}
+
+/**
+ * Load-time adoption of maps created by the former separate map editor: every map that
+ * no points block references gets its own points block appended in map order (the same
+ * position the public page already gives it), and a points block with no title of its
+ * own takes its map title so the public heading is unchanged. Idempotent.
+ */
+export function adoptLegacyMaterialMaps(draft: ProjectAggregateDraft): ProjectAggregateDraft {
+    const mapByKey = new Map(draft.maps.map((map) => [map.key, map]));
+    const linkedMapKeys = new Set<string>();
+    let changed = false;
+    const mediaBlocks = draft.mediaBlocks.map((block) => {
+        if (block.mediaRole !== 'hotspot_image' || !block.projectMaterialMapKey) return block;
+        const map = mapByKey.get(block.projectMaterialMapKey);
+        if (!map) return block;
+        linkedMapKeys.add(map.key);
+        if (block.blockTitle.trim() || !map.title.trim()) return block;
+        changed = true;
+        return { ...block, blockTitle: map.title };
+    });
+    for (const map of draft.maps) {
+        if (linkedMapKeys.has(map.key)) continue;
+        changed = true;
+        linkedMapKeys.add(map.key);
+        mediaBlocks.push({
+            key: createProjectDraftKey('media'),
+            id: null,
+            mediaRole: 'hotspot_image',
+            mediaAssetId: null,
+            projectMaterialMapKey: map.key,
+            blockTitle: map.title,
+            youtubeUrl: '',
+            label: '',
+            caption: '',
+            sortOrder: mediaBlocks.length,
+        });
+    }
+    return changed ? { ...draft, mediaBlocks } : draft;
 }
 
 export function moveProjectDraftItem(
@@ -590,7 +750,7 @@ export function draftToProjectData(
     const materialMaps = draft.maps.map((map): ProjectMaterialMap => ({
         image: mediaUrl(map.mediaAssetId),
         imageAlt: mediaAlt(map.mediaAssetId, `${projectTitle} material placement`),
-        title: map.title.trim() || 'Stone and finish placement',
+        title: map.title.trim() || defaultMaterialPointImageTitle,
         intro: map.intro.trim(),
         hotspots: mapHotspots(map.key),
     }));
@@ -621,8 +781,7 @@ export function draftToProjectData(
                 type: 'hotspot_image',
                 image,
                 imageAlt: mediaAlt(imageId, `${projectTitle} material placement`),
-                title: block.blockTitle.trim() || linkedMap.title.trim() || 'Stone and finish placement',
-                intro: linkedMap.intro.trim() || undefined,
+                title: block.blockTitle.trim() || linkedMap.title.trim() || defaultMaterialPointImageTitle,
                 caption: block.caption.trim() || undefined,
                 hotspots: mapHotspots(linkedMap.key),
             }];
@@ -714,9 +873,24 @@ export function getProjectPublishBlockers(
     draft: ProjectAggregateDraft,
     context: ProjectAggregateMappingContext,
 ): ProjectPublishBlocker[] {
+    return collectProjectPublishBlockers(draft, context).slice(0, 3);
+}
+
+/** Editor sections holding at least one publish blocker, including those past the first three. */
+export function getProjectBlockerSections(
+    draft: ProjectAggregateDraft,
+    context: ProjectAggregateMappingContext,
+): Set<ProjectEditorSection> {
+    return new Set(collectProjectPublishBlockers(draft, context).map((blocker) => blocker.section));
+}
+
+function collectProjectPublishBlockers(
+    draft: ProjectAggregateDraft,
+    context: ProjectAggregateMappingContext,
+): ProjectPublishBlocker[] {
     const blockers: ProjectPublishBlocker[] = [];
     const add = (blocker: ProjectPublishBlocker) => {
-        if (blockers.length < 3) blockers.push(blocker);
+        blockers.push(blocker);
     };
     const mediaById = new Map(context.media.map((asset) => [asset.id, asset]));
 
@@ -788,24 +962,25 @@ export function getProjectPublishBlockers(
                 : null);
         return !mediaId || !mediaById.get(mediaId)?.alt?.trim();
     });
-    if (incompleteMedia) {
-        add({ id: `media-${incompleteMedia.key}`, section: 'media', message: 'Choose or upload described images for every media block.' });
+    // Maps are hidden children of image blocks; one without an image is the same gap.
+    const incompleteMap = incompleteMedia ? undefined : draft.maps.find((map) => !map.mediaAssetId);
+    if (incompleteMedia || incompleteMap) {
+        add({
+            id: incompleteMedia ? `media-${incompleteMedia.key}` : `media-map-${incompleteMap?.key}`,
+            section: 'media',
+            message: 'Choose a described image for every media block.',
+        });
     }
 
-    const incompleteMap = draft.maps.find((map) => !map.mediaAssetId || !map.title.trim());
-    if (incompleteMap) {
-        add({ id: `map-${incompleteMap.key}`, section: 'maps', message: 'Add an image and title to each material map.' });
-    }
-
-    const materialKeys = new Set(draft.materials.map((material) => material.key));
-    const incompleteHotspot = draft.hotspots.find(
-        (hotspot) => !mapKeys.has(hotspot.projectMaterialMapKey)
-            || !hotspot.projectMaterialKey
-            || !materialKeys.has(hotspot.projectMaterialKey)
-            || !hotspot.application.trim(),
-    );
+    const materialByKey = new Map(draft.materials.map((material) => [material.key, material]));
+    const incompleteHotspot = draft.hotspots.find((hotspot) => {
+        const material = hotspot.projectMaterialKey ? materialByKey.get(hotspot.projectMaterialKey) : undefined;
+        return !mapKeys.has(hotspot.projectMaterialMapKey)
+            || !material
+            || (!hotspot.application.trim() && !material.application.trim());
+    });
     if (incompleteHotspot) {
-        add({ id: `hotspot-${incompleteHotspot.key}`, section: 'maps', message: 'Connect each point to a material and describe where it is used.' });
+        add({ id: `hotspot-${incompleteHotspot.key}`, section: 'media', message: 'Connect every point to a material and say where it is used.' });
     }
 
     return blockers;

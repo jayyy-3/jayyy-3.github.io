@@ -4,13 +4,22 @@ import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { exit } from "node:process";
 import {
+  adoptLegacyMaterialMaps,
   collectProjectMediaAssetIds,
+  countHotspotsForMaterial,
   createEmptyProjectAggregateDraft,
+  disableMediaBlockPoints,
   draftToProjectData,
+  enableMediaBlockPoints,
+  getProjectBlockerSections,
   getProjectPublishBlockers,
+  hotspotsForBlock,
+  mediaBlockImageId,
   mergeProjectMediaOptions,
   moveProjectDraftItem,
   normalizeProjectDraftForSave,
+  removeMediaBlock,
+  setMediaBlockImage,
 } from "../src/features/projects/projectAggregate.ts";
 import { projects as staticProjectFixtures } from "../src/data/projectData.ts";
 import {
@@ -635,11 +644,25 @@ requireMatches(
   editorPath,
   "narrow-screen section header stacking",
 );
+// Each media block owns one image field whose identity survives turning material points
+// on or off, so a pending upload can never move to another block.
 requireIncludes(
   editor,
-  "key={`map-${selectedMap.key}`}",
+  "instanceKey={`media-${block.key}`}",
   editorPath,
-  "stable selected-map media identity",
+  "stable per-block media field instance",
+);
+requireIncludes(
+  editor,
+  "key={`media-${block.key}`}",
+  editorPath,
+  "stable per-block media field identity",
+);
+forbidMatches(
+  editor,
+  /Material maps and points|Interactive material image|Add material map/,
+  editorPath,
+  "separate material-map editor",
 );
 forbidMatches(
   editor,
@@ -2069,10 +2092,179 @@ const brokenReferenceDraft = structuredClone(behaviorDraft);
 brokenReferenceDraft.hotspots[0].projectMaterialKey = "material:new:missing";
 assert.ok(
   getProjectPublishBlockers(brokenReferenceDraft, behaviorContext).some(
-    (blocker) => blocker.section === "maps",
+    (blocker) => blocker.section === "media",
   ),
-  "Missing child references must become a plain-language publish blocker",
+  "Missing child references must become a plain-language publish blocker on the image",
 );
+
+// Points live on media images: the map is a hidden child of its image block.
+const pointsDraft = createEmptyProjectAggregateDraft();
+pointsDraft.materials.push(structuredClone(behaviorDraft.materials[0]));
+pointsDraft.mediaBlocks.push({
+  key: "media:new:plain",
+  id: null,
+  mediaRole: "normal_image",
+  mediaAssetId: 2,
+  projectMaterialMapKey: null,
+  blockTitle: "Entry view",
+  youtubeUrl: "",
+  label: "Context",
+  caption: "Caption",
+  sortOrder: 0,
+});
+const enabledPoints = enableMediaBlockPoints(pointsDraft, "media:new:plain");
+const enabledBlock = enabledPoints.mediaBlocks[0];
+assert.equal(enabledBlock.mediaRole, "hotspot_image");
+assert.equal(enabledBlock.mediaAssetId, null, "A points block must read its image from its map");
+assert.equal(enabledPoints.maps.length, 1);
+assert.equal(enabledPoints.maps[0].mediaAssetId, 2);
+assert.equal(enabledPoints.maps[0].title, "Entry view");
+assert.equal(enabledBlock.projectMaterialMapKey, enabledPoints.maps[0].key);
+assert.equal(mediaBlockImageId(enabledPoints, enabledBlock), 2);
+assert.equal(
+  enableMediaBlockPoints(enabledPoints, "media:new:plain"),
+  enabledPoints,
+  "Enabling points twice must be a no-op",
+);
+assert.doesNotThrow(
+  () => validateDraftShape(normalizeProjectDraftForSave(enabledPoints)),
+  "A points block created from an image must satisfy the server draft shape",
+);
+const withPoint = {
+  ...enabledPoints,
+  hotspots: [{
+    key: "hotspot:new:on-image",
+    id: null,
+    projectMaterialMapKey: enabledPoints.maps[0].key,
+    projectMaterialKey: "material:new:proof",
+    xPercent: 30,
+    yPercent: 70,
+    label: "",
+    application: "",
+    note: "",
+    previewMediaId: null,
+    sortOrder: 0,
+  }],
+};
+assert.deepEqual(hotspotsForBlock(withPoint, "media:new:plain").map((point) => point.key), ["hotspot:new:on-image"]);
+assert.equal(countHotspotsForMaterial(withPoint, "material:new:proof"), 1);
+assert.equal(countHotspotsForMaterial(withPoint, "material:new:missing"), 0);
+const replacedImage = setMediaBlockImage(withPoint, "media:new:plain", 1);
+assert.equal(replacedImage.maps[0].mediaAssetId, 1, "Replacing a points image must change the map image");
+assert.deepEqual(
+  [replacedImage.hotspots[0].xPercent, replacedImage.hotspots[0].yPercent],
+  [30, 70],
+  "Replacing a points image must keep point positions",
+);
+assert.equal(
+  setMediaBlockImage(pointsDraft, "media:new:plain", 1).mediaBlocks[0].mediaAssetId,
+  1,
+  "Replacing a plain image must change the block image",
+);
+const disabledPoints = disableMediaBlockPoints(withPoint, "media:new:plain");
+assert.deepEqual(
+  disabledPoints.mediaBlocks,
+  pointsDraft.mediaBlocks,
+  "Turning points off must restore the original plain image block",
+);
+assert.equal(disabledPoints.maps.length, 0, "Turning points off must remove the hidden map");
+assert.equal(disabledPoints.hotspots.length, 0, "Turning points off must delete its points");
+const removedPointsBlock = removeMediaBlock(withPoint, "media:new:plain");
+assert.deepEqual(
+  [removedPointsBlock.mediaBlocks.length, removedPointsBlock.maps.length, removedPointsBlock.hotspots.length],
+  [0, 0, 0],
+  "Removing a points block must cascade to its map and points",
+);
+assert.equal(
+  removeMediaBlock(pointsDraft, "media:new:plain").mediaBlocks.length,
+  0,
+  "Removing a plain image block removes only that block",
+);
+const savedPoints = normalizeProjectDraftForSave({
+  ...withPoint,
+  maps: [{ ...withPoint.maps[0], title: "Old map title", intro: "Retired introduction" }],
+  mediaBlocks: [{ ...withPoint.mediaBlocks[0], blockTitle: "" }],
+});
+assert.equal(savedPoints.maps[0].title, "Stone and finish placement", "An untitled points image must save the public fallback title");
+assert.equal(savedPoints.maps[0].intro, "", "Save must clear the retired map introduction");
+assert.equal(
+  normalizeProjectDraftForSave(withPoint).maps[0].title,
+  "Entry view",
+  "Save must copy the image block title to its map",
+);
+assert.equal(
+  savedPoints.hotspots[0].application,
+  "Paving",
+  "An empty point use must inherit its material wording on Save",
+);
+const publishablePoints = normalizeProjectDraftForSave({
+  ...withPoint,
+  project: structuredClone(behaviorDraft.project),
+});
+assert.doesNotThrow(
+  () => assertPublishDraft(publishablePoints),
+  "A normalized points-on-image draft must satisfy server publish validation",
+);
+assert.equal(
+  getProjectPublishBlockers(withPoint, behaviorContext).some((blocker) => blocker.id.startsWith("hotspot-")),
+  false,
+  "A point using its material wording must not block publishing",
+);
+const unplacedPoint = structuredClone(withPoint);
+unplacedPoint.hotspots[0].projectMaterialKey = null;
+assert.equal(
+  getProjectBlockerSections(unplacedPoint, behaviorContext).has("media"),
+  true,
+  "A point without a material must mark the media section",
+);
+
+const legacyMapDraft = structuredClone(behaviorDraft);
+legacyMapDraft.maps.push({
+  key: "map:new:linked",
+  id: null,
+  mediaAssetId: 1,
+  title: "Linked map title",
+  intro: "",
+  sortOrder: 1,
+});
+legacyMapDraft.mediaBlocks.push({
+  key: "media:new:linked",
+  id: null,
+  mediaRole: "hotspot_image",
+  mediaAssetId: null,
+  projectMaterialMapKey: "map:new:linked",
+  blockTitle: "",
+  youtubeUrl: "",
+  label: "",
+  caption: "",
+  sortOrder: 0,
+});
+const adoptedDraft = adoptLegacyMaterialMaps(legacyMapDraft);
+assert.deepEqual(
+  adoptedDraft.mediaBlocks.map((block) => [block.mediaRole, block.projectMaterialMapKey, block.blockTitle]),
+  [
+    ["hotspot_image", "map:new:linked", "Linked map title"],
+    ["hotspot_image", "map:new:proof", "Material placement"],
+  ],
+  "Unlinked maps must be adopted as trailing points blocks and linked blocks keep their public title",
+);
+assert.equal(
+  adoptLegacyMaterialMaps(adoptedDraft),
+  adoptedDraft,
+  "Adopting already linked maps must not change the draft",
+);
+assert.deepEqual(
+  draftToProjectData(adoptedDraft, behaviorContext).mediaBlocks?.map((block) => block.type === "hotspot_image" ? block.title : block.type),
+  draftToProjectData(legacyMapDraft, behaviorContext).mediaBlocks?.map((block) => block.type === "hotspot_image" ? block.title : block.type),
+  "Adoption must not change the public media sequence or titles",
+);
+for (const draftUnderTest of [behaviorDraft, brokenReferenceDraft, unplacedPoint, legacyMapDraft]) {
+  assert.equal(
+    getProjectPublishBlockers(draftUnderTest, behaviorContext).some((blocker) => blocker.section === "maps"),
+    false,
+    "Publish blockers must never point at a separate maps section",
+  );
+}
 
 const editorBaseline = structuredClone(behaviorDraft);
 Object.assign(editorBaseline.project, { id: 20, status: "published" });
