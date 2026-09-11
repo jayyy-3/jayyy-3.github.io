@@ -209,10 +209,10 @@ Pass condition: an editor can tell whether a media item can be reused on public 
 1. Open Projects.
 2. Search/filter by status and choose an imported Draft project.
 3. Copy the selected `/admin/projects/:projectId` URL, refresh it, and confirm the same Project remains selected.
-4. Move through Overview, Facts, Materials, Media, and Maps; confirm only one task workspace is the primary editing stage at a time.
+4. Use the section bar to move through Hero and overview, Project information, Page images and video, and Material schedule; confirm each opens and collapses on its own and the bar marks sections that still block publishing. On a page image, use Mark materials on this image, place a point, choose its material, then Turn off material points and confirm it asks before deleting.
 5. Change one safe Overview field, attempt to switch task and Project, and confirm the unsaved-change warning prevents accidental loss. Save, refresh, and confirm the value persists.
 6. Confirm Project actions appears beside the Publish checklist.
-7. Select the first blocker and confirm it opens the relevant Overview, Facts, or Materials task and highlights the repair target.
+7. Select the first blocker and confirm it opens and scrolls to the relevant section (Hero and overview, Project information, Page images and video, or Material schedule).
 8. Search the Media library selector by a readable label or URL fragment and confirm the intended item can be selected without scanning the full list.
 9. Confirm proof review wording uses Needs review, Approved for public use, and Deferred / keep private.
 10. If publishing is approved, publish only after the checklist is clear, then use Open public page to check the public route.

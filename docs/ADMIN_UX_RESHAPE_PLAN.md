@@ -122,7 +122,7 @@ Scope:
    facts, material schedule, media, material maps + hotspots), collapsible,
    with one sticky actions bar: Save / Publish / Hide (archive) / Open preview.
 4. **Live preview.** Reuse the public detail rendering (see
-   `src/pages/ProjectDetails.tsx`, `src/components/projects/ProjectMaterialMap.tsx`,
+   `src/pages/ProjectDetails.tsx`, `src/components/projects/ProjectPageView.tsx`,
    `src/components/projects/ProjectHotspotImage.tsx`, and the data mapping in
    `src/service/ProjectService.ts` / `src/service/publicContentOverlay.ts`).
    Extract the pure rendering into components that accept mapped props if

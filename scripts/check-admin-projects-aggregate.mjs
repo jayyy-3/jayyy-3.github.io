@@ -169,7 +169,15 @@ const page = readRequired(pagePath);
 const shell = readRequired(shellPath);
 const aggregate = readRequired(aggregatePath);
 const apiContract = readRequired(apiContractPath);
-const editor = readRequired(editorPath);
+// The editor's Media and Materials sections and shared controls live in projects/sections/;
+// source contracts apply to the editor as a whole.
+const editorSectionPaths = [
+  "src/pages/admin/projects/sections/editorContext.ts",
+  "src/pages/admin/projects/sections/EditorControls.tsx",
+  "src/pages/admin/projects/sections/MediaSection.tsx",
+  "src/pages/admin/projects/sections/MaterialsSection.tsx",
+];
+const editor = [editorPath, ...editorSectionPaths].map(readRequired).join("\n");
 const preview = readRequired(previewPath);
 const media = readRequired(mediaPath);
 const hotspot = readRequired(hotspotPath);

@@ -19,6 +19,8 @@ const docRoots = ['docs']
 const allowedMissing = new Set([
   'docs/README_AGENT.md',
   'public/404.html',
+  // Retired 2026-09-11 (no importers); immutable archived evidence still cites it.
+  'src/components/projects/ProjectMaterialMap.tsx',
 ])
 const pathPrefixes = [
   '.github/',
