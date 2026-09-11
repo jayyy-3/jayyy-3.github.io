@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "lastUpdated": "2026-09-11",
+  "lastUpdated": "2026-09-12",
   "currentTaskId": "NOW-STONE-PROJECT-REFS-001",
   "sourceOfTruth": {
     "currentState": "docs/agent/status.json",
@@ -10,12 +10,12 @@
     "adminHandoffEvidence": "docs/agent/admin-handoff-evidence.json"
   },
   "release": {
-    "observedAt": "2026-09-10",
-    "repositorySha": "d612fcd23ada54b1bf94e75fcdb52e79875da074",
-    "runtimeSha": "d612fcd23ada54b1bf94e75fcdb52e79875da074",
-    "verifiedRuntimeUrl": "https://24e7566f.urblo-site.pages.dev",
-    "ciRunId": 34469804985,
-    "note": "PR #47 production passed isolated workflows and immutable/apex/www smoke. Approved Stone migrations and 12-stone/55-photo adoption completed. Tagged Owner/Editor UI workflows passed; Viewer live proof and Jay acceptance remain open. Subsequent evidence-only changes do not deploy.",
+    "observedAt": "2026-09-12",
+    "repositorySha": "7de1af716fe54fcd7566a17b3693ecb838fb4722",
+    "runtimeSha": "7de1af716fe54fcd7566a17b3693ecb838fb4722",
+    "verifiedRuntimeUrl": "https://905e7161.urblo-site.pages.dev",
+    "ciRunId": 34606801956,
+    "note": "Stone/Project references PRs #50, #51, #52 merged in order with Jay approval; production run passed isolated workflows and immutable/apex/www smoke. No migration or production data write. Stone workspace Viewer live proof and Jay usability acceptance remain open. Subsequent evidence-only changes do not deploy.",
     "evidenceRefs": [
       "docs/WORKLOG.md"
     ]
