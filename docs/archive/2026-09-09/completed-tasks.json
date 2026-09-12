@@ -1852,7 +1852,7 @@
         "2026-08-10: Jay rejected PR `#18`'s 24px Header / 40px menu blur as too frosted. Git history confirmed the original clear-glass material used `backdrop-blur-sm` from March through the shared-header unification, without added saturation. The correction retains the approved route-aware tints/light clearance, restores 4px blur for Header/menu, and adds a smoke guard against medium/heavy blur. PR `#18` technical deployment evidence is not user acceptance.",
         "2026-08-10: The clear-glass correction passed the clean Node 20 gate, immutable Preview `ac951868` smoke/rendered QA, and merged through PR `#19` as `36e69e5f`. Apex and `www` passed byte/MIME-bound smoke after edge convergence; production desktop/390px readback confirms 4px Header/menu blur, no added saturation, and no horizontal overflow.",
         "2026-09-02: Follow-up source repair aligns the first-visit Homepage Acknowledge panel with the accepted Homepage Header material (`bg-black/50` plus 4px `backdrop-blur-sm`). The previous `/88` token became a real near-opaque background only after Tailwind's opacity scale was expanded; source smoke now rejects that regression.",
-        "2026-09-02: Local desktop/390px production-build QA, the clean Node 20 gate, and full immutable Cloudflare Preview smoke pass. Jay reviewed the result and explicitly accepted it with `\u6ca1\u95ee\u9898`.",
+        "2026-09-02: Local desktop/390px production-build QA, the clean Node 20 gate, and full immutable Cloudflare Preview smoke pass. Jay reviewed the result and explicitly accepted it with `没问题`.",
         "2026-09-02: PR `#34` squash-merged as `e298d06`; GitHub Actions deployed immutable production `737e702b`. The immutable deployment, apex, and `www` pass full deployment-bound smoke, closing the Acknowledge follow-up."
       ],
       "acceptance": [
@@ -2049,6 +2049,48 @@
       },
       "nextAction": "No automatic follow-on work. Administrator main protection is tracked separately.",
       "completedAt": "2026-09-10"
+    },
+    {
+      "id": "NOW-COMPANY-ADDRESS-001",
+      "status": "done",
+      "priority": 0,
+      "summary": "Publish the approved Office/Warehouse addresses with shared Settings management.",
+      "files": [
+        "src/lib/companyLocations.ts",
+        "src/pages/admin/AdminSettingsPage.tsx",
+        "src/pages/ContactPage.tsx",
+        "src/components/site/SiteFooter.tsx",
+        "public/downloads/urblo-capability-statement-2026.pdf"
+      ],
+      "acceptance": [
+        "Settings save/refresh feeds Contact, footer and Organization data.",
+        "Old company address removed from public contact content, four legacy articles and PDF page 25.",
+        "Desktop/mobile and production readback pass; project addresses unchanged."
+      ],
+      "verification": [
+        "npm run agent:verify -- --plan",
+        "npm run gate",
+        "Targeted browser save/refresh and PDF inspection; deployed smoke."
+      ],
+      "phase": "complete",
+      "authorization": {
+        "source": "Jay approved implementation of the reviewed address consolidation and release on 2026-09-13.",
+        "included": [
+          "Code, PDF and legacy article changes; update the existing Published Settings address entries; verified PR merge and production publication."
+        ],
+        "excluded": [
+          "Unrelated settings, content or infrastructure changes."
+        ]
+      },
+      "nextAction": "Future website address edits use Settings > Company addresses; update the separate PDF when an address changes.",
+      "blocker": "",
+      "completedAt": "2026-09-13",
+      "evidence": [
+        "PR #54: candidate 418f1129ad53c1508e7040d416dac96ee2ae0552; merged runtime 0ef7835ba293c012e0d3910f8726c390c4a096dd.",
+        "Clean Node 20 gate, 12-route config browser gate, SEO and synthetic Settings save/refresh/public synchronization passed.",
+        "Preview run 34704373106 and production run 34704740559 passed; immutable https://e80309fb.urblo-site.pages.dev and apex/www smoke passed.",
+        "Approved site_settings id 1 address-only update and public browser readback passed; other settings unchanged; four article files and PDF match the released files."
+      ]
     }
   ]
 }

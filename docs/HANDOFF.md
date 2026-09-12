@@ -6,19 +6,19 @@ Last updated: 2026-09-13
 
 ## 正在执行
 
-**NOW-COMPANY-ADDRESS-001** — Publish the approved Office/Warehouse addresses with shared Settings management.
+**NOW-STONE-PROJECT-REFS-001** — Link Stone Library and Projects both ways: quiet public material-point cards with deep links, Stone "Used in projects", and material points on any Project media image in a reshaped admin editor.
 
-阶段：implementation。状态：now。
+阶段：awaiting_external。状态：now。
 
-下一步：Complete targeted verification and release, then read back Published Settings and public addresses.
+下一步：Jay tries the Projects editor in production: mark materials on one project image, Save, Publish and check the public point card and the Stone page Used in projects.
 
 ## 已观察的发布状态
 
-观察日期：2026-09-12。仓库版本：`7de1af716fe54fcd7566a17b3693ecb838fb4722`。已验证运行时代码：`7de1af716fe54fcd7566a17b3693ecb838fb4722`。
+观察日期：2026-09-13。仓库版本：`0ef7835ba293c012e0d3910f8726c390c4a096dd`。已验证运行时代码：`0ef7835ba293c012e0d3910f8726c390c4a096dd`。
 
-验证地址：https://905e7161.urblo-site.pages.dev
+验证地址：https://e80309fb.urblo-site.pages.dev
 
-Stone/Project references PRs #50, #51, #52 merged in order with Jay approval; production run passed isolated workflows and immutable/apex/www smoke. No migration or production data write. Stone workspace Viewer live proof and Jay usability acceptance remain open. Subsequent evidence-only changes do not deploy.
+PR #54 centralizes and updates the approved Office/Warehouse addresses. Clean local gate, Preview, production immutable/apex/www smoke and public address/PDF readback passed. The approved Published Settings address-only update preserved other settings. This record-only closeout does not deploy. Existing Stone/Project user acceptance and broader CMS handoff remain separate.
 
 CMS handoff: **revalidation_required**。QR: material_page_deployed。
 
