@@ -1,7 +1,7 @@
 {
   "version": 2,
   "lastUpdated": "2026-09-13",
-  "currentTaskId": "NOW-COMPANY-ADDRESS-001",
+  "currentTaskId": "NOW-STONE-PROJECT-REFS-001",
   "sourceOfTruth": {
     "currentState": "docs/agent/status.json",
     "taskQueue": "docs/agent/tasks.json",
@@ -10,12 +10,12 @@
     "adminHandoffEvidence": "docs/agent/admin-handoff-evidence.json"
   },
   "release": {
-    "observedAt": "2026-09-12",
-    "repositorySha": "7de1af716fe54fcd7566a17b3693ecb838fb4722",
-    "runtimeSha": "7de1af716fe54fcd7566a17b3693ecb838fb4722",
-    "verifiedRuntimeUrl": "https://905e7161.urblo-site.pages.dev",
-    "ciRunId": 34606801956,
-    "note": "Stone/Project references PRs #50, #51, #52 merged in order with Jay approval; production run passed isolated workflows and immutable/apex/www smoke. No migration or production data write. Stone workspace Viewer live proof and Jay usability acceptance remain open. Subsequent evidence-only changes do not deploy.",
+    "observedAt": "2026-09-13",
+    "repositorySha": "0ef7835ba293c012e0d3910f8726c390c4a096dd",
+    "runtimeSha": "0ef7835ba293c012e0d3910f8726c390c4a096dd",
+    "verifiedRuntimeUrl": "https://e80309fb.urblo-site.pages.dev",
+    "ciRunId": 34704740559,
+    "note": "PR #54 centralizes and updates the approved Office/Warehouse addresses. Clean local gate, Preview, production immutable/apex/www smoke and public address/PDF readback passed. The approved Published Settings address-only update preserved other settings. This record-only closeout does not deploy. Existing Stone/Project user acceptance and broader CMS handoff remain separate.",
     "evidenceRefs": [
       "docs/WORKLOG.md"
     ]
@@ -77,8 +77,8 @@
     ]
   },
   "lastCompletedTask": {
-    "id": "NOW-ADMIN-STONE-WORKSPACE-001",
-    "summary": "Approved Stone implementation and production release completed; user acceptance and Viewer live proof remain open."
+    "id": "NOW-COMPANY-ADDRESS-001",
+    "summary": "Office/Warehouse addresses centralized in Settings and released; public pages, legacy articles and PDF verified."
   },
   "stoneWorkspace": {
     "status": "deployed_awaiting_user_acceptance",
