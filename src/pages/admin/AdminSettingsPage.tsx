@@ -1,3 +1,4 @@
+import { defaultCompanyLocations, readCompanyLocations, writeCompanyLocations, isCompanyAddressItem, companyAddressMaxLength } from '../../lib/companyLocations';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
@@ -47,6 +48,8 @@ interface SettingsFormState {
     seoTitle: string;
     seoDescription: string;
     defaultShareImage: string;
+    officeAddress: string;
+    warehouseAddress: string;
     footerColumns: FooterColumnForm[];
 }
 
@@ -88,6 +91,8 @@ interface AdminInviteFormState {
 }
 
 const emptyForm: SettingsFormState = {
+    officeAddress: defaultCompanyLocations.office,
+    warehouseAddress: defaultCompanyLocations.warehouse,
     status: 'published',
     companyName: 'Urblo',
     primaryEmail: '',
@@ -407,6 +412,19 @@ function AdminSettingsContent() {
                                 </label>
                             </div>
                         )}
+                    </div>
+
+                    <div className="border border-black/10 bg-white p-5 md:p-6">
+                        <h2 className="text-xs font-semibold uppercase tracking-[0.16em] text-black/45">Company addresses</h2>
+                        <p className="mt-2 text-sm leading-6 text-black/58">Used on Contact, the website footer and search listings. The downloadable capability statement is a separate PDF and needs updating when an address changes.</p>
+                        <div className="mt-5 grid gap-4">
+                            {([['officeAddress', 'Office address'], ['warehouseAddress', 'Warehouse address']] as const).map(([field, label]) => (
+                                <label key={field} className="text-xs font-bold uppercase tracking-[0.14em] text-black/55">
+                                    {label}
+                                    <textarea value={form[field]} onChange={event => updateField(field, event.target.value)} disabled={!canEdit || isSaving || isLoading} maxLength={companyAddressMaxLength} rows={2} className={`${fieldClass} py-3 leading-6`} />
+                                </label>
+                            ))}
+                        </div>
                     </div>
 
                     <div className="border border-black/10 bg-white p-5 md:p-6">
@@ -1123,6 +1141,8 @@ function rowToForm(row: SiteSettingsRow | null): SettingsFormState {
     }
 
     return {
+        officeAddress: readCompanyLocations(row.footer_columns).office,
+        warehouseAddress: readCompanyLocations(row.footer_columns).warehouse,
         status: row.status,
         companyName: row.company_name ?? 'Urblo',
         primaryEmail: row.primary_email ?? '',
@@ -1465,7 +1485,18 @@ function validateSettings(form: SettingsFormState): {
         return { error: 'Company name is required.', footerColumns: [], publishedFields: null };
     }
 
-    const footerColumns = serializeFooterColumns(form.footerColumns);
+    if (![form.officeAddress, form.warehouseAddress].every(value => value.trim() && value.trim().length <= companyAddressMaxLength)) {
+        return { error: `Office and Warehouse addresses are required (up to ${companyAddressMaxLength} characters each).`, footerColumns: [], publishedFields: null };
+    }
+    const addressItems = writeCompanyLocations([], { office: form.officeAddress, warehouse: form.warehouseAddress });
+    const columns = form.footerColumns.map(column => ({ ...column, items: [...column.items] }));
+    let contact = columns.find(column => column.title.trim().toLowerCase() === 'contact');
+    if (!contact) { contact = { title: 'Contact', items: [] }; columns.unshift(contact); }
+    if (columns.some(column => column.items.some(item => /^(office|warehouse|address)$/i.test(item.label.trim()) && item.destinationKind === 'text'))) {
+        return { error: 'Edit company addresses in the Company addresses fields above.', footerColumns: [], publishedFields: null };
+    }
+    contact.items.push(...addressItems[0].items.map(item => ({ label: String(item.label), destinationKind: 'text' as const, destination: String(item.value) })));
+    const footerColumns = serializeFooterColumns(columns);
     if (footerColumns.error) {
         return { error: footerColumns.error, footerColumns: [], publishedFields: null };
     }
@@ -1496,7 +1527,7 @@ function normalizeFooterColumns(columns: unknown[]): FooterColumnForm[] {
         .map((column) => {
             if (!isRecord(column)) return null;
             const title = typeof column.title === 'string' ? column.title : '';
-            const rawItems = Array.isArray(column.items) ? column.items : [];
+            const rawItems = Array.isArray(column.items) ? column.items.filter(item => !isCompanyAddressItem(item)) : [];
             const items = rawItems
                 .map((item) => {
                     if (!isRecord(item)) return null;

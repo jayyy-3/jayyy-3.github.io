@@ -1,3 +1,4 @@
+import { defaultCompanyLocations, readCompanyLocations, writeCompanyLocations, type CompanyLocations } from './companyLocations';
 import { createContext, useContext } from 'react';
 import {
   siteFooterContact,
@@ -41,6 +42,7 @@ export interface PublicFooterColumn {
 
 export interface PublicSiteSettings {
   source: 'static' | 'cms';
+  locations: CompanyLocations;
   companyName: string;
   primaryEmail: string | null;
   primaryPhone: string | null;
@@ -55,6 +57,7 @@ export interface PublicSiteSettings {
 
 export const staticPublicSiteSettings: PublicSiteSettings = {
   source: 'static',
+  locations: defaultCompanyLocations,
   companyName: 'Urblo',
   primaryEmail: siteFooterContact.email,
   primaryPhone: siteFooterContact.phone,
@@ -133,6 +136,7 @@ function parsePublicSiteSettings(row: PublicSiteSettingsRow): PublicSiteSettings
 
   return {
     source: 'cms',
+    locations: readCompanyLocations(row.footer_columns),
     companyName,
     primaryEmail:
       row.primary_email === null
@@ -141,7 +145,7 @@ function parsePublicSiteSettings(row: PublicSiteSettingsRow): PublicSiteSettings
     primaryPhone:
       row.primary_phone === null ? null : phone || staticPublicSiteSettings.primaryPhone,
     socialLinks: parseSocialLinks(row.social_links),
-    footerColumns: parseFooterColumns(row.footer_columns),
+    footerColumns: parseFooterColumns(row.footer_columns) ? parseFooterColumns(writeCompanyLocations(row.footer_columns, readCompanyLocations(row.footer_columns))) : null,
     seo: parseSeo(row.seo),
   };
 }

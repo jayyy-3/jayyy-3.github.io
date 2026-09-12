@@ -1,3 +1,4 @@
+import { companyLocationSchema, type CompanyLocations } from '../lib/companyLocations';
 import { useEffect } from 'react';
 import { DEFAULT_SHARE_IMAGE, SITE_URL } from '../data/seoRoutes';
 import { usePublicSiteSettings } from '../lib/publicSiteSettings';
@@ -56,6 +57,7 @@ export default function PublicContentSeo({
       buildPublicContentStructuredData({
         canonicalUrl,
         companyName: settings.companyName,
+        locations: settings.locations,
         description,
         image: shareImage,
         ogType,
@@ -78,6 +80,7 @@ export default function PublicContentSeo({
     seo?.description,
     seo?.title,
     settings.companyName,
+    settings.locations,
     settings.seo.defaultShareImage,
   ]);
 
@@ -147,6 +150,7 @@ function upsertDynamicJsonLd(structuredData: Record<string, unknown>[]) {
 function buildPublicContentStructuredData({
   canonicalUrl,
   companyName,
+  locations,
   description,
   image,
   ogType,
@@ -154,6 +158,7 @@ function buildPublicContentStructuredData({
 }: {
   canonicalUrl: string;
   companyName: string;
+  locations: CompanyLocations;
   description: string;
   image: string;
   ogType: 'website' | 'article';
@@ -203,6 +208,7 @@ function buildPublicContentStructuredData({
       '@context': 'https://schema.org',
       '@type': 'Organization',
       '@id': `${SITE_URL}/#organization`,
+      ...companyLocationSchema(locations),
       name: companyName,
       url: SITE_URL,
     },

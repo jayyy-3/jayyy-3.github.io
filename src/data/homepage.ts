@@ -1,3 +1,5 @@
+import { siteFooterContact } from './siteChrome';
+
 export interface HomepageNavLink {
   label: string;
   to?: string;
@@ -414,7 +416,7 @@ export const homepageData = {
     youtubeId: 'UfRtQZSi7cM',
   },
   footer: {
-    address: ['5 Hamilton St,', 'Oakleigh VIC 3166'],
+    address: siteFooterContact.address,
     email: 'info@urblo.com.au',
     phone: '1300 1URBLO',
     copyright: '© Copyright 2024',

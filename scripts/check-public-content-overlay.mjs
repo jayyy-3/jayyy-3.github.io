@@ -1,3 +1,4 @@
+import { defaultCompanyLocations, readCompanyLocations, writeCompanyLocations, companyLocationSchema } from '../src/lib/companyLocations.ts';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { resolvePublicMediaUrl, toSafePublicMediaSourceUrl } from '../src/lib/publicMediaUrl.ts';
@@ -644,3 +645,17 @@ assert.match(
 );
 
 console.log('Public content overlay checks passed.');
+
+// A Settings address edit must preserve other footer content and feed every consumer.
+const addressFooter = [{ title: 'Contact', items: [{ label: 'Email', value: 'info@urblo.com.au' }, { label: 'Address', value: '5 Hamilton St, Oakleigh VIC 3166' }] }, { title: 'Navigation', items: [{ label: 'Projects', to: '/projects' }] }];
+const replacementLocations = { office: 'Office test address 3000', warehouse: 'Warehouse test address 3150' };
+const addressUpdated = writeCompanyLocations(addressFooter, replacementLocations);
+assert.deepEqual(readCompanyLocations(addressUpdated), replacementLocations);
+assert.deepEqual(addressUpdated[1], addressFooter[1]);
+assert.deepEqual(addressUpdated[0].items[0], addressFooter[0].items[0]);
+assert.equal(JSON.stringify(addressUpdated).includes('Hamilton'), false);
+assert.deepEqual(writeCompanyLocations(addressUpdated, replacementLocations), addressUpdated);
+assert.deepEqual(readCompanyLocations(addressFooter), defaultCompanyLocations);
+assert.deepEqual(readCompanyLocations([{ title: 'Contact', items: [{ label: 'Office', value: 'x'.repeat(161) }] }]), defaultCompanyLocations);
+assert.equal(companyLocationSchema(replacementLocations).address, replacementLocations.office);
+assert.equal(companyLocationSchema(replacementLocations).location[1].address, replacementLocations.warehouse);

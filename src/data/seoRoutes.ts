@@ -1,3 +1,4 @@
+import { defaultCompanyLocations, companyLocationSchema, type CompanyLocations } from '../lib/companyLocations';
 import stoneLibraryJson from '../../data/clean/stone_library.json';
 import articleIndexJson from '../../public/articles/index.json';
 import { projects } from './projectData';
@@ -307,7 +308,7 @@ export function getSeoMetaForPathname(pathname: string, defaults: SeoMetaDefault
     };
 }
 
-export function getStructuredDataForPathname(pathname: string): JsonLd[] {
+export function getStructuredDataForPathname(pathname: string, locations: CompanyLocations = defaultCompanyLocations): JsonLd[] {
     const normalizedPath = normalizePath(pathname);
     const seoRoute = getSeoRouteForPathname(normalizedPath);
 
@@ -315,7 +316,7 @@ export function getStructuredDataForPathname(pathname: string): JsonLd[] {
         return [];
     }
 
-    const structuredData: JsonLd[] = [organizationSchema, websiteSchema, toBreadcrumbSchema(seoRoute)];
+    const structuredData: JsonLd[] = [{ ...organizationSchema, ...companyLocationSchema(locations) }, websiteSchema, toBreadcrumbSchema(seoRoute)];
     const article = articleIndex.find((entry) => `/articles/${entry.slug}` === seoRoute.path);
 
     if (article) {
@@ -376,14 +377,7 @@ const organizationSchema: JsonLd = {
     logo: canonicalUrlForPath(siteLogoUrl),
     email: siteFooterContact.email,
     telephone: siteFooterContact.phone,
-    address: {
-        '@type': 'PostalAddress',
-        streetAddress: siteFooterContact.address.join(' ').replace(',', ''),
-        addressLocality: 'Oakleigh',
-        addressRegion: 'VIC',
-        postalCode: '3166',
-        addressCountry: 'AU',
-    },
+    ...companyLocationSchema(defaultCompanyLocations),
     sameAs: siteSocialLinks.map((link) => link.href).filter(Boolean),
 };
 

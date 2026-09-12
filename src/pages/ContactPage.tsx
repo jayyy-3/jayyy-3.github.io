@@ -1,3 +1,5 @@
+import { usePublicSiteSettings } from '../lib/publicSiteSettings';
+import { companyLocationLabels } from '../lib/companyLocations';
 import { ArrowUpRight, CheckCircle, Mail, MapPin, Phone, Send } from 'lucide-react';
 import type { FormEvent } from 'react';
 import { useEffect, useState } from 'react';
@@ -57,6 +59,7 @@ const inputClassName =
   'w-full rounded-[4px] border border-black/15 bg-white px-4 py-3 text-[15px] font-medium text-black outline-none transition placeholder:text-black/35 focus:border-black focus:ring-2 focus:ring-[var(--urblo-lime)]';
 
 export default function ContactPage() {
+  const settings = usePublicSiteSettings();
   const [searchParams] = useSearchParams();
   const queryProjectType =
     searchParams.get('intent') === 'sample-request' ? 'Sample request' : 'Project enquiry';
@@ -241,19 +244,15 @@ export default function ContactPage() {
                 <ArrowUpRight className="h-5 w-5 text-black/45" aria-hidden="true" />
               </a>
 
-              <div className="flex items-start gap-4 px-5 py-5">
-                <MapPin className="mt-1 h-5 w-5 flex-none text-black" aria-hidden="true" />
-                <div>
-                  <p className="text-[13px] font-semibold uppercase tracking-[0.12em] text-black/52">
-                    Studio
-                  </p>
-                  <p className="mt-1 text-[18px] font-semibold leading-7 text-black">
-                    5 Hamilton St,
-                    <br />
-                    Oakleigh VIC 3166
-                  </p>
+              {(['office', 'warehouse'] as const).map(key => (
+                <div key={key} className="flex items-start gap-4 px-5 py-5">
+                  <MapPin className="mt-1 h-5 w-5 flex-none text-black" aria-hidden="true" />
+                  <div className="min-w-0">
+                    <p className="text-[13px] font-semibold uppercase tracking-[0.12em] text-black/52">{companyLocationLabels[key]}</p>
+                    <p className="mt-1 break-words text-[18px] font-semibold leading-7 text-black">{settings.locations[key]}</p>
+                  </div>
                 </div>
-              </div>
+              ))}
             </div>
           </aside>
 
