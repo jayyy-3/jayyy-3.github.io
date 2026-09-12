@@ -51,7 +51,7 @@ function TitleUpdater() {
             homepageDescription: settings.seo.description,
             defaultShareImage: settings.seo.defaultShareImage,
         });
-        const structuredData = getStructuredDataForPathname(location.pathname);
+        const structuredData = getStructuredDataForPathname(location.pathname, settings.locations);
 
         document.title = meta.title;
         upsertMeta('name', 'description', meta.description);
@@ -74,6 +74,7 @@ function TitleUpdater() {
     }, [
         location.pathname,
         settings.companyName,
+        settings.locations,
         settings.seo.defaultShareImage,
         settings.seo.description,
         settings.seo.title,

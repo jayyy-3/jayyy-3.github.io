@@ -1,3 +1,5 @@
+import { defaultCompanyLocations } from '../lib/companyLocations';
+
 export interface SiteNavLink {
   label: string;
   to?: string;
@@ -79,7 +81,7 @@ export const siteSocialLinks: SiteSocialLink[] = [
 ];
 
 export const siteFooterContact: SiteFooterContact = {
-  address: ['5 Hamilton St,', 'Oakleigh VIC 3166'],
+  address: [defaultCompanyLocations.office, defaultCompanyLocations.warehouse],
   email: 'info@urblo.com.au',
   phone: '1300 1URBLO',
   copyright: '© Copyright 2026',

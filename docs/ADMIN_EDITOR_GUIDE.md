@@ -206,3 +206,8 @@ The CMS is not currently handoff-ready. Required closure:
 4. Open **Preview** to inspect the same page layout used by the website. Choose **Publish**, then **View website** to confirm the result.
 
 An error keeps your edits on screen. Retry a connection failure; if another editor changed the stone, download your edits before reloading and reconciling them. **Previous versions** preserves earlier content separately. **Hide from website** keeps the draft/history and lists public pages that must be updated first. Changing Availability to Upcoming retains the stone page with a truthful supply status. This candidate requires the release steps in `docs/STONE_LIBRARY_WORKSPACE_RELEASE.md` before production use.
+
+
+### Company addresses
+
+In Settings → Company addresses, edit Office address and Warehouse address, then save Published settings. Contact, the website footer and search structured data use these values. Address labels are fixed; edit the two fields rather than adding address text in Footer content. The downloadable capability statement is a separate PDF and must also be updated when company addresses change.

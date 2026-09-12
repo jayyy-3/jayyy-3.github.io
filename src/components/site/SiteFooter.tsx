@@ -56,8 +56,8 @@ export default function SiteFooter() {
         </div>
 
         <div className="space-y-4 text-[18px] leading-[1.9] text-white/85">
-          <p>{siteFooterContact.address[0]}</p>
-          <p>{siteFooterContact.address[1]}</p>
+          <div><p className="text-xs uppercase tracking-widest text-white/50">Office</p><p>{settings.locations.office}</p></div>
+          <div><p className="text-xs uppercase tracking-widest text-white/50">Warehouse</p><p>{settings.locations.warehouse}</p></div>
           <PrimaryContact email={settings.primaryEmail} phone={settings.primaryPhone} />
         </div>
 

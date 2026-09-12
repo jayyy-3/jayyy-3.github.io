@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "lastUpdated": "2026-09-12",
-  "currentTaskId": "NOW-STONE-PROJECT-REFS-001",
+  "lastUpdated": "2026-09-13",
+  "currentTaskId": "NOW-COMPANY-ADDRESS-001",
   "sourceOfTruth": {
     "currentState": "docs/agent/status.json",
     "taskQueue": "docs/agent/tasks.json",
