@@ -257,3 +257,7 @@ The existing clean worktree started from latest main; GitHub authentication and 
 - Read-only production Firefox proof on `https://urblo.com.au/contact` passed after CMS rendering at 1365px and 390px: both addresses appear in Contact/footer, Organization data matches, the old address is absent, no horizontal overflow and no page errors. Anonymous Published Settings returned both exact new values. All four served article HTML files and the downloadable PDF matched their released files byte for byte. The PDF remains a separate asset that needs a future edit when an address changes. This scoped proof does not certify unrelated CMS golden workflows.
 
 Address delivery is complete. The task is archived; current work returns to the existing Stone/Project user acceptance. This closeout changes records only and uses the classified docs graph.
+
+## 2026-09-13 — Our Story experience wording
+
+Jay requested and approved release of exactly the caption under `20+`: “Founded by stone experts with 20+ years of experience.” The number, layout and other SAI references remain unchanged. This uses the supplied founder-experience wording within the existing proof-metric design. Other mentions were located in the Our Story body, capability PDF pages 5 and 11, and internal brand/design guidance; they are outside this release. Required gate and deployment results are recorded in the associated PR/CI.
