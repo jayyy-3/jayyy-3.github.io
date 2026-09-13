@@ -73,7 +73,7 @@ export default function OurStory() {
           {[
             { value: '2024', label: 'Founded in Melbourne' },
             { value: 'MCC', label: 'Melbourne City Council appointed supplier network' },
-            { value: '20+', label: 'Years of stone expertise through SAI Stone' },
+            { value: '20+', label: 'Founded by stone experts with 20+ years of experience.' },
           ].map((item, index) => (
             <motion.div
               key={item.label}
