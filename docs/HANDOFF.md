@@ -14,11 +14,11 @@ Last updated: 2026-09-13
 
 ## 已观察的发布状态
 
-观察日期：2026-09-13。仓库版本：`0ef7835ba293c012e0d3910f8726c390c4a096dd`。已验证运行时代码：`0ef7835ba293c012e0d3910f8726c390c4a096dd`。
+观察日期：2026-09-13。仓库版本：`21ce7b8cf9e81eef8a9703919bf0c150b1e719d2`。已验证运行时代码：`21ce7b8cf9e81eef8a9703919bf0c150b1e719d2`。
 
-验证地址：https://e80309fb.urblo-site.pages.dev
+验证地址：https://0653930e.urblo-site.pages.dev
 
-PR #54 centralizes and updates the approved Office/Warehouse addresses. Clean local gate, Preview, production immutable/apex/www smoke and public address/PDF readback passed. The approved Published Settings address-only update preserved other settings. This record-only closeout does not deploy. Existing Stone/Project user acceptance and broader CMS handoff remain separate.
+PR #56 updates only the Our Story 20+ caption to Jay’s supplied founder-experience wording. Local gate, Preview and production immutable/apex/www checks passed. Other SAI references and the previously released shared addresses remain unchanged. This record-only closeout does not deploy; existing user acceptance and CMS handoff remain separate.
 
 CMS handoff: **revalidation_required**。QR: material_page_deployed。
 
