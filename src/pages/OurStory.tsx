@@ -61,8 +61,15 @@ export default function OurStory() {
             </p>
             <p>
               The company exists to bridge a long-standing gap between creative ambition and what
-              actually gets built. Co-founded with SAI Stone, Urblo pairs design fluency with more
-              than two decades of stone-industry depth.
+              actually gets built. Its founders bring that gap together from both sides: Natalie Ma,
+              an architectural designer with a background in branding and marketing, who speaks the
+              language architects use; Jun Hu, founder of SAI Stone, twenty years in the industry and
+              knows stone inside out; Bob Lu, former CEO of SAI Stone, with over a decade delivering
+              stone on major civil and commercial projects; and Cameron Grover, eighteen years in
+              the industry and one of the most connected people in Australian stone.
+            </p>
+            <p>
+              Design on one side. Stone on the other. Urblo was built by people who work on both.
             </p>
           </div>
         </div>
