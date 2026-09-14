@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "lastUpdated": "2026-09-13",
+  "lastUpdated": "2026-09-14",
   "currentTaskId": "NOW-STONE-PROJECT-REFS-001",
   "sourceOfTruth": {
     "currentState": "docs/agent/status.json",
@@ -10,12 +10,12 @@
     "adminHandoffEvidence": "docs/agent/admin-handoff-evidence.json"
   },
   "release": {
-    "observedAt": "2026-09-13",
-    "repositorySha": "21ce7b8cf9e81eef8a9703919bf0c150b1e719d2",
-    "runtimeSha": "21ce7b8cf9e81eef8a9703919bf0c150b1e719d2",
-    "verifiedRuntimeUrl": "https://0653930e.urblo-site.pages.dev",
-    "ciRunId": 34743018878,
-    "note": "PR #56 updates only the Our Story 20+ caption to Jay’s supplied founder-experience wording. Local gate, Preview and production immutable/apex/www checks passed. Other SAI references and the previously released shared addresses remain unchanged. This record-only closeout does not deploy; existing user acceptance and CMS handoff remain separate.",
+    "observedAt": "2026-09-14",
+    "repositorySha": "5b57b7d4ec074aa33f27f84e2166421d86b7ecb8",
+    "runtimeSha": "5b57b7d4ec074aa33f27f84e2166421d86b7ecb8",
+    "verifiedRuntimeUrl": "https://777af336.urblo-site.pages.dev",
+    "ciRunId": 34818888611,
+    "note": "PR #58 publishes Jay’s supplied three-paragraph Our Story introduction. Local checks, Preview, production immutable/apex/www smoke and exact paragraph/desktop/mobile readback passed. The 20+ caption, PDF and other public content are unchanged. This record-only closeout does not deploy; existing acceptance tasks remain separate.",
     "evidenceRefs": [
       "docs/WORKLOG.md"
     ]
