@@ -253,7 +253,7 @@
       "notes": [
         "2026-09-26: wave 2 of the 2026-09-24 optimization audit. Jay decided the homepage hero headline keeps its letter-by-letter animation (homepage LCP element stays non-hero by design).",
         "2026-09-26: Implemented on claude/opt-agent-docs-slim (stacked on PR #68): startup budget check, ARCHITECTURE split into docs/architecture/, status/verification trim with docs/archive/2026-09-26 byte manifest, Stone adoption plan archived, OPERATING_PROTOCOL release-record/ID/merge rules, CI apex/www convergence wait. Evidence in WORKLOG.",
-        "2026-09-26: Verification passed (clean Node 20 gate 27 checks, 82 unit tests, host no-config browser gate 12 routes, agent:check/state/GC/doc-paths). Startup sets: projects 35,617, products 26,835, public-ui 23,130 bytes (before 175,619 / 246,526 / 83,995). Committed on claude/opt-agent-docs-slim; push and the PR against main (stacked on #68) are pending, then PR CI, Claude review and Jay's merge decision. The CI convergence wait is only exercised on the next main release."
+        "2026-09-26: Verification passed (clean Node 20 gate 27 checks, 82 unit tests, host no-config browser gate 12 routes, agent:check/state/GC/doc-paths). Startup sets: projects 35,617, products 26,835, public-ui 23,130 bytes (before 175,619 / 246,526 / 83,995). PR #70 (base main, stacked on #68): CI run 36161231695 on ccc4fc4 passed (verify-and-deploy and quality); branch Preview https://e4c29c01.urblo-site.pages.dev passed agent:cloudflare-preview-smoke from the workstation. Awaiting Claude review and Jay's merge decision; not merged. The CI convergence wait is only exercised on the next main release."
       ]
     },
     {
