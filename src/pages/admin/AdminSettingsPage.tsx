@@ -247,7 +247,9 @@ function AdminSettingsContent() {
             return;
         }
 
-        const validation = validateSettings(form);
+        // Website settings have no draft workflow: the public site falls back to built-in contact
+        // details for anything that is not Published, so every Save keeps (or makes) them Published.
+        const validation = validateSettings({ ...form, status: 'published' });
         if (validation.error) {
             setError(validation.error);
             return;
@@ -257,7 +259,7 @@ function AdminSettingsContent() {
         const publishedFields = validation.publishedFields;
         const payload = {
             settings_key: 'default',
-            status: form.status,
+            status: 'published' as const,
             company_name: publishedFields?.companyName ?? form.companyName.trim(),
             primary_email: publishedFields ? publishedFields.primaryEmail : form.primaryEmail.trim() || null,
             primary_phone: publishedFields ? publishedFields.primaryPhone : form.primaryPhone.trim() || null,
@@ -275,8 +277,8 @@ function AdminSettingsContent() {
                     ? publishedFields.defaultShareImage ?? undefined
                     : form.defaultShareImage.trim() || undefined,
             },
-            published_at: form.status === 'published' ? (row?.published_at ?? now) : row?.published_at,
-            archived_at: form.status === 'archived' ? now : null,
+            published_at: row?.published_at ?? now,
+            archived_at: null,
         };
 
         setIsSaving(true);
@@ -372,22 +374,6 @@ function AdminSettingsContent() {
                                         required
                                         className={fieldClass}
                                     />
-                                </label>
-
-                                <label className="text-xs font-bold uppercase tracking-[0.14em] text-black/55">
-                                    Status
-                                    <select
-                                        value={form.status}
-                                        onChange={(event) =>
-                                            updateField('status', event.target.value as SiteSettingsStatus)
-                                        }
-                                        disabled={!canEdit || isSaving}
-                                        className={fieldClass}
-                                    >
-                                        <option value="draft">Draft</option>
-                                        <option value="published">Published</option>
-                                        <option value="archived">Archived</option>
-                                    </select>
                                 </label>
 
                                 <label className="text-xs font-bold uppercase tracking-[0.14em] text-black/55">
@@ -1173,14 +1159,14 @@ function WebsiteSettingsStatusCard({ status }: { status: SiteSettingsStatus }) {
             : status === 'archived'
               ? {
                     title: 'Hidden from public settings',
-                    detail: 'Archived settings stay saved in the CMS but should not be used as the current website defaults.',
+                    detail: 'The website is using its built-in contact details. Save settings to make these the live website settings.',
                     badge: 'Hidden',
                     tone: 'hidden' as const,
                 }
               : {
-                    title: 'Safe to edit before public use',
-                    detail: 'Draft settings can be prepared without making them the public-ready website defaults.',
-                    badge: 'Draft settings',
+                    title: 'Not live yet',
+                    detail: 'The website is using its built-in contact details. Save settings to make these the live website settings.',
+                    badge: 'Not live',
                     tone: 'draft' as const,
                 };
 
@@ -1225,9 +1211,7 @@ function SiteSettingsActionBar({
     const statusNote =
         status === 'published'
             ? 'Published settings can appear across the public website after you save.'
-            : status === 'archived'
-              ? 'Archived settings stay hidden. Save only if you are retiring this settings draft.'
-              : 'Draft settings are safe to prepare before they become public.';
+            : 'Saving publishes these settings to the public website.';
     const actionNote = canEdit
         ? `${statusNote} Save settings when contact, footer, homepage metadata, and the default share image are ready.`
         : 'This role can review site settings, but only CMS managers can save global website settings.';

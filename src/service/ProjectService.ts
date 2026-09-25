@@ -608,6 +608,27 @@ export async function getPublishedProjects(
   );
 }
 
+// Admin Projects keeps editing in a private draft, so its envelope reports "draft" for a live
+// Project that has saved-but-unpublished changes. This reads the website's own visibility rule
+// (the public select policy: published and approved) to tell editors which Project addresses
+// visitors can open right now. It returns only ids and addresses, never draft content; null
+// means the check could not run.
+export async function getLiveProjectAddresses(
+  client: SupabaseClient,
+): Promise<Map<number, string> | null> {
+  const { data, error } = await client
+    .from('projects')
+    .select('id,slug')
+    .eq('status', 'published');
+  if (error || !Array.isArray(data)) return null;
+  const addresses = new Map<number, string>();
+  for (const row of data as unknown[]) {
+    const { id, slug } = (row ?? {}) as { id?: unknown; slug?: unknown };
+    if (typeof id === 'number' && typeof slug === 'string') addresses.set(id, slug);
+  }
+  return addresses;
+}
+
 export async function getArchivedProjectSlugs(
   suppliedClient?: SupabaseClient | null,
 ): Promise<string[]> {

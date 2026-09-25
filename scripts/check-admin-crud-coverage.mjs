@@ -130,11 +130,9 @@ const pageChecks = [
       'CMS manager only',
       'Website settings status',
       'Public website can use these settings',
-      'Safe to edit before public use',
       'Hidden from public settings',
       'Site settings actions',
       'Published settings can appear across the public website after you save.',
-      'Draft settings are safe to prepare before they become public.',
       'CMS access handoff actions',
       'Use Invite and grant access for a new editor. Use Grant existing login only when the person already has a login setup code.',
       'Choose the lowest role',
@@ -1398,6 +1396,73 @@ function checkAdminLoadingAndSaveLockSafety() {
   }
 }
 
+// NOW-OPT-ADMIN-SAFETY-001 stop-gap for the older modules. Settings has no draft workflow, so
+// Save always writes Published; Save on a live Product/Article/Media record goes through the
+// shared confirmation; Product/Article URL keys follow the name and lock only after publishing;
+// a live Project with a newer private draft is labelled as live.
+function checkLegacyModuleSafetyStopGap() {
+  const settingsPath = 'src/pages/admin/AdminSettingsPage.tsx';
+  const settings = readRequired(settingsPath);
+  requireIncludes(settings, "validateSettings({ ...form, status: 'published' })", `${settingsPath} Save validates as Published`);
+  requireIncludes(settings, "status: 'published' as const,", `${settingsPath} Save writes Published`);
+  requireNotIncludes(settings, "updateField('status'", `${settingsPath} editable settings status`);
+  requireNotIncludes(settings, '<option value="draft">', `${settingsPath} Draft settings option`);
+  requireNotIncludes(settings, '<option value="archived">', `${settingsPath} Archived settings option`);
+
+  const liveSaveModules = [
+    ['src/pages/admin/AdminProductsPage.tsx', readRequired('src/pages/admin/AdminProductsPage.tsx')],
+    ['src/pages/admin/AdminArticlesPage.tsx', readArticleSource()],
+    ['src/pages/admin/AdminMediaPage.tsx', readRequired('src/pages/admin/AdminMediaPage.tsx')],
+  ];
+  for (const [path, text] of liveSaveModules) {
+    requireIncludes(text, 'useLiveSaveConfirm()', `${path} live-save confirmation`);
+    requireIncludes(text, '{liveSaveDialog}', `${path} rendered live-save dialog`);
+    requireRegex(text, /save[A-Z][A-Za-z]+\([a-zA-Z.]+\.status, \{ confirmLive: true \}\)/, path, 'Save path that confirms live records');
+    requireIncludes(text, 'updateLivePageLabel', `${path} Update live page action label`);
+    requireNotIncludes(text, 'window.confirm', `${path} browser confirm dialog`);
+  }
+  for (const [path, text] of liveSaveModules.slice(0, 2)) {
+    requireIncludes(text, 'followNameUrlKey(', `${path} URL key follows the name`);
+    requireIncludes(text, 'isUrlKeyLocked(', `${path} URL key locks after first publish`);
+    requireNotIncludes(text, 'isLoading || Boolean(selectedProduct)}', `${path} URL key locked on first save`);
+    requireNotIncludes(text, 'isLoading || Boolean(selectedArticle)}', `${path} URL key locked on first save`);
+  }
+
+  const editorPath = 'src/pages/admin/projects/ProjectEditor.tsx';
+  requireIncludes(readRequired(editorPath), 'Live · unpublished changes', `${editorPath} live Project with newer draft`);
+  requireIncludes(readRequired('src/pages/admin/AdminProjectsPage.tsx'), 'getLiveProjectAddresses(', 'src/pages/admin/AdminProjectsPage.tsx live-address lookup');
+  for (const journey of ['scripts/local-journeys/articles.mjs', 'scripts/local-journeys/projects.mjs']) {
+    requireIncludes(readRequired(journey), 'NOW-OPT-ADMIN-SAFETY-001', `${journey} stop-gap browser assertion`);
+  }
+
+  if (process.argv.includes('--self-only')) return;
+  const behavior = spawnSync(
+    execPath,
+    ['--import', 'tsx', '--input-type=module', '-e', `
+      import assert from 'node:assert/strict';
+      import { followNameUrlKey, isUrlKeyLocked, liveSaveRequest, urlKeyFromName } from './src/pages/admin/liveSave.ts';
+      assert.equal(urlKeyFromName('  Café Bench — 2  '), 'cafe-bench-2');
+      assert.equal(followNameUrlKey('', '', 'Stone Bench'), 'stone-bench');
+      assert.equal(followNameUrlKey('stone-bench', 'Stone Bench', 'Stone Bench XL'), 'stone-bench-xl');
+      assert.equal(followNameUrlKey('custom-key', 'Stone Bench', 'Stone Bench XL'), 'custom-key');
+      assert.equal(isUrlKeyLocked(null), false);
+      assert.equal(isUrlKeyLocked({ status: 'draft', published_at: null }), false);
+      assert.equal(isUrlKeyLocked({ status: 'published', published_at: null }), true);
+      assert.equal(isUrlKeyLocked({ status: 'archived', published_at: '2026-01-01T00:00:00Z' }), true);
+      const live = liveSaveRequest({ kind: 'product', name: 'Bench', publicPath: '/products/bench', nextStatus: 'published' });
+      assert.equal(live.confirmLabel, 'Update live page');
+      assert.match(live.detail, /\\/products\\/bench/);
+      assert.notEqual(liveSaveRequest({ kind: 'product', name: 'Bench', nextStatus: 'draft' }).confirmLabel, 'Update live page');
+    `],
+    { cwd: root, encoding: 'utf8' },
+  );
+  if (behavior.status !== 0) {
+    failures.push('Live-save/URL-key helper behavior failed: ' + [behavior.stdout, behavior.stderr].filter(Boolean).join('\n'));
+  } else {
+    notes.push('- Older modules: Settings always Published, live Save confirmation, URL keys lock after first publish');
+  }
+}
+
 function checkProjectsAggregateContract() {
   if (process.argv.includes('--self-only')) return;
   const result = spawnSync(
@@ -1439,6 +1504,7 @@ checkAdminRemovalContract();
 checkAdminMediaSafety();
 checkAdminParentOwnershipSafety();
 checkAdminLoadingAndSaveLockSafety();
+checkLegacyModuleSafetyStopGap();
 checkProjectsAggregateContract();
 checkStoneWorkspaceContract();
 

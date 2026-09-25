@@ -1,4 +1,5 @@
 import { loadStoneCatalogueOptions } from '../../service/stoneCatalogueOptions';
+import { getLiveProjectAddresses } from '../../service/ProjectService';
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FileText, Plus, Search } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -95,6 +96,10 @@ function AdminProjectsContent() {
   const canCleanUpStorage =
     profile?.role === "owner" || profile?.role === "admin";
   const [projects, setProjects] = useState<ProjectListRow[]>([]);
+  // Project id -> public address for Projects visitors can open now (see getLiveProjectAddresses).
+  const [liveProjects, setLiveProjects] = useState<ReadonlyMap<number, string>>(
+    () => new Map(),
+  );
   const [stones, setStones] = useState<ProjectStoneOption[]>([]);
   const [stoneVariants, setStoneVariants] = useState<ProjectStoneVariantOption[]>([]);
   const [finishes, setFinishes] = useState<ProjectFinishOption[]>([]);
@@ -140,7 +145,10 @@ function AdminProjectsContent() {
     [draft],
   );
 
-  const projectCounts = useMemo(() => summarizeProjects(projects), [projects]);
+  const projectCounts = useMemo(
+    () => summarizeProjects(projects, liveProjects),
+    [liveProjects, projects],
+  );
   const projectIdsKey = useMemo(
     () => projects.map((project) => project.id).join(","),
     [projects],
@@ -149,13 +157,14 @@ function AdminProjectsContent() {
     const query = search.trim().toLowerCase();
     return projects.filter((project) => {
       if (filter === "projects" && project.status === "archived") return false;
-      if (filter !== "projects" && project.status !== filter) return false;
+      if (filter !== "projects" && listStatus(project, liveProjects) !== filter)
+        return false;
       if (!query) return true;
       return [project.title, project.slug, project.location]
         .filter(Boolean)
         .some((value) => String(value).toLowerCase().includes(query));
     });
-  }, [filter, projects, search]);
+  }, [filter, liveProjects, projects, search]);
 
   const loadIndex = useCallback(async () => {
     if (!supabase) return;
@@ -166,6 +175,7 @@ function AdminProjectsContent() {
     try {
       const accessToken = await getAccessToken();
       const stoneCatalogue = await loadStoneCatalogueOptions();
+      const liveAddressesRequest = getLiveProjectAddresses(client).catch(() => null);
       const [projectListResponse, stonesResult, variantsResult, finishesResult, capabilitiesResult, finishImagesResult, mediaResult] =
         await Promise.all([
           fetch(projectEndpoint, {
@@ -220,8 +230,12 @@ function AdminProjectsContent() {
         sort_order: project.sortOrder,
         updated_at: project.updatedAt,
       }));
+      const liveAddresses = await liveAddressesRequest;
+      if (!liveAddresses)
+        console.warn("Projects live-address check failed; showing draft labels only.");
       projectsRef.current = nextProjects;
       setProjects(nextProjects);
+      setLiveProjects(liveAddresses ?? new Map());
       setStones(
         (stonesResult.data ?? []).map((row) => ({
           id: row.id,
@@ -651,6 +665,15 @@ function AdminProjectsContent() {
         .filter(Boolean)
         .join(" ");
       setNotice(`${responseMessage}${mediaRefreshWarning}`);
+      if (action !== "save" && nextDraft.project.id !== null) {
+        const projectId = nextDraft.project.id;
+        setLiveProjects((current) => {
+          const next = new Map(current);
+          if (action === "publish") next.set(projectId, nextDraft.project.slug);
+          else next.delete(projectId);
+          return next;
+        });
+      }
       setProjects((current) => {
         const nextProjects = upsertProjectListRow(current, nextDraft);
         projectsRef.current = nextProjects;
@@ -867,7 +890,10 @@ function AdminProjectsContent() {
                         {project.location || "Location not added"}
                       </span>
                     </span>
-                    <ProjectListStatus status={project.status} />
+                    <ProjectListStatus
+                      status={project.status}
+                      isLive={liveProjects.has(project.id)}
+                    />
                   </span>
                 </button>
               ))}
@@ -887,6 +913,11 @@ function AdminProjectsContent() {
             <ProjectEditor
               key={`${draft.project.id ?? "new"}-${editorSession}`}
               draft={draft}
+              liveSlug={
+                draft.project.id === null
+                  ? null
+                  : (liveProjects.get(draft.project.id) ?? null)
+              }
               isDirty={isDirty}
               media={media}
               stones={stones}
@@ -1212,14 +1243,20 @@ function upsertProjectListRow(
   );
 }
 
-function summarizeProjects(projects: readonly ProjectListRow[]) {
+function summarizeProjects(
+  projects: readonly ProjectListRow[],
+  liveProjects: ReadonlyMap<number, string>,
+) {
   return projects.reduce(
-    (counts, project) => ({
-      active: counts.active + (project.status === "archived" ? 0 : 1),
-      draft: counts.draft + (project.status === "draft" ? 1 : 0),
-      published: counts.published + (project.status === "published" ? 1 : 0),
-      archived: counts.archived + (project.status === "archived" ? 1 : 0),
-    }),
+    (counts, project) => {
+      const status = listStatus(project, liveProjects);
+      return {
+        active: counts.active + (status === "archived" ? 0 : 1),
+        draft: counts.draft + (status === "draft" ? 1 : 0),
+        published: counts.published + (status === "published" ? 1 : 0),
+        archived: counts.archived + (status === "archived" ? 1 : 0),
+      };
+    },
     { active: 0, draft: 0, published: 0, archived: 0 },
   );
 }
@@ -1263,7 +1300,13 @@ function FilterButton({
   );
 }
 
-function ProjectListStatus({ status }: { status: ProjectLifecycleStatus }) {
+function ProjectListStatus({
+  status,
+  isLive,
+}: {
+  status: ProjectLifecycleStatus;
+  isLive: boolean;
+}) {
   const labels: Record<ProjectLifecycleStatus, string> = {
     draft: "Draft",
     published: "Live",
@@ -1271,9 +1314,20 @@ function ProjectListStatus({ status }: { status: ProjectLifecycleStatus }) {
   };
   return (
     <span className="shrink-0 text-[10px] font-bold uppercase tracking-[0.12em] opacity-65">
-      {labels[status]}
+      {status === "draft" && isLive ? "Live · changes" : labels[status]}
     </span>
   );
+}
+
+// A live Project with saved-but-unpublished changes is still on the website, so the list
+// filters and counts treat it as Live; its row label says it has changes waiting.
+function listStatus(
+  project: ProjectListRow,
+  liveProjects: ReadonlyMap<number, string>,
+): ProjectLifecycleStatus {
+  return project.status === "draft" && liveProjects.has(project.id)
+    ? "published"
+    : project.status;
 }
 
 function ListState({ children }: { children: string }) {
