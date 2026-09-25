@@ -43,12 +43,13 @@
         ]
       },
       "status": "now",
-      "phase": "verification",
-      "nextAction": "Branch claude/opt-seo-edge-head: finish Preview evidence, then Claude reports to Jay before merge; Jay creates the www to apex zone redirect rule.",
+      "phase": "awaiting_external",
+      "nextAction": "PR #71 (stacked on #68) awaits Jay: review and merge approval, then production readback; Jay creates the www to apex zone redirect rule recorded in WORKLOG.",
       "blocker": "",
       "notes": [
         "2026-09-26: wave 2 of the 2026-09-24 optimization audit. Jay decided the homepage hero headline keeps its letter-by-letter animation (homepage LCP element stays non-hero by design).",
-        "2026-09-26: implemented on branch claude/opt-seo-edge-head (stacked on PR #68): functions/_middleware.js + functions/_lib/edge-seo.js + src/lib/edgeSeo.ts; public/_routes.json now includes /* and excludes static asset/media folders. Homepage title restored by a code floor (CMS SEO title under 20 characters is ignored); no production Settings write was made. No Cloudflare API token is available to the agent, so the www to apex rule is recorded for Jay in WORKLOG instead of created."
+        "2026-09-26: implemented on branch claude/opt-seo-edge-head (stacked on PR #68): functions/_middleware.js + functions/_lib/edge-seo.js + src/lib/edgeSeo.ts; public/_routes.json now includes /* and excludes static asset/media folders. Homepage title restored by a code floor (CMS SEO title under 20 characters is ignored); no production Settings write was made. No Cloudflare API token is available to the agent, so the www to apex rule is recorded for Jay in WORKLOG instead of created.",
+        "2026-09-26: evidence: clean Node 20 gate 25/25 then 26/26 after the local-app fix; npm test 89 passed; CI run 36161583511 failed at local:verify (local Functions copy lacked public/articles/index.json), fixed in 4cd9942; CI run 36162258620 passed both jobs and deployed Preview https://614c9ceb.urblo-site.pages.dev; agent:cloudflare-preview-smoke passed there (sitemap 54 URLs including all 19 audit-missing URLs; unknown path 404; trailing slash 301). Production verification and www rule pending."
       ]
     },
     {

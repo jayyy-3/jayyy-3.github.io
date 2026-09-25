@@ -8,9 +8,9 @@ Last updated: 2026-09-26
 
 **NOW-OPT-SEO-EDGE-HEAD-001** — Per-route HTML head at the edge (title, description, canonical, share image, JSON-LD) for every public route including CMS-published details, real 404 responses for unknown paths, a generated sitemap with every published project/stone/product/article, trailing-slash 301s, and the www to apex 301.
 
-阶段：verification。状态：now。
+阶段：awaiting_external。状态：now。
 
-下一步：Branch claude/opt-seo-edge-head: finish Preview evidence, then Claude reports to Jay before merge; Jay creates the www to apex zone redirect rule.
+下一步：PR #71 (stacked on #68) awaits Jay: review and merge approval, then production readback; Jay creates the www to apex zone redirect rule recorded in WORKLOG.
 
 ## 已观察的发布状态
 
