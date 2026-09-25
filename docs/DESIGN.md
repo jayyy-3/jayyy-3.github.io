@@ -251,7 +251,7 @@ Current source state:
 Project Material Map pattern:
 - Use real project photography as an inspection surface, not a decorative gimmick.
 - Hotspots should identify material and finish placement first; avoid broad conceptual markers unless they are tied to a material/application fact.
-- Points are quiet by default: a small white marker with a thin lime ring and no number, label or side panel, so the photograph stays the subject.
+- Points are quiet by default: a 14px white dot with a lime ring (spec in `Project point marker — 2026-09-26`) and no number, label or side panel, so the photograph stays the subject.
 - Hover or keyboard focus opens one small card beside its point; click/tap pins it and a second tap closes it. `Esc` or a tap outside the image closes it. Hover is never the only way in.
 - The card names the stone, finish and where it is used, shows the Published finish image as a small thumbnail, may add a two-line project note, and ends with `View stone` deep-linking the exact variant/finish. It opens away from the nearest image edges and never leaves the frame.
 - A one-line legend of `NN Stone · Finish` buttons sits under the image as the touch/no-hover fallback and readable text record; it pins the matching point.
@@ -456,3 +456,17 @@ Jay's decisions:
 Implementation: public points are quiet until hovered, focused or tapped; a small card names stone, finish and use and links to the exact Stone Library finish, with a legend fallback and `?point=` deep links. Stone detail pages list the Projects using that stone.
 
 Remember: the photograph and the stone stay primary. Cards and chips are signals, never permanent overlays; lime marks state only.
+
+## Project point marker — 2026-09-26
+
+Review: Jay approved a replacement from a production screenshot of `/projects/artisan-park-yarrabend`. The previous marker was a 28px white disc with a lime border, a black centre dot and a drop shadow.
+
+Jay's decisions:
+- The marker is a 14px white dot with a 2px `--urblo-lime` border and a 1px dark outer stroke so it reads on light paving and dark stone alike. No centre dot, number or label.
+- The visible dot sits in an invisible hit area of at least 44px.
+- Idle: a lime halo expands and fades about every 2s for three cycles after the image enters the viewport, then rests. Hover or focus restarts it. Under `prefers-reduced-motion` only the static dot shows.
+- Hover, focus and the open-card state scale the dot to about 1.3x.
+
+Implementation: stroke `rgba(0,0,0,0.72)` plus a soft `0 1px 4px` shadow; halo scales 1x to 3x while fading from 0.6 opacity over the first 70% of each 2s cycle; it starts when 35% of the image is visible and a hover/focus replays all three cycles for that point. Hover scaling applies only on hover-capable pointers. Keyboard focus draws the site's black ring framed in white around the dot, not around the hit area.
+
+Remember: the dot signals that a point exists; it should never outweigh the stone in the photograph. Motion stops by itself and never loops.

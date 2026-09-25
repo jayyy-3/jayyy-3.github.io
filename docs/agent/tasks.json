@@ -30,7 +30,7 @@
         "npm run agent:cloudflare-preview-smoke -- --base-url <branch Preview>",
         "git diff --check"
       ],
-      "phase": "implementation",
+      "phase": "verification",
       "authorization": {
         "source": "Jay approved the marker spec on 2026-09-26 (14px white/lime dot, dark outer stroke, three pulse cycles then rest) and asked for it alongside wave 1.",
         "included": [
@@ -40,10 +40,11 @@
           "Merge to main, production data writes, email, DNS, credentials, migrations."
         ]
       },
-      "nextAction": "Opus implements on its own branch; Claude reports to Jay before merge.",
+      "nextAction": "Opus runs the Node 20 gate, pushes claude/opt-project-point-marker, opens the PR stacked on #60 and runs branch Preview smoke; Claude reports to Jay before merge.",
       "blocker": "",
       "notes": [
-        "2026-09-26: Jay's request from a production screenshot of /projects/artisan-park-yarrabend; the current 36px white/lime/black-dot marker is replaced. Not a keyboard focus-ring change."
+        "2026-09-26: Jay's request from a production screenshot of /projects/artisan-park-yarrabend; the current 36px white/lime/black-dot marker is replaced. Not a keyboard focus-ring change.",
+        "2026-09-26: implemented on claude/opt-project-point-marker. The measured previous marker was 28px (h-7), not 36px. Marker CSS is a localized block in src/index.css (.urblo-hotspot-marker*); the component change is confined to the marker button plus an IntersectionObserver pulse trigger."
       ]
     },
     {

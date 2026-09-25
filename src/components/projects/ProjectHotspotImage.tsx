@@ -30,6 +30,8 @@ interface ProjectHotspotImageProps {
 const CARD_WIDTH = 260;
 const CARD_OFFSET = 22;
 const HOVER_CLOSE_DELAY_MS = 140;
+/** Share of the image that must be visible before the marker halo plays its three cycles. */
+const PULSE_VISIBLE_RATIO = 0.35;
 
 function toFallbackLabel(value: string): string {
     return value
@@ -111,6 +113,8 @@ export default function ProjectHotspotImage({
     const [activeId, setActiveId] = useState<string | null>(null);
     const [pinnedId, setPinnedId] = useState<string | null>(null);
     const [layerWidth, setLayerWidth] = useState(0);
+    const [pulseStarted, setPulseStarted] = useState(false);
+    const [pulseRuns, setPulseRuns] = useState<Readonly<Record<string, number>>>({});
     const [publishedDetails, setPublishedDetails] = useState<ReadonlyMap<string, StoneDetailVM>>(
         () => new Map(),
     );
@@ -172,6 +176,22 @@ export default function ProjectHotspotImage({
     }, [hotspots.length]);
 
     useEffect(() => {
+        const layer = layerRef.current;
+        if (pulseStarted || !layer || !hotspots.length) return undefined;
+        if (typeof IntersectionObserver === 'undefined') {
+            setPulseStarted(true);
+            return undefined;
+        }
+        const observer = new IntersectionObserver((entries) => {
+            if (!entries.some((entry) => entry.isIntersecting)) return;
+            setPulseStarted(true);
+            observer.disconnect();
+        }, { threshold: PULSE_VISIBLE_RATIO });
+        observer.observe(layer);
+        return () => observer.disconnect();
+    }, [pulseStarted, hotspots.length]);
+
+    useEffect(() => {
         if (deepLinkHandledRef.current || !focusHotspotId) return;
         if (!hotspots.some((hotspot) => hotspot.id === focusHotspotId)) return;
         deepLinkHandledRef.current = true;
@@ -221,6 +241,12 @@ export default function ProjectHotspotImage({
     function openTransient(hotspotId: string) {
         cancelScheduledClose();
         setActiveId(hotspotId);
+    }
+
+    /** Remounting the halo restarts its three-cycle animation for this marker. */
+    function replayPulse(hotspotId: string) {
+        setPulseStarted(true);
+        setPulseRuns((current) => ({ ...current, [hotspotId]: (current[hotspotId] ?? 0) + 1 }));
     }
 
     function scheduleTransientClose(hotspotId: string) {
@@ -315,20 +341,26 @@ export default function ProjectHotspotImage({
                                         else markerRefs.current.delete(hotspot.id);
                                     }}
                                     type="button"
-                                    className={[
-                                        'absolute z-10 flex h-7 w-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-[var(--urblo-lime)] bg-white transition duration-200',
-                                        open
-                                            ? 'shadow-[0_0_0_5px_rgba(0,255,25,0.28)]'
-                                            : 'shadow-[0_2px_8px_rgba(0,0,0,0.35)] hover:shadow-[0_0_0_5px_rgba(0,255,25,0.22)]',
-                                    ].join(' ')}
+                                    className="urblo-hotspot-marker absolute z-10 -translate-x-1/2 -translate-y-1/2"
                                     style={{ left: `${hotspot.x}%`, top: `${hotspot.y}%` }}
                                     aria-label={`Point ${index + 1}: ${material.stoneName} / ${material.finishLabel}`}
                                     aria-expanded={open}
                                     aria-controls={cardId}
-                                    onFocus={() => openTransient(hotspot.id)}
+                                    onMouseEnter={() => replayPulse(hotspot.id)}
+                                    onFocus={() => {
+                                        openTransient(hotspot.id);
+                                        replayPulse(hotspot.id);
+                                    }}
                                     onClick={() => togglePinned(hotspot.id)}
                                 >
-                                    <span className="block h-2 w-2 rounded-full bg-black" aria-hidden="true" />
+                                    {pulseStarted ? (
+                                        <span
+                                            key={pulseRuns[hotspot.id] ?? 0}
+                                            className="urblo-hotspot-marker__halo"
+                                            aria-hidden="true"
+                                        />
+                                    ) : null}
+                                    <span className="urblo-hotspot-marker__dot" aria-hidden="true" />
                                 </button>
 
                                 <div

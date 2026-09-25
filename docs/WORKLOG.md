@@ -1,6 +1,6 @@
 # WORKLOG — current execution evidence
 
-Last updated: 2026-09-25
+Last updated: 2026-09-26
 
 Historical evidence is immutable and is not current task state. Current state is generated from `docs/agent/status.json` and `docs/agent/tasks.json`.
 
@@ -379,3 +379,10 @@ Scope: Jay-approved optimization wave 1 (dev dependency, script migration, isola
 - `agent:verify --plan --base HEAD` with a temporary edit: `src/pages/admin/AdminLeadsPage.test.ts` → tooling/container, deploy=false, 24 checks including `unit`; `src/pages/admin/AdminLeadsPage.tsx` → runtime, deploy=true, 25 checks including `unit` and `browser`. The branch as a whole is runtime (package.json).
 - Clean Node 20 gate: attempt 1 failed `state` (summaries not regenerated after the task update); attempt 2 failed `paths` (archive citation of the removed forms script); attempt 3 on `72e4f92` plus the doc-path allow-list passed all 24 checks (`unit` 1.7 s). Host no-config browser gate passed 12 routes. `check-verification.mjs` covers the unit node and the test-path classification.
 - Residual: PR CI and Jay's merge decision are pending. The package.json and lockfile diff will likely need a rebase after the repo-hygiene and framer-motion branches. `tests/*.test.ts` are migrated JavaScript and are not type-checked; the admin editor tests in `src/` are type-checked by `tsc -b`.
+## 2026-09-26 — Project point marker (NOW-OPT-PROJECT-POINT-MARKER-001)
+
+Scope: Jay's approved marker spec only (task authorization: branch, local tests, push, PR, branch Preview and smoke; no merge, production write, email, DNS or migration). Branch `claude/opt-project-point-marker` from `e3be4ce`, stacked on PR #60. Changed `src/components/projects/ProjectHotspotImage.tsx` (marker button, halo replay, IntersectionObserver start), a localized `.urblo-hotspot-marker*` block in `src/index.css`, and the `Project point marker — 2026-09-26` decision in `docs/DESIGN.md`. Card, legend, deep-link and close logic are unchanged. The previous marker measured 28px on production (the task note said 36px).
+
+- Values: 44px transparent button; 14px dot, 2px `--urblo-lime` border, white fill, `0 0 0 1px rgba(0,0,0,0.72), 0 1px 4px rgba(0,0,0,0.35)`; halo lime disc 1x→3x, opacity 0.6→0 over 70% of a 2s ease-out cycle, 3 iterations, started at 35% image visibility and replayed on marker hover/focus; dot `scale(1.3)` on open, `:focus-visible` and hover-capable `:hover`, 160ms; keyboard focus ring on the dot `0 0 0 2px #fff, 0 0 0 4px #000, 0 0 0 6px #fff` (PR #64's black ring framed in white). Reduced motion hides the halo and drops the transition.
+- Local Playwright (Chromium, Vite dev, static fallback `moon-gate-woolley-street` with `?point=angola-black-marker`): 30/30 checks passed — dot geometry and colours, no centre dot, 44px hit area at 1440 and 375, no halo before viewport entry, 2s x3 then rest at opacity 0, hover/focus/open scale 1.3, hover replay, hover opens and leave closes, click pins, second click, Esc and outside click close, focus ring, reduced-motion static dot, 375 tap toggle, card inside the frame and viewport, legend pin, no horizontal overflow, deep link pins and scrolls.
+- Before captures: production `https://urblo.com.au` (read-only GET) at 1440/375 for Artisan Park (light paving, mean crop luminance 187) and Moon Gate (dark stone, 84); saved under ignored `.tmp/marker/`.
