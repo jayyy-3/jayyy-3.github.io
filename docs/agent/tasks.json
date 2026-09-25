@@ -187,11 +187,12 @@
         ]
       },
       "status": "now",
-      "phase": "verification",
-      "nextAction": "Branch claude/opt-admin-guide implemented; running gate, push, PR and branch Preview smoke. Claude reports to Jay before merge.",
-      "blocker": "",
+      "phase": "awaiting_external",
+      "nextAction": "PR #69 (stacked on #68) verified on branch Preview; Claude reports to Jay for merge approval, then a colleague runs two guide tasks and editorGuideUsability is recorded.",
+      "blocker": "A non-technical colleague must complete two quick-guide tasks on the deployed admin, and Jay must approve the merge of PR #69 (after #68).",
       "notes": [
-        "2026-09-26: wave 2 of the 2026-09-24 optimization audit. Jay decided the homepage hero headline keeps its letter-by-letter animation (homepage LCP element stays non-hero by design)."
+        "2026-09-26: wave 2 of the 2026-09-24 optimization audit. Jay decided the homepage hero headline keeps its letter-by-letter animation (homepage LCP element stays non-hero by design).",
+        "2026-09-26: runtime commit 86b648e passed the Node 20 container gate (26 checks), npm test 77/77 and config gate 12 routes; PR #69 CI run 36160848011 passed (verify-and-deploy, quality); branch Preview https://445df750.urblo-site.pages.dev passed agent:cloudflare-preview-smoke and a read-only headless check of the login-page Help sheet."
       ]
     },
     {
