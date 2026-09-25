@@ -4,352 +4,233 @@
   "archive": "docs/archive/2026-09-09/completed-tasks.json",
   "tasks": [
     {
-      "id": "NOW-OPT-PROJECT-POINT-MARKER-001",
-      "status": "now",
+      "id": "NOW-OPT-SEO-EDGE-HEAD-001",
       "priority": 0,
       "modules": [
-        "projects",
+        "delivery",
         "public-ui"
       ],
-      "summary": "Restyle the public Project material-point markers to Jay's approved spec: 14px white dot with lime border and 1px dark outer stroke, invisible 44px hit area, three pulse cycles then rest, enlarge on hover/active, no pulse under reduced motion.",
+      "summary": "Per-route HTML head at the edge (title, description, canonical, share image, JSON-LD) for every public route including CMS-published details, real 404 responses for unknown paths, a generated sitemap with every published project/stone/product/article, trailing-slash 301s, and the www to apex 301.",
       "files": [
-        "src/components/projects/ProjectHotspotImage.tsx",
-        "src/index.css",
-        "docs/DESIGN.md"
+        "functions/",
+        "src/components/PublicContentSeo.tsx",
+        "public/sitemap.xml",
+        "public/robots.txt",
+        "scripts/check-seo-readiness.mjs",
+        "docs/SEO_PHASE_2_PLAN.md"
       ],
       "acceptance": [
-        "Marker renders as a 14px circle, white fill, 2px lime (--urblo-lime) border and 1px dark outer stroke; the centre black dot is removed.",
-        "A lime halo expands and fades about every 2s for three cycles after the image enters the viewport, then stops; hover or focus restarts it; prefers-reduced-motion shows the static dot only.",
-        "Hover, focus and the open-card state scale the dot up (about 1.3x); the hit area stays >= 44px on touch and pointer.",
-        "Existing behaviour is unchanged: hover/focus opens the card, tap toggles, Esc/outside closes, ?point= deep link pins, legend works at 375px.",
-        "DESIGN.md records the marker spec as a durable decision; before/after screenshots at 1440px and 375px on a light and a dark image."
+        "curl of any published project, stone, product or article URL returns first-response HTML with that entity's title, description, self canonical and og:image (sized variant), verified on Preview and production.",
+        "Unknown paths return HTTP 404 with the SPA not-found page; trailing-slash variants 301 to the canonical form.",
+        "/sitemap.xml is generated from static routes plus published records with edge caching; it contains the 19 URLs the audit found missing and no draft URLs.",
+        "https://www.urblo.com.au/<path> returns 301 to https://urblo.com.au/<path> (Cloudflare zone rule; if the available token cannot create it, record the exact rule for Jay instead).",
+        "Homepage rendered title restored to the descriptive SEO title via the CMS setting or code fallback; agent:seo-readiness updated and passing; NEXT-SEO-CONTENT-GROWTH-001 acceptance item 5 closed."
       ],
       "verification": [
         "npm run agent:verify -- --plan",
         "npm run gate",
+        "npm test",
         "npm run agent:cloudflare-preview-smoke -- --base-url <branch Preview>",
         "git diff --check"
       ],
-      "phase": "awaiting_external",
       "authorization": {
-        "source": "Jay approved the marker spec on 2026-09-26 (14px white/lime dot, dark outer stroke, three pulse cycles then rest) and asked for it alongside wave 1.",
+        "source": "Jay approved optimization wave 2 on 2026-09-26 (\"开第二波\") after the wave 1 report; www redirect, CMS SEO data fixes and merged-branch deletion were authorized on 2026-09-25 (\"可以\").",
         "included": [
-          "Branch implementation, isolated local tests, git push, pull request, Cloudflare branch Preview and smoke, DESIGN.md and docs/agent state updates."
+          "Branch implementation, Pages Functions middleware, sitemap generation, Cloudflare zone redirect rule creation (read back and recorded), the approved homepage SEO title CMS setting update, git push, pull request, branch Preview and smoke, docs/agent state updates."
         ],
         "excluded": [
-          "Merge to main, production data writes, email, DNS, credentials, migrations."
-        ]
-      },
-      "nextAction": "Claude reports PR #67 and the before/after captures to Jay; Jay reviews the marker on the branch Preview and decides merge (merge #60 first or retarget).",
-      "blocker": "",
-      "notes": [
-        "2026-09-26: Jay's request from a production screenshot of /projects/artisan-park-yarrabend; the current 36px white/lime/black-dot marker is replaced. Not a keyboard focus-ring change.",
-        "2026-09-26: implemented on claude/opt-project-point-marker. The measured previous marker was 28px (h-7), not 36px. Marker CSS is a localized block in src/index.css (.urblo-hotspot-marker*); the component change is confined to the marker button plus an IntersectionObserver pulse trigger.",
-        "2026-09-26: runtime commit d95ca1b passed the clean Node 20 container gate (27 checks) and host admin-config-gate; PR #67 CI run 36148759867 passed; branch Preview https://838c5d5b.urblo-site.pages.dev passed agent:cloudflare-preview-smoke and read-only Playwright marker checks (Artisan Park 30/30 incl. ?point= deep link, Moon Gate 28/28). Awaiting Jay's visual review and merge decision."
-      ]
-    },
-    {
-      "id": "NOW-OPT-PERF-STONE-IMG-001",
-      "priority": 0,
-      "modules": [
-        "stone-library",
-        "public-ui"
-      ],
-      "summary": "Serve Stone Library and product-option stone media through sized variants (srcset/sizes/lazy) instead of raw Supabase originals; keep a full-resolution original link for designers on the stone detail stage.",
-      "files": [
-        "src/components/OptionSelector.tsx",
-        "src/components/stone-library/",
-        "src/pages/StonePageView.tsx",
-        "src/pages/StoneLibraryDetailPage.tsx",
-        "src/features/projects/",
-        "src/lib/"
-      ],
-      "acceptance": [
-        "No public page requests a raw stone-assets storage original except through an explicit View original / Download original link on the stone detail stage.",
-        "Swatches and cards load a variant sized to their rendered box; detail stage uses srcset up to at least 2560px so texture stays inspectable on Retina displays.",
-        "Production-equivalent Lighthouse mobile: /products/prime-block transfer < 3MB, /stone-library desktop transfer < 5MB, one stone detail desktop LCP < 2.5s (measured on branch Preview).",
-        "og:image for stone pages points at a sized variant, not the original.",
-        "No Function/RPC/migration change unless justified; existing resize endpoint reused."
-      ],
-      "verification": [
-        "npm run agent:verify -- --plan",
-        "npm run gate",
-        "npm run agent:cloudflare-preview-smoke -- --base-url <branch Preview>",
-        "git diff --check",
-        "npx lighthouse against branch Preview for /stone-library, one stone detail and /products/prime-block (mobile + desktop), results saved in .tmp/"
-      ],
-      "authorization": {
-        "source": "Jay approved the 2026-09-24 optimization audit wave 1 and instructed Opus execution on 2026-09-25 (\"第一波6个任务开工，让Opus去干\").",
-        "included": [
-          "Branch implementation, isolated local tests, git push, pull request, Cloudflare branch Preview and smoke, docs/agent state updates."
-        ],
-        "excluded": [
-          "Merge to main (Jay approves after Claude report), production data or Storage writes, real email, DNS or credential changes, migrations."
+          "Merge to main (Jay approves after Claude report), production data or Storage writes beyond the items listed, real email, credentials, migrations."
         ]
       },
       "status": "now",
-      "phase": "awaiting_external",
-      "nextAction": "Jay reviews PR #63 (Preview https://49839330.urblo-site.pages.dev) and decides on merge; the prime-block mobile 3MB target depends on the static-assets task.",
+      "phase": "planned",
+      "nextAction": "Opus implements on its own branch; Claude reports to Jay before merge.",
       "blocker": "",
       "notes": [
-        "2026-09-25: PR #63 head 6716117; CI 36143175914 passed; Preview https://49839330.urblo-site.pages.dev smoke passed; zero stone-assets originals requested; Lighthouse after: prime-block mobile 3.01MB (target <3MB missed by ~10KB, remainder is static non-stone assets), stone-library desktop 1.21MB, harcourt desktop LCP 1.7s. Evidence in WORKLOG.",
-        "2026-09-25: created from the 2026-09-24 four-track optimization audit (session scratch, not repository state). Wave 1 of 3; Jay decides on wave 2 after Claude's report."
+        "2026-09-26: wave 2 of the 2026-09-24 optimization audit. Jay decided the homepage hero headline keeps its letter-by-letter animation (homepage LCP element stays non-hero by design)."
       ]
     },
     {
-      "id": "NOW-OPT-PERF-CLS-SHELL-001",
+      "id": "NOW-OPT-DESIGN-TOKENS-COMPONENTS-001",
       "priority": 0,
       "modules": [
         "public-ui"
       ],
-      "summary": "Remove the footer layout shift and route fade-in that make CLS fail on 8 of 9 public pages; scope the homepage poster preload to /; replace framer-motion with CSS for the route transition.",
+      "summary": "Define the colour, type-scale (about 8 steps), tracking, gutter and section-spacing tokens in Tailwind and DESIGN.md; build shared Button (4 variants), SectionHeading (2 levels), PageIntro (Projects page as template), Card and Reveal components; align the header gutter with page content; adopt them on Home and Capabilities first.",
       "files": [
-        "src/App.tsx",
-        "src/components/site/",
-        "index.html",
-        "vite.config.ts",
-        "package.json",
-        "src/components/Footer.tsx",
-        "src/components/Header.tsx"
-      ],
-      "acceptance": [
-        "Lighthouse CLS < 0.1 on all 9 audited public URLs, mobile and desktop, measured on branch Preview.",
-        "Homepage LCP element is the hero, not the footer.",
-        "Non-homepage routes do not request hero-poster.jpg.",
-        "Entry JS gzip size reduced (target < 105KB) with framer-motion removed or confined to a lazy chunk; visual result of the route transition preserved as a simple CSS fade.",
-        "No visible change to layout at 375px and 1440px other than the removed jump (before/after screenshots kept in .tmp/)."
-      ],
-      "verification": [
-        "npm run agent:verify -- --plan",
-        "npm run gate",
-        "npm run agent:cloudflare-preview-smoke -- --base-url <branch Preview>",
-        "git diff --check",
-        "npx lighthouse against branch Preview for the 9 audited URLs (mobile + desktop)",
-        "dist chunk size table before/after in the PR"
-      ],
-      "authorization": {
-        "source": "Jay approved the 2026-09-24 optimization audit wave 1 and instructed Opus execution on 2026-09-25 (\"第一波6个任务开工，让Opus去干\").",
-        "included": [
-          "Branch implementation, dependency removal, isolated local tests, git push, pull request, Cloudflare branch Preview and smoke, docs/agent state updates."
-        ],
-        "excluded": [
-          "Merge to main (Jay approves after Claude report), production data or Storage writes, real email, DNS or credential changes, migrations."
-        ]
-      },
-      "status": "now",
-      "phase": "awaiting_external",
-      "nextAction": "Claude reports PR #65 to Jay; Jay decides on merge (after PR #60) and on the homepage-LCP open question.",
-      "blocker": "",
-      "notes": [
-        "2026-09-25: created from the 2026-09-24 four-track optimization audit (session scratch, not repository state). Wave 1 of 3; Jay decides on wave 2 after Claude's report.",
-        "2026-09-26: Homepage LCP element being the logo/acknowledgement rather than the hero is accepted for wave 1; the hero headline animation decision goes to wave 2.",
-        "2026-09-25: PR #65 (branch claude/opt-cls-page-shell, code commit 24f0847) passed clean Node 20 gate, CI run 36144515149 and Preview smoke at https://85e797f2.urblo-site.pages.dev. Lighthouse on that Preview: CLS 0.000-0.003 on all 9 URLs mobile and desktop (before, on 777af336: up to 0.440). Entry JS gzip went from 129.35KB to 91.88KB. framer-motion stays a dependency because lazy Home, Articles, Our Story and Capabilities pages use it; it is now a shared lazy chunk. hero-poster.jpg is requested only on /. Screenshots at 375px and 1440px are pixel-identical except the playing hero video frame.",
-        "2026-09-25: Open acceptance item: the homepage LCP element is no longer the footer, but it is also not the hero. Chrome excludes images that cover the whole viewport from LCP (confirmed with a local probe), so the 100svh poster and video never count. The hero headline is split into per-letter spans, each too small to win. Lighthouse reports the header logo (mobile) or the first-visit Acknowledgement popup text (desktop). Making the hero count would mean changing the hero headline reveal or hero size, which is a design decision."
-      ]
-    },
-    {
-      "id": "NOW-OPT-UI-CASCADE-FIXES-001",
-      "priority": 0,
-      "modules": [
-        "public-ui",
-        "stone-library"
-      ],
-      "summary": "Fix the four confirmed visible UI defects: urblo-* utilities overriding Tailwind modifiers (dark-background eyebrows unreadable), StatusPill unreadable on dark stones, inconsistent keyboard focus rings, and wrapping button labels on Contact.",
-      "files": [
+        "tailwind.config.js",
         "src/index.css",
-        "src/components/stone-library/StatusPill.tsx",
-        "src/pages/ContactPage.tsx",
-        "src/pages/CapabilitiesPage.tsx",
-        "tailwind.config.js"
+        "docs/DESIGN.md",
+        "src/components/",
+        "src/pages/",
+        "src/layouts/"
       ],
       "acceptance": [
-        "urblo-* component classes live in @layer components so Tailwind modifiers such as text-white/62 and text-[10px] apply again; no page gains a new body/meta text below 4.5:1 contrast (spot-check screenshots of Home, Capabilities, Contact, Stone Library, Projects before/after).",
-        "Eyebrow labels on dark sections of Contact and Capabilities render white/near-white.",
-        "StatusPill on stone cards meets DESIGN.md (dark backing, white text) and is readable on Angola Black.",
-        "Every focusable element on Home, Stone Library, Projects, Contact, Capabilities shows a visible focus-visible ring of >= 3:1 contrast; no default blue outline mix.",
-        "STONE LIBRARY and SEND ENQUIRY buttons on Contact stay on one line at 1440px and 375px.",
-        "No token/type-scale redesign in this task (wave 2)."
+        "DESIGN.md has a referenceable token table matching tailwind.config.js; a check script counts arbitrary text-[Npx] utilities on public pages and fails on new additions (baseline 344 recorded).",
+        "Shared Button, SectionHeading, PageIntro, Card and Reveal exist with tests; the duplicated fade-in component in HomepageSections and CapabilitiesPage is removed.",
+        "Home and Capabilities use only shared Button variants and the two heading levels; arbitrary font-size count on those two files drops by at least 70%.",
+        "Logo left edge aligns with the page content edge within 2px at 375, 768 and 1440.",
+        "No visual regression on Projects, Stone Library or 404 (before/after screenshots); other pages unchanged in this task (per-page convergence is wave 3)."
       ],
       "verification": [
         "npm run agent:verify -- --plan",
         "npm run gate",
+        "npm test",
         "npm run agent:cloudflare-preview-smoke -- --base-url <branch Preview>",
-        "git diff --check",
-        "Playwright or built-in browser screenshots desktop 1440px and mobile 375px, before/after, stored in .tmp/"
+        "git diff --check"
       ],
       "authorization": {
-        "source": "Jay approved the 2026-09-24 optimization audit wave 1 and instructed Opus execution on 2026-09-25 (\"第一波6个任务开工，让Opus去干\").",
+        "source": "Jay approved optimization wave 2 on 2026-09-26 (\"开第二波\") after the wave 1 report; www redirect, CMS SEO data fixes and merged-branch deletion were authorized on 2026-09-25 (\"可以\").",
         "included": [
-          "Branch implementation, isolated local tests, git push, pull request, Cloudflare branch Preview and smoke, docs/agent state updates."
+          "Branch implementation, isolated local tests, git push, pull request, branch Preview and smoke, DESIGN.md and docs/agent state updates."
         ],
         "excluded": [
-          "Merge to main (Jay approves after Claude report), production data or Storage writes, real email, DNS or credential changes, migrations."
+          "Merge to main (Jay approves after Claude report), production data or Storage writes beyond the items listed, real email, credentials, migrations."
         ]
       },
       "status": "now",
-      "phase": "awaiting_external",
-      "nextAction": "Claude reports PR #64 to Jay; Jay reviews rendering and approves merge (stacks on PR #60).",
+      "phase": "planned",
+      "nextAction": "Opus implements on its own branch; Claude reports to Jay before merge.",
       "blocker": "",
       "notes": [
-        "2026-09-25: created from the 2026-09-24 four-track optimization audit (session scratch, not repository state). Wave 1 of 3; Jay decides on wave 2 after Claude's report.",
-        "2026-09-26: Jay approved the open design choices: light-grey eyebrows on dark backgrounds (not pure white) and the black/white focus ring.",
-        "2026-09-25: implemented on claude/opt-ui-cascade-fixes b8d5ba5, PR #64 (stacks on #60, not merged). Clean Node 20 gate passed; CI 36143351963 passed; Preview https://44c93f47.urblo-site.pages.dev smoke passed; Preview tab pass 0 flagged focus stops on five pages; Contact buttons one line at 1440/375. Awaiting Jay visual acceptance and merge approval."
+        "2026-09-26: wave 2 of the 2026-09-24 optimization audit. Jay decided the homepage hero headline keeps its letter-by-letter animation (homepage LCP element stays non-hero by design)."
       ]
     },
     {
-      "id": "NOW-OPT-ADMIN-SAFETY-001",
+      "id": "NOW-OPT-ADMIN-SHARED-UX-001",
       "priority": 0,
       "modules": [
         "products",
         "articles",
         "media",
         "auth-settings",
-        "projects"
+        "forms"
       ],
-      "summary": "Stop-gap safety for the older admin modules used by non-technical colleagues: remove the Settings Status dropdown, require confirmation before Save changes a published Product/Article/Media record, auto-generate URL keys from names, and correct the Projects 'Saved — not live' label for live projects with unpublished changes.",
+      "summary": "Shared admin UX layer for the older modules: one feedback component next to the action bar with a live region, an error translator that replaces raw Supabase/Postgres/network/JWT messages with plain English, an unsaved-changes guard on record switch, navigation, refresh and sign-out, and confirmation dialogs for Archive/Hide on live records; wired into Products, Articles, Media, Leads and Settings.",
       "files": [
-        "src/pages/admin/AdminSettingsPage.tsx",
-        "src/pages/admin/AdminProductsPage.tsx",
-        "src/pages/admin/AdminMediaPage.tsx",
-        "src/pages/admin/AdminArticlesPage.tsx",
-        "src/pages/admin/projects/sections/EditorControls.tsx",
+        "src/pages/admin/",
+        "src/lib/",
+        "functions/_lib/admin-projects.js",
         "scripts/check-admin-crud-coverage.mjs"
       ],
       "acceptance": [
-        "Settings page has no Status control; saved settings stay Published.",
-        "Saving an already-published Product, Article or Media record shows a confirmation naming the live effect (\"Update live page\") before writing; new drafts save without confirmation.",
-        "New Products and Articles derive the URL key from the name automatically, editable until first publish, locked after.",
-        "A live Project with unpublished changes shows \"Live · unpublished changes\", never \"Saved — not live\".",
-        "No schema, Function or RLS change; local synthetic journeys pass; check-admin-crud-coverage assertions updated to behavior-level where strings changed, every forbid assertion kept."
+        "Duplicate URL key, permission denied, expired session and network failure each show a plain-English message in all five modules (vitest table test on the translator; no setError(x.message) of raw Supabase errors remains, enforced by a check).",
+        "Save result is visible within 1s next to the button and announced to screen readers.",
+        "Switching records or navigating with unsaved edits prompts Save / Discard / Keep editing in the five modules; refresh and sign-out warn.",
+        "Archive and Hide on live Products, Articles and Media require a confirmation naming the public effect.",
+        "Local synthetic journeys extended for at least Products and Media; admin-crud-coverage assertions updated at behaviour level, every forbid assertion kept."
       ],
       "verification": [
         "npm run agent:verify -- --plan",
         "npm run gate",
+        "npm test",
         "npm run agent:cloudflare-preview-smoke -- --base-url <branch Preview>",
         "git diff --check",
-        "npm run local:start && npm run local:verify",
-        "npm run agent:admin-crud-coverage"
+        "npm run local:verify"
       ],
       "authorization": {
-        "source": "Jay approved the 2026-09-24 optimization audit wave 1 and instructed Opus execution on 2026-09-25 (\"第一波6个任务开工，让Opus去干\").",
+        "source": "Jay approved optimization wave 2 on 2026-09-26 (\"开第二波\") after the wave 1 report; www redirect, CMS SEO data fixes and merged-branch deletion were authorized on 2026-09-25 (\"可以\").",
         "included": [
-          "Branch implementation, isolated local synthetic tests, git push, pull request, Cloudflare branch Preview and smoke, docs/agent state updates."
+          "Branch implementation, isolated local synthetic tests, git push, pull request, branch Preview and smoke, docs/agent state updates."
         ],
         "excluded": [
-          "Merge to main (Jay approves after Claude report), production data or Storage writes, real email, DNS or credential changes, migrations."
+          "Merge to main (Jay approves after Claude report), production data or Storage writes beyond the items listed, real email, credentials, migrations."
         ]
       },
       "status": "now",
-      "phase": "awaiting_external",
-      "nextAction": "Claude reports PR #62 (stacked on #60) to Jay; Jay decides merge, then production readback and Jay usability check.",
-      "blocker": "Awaiting Jay merge approval for PR #62 (merge #60 first).",
+      "phase": "planned",
+      "nextAction": "Opus implements on its own branch; Claude reports to Jay before merge.",
+      "blocker": "",
       "notes": [
-        "2026-09-25: created from the 2026-09-24 four-track optimization audit (session scratch, not repository state). Wave 1 of 3; Jay decides on wave 2 after Claude's report.",
-        "2026-09-26: Jay approved keeping the single \"Update live page\" wording everywhere (product and model both show it when both are live; media uses the same). Confirmation for Archive/Hide on live records is deferred to wave 2.",
-        "2026-09-25: implemented on claude/opt-admin-safety-stopgap (PR #62, code 3232b83 + journey fix 33448ca): Settings Status control removed and Save writes Published; live Product/Article/Media Save requires an 'Update live page' confirmation; Product/Article URL keys follow the name and lock after first publish; live Project with a newer draft shows 'Live · unpublished changes'. Clean Node 20 gate and admin-crud-coverage passed; PR CI run 36143665645 passed local:verify with the new Articles/Projects journey assertions and deployed Preview https://3e20e17d.urblo-site.pages.dev (smoke passed). Workstation local stack was owned by another checkout, so mocked-network before/after browser evidence is under ignored .tmp/admin-safety/. See WORKLOG 2026-09-25 admin safety stop-gap."
+        "2026-09-26: wave 2 of the 2026-09-24 optimization audit. Jay decided the homepage hero headline keeps its letter-by-letter animation (homepage LCP element stays non-hero by design)."
       ]
     },
     {
-      "id": "NOW-OPT-TEST-RUNNER-001",
-      "priority": 0,
+      "id": "NOW-OPT-ADMIN-GUIDE-001",
+      "priority": 1,
       "modules": [
-        "harness",
-        "delivery"
+        "auth-settings",
+        "harness"
       ],
-      "summary": "Add vitest as the repository test runner, migrate the existing behavior assertions from scripts/check-*.mjs into *.test.ts, register a unit node in agent:verify, and write the first 20 behavior tests for the admin editors (Products 8, Media 6, Settings 4, Leads 2).",
+      "summary": "Split ADMIN_EDITOR_GUIDE.md into a one-screen English task-based quick guide for colleagues (change an image, edit a product, handle a lead, update addresses) and a developer operations runbook; remove the stale Stone workflow text; add an in-app Help entry in the admin shell that shows the quick guide.",
       "files": [
-        "package.json",
-        "scripts/_lib/verification.mjs",
-        "scripts/agent-verify.mjs",
-        "docs/agent/verification.md",
-        "scripts/"
+        "docs/ADMIN_EDITOR_GUIDE.md",
+        "docs/ADMIN_UX_RESHAPE_PLAN.md",
+        "src/pages/admin/AdminApp.tsx",
+        "docs/agent/admin-handoff-evidence.json"
       ],
       "acceptance": [
-        "npm test runs vitest; assertion count after migration >= count before (per-file table in the PR).",
-        "One deliberate mutation of a tested function makes the suite fail (mutation proof recorded).",
-        "agent:verify --plan includes unit when src/ changes; test-only changes classify as tooling with deploy=false.",
-        "The 20 new tests cover save/publish/validation behavior of Products, Media, Settings and Leads without touching production.",
-        "gate and CI green; verification.md documents the unit node in <= 15 added lines."
+        "Quick guide fits one screen, contains no Supabase/bucket/migration/localhost terms, and every step names a control that exists in the current UI (checked by a script against the admin source).",
+        "Developer content moved to a runbook and linked from PROJECT_MAP.",
+        "Admin shell shows a Help link or drawer with the quick guide on every admin route.",
+        "ADMIN_UX_RESHAPE_PLAN completed sections absorbed; admin-handoff-evidence editorGuideUsability updated with what was verified and what still needs a colleague."
       ],
       "verification": [
-        "npm test",
         "npm run agent:verify -- --plan",
         "npm run gate",
         "git diff --check"
       ],
       "authorization": {
-        "source": "Jay approved the 2026-09-24 optimization audit wave 1 and instructed Opus execution on 2026-09-25 (\"第一波6个任务开工，让Opus去干\").",
+        "source": "Jay approved optimization wave 2 on 2026-09-26 (\"开第二波\") after the wave 1 report; www redirect, CMS SEO data fixes and merged-branch deletion were authorized on 2026-09-25 (\"可以\").",
         "included": [
-          "Dev dependency addition, script migration, isolated local tests, git push, pull request, docs/agent state updates."
+          "Docs and admin shell changes, git push, pull request, branch Preview and smoke, docs/agent state updates."
         ],
         "excluded": [
-          "Runtime behavior changes in src/, deployment, production access."
+          "Merge to main (Jay approves after Claude report), production data or Storage writes beyond the items listed, real email, credentials, migrations."
         ]
       },
       "status": "now",
-      "phase": "awaiting_external",
-      "nextAction": "Claude reviews PR claude/opt-vitest-runner (stacked on PR #60) and reports to Jay; merge only after required CI passes and Jay approves. Rebase package.json/package-lock.json onto the repo-hygiene and framer-motion branches if they merge first.",
-      "blocker": "Jay review and merge decision; PR CI (runtime classification because package.json changed) must pass.",
+      "phase": "planned",
+      "nextAction": "Opus implements on its own branch; Claude reports to Jay before merge.",
+      "blocker": "",
       "notes": [
-        "2026-09-25: created from the 2026-09-24 four-track optimization audit (session scratch, not repository state). Wave 1 of 3; Jay decides on wave 2 after Claude's report.",
-        "New files to create: vitest.config.ts, src/**/*.test.ts (not listed because the path check requires existing files).",
-        "2026-09-25 implementation: vitest 4.1.11 (Node 20 compatible; vitest 5 needs Node 22) with npm test; 461 migrated assertions in tests/*.test.ts equal the 461 in the six source scripts; 20 admin editor tests (Products 8, Media 6, Settings 4, Leads 2) against exported pure helpers with Supabase mocked; graph node unit replaces forms-api/overlay/stone-workspace/admin-runtime; tests/**, src/**/*.test.ts(x) and vitest.config.* classify as tooling (deploy=false). Mutation proof and gate evidence: WORKLOG 2026-09-25 Test runner."
+        "2026-09-26: wave 2 of the 2026-09-24 optimization audit. Jay decided the homepage hero headline keeps its letter-by-letter animation (homepage LCP element stays non-hero by design)."
       ]
     },
     {
-      "id": "NOW-OPT-REPO-HYGIENE-001",
-      "priority": 0,
+      "id": "NOW-OPT-AGENT-DOCS-SLIM-001",
+      "priority": 1,
       "modules": [
         "harness",
         "delivery"
       ],
-      "summary": "Dependency and repository hygiene: fix react-router advisories (7.18.x), untrack .vite/deps, delete dead files (ProjectCard.tsx, utils/articles.ts, src/scripts/generate-article-index.ts, App.css), remove unused dependencies (lodash.throttle and types, clsx), move runtime libraries out of devDependencies, commit a knip config and add it to the tooling graph, and delete the 34 merged remote branches.",
+      "summary": "Cut agent startup reading to 40KB or less per task: split ARCHITECTURE.md into per-module contract files referenced by modules.json, trim status.json history and verification.md to the live rules, archive the executed Stone adoption plan, fix NOW/NEXT prefixes, record the per-wave release-record policy in OPERATING_PROTOCOL, and make the CI production readback step wait and retry for edge convergence.",
       "files": [
-        "package.json",
-        "package-lock.json",
-        ".gitignore",
-        "src/components/ProjectCard.tsx",
-        "src/utils/articles.ts",
-        "src/scripts/generate-article-index.ts",
-        "src/App.css",
-        "scripts/_lib/verification.mjs",
-        "scripts/check-doc-paths.mjs",
-        "scripts/check-verification.mjs",
-        "knip.json"
+        "docs/ARCHITECTURE.md",
+        "docs/agent/",
+        "docs/OPERATING_PROTOCOL.md",
+        "docs/PROJECT_MAP.md",
+        "scripts/agent-init.mjs",
+        "scripts/check-harness-gc.mjs",
+        ".github/workflows/deploy.yml"
       ],
       "acceptance": [
-        "npm audit --omit=dev reports no high or critical.",
-        "knip reports 0 unused files and 0 unused dependencies with the committed config; knip runs in the tooling graph.",
-        ".vite/ is ignored and removed from the index; git status clean after build.",
-        "Full source graph, local:verify and branch Preview smoke pass (runtime dependency change requires the full release profile).",
-        "Merged remote branches deleted only after confirming each is merged into main (list recorded in WORKLOG); gh-pages left untouched unless Jay confirms separately."
+        "For three representative tasks (projects, products, public-ui) the bytes of AGENTS.md + startup files + listed module rules are <= 40KB, measured by a script added to the harness check.",
+        "Every module rule file is <= 8KB; ARCHITECTURE.md becomes an index; archived material keeps byte-integrity manifests; check-doc-paths and harness-gc pass.",
+        "OPERATING_PROTOCOL records: code PRs carry Preview evidence, production readback is recorded once per wave.",
+        "deploy.yml production-domain readback retries for up to 3 minutes before failing; a WORKLOG note references the 2026-09-26 false failure on run 36153157216.",
+        "Cold-start drill: a fresh agent states the task, boundaries and verification commands from the trimmed set without reading history."
       ],
       "verification": [
         "npm run agent:verify -- --plan",
         "npm run gate",
-        "npm run agent:cloudflare-preview-smoke -- --base-url <branch Preview>",
-        "git diff --check",
-        "npm audit --omit=dev",
-        "npx knip",
-        "npm run local:verify"
+        "git diff --check"
       ],
       "authorization": {
-        "source": "Jay approved the 2026-09-24 optimization audit wave 1 and instructed Opus execution on 2026-09-25 (\"第一波6个任务开工，让Opus去干\").",
+        "source": "Jay approved optimization wave 2 on 2026-09-26 (\"开第二波\") after the wave 1 report; www redirect, CMS SEO data fixes and merged-branch deletion were authorized on 2026-09-25 (\"可以\").",
         "included": [
-          "Dependency changes, dead-code removal, git push, pull request, branch Preview and smoke, deletion of remote branches already merged into main (Jay approved 2026-09-25), docs/agent state updates."
+          "Docs restructuring, harness scripts, CI workflow readback step change, git push, pull request, docs/agent state updates."
         ],
         "excluded": [
-          "Deleting gh-pages or any unmerged branch; merge to main; production access."
+          "Runtime src/ changes, deployment behaviour changes other than the readback wait, production access."
         ]
       },
       "status": "now",
-      "phase": "awaiting_external",
-      "nextAction": "Claude reports PR #61 to Jay; merge after PR #60 and Jay's approval, then production readback.",
+      "phase": "planned",
+      "nextAction": "Opus implements on its own branch; Claude reports to Jay before merge.",
       "blocker": "",
       "notes": [
-        "2026-09-25: created from the 2026-09-24 four-track optimization audit (session scratch, not repository state). Wave 1 of 3; Jay decides on wave 2 after Claude's report.",
-        "2026-09-25: implemented on claude/opt-repo-hygiene (stacks on PR #60). Prod audit 6 -> 0; knip 0 unused files/dependencies and wired into tooling/container/runtime/migrations suites; 27 merged remote branches listed in WORKLOG. Evidence in WORKLOG 2026-09-25 Repository hygiene.",
-        "2026-09-25: runtime candidate d0a48af passed clean Node 20 gate, host no-config browser gate (12 routes), PR #61 CI 36141692162 (graph incl. knip, isolated local:verify, deploy) and host Preview smoke at https://0fa64dc7.urblo-site.pages.dev; 27 merged remote branches deleted with SHA leases. Host local:verify was blocked by another checkout's local stack (CI covered it). Not merged; production unverified."
+        "2026-09-26: wave 2 of the 2026-09-24 optimization audit. Jay decided the homepage hero headline keeps its letter-by-letter animation (homepage LCP element stays non-hero by design)."
       ]
     },
     {

@@ -6,19 +6,19 @@ Last updated: 2026-09-26
 
 ## 正在执行
 
-**NOW-OPT-PERF-STONE-IMG-001** — Serve Stone Library and product-option stone media through sized variants (srcset/sizes/lazy) instead of raw Supabase originals; keep a full-resolution original link for designers on the stone detail stage.
+**NOW-OPT-SEO-EDGE-HEAD-001** — Per-route HTML head at the edge (title, description, canonical, share image, JSON-LD) for every public route including CMS-published details, real 404 responses for unknown paths, a generated sitemap with every published project/stone/product/article, trailing-slash 301s, and the www to apex 301.
 
-阶段：awaiting_external。状态：now。
+阶段：planned。状态：now。
 
-下一步：Jay reviews PR #63 (Preview https://49839330.urblo-site.pages.dev) and decides on merge; the prime-block mobile 3MB target depends on the static-assets task.
+下一步：Opus implements on its own branch; Claude reports to Jay before merge.
 
 ## 已观察的发布状态
 
-观察日期：2026-09-14。仓库版本：`5b57b7d4ec074aa33f27f84e2166421d86b7ecb8`。已验证运行时代码：`5b57b7d4ec074aa33f27f84e2166421d86b7ecb8`。
+观察日期：2026-09-26。仓库版本：`e1548af3df842874e0f995d7cb34afcd18a3fb40`。已验证运行时代码：`e1548af3df842874e0f995d7cb34afcd18a3fb40`。
 
-验证地址：https://777af336.urblo-site.pages.dev
+验证地址：https://21ec9a4c.urblo-site.pages.dev
 
-PR #58 publishes Jay’s supplied three-paragraph Our Story introduction. Local checks, Preview, production immutable/apex/www smoke and exact paragraph/desktop/mobile readback passed. The 20+ caption, PDF and other public content are unchanged. This record-only closeout does not deploy; existing acceptance tasks remain separate.
+Optimization wave 1 (PRs #60–#67) merged in order on 2026-09-26 with Jay approval: stone media variants, footer CLS and CSS route fade, UI cascade/status pill/focus/Contact button fixes, admin safety stop-gap, vitest runner with 74 tests, repository hygiene, and the 14px project point marker. Production readback: immutable/apex/www smoke passed; Lighthouse mobile performance 79–93, CLS <= 0.002 on five pages; no stone originals requested; markers 14px in a 44px hit area. This batch record does not deploy.
 
 CMS handoff: **revalidation_required**。QR: material_page_deployed。
 
