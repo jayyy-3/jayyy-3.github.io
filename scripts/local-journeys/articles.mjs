@@ -114,11 +114,13 @@ export async function articleJourney({ page, context, check, id, directory }) {
     await expect(field('Website URL key')).toBeDisabled()
     await expect(page.getByRole('button', { name: 'Save article', exact: true })).toHaveCount(0)
     await field('Excerpt').fill(`Live excerpt ${id}`)
+    // The published section's action bar also says Update live page; use the article's own form.
+    const articleLiveSave = page.locator('form').filter({ has: field('Title') }).getByRole('button', { name: 'Update live page', exact: true })
     const writes = []
     const recordWrite = request => { if (request.method() === 'PATCH' && new URL(request.url()).pathname === '/rest/v1/articles') writes.push(request.url()) }
     page.on('request', recordWrite)
     try {
-      await page.getByRole('button', { name: 'Update live page', exact: true }).click()
+      await articleLiveSave.click()
       const dialog = page.getByRole('dialog', { name: 'Update the live article?', exact: true })
       await expect(dialog).toContainText(`/articles/${a.slug}`)
       await page.screenshot({ path: `${directory}/article-live-save-confirm.png`, fullPage: true })
@@ -126,7 +128,7 @@ export async function articleJourney({ page, context, check, id, directory }) {
       await expect(dialog).toHaveCount(0)
       assert.deepEqual(writes, [])
       await expect(field('Excerpt')).toHaveValue(`Live excerpt ${id}`)
-      await page.getByRole('button', { name: 'Update live page', exact: true }).click()
+      await articleLiveSave.click()
       const [response] = await Promise.all([
         page.waitForResponse(r => new URL(r.url()).pathname === '/rest/v1/articles' && r.request().method() === 'PATCH'),
         dialog.getByRole('button', { name: 'Update live page', exact: true }).click(),
@@ -135,7 +137,7 @@ export async function articleJourney({ page, context, check, id, directory }) {
       assert.equal((await response.json()).status, 'published')
       assert.equal(writes.length, 1)
     } finally { page.off('request', recordWrite) }
-    await expect(page.getByRole('button', { name: 'Update live page', exact: true })).toBeEnabled()
+    await expect(articleLiveSave).toBeEnabled()
     await save('Archive article', 'articles')
     const credentials = readLocalCredentials()
     const response = await localFetch(`${credentials.apiUrl}/rest/v1/articles?slug=eq.${a.slug}&select=id`, { headers: { apikey: credentials.anonKey } })
