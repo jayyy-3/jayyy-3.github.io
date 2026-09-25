@@ -278,7 +278,7 @@ Pass condition: a manager can audit what changed from Change history without rea
 Pass condition: permitted routes and primary actions are discoverable, readable, and unclipped at mobile, 1116px, and wide desktop widths.
 
 ### 11. Editor Guide Usability
-1. Give a non-technical editor `docs/ADMIN_EDITOR_GUIDE.md` and only the approved account credentials; do not explain the interface verbally.
+1. Give a non-technical editor the quick guide (the admin Help button, source `docs/ADMIN_EDITOR_GUIDE.md`) and only the approved account credentials; do not explain the interface verbally. Ask them to complete two of its tasks, for example change a project image and edit a product.
 2. Ask them to identify where to start, find one Draft Project, make the approved safe change, save and refresh it, locate the first publish blocker, and explain how they would confirm a public result.
 3. Ask them to identify where teammate invitation, password recovery, Media publication, and support escalation live.
 4. Record every place where the guide differs from production or verbal help is required.

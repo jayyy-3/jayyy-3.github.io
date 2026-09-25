@@ -155,9 +155,16 @@
       "summary": "Split ADMIN_EDITOR_GUIDE.md into a one-screen English task-based quick guide for colleagues (change an image, edit a product, handle a lead, update addresses) and a developer operations runbook; remove the stale Stone workflow text; add an in-app Help entry in the admin shell that shows the quick guide.",
       "files": [
         "docs/ADMIN_EDITOR_GUIDE.md",
+        "docs/ADMIN_OPERATIONS_RUNBOOK.md",
         "docs/ADMIN_UX_RESHAPE_PLAN.md",
-        "src/pages/admin/AdminApp.tsx",
-        "docs/agent/admin-handoff-evidence.json"
+        "docs/PROJECT_MAP.md",
+        "docs/ARCHITECTURE.md",
+        "docs/agent/admin-handoff-evidence.json",
+        "src/pages/admin/AdminHelp.tsx",
+        "src/pages/admin/adminGuide.ts",
+        "src/pages/admin/AdminShell.tsx",
+        "scripts/check-admin-guide.mjs",
+        "scripts/_lib/verification.mjs"
       ],
       "acceptance": [
         "Quick guide fits one screen, contains no Supabase/bucket/migration/localhost terms, and every step names a control that exists in the current UI (checked by a script against the admin source).",
@@ -180,8 +187,8 @@
         ]
       },
       "status": "now",
-      "phase": "planned",
-      "nextAction": "Opus implements on its own branch; Claude reports to Jay before merge.",
+      "phase": "verification",
+      "nextAction": "Branch claude/opt-admin-guide implemented; running gate, push, PR and branch Preview smoke. Claude reports to Jay before merge.",
       "blocker": "",
       "notes": [
         "2026-09-26: wave 2 of the 2026-09-24 optimization audit. Jay decided the homepage hero headline keeps its letter-by-letter animation (homepage LCP element stays non-hero by design)."

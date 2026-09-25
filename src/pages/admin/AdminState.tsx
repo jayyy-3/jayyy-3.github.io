@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { AlertCircle, RefreshCw, ShieldAlert } from 'lucide-react';
 import { useAdminAuth } from '../../lib/adminAuthHooks';
+import { AdminHelpButton } from './AdminHelp';
 
 interface AdminStateProps {
     eyebrow: string;
@@ -17,8 +18,11 @@ export function AdminState({ eyebrow, title, copy, variant = 'default', action }
     return (
         <main className="flex min-h-screen items-center bg-[#f5f6f2] px-5 py-10 text-[var(--urblo-text)]">
             <section className="mx-auto w-full max-w-[760px] border border-black/10 bg-white p-6 shadow-[0_24px_70px_rgba(0,0,0,0.08)] md:p-10">
-                <div className="flex h-11 w-11 items-center justify-center rounded bg-black text-[var(--urblo-lime)]">
-                    <Icon className="h-5 w-5" />
+                <div className="flex items-start justify-between gap-4">
+                    <div className="flex h-11 w-11 items-center justify-center rounded bg-black text-[var(--urblo-lime)]">
+                        <Icon className="h-5 w-5" />
+                    </div>
+                    <AdminHelpButton />
                 </div>
                 <p className="mt-8 text-xs font-semibold uppercase tracking-[0.18em] text-black/45">
                     {eyebrow}

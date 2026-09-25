@@ -31,7 +31,7 @@ Viewer 不能执行编辑动作；owner/admin/editor 的具体能力由模块与
 
 ## 如何找规则和检查
 
-`docs/agent/modules.json` 是机器可读模块索引；agent:init 按任务打印相关入口。`docs/agent/verification.md` 管理检查类型；`docs/ARCHITECTURE.md` 管理稳定技术合同；`docs/ADMIN_IA_ACCESS.md` 管理后台角色与编辑流程。源码事实与旧文档冲突时先验证，再修正文档。
+`docs/agent/modules.json` 是机器可读模块索引；agent:init 按任务打印相关入口。`docs/agent/verification.md` 管理检查类型；`docs/ARCHITECTURE.md` 管理稳定技术合同；`docs/ADMIN_IA_ACCESS.md` 管理后台角色与编辑流程。后台运维（交接证据、Auth 配置、存储、发布与回滚、已完成的改版记录）见 `docs/ADMIN_OPERATIONS_RUNBOOK.md`；给同事的一屏英文速查是 `docs/ADMIN_EDITOR_GUIDE.md`，由后台每页的 Help 按钮渲染，并由 `npm run agent:admin-guide` 对照后台源码检查。源码事实与旧文档冲突时先验证，再修正文档。
 
 历史架构与发布记录在 `docs/archive/2026-09-09/`，不属于默认启动材料。大文件仅是检查信号，不自动触发重写。
 

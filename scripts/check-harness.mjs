@@ -13,6 +13,7 @@ const requiredFiles = [
   'docs/DESIGN.md',
   'docs/ARCHITECTURE.md',
   'docs/ADMIN_EDITOR_GUIDE.md',
+  'docs/ADMIN_OPERATIONS_RUNBOOK.md',
   'docs/ADMIN_PRODUCTION_WALKTHROUGH.md',
   'docs/NEXT_STEPS.md',
   'docs/WORKLOG.md',
@@ -27,6 +28,7 @@ const requiredFiles = [
   'scripts/container-gate.sh',
   'scripts/check-admin-auth-browser.mjs',
   'scripts/check-admin-config-gate.mjs',
+  'scripts/check-admin-guide.mjs',
   'scripts/check-admin-handoff-readiness.mjs',
   'scripts/check-admin-image-qr.mjs',
   'scripts/check-admin-media-role-boundary-live.mjs',
@@ -55,6 +57,7 @@ const requiredPackageScripts = {
   'agent:admin-media-role-boundary-live': 'node scripts/check-admin-media-role-boundary-live.mjs',
   'agent:admin-projects-aggregate': 'tsx scripts/check-admin-projects-aggregate.mjs',
   'agent:admin-handoff-readiness': 'node scripts/check-admin-handoff-readiness.mjs',
+  'agent:admin-guide': 'node scripts/check-admin-guide.mjs',
   'agent:admin-live-readiness': 'node scripts/check-admin-live-readiness.mjs',
   'agent:cloudflare-preview-smoke': 'node scripts/check-cloudflare-preview-smoke.mjs',
   'agent:cloudflare-readiness': 'node scripts/check-cloudflare-pages-readiness.mjs',
@@ -206,88 +209,37 @@ try {
   failures.push(`Unable to read scripts/check-admin-media-role-boundary-live.mjs: ${error.message}`)
 }
 
-const adminEditorGuideRequiredText = [
-  'https://urblo.com.au/admin',
+// The colleague quick guide (docs/ADMIN_EDITOR_GUIDE.md) is checked by scripts/check-admin-guide.mjs
+// against the admin source. Developer handoff material lives in the operations runbook.
+const adminOperationsRunbookRequiredText = [
+  'docs/ADMIN_EDITOR_GUIDE.md',
+  'npm run agent:admin-guide',
+  'Handoff status',
+  'revalidation_required',
+  'Admin address and roles',
   'Website owner',
   'CMS manager',
   'Editor',
   'Viewer',
-  'Customer Handoff Summary',
-  'Give an editor the production admin address',
-  'Daily editing starts on Dashboard.',
-  'The CMS currently covers Projects, Stone Library, Products, Articles, Media, Image QR, Leads, Settings, and Change history.',
-  'Public pages read Published CMS content where the public adapter is active, with static fallback still kept for safety.',
-  'Quick Start For Editors',
-  'One-Page Editor Handoff',
-  'Admin address: `https://urblo.com.au/admin`.',
-  'Account setup: a Website owner or CMS manager invites the editor from Settings, People and access, using the lowest useful role.',
-  'Find content: open the relevant module, then use search and status filters before selecting an item.',
-  'Publish carefully: Published can appear on the public website. Publish only when the checklist is clear.',
-  'CMS coverage: Projects, Stone Library, Products, Articles, Media, Image QR, Leads, Settings, and Change history are in the CMS.',
-  'First Handoff Walkthrough',
-  'Filter to Draft so the editor sees content that is safe to review.',
-  'Pass condition: the editor can explain where they start',
-  'Start with Dashboard Recommended next action',
-  'visible actions bar',
-  'Most day-to-day editing should not require Supabase, code, table names, or developer help.',
-  'CMS team',
-  'People and access',
-  'Active access',
-  'Draft',
-  'Published',
-  'Archived',
-  'Needs confirmation',
-  'Recommended next action',
-  'Content health queue',
-  'Project actions',
-  'Stone family actions',
-  'Variant actions',
-  'Product actions',
-  'Model actions',
-  'Article actions',
-  'Section actions',
-  'Media actions',
-  'Lead workflow status',
-  'Lead workflow actions',
-  'Website settings status',
-  'Site settings actions',
-  'CMS access handoff actions',
-  'Open public page',
-  'Article sections',
-  'Published in Media',
-  'change history',
-  'static fallback',
-  'sanitized original import HTML',
-  'The approved import has already written production Projects, Stone Library, Products, Articles, and Media candidates into the CMS as Draft items.',
-  'Current warning: this guide is the target operating flow, not proof that production is handoff-ready.',
+  'Account setup and Auth',
   '/admin/account-setup',
-  'golden workflow',
+  'Active access',
+  'Content lifecycle by module',
+  'Update live page',
+  'Public website fallbacks',
+  'Media and storage',
+  'Leads export',
+  'Verification and rollback',
+  'Completed admin reshape record',
 ]
-const adminEditorGuideRequiredModules = [
-  'Dashboard',
-  'Projects',
-  'Stone Library',
-  'Products',
-  'Articles',
-  'Media',
-  'Image QR',
-  'Leads',
-  'Settings',
-  'Change history',
-]
-const adminEditorGuideForbiddenText = [
+const adminOperationsRunbookForbiddenText = [
   'Supabase Auth login account',
   'Admin team',
-  'Active profile',
   'structured article blocks',
-  'activity logging',
-  'SEO defaults',
-  'TBC |',
-  'owner/admin',
-  '| Owner |',
-  '| Admin |',
   'reviewed project claim status',
-  'clean model key',
+  'Projects task workspace',
+  'child-save isolation',
+  'new workspace candidate',
 ]
 
 const adminProductionWalkthroughRequiredText = [
@@ -352,24 +304,19 @@ const adminProductionWalkthroughForbiddenText = [
 ]
 
 try {
-  const guide = readFileSync(join(root, 'docs/ADMIN_EDITOR_GUIDE.md'), 'utf8')
-  for (const text of adminEditorGuideRequiredText) {
-    if (!guide.includes(text)) {
-      failures.push(`docs/ADMIN_EDITOR_GUIDE.md must include current editor handoff text: ${text}`)
+  const runbook = readFileSync(join(root, 'docs/ADMIN_OPERATIONS_RUNBOOK.md'), 'utf8')
+  for (const text of adminOperationsRunbookRequiredText) {
+    if (!runbook.includes(text)) {
+      failures.push(`docs/ADMIN_OPERATIONS_RUNBOOK.md must include current operations text: ${text}`)
     }
   }
-  for (const moduleName of adminEditorGuideRequiredModules) {
-    if (!guide.includes(`| ${moduleName} |`)) {
-      failures.push(`docs/ADMIN_EDITOR_GUIDE.md must document the ${moduleName} admin module.`)
-    }
-  }
-  for (const text of adminEditorGuideForbiddenText) {
-    if (guide.includes(text)) {
-      failures.push(`docs/ADMIN_EDITOR_GUIDE.md must not drift back to old admin terminology: ${text}`)
+  for (const text of adminOperationsRunbookForbiddenText) {
+    if (runbook.includes(text)) {
+      failures.push(`docs/ADMIN_OPERATIONS_RUNBOOK.md must not drift back to retired admin wording: ${text}`)
     }
   }
 } catch (error) {
-  failures.push(`Unable to read docs/ADMIN_EDITOR_GUIDE.md: ${error.message}`)
+  failures.push(`Unable to read docs/ADMIN_OPERATIONS_RUNBOOK.md: ${error.message}`)
 }
 
 try {

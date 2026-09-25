@@ -16,6 +16,7 @@ Last updated: 2026-08-02
 - Planning source: `docs/SUPABASE_CLOUDFLARE_LAUNCH_PLAN.md`.
 - Supabase schema design source: `docs/SUPABASE_SCHEMA.md`.
 - Admin IA/access design source: `docs/ADMIN_IA_ACCESS.md`.
+- Admin operations (handoff evidence, Auth setup, storage, verification, rollback, completed reshape record): `docs/ADMIN_OPERATIONS_RUNBOOK.md`. The colleague quick guide `docs/ADMIN_EDITOR_GUIDE.md` is bundled into the admin Help drawer (`src/pages/admin/AdminHelp.tsx`) and therefore classifies as a runtime build input.
 
 ## Runtime Stack
 - Bundler/dev server: Vite 6
