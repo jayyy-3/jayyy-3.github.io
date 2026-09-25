@@ -289,12 +289,13 @@
         ]
       },
       "status": "now",
-      "phase": "verification",
-      "nextAction": "Opus implements on its own branch and worktree; Claude reports to Jay before merge.",
+      "phase": "awaiting_external",
+      "nextAction": "Claude reports PR #61 to Jay; merge after PR #60 and Jay's approval, then production readback.",
       "blocker": "",
       "notes": [
         "2026-09-25: created from the 2026-09-24 four-track optimization audit (session scratch, not repository state). Wave 1 of 3; Jay decides on wave 2 after Claude's report.",
-        "2026-09-25: implemented on claude/opt-repo-hygiene (stacks on PR #60). Prod audit 6 -> 0; knip 0 unused files/dependencies and wired into tooling/container/runtime/migrations suites; 27 merged remote branches listed in WORKLOG. Evidence in WORKLOG 2026-09-25 Repository hygiene."
+        "2026-09-25: implemented on claude/opt-repo-hygiene (stacks on PR #60). Prod audit 6 -> 0; knip 0 unused files/dependencies and wired into tooling/container/runtime/migrations suites; 27 merged remote branches listed in WORKLOG. Evidence in WORKLOG 2026-09-25 Repository hygiene.",
+        "2026-09-25: runtime candidate d0a48af passed clean Node 20 gate, host no-config browser gate (12 routes), PR #61 CI 36141692162 (graph incl. knip, isolated local:verify, deploy) and host Preview smoke at https://0fa64dc7.urblo-site.pages.dev; 27 merged remote branches deleted with SHA leases. Host local:verify was blocked by another checkout's local stack (CI covered it). Not merged; production unverified."
       ]
     },
     {
