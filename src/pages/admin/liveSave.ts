@@ -41,6 +41,30 @@ export function liveSaveRequest({
     };
 }
 
+// Archive on a record that is live removes it from the public website straight away, so the
+// older modules ask first and name the public effect (Jay approved this on 2026-09-26).
+export function archiveConfirmRequest({
+    kind,
+    name,
+    publicPath,
+    liveTarget,
+    confirmLabel,
+}: {
+    kind: string;
+    name: string;
+    publicPath?: string | null;
+    liveTarget?: string;
+    confirmLabel: string;
+}): LiveSaveConfirmRequest {
+    const label = name.trim() ? `“${name.trim()}”` : `This ${kind}`;
+    const target = liveTarget ?? (publicPath ? `the public page at ${publicPath}` : 'the public website');
+    return {
+        title: `Archive this live ${kind}?`,
+        detail: `${label} is live on the website. Archiving removes it from ${target} straight away. It stays in the CMS, and you can publish it again later.`,
+        confirmLabel,
+    };
+}
+
 // URL keys follow the name until the editor types their own, and stay editable until the record
 // has been published once. After that the public address is permanent (links, search results).
 export function urlKeyFromName(value: string) {

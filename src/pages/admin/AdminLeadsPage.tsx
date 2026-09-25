@@ -1,12 +1,16 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { FormEvent } from 'react';
+import type { FormEvent, ReactNode } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { CheckCircle2, Download, Inbox, Mail, PackageCheck, Save, Search, ShieldAlert } from 'lucide-react';
 import { recordAdminAuditEvent, withAuditNotice } from '../../lib/adminAudit';
 import { supabase } from '../../lib/supabaseClient';
 import { useAdminAuth } from '../../lib/adminAuthHooks';
+import { AdminFeedback } from './AdminFeedback';
+import { useAdminFeedback } from './useAdminFeedback';
 import AdminShell from './AdminShell';
 import RequireAdmin from './RequireAdmin';
+import { isFormDirty } from './unsavedGuard';
+import { useUnsavedGuard } from './useUnsavedGuard';
 
 type LeadKind = 'enquiry' | 'sample';
 type LeadKindFilter = LeadKind | 'all';
@@ -151,8 +155,7 @@ function AdminLeadsContent() {
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [isExporting, setIsExporting] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [notice, setNotice] = useState<string | null>(null);
+    const { feedback, setError, setNotice, setInfo, reportError, clearFeedback } = useAdminFeedback();
 
     const combinedLeads = useMemo(
         () =>
@@ -276,7 +279,7 @@ function AdminLeadsContent() {
                 stonesResult.error ??
                 finishesResult.error;
             if (loadError) {
-                setError(loadError.message);
+                reportError(loadError, { entity: 'lead inbox', action: 'load' });
                 setIsLoading(false);
                 return;
             }
@@ -304,7 +307,7 @@ function AdminLeadsContent() {
             setForm(leadToForm(nextSelected?.kind ?? null, nextSelected?.id ?? null, nextEnquiries, nextSamples));
             setIsLoading(false);
         },
-        [],
+        [reportError, setError],
     );
 
     useEffect(() => {
@@ -324,18 +327,21 @@ function AdminLeadsContent() {
         setNotice(null);
     }
 
-    async function saveLead(event: FormEvent<HTMLFormElement>) {
+    async function handleLeadSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
+        await saveLead();
+    }
 
-        if (!supabase || !canManageLeads || !user || !selectedKind || !selectedId) return;
+    async function saveLead() {
+        if (!supabase || !canManageLeads || !user || !selectedKind || !selectedId) return false;
 
         const allowedStatuses =
             selectedKind === 'enquiry'
                 ? enquiryStatusOptions.map(([value]) => value)
                 : sampleStatusOptions.map(([value]) => value);
         if (!allowedStatuses.some((status) => status === form.status)) {
-            setError('Lead status is not valid for this lead type.');
-            return;
+            setError('Lead status is not valid for this lead type.', { scope: 'lead' });
+            return false;
         }
 
         setIsSaving(true);
@@ -356,8 +362,8 @@ function AdminLeadsContent() {
         setIsSaving(false);
 
         if (response.error) {
-            setError(response.error.message);
-            return;
+            reportError(response, { entity: 'lead', scope: 'lead' });
+            return false;
         }
 
         const auditError = await recordAdminAuditEvent(supabase, {
@@ -371,8 +377,9 @@ function AdminLeadsContent() {
                 hasInternalNotes: Boolean(form.internalNotes.trim()),
             },
         });
-        setNotice(withAuditNotice('Lead workflow updated.', auditError));
+        setNotice(withAuditNotice('Lead workflow updated.', auditError), { scope: 'lead' });
         await loadLeads({ kind: selectedKind, id: selectedId });
+        return true;
     }
 
     async function exportLeadCsv() {
@@ -413,7 +420,10 @@ function AdminLeadsContent() {
 
         if (auditError) {
             setIsExporting(false);
-            setError(`Export is locked because the change history could not be recorded: ${auditError}`);
+            setError(
+                'Export is locked because the change history could not be recorded. Try again, or ask a Website owner or CMS manager to check Change history.',
+                { detail: auditError },
+            );
             return;
         }
 
@@ -431,6 +441,23 @@ function AdminLeadsContent() {
     }
 
     const statusOptions = selectedKind === 'sample' ? sampleStatusOptions : enquiryStatusOptions;
+
+    // Unsaved-changes guard: status, owner and internal notes compare with the selected lead.
+    const isLeadFormDirty =
+        canManageLeads &&
+        !isLoading &&
+        Boolean(selectedLead) &&
+        isFormDirty(form, leadToForm(selectedKind, selectedId, enquiries, sampleRequests));
+    const { confirmLeave, unsavedDialog } = useUnsavedGuard({
+        sections: isLeadFormDirty ? [{ key: 'lead', label: 'the lead workflow (status, owner and notes)', save: saveLead }] : [],
+        isBusy: isSaving,
+        onBlockedWhileBusy: () => setInfo('Wait for the workflow save to finish before leaving this lead.'),
+    });
+
+    function requestSelectLead(lead: CombinedLead) {
+        if (lead.kind === selectedKind && lead.id === selectedId) return;
+        confirmLeave(() => selectLead(lead), { actionLabel: 'open another lead' });
+    }
 
     return (
         <AdminShell
@@ -535,7 +562,7 @@ function AdminLeadsContent() {
                                     <button
                                         key={`${lead.kind}-${lead.id}`}
                                         type="button"
-                                        onClick={() => selectLead(lead)}
+                                        onClick={() => requestSelectLead(lead)}
                                         className={[
                                             'block w-full p-4 text-left transition hover:bg-[#f8f9f5]',
                                             selectedKind === lead.kind && selectedId === lead.id
@@ -578,6 +605,7 @@ function AdminLeadsContent() {
                 </section>
 
                 <section className="space-y-5">
+                    <AdminFeedback feedback={feedback} scope="page" onDismiss={clearFeedback} />
                     <section className="border border-black/10 bg-white p-5 md:p-6">
                         <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                             <div>
@@ -650,7 +678,7 @@ function AdminLeadsContent() {
                         )}
                     </section>
 
-                    <form onSubmit={(event) => void saveLead(event)} className="border border-black/10 bg-white p-5 md:p-6">
+                    <form onSubmit={(event) => void handleLeadSubmit(event)} className="border border-black/10 bg-white p-5 md:p-6">
                         <div className="flex items-start justify-between gap-3">
                             <div>
                                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-black/45">
@@ -682,6 +710,7 @@ function AdminLeadsContent() {
                             canManageLeads={canManageLeads}
                             isSaving={isSaving}
                             hasSelectedLead={Boolean(selectedLead)}
+                            feedback={<AdminFeedback feedback={feedback} scope="lead" onDismiss={clearFeedback} className="mt-4" />}
                         />
 
                         <div className="mt-5 grid gap-4 md:grid-cols-2">
@@ -765,16 +794,6 @@ function AdminLeadsContent() {
                         </section>
                     ) : null}
 
-                    {error ? (
-                        <section className="border border-red-200 bg-red-50 p-4 text-sm font-semibold leading-6 text-red-700">
-                            {error}
-                        </section>
-                    ) : null}
-                    {notice ? (
-                        <section className="border border-[var(--urblo-lime)] bg-[rgba(0,255,25,0.10)] p-4 text-sm font-semibold leading-6 text-black">
-                            {notice}
-                        </section>
-                    ) : null}
                     {!canManageLeads ? (
                         <section className="border border-black/10 bg-white p-5 text-sm leading-6 text-black/62">
                             Current role is read-only for Leads. Ask a lead manager to update workflow status, assignment, or internal notes.
@@ -782,6 +801,7 @@ function AdminLeadsContent() {
                     ) : null}
                 </aside>
             </div>
+            {unsavedDialog}
         </AdminShell>
     );
 }
@@ -938,12 +958,15 @@ function LeadWorkflowActionBar({
     canManageLeads,
     isSaving,
     hasSelectedLead,
+    feedback,
 }: {
     kind: LeadKind | null;
     status: string;
     canManageLeads: boolean;
     isSaving: boolean;
     hasSelectedLead: boolean;
+    /** Save result (AdminFeedback), shown right below the Save button. */
+    feedback?: ReactNode;
 }) {
     const guidance = getWorkflowGuidance(kind, status);
     const saveDisabled = !canManageLeads || isSaving || !hasSelectedLead;
@@ -976,6 +999,7 @@ function LeadWorkflowActionBar({
                 <p>2. Assign an owner</p>
                 <p>3. Record internal notes</p>
             </div>
+            {feedback}
         </section>
     );
 }

@@ -141,11 +141,12 @@
         ]
       },
       "status": "now",
-      "phase": "planned",
-      "nextAction": "Opus implements on its own branch; Claude reports to Jay before merge.",
+      "phase": "verification",
+      "nextAction": "Push branch claude/opt-admin-shared-ux, open the PR stacked on #68, run branch Preview smoke, then Claude reports to Jay before merge.",
       "blocker": "",
       "notes": [
-        "2026-09-26: wave 2 of the 2026-09-24 optimization audit. Jay decided the homepage hero headline keeps its letter-by-letter animation (homepage LCP element stays non-hero by design)."
+        "2026-09-26: wave 2 of the 2026-09-24 optimization audit. Jay decided the homepage hero headline keeps its letter-by-letter animation (homepage LCP element stays non-hero by design).",
+        "2026-09-26: Implemented on claude/opt-admin-shared-ux: src/lib/adminErrors.ts translator, AdminFeedback + useAdminFeedback beside each action bar (status/alert live regions, auto-dismissed success, persistent error with Details), useUnsavedGuard (record switch, in-app links, Back, Sign out, Refresh, beforeunload; StoneDialog Save / Discard / Keep editing), Archive confirmation on live Products/Articles/Media (models and sections of live parents included). Wired into Products, Articles, Media, Leads and Settings; no schema, Function or RLS change. Save in the guard dialog is offered only when exactly one form section is unsaved."
       ]
     },
     {

@@ -12,6 +12,7 @@ import {
     CmsStatusMeaning,
     CmsStatusPill,
 } from '../AdminCmsPrimitives';
+import { AdminFeedback } from '../AdminFeedback';
 import AdminShell from '../AdminShell';
 import {
     ArticleActionBar,
@@ -43,6 +44,7 @@ export default function ArticlesWorkspace() {
         isBlockLive,
         isArticleUrlKeyLocked,
         liveSaveDialog,
+        unsavedDialog,
         articles,
         blocks,
         projectOptions,
@@ -59,8 +61,8 @@ export default function ArticlesWorkspace() {
         isLoading,
         isSavingArticle,
         isSavingBlock,
-        error,
-        notice,
+        feedback,
+        clearFeedback,
         selectedArticle,
         articleCounts,
         selectedCoverMedia,
@@ -78,8 +80,10 @@ export default function ArticlesWorkspace() {
         startNewBlock,
         selectBlock,
         saveArticle,
+        archiveArticle,
         handleArticleSubmit,
         saveBlock,
+        archiveBlock,
     } = useArticleEditor();
     return (
         <AdminShell
@@ -206,6 +210,7 @@ export default function ArticlesWorkspace() {
                 </section>
 
                 <section className="space-y-5">
+                    <AdminFeedback feedback={feedback} scope="page" onDismiss={clearFeedback} />
                     <form
                         onSubmit={(event) => void handleArticleSubmit(event)}
                         className="border border-black/10 bg-white p-5 md:p-6"
@@ -376,7 +381,8 @@ export default function ArticlesWorkspace() {
                             publishLabel="Publish article"
                             archiveLabel="Archive article"
                             onPublish={() => void saveArticle('published')}
-                            onArchive={() => void saveArticle('archived')}
+                            onArchive={() => void archiveArticle()}
+                            feedback={<AdminFeedback feedback={feedback} scope="article" onDismiss={clearFeedback} className="mt-3" />}
                         />
                     </form>
 
@@ -479,7 +485,8 @@ export default function ArticlesWorkspace() {
                             archiveLabel="Archive section"
                             onSave={() => void saveBlock(blockForm.status, { confirmLive: true })}
                             onPublish={() => void saveBlock('published')}
-                            onArchive={() => void saveBlock('archived')}
+                            onArchive={() => void archiveBlock()}
+                            feedback={<AdminFeedback feedback={feedback} scope="section" onDismiss={clearFeedback} className="mt-3" />}
                             compact
                         />
                     </SubrecordEditor>
@@ -507,16 +514,6 @@ export default function ArticlesWorkspace() {
                         </ul>
                     </section>
 
-                    {error ? (
-                        <section className="border border-red-200 bg-red-50 p-4 text-sm font-semibold leading-6 text-red-700">
-                            {error}
-                        </section>
-                    ) : null}
-                    {notice ? (
-                        <section className="border border-[var(--urblo-lime)] bg-[rgba(0,255,25,0.10)] p-4 text-sm font-semibold leading-6 text-black">
-                            {notice}
-                        </section>
-                    ) : null}
                     {!canEdit ? (
                         <section className="border border-black/10 bg-white p-5 text-sm leading-6 text-black/62">
                             Current role is read-only for Articles. Ask a CMS editor to update article content.
@@ -525,6 +522,7 @@ export default function ArticlesWorkspace() {
                 </aside>
             </div>
             {liveSaveDialog}
+            {unsavedDialog}
         </AdminShell>
     );
 }
