@@ -21,6 +21,12 @@ const allowedMissing = new Set([
   'public/404.html',
   // Retired 2026-09-11 (no importers); immutable archived evidence still cites it.
   'src/components/projects/ProjectMaterialMap.tsx',
+  // Retired 2026-09-25 by NOW-OPT-REPO-HYGIENE-001 (no importers; knip-confirmed);
+  // the task record and immutable archived evidence still cite them.
+  'src/App.css',
+  'src/components/ProjectCard.tsx',
+  'src/scripts/generate-article-index.ts',
+  'src/utils/articles.ts',
 ])
 const pathPrefixes = [
   '.github/',

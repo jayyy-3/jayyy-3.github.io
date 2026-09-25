@@ -7,6 +7,7 @@ const tsx = (file) => ({ command: ['node', 'node_modules/tsx/dist/cli.mjs', `scr
 export const checks = {
   build: { command: ['npm', 'run', 'build'], deps: [] },
   lint: { command: ['npm', 'run', 'lint'], deps: [] },
+  knip: { command: ['node', 'node_modules/knip/bin/knip.js', '--no-progress'], deps: [] },
   state: node('check-agent-state.mjs'),
   paths: node('check-doc-paths.mjs'),
   foundation: node('check-supabase-foundation-readiness.mjs'),
@@ -38,12 +39,12 @@ const smoke = ['routes', 'forms-api', 'forms-ui', 'capabilities', 'homepage-vide
 const admin = ['stone-workspace', 'coverage', 'qr', 'projects', 'admin-runtime', 'build', 'lint', 'foundation', 'media-plan', 'public-readiness', 'overlay', 'cloudflare', 'harness', 'handoff']
 export const suites = {
   docs: ['state', 'paths', 'harness', 'classifier'],
-  tooling: ['harness', 'classifier', 'lint'],
+  tooling: ['harness', 'classifier', 'lint', 'knip'],
   smoke,
   admin,
-  container: [...smoke, ...admin, 'classifier', 'local-boundary', 'deployment-readiness'],
-  runtime: [...smoke, ...admin, 'classifier', 'local-boundary', 'deployment-readiness', 'browser'],
-  migrations: [...smoke, ...admin, 'classifier', 'local-boundary', 'deployment-readiness', 'browser'],
+  container: [...smoke, ...admin, 'classifier', 'local-boundary', 'deployment-readiness', 'knip'],
+  runtime: [...smoke, ...admin, 'classifier', 'local-boundary', 'deployment-readiness', 'knip', 'browser'],
+  migrations: [...smoke, ...admin, 'classifier', 'local-boundary', 'deployment-readiness', 'knip', 'browser'],
 }
 export function resolveChecks(suite) {
   if (!suites[suite]) throw new Error(`Unknown verification suite: ${suite}`)
