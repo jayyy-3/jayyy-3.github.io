@@ -10,6 +10,7 @@ import VariantSwitch from '../components/stone-library/VariantSwitch';
 import PublicContentSeo from '../components/PublicContentSeo';
 import type { StoneProjectUsage } from '../service/ProjectService';
 import type { StoneDetailVM } from '../types/stone-library';
+import { getStoneShareImageUrl } from '../lib/stoneImageDelivery';
 
 function statusLabel(status: 'active' | 'tbc') {
   return status === 'tbc' ? 'Upcoming' : 'Available';
@@ -86,7 +87,7 @@ export default function StonePageView({
           canonicalPath={`/stone-library/${detail.stoneGroupId}`}
           fallbackTitle={`${detail.name} ${detail.stoneType} | Urblo Stone Library`}
           fallbackDescription={`Review ${detail.name} in the Urblo Stone Library, including finish options, sourcing notes, and public realm application guidance.`}
-          image={activeFinish?.imageUrl}
+          image={getStoneShareImageUrl(activeFinish?.imageUrl)}
         />
       ) : null}
       <nav className="border-b border-black/10 bg-white/92 py-4">

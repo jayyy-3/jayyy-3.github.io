@@ -4,6 +4,9 @@ import { Link } from 'react-router-dom';
 import { formatQrBlockSize, qrStoneLibraryUrl } from '../../service/ImageQrService';
 import type { QrMaterialDetail } from '../../service/ImageQrService';
 import type { PublicImageQrResource } from '../../types/image-qr';
+import StoneResponsiveImage from '../stone-library/StoneResponsiveImage';
+
+type ExpandedImage = { url: string; label: string; stoneMedia?: boolean };
 
 interface Props {
   resource: PublicImageQrResource;
@@ -11,7 +14,7 @@ interface Props {
 }
 
 export default function ImageQrPageView({ resource, material }: Props) {
-  const [expanded, setExpanded] = useState<{ url: string; label: string } | null>(null);
+  const [expanded, setExpanded] = useState<ExpandedImage | null>(null);
   const title = material?.detail.name || resource.name;
   const finishLabel = material ? [material.variantLabel, `${material.finish.label} finish`].filter(Boolean).join(' · ') : null;
   return (
@@ -44,6 +47,7 @@ export default function ImageQrPageView({ resource, material }: Props) {
             caption={`${material.finish.label} · Actual material image`}
             aspect="aspect-[21/10]"
             onExpand={setExpanded}
+            stoneMedia
           />
         ) : (
           <section className="border-y border-black/15 py-6" role="status">
@@ -97,21 +101,23 @@ export default function ImageQrPageView({ resource, material }: Props) {
   );
 }
 
-function QrFigure({ url, alt, title, caption, aspect, priority, onExpand }: {
+function QrFigure({ url, alt, title, caption, aspect, priority, stoneMedia, onExpand }: {
   url: string; alt: string; title: string; caption: string; aspect: string; priority?: boolean;
-  onExpand: (image: { url: string; label: string }) => void;
+  /** Stone Library surface: request a sized render variant instead of the original. */
+  stoneMedia?: boolean;
+  onExpand: (image: ExpandedImage) => void;
 }) {
   const [failed, setFailed] = useState(false);
   return <figure>
-    <button type="button" disabled={failed} onClick={() => onExpand({ url, label: `${title} · ${alt}` })} aria-label={`Enlarge ${title.toLowerCase()}`} className={`relative block w-full overflow-hidden bg-[#ededed] ${aspect} focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4`}>
-      {failed ? <span className="flex h-full items-center justify-center p-5 text-sm text-black/65">Image unavailable. Please try again later.</span> : <img src={url} alt={alt} loading={priority ? 'eager' : 'lazy'} fetchPriority={priority ? 'high' : 'auto'} className={`h-full w-full ${priority ? 'object-contain' : 'object-cover'}`} onError={() => setFailed(true)} />}
+    <button type="button" disabled={failed} onClick={() => onExpand({ url, label: `${title} · ${alt}`, stoneMedia })} aria-label={`Enlarge ${title.toLowerCase()}`} className={`relative block w-full overflow-hidden bg-[#ededed] ${aspect} focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4`}>
+      {failed ? <span className="flex h-full items-center justify-center p-5 text-sm text-black/65">Image unavailable. Please try again later.</span> : stoneMedia ? <StoneResponsiveImage src={url} profile="qr" alt={alt} loading={priority ? 'eager' : 'lazy'} fetchPriority={priority ? 'high' : 'auto'} className={`h-full w-full ${priority ? 'object-contain' : 'object-cover'}`} onError={() => setFailed(true)} /> : <img src={url} alt={alt} loading={priority ? 'eager' : 'lazy'} fetchPriority={priority ? 'high' : 'auto'} className={`h-full w-full ${priority ? 'object-contain' : 'object-cover'}`} onError={() => setFailed(true)} />}
       {!failed ? <span className="absolute bottom-3 right-3 flex h-11 w-11 items-center justify-center rounded-full bg-white/95"><Maximize2 size={19} aria-hidden="true" /></span> : null}
     </button>
     <figcaption className="mt-2"><h2 className="text-[15px] leading-5">{title}</h2><p className="mt-0.5 text-[13px] leading-[18px] text-black/60">{caption}</p></figcaption>
   </figure>;
 }
 
-function QrImageDialog({ image, onClose }: { image: { url: string; label: string }; onClose: () => void }) {
+function QrImageDialog({ image, onClose }: { image: ExpandedImage; onClose: () => void }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const [zoom, setZoom] = useState(false);
   useEffect(() => {
@@ -132,7 +138,7 @@ function QrImageDialog({ image, onClose }: { image: { url: string; label: string
         </div>
       </div>
       <div className="min-h-0 flex-1 overflow-auto bg-[#ededed]" tabIndex={0} aria-label="Scrollable enlarged image">
-        <div className={zoom ? 'h-[200%] w-[200%]' : 'h-full w-full'}><img src={image.url} alt={image.label} className="h-full w-full object-contain" /></div>
+        <div className={zoom ? 'h-[200%] w-[200%]' : 'h-full w-full'}>{image.stoneMedia ? <StoneResponsiveImage src={image.url} profile="zoom" sizes={zoom ? '200vw' : '100vw'} alt={image.label} className="h-full w-full object-contain" /> : <img src={image.url} alt={image.label} className="h-full w-full object-contain" />}</div>
       </div>
     </div>
   </dialog>;

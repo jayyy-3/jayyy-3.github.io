@@ -1,5 +1,6 @@
 import { useProductStore } from '../store/productStore';
 import type { MaterialCategory, OptionItem } from '../types/product';
+import StoneResponsiveImage from './stone-library/StoneResponsiveImage';
 
 type Props = {
   title: string;
@@ -40,10 +41,12 @@ export default function OptionSelector({ title, category, options, whitelist }: 
               ].join(' ')}
             >
               <span className="relative block h-20 w-28 overflow-hidden bg-black/5">
-                <img
+                <StoneResponsiveImage
                   src={option.img}
+                  profile="swatch"
                   alt=""
                   aria-hidden="true"
+                  loading="lazy"
                   className={[
                     'h-full w-full object-cover',
                     imagePending ? 'opacity-70 grayscale' : '',

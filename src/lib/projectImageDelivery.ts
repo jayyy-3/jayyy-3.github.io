@@ -61,23 +61,50 @@ function parsePublicProjectStorageUrl(source: string): URL | null {
   }
 }
 
+export type PublicMediaRenderOptions = {
+  width: number;
+  quality: number;
+  /** Fixed box height; only used by exact-size share images. */
+  height?: number;
+  /** `webp` for page delivery; `origin` keeps the uploaded format (share previews). */
+  format?: 'webp' | 'origin';
+  resize?: 'contain' | 'cover';
+  /** Upper bound applied to width; the Supabase transform clamps at 3000px. */
+  maxWidth?: number;
+};
+
+/**
+ * Rewrites a public `urblo-public-media` Storage URL to the Supabase image
+ * render endpoint. Any other URL (static assets, data URIs, other buckets or
+ * hosts) returns null so callers keep the untouched source.
+ */
+export function toPublicMediaRenderUrl(
+  source: string,
+  { width, quality, height, format = 'webp', resize = 'contain', maxWidth = 2500 }: PublicMediaRenderOptions,
+): string | null {
+  const url = parsePublicProjectStorageUrl(source);
+  if (!url) return null;
+
+  const safeWidth = Math.min(maxWidth, Math.max(1, Math.round(width)));
+  const safeQuality = Math.min(100, Math.max(20, Math.round(quality)));
+  url.pathname = url.pathname.replace(PUBLIC_STORAGE_MARKER, PUBLIC_RENDER_MARKER);
+  url.search = '';
+  url.searchParams.set('width', String(safeWidth));
+  if (height) url.searchParams.set('height', String(Math.max(1, Math.round(height))));
+  url.searchParams.set('quality', String(safeQuality));
+  if (format === 'origin') url.searchParams.set('format', 'origin');
+  else url.searchParams.set('format', 'webp');
+  if (resize === 'cover') url.searchParams.set('resize', 'cover');
+  else url.searchParams.set('resize', 'contain');
+  return url.toString();
+}
+
 export function toProjectImageVariantUrl(
   source: string,
   width: number,
   quality: number,
 ): string | null {
-  const url = parsePublicProjectStorageUrl(source);
-  if (!url) return null;
-
-  const safeWidth = Math.min(2500, Math.max(1, Math.round(width)));
-  const safeQuality = Math.min(100, Math.max(20, Math.round(quality)));
-  url.pathname = url.pathname.replace(PUBLIC_STORAGE_MARKER, PUBLIC_RENDER_MARKER);
-  url.search = '';
-  url.searchParams.set('width', String(safeWidth));
-  url.searchParams.set('quality', String(safeQuality));
-  url.searchParams.set('format', 'webp');
-  url.searchParams.set('resize', 'contain');
-  return url.toString();
+  return toPublicMediaRenderUrl(source, { width, quality });
 }
 
 export function getProjectImageDelivery(source: string, profile: ProjectImageProfile) {

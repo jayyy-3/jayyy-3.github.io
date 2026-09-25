@@ -5,6 +5,7 @@ import OptionSelector from '../components/OptionSelector';
 import RouteState from '../components/RouteState';
 import PublicContentSeo from '../components/PublicContentSeo';
 import SpecTable from '../components/SpecTable';
+import StoneResponsiveImage from '../components/stone-library/StoneResponsiveImage';
 import { battenOptions } from '../data/battenData';
 import { frameFinishes } from '../data/frameFinishData';
 import ProductService from '../service/ProductService';
@@ -209,10 +210,12 @@ export default function ProductDetailPage() {
                   </p>
                   <div className="mt-3 aspect-[4/3] overflow-hidden bg-white">
                     {option ? (
-                      <img
+                      <StoneResponsiveImage
                         src={option.img}
+                        profile="preview"
                         alt=""
                         aria-hidden="true"
+                        loading="lazy"
                         className={[
                           'h-full w-full object-cover',
                           option.imageState === 'pending' ? 'opacity-70 grayscale' : '',
