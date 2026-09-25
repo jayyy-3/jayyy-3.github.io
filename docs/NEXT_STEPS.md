@@ -8,7 +8,7 @@ Last updated: 2026-09-25
 
 | ID | 状态 / 阶段 | 内容 | 阻塞 |
 |---|---|---|---|
-| NOW-OPT-PERF-STONE-IMG-001 | now / verification | Serve Stone Library and product-option stone media through sized variants (srcset/sizes/lazy) instead of raw Supabase originals; keep a full-resolution original link for designers on the stone detail stage. | — |
+| NOW-OPT-PERF-STONE-IMG-001 | now / verification | Serve Stone Library and product-option stone media through sized variants (srcset/sizes/lazy) instead of raw Supabase originals; keep a full-resolution original link for designers on the stone detail stage. | Branch claude/opt-stone-media-variants is committed locally, but the session permission layer refused git push. The PR, branch Preview smoke and Preview Lighthouse wait on an operator push. |
 | NOW-OPT-PERF-CLS-SHELL-001 | now / implementation | Remove the footer layout shift and route fade-in that make CLS fail on 8 of 9 public pages; scope the homepage poster preload to /; replace framer-motion with CSS for the route transition. | — |
 | NOW-OPT-UI-CASCADE-FIXES-001 | now / implementation | Fix the four confirmed visible UI defects: urblo-* utilities overriding Tailwind modifiers (dark-background eyebrows unreadable), StatusPill unreadable on dark stones, inconsistent keyboard focus rings, and wrapping button labels on Contact. | — |
 | NOW-OPT-ADMIN-SAFETY-001 | now / implementation | Stop-gap safety for the older admin modules used by non-technical colleagues: remove the Settings Status dropdown, require confirmation before Save changes a published Product/Article/Media record, auto-generate URL keys from names, and correct the Projects 'Saved — not live' label for live projects with unpublished changes. | — |
