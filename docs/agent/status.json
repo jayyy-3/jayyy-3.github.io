@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "lastUpdated": "2026-09-14",
-  "currentTaskId": "NOW-STONE-PROJECT-REFS-001",
+  "lastUpdated": "2026-09-25",
+  "currentTaskId": "NOW-ADMIN-STONE-WORKSPACE-001",
   "sourceOfTruth": {
     "currentState": "docs/agent/status.json",
     "taskQueue": "docs/agent/tasks.json",
@@ -77,8 +77,8 @@
     ]
   },
   "lastCompletedTask": {
-    "id": "NOW-COMPANY-ADDRESS-001",
-    "summary": "Office/Warehouse addresses centralized in Settings and released; public pages, legacy articles and PDF verified."
+    "id": "NOW-STONE-PROJECT-REFS-001",
+    "summary": "Stone Library ⇄ Projects references released 2026-09-12 and accepted by Jay 2026-09-25 after production use; public point cards and Used in projects read back."
   },
   "stoneWorkspace": {
     "status": "deployed_awaiting_user_acceptance",

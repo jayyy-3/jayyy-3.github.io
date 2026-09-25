@@ -2091,6 +2091,76 @@
         "Preview run 34704373106 and production run 34704740559 passed; immutable https://e80309fb.urblo-site.pages.dev and apex/www smoke passed.",
         "Approved site_settings id 1 address-only update and public browser readback passed; other settings unchanged; four article files and PDF match the released files."
       ]
+    },
+    {
+      "id": "NOW-STONE-PROJECT-REFS-001",
+      "status": "done",
+      "priority": 0,
+      "summary": "Link Stone Library and Projects both ways: quiet public material-point cards with deep links, Stone \"Used in projects\", and material points on any Project media image in a reshaped admin editor.",
+      "files": [
+        "src/components/projects/ProjectHotspotImage.tsx",
+        "src/components/projects/ProjectPageView.tsx",
+        "src/pages/ProjectDetails.tsx",
+        "src/service/ProjectService.ts",
+        "src/components/stone-library/StoneProjectsSection.tsx",
+        "src/pages/StonePageView.tsx",
+        "src/pages/StoneLibraryDetailPage.tsx",
+        "src/pages/admin/projects/ProjectEditor.tsx",
+        "src/pages/admin/projects/sections/MediaSection.tsx",
+        "src/pages/admin/projects/sections/MaterialsSection.tsx",
+        "src/pages/admin/projects/sections/EditorControls.tsx",
+        "src/pages/admin/AdminProjectsPage.tsx",
+        "src/features/projects/projectAggregate.ts",
+        "scripts/check-admin-projects-aggregate.mjs",
+        "scripts/local-journeys/projects.mjs"
+      ],
+      "acceptance": [
+        "Public material points are quiet by default; hover/focus opens a card, tap toggles, Esc/outside closes, cards stay inside the image, View stone deep-links variant and finish; a legend works at 375px.",
+        "/projects/<slug>?point=<id> scrolls to the image and pins that point.",
+        "Stone detail shows Used in projects only when referenced, ordered/highlighted by the current finish, with See placement deep links; the admin preview does not render it; Featured Materials remains.",
+        "Admin Projects has no Maps section: four expandable sections with a section rail and blocker dots; any media image can enable/disable points (disable deletes after confirmation), image replacement keeps points with a notice, and removing a point image cascades.",
+        "The point panel can create a material in place; Materials show point counts; older projects with maps open clean and persist on Save; publish blockers never reference maps.",
+        "No Function/RPC/migration change (git diff main -- functions supabase is empty); each phase PR has green CI, gate, Preview smoke and clean diff check; check-script changes are justified and every forbid assertion is kept."
+      ],
+      "verification": [
+        "npm run agent:verify -- --plan",
+        "npm run gate",
+        "npm run local:start && npm run local:verify (Phase 2)",
+        "npm run agent:cloudflare-preview-smoke -- --base-url <branch Preview>",
+        "git diff --check"
+      ],
+      "notes": [
+        "2026-09-11: Phase 1 (public point cards, Stone Used in projects, ?point= deep links) implemented on claude/stone-project-refs-phase1-public. Plan: docs/plans/TMP-stone-project-bidirectional-refs.md (temporary; Claude deletes it after acceptance).",
+        "2026-09-11: Phase 1 PR #50 (1fba735) CI 34594618314 passed; Preview https://27097513.urblo-site.pages.dev smoke and read-only QA passed. Awaiting acceptance; not merged.",
+        "2026-09-11: Phase 2 (four-section editor, section rail, points on any page image, legacy map adoption, inline confirmations) implemented on claude/stone-project-refs-phase2-admin, stacked on phase 1. Local stack has no Stone Library records, so the local journey stops at the publish blocker.",
+        "2026-09-11: Phase 2 PR #51 (d368738) CI 34597059624 passed, including local:verify and Preview https://f267fac3.urblo-site.pages.dev smoke; separate preview smoke and read-only public regression passed.",
+        "2026-09-11: Phase 3 cleanup on claude/stone-project-refs-phase3-cleanup: ProjectMaterialMap wrapper retired, editor split into projects/sections, docs closed out. Stone page Project reads measured at 6 requests / ~217 ms median in parallel with the catalogue (threshold >6 or >400 ms not met), so no Stone-projects RPC follow-up task.",
+        "2026-09-11: Phase 3 PR #52 CI 34598051213 passed; Preview https://b03a03ab.urblo-site.pages.dev smoke passed. All three stacked PRs await Claude acceptance and Jay merge approval.",
+        "2026-09-11: Claude acceptance passed on f71b95b (source review, host checks, read-only Preview 6454b862 desktop/mobile QA). Temporary plan file removed. Merge #50 → #51 → #52 in order awaits Jay.",
+        "2026-09-12: Jay approved merge and release. #50 → aa4f299, #51 → 3957622, #52 → 7de1af7 merged in order; production CI 34606801956 deployed immutable https://905e7161.urblo-site.pages.dev and passed immutable/apex/www smoke; separate apex/www readback against that reference and read-only live feature checks passed.",
+        "2026-09-25: Jay confirmed the feature is done. Read-only production readback: anonymous REST returned 25 published project_hotspots created 2026-09-15 to 2026-09-17 by one admin across Artisan Park, Greenline, Cowes Streetscape and other projects; https://urblo.com.au/projects/artisan-park-yarrabend renders the Material points list with a View stone deep link to /stone-library/new-grey?variant=new-grey&finish=flamed; that Stone page renders Used in projects with nine See placement ?point= deep links. No production write, migration or email. Runtime unchanged since 7de1af7."
+      ],
+      "phase": "complete",
+      "modules": [
+        "projects",
+        "stone-library"
+      ],
+      "authorization": {
+        "source": "Jay approved the Stone Library ⇄ Projects bidirectional references plan on 2026-09-11.",
+        "included": [
+          "Branch implementation, isolated local tests, git push, pull requests, Cloudflare branch Preview and deployed smoke, docs/agent state updates."
+        ],
+        "excluded": [
+          "Merge to main, production data or Storage writes, real email, DNS, credentials and any migration apply."
+        ]
+      },
+      "nextAction": "Editors mark material points from Projects > Media; Stone Used in projects and public point cards update on Publish. No automatic follow-on work.",
+      "blocker": "",
+      "completedAt": "2026-09-25",
+      "evidence": [
+        "PRs #50 1fba735, #51 d368738, #52 merged 2026-09-12 as aa4f299, 3957622, 7de1af7; production CI 34606801956 deployed https://905e7161.urblo-site.pages.dev with immutable/apex/www smoke.",
+        "2026-09-25 user acceptance: Jay used the production Projects editor between 2026-09-15 and 2026-09-17 (25 published material points) and confirmed the feature is done; Claude read-only public readback of project point cards and Stone Used in projects passed."
+      ]
     }
   ]
 }

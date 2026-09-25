@@ -1,6 +1,6 @@
 # WORKLOG — current execution evidence
 
-Last updated: 2026-09-12
+Last updated: 2026-09-25
 
 Historical evidence is immutable and is not current task state. Current state is generated from `docs/agent/status.json` and `docs/agent/tasks.json`.
 
@@ -269,3 +269,7 @@ Our Story release evidence: candidate `50d735e56b2a485b3be6f9acd1ab417fe48ebdf0`
 Jay supplied and approved a three-paragraph introduction: retain the company description with the missing F restored in Founded, replace the partnership paragraph with the supplied Natalie Ma / Jun Hu / Bob Lu / Cameron Grover backgrounds, and add the independent Design / Stone closing paragraph. Preserve the current paragraph styling and the previously approved 20+ caption. These are client-supplied claims; this edit does not independently verify biographies or change the PDF. Jay subsequently approved publication with “上线”. The unchanged runtime tree passed the clean Node 20 gate; local desktop and fresh mobile paragraph/layout checks passed. Release CI and deployed readback follow.
 
 Founder introduction release: PR #58 candidate `bbc0482b9199773e528207f39a33018fefbc0f6f` passed Preview CI `34818378061` at `https://57b25957.urblo-site.pages.dev`; deployed browser checks matched all three paragraphs exactly to source at 1365px and fresh 390px viewports, with no horizontal overflow. Jay’s publication approval was used to merge as `5b57b7d4ec074aa33f27f84e2166421d86b7ecb8`. Production CI `34818888611` passed source/isolated verification and immutable/apex/www smoke at `https://777af336.urblo-site.pages.dev`. The same exact-paragraph and responsive rendering checks passed on `https://urblo.com.au/our-story`; both production captures were visually inspected. No database writes, PDF changes or changes to the 20+ caption. This closeout records evidence only.
+
+## 2026-09-25 — Stone/Project references user acceptance
+
+Jay stated the Stone Library ⇄ Projects references work is done. Read-only production readback confirmed use since release 7de1af7: the anonymous public REST API returned 25 published `project_hotspots` created between 2026-09-15 and 2026-09-17 by one admin account across Artisan Park, Greenline, Cowes Streetscape and other published projects. `https://urblo.com.au/projects/artisan-park-yarrabend` renders the Material points list with a View stone deep link to `/stone-library/new-grey?variant=new-grey&finish=flamed`; that Stone page renders Used in projects with nine See placement `?point=` deep links. No production write, migration, Storage change or email. Runtime is unchanged; this closeout records evidence only and uses the classified docs graph. NOW-STONE-PROJECT-REFS-001 is archived; the current task returns to the existing Stone workspace acceptance. The separate 2026-09-24 four-track optimization audit (performance/SEO, UI consistency, admin usability, code health) is held in session scratch pending Jay's task selection and is not repository state.
