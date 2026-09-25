@@ -17,6 +17,14 @@ Use `agent:verify --plan` to identify the applicable checks. For runtime/tooling
 
 The registry in `scripts/_lib/verification.mjs` owns dependencies; classification tests cover actual Git rename/delete/untracked records and runtime fingerprints. `quality` always resolves on PRs, including record-only PRs; runtime smoke failure makes it fail. Main branch protection needs repository administrator access.
 
+## Unit tests (vitest)
+
+`npm test` runs vitest 4 once in Node 20+ (`vitest.config.ts` extends the Vite config). Behaviour assertions live in `tests/*.test.ts` (forms API, public overlay, Stone workspace, Image QR, Projects aggregate, admin identity) and beside the code as `src/**/*.test.ts` (admin editors). `tests/setup/no-network.ts` fails any unmocked fetch or WebSocket; suites use in-memory Supabase/HTTP doubles and never reach Preview or production.
+- Graph node `unit` sits in the smoke and admin suites, so every tooling, runtime and migration graph runs it; record docs do not.
+- `tests/**`, `src/**/*.test.ts(x)` and `vitest.config.*` classify as tooling: full source graph, no deployment. A test file under `functions/` or `public/` still deploys.
+- `agent:stone-workspace` and `agent:public-content-overlay` delegate to their vitest files. `agent:admin-image-qr` and `agent:admin-projects-aggregate` run their source checks, then their vitest file; the graph passes `--source-only` to avoid running it twice.
+- Add new behaviour checks as `*.test.ts`, not as new `scripts/check-*.mjs` assertions.
+
 Runtime CI additionally runs `npm run local:verify` with Node 22 before deployment. That local configuration has its own build and real database; it is distinct from the configured production build. Synthetic journeys cover QR upload/material save/refresh/public readback; Projects private draft/publish/hide, delayed-load cancellation and material points on a page image (enable, add point and material, Save/refresh, turn off); Articles validation/API-failure recovery/parent-bound section saves/selection locks/public rendering; Contact/Sample Request persistence and owner inbox readback; and an unprofiled account boundary. External mail is disabled; notification-provider logic is separately covered by in-memory forms API checks.
 
 ## Retained specialized verification and live boundaries

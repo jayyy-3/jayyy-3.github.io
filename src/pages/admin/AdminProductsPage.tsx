@@ -2024,7 +2024,7 @@ function RecordChips<T extends { id: number }>({
     );
 }
 
-function rowToProductForm(row: ProductRow | null): ProductFormState {
+export function rowToProductForm(row: ProductRow | null): ProductFormState {
     if (!row) return emptyProductForm;
     const seo = objectRecord(row.seo);
 
@@ -2074,7 +2074,7 @@ function rowToSpecForm(row: ProductSpecRow | null): SpecFormState {
     };
 }
 
-function validateProductForm(form: ProductFormState) {
+export function validateProductForm(form: ProductFormState) {
     if (!form.name.trim()) return validationFailure('Product name is required.');
     if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(form.slug.trim())) {
         return validationFailure('Website URL key must use lowercase words separated by hyphens.');
@@ -2110,7 +2110,7 @@ function validateProductForm(form: ProductFormState) {
     return { error: null, sortOrder: sortOrder.value, heroMediaId: heroMediaId.value, seo };
 }
 
-function validateModelForm(form: ModelFormState) {
+export function validateModelForm(form: ModelFormState) {
     if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(form.modelKey.trim())) {
         return validationFailure('Model website key must use lowercase words separated by hyphens.');
     }
@@ -2129,7 +2129,7 @@ function validateModelForm(form: ModelFormState) {
     return { error: null, sortOrder: sortOrder.value, imageMediaId: imageMediaId.value };
 }
 
-function validateMaterialDefaultForm(form: MaterialDefaultFormState) {
+export function validateMaterialDefaultForm(form: MaterialDefaultFormState) {
     const stoneGroupId = optionalPositiveInteger(form.stoneGroupId, 'Stone Library link');
     if (stoneGroupId.error) return validationFailure(stoneGroupId.error);
 
@@ -2140,7 +2140,7 @@ function validateMaterialDefaultForm(form: MaterialDefaultFormState) {
     return { error: null, stoneGroupId: stoneGroupId.value };
 }
 
-function validateSpecForm(form: SpecFormState) {
+export function validateSpecForm(form: SpecFormState) {
     if (!form.specLabel.trim()) return validationFailure('Spec label is required.');
     if (!form.specValue.trim()) return validationFailure('Spec value is required.');
     const sortOrder = requiredInteger(form.sortOrder, 'Sort order');
@@ -2148,7 +2148,7 @@ function validateSpecForm(form: SpecFormState) {
     return { error: null, sortOrder: sortOrder.value };
 }
 
-function getProductPublishChecklist(
+export function getProductPublishChecklist(
     form: ProductFormState,
     models: ProductModelRow[],
     materialDefaults: ProductMaterialDefaultRow[],
@@ -2209,7 +2209,7 @@ function getProductPublishChecklist(
     ];
 }
 
-function getProductModelPublishChecklist(form: ModelFormState) {
+export function getProductModelPublishChecklist(form: ModelFormState) {
     const modelKeyIsReady = /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(form.modelKey.trim());
 
     return [

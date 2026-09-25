@@ -155,8 +155,8 @@ try {
 try {
   const { resolveChecks } = await import('./_lib/verification.mjs')
   for (const [suite, required] of Object.entries({
-    smoke: ['forms-api', 'forms-ui', 'capabilities', 'homepage-video', 'product-images', 'stone-library', 'qr', 'projects'],
-    admin: ['overlay', 'media-plan', 'projects', 'qr'],
+    smoke: ['unit', 'forms-ui', 'capabilities', 'homepage-video', 'product-images', 'stone-library', 'qr', 'projects'],
+    admin: ['unit', 'media-plan', 'projects', 'qr'],
   })) {
     const selected = resolveChecks(suite)
     for (const id of required) if (!selected.includes(id)) failures.push(`${suite} must include ${id}`)

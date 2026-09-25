@@ -368,3 +368,14 @@ Scope: public page shell only. No production data, Storage, email, DNS or creden
   - Chrome ignores images that fill the viewport for LCP; a local probe showed a 100svh poster is ignored while a 90svh one counts.
   - The hero headline is made of per-letter spans.
   - Fixing this needs a design decision.
+## 2026-09-25 — Test runner (NOW-OPT-TEST-RUNNER-001)
+
+Scope: Jay-approved optimization wave 1 (dev dependency, script migration, isolated local tests, push and PR). No deployment, production access or runtime behaviour change; the only `src/` edit adds `export` to 23 pure admin editor helpers. Branch `claude/opt-vitest-runner`, stacked on PR #60.
+
+- vitest 4.1.11 with `npm test` (vitest 5 requires Node 22; 4.x supports Node 20 and Vite 6.4.2 without a second Vite). npm 10.9.8 on the host failed `npm install` with an arborist `edgesOut` error; the lockfile was produced with npm 11, and `npm ci` with npm 10.8.2 in the Node 20 gate image passed.
+- Migrated assertions (static `assert*(` count, before → after): forms API 119 → 119, Projects aggregate behaviour 116 → 116, public overlay 84 → 84, Stone workspace 67 → 67, Image QR 51 + 5 → 56, admin identity 19 → 19; total 461 → 461. Source-string checks remain in their scripts (Projects 206 → 207 and QR 11 → 12, the extra entry records a vitest failure). `check-forms-api.mjs`, `check-admin-runtime.mjs` and `check-image-qr-behavior.mjs` were removed; archived evidence still cites the first, so it joins the doc-path allow-list.
+- New admin editor tests with Supabase mocked: Products 8, Media 6, Settings 4, Leads 2 (123 `expect` calls). Suite: 10 files, 73 tests, under 1 s locally.
+- Mutation proof: changing the Products hero-image publish gate (`heroMediaId.value === null` → `=== undefined`) failed exactly one test, "locks Publish until the product has a short description and a hero image" (1 failed, 72 passed); after the revert, 73 passed.
+- `agent:verify --plan --base HEAD` with a temporary edit: `src/pages/admin/AdminLeadsPage.test.ts` → tooling/container, deploy=false, 24 checks including `unit`; `src/pages/admin/AdminLeadsPage.tsx` → runtime, deploy=true, 25 checks including `unit` and `browser`. The branch as a whole is runtime (package.json).
+- Clean Node 20 gate: attempt 1 failed `state` (summaries not regenerated after the task update); attempt 2 failed `paths` (archive citation of the removed forms script); attempt 3 on `72e4f92` plus the doc-path allow-list passed all 24 checks (`unit` 1.7 s). Host no-config browser gate passed 12 routes. `check-verification.mjs` covers the unit node and the test-path classification.
+- Residual: PR CI and Jay's merge decision are pending. The package.json and lockfile diff will likely need a rebase after the repo-hygiene and framer-motion branches. `tests/*.test.ts` are migrated JavaScript and are not type-checked; the admin editor tests in `src/` are type-checked by `tsc -b`.

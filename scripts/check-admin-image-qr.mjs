@@ -1,15 +1,12 @@
 #!/usr/bin/env node
-import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { cwd, exit } from 'node:process';
+import { argv, cwd, exit } from 'node:process';
 import { join } from 'node:path';
-import {
-  adminImageQrMethodNotAllowedResponse,
-  adminImageQrOptionsResponse,
-  handleAdminImageQrRequest,
-  handlePublicImageQrRequest,
-} from '../functions/_lib/admin-image-qr.js';
-import { checkQrBehavior } from './check-image-qr-behavior.mjs';
+import { runVitest } from './_lib/vitest.mjs';
+
+// Source contracts stay here; in-memory Function behaviour lives in
+// tests/image-qr-behavior.test.ts. The verification graph runs that file in its
+// `unit` node, so it passes --source-only to avoid running it twice.
 
 const root = cwd();
 const failures = [];
@@ -102,27 +99,9 @@ async function run() {
     'object_path text not null unique',
   ]) requireIncludes(migration, value, 'Image QR migration');
 
-  assert.equal((await adminImageQrOptionsResponse()).status, 204);
-  assert.equal((await adminImageQrMethodNotAllowedResponse()).status, 405);
-
-  for (const method of ['GET', 'POST']) {
-    const response = await handleAdminImageQrRequest(
-      new Request('https://example.test/api/admin/image-qr', { method }),
-      {},
-    );
-    const payload = await response.json();
-    assert.equal(response.status, 401);
-    assert.equal(payload.error, 'missing_session');
+  if (!argv.includes('--source-only') && runVitest(['tests/image-qr-behavior.test.ts']) !== 0) {
+    failures.push('Image QR behaviour tests failed (tests/image-qr-behavior.test.ts).');
   }
-
-  const invalidPublic = await handlePublicImageQrRequest(
-    new Request('https://example.test/image/%20'),
-    {},
-    ' ',
-  );
-  assert.equal(invalidPublic.status, 404);
-
-  await checkQrBehavior();
 
   if (failures.length) {
     console.error('Admin Image QR checks failed:');

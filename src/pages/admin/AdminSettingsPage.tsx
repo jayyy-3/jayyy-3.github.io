@@ -1460,7 +1460,7 @@ function FooterItemRow({
     );
 }
 
-function validateSettings(form: SettingsFormState): {
+export function validateSettings(form: SettingsFormState): {
     error: string | null;
     footerColumns: unknown[];
     publishedFields: NormalizedPublishedSiteSettingsFields | null;
@@ -1506,7 +1506,7 @@ function validateSettings(form: SettingsFormState): {
     return { error: null, footerColumns: footerColumns.value, publishedFields: null };
 }
 
-function normalizeFooterColumns(columns: unknown[]): FooterColumnForm[] {
+export function normalizeFooterColumns(columns: unknown[]): FooterColumnForm[] {
     return columns
         .map((column) => {
             if (!isRecord(column)) return null;
@@ -1534,7 +1534,7 @@ function normalizeFooterColumns(columns: unknown[]): FooterColumnForm[] {
         .filter((column): column is FooterColumnForm => column !== null);
 }
 
-function serializeFooterColumns(columns: FooterColumnForm[]): { error: string | null; value: unknown[] } {
+export function serializeFooterColumns(columns: FooterColumnForm[]): { error: string | null; value: unknown[] } {
     if (columns.length > siteSettingsFooterLimits.columns) {
         return {
             error: `Footer content supports up to ${siteSettingsFooterLimits.columns} columns.`,
@@ -1625,7 +1625,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
     return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-function validateAdminProfileForm(
+export function validateAdminProfileForm(
     form: AdminProfileFormState,
     {
         currentRole,
@@ -1690,7 +1690,7 @@ function validateAdminProfileForm(
     return null;
 }
 
-function validateAdminInviteForm(
+export function validateAdminInviteForm(
     form: AdminInviteFormState,
     {
         currentRole,

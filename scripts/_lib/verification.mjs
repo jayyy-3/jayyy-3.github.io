@@ -3,7 +3,7 @@ import { execFileSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
 
 const node = (file, args = [], deps = []) => ({ command: ['node', `scripts/${file}`, ...args], deps })
-const tsx = (file) => ({ command: ['node', 'node_modules/tsx/dist/cli.mjs', `scripts/${file}`], deps: [] })
+const tsx = (file, args = []) => ({ command: ['node', 'node_modules/tsx/dist/cli.mjs', `scripts/${file}`, ...args], deps: [] })
 export const checks = {
   build: { command: ['npm', 'run', 'build'], deps: [] },
   lint: { command: ['npm', 'run', 'lint'], deps: [] },
@@ -14,29 +14,27 @@ export const checks = {
   harness: node('check-harness.mjs', ['--self-only'], ['state', 'paths', 'foundation']),
   classifier: node('check-verification.mjs'),
   'local-boundary': node('check-local-boundary.mjs'),
+  // vitest: all *.test.ts behaviour suites (forms API, overlay, Stone workspace, QR, Projects, admin editors).
+  unit: { command: ['node', 'node_modules/vitest/vitest.mjs', 'run'], deps: [] },
   routes: { command: ['bash', 'scripts/agent-smoke-core.sh'], deps: ['build'] },
-  'forms-api': node('check-forms-api.mjs'),
   'forms-ui': node('check-contact-form-ui-source.mjs'),
   capabilities: node('check-capabilities-page-source.mjs'),
   'homepage-video': node('check-homepage-hero-video.mjs'),
   'product-images': node('check-product-model-image-mapping.mjs'),
   'stone-library': node('check-stone-library-detail-integrity.mjs'),
-  'stone-workspace': { command: ['node', '--import', 'tsx', 'scripts/check-stone-workspace.mjs'], deps: [] },
   'stone-adoption-snapshot': node('check-stone-adoption-snapshot.mjs'),
-  qr: tsx('check-admin-image-qr.mjs'),
-  projects: tsx('check-admin-projects-aggregate.mjs'),
-  'admin-runtime': tsx('check-admin-runtime.mjs'),
+  qr: tsx('check-admin-image-qr.mjs', ['--source-only']),
+  projects: tsx('check-admin-projects-aggregate.mjs', ['--source-only']),
   coverage: node('check-admin-crud-coverage.mjs', ['--self-only'], ['projects']),
   'public-readiness': node('check-public-supabase-readiness.mjs'),
-  overlay: tsx('check-public-content-overlay.mjs'),
   cloudflare: node('check-cloudflare-pages-readiness.mjs'),
   'deployment-readiness': node('check-deployment-readiness.mjs'),
   'media-plan': node('check-admin-media-role-boundary-live.mjs'),
   handoff: node('check-admin-handoff-readiness.mjs', ['--base-url', 'https://urblo.com.au', '--admin-email', 'info@urblo.com.au']),
   browser: node('check-admin-config-gate.mjs', [], ['build']),
 }
-const smoke = ['routes', 'forms-api', 'forms-ui', 'capabilities', 'homepage-video', 'product-images', 'stone-library', 'stone-workspace', 'stone-adoption-snapshot', 'qr', 'projects']
-const admin = ['stone-workspace', 'coverage', 'qr', 'projects', 'admin-runtime', 'build', 'lint', 'foundation', 'media-plan', 'public-readiness', 'overlay', 'cloudflare', 'harness', 'handoff']
+const smoke = ['routes', 'unit', 'forms-ui', 'capabilities', 'homepage-video', 'product-images', 'stone-library', 'stone-adoption-snapshot', 'qr', 'projects']
+const admin = ['unit', 'coverage', 'qr', 'projects', 'build', 'lint', 'foundation', 'media-plan', 'public-readiness', 'cloudflare', 'harness', 'handoff']
 export const suites = {
   docs: ['state', 'paths', 'harness', 'classifier'],
   tooling: ['harness', 'classifier', 'lint', 'knip'],
@@ -61,6 +59,8 @@ export function resolveChecks(suite) {
 }
 export function pathCategory(path) {
   if (/^scripts\/(?:container-gate|deploy|build|release)/.test(path)) return 'runtime'
+  // Tests and their config never enter the deployed bundle (functions/ and public/ files always deploy).
+  if (/^(?:tests\/|vitest\.config\.[cm]?[jt]s$|src\/.*\.test\.tsx?$)/.test(path)) return 'tooling'
   if (/^supabase\/migrations\//.test(path)) return 'migrations'
   if (/^(src\/|public\/|functions\/|supabase\/|\.github\/|Dockerfile|\.dockerignore$|package(?:-lock)?\.json$|(?:vite|tsconfig|tailwind|postcss|eslint|wrangler)[^/]*|index\.html$)/.test(path)) return 'runtime'
   if (/^(scripts\/|\.nvmrc$|\.node-version$)/.test(path)) return 'tooling'

@@ -30,4 +30,22 @@ export default tseslint.config(
       ],
     },
   },
+  {
+    // Pure editor helpers exported only for their vitest suites (*.test.ts beside
+    // each page) until the editors are split into forms modules.
+    files: ['src/pages/admin/Admin{Products,Media,Settings,Leads}Page.tsx'],
+    rules: {
+      'react-refresh/only-export-components': ['warn', {
+        allowConstantExport: true,
+        allowExportNames: [
+          'rowToProductForm', 'validateProductForm', 'validateModelForm', 'validateMaterialDefaultForm', 'validateSpecForm',
+          'getProductPublishChecklist', 'getProductModelPublishChecklist',
+          'validateMediaForm', 'getMediaPublishChecklist', 'mediaTypeFromMime', 'buildObjectPath', 'buildMediaExportCsv',
+          'removePublicObjectIfUnreferenced', 'removePrivatePromotionSourceIfUnreferenced',
+          'validateSettings', 'normalizeFooterColumns', 'serializeFooterColumns', 'validateAdminProfileForm', 'validateAdminInviteForm',
+          'leadToForm', 'getWorkflowGuidance', 'getLeadWorkflowStatusSummary', 'buildLeadExportCsv',
+        ],
+      }],
+    },
+  },
 )

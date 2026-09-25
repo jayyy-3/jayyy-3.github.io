@@ -1507,7 +1507,7 @@ function rowToForm(row: MediaAssetRow | null): MediaFormState {
     };
 }
 
-function validateMediaForm(
+export function validateMediaForm(
     form: MediaFormState,
     { allowPrivateStoragePublish = false }: { allowPrivateStoragePublish?: boolean } = {},
 ): {
@@ -1571,7 +1571,7 @@ function validateMediaForm(
     };
 }
 
-function getMediaPublishChecklist(
+export function getMediaPublishChecklist(
     form: MediaFormState,
     canAutoPromotePrivateStorage: boolean,
     isPrivateStorageSelection: boolean,
@@ -1667,14 +1667,14 @@ function optionalNonNegativeInteger(value: string, label: string): { error: stri
     return { error: null, value: parsed };
 }
 
-function mediaTypeFromMime(mimeType: string): MediaType {
+export function mediaTypeFromMime(mimeType: string): MediaType {
     if (mimeType.startsWith('image/')) return 'image';
     if (mimeType.startsWith('video/')) return 'video';
     if (mimeType === 'application/pdf') return 'document';
     return 'other';
 }
 
-function buildObjectPath(file: File) {
+export function buildObjectPath(file: File) {
     const date = new Date();
     const month = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
     const safeName = file.name
@@ -1709,7 +1709,7 @@ async function getImageDimensions(file: File): Promise<{ width: number; height: 
     });
 }
 
-function buildMediaExportCsv(rows: MediaAssetRow[]) {
+export function buildMediaExportCsv(rows: MediaAssetRow[]) {
     const outputRows = [
         [
             'id',
@@ -1793,7 +1793,7 @@ type ConditionalStorageRemoval = {
     detail: string | null;
 };
 
-async function removePublicObjectIfUnreferenced(
+export async function removePublicObjectIfUnreferenced(
     client: SupabaseClient,
     objectPath: string,
 ): Promise<ConditionalStorageRemoval> {
@@ -1825,7 +1825,7 @@ async function removePublicObjectIfUnreferenced(
         : { removed: true, detail: null };
 }
 
-async function removePrivatePromotionSourceIfUnreferenced(
+export async function removePrivatePromotionSourceIfUnreferenced(
     client: SupabaseClient,
     objectPath: string,
 ): Promise<ConditionalStorageRemoval> {
