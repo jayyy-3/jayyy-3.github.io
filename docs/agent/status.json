@@ -1,7 +1,7 @@
 {
   "version": 2,
   "lastUpdated": "2026-09-25",
-  "currentTaskId": "NOW-ADMIN-STONE-WORKSPACE-001",
+  "currentTaskId": "NOW-OPT-PERF-STONE-IMG-001",
   "sourceOfTruth": {
     "currentState": "docs/agent/status.json",
     "taskQueue": "docs/agent/tasks.json",

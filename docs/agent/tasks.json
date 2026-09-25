@@ -4,6 +4,297 @@
   "archive": "docs/archive/2026-09-09/completed-tasks.json",
   "tasks": [
     {
+      "id": "NOW-OPT-PERF-STONE-IMG-001",
+      "priority": 0,
+      "modules": [
+        "stone-library",
+        "public-ui"
+      ],
+      "summary": "Serve Stone Library and product-option stone media through sized variants (srcset/sizes/lazy) instead of raw Supabase originals; keep a full-resolution original link for designers on the stone detail stage.",
+      "files": [
+        "src/components/OptionSelector.tsx",
+        "src/components/stone-library/",
+        "src/pages/StonePageView.tsx",
+        "src/pages/StoneLibraryDetailPage.tsx",
+        "src/features/projects/",
+        "src/lib/"
+      ],
+      "acceptance": [
+        "No public page requests a raw stone-assets storage original except through an explicit View original / Download original link on the stone detail stage.",
+        "Swatches and cards load a variant sized to their rendered box; detail stage uses srcset up to at least 2560px so texture stays inspectable on Retina displays.",
+        "Production-equivalent Lighthouse mobile: /products/prime-block transfer < 3MB, /stone-library desktop transfer < 5MB, one stone detail desktop LCP < 2.5s (measured on branch Preview).",
+        "og:image for stone pages points at a sized variant, not the original.",
+        "No Function/RPC/migration change unless justified; existing resize endpoint reused."
+      ],
+      "verification": [
+        "npm run agent:verify -- --plan",
+        "npm run gate",
+        "npm run agent:cloudflare-preview-smoke -- --base-url <branch Preview>",
+        "git diff --check",
+        "npx lighthouse against branch Preview for /stone-library, one stone detail and /products/prime-block (mobile + desktop), results saved in .tmp/"
+      ],
+      "authorization": {
+        "source": "Jay approved the 2026-09-24 optimization audit wave 1 and instructed Opus execution on 2026-09-25 (\"第一波6个任务开工，让Opus去干\").",
+        "included": [
+          "Branch implementation, isolated local tests, git push, pull request, Cloudflare branch Preview and smoke, docs/agent state updates."
+        ],
+        "excluded": [
+          "Merge to main (Jay approves after Claude report), production data or Storage writes, real email, DNS or credential changes, migrations."
+        ]
+      },
+      "status": "now",
+      "phase": "implementation",
+      "nextAction": "Opus implements on its own branch and worktree; Claude reports to Jay before merge.",
+      "blocker": "",
+      "notes": [
+        "2026-09-25: created from the 2026-09-24 four-track optimization audit (session scratch, not repository state). Wave 1 of 3; Jay decides on wave 2 after Claude's report."
+      ]
+    },
+    {
+      "id": "NOW-OPT-PERF-CLS-SHELL-001",
+      "priority": 0,
+      "modules": [
+        "public-ui"
+      ],
+      "summary": "Remove the footer layout shift and route fade-in that make CLS fail on 8 of 9 public pages; scope the homepage poster preload to /; replace framer-motion with CSS for the route transition.",
+      "files": [
+        "src/App.tsx",
+        "src/components/site/",
+        "index.html",
+        "vite.config.ts",
+        "package.json",
+        "src/components/Footer.tsx",
+        "src/components/Header.tsx"
+      ],
+      "acceptance": [
+        "Lighthouse CLS < 0.1 on all 9 audited public URLs, mobile and desktop, measured on branch Preview.",
+        "Homepage LCP element is the hero, not the footer.",
+        "Non-homepage routes do not request hero-poster.jpg.",
+        "Entry JS gzip size reduced (target < 105KB) with framer-motion removed or confined to a lazy chunk; visual result of the route transition preserved as a simple CSS fade.",
+        "No visible change to layout at 375px and 1440px other than the removed jump (before/after screenshots kept in .tmp/)."
+      ],
+      "verification": [
+        "npm run agent:verify -- --plan",
+        "npm run gate",
+        "npm run agent:cloudflare-preview-smoke -- --base-url <branch Preview>",
+        "git diff --check",
+        "npx lighthouse against branch Preview for the 9 audited URLs (mobile + desktop)",
+        "dist chunk size table before/after in the PR"
+      ],
+      "authorization": {
+        "source": "Jay approved the 2026-09-24 optimization audit wave 1 and instructed Opus execution on 2026-09-25 (\"第一波6个任务开工，让Opus去干\").",
+        "included": [
+          "Branch implementation, dependency removal, isolated local tests, git push, pull request, Cloudflare branch Preview and smoke, docs/agent state updates."
+        ],
+        "excluded": [
+          "Merge to main (Jay approves after Claude report), production data or Storage writes, real email, DNS or credential changes, migrations."
+        ]
+      },
+      "status": "now",
+      "phase": "implementation",
+      "nextAction": "Opus implements on its own branch and worktree; Claude reports to Jay before merge.",
+      "blocker": "",
+      "notes": [
+        "2026-09-25: created from the 2026-09-24 four-track optimization audit (session scratch, not repository state). Wave 1 of 3; Jay decides on wave 2 after Claude's report."
+      ]
+    },
+    {
+      "id": "NOW-OPT-UI-CASCADE-FIXES-001",
+      "priority": 0,
+      "modules": [
+        "public-ui",
+        "stone-library"
+      ],
+      "summary": "Fix the four confirmed visible UI defects: urblo-* utilities overriding Tailwind modifiers (dark-background eyebrows unreadable), StatusPill unreadable on dark stones, inconsistent keyboard focus rings, and wrapping button labels on Contact.",
+      "files": [
+        "src/index.css",
+        "src/components/stone-library/StatusPill.tsx",
+        "src/pages/ContactPage.tsx",
+        "src/pages/CapabilitiesPage.tsx",
+        "tailwind.config.js"
+      ],
+      "acceptance": [
+        "urblo-* component classes live in @layer components so Tailwind modifiers such as text-white/62 and text-[10px] apply again; no page gains a new body/meta text below 4.5:1 contrast (spot-check screenshots of Home, Capabilities, Contact, Stone Library, Projects before/after).",
+        "Eyebrow labels on dark sections of Contact and Capabilities render white/near-white.",
+        "StatusPill on stone cards meets DESIGN.md (dark backing, white text) and is readable on Angola Black.",
+        "Every focusable element on Home, Stone Library, Projects, Contact, Capabilities shows a visible focus-visible ring of >= 3:1 contrast; no default blue outline mix.",
+        "STONE LIBRARY and SEND ENQUIRY buttons on Contact stay on one line at 1440px and 375px.",
+        "No token/type-scale redesign in this task (wave 2)."
+      ],
+      "verification": [
+        "npm run agent:verify -- --plan",
+        "npm run gate",
+        "npm run agent:cloudflare-preview-smoke -- --base-url <branch Preview>",
+        "git diff --check",
+        "Playwright or built-in browser screenshots desktop 1440px and mobile 375px, before/after, stored in .tmp/"
+      ],
+      "authorization": {
+        "source": "Jay approved the 2026-09-24 optimization audit wave 1 and instructed Opus execution on 2026-09-25 (\"第一波6个任务开工，让Opus去干\").",
+        "included": [
+          "Branch implementation, isolated local tests, git push, pull request, Cloudflare branch Preview and smoke, docs/agent state updates."
+        ],
+        "excluded": [
+          "Merge to main (Jay approves after Claude report), production data or Storage writes, real email, DNS or credential changes, migrations."
+        ]
+      },
+      "status": "now",
+      "phase": "implementation",
+      "nextAction": "Opus implements on its own branch and worktree; Claude reports to Jay before merge.",
+      "blocker": "",
+      "notes": [
+        "2026-09-25: created from the 2026-09-24 four-track optimization audit (session scratch, not repository state). Wave 1 of 3; Jay decides on wave 2 after Claude's report."
+      ]
+    },
+    {
+      "id": "NOW-OPT-ADMIN-SAFETY-001",
+      "priority": 0,
+      "modules": [
+        "products",
+        "articles",
+        "media",
+        "auth-settings",
+        "projects"
+      ],
+      "summary": "Stop-gap safety for the older admin modules used by non-technical colleagues: remove the Settings Status dropdown, require confirmation before Save changes a published Product/Article/Media record, auto-generate URL keys from names, and correct the Projects 'Saved — not live' label for live projects with unpublished changes.",
+      "files": [
+        "src/pages/admin/AdminSettingsPage.tsx",
+        "src/pages/admin/AdminProductsPage.tsx",
+        "src/pages/admin/AdminMediaPage.tsx",
+        "src/pages/admin/AdminArticlesPage.tsx",
+        "src/pages/admin/projects/sections/EditorControls.tsx",
+        "scripts/check-admin-crud-coverage.mjs"
+      ],
+      "acceptance": [
+        "Settings page has no Status control; saved settings stay Published.",
+        "Saving an already-published Product, Article or Media record shows a confirmation naming the live effect (\"Update live page\") before writing; new drafts save without confirmation.",
+        "New Products and Articles derive the URL key from the name automatically, editable until first publish, locked after.",
+        "A live Project with unpublished changes shows \"Live · unpublished changes\", never \"Saved — not live\".",
+        "No schema, Function or RLS change; local synthetic journeys pass; check-admin-crud-coverage assertions updated to behavior-level where strings changed, every forbid assertion kept."
+      ],
+      "verification": [
+        "npm run agent:verify -- --plan",
+        "npm run gate",
+        "npm run agent:cloudflare-preview-smoke -- --base-url <branch Preview>",
+        "git diff --check",
+        "npm run local:start && npm run local:verify",
+        "npm run agent:admin-crud-coverage"
+      ],
+      "authorization": {
+        "source": "Jay approved the 2026-09-24 optimization audit wave 1 and instructed Opus execution on 2026-09-25 (\"第一波6个任务开工，让Opus去干\").",
+        "included": [
+          "Branch implementation, isolated local synthetic tests, git push, pull request, Cloudflare branch Preview and smoke, docs/agent state updates."
+        ],
+        "excluded": [
+          "Merge to main (Jay approves after Claude report), production data or Storage writes, real email, DNS or credential changes, migrations."
+        ]
+      },
+      "status": "now",
+      "phase": "implementation",
+      "nextAction": "Opus implements on its own branch and worktree; Claude reports to Jay before merge.",
+      "blocker": "",
+      "notes": [
+        "2026-09-25: created from the 2026-09-24 four-track optimization audit (session scratch, not repository state). Wave 1 of 3; Jay decides on wave 2 after Claude's report."
+      ]
+    },
+    {
+      "id": "NOW-OPT-TEST-RUNNER-001",
+      "priority": 0,
+      "modules": [
+        "harness",
+        "delivery"
+      ],
+      "summary": "Add vitest as the repository test runner, migrate the existing behavior assertions from scripts/check-*.mjs into *.test.ts, register a unit node in agent:verify, and write the first 20 behavior tests for the admin editors (Products 8, Media 6, Settings 4, Leads 2).",
+      "files": [
+        "package.json",
+        "scripts/_lib/verification.mjs",
+        "scripts/agent-verify.mjs",
+        "docs/agent/verification.md",
+        "scripts/"
+      ],
+      "acceptance": [
+        "npm test runs vitest; assertion count after migration >= count before (per-file table in the PR).",
+        "One deliberate mutation of a tested function makes the suite fail (mutation proof recorded).",
+        "agent:verify --plan includes unit when src/ changes; test-only changes classify as tooling with deploy=false.",
+        "The 20 new tests cover save/publish/validation behavior of Products, Media, Settings and Leads without touching production.",
+        "gate and CI green; verification.md documents the unit node in <= 15 added lines."
+      ],
+      "verification": [
+        "npm test",
+        "npm run agent:verify -- --plan",
+        "npm run gate",
+        "git diff --check"
+      ],
+      "authorization": {
+        "source": "Jay approved the 2026-09-24 optimization audit wave 1 and instructed Opus execution on 2026-09-25 (\"第一波6个任务开工，让Opus去干\").",
+        "included": [
+          "Dev dependency addition, script migration, isolated local tests, git push, pull request, docs/agent state updates."
+        ],
+        "excluded": [
+          "Runtime behavior changes in src/, deployment, production access."
+        ]
+      },
+      "status": "now",
+      "phase": "implementation",
+      "nextAction": "Opus implements on its own branch and worktree; Claude reports to Jay before merge.",
+      "blocker": "",
+      "notes": [
+        "2026-09-25: created from the 2026-09-24 four-track optimization audit (session scratch, not repository state). Wave 1 of 3; Jay decides on wave 2 after Claude's report.",
+        "New files to create: vitest.config.ts, src/**/*.test.ts (not listed because the path check requires existing files)."
+      ]
+    },
+    {
+      "id": "NOW-OPT-REPO-HYGIENE-001",
+      "priority": 0,
+      "modules": [
+        "harness",
+        "delivery"
+      ],
+      "summary": "Dependency and repository hygiene: fix react-router advisories (7.18.x), untrack .vite/deps, delete dead files (ProjectCard.tsx, utils/articles.ts, src/scripts/generate-article-index.ts, App.css), remove unused dependencies (lodash.throttle and types, clsx), move runtime libraries out of devDependencies, commit a knip config and add it to the tooling graph, and delete the 34 merged remote branches.",
+      "files": [
+        "package.json",
+        "package-lock.json",
+        ".gitignore",
+        "src/components/ProjectCard.tsx",
+        "src/utils/articles.ts",
+        "src/scripts/generate-article-index.ts",
+        "src/App.css",
+        "scripts/_lib/verification.mjs"
+      ],
+      "acceptance": [
+        "npm audit --omit=dev reports no high or critical.",
+        "knip reports 0 unused files and 0 unused dependencies with the committed config; knip runs in the tooling graph.",
+        ".vite/ is ignored and removed from the index; git status clean after build.",
+        "Full source graph, local:verify and branch Preview smoke pass (runtime dependency change requires the full release profile).",
+        "Merged remote branches deleted only after confirming each is merged into main (list recorded in WORKLOG); gh-pages left untouched unless Jay confirms separately."
+      ],
+      "verification": [
+        "npm run agent:verify -- --plan",
+        "npm run gate",
+        "npm run agent:cloudflare-preview-smoke -- --base-url <branch Preview>",
+        "git diff --check",
+        "npm audit --omit=dev",
+        "npx knip",
+        "npm run local:verify"
+      ],
+      "authorization": {
+        "source": "Jay approved the 2026-09-24 optimization audit wave 1 and instructed Opus execution on 2026-09-25 (\"第一波6个任务开工，让Opus去干\").",
+        "included": [
+          "Dependency changes, dead-code removal, git push, pull request, branch Preview and smoke, deletion of remote branches already merged into main (Jay approved 2026-09-25), docs/agent state updates."
+        ],
+        "excluded": [
+          "Deleting gh-pages or any unmerged branch; merge to main; production access."
+        ]
+      },
+      "status": "now",
+      "phase": "implementation",
+      "nextAction": "Opus implements on its own branch and worktree; Claude reports to Jay before merge.",
+      "blocker": "",
+      "notes": [
+        "2026-09-25: created from the 2026-09-24 four-track optimization audit (session scratch, not repository state). Wave 1 of 3; Jay decides on wave 2 after Claude's report.",
+        "New file to create: knip.json (not listed because the path check requires existing files)."
+      ]
+    },
+    {
       "id": "NOW-ADMIN-STONE-WORKSPACE-001",
       "status": "now",
       "priority": 0,

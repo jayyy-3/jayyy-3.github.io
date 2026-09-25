@@ -6,11 +6,11 @@ Last updated: 2026-09-25
 
 ## 正在执行
 
-**NOW-ADMIN-STONE-WORKSPACE-001** — Deliver the page-shaped Stone Library workspace and approved current-public-baseline adoption.
+**NOW-OPT-PERF-STONE-IMG-001** — Serve Stone Library and product-option stone media through sized variants (srcset/sizes/lazy) instead of raw Supabase originals; keep a full-resolution original link for designers on the stone detail stage.
 
-阶段：awaiting_external。状态：now。
+阶段：implementation。状态：now。
 
-下一步：Jay performs the five-minute image replacement/publish acceptance in production. Complete live Viewer proof only after explicit approval for the named QA account role change; broader CMS handoff remains separate.
+下一步：Opus implements on its own branch and worktree; Claude reports to Jay before merge.
 
 ## 已观察的发布状态
 
