@@ -10,7 +10,11 @@
       ],
       "rules": [
         "docs/OPERATING_PROTOCOL.md",
-        "docs/MAINTAINABILITY_AUDIT.md"
+        "docs/architecture/harness.md"
+      ],
+      "references": [
+        "docs/MAINTAINABILITY_AUDIT.md",
+        "docs/architecture/platform.md"
       ],
       "checks": [
         "agent:check",
@@ -24,9 +28,14 @@
         "scripts/container-gate.sh"
       ],
       "rules": [
-        "docs/CLOUDFLARE_DEPLOYMENT.md",
         "docs/agent/verification.md",
-        "docs/LOCAL_DEVELOPMENT.md"
+        "docs/architecture/delivery.md"
+      ],
+      "references": [
+        "docs/CLOUDFLARE_DEPLOYMENT.md",
+        "docs/LOCAL_DEVELOPMENT.md",
+        "docs/agent/live-verification.md",
+        "docs/architecture/platform.md"
       ],
       "checks": [
         "agent:cloudflare-readiness",
@@ -43,8 +52,11 @@
         "functions/_lib/admin-runtime.js"
       ],
       "rules": [
-        "docs/ARCHITECTURE.md",
-        "docs/ADMIN_IA_ACCESS.md"
+        "docs/architecture/qr.md"
+      ],
+      "references": [
+        "docs/ADMIN_IA_ACCESS.md",
+        "docs/architecture/stone-library.md"
       ],
       "checks": [
         "agent:admin-image-qr",
@@ -60,8 +72,13 @@
         "functions/_lib/admin-runtime.js"
       ],
       "rules": [
+        "docs/architecture/projects.md",
+        "docs/architecture/projects-admin.md"
+      ],
+      "references": [
         "docs/ADMIN_IA_ACCESS.md",
-        "docs/ARCHITECTURE.md"
+        "docs/architecture/content-data.md",
+        "docs/SUPABASE_SCHEMA.md"
       ],
       "checks": [
         "agent:admin-projects-aggregate",
@@ -77,8 +94,12 @@
         "scripts/local-journeys/articles.mjs"
       ],
       "rules": [
+        "docs/architecture/articles.md"
+      ],
+      "references": [
         "docs/ADMIN_IA_ACCESS.md",
-        "docs/brand-baseline.md"
+        "docs/brand-baseline.md",
+        "docs/architecture/content-data.md"
       ],
       "checks": [
         "agent:admin-crud-coverage",
@@ -93,8 +114,11 @@
         "src/pages/admin/AdminLeadsPage.tsx"
       ],
       "rules": [
-        "docs/ARCHITECTURE.md",
-        "docs/ADMIN_IA_ACCESS.md"
+        "docs/architecture/forms.md"
+      ],
+      "references": [
+        "docs/ADMIN_IA_ACCESS.md",
+        "docs/SUPABASE_SCHEMA.md"
       ],
       "checks": [
         "agent:forms-ui"
@@ -110,8 +134,13 @@
         "src/service/stoneCatalogueOptions.ts"
       ],
       "rules": [
+        "docs/architecture/stone-library.md",
+        "docs/architecture/stone-library-admin.md"
+      ],
+      "references": [
         "docs/DESIGN.md",
-        "docs/ARCHITECTURE.md"
+        "docs/architecture/public-media.md",
+        "docs/architecture/content-data.md"
       ],
       "checks": [
         "agent:stone-library-detail",
@@ -125,8 +154,11 @@
         "src/service/ProductService.ts"
       ],
       "rules": [
+        "docs/architecture/products.md"
+      ],
+      "references": [
         "docs/DESIGN.md",
-        "docs/ARCHITECTURE.md"
+        "docs/architecture/content-data.md"
       ],
       "checks": [
         "agent:product-model-images",
@@ -139,6 +171,9 @@
         "src/lib/publicMediaUrl.ts"
       ],
       "rules": [
+        "docs/architecture/media.md"
+      ],
+      "references": [
         "docs/ADMIN_IA_ACCESS.md",
         "docs/SUPABASE_SCHEMA.md"
       ],
@@ -154,6 +189,10 @@
         "src/pages/admin/AdminSettingsPage.tsx"
       ],
       "rules": [
+        "docs/architecture/auth-settings.md",
+        "docs/architecture/admin-cms.md"
+      ],
+      "references": [
         "docs/ADMIN_IA_ACCESS.md",
         "docs/ADMIN_EDITOR_GUIDE.md",
         "docs/ADMIN_OPERATIONS_RUNBOOK.md"
@@ -171,8 +210,14 @@
         "src/layouts"
       ],
       "rules": [
+        "docs/architecture/public-routes.md",
+        "docs/architecture/public-metadata.md"
+      ],
+      "references": [
+        "docs/architecture/homepage.md",
         "docs/DESIGN.md",
-        "docs/brand-baseline.md"
+        "docs/brand-baseline.md",
+        "docs/architecture/public-media.md"
       ],
       "checks": [
         "agent:smoke"

@@ -27,7 +27,7 @@ Archive, never delete: Stone **1** (`admin-live-1780496442071-f27c2b7d`, exact p
 
 Preserve all six formal Product drafts and defaults, four formal Article drafts and blocks, all Project content including Moon Gate draft and material IDs, historical sample requests, and all 32 Image QR records. Current-main integration also makes active QR material references block destructive Stone changes and makes QR material choices honor managed catalogue tombstones; no QR record or permanent address is changed. The adoption runner fingerprints Products, Articles, Projects and Image QR before/after and writes none of those modules. Old originals/media remain intact; create 55 uniquely named private uploads and verified public copies, about 66.24 MB per set.
 
-Machine inventory: `docs/agent/stone-library-adoption-plan.json`. Exact file SHA-256: `b9a4e1f1c3fce163793263641139cc69c7620cce3853b2e03ed1a5a114784f9f`. `npm run agent:stone-adoption-plan` prints the plan without network or writes. Changed baseline rows or files cause live adoption to stop for review.
+Machine inventory: `docs/archive/2026-09-26/stone-library-adoption-plan.json`. Exact file SHA-256: `b9a4e1f1c3fce163793263641139cc69c7620cce3853b2e03ed1a5a114784f9f`. `npm run agent:stone-adoption-plan` prints the plan without network or writes. Changed baseline rows or files cause live adoption to stop for review.
 
 ## Approved live sequence
 

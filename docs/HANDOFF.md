@@ -30,4 +30,4 @@ CMS handoff: **revalidation_required**。QR: material_page_deployed。
 
 ## 接手入口
 
-运行 `npm run agent:init`，只读当前任务及列出的模块规则。`docs/agent/status.json` 是发布观察来源，`docs/agent/tasks.json` 是任务来源。历史索引在 `docs/WORKLOG.md`。
+运行 `npm run agent:init`，只读当前任务及列出的模块规则。本文件是给人看的摘要，agent 启动不必再读：init 已输出同样的任务、发布观察和外部依赖。`docs/agent/status.json` 是发布观察来源，`docs/agent/tasks.json` 是任务来源。历史索引在 `docs/WORKLOG.md`。

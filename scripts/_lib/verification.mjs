@@ -11,7 +11,8 @@ export const checks = {
   state: node('check-agent-state.mjs'),
   paths: node('check-doc-paths.mjs'),
   foundation: node('check-supabase-foundation-readiness.mjs'),
-  harness: node('check-harness.mjs', ['--self-only'], ['state', 'paths', 'foundation']),
+  'startup-budget': node('check-agent-startup-budget.mjs'),
+  harness: node('check-harness.mjs', ['--self-only'], ['state', 'paths', 'foundation', 'startup-budget']),
   classifier: node('check-verification.mjs'),
   'local-boundary': node('check-local-boundary.mjs'),
   // vitest: all *.test.ts behaviour suites (forms API, overlay, Stone workspace, QR, Projects, admin editors).

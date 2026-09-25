@@ -11,7 +11,7 @@
 - Working process: `docs/OPERATING_PROTOCOL.md`.
 - Brand, audience and claims: `docs/brand-baseline.md`.
 - Visual design and UX: `docs/DESIGN.md`.
-- Routes, data and side effects: `docs/ARCHITECTURE.md`; module index: `docs/PROJECT_MAP.md`.
+- Routes, data and side effects: `docs/ARCHITECTURE.md` indexes one contract file per module under `docs/architecture/`; module index: `docs/PROJECT_MAP.md`.
 - HANDOFF, NEXT_STEPS and the README status block are generated views. Edit their inputs, then run `npm run agent:state`.
 - `docs/WORKLOG.md` and its archive are evidence history. Historical approval or a past passing test does not certify a different operation or current deployment.
 

@@ -89,9 +89,16 @@ jobs:
         if: steps.plan.outputs.deploy == 'true' && github.ref == 'refs/heads/main'
         env:
           IMMUTABLE_URL: ${{ steps.deployment.outputs.url }}
+        # Run 36153157216 (2026-09-26) failed here only because the apex edge still served the
+        # SPA shell for a new lazy chunk; the same smoke passed minutes later. Wait up to 3 minutes
+        # (read-only GETs, no redirects followed) until apex and www serve the immutable asset graph
+        # byte-for-byte, then run the unchanged smoke once. The step still fails if they never converge.
         run: |
+          converged=0
+          node scripts/wait-for-domain-convergence.mjs --reference-url "$IMMUTABLE_URL" --base-url https://urblo.com.au --base-url https://www.urblo.com.au --budget-seconds 180 || converged=$?
           npm run agent:cloudflare-preview-smoke -- --base-url https://urblo.com.au --reference-url "$IMMUTABLE_URL"
           npm run agent:cloudflare-preview-smoke -- --base-url https://www.urblo.com.au --reference-url "$IMMUTABLE_URL"
+          test "$converged" -eq 0
       - name: Report rollback reference on release failure
         if: failure() && steps.deployment.outputs.url != ''
         run: |

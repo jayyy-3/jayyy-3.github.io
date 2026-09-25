@@ -215,7 +215,15 @@
         "docs/PROJECT_MAP.md",
         "scripts/agent-init.mjs",
         "scripts/check-harness-gc.mjs",
-        ".github/workflows/deploy.yml"
+        ".github/workflows/deploy.yml",
+        "docs/architecture/",
+        "docs/agent/live-verification.md",
+        "docs/archive/2026-09-26/manifest.json",
+        "scripts/check-agent-startup-budget.mjs",
+        "scripts/wait-for-domain-convergence.mjs",
+        "scripts/_lib/deployment-readiness.mjs",
+        "tests/domain-convergence.test.ts",
+        "tests/agent-startup-budget.test.ts"
       ],
       "acceptance": [
         "For three representative tasks (projects, products, public-ui) the bytes of AGENTS.md + startup files + listed module rules are <= 40KB, measured by a script added to the harness check.",
@@ -239,11 +247,13 @@
         ]
       },
       "status": "now",
-      "phase": "planned",
-      "nextAction": "Opus implements on its own branch; Claude reports to Jay before merge.",
+      "phase": "awaiting_external",
+      "nextAction": "Claude reviews the PR and reports to Jay; merge only with Jay approval. Other wave 2 branches rebase onto the ARCHITECTURE split (section text moves to docs/architecture/<module>.md).",
       "blocker": "",
       "notes": [
-        "2026-09-26: wave 2 of the 2026-09-24 optimization audit. Jay decided the homepage hero headline keeps its letter-by-letter animation (homepage LCP element stays non-hero by design)."
+        "2026-09-26: wave 2 of the 2026-09-24 optimization audit. Jay decided the homepage hero headline keeps its letter-by-letter animation (homepage LCP element stays non-hero by design).",
+        "2026-09-26: Implemented on claude/opt-agent-docs-slim (stacked on PR #68): startup budget check, ARCHITECTURE split into docs/architecture/, status/verification trim with docs/archive/2026-09-26 byte manifest, Stone adoption plan archived, OPERATING_PROTOCOL release-record/ID/merge rules, CI apex/www convergence wait. Evidence in WORKLOG.",
+        "2026-09-26: Verification passed (clean Node 20 gate 27 checks, 82 unit tests, host no-config browser gate 12 routes, agent:check/state/GC/doc-paths). Startup sets: projects 35,617, products 26,835, public-ui 23,130 bytes (before 175,619 / 246,526 / 83,995). Pushed claude/opt-agent-docs-slim and opened a PR against main stacked on #68; awaiting PR CI, Claude review and Jay's merge decision. The CI convergence wait is only exercised on the next main release."
       ]
     },
     {
@@ -256,7 +266,7 @@
         "functions/_lib/admin-stones.js",
         "src/service/StoneLibraryService.ts",
         "docs/STONE_LIBRARY_WORKSPACE_RELEASE.md",
-        "docs/agent/stone-library-adoption-plan.json",
+        "docs/archive/2026-09-26/stone-library-adoption-plan.json",
         ".github/workflows/deploy.yml",
         "scripts/_lib/deployment-readiness.mjs",
         "scripts/check-deployment-readiness.mjs",

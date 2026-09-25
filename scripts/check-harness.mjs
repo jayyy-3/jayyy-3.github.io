@@ -22,6 +22,7 @@ const requiredFiles = [
   'docs/agent/harness-gc.md',
   'docs/agent/tasks.json',
   'docs/agent/verification.md',
+  'docs/agent/live-verification.md',
   'scripts/agent-init.sh',
   'scripts/admin-cms-predeploy.sh',
   'scripts/agent-smoke.sh',
@@ -33,6 +34,7 @@ const requiredFiles = [
   'scripts/check-admin-image-qr.mjs',
   'scripts/check-admin-media-role-boundary-live.mjs',
   'scripts/check-admin-projects-aggregate.mjs',
+  'scripts/check-agent-startup-budget.mjs',
   'scripts/check-capabilities-page-source.mjs',
   'scripts/check-contact-form-ui-source.mjs',
   'scripts/check-doc-paths.mjs',
@@ -366,7 +368,7 @@ try {
 }
 const liveReadinessDocFiles = [
   'docs/CLOUDFLARE_DEPLOYMENT.md',
-  'docs/agent/verification.md',
+  'docs/agent/live-verification.md',
 ]
 
 for (const file of liveReadinessDocFiles) {
@@ -385,6 +387,11 @@ for (const file of liveReadinessDocFiles) {
 if (!failures.length && !process.argv.includes('--self-only')) {
   const stateCheck = spawnSync('node', ['scripts/check-agent-state.mjs'], { cwd: root, encoding: 'utf8' });
   if (stateCheck.status !== 0) failures.push(stateCheck.stdout + stateCheck.stderr);
+}
+
+if (!failures.length && !process.argv.includes('--self-only')) {
+  const budget = spawnSync('node', ['scripts/check-agent-startup-budget.mjs'], { cwd: root, encoding: 'utf8' })
+  if (budget.status !== 0) failures.push(budget.stdout + budget.stderr)
 }
 
 if (!failures.length && !process.argv.includes('--self-only')) {

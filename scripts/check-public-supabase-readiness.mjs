@@ -603,7 +603,8 @@ function checkCloudflareStaticBoundary() {
 }
 
 function checkDocsContracts() {
-  const architecture = readRequired('docs/ARCHITECTURE.md');
+  // ARCHITECTURE.md is an index; module contracts live in docs/architecture/*.md.
+  const architecture = [readRequired('docs/ARCHITECTURE.md'), ...readdirSync(join(root, 'docs/architecture')).filter((name) => name.endsWith('.md')).sort().map((name) => readRequired(`docs/architecture/${name}`))].join('\n');
   const schema = readRequired('docs/SUPABASE_SCHEMA.md');
   const state = JSON.parse(readRequired('docs/agent/status.json'));
 
@@ -633,16 +634,16 @@ function checkDocsContracts() {
     requireIncludes(schema, fragment, 'docs/SUPABASE_SCHEMA.md');
   }
 
-  requireIncludes(architecture, 'public page components are lazy-loaded', 'docs/ARCHITECTURE.md');
+  requireIncludes(architecture, 'public page components are lazy-loaded', 'docs/architecture/platform.md');
   requireIncludes(
     architecture,
     'Published Projects, Products, and Articles overlay the matching static item by canonical slug',
-    'docs/ARCHITECTURE.md per-record public overlay contract',
+    'docs/architecture per-record public overlay contract',
   );
   requireIncludes(
     architecture,
     'Managed Stone Library keys never fall back to static content',
-    'docs/ARCHITECTURE.md Stone Library public overlay contract',
+    'docs/architecture Stone Library public overlay contract',
   );
   if (state.production.content !== 'published_cms_overlay_with_static_fallback') {
     failures.push('Structured state must retain the Published CMS overlay with static fallback contract.');

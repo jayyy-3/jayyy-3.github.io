@@ -7,7 +7,7 @@ import { normalizeAdoptionSnapshot as normal, reviewedStoneState } from './_lib/
 const args = process.argv.slice(2);
 const value = (flag, fallback) =>
   args.includes(flag) ? args[args.indexOf(flag) + 1] : fallback;
-const planFile = value('--plan', 'docs/agent/stone-library-adoption-plan.json');
+const planFile = value('--plan', 'docs/archive/2026-09-26/stone-library-adoption-plan.json');
 const planBytes = await readFile(planFile);
 const plan = JSON.parse(planBytes);
 const hash = (bytes) => createHash('sha256').update(bytes).digest('hex');

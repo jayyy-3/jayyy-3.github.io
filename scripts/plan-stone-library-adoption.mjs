@@ -12,7 +12,8 @@ const importPath = arg(
   '--baseline',
   '.tmp/stone-library-before/static-import.json',
 );
-const output = arg('--out', 'docs/agent/stone-library-adoption-plan.json');
+// The executed 2026-09-10 plan is archived and immutable; regenerated plans go to .tmp for review.
+const output = arg('--out', '.tmp/stone-library-adoption-plan.json');
 const before = JSON.parse(await readFile(snapshotPath, 'utf8'));
 const baseline = JSON.parse(await readFile(importPath, 'utf8'));
 const raw = JSON.parse(await readFile('data/clean/stone_library.json', 'utf8'));

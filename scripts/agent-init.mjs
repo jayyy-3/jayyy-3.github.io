@@ -31,12 +31,14 @@ if (args.includes('--json')) console.log(JSON.stringify(result, null, 2));
 else {
   console.log(`Urblo — ${result.checkout.branch ?? 'no Git metadata'} / ${result.checkout.sha?.slice(0, 7) ?? 'unavailable'}${result.checkout.dirty ? ' (dirty; preserve unrelated work)' : ''}`);
   console.log(`Observed runtime: ${status.release.runtimeSha.slice(0, 7)} / ${status.release.verifiedRuntimeUrl}`);
+  const openDependencies = status.externalDependencies.filter((item) => item.status !== 'complete');
+  if (openDependencies.length) console.log(`External dependencies: ${openDependencies.map((item) => `${item.id} (${item.status})`).join('; ')}. CMS handoff: ${status.production.adminCmsHandoff}.`);
   if (task) {
     console.log(`Task: ${task.id} [${task.status}/${task.phase}]\n${task.summary}`);
     if (task.blocker) console.log(`Blocker: ${task.blocker}`);
     if (task.progress) console.log(`Progress: ${JSON.stringify(task.progress)}`);
     console.log(`Acceptance:\n${task.acceptance.map((line) => `- ${line}`).join('\n')}`);
-    for (const [id, module] of Object.entries(selectedModules)) console.log(`\n${id}\nRead: ${module.rules.join(', ')}\nCode: ${module.paths.join(', ')}\nChecks: ${module.checks.join(', ')}`);
+    for (const [id, module] of Object.entries(selectedModules)) console.log(`\n${id}\nRead: ${module.rules.join(', ')}${module.references?.length ? `\nOn demand (only the sections you touch): ${module.references.join(', ')}` : ''}\nCode: ${module.paths.join(', ')}\nChecks: ${module.checks.join(', ')}`);
     console.log(`\nAuthorization: ${task.authorization ? JSON.stringify(task.authorization) : 'Use the current user request; no live-write authority is inferred.'}`);
     console.log(`\nNext action: ${task.nextAction ?? 'Follow the task acceptance and current phase.'}`);
     console.log(`Verification: ${task.verification.join(' → ')}. No full history read is required.`);
