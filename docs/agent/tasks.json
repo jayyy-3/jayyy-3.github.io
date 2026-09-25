@@ -86,10 +86,11 @@
         ]
       },
       "status": "now",
-      "phase": "verification",
-      "nextAction": "Opus implements on its own branch and worktree; Claude reports to Jay before merge.",
-      "blocker": "Branch claude/opt-stone-media-variants is committed locally, but the session permission layer refused git push. The PR, branch Preview smoke and Preview Lighthouse wait on an operator push.",
+      "phase": "awaiting_external",
+      "nextAction": "Jay reviews PR #63 (Preview https://49839330.urblo-site.pages.dev) and decides on merge; the prime-block mobile 3MB target depends on the static-assets task.",
+      "blocker": "",
       "notes": [
+        "2026-09-25: PR #63 head 6716117; CI 36143175914 passed; Preview https://49839330.urblo-site.pages.dev smoke passed; zero stone-assets originals requested; Lighthouse after: prime-block mobile 3.01MB (target <3MB missed by ~10KB, remainder is static non-stone assets), stone-library desktop 1.21MB, harcourt desktop LCP 1.7s. Evidence in WORKLOG.",
         "2026-09-25: created from the 2026-09-24 four-track optimization audit (session scratch, not repository state). Wave 1 of 3; Jay decides on wave 2 after Claude's report."
       ]
     },

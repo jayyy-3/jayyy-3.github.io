@@ -8,9 +8,9 @@ Last updated: 2026-09-26
 
 **NOW-OPT-PERF-STONE-IMG-001** — Serve Stone Library and product-option stone media through sized variants (srcset/sizes/lazy) instead of raw Supabase originals; keep a full-resolution original link for designers on the stone detail stage.
 
-阶段：verification。状态：now。
+阶段：awaiting_external。状态：now。
 
-下一步：Opus implements on its own branch and worktree; Claude reports to Jay before merge.
+下一步：Jay reviews PR #63 (Preview https://49839330.urblo-site.pages.dev) and decides on merge; the prime-block mobile 3MB target depends on the static-assets task.
 
 ## 已观察的发布状态
 
