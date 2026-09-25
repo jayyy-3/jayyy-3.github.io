@@ -590,16 +590,15 @@ function checkCloudflareStaticBoundary() {
   if (routes.version !== 1) {
     failures.push('public/_routes.json: version must be 1');
   }
-  if (
-    !Array.isArray(routes.include) ||
-    routes.include.length !== 2 ||
-    routes.include[0] !== '/api/*' ||
-    routes.include[1] !== '/image/*'
-  ) {
-    failures.push('public/_routes.json: include must remain exactly ["/api/*", "/image/*"]');
+  // The edge SEO middleware sees page navigations (include "/*"); hashed assets and media
+  // stay static. The middleware reads Published rows with the browser-safe key only.
+  if (!Array.isArray(routes.include) || routes.include.length !== 1 || routes.include[0] !== '/*') {
+    failures.push('public/_routes.json: include must be exactly ["/*"] for the edge SEO middleware');
   }
-  if (!Array.isArray(routes.exclude) || routes.exclude.length !== 0) {
-    failures.push('public/_routes.json: exclude must remain an empty array');
+  for (const staticPrefix of ['/assets/*', '/fonts/*', '/media/*']) {
+    if (!Array.isArray(routes.exclude) || !routes.exclude.includes(staticPrefix)) {
+      failures.push(`public/_routes.json: exclude must keep ${staticPrefix} out of Functions`);
+    }
   }
 }
 

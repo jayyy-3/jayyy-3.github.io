@@ -43,11 +43,12 @@
         ]
       },
       "status": "now",
-      "phase": "planned",
-      "nextAction": "Opus implements on its own branch; Claude reports to Jay before merge.",
+      "phase": "verification",
+      "nextAction": "Branch claude/opt-seo-edge-head: finish Preview evidence, then Claude reports to Jay before merge; Jay creates the www to apex zone redirect rule.",
       "blocker": "",
       "notes": [
-        "2026-09-26: wave 2 of the 2026-09-24 optimization audit. Jay decided the homepage hero headline keeps its letter-by-letter animation (homepage LCP element stays non-hero by design)."
+        "2026-09-26: wave 2 of the 2026-09-24 optimization audit. Jay decided the homepage hero headline keeps its letter-by-letter animation (homepage LCP element stays non-hero by design).",
+        "2026-09-26: implemented on branch claude/opt-seo-edge-head (stacked on PR #68): functions/_middleware.js + functions/_lib/edge-seo.js + src/lib/edgeSeo.ts; public/_routes.json now includes /* and excludes static asset/media folders. Homepage title restored by a code floor (CMS SEO title under 20 characters is ignored); no production Settings write was made. No Cloudflare API token is available to the agent, so the www to apex rule is recorded for Jay in WORKLOG instead of created."
       ]
     },
     {

@@ -194,7 +194,58 @@ for (const retiredPath of ['/wp-', '/wp/', '/wp-admin', '/wp-json', '/feed/', '/
   assertNotIncludes(sitemap, retiredPath, 'sitemap.xml');
 }
 
+// Edge SEO (NOW-OPT-SEO-EDGE-HEAD-001): first-response head, real 404s, trailing-slash 301s
+// and the generated sitemap. Behaviour is covered by tests/edge-seo.test.ts; these source
+// assertions keep the wiring from silently regressing.
+const middlewareSource = readText('functions/_middleware.js');
+const edgeHandlerSource = readText('functions/_lib/edge-seo.js');
+const edgeModelSource = readText('src/lib/edgeSeo.ts');
+const routesJson = readJson('public/_routes.json');
+assertIncludes(middlewareSource, 'createEdgeSeoHandler', 'functions/_middleware.js');
+for (const marker of [
+  "path === '/sitemap.xml'",
+  'buildSitemapXml(dataset)',
+  "'Content-Type': 'application/xml; charset=utf-8'",
+  'status: 301',
+  'resolution.status',
+  'renderEdgeHeadHtml',
+  'REMOVED_HEAD_SELECTORS',
+  'SPA_ROOT_MARKER',
+  'DATASET_FRESH_MS',
+  "status=eq.published",
+  'rpc/public_stone_catalogue',
+  'rpc/get_archived_project_slugs',
+]) {
+  assertIncludes(edgeHandlerSource, marker, 'functions/_lib/edge-seo.js');
+}
+for (const marker of [
+  'export function resolveEdgeSeoDocument',
+  'export function buildSitemapXml',
+  "status: 404, head: notFoundHead",
+  'getStructuredDataForPathname',
+  'buildPublicContentSeoMeta',
+  'getStoneShareImageUrl',
+]) {
+  assertIncludes(edgeModelSource, marker, 'src/lib/edgeSeo.ts');
+}
+if (!Array.isArray(routesJson.include) || !routesJson.include.includes('/*')) {
+  fail('public/_routes.json must route page navigations through the edge SEO middleware ("/*").');
+}
+for (const staticPrefix of ['/assets/*', '/fonts/*', '/media/*']) {
+  if (!routesJson.exclude?.includes(staticPrefix)) {
+    fail(`public/_routes.json must exclude ${staticPrefix} from Functions.`);
+  }
+}
+assertIncludes(readText('vite.config.ts'), "fileName: 'seo-edge-config.json'", 'vite.config.ts');
+assertIncludes(readText('src/components/PublicContentSeo.tsx'), 'buildPublicContentSeoMeta', 'src/components/PublicContentSeo.tsx');
+assertIncludes(appSource, 'hasEdgeEntityHead(location.pathname)', 'src/App.tsx');
+// Homepage title floor: a bare-brand CMS SEO title must not replace the descriptive title.
+assertIncludes(seoRoutesSource, 'MIN_DESCRIPTIVE_HOMEPAGE_TITLE_LENGTH', 'src/data/seoRoutes.ts');
+assertIncludes(seoRoutesSource, 'toDescriptiveHomepageTitle(defaults.homepageTitle)', 'src/data/seoRoutes.ts');
+assertIncludes(seoRoutesSource, "title: 'Urblo | Natural Stone Streetscape Systems'", 'src/data/seoRoutes.ts');
+
 note(`robots.txt points crawlers to ${SITE_URL}/sitemap.xml and excludes /admin and /api.`);
+note('Edge middleware serves per-route head, 404 for unknown paths, trailing-slash 301s and the generated sitemap; public/sitemap.xml remains the static-registry baseline.');
 note(`sitemap.xml contains ${sitemapUrls.length} approved public URLs.`);
 note(`Route metadata is centralized in src/data/seoRoutes.ts and wired into src/App.tsx.`);
 note(`public/_redirects contains ${expectedLegacyRedirects.length} GSC legacy/canonical cleanup rules.`);

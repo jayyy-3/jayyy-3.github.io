@@ -10,6 +10,7 @@ import {
 import WelcomePopup from './components/WelcomePopup';
 import RouteState from './components/RouteState';
 import { getSeoMetaForPathname, getStructuredDataForPathname } from './data/seoRoutes';
+import { hasEdgeEntityHead } from './lib/publicContentSeoMeta';
 import DefaultLayout from './layouts/DefaultLayout';
 import HomepageLayout from './layouts/HomepageLayout';
 import { PublicSiteSettingsProvider } from './lib/PublicSiteSettingsProvider';
@@ -45,6 +46,9 @@ function TitleUpdater() {
     const settings = usePublicSiteSettings();
 
     useEffect(() => {
+        // The edge already rendered this Published CMS record's head; PublicContentSeo
+        // keeps it current, so do not overwrite it with registry/not-found metadata.
+        if (hasEdgeEntityHead(location.pathname)) return;
         const meta = getSeoMetaForPathname(location.pathname, {
             homepageTitle: settings.seo.title,
             homepageDescription: settings.seo.description,

@@ -124,16 +124,18 @@ function checkRouting() {
   if (routes.version !== 1) {
     failures.push('public/_routes.json: version must be 1');
   }
-  if (
-    !Array.isArray(routes.include) ||
-    routes.include.length !== 2 ||
-    routes.include[0] !== '/api/*' ||
-    routes.include[1] !== '/image/*'
-  ) {
-    failures.push('public/_routes.json: include must be exactly ["/api/*", "/image/*"] so only APIs and stable QR images invoke Functions');
+  // The edge SEO middleware (functions/_middleware.js) runs for public HTML navigations, so
+  // Functions include every path except the static asset folders, which never invoke them.
+  if (!Array.isArray(routes.include) || routes.include.length !== 1 || routes.include[0] !== '/*') {
+    failures.push('public/_routes.json: include must be exactly ["/*"] so the edge SEO middleware sees page navigations');
   }
-  if (!Array.isArray(routes.exclude) || routes.exclude.length !== 0) {
-    failures.push('public/_routes.json: exclude must remain an empty array');
+  const requiredExcludes = ['/assets/*', '/fonts/*', '/media/*', '/images/*', '/downloads/*'];
+  if (
+    !Array.isArray(routes.exclude) ||
+    routes.exclude.length !== requiredExcludes.length ||
+    requiredExcludes.some((pattern, index) => routes.exclude[index] !== pattern)
+  ) {
+    failures.push(`public/_routes.json: exclude must be exactly ${JSON.stringify(requiredExcludes)} so hashed assets and media never invoke Functions`);
   }
 }
 
@@ -277,6 +279,26 @@ function checkFunctions() {
   }
   if (/VITE_SUPABASE_(?:ANON|PUBLISHABLE)_KEY/.test(adminImageQr)) {
     failures.push('functions/_lib/admin-image-qr.js: Image QR Functions must not use browser Supabase keys');
+  }
+
+  // Edge SEO middleware: public reads only, protected Functions untouched.
+  const middleware = readRequired('functions/_middleware.js');
+  const edgeSeo = readRequired('functions/_lib/edge-seo.js');
+  requireIncludes(middleware, 'createEdgeSeoHandler', 'functions/_middleware.js');
+  for (const contract of [
+    "path.startsWith('/api/')",
+    "path.startsWith('/image/')",
+    'return context.next();',
+    'isBrowserSafeKey',
+    "'/sitemap.xml'",
+    'status: 301',
+    'resolveEdgeSeoDocument',
+    'HTMLRewriter',
+  ]) {
+    requireIncludes(edgeSeo, contract, 'functions/_lib/edge-seo.js');
+  }
+  if (/SERVICE_ROLE|SERVICE_KEY|createServiceClient|admin-runtime/.test(middleware + edgeSeo)) {
+    failures.push('functions/_lib/edge-seo.js: the edge SEO middleware must never read service-role credentials');
   }
 }
 
