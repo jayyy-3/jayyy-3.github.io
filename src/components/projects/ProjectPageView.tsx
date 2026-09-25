@@ -212,7 +212,7 @@ function ProjectInformation({ project }: { project: ProjectData }) {
           <div className="grid gap-x-8 border-t border-black md:grid-cols-2">
             {facts.map(({ label, value }) => (
               <div key={label} className="grid gap-2 border-b border-black/10 py-5">
-                <p className="urblo-meta text-black/45">{label}</p>
+                <p className="urblo-meta text-black/60">{label}</p>
                 <div>{renderDetailValue(value)}</div>
               </div>
             ))}
@@ -243,7 +243,7 @@ function NormalImageBlock({ block }: { block: Extract<ProjectMediaBlock, { type:
       </div>
       {block.label || block.caption ? (
         <figcaption className="grid gap-3 border-b border-black/10 py-5 md:grid-cols-[0.28fr_1fr]">
-          <p className="urblo-meta text-black/45">{block.label || 'Project media'}</p>
+          <p className="urblo-meta text-black/60">{block.label || 'Project media'}</p>
           <p className="text-[15px] leading-7 text-[var(--urblo-text)]">{block.caption}</p>
         </figcaption>
       ) : null}
@@ -265,7 +265,7 @@ function YoutubeVideoBlock({ block }: { block: Extract<ProjectMediaBlock, { type
         />
       </div>
       <figcaption className="grid gap-3 border-b border-black/10 py-5 md:grid-cols-[0.28fr_1fr]">
-        <p className="urblo-meta text-black/45">Video</p>
+        <p className="urblo-meta text-black/60">Video</p>
         <div>
           <h3 className="text-[24px] font-semibold leading-tight text-black">{block.title}</h3>
           {block.caption ? <p className="mt-2 text-[15px] leading-7 text-[var(--urblo-text)]">{block.caption}</p> : null}

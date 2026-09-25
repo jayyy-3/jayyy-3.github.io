@@ -183,7 +183,7 @@
         ]
       },
       "status": "now",
-      "phase": "implementation",
+      "phase": "verification",
       "nextAction": "Opus implements on its own branch and worktree; Claude reports to Jay before merge.",
       "blocker": "",
       "notes": [

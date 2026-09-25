@@ -321,7 +321,7 @@ const projectLedger: ProjectProof[] = [
 ];
 
 const inputClassName =
-  'w-full rounded-[4px] border border-white/18 bg-white px-4 py-3 text-[15px] font-semibold text-black outline-none transition placeholder:text-black/35 focus:border-[var(--urblo-lime)] focus:ring-2 focus:ring-[var(--urblo-lime)]';
+  'w-full rounded-[4px] border border-white/18 bg-white px-4 py-3 text-[15px] font-semibold text-black transition placeholder:text-black/35 focus:border-[var(--urblo-lime)]';
 
 function Reveal({
   children,

@@ -95,6 +95,20 @@ a {
     color: inherit;
 }
 
+@layer base {
+    /*
+     * One keyboard focus style for every public surface: a 2px black ring set 2px off the
+     * element, framed by a white halo on both sides. The black band reads on white pages and the
+     * white bands read on dark sections and photography (each >= 3:1 against its surface).
+     * Lime stays a signal colour and is not used for focus (about 1.4:1 on white).
+     */
+    :focus-visible {
+        outline: 2px solid var(--urblo-black);
+        outline-offset: 2px;
+        box-shadow: 0 0 0 6px #ffffff;
+    }
+}
+
 .font-sans {
     font-family: var(--urblo-font-sans);
 }
@@ -107,170 +121,224 @@ a {
     font-family: var(--urblo-font-accent);
 }
 
-.urblo-page-container {
-    width: min(100%, 1440px);
-    margin: 0 auto;
-    padding-inline: 24px;
-}
+/*
+ * Urblo component classes live in the components layer so Tailwind utilities written next to
+ * them (text-white/62, mt-0, border-white, shadow-none ...) win, as the markup intends.
+ * Unlayered rules here would be emitted after `@tailwind utilities` and silently override them.
+ */
+@layer components {
+    .urblo-page-container {
+        width: min(100%, 1440px);
+        margin: 0 auto;
+        padding-inline: 24px;
+    }
 
-.urblo-edge-container {
-    width: 100%;
-    padding-inline: clamp(20px, 3.2vw, 64px);
-}
+    .urblo-edge-container {
+        width: 100%;
+        padding-inline: clamp(20px, 3.2vw, 64px);
+    }
 
-.urblo-section {
-    padding-block: 72px;
-}
+    .urblo-section {
+        padding-block: 72px;
+    }
 
-.urblo-section-tight {
-    padding-block: 48px;
-}
+    .urblo-section-tight {
+        padding-block: 48px;
+    }
 
-.urblo-eyebrow {
-    margin: 0;
-    color: rgba(51, 54, 63, 0.72);
-    font-size: 13px;
-    font-weight: 600;
-    line-height: 1.4;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-}
+    .urblo-eyebrow {
+        margin: 0;
+        color: rgba(51, 54, 63, 0.72);
+        font-size: 13px;
+        font-weight: 600;
+        line-height: 1.4;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+    }
 
-.urblo-eyebrow.text-white\/70 {
-    color: rgb(255 255 255 / 0.7);
-}
-
-.urblo-page-title,
-.urblo-project-page-title {
-    margin: 16px 0 0;
-    color: var(--urblo-black);
-    font-family: var(--urblo-font-sans);
-    font-size: 50px;
-    font-weight: 300;
-    line-height: 1.1;
-    letter-spacing: 0;
-    text-transform: none;
-    overflow-wrap: anywhere;
-}
-
-.urblo-page-title--inverse {
-    color: #ffffff;
-}
-
-.urblo-project-hero-title,
-.urblo-project-section-title,
-.urblo-project-card-title {
-    font-family: var(--urblo-font-sans);
-    letter-spacing: 0;
-}
-
-.urblo-project-hero-title {
-    font-size: 50px;
-    font-weight: 300;
-    line-height: 1.1;
-    text-transform: none;
-}
-
-.urblo-project-section-title {
-    font-size: 30px;
-    font-weight: 600;
-    line-height: 1.35;
-    text-transform: uppercase;
-}
-
-.urblo-project-card-title {
-    font-size: 28px;
-    font-weight: 600;
-    line-height: 1.08;
-    text-transform: uppercase;
-}
-
-@media (min-width: 768px) {
     .urblo-page-title,
     .urblo-project-page-title {
-        font-size: 64px;
+        margin: 16px 0 0;
+        color: var(--urblo-black);
+        font-family: var(--urblo-font-sans);
+        font-size: 50px;
+        font-weight: 300;
+        line-height: 1.1;
+        letter-spacing: 0;
+        text-transform: none;
+        overflow-wrap: anywhere;
+    }
+
+    .urblo-page-title--inverse {
+        color: #ffffff;
+    }
+
+    .urblo-project-hero-title,
+    .urblo-project-section-title,
+    .urblo-project-card-title {
+        font-family: var(--urblo-font-sans);
+        letter-spacing: 0;
     }
 
     .urblo-project-hero-title {
-        font-size: 76px;
+        font-size: 50px;
+        font-weight: 300;
+        line-height: 1.1;
+        text-transform: none;
     }
 
     .urblo-project-section-title {
-        font-size: 34px;
-        line-height: 1.5;
+        font-size: 30px;
+        font-weight: 600;
+        line-height: 1.35;
+        text-transform: uppercase;
     }
-}
 
-@media (min-width: 1024px) {
-    .urblo-project-hero-title {
-        font-size: 100px;
+    .urblo-project-card-title {
+        font-size: 28px;
+        font-weight: 600;
+        line-height: 1.08;
+        text-transform: uppercase;
     }
-}
 
-.urblo-page-copy {
-    margin-top: 24px;
-    max-width: 44rem;
-    color: var(--urblo-text);
-    font-size: 20px;
-    font-weight: 500;
-    line-height: 1.6;
-}
+    @media (min-width: 768px) {
+        .urblo-page-title,
+        .urblo-project-page-title {
+            font-size: 64px;
+        }
 
-.urblo-card {
-    border: 1px solid rgba(0, 0, 0, 0.12);
-    border-radius: 4px;
-    background: #fff;
-    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.06);
-}
+        .urblo-project-hero-title {
+            font-size: 76px;
+        }
 
-.urblo-button,
-.urblo-button-inverse {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    min-height: 48px;
-    padding: 0 18px;
-    border: 1px solid var(--urblo-black);
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    transition:
-        background-color 0.2s ease,
-        color 0.2s ease,
-        border-color 0.2s ease,
-        transform 0.2s ease;
-}
+        .urblo-project-section-title {
+            font-size: 34px;
+            line-height: 1.5;
+        }
+    }
 
-.urblo-button {
-    background: transparent;
-    color: var(--urblo-black);
-}
+    @media (min-width: 1024px) {
+        .urblo-project-hero-title {
+            font-size: 100px;
+        }
+    }
 
-.urblo-button:hover {
-    background: var(--urblo-black);
-    color: #fff;
-}
+    .urblo-page-copy {
+        margin-top: 24px;
+        max-width: 44rem;
+        color: var(--urblo-text);
+        font-size: 20px;
+        font-weight: 500;
+        line-height: 1.6;
+    }
 
-.urblo-button-inverse {
-    background: var(--urblo-black);
-    color: #fff;
-}
+    .urblo-card {
+        border: 1px solid rgba(0, 0, 0, 0.12);
+        border-radius: 4px;
+        background: #fff;
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.06);
+    }
 
-.urblo-button-inverse:hover {
-    border-color: var(--urblo-lime);
-    background: var(--urblo-lime);
-    color: var(--urblo-black);
-}
+    .urblo-button,
+    .urblo-button-inverse {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        min-height: 48px;
+        padding: 0 18px;
+        border: 1px solid var(--urblo-black);
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        transition:
+            background-color 0.2s ease,
+            color 0.2s ease,
+            border-color 0.2s ease,
+            transform 0.2s ease;
+    }
 
-.urblo-meta {
-    color: rgba(51, 54, 63, 0.8);
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
+    .urblo-button {
+        background: transparent;
+        color: var(--urblo-black);
+    }
+
+    .urblo-button:hover {
+        background: var(--urblo-black);
+        color: #fff;
+    }
+
+    .urblo-button-inverse {
+        background: var(--urblo-black);
+        color: #fff;
+    }
+
+    .urblo-button-inverse:hover {
+        border-color: var(--urblo-lime);
+        background: var(--urblo-lime);
+        color: var(--urblo-black);
+    }
+
+    /*
+     * For focusable elements inside an overflow-clipped parent (rails, carousels, rounded cards):
+     * the same black ring with white halo, drawn inside the element on a pseudo-element so
+     * positioned or scaled children (images, scrims) cannot paint over it.
+     */
+    .urblo-focus-inset {
+        position: relative;
+    }
+
+    .urblo-focus-inset:focus-visible {
+        outline: none;
+        box-shadow: none;
+    }
+
+    .urblo-focus-inset:focus-visible::after {
+        content: '';
+        position: absolute;
+        inset: 3px;
+        z-index: 40;
+        border: 2px solid var(--urblo-black);
+        border-radius: inherit;
+        box-shadow:
+            0 0 0 2px #ffffff,
+            inset 0 0 0 2px #ffffff;
+        pointer-events: none;
+    }
+
+    .urblo-meta {
+        color: rgba(51, 54, 63, 0.8);
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+    }
+
+    @media (min-width: 768px) {
+        .urblo-page-container {
+            padding-inline: 40px;
+        }
+
+        .urblo-edge-container {
+            padding-inline: clamp(28px, 4vw, 78px);
+        }
+    }
+
+    @media (min-width: 1024px) {
+        .urblo-page-container {
+            padding-inline: 94px;
+        }
+
+        .urblo-section {
+            padding-block: 96px;
+        }
+
+        .urblo-section-tight {
+            padding-block: 64px;
+        }
+    }
 }
 
 .article-wrapper img[src*=".gif" i] {
@@ -570,29 +638,5 @@ html {
     .homepage-collaboration-track-right {
         animation: none;
         transform: translateX(0);
-    }
-}
-
-@media (min-width: 768px) {
-    .urblo-page-container {
-        padding-inline: 40px;
-    }
-
-    .urblo-edge-container {
-        padding-inline: clamp(28px, 4vw, 78px);
-    }
-}
-
-@media (min-width: 1024px) {
-    .urblo-page-container {
-        padding-inline: 94px;
-    }
-
-    .urblo-section {
-        padding-block: 96px;
-    }
-
-    .urblo-section-tight {
-        padding-block: 64px;
     }
 }

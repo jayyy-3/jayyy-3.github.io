@@ -26,7 +26,7 @@ export default function VariantSwitch({
 
     return (
         <section aria-label={`${label} selector`} className="space-y-2.5">
-            <p className="urblo-meta text-[10px] text-black/58">{label}</p>
+            <p className="urblo-meta text-black/58">{label}</p>
             <div className="grid grid-cols-2 gap-2">
                 {variants.map((variant) => {
                     const isActive = variant.stoneVariantId === activeVariantId;

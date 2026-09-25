@@ -56,7 +56,7 @@ export default function StoneProjectsSection({
                             <li key={project.slug} className="flex flex-col border-t border-black/12 pt-5">
                                 <Link
                                     to={`/projects/${project.slug}`}
-                                    className="group block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--urblo-lime)] focus-visible:ring-offset-4"
+                                    className="group block"
                                 >
                                     <div className="aspect-[4/3] overflow-hidden bg-black">
                                         <ProjectResponsiveImage
@@ -103,7 +103,7 @@ export default function StoneProjectsSection({
                                 {pointRef ? (
                                     <Link
                                         to={`/projects/${project.slug}?point=${encodeURIComponent(pointRef.hotspotId)}`}
-                                        className="mt-4 inline-flex self-start border-b border-black pb-1 text-[11px] font-bold uppercase tracking-[0.14em] text-black transition-colors hover:border-[var(--urblo-lime)] focus-visible:border-[var(--urblo-lime)] focus-visible:outline-none"
+                                        className="mt-4 inline-flex self-start border-b border-black pb-1 text-[11px] font-bold uppercase tracking-[0.14em] text-black transition-colors hover:border-[var(--urblo-lime)]"
                                         aria-label={`See placement of ${stoneName} in ${project.listing.title || project.name}`}
                                     >
                                         See placement

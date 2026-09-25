@@ -9,16 +9,19 @@ interface StatusPillProps {
 }
 
 function surfaceClass(tone: StatusPillTone, surface: StatusPillSurface): string {
+    // Image overlay labels (DESIGN.md, Stone Library): dark translucent backplate with white
+    // text for every tone so the label stays readable on light, dark and patterned stone.
+    // Lime is kept to the small available dot.
+    if (surface === 'overlay') {
+        return 'border border-white/20 bg-black/65 text-white shadow-[0_6px_14px_rgba(0,0,0,0.18)] backdrop-blur-sm';
+    }
+
     if (tone === 'available') {
         if (surface === 'dark') {
             return 'border border-[rgba(0,255,25,0.38)] bg-[rgba(0,255,25,0.1)] text-white';
         }
 
         return 'border border-[rgba(0,255,25,0.44)] bg-[rgba(0,255,25,0.1)] text-black/72';
-    }
-
-    if (surface === 'overlay') {
-        return 'border border-white/55 bg-white/75 text-black/60 shadow-[0_8px_18px_rgba(0,0,0,0.1)] backdrop-blur-sm';
     }
 
     if (surface === 'dark') {

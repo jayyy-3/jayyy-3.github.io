@@ -34,7 +34,7 @@ export default function OptionSelector({ title, category, options, whitelist }: 
               onClick={() => setMaterial(category, option.slug)}
               aria-pressed={active}
               className={[
-                'overflow-hidden rounded-[4px] border bg-white text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--urblo-lime)]',
+                'overflow-hidden rounded-[4px] border bg-white text-left transition',
                 active
                   ? 'border-[var(--urblo-lime)] shadow-[0_0_0_1px_rgba(0,255,25,0.32)]'
                   : 'border-black/10 hover:border-black/30',
