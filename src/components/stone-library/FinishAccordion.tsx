@@ -30,7 +30,7 @@ export default function FinishAccordion({
 }: FinishAccordionProps) {
     return (
         <section className="min-w-0 space-y-2.5">
-            <p className="urblo-meta text-[10px] text-black/58">Finish selector</p>
+            <p className="urblo-meta text-black/58">Finish selector</p>
 
             <div className="divide-y divide-black/10 overflow-hidden rounded-[4px] border border-black/10 bg-white shadow-none">
                 {finishes.map((finish) => {

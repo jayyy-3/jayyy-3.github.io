@@ -28,7 +28,7 @@ export default function StoneCard({ stone }: StoneCardProps) {
           />
         ) : (
           <div className="flex h-full items-center justify-center bg-[linear-gradient(135deg,#f4f4f1,#deded8)] px-6 text-center">
-            <p className="urblo-meta text-black/50">Image coming soon</p>
+            <p className="urblo-meta text-black/60">Image coming soon</p>
           </div>
         )}
 
@@ -46,8 +46,8 @@ export default function StoneCard({ stone }: StoneCardProps) {
         </h3>
         <p className="text-[14px] font-medium text-black/80">{stone.stoneType}</p>
         <div className="flex items-center justify-between border-t border-black/10 pt-3">
-          <p className="urblo-meta text-[10px] text-black/58">{stone.finishCount} finishes</p>
-          <p className="urblo-meta text-[10px] text-black/58">
+          <p className="urblo-meta text-black/58">{stone.finishCount} finishes</p>
+          <p className="urblo-meta text-black/58">
             {stone.variantCount > 1 ? `${stone.variantCount} variants` : 'Standard'}
           </p>
         </div>

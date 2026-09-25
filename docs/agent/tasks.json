@@ -183,12 +183,13 @@
         ]
       },
       "status": "now",
-      "phase": "implementation",
-      "nextAction": "Opus implements on its own branch and worktree; Claude reports to Jay before merge.",
+      "phase": "awaiting_external",
+      "nextAction": "Claude reports PR #64 to Jay; Jay reviews rendering and approves merge (stacks on PR #60).",
       "blocker": "",
       "notes": [
         "2026-09-25: created from the 2026-09-24 four-track optimization audit (session scratch, not repository state). Wave 1 of 3; Jay decides on wave 2 after Claude's report.",
-        "2026-09-26: Jay approved the open design choices: light-grey eyebrows on dark backgrounds (not pure white) and the black/white focus ring."
+        "2026-09-26: Jay approved the open design choices: light-grey eyebrows on dark backgrounds (not pure white) and the black/white focus ring.",
+        "2026-09-25: implemented on claude/opt-ui-cascade-fixes b8d5ba5, PR #64 (stacks on #60, not merged). Clean Node 20 gate passed; CI 36143351963 passed; Preview https://44c93f47.urblo-site.pages.dev smoke passed; Preview tab pass 0 flagged focus stops on five pages; Contact buttons one line at 1440/375. Awaiting Jay visual acceptance and merge approval."
       ]
     },
     {

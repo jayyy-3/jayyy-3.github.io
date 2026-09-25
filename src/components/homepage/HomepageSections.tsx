@@ -495,7 +495,7 @@ function HeroSection() {
         <button
           type="button"
           onClick={attemptVideoPlay}
-          className="absolute left-1/2 top-1/2 z-20 flex -translate-x-1/2 -translate-y-1/2 items-center gap-2 rounded-full border border-white/45 bg-black/50 px-4 py-2 text-[11px] font-medium uppercase tracking-[0.14em] text-white shadow-[0_12px_30px_rgba(0,0,0,0.22)] backdrop-blur-sm transition-colors hover:bg-black/65 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--urblo-lime)] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+          className="absolute left-1/2 top-1/2 z-20 flex -translate-x-1/2 -translate-y-1/2 items-center gap-2 rounded-full border border-white/45 bg-black/50 px-4 py-2 text-[11px] font-medium uppercase tracking-[0.14em] text-white shadow-[0_12px_30px_rgba(0,0,0,0.22)] backdrop-blur-sm transition-colors hover:bg-black/65"
           aria-label="Play homepage background video"
         >
           <Play aria-hidden="true" className="h-3.5 w-3.5 fill-current" />
@@ -1038,7 +1038,7 @@ function ProductShowcaseSection() {
                 return (
                   <SwiperSlide key={category.index} className="!h-[620px]">
                     <div
-                      className="relative h-full"
+                      className="urblo-focus-inset relative h-full"
                       tabIndex={0}
                       onMouseEnter={() => setFocusedProduct(category.index)}
                       onMouseLeave={() => setFocusedProduct(null)}
@@ -1131,7 +1131,7 @@ function MetricsSection() {
           </p>
           <Link
             to={siteCtas.capabilities.to}
-            className="group mt-11 inline-flex min-h-[48px] items-center gap-4 rounded-full border border-black/[0.18] px-5 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-black transition duration-200 hover:border-[var(--urblo-lime)] hover:bg-[rgba(0,255,25,0.08)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--urblo-lime)]"
+            className="group mt-11 inline-flex min-h-[48px] items-center gap-4 rounded-full border border-black/[0.18] px-5 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-black transition duration-200 hover:border-[var(--urblo-lime)] hover:bg-[rgba(0,255,25,0.08)]"
           >
             <span>Our {siteCtas.capabilities.label}</span>
             <span
@@ -1363,7 +1363,7 @@ function LatestProjectsSection() {
                       </dl>
                       <Link
                         to={`/projects/${activeProject.slug}`}
-                        className="homepage-project-active-link group mt-3 inline-flex min-h-[38px] items-center gap-3 rounded-full border border-black/[0.18] px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-black transition duration-200 hover:border-[var(--urblo-lime)] hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--urblo-lime)] md:mt-4 md:min-h-[42px] md:px-5 md:text-[11px]"
+                        className="homepage-project-active-link urblo-focus-inset group mt-3 inline-flex min-h-[38px] items-center gap-3 rounded-full border border-black/[0.18] px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-black transition duration-200 hover:border-[var(--urblo-lime)] hover:bg-white md:mt-4 md:min-h-[42px] md:px-5 md:text-[11px]"
                       >
                         <span>View project</span>
                         <span
@@ -1430,7 +1430,7 @@ function LatestProjectsSection() {
               <div className="pointer-events-auto flex items-center gap-2">
                 <button
                   type="button"
-                  className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-black/18 bg-white/82 text-black shadow-sm backdrop-blur-sm transition duration-200 hover:border-black/34 hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--urblo-lime)] disabled:pointer-events-none disabled:opacity-35"
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-black/18 bg-white/82 text-black shadow-sm backdrop-blur-sm transition duration-200 hover:border-black/34 hover:bg-white disabled:pointer-events-none disabled:opacity-35"
                   aria-label="Previous project"
                   disabled={activeProjectIndex === 0}
                   onClick={() => moveProject(-1)}
@@ -1439,7 +1439,7 @@ function LatestProjectsSection() {
                 </button>
                 <button
                   type="button"
-                  className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-black/18 bg-white/82 text-black shadow-sm backdrop-blur-sm transition duration-200 hover:border-black/34 hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--urblo-lime)] disabled:pointer-events-none disabled:opacity-35"
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-black/18 bg-white/82 text-black shadow-sm backdrop-blur-sm transition duration-200 hover:border-black/34 hover:bg-white disabled:pointer-events-none disabled:opacity-35"
                   aria-label="Next project"
                   disabled={activeProjectIndex === projects.length - 1}
                   onClick={() => moveProject(1)}
@@ -1499,7 +1499,7 @@ function LatestProjectsSection() {
                     data-project-thumb-index={index}
                     aria-pressed={isActive}
                     aria-label={`Show ${project.title}`}
-                    className="group h-full w-[42%] flex-none snap-start text-left outline-none sm:w-[calc(50%_-_8px)] md:w-[calc(25%_-_12px)] xl:w-[calc(25%_-_18px)]"
+                    className="urblo-focus-inset group h-full w-[42%] flex-none snap-start text-left sm:w-[calc(50%_-_8px)] md:w-[calc(25%_-_12px)] xl:w-[calc(25%_-_18px)]"
                     onMouseEnter={() => {
                       if (!dragStateRef.current.isDown && !suppressClickRef.current) selectProject(index);
                     }}
@@ -1637,7 +1637,7 @@ function LogoCarouselSection() {
 
   return (
     <section aria-label="Project partners" className="overflow-hidden bg-white py-16 md:py-20">
-      <div className="logo-carousel-viewport overflow-hidden">
+      <div className="logo-carousel-viewport urblo-focus-inset overflow-hidden">
         <div className="animate-marquee flex w-max items-center">
           {[0, 1].map((groupIndex) => (
             <div

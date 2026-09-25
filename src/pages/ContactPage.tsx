@@ -56,7 +56,7 @@ function FieldLabel({ children, htmlFor }: { children: string; htmlFor: string }
 }
 
 const inputClassName =
-  'w-full rounded-[4px] border border-black/15 bg-white px-4 py-3 text-[15px] font-medium text-black outline-none transition placeholder:text-black/35 focus:border-black focus:ring-2 focus:ring-[var(--urblo-lime)]';
+  'w-full rounded-[4px] border border-black/15 bg-white px-4 py-3 text-[15px] font-medium text-black transition placeholder:text-black/35 focus:border-black';
 
 export default function ContactPage() {
   const settings = usePublicSiteSettings();
@@ -210,7 +210,7 @@ export default function ContactPage() {
             <div className="urblo-card divide-y divide-black/10 overflow-hidden bg-white shadow-none">
               <a
                 href="mailto:info@urblo.com.au?subject=Contact%20Us"
-                className="flex items-center justify-between gap-4 px-5 py-5 transition hover:bg-[rgba(239,239,239,0.45)]"
+                className="urblo-focus-inset flex items-center justify-between gap-4 px-5 py-5 transition hover:bg-[rgba(239,239,239,0.45)]"
               >
                 <span className="flex items-center gap-4">
                   <Mail className="h-5 w-5 text-black" aria-hidden="true" />
@@ -228,7 +228,7 @@ export default function ContactPage() {
 
               <a
                 href="tel:1300187256"
-                className="flex items-center justify-between gap-4 px-5 py-5 transition hover:bg-[rgba(239,239,239,0.45)]"
+                className="urblo-focus-inset flex items-center justify-between gap-4 px-5 py-5 transition hover:bg-[rgba(239,239,239,0.45)]"
               >
                 <span className="flex items-center gap-4">
                   <Phone className="h-5 w-5 text-black" aria-hidden="true" />
@@ -264,7 +264,7 @@ export default function ContactPage() {
                   Send a project brief
                 </h2>
               </div>
-              <Link to="/stone-library" className="urblo-button self-start">
+              <Link to="/stone-library" className="urblo-button shrink-0 self-start whitespace-nowrap">
                 Stone Library
                 <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
               </Link>
@@ -455,7 +455,7 @@ export default function ContactPage() {
                 </p>
                 <button
                   type="submit"
-                  className="urblo-button-inverse disabled:cursor-wait disabled:opacity-60"
+                  className="urblo-button-inverse shrink-0 whitespace-nowrap disabled:cursor-wait disabled:opacity-60"
                   disabled={submissionStatus === 'submitting'}
                 >
                   {submissionStatus === 'submitting'

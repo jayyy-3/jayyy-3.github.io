@@ -154,7 +154,7 @@ export default function StonePageView({
 
                 {isRefreshingVariant ? (
                   <p
-                    className="urblo-meta text-[10px] text-black/55"
+                    className="urblo-meta text-black/55"
                     role="status"
                   >
                     Updating cut and finish options

@@ -294,7 +294,7 @@ export default function ImageStage({
         return (
             <section className="urblo-card self-start overflow-hidden border-black/10 shadow-none">
                 <div className="flex h-[320px] items-center justify-center bg-[rgba(239,239,239,0.78)] px-6 text-center">
-                    <p className="urblo-meta text-black/50">
+                    <p className="urblo-meta text-black/60">
                         Image coming soon
                     </p>
                 </div>
@@ -304,7 +304,7 @@ export default function ImageStage({
 
     return (
         <section className="min-w-0 space-y-2 self-start">
-            <p className="urblo-meta text-[10px] text-black/58">Finish imagery</p>
+            <p className="urblo-meta text-black/58">Finish imagery</p>
 
             <div className="overflow-hidden rounded-[4px] border border-black/10 bg-white p-2 shadow-none">
                 <div
@@ -346,7 +346,7 @@ export default function ImageStage({
                                     onClick={() => onSelect(finish.finishKey)}
                                     aria-pressed={isActive}
                                     aria-label={`${stoneName} ${finish.label}`}
-                                    className="absolute inset-0 text-left outline-none focus-visible:ring-2 focus-visible:ring-[#00FF19] focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950"
+                                    className="absolute inset-0 text-left"
                                 >
                                     {finish.imageUrl ? (
                                         <StoneResponsiveImage
@@ -367,7 +367,7 @@ export default function ImageStage({
                                         />
                                     ) : (
                                         <div className="absolute inset-0 flex items-center justify-center bg-[#242424] px-3 text-center">
-                                            <p className="urblo-meta max-w-32 text-[10px] leading-5 text-white/70">
+                                            <p className="urblo-meta max-w-32 leading-5 text-white/70">
                                                 Finish image pending
                                             </p>
                                         </div>
@@ -378,7 +378,7 @@ export default function ImageStage({
                                     <button
                                         type="button"
                                         onClick={() => onOpenLightbox(finish.finishKey)}
-                                        className="absolute right-2 top-2 min-h-8 rounded-[4px] border border-white/25 bg-black/80 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.06em] text-white shadow-[0_8px_18px_rgba(0,0,0,0.22)] backdrop-blur-sm transition hover:border-[var(--urblo-lime)] hover:bg-black/90 hover:text-[var(--urblo-lime)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--urblo-lime)] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                                        className="absolute right-2 top-2 min-h-8 rounded-[4px] border border-white/25 bg-black/80 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.06em] text-white shadow-[0_8px_18px_rgba(0,0,0,0.22)] backdrop-blur-sm transition hover:border-[var(--urblo-lime)] hover:bg-black/90 hover:text-[var(--urblo-lime)]"
                                         aria-label={`Open ${finish.label} in large view`}
                                     >
                                         Zoom
@@ -451,7 +451,7 @@ export default function ImageStage({
             {activeFinish && activeSecondaryImages.length ? (
                 <div className="rounded-[4px] border border-black/10 bg-white p-3 shadow-none">
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                        <p className="urblo-meta text-[10px] text-black/58">
+                        <p className="urblo-meta text-black/58">
                             Secondary frame
                         </p>
                         <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-black/45">
@@ -465,7 +465,7 @@ export default function ImageStage({
                                 key={`${activeFinish.finishKey}-${image.imageUrl}`}
                                 type="button"
                                 onClick={() => onOpenLightbox(activeFinish.finishKey, index + 1)}
-                                className="group flex w-[120px] flex-none flex-col overflow-hidden rounded-[4px] border border-black/10 bg-white text-left transition hover:border-black/35 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--urblo-lime)]"
+                                className="group flex w-[120px] flex-none flex-col overflow-hidden rounded-[4px] border border-black/10 bg-white text-left transition hover:border-black/35"
                             >
                                 <span className="block aspect-[3/2] overflow-hidden bg-black/5">
                                     <StoneResponsiveImage

@@ -316,7 +316,7 @@ export default function ProjectHotspotImage({
                                     }}
                                     type="button"
                                     className={[
-                                        'absolute z-10 flex h-7 w-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-[var(--urblo-lime)] bg-white transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black',
+                                        'absolute z-10 flex h-7 w-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-[var(--urblo-lime)] bg-white transition duration-200',
                                         open
                                             ? 'shadow-[0_0_0_5px_rgba(0,255,25,0.28)]'
                                             : 'shadow-[0_2px_8px_rgba(0,0,0,0.35)] hover:shadow-[0_0_0_5px_rgba(0,255,25,0.22)]',
@@ -355,14 +355,14 @@ export default function ProjectHotspotImage({
                                             <p className="text-[17px] font-semibold leading-tight text-black">
                                                 {material.stoneName}
                                             </p>
-                                            <p className="urblo-meta mt-1.5 text-[11px] text-black/50">
+                                            <p className="urblo-meta mt-1.5 text-black/60">
                                                 {material.finishLabel}
                                             </p>
                                         </div>
                                     </div>
 
                                     <dl className="mt-3 border-t border-black/10 pt-3">
-                                        <dt className="urblo-meta text-[10px] text-black/45">Where it is used</dt>
+                                        <dt className="urblo-meta text-black/60">Where it is used</dt>
                                         <dd className="mt-1 text-[14px] font-semibold leading-6 text-black">
                                             {hotspot.application}
                                         </dd>
@@ -375,7 +375,7 @@ export default function ProjectHotspotImage({
 
                                     <Link
                                         to={stoneHref(hotspot)}
-                                        className="mt-3 inline-flex border-b border-black pb-1 text-[11px] font-bold uppercase tracking-[0.14em] text-black transition-colors hover:border-[var(--urblo-lime)] hover:text-black focus-visible:border-[var(--urblo-lime)] focus-visible:outline-none"
+                                        className="mt-3 inline-flex border-b border-black pb-1 text-[11px] font-bold uppercase tracking-[0.14em] text-black transition-colors hover:border-[var(--urblo-lime)] hover:text-black"
                                     >
                                         View stone
                                     </Link>
@@ -395,7 +395,7 @@ export default function ProjectHotspotImage({
                                 <button
                                     type="button"
                                     className={[
-                                        'urblo-meta border-b pb-0.5 text-[11px] transition-colors focus-visible:outline-none focus-visible:border-[var(--urblo-lime)]',
+                                        'urblo-meta border-b pb-0.5 transition-colors',
                                         open ? 'border-[var(--urblo-lime)] text-black' : 'border-transparent text-black/55 hover:text-black',
                                     ].join(' ')}
                                     aria-controls={`${baseId}-point-${index + 1}`}

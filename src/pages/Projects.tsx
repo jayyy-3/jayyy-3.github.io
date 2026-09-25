@@ -22,7 +22,7 @@ function ProjectsGridCard({ project }: { project: ProjectData }) {
   return (
     <Link
       to={`/projects/${project.slug}`}
-      className="group grid grid-rows-[auto_1fr] border-t border-black/12 pt-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--urblo-lime)] focus-visible:ring-offset-4"
+      className="group grid grid-rows-[auto_1fr] border-t border-black/12 pt-5"
     >
       <div className="aspect-[4/3] overflow-hidden bg-black">
         <ProjectResponsiveImage
@@ -35,7 +35,7 @@ function ProjectsGridCard({ project }: { project: ProjectData }) {
       </div>
       <div className="grid min-h-[220px] grid-rows-[auto_1fr_auto] gap-5 py-5">
         <div className="flex items-start justify-between gap-4">
-          <p className="urblo-meta text-black/45">{project.listing.sector}</p>
+          <p className="urblo-meta text-black/60">{project.listing.sector}</p>
           <ArrowUpRight className="h-5 w-5 shrink-0 text-black transition group-hover:text-[var(--urblo-lime)]" />
         </div>
         <div>
@@ -58,7 +58,7 @@ function ProjectsListRow({ project, index }: { project: ProjectData; index: numb
   return (
     <Link
       to={`/projects/${project.slug}`}
-      className="group grid gap-5 border-t border-black/12 py-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--urblo-lime)] focus-visible:ring-offset-4 md:grid-cols-[120px_minmax(0,0.35fr)_minmax(0,1fr)_120px_40px] md:items-center"
+      className="group grid gap-5 border-t border-black/12 py-5 md:grid-cols-[120px_minmax(0,0.35fr)_minmax(0,1fr)_120px_40px] md:items-center"
     >
       <div className="overflow-hidden bg-black">
         <ProjectResponsiveImage
@@ -178,7 +178,7 @@ export default function Projects() {
               type="button"
               onClick={() => setViewMode('grid')}
               className={[
-                'inline-flex min-h-10 items-center gap-2 px-3 text-[11px] font-bold uppercase tracking-[0.14em] transition',
+                'urblo-focus-inset inline-flex min-h-10 items-center gap-2 px-3 text-[11px] font-bold uppercase tracking-[0.14em] transition',
                 viewMode === 'grid' ? 'bg-black text-white' : 'text-black/58 hover:text-black',
               ].join(' ')}
               aria-pressed={viewMode === 'grid'}
@@ -190,7 +190,7 @@ export default function Projects() {
               type="button"
               onClick={() => setViewMode('list')}
               className={[
-                'inline-flex min-h-10 items-center gap-2 border-l border-black/12 px-3 text-[11px] font-bold uppercase tracking-[0.14em] transition',
+                'urblo-focus-inset inline-flex min-h-10 items-center gap-2 border-l border-black/12 px-3 text-[11px] font-bold uppercase tracking-[0.14em] transition',
                 viewMode === 'list' ? 'bg-black text-white' : 'text-black/58 hover:text-black',
               ].join(' ')}
               aria-pressed={viewMode === 'list'}
