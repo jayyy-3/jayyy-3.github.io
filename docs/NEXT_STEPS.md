@@ -8,7 +8,7 @@ Last updated: 2026-09-26
 
 | ID | 状态 / 阶段 | 内容 | 阻塞 |
 |---|---|---|---|
-| NOW-OPT-PROJECT-POINT-MARKER-001 | now / verification | Restyle the public Project material-point markers to Jay's approved spec: 14px white dot with lime border and 1px dark outer stroke, invisible 44px hit area, three pulse cycles then rest, enlarge on hover/active, no pulse under reduced motion. | — |
+| NOW-OPT-PROJECT-POINT-MARKER-001 | now / awaiting_external | Restyle the public Project material-point markers to Jay's approved spec: 14px white dot with lime border and 1px dark outer stroke, invisible 44px hit area, three pulse cycles then rest, enlarge on hover/active, no pulse under reduced motion. | — |
 | NOW-OPT-PERF-STONE-IMG-001 | now / implementation | Serve Stone Library and product-option stone media through sized variants (srcset/sizes/lazy) instead of raw Supabase originals; keep a full-resolution original link for designers on the stone detail stage. | — |
 | NOW-OPT-PERF-CLS-SHELL-001 | now / implementation | Remove the footer layout shift and route fade-in that make CLS fail on 8 of 9 public pages; scope the homepage poster preload to /; replace framer-motion with CSS for the route transition. | — |
 | NOW-OPT-UI-CASCADE-FIXES-001 | now / implementation | Fix the four confirmed visible UI defects: urblo-* utilities overriding Tailwind modifiers (dark-background eyebrows unreadable), StatusPill unreadable on dark stones, inconsistent keyboard focus rings, and wrapping button labels on Contact. | — |

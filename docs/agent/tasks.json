@@ -30,7 +30,7 @@
         "npm run agent:cloudflare-preview-smoke -- --base-url <branch Preview>",
         "git diff --check"
       ],
-      "phase": "verification",
+      "phase": "awaiting_external",
       "authorization": {
         "source": "Jay approved the marker spec on 2026-09-26 (14px white/lime dot, dark outer stroke, three pulse cycles then rest) and asked for it alongside wave 1.",
         "included": [
@@ -40,11 +40,12 @@
           "Merge to main, production data writes, email, DNS, credentials, migrations."
         ]
       },
-      "nextAction": "Opus runs the Node 20 gate, pushes claude/opt-project-point-marker, opens the PR stacked on #60 and runs branch Preview smoke; Claude reports to Jay before merge.",
+      "nextAction": "Claude reports PR #67 and the before/after captures to Jay; Jay reviews the marker on the branch Preview and decides merge (merge #60 first or retarget).",
       "blocker": "",
       "notes": [
         "2026-09-26: Jay's request from a production screenshot of /projects/artisan-park-yarrabend; the current 36px white/lime/black-dot marker is replaced. Not a keyboard focus-ring change.",
-        "2026-09-26: implemented on claude/opt-project-point-marker. The measured previous marker was 28px (h-7), not 36px. Marker CSS is a localized block in src/index.css (.urblo-hotspot-marker*); the component change is confined to the marker button plus an IntersectionObserver pulse trigger."
+        "2026-09-26: implemented on claude/opt-project-point-marker. The measured previous marker was 28px (h-7), not 36px. Marker CSS is a localized block in src/index.css (.urblo-hotspot-marker*); the component change is confined to the marker button plus an IntersectionObserver pulse trigger.",
+        "2026-09-26: runtime commit d95ca1b passed the clean Node 20 container gate (27 checks) and host admin-config-gate; PR #67 CI run 36148759867 passed; branch Preview https://838c5d5b.urblo-site.pages.dev passed agent:cloudflare-preview-smoke and read-only Playwright marker checks (Artisan Park 30/30 incl. ?point= deep link, Moon Gate 28/28). Awaiting Jay's visual review and merge decision."
       ]
     },
     {
