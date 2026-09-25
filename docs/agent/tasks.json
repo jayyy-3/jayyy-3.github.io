@@ -234,12 +234,13 @@
         ]
       },
       "status": "now",
-      "phase": "implementation",
-      "nextAction": "Opus implements on its own branch and worktree; Claude reports to Jay before merge.",
-      "blocker": "",
+      "phase": "awaiting_external",
+      "nextAction": "Claude reports PR #62 (stacked on #60) to Jay; Jay decides merge, then production readback and Jay usability check.",
+      "blocker": "Awaiting Jay merge approval for PR #62 (merge #60 first).",
       "notes": [
         "2026-09-25: created from the 2026-09-24 four-track optimization audit (session scratch, not repository state). Wave 1 of 3; Jay decides on wave 2 after Claude's report.",
-        "2026-09-26: Jay approved keeping the single \"Update live page\" wording everywhere (product and model both show it when both are live; media uses the same). Confirmation for Archive/Hide on live records is deferred to wave 2."
+        "2026-09-26: Jay approved keeping the single \"Update live page\" wording everywhere (product and model both show it when both are live; media uses the same). Confirmation for Archive/Hide on live records is deferred to wave 2.",
+        "2026-09-25: implemented on claude/opt-admin-safety-stopgap (PR #62, code 3232b83 + journey fix 33448ca): Settings Status control removed and Save writes Published; live Product/Article/Media Save requires an 'Update live page' confirmation; Product/Article URL keys follow the name and lock after first publish; live Project with a newer draft shows 'Live · unpublished changes'. Clean Node 20 gate and admin-crud-coverage passed; PR CI run 36143665645 passed local:verify with the new Articles/Projects journey assertions and deployed Preview https://3e20e17d.urblo-site.pages.dev (smoke passed). Workstation local stack was owned by another checkout, so mocked-network before/after browser evidence is under ignored .tmp/admin-safety/. See WORKLOG 2026-09-25 admin safety stop-gap."
       ]
     },
     {
