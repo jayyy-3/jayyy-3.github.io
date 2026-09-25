@@ -322,3 +322,24 @@ Preview evidence: branch CI `36143175914` succeeded on `6716117` and deployed th
 - Harcourt desktop: 29.4MB → 1.58MB, LCP 23.7s → 1.7s, Perf 58 → 77.
 
 Acceptance met: no originals except the explicit link; srcset reaches 2560/3000px; the og:image is a variant; Stone Library desktop is under 5MB; Harcourt desktop LCP is under 2.5s. Prime-block mobile misses the < 3MB target by about 10KB. Stone variants there are now 0.33MB (previously 49.6MB); the remainder is static non-stone assets outside this scope (batten/frame JPGs 1.27MB, materials banner 498KB, global hero-poster preload 422KB). Harcourt mobile Perf dropped from 80 to 57. CLS rose from 0.002 to 0.317, and Lighthouse attributes 0.316 of it to the `<footer>` shift (audit P0-2). Stone panels are fixed-size. This needs repeat runs. The Project og:image is still a Project original PNG, which is outside this Stone scope. No merge; Jay approval pending.
+## 2026-09-25 — UI cascade fixes (NOW-OPT-UI-CASCADE-FIXES-001)
+
+Scope: the four audit defects only. There is no token, type-scale or shared-component change; those belong to wave 2. There were no production writes. Branch `claude/opt-ui-cascade-fixes`, candidate `b8d5ba503fd3bc1a5cdf3ced223d3360104d4782`, PR #64. It stacks on #60 and is not merged.
+
+- **Cascade:** the `urblo-*` classes moved into `@layer components`, so Tailwind classes written next to them now apply. Eyebrows and meta labels on dark Contact and Capabilities surfaces now render as `white/62`–`/64` instead of dark grey, which on black is about 7:1.
+  - Changes that surfaced once the utilities applied:
+    - Contact cards: `shadow-none` removes their shadow, and the image card now sits on `bg-black`.
+    - Projects H1: `mt-0` applies.
+    - Stone detail eyebrow: `mt-6` applies.
+  - How they were resolved: `text-[10px]`/`[11px]` on `urblo-meta` were removed so labels keep the 12px visitors see today. `text-black/45`/`/50` meta labels were raised to `/60`, so no meta text drops below 4.5:1.
+- **StatusPill:** the overlay surface is now a dark translucent backplate with white text and a lime dot only, per DESIGN.md.
+- **Focus:** there is one global `:focus-visible` ring (2px black with a white halo). The inset `.urblo-focus-inset` variant draws the same ring inside elements whose parent clips overflow. Per-element blue and lime focus styles were removed from public UI. Local tab pass over five pages (118 stops, identical on both builds): before, 102 stops were flagged (95 browser-blue, 18 lime); after, 0. On Preview the same pass recorded 151 stops across the five pages with 0 flagged.
+- **Contact:** the "Stone Library" and "Send enquiry" buttons measured 2 lines at 1440px before the fix. After, they are 1 line at 1440px and at 375px, locally and on Preview.
+- **Evidence:** before/after screenshots at 1440px and 375px for Home, Capabilities, Contact, Stone Library, Projects and Angola Black, plus zoom crops, computed-style dumps and focus screenshots, are under ignored `.tmp/ui-fixes/`.
+- **Checks:**
+  - ESLint, `tsc -b`, and the source checks `forms-ui`, `capabilities-ui` and `stone-library-detail` passed.
+  - Clean Node 20 `npm run gate` passed, 28 checks.
+  - CI run `36143351963` passed at `https://44c93f47.urblo-site.pages.dev`.
+  - `agent:cloudflare-preview-smoke` passed.
+  - Preview screenshots and the tab pass were read-only and repeated the local results.
+- **Residual:** Jay has not yet given visual acceptance. The Image QR page's focus styles and admin screens with custom focus styles were left unchanged. Safari/iOS rendering and the 768px width were not checked.
