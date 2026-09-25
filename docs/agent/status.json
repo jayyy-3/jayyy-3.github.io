@@ -1,7 +1,7 @@
 {
   "version": 2,
   "lastUpdated": "2026-09-26",
-  "currentTaskId": "NOW-OPT-PERF-STONE-IMG-001",
+  "currentTaskId": "NOW-OPT-SEO-EDGE-HEAD-001",
   "sourceOfTruth": {
     "currentState": "docs/agent/status.json",
     "taskQueue": "docs/agent/tasks.json",
@@ -10,12 +10,12 @@
     "adminHandoffEvidence": "docs/agent/admin-handoff-evidence.json"
   },
   "release": {
-    "observedAt": "2026-09-14",
-    "repositorySha": "5b57b7d4ec074aa33f27f84e2166421d86b7ecb8",
-    "runtimeSha": "5b57b7d4ec074aa33f27f84e2166421d86b7ecb8",
-    "verifiedRuntimeUrl": "https://777af336.urblo-site.pages.dev",
-    "ciRunId": 34818888611,
-    "note": "PR #58 publishes Jay’s supplied three-paragraph Our Story introduction. Local checks, Preview, production immutable/apex/www smoke and exact paragraph/desktop/mobile readback passed. The 20+ caption, PDF and other public content are unchanged. This record-only closeout does not deploy; existing acceptance tasks remain separate.",
+    "observedAt": "2026-09-26",
+    "repositorySha": "e1548af3df842874e0f995d7cb34afcd18a3fb40",
+    "runtimeSha": "e1548af3df842874e0f995d7cb34afcd18a3fb40",
+    "verifiedRuntimeUrl": "https://21ec9a4c.urblo-site.pages.dev",
+    "ciRunId": 36157672301,
+    "note": "Optimization wave 1 (PRs #60–#67) merged in order on 2026-09-26 with Jay approval: stone media variants, footer CLS and CSS route fade, UI cascade/status pill/focus/Contact button fixes, admin safety stop-gap, vitest runner with 74 tests, repository hygiene, and the 14px project point marker. Production readback: immutable/apex/www smoke passed; Lighthouse mobile performance 79–93, CLS <= 0.002 on five pages; no stone originals requested; markers 14px in a 44px hit area. This batch record does not deploy.",
     "evidenceRefs": [
       "docs/WORKLOG.md"
     ]
@@ -77,8 +77,8 @@
     ]
   },
   "lastCompletedTask": {
-    "id": "NOW-STONE-PROJECT-REFS-001",
-    "summary": "Stone Library ⇄ Projects references released 2026-09-12 and accepted by Jay 2026-09-25 after production use; public point cards and Used in projects read back."
+    "id": "NOW-OPT-PROJECT-POINT-MARKER-001",
+    "summary": "Optimization wave 1 (seven tasks) released to production 2026-09-26 and read back; wave 2 registered."
   },
   "stoneWorkspace": {
     "status": "deployed_awaiting_user_acceptance",
