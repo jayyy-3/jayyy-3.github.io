@@ -21,10 +21,10 @@ Last updated: 2026-08-02
 - Bundler/dev server: Vite 6
 - UI runtime: React 19
 - Routing: `react-router-dom` with `BrowserRouter`
-- Styling: Tailwind CSS + project CSS (`src/index.css`, `src/App.css`)
+- Styling: Tailwind CSS + project CSS (`src/index.css`)
 - Client state: Zustand (`src/store/productStore.ts`)
 - Motion/interaction: Framer Motion
-- Supporting libraries: Swiper, DOMPurify, lodash.throttle
+- Supporting libraries: Swiper, DOMPurify, lucide-react, qrcode.react
 - Route loading: public page components are lazy-loaded in `src/App.tsx`; admin page modules are independently lazy-loaded in `src/pages/admin/AdminApp.tsx`.
 
 ## Launch Target Stack

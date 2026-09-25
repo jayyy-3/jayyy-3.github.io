@@ -20,6 +20,7 @@ for (const suite of Object.keys(suites)) {
 }
 assert.equal(resolveChecks('container').filter(id => id === 'build').length, 1)
 assert.ok(resolveChecks('runtime').includes('browser'))
+for (const suite of ['tooling', 'container', 'runtime', 'migrations']) assert.ok(resolveChecks(suite).includes('knip'), `${suite} runs knip`)
 console.log('Verification classification, rename/delete fail-closed handling, dependencies and deduplication passed.')
 
 // Exercise actual Git records and fingerprints, not just handcrafted path arrays.

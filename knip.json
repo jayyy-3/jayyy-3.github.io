@@ -1,0 +1,24 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": [
+    "functions/**/*.js",
+    "scripts/*.mjs",
+    "scripts/_lib/local-article-fault.mjs",
+    "scripts/fixtures/*.mjs",
+    "scripts/local-journeys/*.mjs"
+  ],
+  "project": [
+    "src/**/*.{ts,tsx,css}",
+    "functions/**/*.js",
+    "scripts/**/*.mjs"
+  ],
+  "ignoreDependencies": ["supabase"],
+  "rules": {
+    "exports": "warn",
+    "types": "warn",
+    "nsExports": "warn",
+    "nsTypes": "warn",
+    "enumMembers": "warn",
+    "duplicates": "warn"
+  }
+}

@@ -7,7 +7,7 @@ Use `npm run agent:init -- --task <id>` to locate the task and scope. `npm run a
 | Category | Checks | Deploy |
 | --- | --- | --- |
 | Record docs | state, paths, harness and classifier; foundation dependency | No |
-| Tooling | full source graph, build/lint and behavior checks | No, unless release/build input |
+| Tooling | full source graph, build/lint, knip (unused files/dependencies) and behavior checks | No, unless release/build input |
 | Runtime or unknown | full graph plus browser config gate | Yes, then immutable smoke |
 | Migration | runtime graph; isolated reset/journey proof before deployment | Yes; SQL application is a separate authorization boundary |
 
