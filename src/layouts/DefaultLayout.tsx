@@ -36,7 +36,9 @@ export default function DefaultLayout({
     <div className="min-h-screen bg-white text-[var(--urblo-text)]">
       <Header surface={resolvedHeaderSurface} />
       {showBanner ? <LayoutBanner bgImage={bgImage} /> : null}
-      <main className="min-h-[40vh]">{children}</main>
+      {/* Keep the footer below the first viewport while lazy page code and data load,
+          so it is never painted in view and then pushed down (CLS). */}
+      <main className="min-h-[100svh]">{children}</main>
       <Footer />
     </div>
   );

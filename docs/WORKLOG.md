@@ -343,3 +343,28 @@ Scope: the four audit defects only. There is no token, type-scale or shared-comp
   - `agent:cloudflare-preview-smoke` passed.
   - Preview screenshots and the tab pass were read-only and repeated the local results.
 - **Residual:** Jay has not yet given visual acceptance. The Image QR page's focus styles and admin screens with custom focus styles were left unchanged. Safari/iOS rendering and the 768px width were not checked.
+## 2026-09-25 — CLS and page shell (NOW-OPT-PERF-CLS-SHELL-001)
+
+Scope: public page shell only. No production data, Storage, email, DNS or credential changes. Not merged.
+
+- Code commit `24f0847` on `claude/opt-cls-page-shell`, PR #65. It is based on `7b42ab6` and stacks on PR #60.
+- `<main>` now reserves one viewport (`min-h-[100svh]`) in `DefaultLayout` and `HomepageLayout`. The footer can no longer paint in view and then be pushed down.
+- The homepage Suspense fallback is a black 100svh hero placeholder.
+- The route transition is now a CSS keyframe: opacity plus a 10px rise, 220ms, reduced-motion aware. It runs only after client-side navigation, so the first page paints without starting at opacity 0.
+- `hero-poster.jpg` is preloaded only on `/`.
+- framer-motion stays a dependency because lazy pages use it (Home, Articles, Our Story, Capabilities). It is now in a shared lazy chunk. `package.json` is unchanged.
+- Entry JS: 417.60KB → 304.80KB raw, 129.35KB → 91.88KB gzip. The framer-motion lazy chunk is 37.18KB gzip.
+- Checks passed:
+  - Clean Node 20 `npm run gate` (Docker), all 27 checks.
+  - CI run `36144515149`.
+  - `agent:cloudflare-preview-smoke` on `https://85e797f2.urblo-site.pages.dev`.
+- Lighthouse 9 URLs × mobile/desktop, one run each.
+  - Before, on `777af336`: CLS 0.037–0.440; 15 of 18 runs were at or above 0.1.
+  - After, on `85e797f2`: CLS 0.000–0.003 on all 18 runs. Non-home routes no longer request `hero-poster.jpg`.
+  - JSON is in ignored `.tmp/lighthouse-cls-shell/`.
+- Local Playwright screenshots at 375px and 1440px for the 9 URLs are in `.tmp/cls-shell/`. Page heights are identical before and after. Pixels are identical except the playing homepage hero video frame.
+- Open item: the homepage LCP element is no longer the footer, but it is not the hero either.
+  - Lighthouse reports the header logo on mobile and the first-visit Acknowledgement popup text on desktop.
+  - Chrome ignores images that fill the viewport for LCP; a local probe showed a 100svh poster is ignored while a 90svh one counts.
+  - The hero headline is made of per-letter spans.
+  - Fixing this needs a design decision.

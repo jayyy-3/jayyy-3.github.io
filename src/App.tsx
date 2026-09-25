@@ -1,6 +1,5 @@
-import { lazy, Suspense, useEffect, useLayoutEffect, useRef } from 'react';
+import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
 import {
     BrowserRouter,
     Route,
@@ -184,21 +183,36 @@ function PageLoading({ headerOffset = false }: { headerOffset?: boolean }) {
     );
 }
 
-function loadPage(page: ReactNode, options: { headerOffset?: boolean } = {}) {
-    return <Suspense fallback={<PageLoading headerOffset={options.headerOffset} />}>{page}</Suspense>;
+// Same box and colour as the homepage hero (black, one viewport tall), so the page chunk
+// replaces it without a white "Preparing content" flash or a layout jump.
+function HomeHeroPlaceholder() {
+    return <section className="min-h-[100svh] bg-black" aria-hidden="true" />;
+}
+
+function loadPage(page: ReactNode, options: { headerOffset?: boolean; fallback?: ReactNode } = {}) {
+    return (
+        <Suspense fallback={options.fallback ?? <PageLoading headerOffset={options.headerOffset} />}>
+            {page}
+        </Suspense>
+    );
 }
 
 function AnimatedRoutes() {
     const location = useLocation();
-    const shouldReduceMotion = useReducedMotion();
     const routeTransitionKey = location.pathname.startsWith('/admin') ? 'admin' : location.pathname;
+    // The first page paints immediately (no opacity-0 start) so it stays an LCP candidate;
+    // the CSS fade (.urblo-route-enter) only runs after a client-side navigation.
+    const [initialRouteKey] = useState(routeTransitionKey);
+    const [hasNavigated, setHasNavigated] = useState(false);
+
+    if (!hasNavigated && routeTransitionKey !== initialRouteKey) {
+        setHasNavigated(true);
+    }
 
     return (
-        <motion.div
+        <div
             key={routeTransitionKey}
-            initial={shouldReduceMotion ? false : { opacity: 0, y: 10 }}
-            animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-            transition={{ duration: shouldReduceMotion ? 0.01 : 0.22, ease: [0.22, 1, 0.36, 1] }}
+            className={hasNavigated || routeTransitionKey !== initialRouteKey ? 'urblo-route-enter' : undefined}
         >
             <Routes location={location}>
                 <Route path="/image/:slug" element={loadPage(<ImageQrPage />)} />
@@ -206,7 +220,7 @@ function AnimatedRoutes() {
                     path="/"
                     element={
                         <HomepageLayout>
-                            {loadPage(<Home />)}
+                            {loadPage(<Home />, { fallback: <HomeHeroPlaceholder /> })}
                         </HomepageLayout>
                     }
                 />
@@ -321,7 +335,7 @@ function AnimatedRoutes() {
                     }
                 />
             </Routes>
-        </motion.div>
+        </div>
     );
 }
 

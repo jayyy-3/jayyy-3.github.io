@@ -135,12 +135,14 @@
         ]
       },
       "status": "now",
-      "phase": "implementation",
-      "nextAction": "Opus implements on its own branch and worktree; Claude reports to Jay before merge.",
+      "phase": "awaiting_external",
+      "nextAction": "Claude reports PR #65 to Jay; Jay decides on merge (after PR #60) and on the homepage-LCP open question.",
       "blocker": "",
       "notes": [
         "2026-09-25: created from the 2026-09-24 four-track optimization audit (session scratch, not repository state). Wave 1 of 3; Jay decides on wave 2 after Claude's report.",
-        "2026-09-26: Homepage LCP element being the logo/acknowledgement rather than the hero is accepted for wave 1; the hero headline animation decision goes to wave 2."
+        "2026-09-26: Homepage LCP element being the logo/acknowledgement rather than the hero is accepted for wave 1; the hero headline animation decision goes to wave 2.",
+        "2026-09-25: PR #65 (branch claude/opt-cls-page-shell, code commit 24f0847) passed clean Node 20 gate, CI run 36144515149 and Preview smoke at https://85e797f2.urblo-site.pages.dev. Lighthouse on that Preview: CLS 0.000-0.003 on all 9 URLs mobile and desktop (before, on 777af336: up to 0.440). Entry JS gzip went from 129.35KB to 91.88KB. framer-motion stays a dependency because lazy Home, Articles, Our Story and Capabilities pages use it; it is now a shared lazy chunk. hero-poster.jpg is requested only on /. Screenshots at 375px and 1440px are pixel-identical except the playing hero video frame.",
+        "2026-09-25: Open acceptance item: the homepage LCP element is no longer the footer, but it is also not the hero. Chrome excludes images that cover the whole viewport from LCP (confirmed with a local probe), so the 100svh poster and video never count. The hero headline is split into per-letter spans, each too small to win. Lighthouse reports the header logo (mobile) or the first-visit Acknowledgement popup text (desktop). Making the hero count would mean changing the hero headline reveal or hero size, which is a design decision."
       ]
     },
     {
