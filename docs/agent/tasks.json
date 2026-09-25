@@ -1,8 +1,51 @@
 {
   "version": 2,
-  "lastUpdated": "2026-09-25",
+  "lastUpdated": "2026-09-26",
   "archive": "docs/archive/2026-09-09/completed-tasks.json",
   "tasks": [
+    {
+      "id": "NOW-OPT-PROJECT-POINT-MARKER-001",
+      "status": "now",
+      "priority": 0,
+      "modules": [
+        "projects",
+        "public-ui"
+      ],
+      "summary": "Restyle the public Project material-point markers to Jay's approved spec: 14px white dot with lime border and 1px dark outer stroke, invisible 44px hit area, three pulse cycles then rest, enlarge on hover/active, no pulse under reduced motion.",
+      "files": [
+        "src/components/projects/ProjectHotspotImage.tsx",
+        "src/index.css",
+        "docs/DESIGN.md"
+      ],
+      "acceptance": [
+        "Marker renders as a 14px circle, white fill, 2px lime (--urblo-lime) border and 1px dark outer stroke; the centre black dot is removed.",
+        "A lime halo expands and fades about every 2s for three cycles after the image enters the viewport, then stops; hover or focus restarts it; prefers-reduced-motion shows the static dot only.",
+        "Hover, focus and the open-card state scale the dot up (about 1.3x); the hit area stays >= 44px on touch and pointer.",
+        "Existing behaviour is unchanged: hover/focus opens the card, tap toggles, Esc/outside closes, ?point= deep link pins, legend works at 375px.",
+        "DESIGN.md records the marker spec as a durable decision; before/after screenshots at 1440px and 375px on a light and a dark image."
+      ],
+      "verification": [
+        "npm run agent:verify -- --plan",
+        "npm run gate",
+        "npm run agent:cloudflare-preview-smoke -- --base-url <branch Preview>",
+        "git diff --check"
+      ],
+      "phase": "implementation",
+      "authorization": {
+        "source": "Jay approved the marker spec on 2026-09-26 (14px white/lime dot, dark outer stroke, three pulse cycles then rest) and asked for it alongside wave 1.",
+        "included": [
+          "Branch implementation, isolated local tests, git push, pull request, Cloudflare branch Preview and smoke, DESIGN.md and docs/agent state updates."
+        ],
+        "excluded": [
+          "Merge to main, production data writes, email, DNS, credentials, migrations."
+        ]
+      },
+      "nextAction": "Opus implements on its own branch; Claude reports to Jay before merge.",
+      "blocker": "",
+      "notes": [
+        "2026-09-26: Jay's request from a production screenshot of /projects/artisan-park-yarrabend; the current 36px white/lime/black-dot marker is replaced. Not a keyboard focus-ring change."
+      ]
+    },
     {
       "id": "NOW-OPT-PERF-STONE-IMG-001",
       "priority": 0,
@@ -95,7 +138,8 @@
       "nextAction": "Opus implements on its own branch and worktree; Claude reports to Jay before merge.",
       "blocker": "",
       "notes": [
-        "2026-09-25: created from the 2026-09-24 four-track optimization audit (session scratch, not repository state). Wave 1 of 3; Jay decides on wave 2 after Claude's report."
+        "2026-09-25: created from the 2026-09-24 four-track optimization audit (session scratch, not repository state). Wave 1 of 3; Jay decides on wave 2 after Claude's report.",
+        "2026-09-26: Homepage LCP element being the logo/acknowledgement rather than the hero is accepted for wave 1; the hero headline animation decision goes to wave 2."
       ]
     },
     {
@@ -142,7 +186,8 @@
       "nextAction": "Opus implements on its own branch and worktree; Claude reports to Jay before merge.",
       "blocker": "",
       "notes": [
-        "2026-09-25: created from the 2026-09-24 four-track optimization audit (session scratch, not repository state). Wave 1 of 3; Jay decides on wave 2 after Claude's report."
+        "2026-09-25: created from the 2026-09-24 four-track optimization audit (session scratch, not repository state). Wave 1 of 3; Jay decides on wave 2 after Claude's report.",
+        "2026-09-26: Jay approved the open design choices: light-grey eyebrows on dark backgrounds (not pure white) and the black/white focus ring."
       ]
     },
     {
@@ -193,7 +238,8 @@
       "nextAction": "Opus implements on its own branch and worktree; Claude reports to Jay before merge.",
       "blocker": "",
       "notes": [
-        "2026-09-25: created from the 2026-09-24 four-track optimization audit (session scratch, not repository state). Wave 1 of 3; Jay decides on wave 2 after Claude's report."
+        "2026-09-25: created from the 2026-09-24 four-track optimization audit (session scratch, not repository state). Wave 1 of 3; Jay decides on wave 2 after Claude's report.",
+        "2026-09-26: Jay approved keeping the single \"Update live page\" wording everywhere (product and model both show it when both are live; media uses the same). Confirmation for Archive/Hide on live records is deferred to wave 2."
       ]
     },
     {
