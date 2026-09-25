@@ -27,6 +27,8 @@ const allowedMissing = new Set([
   'src/components/ProjectCard.tsx',
   'src/scripts/generate-article-index.ts',
   'src/utils/articles.ts',
+  // Retired 2026-09-25: assertions moved to tests/forms-api.test.ts; archived evidence still cites it.
+  'scripts/check-forms-api.mjs',
 ])
 const pathPrefixes = [
   '.github/',
