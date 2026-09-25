@@ -26,6 +26,9 @@ cpSync(resolve(root, 'functions'), resolve(directory, 'functions'), { recursive:
 // Function modules import shared source contracts using their original relative paths.
 cpSync(resolve(root, 'src'), resolve(directory, 'src'), { recursive: true })
 cpSync(resolve(root, 'data/clean'), resolve(directory, 'data/clean'), { recursive: true })
+// The edge SEO middleware bundles the static article index with the route registry.
+mkdirSync(resolve(directory, 'public/articles'), { recursive: true })
+cpSync(resolve(root, 'public/articles/index.json'), resolve(directory, 'public/articles/index.json'))
 writeFileSync(resolve(directory, '.dev.vars'), `SUPABASE_URL=${credentials.apiUrl}\nSUPABASE_SERVICE_ROLE_KEY=${credentials.serviceKey}\n`, { mode: 0o600 })
 if (articleFault) console.log(`Deliberate local build fault: ${articleFault}`)
 console.log(`Starting real Pages Functions at ${LOCAL_APP}; database ${LOCAL_API}; external mail credentials absent.`)
