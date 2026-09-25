@@ -13,7 +13,17 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
     <meta name="msapplication-TileImage" content="/mstile-270x270.png" />
-    <link rel="preload" as="image" href="/media/launch/home/hero-poster.jpg" fetchpriority="high" />
+    <script>
+      // Preload the homepage hero poster only on the homepage; other routes have their own LCP image.
+      if (window.location.pathname === '/') {
+        var heroPosterPreload = document.createElement('link');
+        heroPosterPreload.rel = 'preload';
+        heroPosterPreload.as = 'image';
+        heroPosterPreload.href = '/media/launch/home/hero-poster.jpg';
+        heroPosterPreload.setAttribute('fetchpriority', 'high');
+        document.head.appendChild(heroPosterPreload);
+      }
+    </script>
     <link rel="canonical" href="https://urblo.com.au/" />
     <meta property="og:site_name" content="Urblo" />
     <meta property="og:type" content="website" />
