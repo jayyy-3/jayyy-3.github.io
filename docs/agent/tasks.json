@@ -91,8 +91,8 @@
         ]
       },
       "status": "now",
-      "phase": "planned",
-      "nextAction": "Opus implements on its own branch; Claude reports to Jay before merge.",
+      "phase": "verification",
+      "nextAction": "Run the clean gate, push branch claude/opt-design-tokens-components, open the PR stacked on #68 and smoke its branch Preview; Claude reports to Jay before merge.",
       "blocker": "",
       "notes": [
         "2026-09-26: wave 2 of the 2026-09-24 optimization audit. Jay decided the homepage hero headline keeps its letter-by-letter animation (homepage LCP element stays non-hero by design)."

@@ -74,6 +74,25 @@
     --urblo-font-sans: 'Avenir LT Std', 'Avenir Next', 'Helvetica Neue', Helvetica, Arial, sans-serif;
     --urblo-font-display: 'Space Grotesk', 'Avenir LT Std', 'Helvetica Neue', Helvetica, Arial, sans-serif;
     --urblo-font-accent: 'Didot LT Std', 'Iowan Old Style', 'Times New Roman', serif;
+    /* Layout tokens (docs/DESIGN.md Visual System → Tokens): one page gutter shared by the
+       header, page containers and section content, and two vertical section rhythms. */
+    --urblo-gutter: 24px;
+    --urblo-section: 72px;
+    --urblo-section-tight: 48px;
+}
+
+@media (min-width: 768px) {
+    :root {
+        --urblo-gutter: 40px;
+    }
+}
+
+@media (min-width: 1024px) {
+    :root {
+        --urblo-gutter: 94px;
+        --urblo-section: 96px;
+        --urblo-section-tight: 64px;
+    }
 }
 
 html,
@@ -130,7 +149,7 @@ a {
     .urblo-page-container {
         width: min(100%, 1440px);
         margin: 0 auto;
-        padding-inline: 24px;
+        padding-inline: var(--urblo-gutter);
     }
 
     .urblo-edge-container {
@@ -139,11 +158,11 @@ a {
     }
 
     .urblo-section {
-        padding-block: 72px;
+        padding-block: var(--urblo-section);
     }
 
     .urblo-section-tight {
-        padding-block: 48px;
+        padding-block: var(--urblo-section-tight);
     }
 
     .urblo-eyebrow {
@@ -240,7 +259,9 @@ a {
     }
 
     .urblo-button,
-    .urblo-button-inverse {
+    .urblo-button-inverse,
+    .urblo-button-signal,
+    .urblo-button-ghost {
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -282,6 +303,125 @@ a {
     }
 
     /*
+     * Shared <Button> variants (src/components/ui/Button.tsx). `urblo-button-inverse` is the
+     * primary black fill; `urblo-button-signal` is the lime fill for dark surfaces; `urblo-button-ghost`
+     * is the quiet hairline outline; `urblo-button-link` is the uppercase text link.
+     * `urblo-button--on-dark` adapts primary and ghost to dark surfaces and photography.
+     */
+    .urblo-button-inverse.urblo-button--on-dark {
+        border-color: #fff;
+        background: #fff;
+        color: var(--urblo-black);
+    }
+
+    .urblo-button-inverse.urblo-button--on-dark:hover {
+        border-color: var(--urblo-lime);
+        background: var(--urblo-lime);
+    }
+
+    .urblo-button-signal {
+        border-color: var(--urblo-lime);
+        background: var(--urblo-lime);
+        color: var(--urblo-black);
+    }
+
+    .urblo-button-signal:hover {
+        border-color: #fff;
+        background: #fff;
+    }
+
+    .urblo-button-ghost {
+        border-color: rgba(0, 0, 0, 0.18);
+        background: transparent;
+        color: var(--urblo-black);
+    }
+
+    .urblo-button-ghost:hover {
+        border-color: var(--urblo-lime);
+        background: rgba(0, 255, 25, 0.08);
+    }
+
+    .urblo-button-ghost.urblo-button--on-dark {
+        border-color: rgba(255, 255, 255, 0.28);
+        color: #fff;
+    }
+
+    .urblo-button-ghost.urblo-button--on-dark:hover {
+        border-color: var(--urblo-lime);
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .urblo-button--sm {
+        min-height: 40px;
+        padding: 0 14px;
+    }
+
+    .urblo-button-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        color: var(--urblo-black);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        text-decoration: underline;
+        text-decoration-thickness: 1px;
+        text-underline-offset: 5px;
+        transition: text-decoration-color 0.2s ease, color 0.2s ease;
+    }
+
+    .urblo-button-link:hover {
+        text-decoration-color: var(--urblo-lime);
+    }
+
+    .urblo-button-link.urblo-button--on-dark {
+        color: #fff;
+    }
+
+    /* Home first-viewport verb stack: the approved hero ramp (DESIGN.md Home → Hero behavior). */
+    .urblo-hero-title {
+        font-family: var(--urblo-font-sans);
+        font-size: 52px;
+        font-weight: 300;
+        line-height: 0.98;
+        letter-spacing: 0;
+    }
+
+    @media (min-width: 640px) {
+        .urblo-hero-title {
+            font-size: 66px;
+        }
+    }
+
+    @media (min-width: 768px) {
+        .urblo-hero-title {
+            font-size: 88px;
+        }
+    }
+
+    @media (min-width: 1024px) {
+        .urblo-hero-title {
+            font-size: 112px;
+        }
+    }
+
+    @media (min-width: 1280px) {
+        .urblo-hero-title {
+            font-size: 132px;
+        }
+    }
+
+    @media (min-width: 1536px) {
+        .urblo-hero-title {
+            font-size: 148px;
+        }
+    }
+
+    /*
      * For focusable elements inside an overflow-clipped parent (rails, carousels, rounded cards):
      * the same black ring with white halo, drawn inside the element on a pseudo-element so
      * positioned or scaled children (images, scrims) cannot paint over it.
@@ -317,26 +457,8 @@ a {
     }
 
     @media (min-width: 768px) {
-        .urblo-page-container {
-            padding-inline: 40px;
-        }
-
         .urblo-edge-container {
             padding-inline: clamp(28px, 4vw, 78px);
-        }
-    }
-
-    @media (min-width: 1024px) {
-        .urblo-page-container {
-            padding-inline: 94px;
-        }
-
-        .urblo-section {
-            padding-block: 96px;
-        }
-
-        .urblo-section-tight {
-            padding-block: 64px;
         }
     }
 }

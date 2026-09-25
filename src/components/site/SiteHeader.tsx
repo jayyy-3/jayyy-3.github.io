@@ -76,7 +76,8 @@ export default function SiteHeader({ surface = 'light-page' }: { surface?: SiteH
       data-header-surface={surface}
       className={`absolute inset-x-0 top-0 z-50 border-b border-white/20 text-white transition-[background-color,border-color,backdrop-filter] duration-300 ${headerSurfaceClasses[surface]}`}
     >
-      <div className="urblo-edge-container flex h-[102px] items-center justify-between">
+      {/* Same gutter as .urblo-page-container so the logo lines up with page content (DESIGN.md Tokens). */}
+      <div className="urblo-page-container flex h-[102px] items-center justify-between">
         <Link to="/" aria-label="Urblo home">
           <img src={siteLogoUrl} alt="Urblo logo" className="h-10 w-auto md:h-[45px]" />
         </Link>
@@ -121,7 +122,7 @@ export default function SiteHeader({ surface = 'light-page' }: { surface?: SiteH
       {menuOpen ? (
         <div
           data-header-menu-surface={surface}
-          className={`border-t border-white/15 px-6 py-6 shadow-[0_24px_60px_rgba(0,0,0,0.24)] lg:absolute lg:right-[clamp(20px,3.2vw,64px)] lg:top-[102px] lg:w-[260px] lg:border lg:border-white/15 lg:px-6 lg:py-5 ${menuSurfaceClasses[surface]}`}
+          className={`border-t border-white/15 px-gutter py-6 shadow-[0_24px_60px_rgba(0,0,0,0.24)] lg:absolute lg:right-[max(var(--urblo-gutter),calc(50%_-_720px_+_var(--urblo-gutter)))] lg:top-[102px] lg:w-[260px] lg:border lg:border-white/15 lg:px-6 lg:py-5 ${menuSurfaceClasses[surface]}`}
         >
           <nav className="flex flex-col gap-4 text-lg font-light tracking-[0.02em] lg:hidden">
             {siteNavLinks.map((item) => (

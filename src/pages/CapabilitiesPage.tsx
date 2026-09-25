@@ -1,6 +1,5 @@
-import type { FormEvent, ReactNode } from 'react';
+import type { FormEvent } from 'react';
 import { useState } from 'react';
-import { motion } from 'framer-motion';
 import {
   ArrowDownToLine,
   ArrowUpRight,
@@ -17,8 +16,12 @@ import {
   ShieldCheck,
   type LucideIcon,
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import TurnstileField from '../components/TurnstileField';
+import Button from '../components/ui/Button';
+import Card from '../components/ui/Card';
+import PageIntro from '../components/ui/PageIntro';
+import Reveal from '../components/ui/Reveal';
+import SectionHeading from '../components/ui/SectionHeading';
 import { siteCtas } from '../data/siteChrome';
 import { turnstileSiteKey } from '../lib/turnstileConfig';
 
@@ -321,29 +324,9 @@ const projectLedger: ProjectProof[] = [
 ];
 
 const inputClassName =
-  'w-full rounded-[4px] border border-white/18 bg-white px-4 py-3 text-[15px] font-semibold text-black transition placeholder:text-black/35 focus:border-[var(--urblo-lime)]';
+  'w-full rounded border border-line-inverse bg-white px-4 py-3 text-copy font-semibold text-ink transition placeholder:text-ink/35 focus:border-lime';
 
-function Reveal({
-  children,
-  className,
-  delay = 0,
-}: {
-  children: ReactNode;
-  className?: string;
-  delay?: number;
-}) {
-  return (
-    <motion.div
-      className={className}
-      initial={{ opacity: 0, y: 24 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.18 }}
-      transition={{ duration: 0.5, delay, ease: 'easeOut' }}
-    >
-      {children}
-    </motion.div>
-  );
-}
+const labelClassName = 'text-meta font-semibold uppercase tracking-eyebrow';
 
 function isEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value);
@@ -427,7 +410,7 @@ function CapabilityDownloadForm() {
   return (
     <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
       <div>
-        <label htmlFor="capability-download-email" className="urblo-meta mb-2 block text-white/62">
+        <label htmlFor="capability-download-email" className="urblo-meta mb-2 block text-inverse-muted">
           Work email
         </label>
         <input
@@ -455,10 +438,10 @@ function CapabilityDownloadForm() {
           id="capability-download-message"
           role={status === 'success' ? 'status' : 'alert'}
           className={[
-            'rounded-[4px] border px-4 py-3 text-[14px] font-semibold leading-6',
+            'rounded border px-4 py-3 text-small font-semibold text-inverse',
             status === 'success'
-              ? 'border-[var(--urblo-lime)]/60 bg-[rgba(0,255,25,0.12)] text-white'
-              : 'border-white/16 bg-white/10 text-white',
+              ? 'border-lime/60 bg-lime/[0.12]'
+              : 'border-white/16 bg-white/10',
           ].join(' ')}
         >
           {message}
@@ -466,28 +449,25 @@ function CapabilityDownloadForm() {
       ) : null}
 
       <div className="flex flex-col gap-3 sm:flex-row">
-        <button
-          type="submit"
-          className="inline-flex min-h-[48px] items-center justify-center gap-3 rounded-[4px] bg-[var(--urblo-lime)] px-5 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-black transition hover:bg-white disabled:cursor-wait disabled:opacity-60"
-          disabled={status === 'submitting'}
-        >
+        <Button type="submit" variant="inverse" disabled={status === 'submitting'}>
           {status === 'submitting' ? 'Capturing...' : 'Email me the download'}
           <Send className="h-4 w-4" aria-hidden="true" />
-        </button>
+        </Button>
 
         {status === 'success' ? (
-          <a
+          <Button
+            variant="ghost"
+            surface="dark"
             href={siteCtas.capabilityStatementDownload.href}
             download={siteCtas.capabilityStatementDownload.filename}
-            className="inline-flex min-h-[48px] items-center justify-center gap-3 rounded-[4px] border border-white/25 px-5 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-white transition hover:border-[var(--urblo-lime)] hover:bg-white/10"
           >
             Download PDF
             <ArrowDownToLine className="h-4 w-4" aria-hidden="true" />
-          </a>
+          </Button>
         ) : null}
       </div>
 
-      <p className="text-[13px] leading-6 text-white/50">
+      <p className="text-meta text-inverse-muted">
         The request is stored as a capability-statement lead for Urblo. Direct email remains
         available if the live form endpoint is not configured.
       </p>
@@ -495,46 +475,10 @@ function CapabilityDownloadForm() {
   );
 }
 
-function SectionHeading({
-  eyebrow,
-  title,
-  copy,
-  inverse = false,
-}: {
-  eyebrow: string;
-  title: string;
-  copy?: string;
-  inverse?: boolean;
-}) {
-  return (
-    <Reveal className="max-w-[48rem]">
-      <p className={inverse ? 'urblo-eyebrow text-white/62' : 'urblo-eyebrow'}>{eyebrow}</p>
-      <h2
-        className={[
-          'mt-4 text-[36px] font-light leading-[1.14] md:text-[58px]',
-          inverse ? 'text-white' : 'text-black',
-        ].join(' ')}
-      >
-        {title}
-      </h2>
-      {copy ? (
-        <p
-          className={[
-            'mt-6 text-[18px] leading-8 md:text-[20px]',
-            inverse ? 'text-white/70' : 'text-[var(--urblo-text)]',
-          ].join(' ')}
-        >
-          {copy}
-        </p>
-      ) : null}
-    </Reveal>
-  );
-}
-
 export default function CapabilitiesPage() {
   return (
     <div className="bg-white">
-      <section className="relative min-h-[88svh] overflow-hidden bg-black pt-[112px] text-white md:pt-[124px]">
+      <section className="relative min-h-[88svh] overflow-hidden bg-ink pt-[112px] text-inverse md:pt-[124px]">
         <img
           src="/media/launch/capabilities/west-side-place-aerial.jpg"
           alt="Urblo public realm stone project seen from above"
@@ -543,38 +487,34 @@ export default function CapabilitiesPage() {
         <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-black/20" />
         <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black via-black/60 to-transparent" />
 
-        <div className="urblo-edge-container relative flex min-h-[calc(88svh-112px)] items-end pb-8 md:min-h-[calc(88svh-124px)] md:pb-10">
+        <div className="urblo-page-container relative flex min-h-[calc(88svh-112px)] items-end pb-8 md:min-h-[calc(88svh-124px)] md:pb-10">
           <div className="w-full">
             <Reveal className="max-w-[64rem]">
-              <p className="urblo-eyebrow text-white/64">May 2026 / Melbourne / Australia-wide</p>
-              <h1 className="mt-5 text-[44px] font-light leading-[1.02] text-white md:text-[78px] lg:text-[104px]">
-                Urblo Capability Statement 2026
-              </h1>
-              <p className="mt-6 max-w-[43rem] text-[18px] leading-8 text-white/78 md:text-[21px]">
-                Design-led stone solutions for streetscapes and civic landscapes, built for teams
-                that need complex hardscape intent translated into resolved site outcomes.
-              </p>
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <a
-                  href="#all-capabilities"
-                  className="inline-flex min-h-[48px] items-center justify-center gap-3 rounded-[4px] bg-[var(--urblo-lime)] px-5 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-black transition hover:bg-white"
-                >
-                  Explore capabilities
-                  <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
-                </a>
-                <a
-                  href="#capability-statement"
-                  className="inline-flex min-h-[48px] items-center justify-center gap-3 rounded-[4px] border border-white/25 px-5 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-white transition hover:border-[var(--urblo-lime)] hover:bg-white/10"
-                >
-                  {siteCtas.capabilityStatementDownload.label}
-                  <ArrowDownToLine className="h-4 w-4" aria-hidden="true" />
-                </a>
-              </div>
+              <PageIntro
+                surface="dark"
+                size="hero"
+                ledeClassName="max-w-[43rem]"
+                eyebrow="May 2026 / Melbourne / Australia-wide"
+                title="Urblo Capability Statement 2026"
+                lede="Design-led stone solutions for streetscapes and civic landscapes, built for teams that need complex hardscape intent translated into resolved site outcomes."
+                actions={
+                  <>
+                    <Button variant="inverse" href="#all-capabilities">
+                      Explore capabilities
+                      <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+                    </Button>
+                    <Button variant="ghost" surface="dark" href="#capability-statement">
+                      {siteCtas.capabilityStatementDownload.label}
+                      <ArrowDownToLine className="h-4 w-4" aria-hidden="true" />
+                    </Button>
+                  </>
+                }
+              />
             </Reveal>
 
             <Reveal
               delay={0.08}
-              className="mt-12 grid border-y border-white/14 sm:grid-cols-2 lg:grid-cols-4"
+              className="mt-12 grid border-y border-line-inverse sm:grid-cols-2 lg:grid-cols-4"
             >
               {[
                 ['Founded', '2024'],
@@ -582,11 +522,9 @@ export default function CapabilitiesPage() {
                 ['Supplier network', 'MCC'],
                 ['Service model', 'Australia-wide'],
               ].map(([label, value]) => (
-                <div key={label} className="border-white/14 py-4 sm:border-r sm:px-4 first:pl-0 last:border-r-0">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/44">
-                    {label}
-                  </p>
-                  <p className="mt-2 text-[22px] font-semibold text-white">{value}</p>
+                <div key={label} className="border-line-inverse py-4 sm:border-r sm:px-4 first:pl-0 last:border-r-0">
+                  <p className={`${labelClassName} text-inverse-muted`}>{label}</p>
+                  <p className="mt-2 text-title-sm font-semibold text-inverse">{value}</p>
                 </div>
               ))}
             </Reveal>
@@ -594,15 +532,16 @@ export default function CapabilitiesPage() {
         </div>
       </section>
 
-      <section id="all-capabilities" className="py-16 md:py-24">
+      <section id="all-capabilities" className="py-section">
         <div className="urblo-page-container">
           <div className="grid gap-10 lg:grid-cols-[0.36fr_1fr] lg:items-start">
             <Reveal className="lg:sticky lg:top-24">
-              <p className="urblo-eyebrow">All capabilities</p>
-              <h2 className="mt-4 text-[34px] font-light leading-[1.14] text-black md:text-[48px]">
-                A capability map for complex stone work.
-              </h2>
-              <p className="mt-5 text-[17px] leading-8 text-[var(--urblo-text)]">
+              <SectionHeading
+                level="section"
+                eyebrow="All capabilities"
+                title="A capability map for complex stone work."
+              />
+              <p className="mt-5 text-copy text-body">
                 Five operating scopes cover how Urblo translates design intent into specified,
                 fabricated and buildable stone outcomes.
               </p>
@@ -611,7 +550,7 @@ export default function CapabilitiesPage() {
                   <a
                     key={module.id}
                     href={`#${module.id}`}
-                    className="group flex items-center justify-between border-b border-black/12 py-3 text-[13px] font-semibold uppercase tracking-[0.12em] text-black/62 transition hover:text-black"
+                    className="group flex items-center justify-between border-b border-line py-3 text-meta font-semibold uppercase tracking-caps text-muted transition hover:text-ink"
                   >
                     <span>
                       {module.index} / {module.title}
@@ -625,39 +564,28 @@ export default function CapabilitiesPage() {
               </nav>
             </Reveal>
 
-            <div className="border-t border-black/12">
+            <div className="border-t border-line">
               {capabilityModules.map((module, index) => (
-                <Reveal
-                  key={module.id}
-                  delay={index * 0.03}
-                  className="border-b border-black/12 py-10"
-                >
-                  <article
-                    id={module.id}
-                    className="grid scroll-mt-28 gap-8 xl:grid-cols-[0.9fr_1.1fr]"
-                  >
+                <Reveal key={module.id} delay={index * 0.03} className="border-b border-line py-10">
+                  <article id={module.id} className="grid scroll-mt-28 gap-8 xl:grid-cols-[0.9fr_1.1fr]">
                     <div>
                       <div className="flex items-center gap-4">
-                        <span className="text-[13px] font-semibold uppercase tracking-[0.16em] text-black/42">
-                          {module.index}
-                        </span>
-                        <module.Icon
-                          className="h-6 w-6 text-black"
-                          strokeWidth={1.5}
-                          aria-hidden="true"
-                        />
+                        <span className={`${labelClassName} text-muted`}>{module.index}</span>
+                        <module.Icon className="h-6 w-6 text-ink" strokeWidth={1.5} aria-hidden="true" />
                       </div>
-                      <h3 className="mt-5 max-w-[34rem] text-[30px] font-semibold leading-[1.08] text-black md:text-[44px]">
-                        {module.title}
-                      </h3>
-                      <p className="mt-5 text-[18px] leading-8 text-[var(--urblo-text)]">
-                        {module.summary}
-                      </p>
-                      <p className="mt-5 text-[16px] leading-7 text-black/68">{module.proof}</p>
+                      <SectionHeading
+                        as="h3"
+                        level="section"
+                        title={module.title}
+                        className="mt-5"
+                        titleClassName="max-w-[34rem]"
+                      />
+                      <p className="mt-5 text-lead text-body">{module.summary}</p>
+                      <p className="mt-5 text-copy text-muted">{module.proof}</p>
                     </div>
 
                     <div className="grid gap-6 md:grid-cols-[0.92fr_1.08fr] md:items-stretch">
-                      <div className="overflow-hidden rounded-[4px] bg-black">
+                      <div className="overflow-hidden rounded bg-ink">
                         <img
                           src={module.image}
                           alt={module.alt}
@@ -666,34 +594,23 @@ export default function CapabilitiesPage() {
                       </div>
                       <div className="grid content-between gap-8">
                         <div>
-                          <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-black/45">
-                            What Urblo resolves
-                          </p>
+                          <p className={`${labelClassName} text-muted`}>What Urblo resolves</p>
                           <ul className="mt-4 grid gap-3">
                             {module.disciplines.map((detail) => (
-                              <li
-                                key={detail}
-                                className="flex items-center gap-3 text-[14px] font-semibold leading-6 text-black"
-                              >
-                                <CheckCircle2
-                                  className="h-4 w-4 text-[var(--urblo-lime)]"
-                                  strokeWidth={1.8}
-                                  aria-hidden="true"
-                                />
+                              <li key={detail} className="flex items-center gap-3 text-small font-semibold text-ink">
+                                <CheckCircle2 className="h-4 w-4 text-lime" strokeWidth={1.8} aria-hidden="true" />
                                 {detail}
                               </li>
                             ))}
                           </ul>
                         </div>
                         <div>
-                          <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-black/45">
-                            Typical applications
-                          </p>
+                          <p className={`${labelClassName} text-muted`}>Typical applications</p>
                           <div className="mt-4 flex flex-wrap gap-2">
                             {module.applications.map((application) => (
                               <span
                                 key={application}
-                                className="rounded-[4px] border border-black/12 px-3 py-2 text-[12px] font-semibold uppercase tracking-[0.1em] text-black/65"
+                                className="rounded border border-line px-3 py-2 text-meta font-semibold uppercase tracking-caps text-muted"
                               >
                                 {application}
                               </span>
@@ -710,9 +627,9 @@ export default function CapabilitiesPage() {
         </div>
       </section>
 
-      <section className="bg-black py-16 text-white md:py-24">
+      <section className="bg-ink py-section text-inverse">
         <div className="urblo-page-container grid gap-12 lg:grid-cols-[1.08fr_0.92fr] lg:items-center">
-          <Reveal className="overflow-hidden rounded-[4px]">
+          <Reveal className="overflow-hidden rounded">
             <img
               src="/media/launch/capabilities/factory-preassembly.jpg"
               alt="Urblo factory pre-assembly of shaped natural stone seating"
@@ -720,24 +637,20 @@ export default function CapabilitiesPage() {
             />
           </Reveal>
           <Reveal delay={0.08}>
-            <p className="urblo-eyebrow text-white/62">Our approach</p>
-            <h2 className="mt-4 text-[36px] font-light leading-[1.12] text-white md:text-[60px]">
-              We do not supply stone. We resolve it.
-            </h2>
-            <p className="mt-6 text-[18px] leading-8 text-white/70">
-              Urblo works upstream of the typical supplier conversation: concept reviews,
-              buildability workshops, prototyping, value management, shop drawings and installation
-              methodology.
-            </p>
+            <SectionHeading
+              level="display"
+              surface="dark"
+              eyebrow="Our approach"
+              title="We do not supply stone. We resolve it."
+              copy="Urblo works upstream of the typical supplier conversation: concept reviews, buildability workshops, prototyping, value management, shop drawings and installation methodology."
+            />
             <div className="mt-10 space-y-6">
               {approachPrinciples.map((item, index) => (
-                <div key={item.title} className="grid gap-4 border-t border-white/14 pt-5 sm:grid-cols-[4rem_1fr]">
-                  <span className="text-[13px] font-semibold uppercase tracking-[0.16em] text-[var(--urblo-lime)]">
-                    {String(index + 1).padStart(2, '0')}
-                  </span>
+                <div key={item.title} className="grid gap-4 border-t border-line-inverse pt-5 sm:grid-cols-[4rem_1fr]">
+                  <span className={`${labelClassName} text-lime`}>{String(index + 1).padStart(2, '0')}</span>
                   <div>
-                    <h3 className="text-[20px] font-semibold text-white">{item.title}</h3>
-                    <p className="mt-2 text-[15px] leading-7 text-white/64">{item.copy}</p>
+                    <h3 className="text-lead font-semibold text-inverse">{item.title}</h3>
+                    <p className="mt-2 text-small text-inverse-body">{item.copy}</p>
                   </div>
                 </div>
               ))}
@@ -746,92 +659,88 @@ export default function CapabilitiesPage() {
         </div>
       </section>
 
-      <section className="py-16 md:py-24">
+      <section className="py-section">
         <div className="urblo-page-container">
-          <SectionHeading
-            eyebrow="Lifecycle support"
-            title="From the first sketch to the tenth-year visit."
-            copy="Urblo is most useful when risk can still be surfaced, costed and resolved before the project reaches site."
-          />
+          <Reveal className="max-w-[48rem]">
+            <SectionHeading
+              level="display"
+              eyebrow="Lifecycle support"
+              title="From the first sketch to the tenth-year visit."
+              copy="Urblo is most useful when risk can still be surfaced, costed and resolved before the project reaches site."
+            />
+          </Reveal>
 
           <div className="mt-12 grid gap-12 lg:grid-cols-[0.9fr_1.1fr]">
-            <Reveal className="border-t border-black/12">
+            <Reveal className="border-t border-line">
               {lifecycleSteps.map((step, index) => (
-                <div key={step.title} className="grid gap-5 border-b border-black/12 py-7 sm:grid-cols-[5rem_1fr]">
-                  <span className="flex h-12 w-12 items-center justify-center rounded-full border border-black/16 text-[13px] font-semibold text-black">
+                <div key={step.title} className="grid gap-5 border-b border-line py-7 sm:grid-cols-[5rem_1fr]">
+                  <span className="flex h-12 w-12 items-center justify-center rounded-full border border-ink/16 text-meta font-semibold text-ink">
                     {String(index + 1).padStart(2, '0')}
                   </span>
                   <div>
-                    <h3 className="text-[24px] font-semibold leading-tight text-black">{step.title}</h3>
-                    <p className="mt-3 text-[16px] leading-7 text-[var(--urblo-text)]">{step.copy}</p>
+                    <h3 className="text-title-sm font-semibold text-ink">{step.title}</h3>
+                    <p className="mt-3 text-copy text-body">{step.copy}</p>
                   </div>
                 </div>
               ))}
             </Reveal>
 
-            <Reveal delay={0.08} className="bg-[rgba(239,239,239,0.28)] p-6 md:p-8">
-              <div className="flex items-center gap-3">
-                <MapPinned className="h-6 w-6 text-black" strokeWidth={1.5} aria-hidden="true" />
-                <p className="urblo-eyebrow">National reach</p>
-              </div>
-              <h3 className="mt-5 text-[34px] font-light leading-[1.16] text-black md:text-[46px]">
-                Melbourne-based. Working Australia-wide.
-              </h3>
-              <p className="mt-5 text-[17px] leading-8 text-[var(--urblo-text)]">
-                Active markets span Victoria, New South Wales and the ACT, with Queensland underway
-                and technical interstate work already delivered in Canberra.
-              </p>
-              <div className="mt-8 grid gap-4 md:grid-cols-3">
-                {reachItems.map((item) => (
-                  <div key={item.title} className="border-t border-black/12 pt-4">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-black/44">
-                      {item.label}
-                    </p>
-                    <h4 className="mt-3 text-[19px] font-semibold text-black">{item.title}</h4>
-                    <p className="mt-3 text-[14px] leading-6 text-black/64">{item.copy}</p>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-8 flex flex-wrap gap-2">
-                {reachLocations.map((location) => (
-                  <span
-                    key={location}
-                    className="inline-flex items-center gap-2 rounded-[4px] bg-white px-3 py-2 text-[12px] font-semibold uppercase tracking-[0.1em] text-black/62"
-                  >
-                    <CircleDot className="h-3 w-3 text-[var(--urblo-lime)]" aria-hidden="true" />
-                    {location}
-                  </span>
-                ))}
-              </div>
+            <Reveal delay={0.08} className="bg-surface p-6 md:p-8">
+                <div className="flex items-center gap-3">
+                  <MapPinned className="h-6 w-6 text-ink" strokeWidth={1.5} aria-hidden="true" />
+                  <p className="urblo-eyebrow">National reach</p>
+                </div>
+                <h3 className="mt-5 text-title font-light text-ink md:text-title-lg">
+                  Melbourne-based. Working Australia-wide.
+                </h3>
+                <p className="mt-5 text-copy text-body">
+                  Active markets span Victoria, New South Wales and the ACT, with Queensland underway
+                  and technical interstate work already delivered in Canberra.
+                </p>
+                <div className="mt-8 grid gap-4 md:grid-cols-3">
+                  {reachItems.map((item) => (
+                    <div key={item.title} className="border-t border-line pt-4">
+                      <p className={`${labelClassName} text-muted`}>{item.label}</p>
+                      <h4 className="mt-3 text-lead font-semibold text-ink">{item.title}</h4>
+                      <p className="mt-3 text-small text-muted">{item.copy}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-8 flex flex-wrap gap-2">
+                  {reachLocations.map((location) => (
+                    <span
+                      key={location}
+                      className="inline-flex items-center gap-2 rounded bg-white px-3 py-2 text-meta font-semibold uppercase tracking-caps text-muted"
+                    >
+                      <CircleDot className="h-3 w-3 text-lime" aria-hidden="true" />
+                      {location}
+                    </span>
+                  ))}
+                </div>
             </Reveal>
           </div>
         </div>
       </section>
 
-      <section className="border-y border-black/10 bg-white py-16 md:py-24">
+      <section className="border-y border-ink/10 bg-white py-section">
         <div className="urblo-page-container grid gap-12 lg:grid-cols-[1fr_0.86fr] lg:items-center">
           <Reveal>
-            <p className="urblo-eyebrow">The Urblo advantage</p>
-            <h2 className="mt-4 text-[36px] font-light leading-[1.14] text-black md:text-[58px]">
-              Design-fluent at the studio table. Technically rigorous behind the factory door.
-            </h2>
+            <SectionHeading
+              level="display"
+              eyebrow="The Urblo advantage"
+              title="Design-fluent at the studio table. Technically rigorous behind the factory door."
+            />
             <div className="mt-10 grid gap-6 md:grid-cols-2">
               {advantageItems.map((item) => (
-                <div key={item.title} className="border-t border-black/12 pt-5">
-                  <ShieldCheck
-                    className="h-5 w-5 text-[var(--urblo-lime)]"
-                    strokeWidth={1.8}
-                    aria-hidden="true"
-                  />
-                  <h3 className="mt-4 text-[20px] font-semibold leading-tight text-black">
-                    {item.title}
-                  </h3>
-                  <p className="mt-3 text-[15px] leading-7 text-[var(--urblo-text)]">{item.copy}</p>
+                <div key={item.title} className="border-t border-line pt-5">
+                  <ShieldCheck className="h-5 w-5 text-lime" strokeWidth={1.8} aria-hidden="true" />
+                  <h3 className="mt-4 text-lead font-semibold leading-tight text-ink">{item.title}</h3>
+                  <p className="mt-3 text-small text-body">{item.copy}</p>
                 </div>
               ))}
             </div>
           </Reveal>
-          <Reveal delay={0.08} className="overflow-hidden rounded-[4px]">
+          <Reveal delay={0.08} className="overflow-hidden rounded">
             <img
               src="/media/launch/capabilities/site-install-review.jpg"
               alt="Urblo site review during stone installation"
@@ -841,52 +750,56 @@ export default function CapabilitiesPage() {
         </div>
       </section>
 
-      <section id="selected-proof" className="bg-black py-16 text-white md:py-24">
+      <section id="selected-proof" className="bg-ink py-section text-inverse">
         <div className="urblo-page-container">
-          <SectionHeading
-            eyebrow="Selected project proof"
-            title="Civic, commercial and institutional work with the facts left visible."
-            copy="Each project record keeps the useful decision facts visible: sector, location, stone selection and delivered outcome."
-            inverse
-          />
+          <Reveal className="max-w-[48rem]">
+            <SectionHeading
+              level="display"
+              surface="dark"
+              eyebrow="Selected project proof"
+              title="Civic, commercial and institutional work with the facts left visible."
+              copy="Each project record keeps the useful decision facts visible: sector, location, stone selection and delivered outcome."
+            />
+          </Reveal>
 
           <div className="mt-12 grid gap-5 lg:grid-cols-4">
             {featuredProjects.map((project, index) => (
-              <Reveal key={project.title} delay={index * 0.05} className="group">
-                <article className="h-full border border-white/14 bg-white/[0.04]">
-                  <div className="overflow-hidden bg-white/5">
+              <Reveal key={project.title} delay={index * 0.05}>
+                <Card
+                  as="article"
+                  variant="bordered"
+                  surface="dark"
+                  className="h-full"
+                  media={
                     <img
                       src={project.image}
                       alt={`${project.title} Urblo stone project`}
                       className="aspect-[4/3] w-full object-cover transition duration-700 group-hover:scale-[1.03]"
                     />
-                  </div>
-                  <div className="p-5">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--urblo-lime)]">
-                      {project.sector}
-                    </p>
-                    <h3 className="mt-4 text-[24px] font-semibold leading-tight text-white">
-                      {project.title}
-                    </h3>
-                    <p className="mt-4 text-[14px] leading-6 text-white/66">{project.outcome}</p>
-                    <dl className="mt-5 grid gap-3 border-t border-white/12 pt-4 text-[13px] leading-6">
-                      <div>
-                        <dt className="font-semibold uppercase tracking-[0.12em] text-white/36">Stone</dt>
-                        <dd className="text-white/76">{project.stone}</dd>
-                      </div>
-                      <div>
-                        <dt className="font-semibold uppercase tracking-[0.12em] text-white/36">Location</dt>
-                        <dd className="text-white/76">{project.location}</dd>
-                      </div>
-                    </dl>
-                  </div>
-                </article>
+                  }
+                  meta={<span className="text-lime">{project.sector}</span>}
+                  title={project.title}
+                >
+                  <p>{project.outcome}</p>
+                  <dl className="mt-5 grid gap-3 border-t border-line-inverse pt-4">
+                    <div>
+                      <dt className={`${labelClassName} text-inverse-muted`}>Stone</dt>
+                      <dd className="text-inverse-body">{project.stone}</dd>
+                    </div>
+                    <div>
+                      <dt className={`${labelClassName} text-inverse-muted`}>Location</dt>
+                      <dd className="text-inverse-body">{project.location}</dd>
+                    </div>
+                  </dl>
+                </Card>
               </Reveal>
             ))}
           </div>
 
-          <Reveal className="mt-12 overflow-hidden border border-white/14">
-            <div className="grid border-b border-white/14 bg-white/[0.06] px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/45 md:grid-cols-[1.15fr_1fr_1.2fr_0.7fr]">
+          <Reveal className="mt-12 overflow-hidden border border-line-inverse">
+            <div
+              className={`grid border-b border-line-inverse bg-white/[0.06] px-4 py-3 md:grid-cols-[1.15fr_1fr_1.2fr_0.7fr] ${labelClassName} text-inverse-muted`}
+            >
               <span>Project</span>
               <span className="hidden md:block">Type</span>
               <span className="hidden md:block">Stone featured</span>
@@ -899,14 +812,12 @@ export default function CapabilitiesPage() {
                   className="grid gap-3 border-b border-white/10 px-4 py-4 last:border-b-0 md:grid-cols-[1.15fr_1fr_1.2fr_0.7fr] md:items-start"
                 >
                   <div>
-                    <h3 className="text-[17px] font-semibold leading-tight text-white">{project.title}</h3>
-                    <p className="mt-1 text-[13px] leading-6 text-white/50">{project.location}</p>
+                    <h3 className="text-copy font-semibold leading-tight text-inverse">{project.title}</h3>
+                    <p className="mt-1 text-small text-inverse-muted">{project.location}</p>
                   </div>
-                  <p className="text-[14px] leading-6 text-white/66">{project.sector}</p>
-                  <p className="text-[14px] leading-6 text-white/66">{project.stone}</p>
-                  <p className="text-[13px] font-semibold uppercase tracking-[0.12em] text-white/46">
-                    {project.date}
-                  </p>
+                  <p className="text-small text-inverse-body">{project.sector}</p>
+                  <p className="text-small text-inverse-body">{project.stone}</p>
+                  <p className={`${labelClassName} text-inverse-muted`}>{project.date}</p>
                 </article>
               ))}
             </div>
@@ -914,64 +825,66 @@ export default function CapabilitiesPage() {
         </div>
       </section>
 
-      <section id="capability-statement" className="bg-black py-16 text-white md:py-24">
+      <section id="capability-statement" className="bg-ink py-section text-inverse">
         <div className="urblo-page-container grid gap-12 lg:grid-cols-[0.92fr_1.08fr] lg:items-center">
           <Reveal>
-            <p className="urblo-eyebrow text-white/62">PDF download</p>
-            <h2 className="mt-4 text-[38px] font-light leading-[1.12] text-white md:text-[64px]">
-              Download the full 2026 Capability Statement.
-            </h2>
-            <p className="mt-6 max-w-[38rem] text-[18px] leading-8 text-white/72">
+            <SectionHeading
+              level="display"
+              surface="dark"
+              eyebrow="PDF download"
+              title="Download the full 2026 Capability Statement."
+            />
+            <p className="mt-6 max-w-[38rem] text-lead text-inverse-body">
               Enter your email to record the request with Urblo, then download Natalie Ma's full
               capability statement as a PDF.
             </p>
             <CapabilityDownloadForm />
           </Reveal>
-          <Reveal delay={0.08} className="border border-white/14 bg-white/[0.04] p-5">
-            <div className="grid gap-5 md:grid-cols-[0.95fr_1.05fr] md:items-center">
-              <div className="overflow-hidden bg-white">
-                <img
-                  src="/media/launch/capabilities/west-side-place-aerial.jpg"
-                  alt="Capability statement preview showing Urblo public realm stone work"
-                  className="aspect-[4/5] h-full w-full object-cover"
-                />
+          <Reveal delay={0.08}>
+            <Card variant="bordered" surface="dark" className="p-5">
+              <div className="grid gap-5 md:grid-cols-[0.95fr_1.05fr] md:items-center">
+                <div className="overflow-hidden bg-white">
+                  <img
+                    src="/media/launch/capabilities/west-side-place-aerial.jpg"
+                    alt="Capability statement preview showing Urblo public realm stone work"
+                    className="aspect-[4/5] h-full w-full object-cover"
+                  />
+                </div>
+                <div>
+                  <p className={`${labelClassName} text-lime`}>Statement contents</p>
+                  <ul className="mt-5 grid gap-4">
+                    {[
+                      'Capability and product range',
+                      'National reach and service model',
+                      'Lifecycle support',
+                      'Founder profile',
+                      'Selected project facts',
+                    ].map((item) => (
+                      <li key={item} className="flex items-center gap-3 text-small font-semibold text-inverse">
+                        <Ruler className="h-4 w-4 text-inverse-muted" strokeWidth={1.8} aria-hidden="true" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
-              <div>
-                <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--urblo-lime)]">
-                  Statement contents
-                </p>
-                <ul className="mt-5 grid gap-4">
-                  {[
-                    'Capability and product range',
-                    'National reach and service model',
-                    'Lifecycle support',
-                    'Founder profile',
-                    'Selected project facts',
-                  ].map((item) => (
-                    <li key={item} className="flex items-center gap-3 text-[15px] font-semibold text-white">
-                      <Ruler className="h-4 w-4 text-white/45" strokeWidth={1.8} aria-hidden="true" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
+            </Card>
           </Reveal>
         </div>
       </section>
 
-      <section className="py-14">
+      <section className="py-section-tight">
         <div className="urblo-page-container flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-          <div>
-            <p className="urblo-eyebrow">Next step</p>
-            <h2 className="mt-3 max-w-[48rem] text-[30px] font-light leading-tight text-black md:text-[42px]">
-              Bring Urblo in before the stone decision becomes a site problem.
-            </h2>
-          </div>
-          <Link to={siteCtas.contact.to} className="urblo-button-inverse self-start">
+          <SectionHeading
+            level="section"
+            eyebrow="Next step"
+            title="Bring Urblo in before the stone decision becomes a site problem."
+            titleClassName="max-w-[48rem]"
+          />
+          <Button variant="primary" to={siteCtas.contact.to} className="self-start">
             {siteCtas.contact.label}
             <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
-          </Link>
+          </Button>
         </div>
       </section>
     </div>

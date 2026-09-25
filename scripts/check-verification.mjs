@@ -33,6 +33,7 @@ for (const path of ['functions/api/example.test.ts', 'public/example.test.ts', '
 assert.equal(classify(['src/pages/admin/AdminProductsPage.test.ts', 'src/pages/admin/AdminProductsPage.tsx']).deploy, true)
 for (const suite of ['smoke', 'admin', 'container', 'runtime', 'migrations']) assert.ok(resolveChecks(suite).includes('unit'), `${suite} includes unit`)
 assert.ok(!resolveChecks('docs').includes('unit'))
+for (const suite of ['smoke', 'container', 'runtime', 'migrations']) assert.ok(resolveChecks(suite).includes('ui-tokens'), `${suite} runs the public type-scale ratchet`)
 console.log('Verification classification, rename/delete fail-closed handling, dependencies and deduplication passed.')
 
 // Exercise actual Git records and fingerprints, not just handcrafted path arrays.
