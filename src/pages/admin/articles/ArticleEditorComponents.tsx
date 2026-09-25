@@ -32,6 +32,7 @@ export function TextField({
     required,
     type = 'text',
     inputMode,
+    help,
     onChange,
 }: {
     label: string;
@@ -40,9 +41,10 @@ export function TextField({
     required?: boolean;
     type?: string;
     inputMode?: 'numeric';
+    help?: string;
     onChange: (value: string) => void;
 }) {
-    return (
+    const field = (
         <label className="block text-xs font-bold uppercase tracking-[0.14em] text-black/55">
             {label}
             <input
@@ -52,9 +54,18 @@ export function TextField({
                 disabled={disabled}
                 required={required}
                 inputMode={inputMode}
+                aria-description={help}
                 className={fieldClass}
             />
         </label>
+    );
+    if (!help) return field;
+    // Help sits outside the label so the field's accessible name stays exactly `label`.
+    return (
+        <div>
+            {field}
+            <p className="mt-2 text-xs font-semibold leading-5 text-black/45">{help}</p>
+        </div>
     );
 }
 

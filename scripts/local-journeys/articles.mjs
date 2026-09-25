@@ -109,10 +109,48 @@ export async function articleJourney({ page, context, check, id, directory }) {
       await expect(publicPage.getByText(`Local body A ${id}`, { exact: true })).toBeVisible()
       await publicPage.screenshot({ path: `${directory}/article-public.png`, fullPage: true })
     } finally { await publicPage.close() }
+    // NOW-OPT-ADMIN-SAFETY-001: Save on a live article names the live effect and waits for
+    // confirmation; Keep editing writes nothing. The published URL key is locked.
+    await expect(field('Website URL key')).toBeDisabled()
+    await expect(page.getByRole('button', { name: 'Save article', exact: true })).toHaveCount(0)
+    await field('Excerpt').fill(`Live excerpt ${id}`)
+    const writes = []
+    const recordWrite = request => { if (request.method() === 'PATCH' && new URL(request.url()).pathname === '/rest/v1/articles') writes.push(request.url()) }
+    page.on('request', recordWrite)
+    try {
+      await page.getByRole('button', { name: 'Update live page', exact: true }).click()
+      const dialog = page.getByRole('dialog', { name: 'Update the live article?', exact: true })
+      await expect(dialog).toContainText(`/articles/${a.slug}`)
+      await page.screenshot({ path: `${directory}/article-live-save-confirm.png`, fullPage: true })
+      await dialog.getByRole('button', { name: 'Keep editing', exact: true }).click()
+      await expect(dialog).toHaveCount(0)
+      assert.deepEqual(writes, [])
+      await expect(field('Excerpt')).toHaveValue(`Live excerpt ${id}`)
+      await page.getByRole('button', { name: 'Update live page', exact: true }).click()
+      const [response] = await Promise.all([
+        page.waitForResponse(r => new URL(r.url()).pathname === '/rest/v1/articles' && r.request().method() === 'PATCH'),
+        dialog.getByRole('button', { name: 'Update live page', exact: true }).click(),
+      ])
+      assert.equal(response.status(), 200)
+      assert.equal((await response.json()).status, 'published')
+      assert.equal(writes.length, 1)
+    } finally { page.off('request', recordWrite) }
+    await expect(page.getByRole('button', { name: 'Update live page', exact: true })).toBeEnabled()
     await save('Archive article', 'articles')
     const credentials = readLocalCredentials()
     const response = await localFetch(`${credentials.apiUrl}/rest/v1/articles?slug=eq.${a.slug}&select=id`, { headers: { apikey: credentials.anonKey } })
     assert.equal(response.status, 200)
     assert.deepEqual(await response.json(), [])
+  })
+  await check('Articles new draft URL key follows the title until edited', async () => {
+    // NOW-OPT-ADMIN-SAFETY-001: nothing is saved here; the key is editable before first publish.
+    await page.getByRole('button', { name: 'New article', exact: true }).click()
+    await field('Title').fill(`Local Draft Key ${id}`)
+    await expect(field('Website URL key')).toHaveValue(`local-draft-key-${id}`)
+    await expect(field('Website URL key')).toBeEnabled()
+    await field('Website URL key').fill(`custom-key-${id}`)
+    await field('Title').fill(`Local Draft Key Renamed ${id}`)
+    await expect(field('Website URL key')).toHaveValue(`custom-key-${id}`)
+    await expect(page.getByRole('button', { name: 'Save article', exact: true })).toBeEnabled()
   })
 }

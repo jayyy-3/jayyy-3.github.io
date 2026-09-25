@@ -19,6 +19,8 @@ import { useAdminAuth } from '../../lib/adminAuthHooks';
 import AdminShell from './AdminShell';
 import RequireAdmin from './RequireAdmin';
 import { CmsLiveRuleCard, CmsStatusCounts, CmsStatusMeaning, CmsStatusPill } from './AdminCmsPrimitives';
+import { useLiveSaveConfirm } from './LiveSaveConfirm';
+import { liveSaveRequest, updateLivePageLabel } from './liveSave';
 
 type MediaStatus = 'draft' | 'published' | 'archived';
 type MediaListFilter = MediaStatus | 'all';
@@ -170,6 +172,8 @@ function AdminMediaContent() {
         () => assets.find((asset) => asset.id === selectedId) ?? null,
         [assets, selectedId],
     );
+    const isAssetLive = selectedAsset?.status === 'published';
+    const { confirmLiveSave, liveSaveDialog } = useLiveSaveConfirm();
 
     const loadAssets = useCallback(async () => {
         if (!supabase) {
@@ -379,10 +383,10 @@ function AdminMediaContent() {
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
-        await saveAsset(form.status);
+        await saveAsset(form.status, { confirmLive: true });
     }
 
-    async function saveAsset(nextStatus: MediaStatus) {
+    async function saveAsset(nextStatus: MediaStatus, options: { confirmLive?: boolean } = {}) {
         if (!supabase || !canEdit || !user) {
             return;
         }
@@ -442,6 +446,22 @@ function AdminMediaContent() {
         );
         if (validation.error) {
             setError(validation.error);
+            return;
+        }
+
+        // Published media is already used by public pages: Save changes them straight away.
+        if (
+            options.confirmLive &&
+            selectedAsset?.status === 'published' &&
+            !(await confirmLiveSave(
+                liveSaveRequest({
+                    kind: 'media item',
+                    name: selectedAsset.alt?.trim() || `Asset ${selectedAsset.id}`,
+                    liveTarget: 'every public page that shows this media',
+                    nextStatus,
+                }),
+            ))
+        ) {
             return;
         }
 
@@ -1025,7 +1045,9 @@ function AdminMediaContent() {
                             disabled={!canEdit || isLoading}
                             canPublish={canPublishMedia}
                             willPromotePrivateStorage={canAutoPromotePrivateStorage}
+                            isLive={isAssetLive}
                             onSaveDraft={() => void saveAsset('draft')}
+                            onSaveLive={() => void saveAsset(form.status, { confirmLive: true })}
                             onPublish={() => void saveAsset('published')}
                             onArchive={() => void saveAsset('archived')}
                         />
@@ -1227,13 +1249,16 @@ function AdminMediaContent() {
                         disabled={!canEdit || isLoading}
                         canPublish={canPublishMedia}
                         willPromotePrivateStorage={canAutoPromotePrivateStorage}
+                        isLive={isAssetLive}
                         onSaveDraft={() => void saveAsset('draft')}
+                        onSaveLive={() => void saveAsset(form.status, { confirmLive: true })}
                         onPublish={() => void saveAsset('published')}
                         onArchive={() => void saveAsset('archived')}
                         compact
                     />
                 </aside>
             </div>
+            {liveSaveDialog}
         </AdminShell>
     );
 }
@@ -1362,7 +1387,9 @@ function MediaActionBar({
     disabled,
     canPublish,
     willPromotePrivateStorage,
+    isLive,
     onSaveDraft,
+    onSaveLive,
     onPublish,
     onArchive,
     compact = false,
@@ -1372,7 +1399,9 @@ function MediaActionBar({
     disabled?: boolean;
     canPublish: boolean;
     willPromotePrivateStorage: boolean;
+    isLive: boolean;
     onSaveDraft: () => void;
+    onSaveLive: () => void;
     onPublish: () => void;
     onArchive: () => void;
     compact?: boolean;
@@ -1402,11 +1431,11 @@ function MediaActionBar({
                     <button
                         type="button"
                         disabled={isDisabled}
-                        onClick={onSaveDraft}
+                        onClick={isLive ? onSaveLive : onSaveDraft}
                         className="inline-flex min-h-11 items-center justify-center gap-2 rounded border border-black/15 bg-white px-4 text-xs font-bold uppercase tracking-[0.14em] text-black transition hover:border-black disabled:cursor-not-allowed disabled:text-black/35"
                     >
                         <Save className="h-4 w-4" />
-                        {isSaving ? 'Saving' : 'Save draft'}
+                        {isSaving ? 'Saving' : isLive ? updateLivePageLabel : 'Save draft'}
                     </button>
                     <button
                         type="button"

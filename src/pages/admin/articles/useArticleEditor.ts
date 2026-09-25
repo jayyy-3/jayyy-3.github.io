@@ -4,6 +4,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { recordAdminAuditEvent, withAuditNotice } from '../../../lib/adminAudit';
 import { useAdminAuth } from '../../../lib/adminAuthHooks';
 import { supabase } from '../../../lib/supabaseClient';
+import { useLiveSaveConfirm } from '../LiveSaveConfirm';
+import { followNameUrlKey, isUrlKeyLocked, liveSaveRequest } from '../liveSave';
 import { readArticleBlocks, readArticleWorkspace, writeArticle, writeArticleBlock } from './data';
 import {
     compareArticleBlockRows,
@@ -60,6 +62,7 @@ export function useArticleEditor() {
     const selectedBlockIdRef = useRef<number | null>(null);
     const savingArticleRef = useRef(false);
     const savingBlockRef = useRef(false);
+    const { confirmLiveSave, liveSaveDialog } = useLiveSaveConfirm();
 
     selectedArticleIdRef.current = selectedArticleId;
 
@@ -76,6 +79,9 @@ export function useArticleEditor() {
     );
 
     const articleCounts = useMemo(() => summarizeArticles(articles), [articles]);
+    const isArticleLive = selectedArticle?.status === 'published';
+    const isBlockLive = isArticleLive && selectedBlock?.status === 'published';
+    const isArticleUrlKeyLocked = isUrlKeyLocked(selectedArticle);
 
     const selectedCoverMedia = useMemo(
         () => findMediaOption(mediaOptions, articleForm.coverMediaId),
@@ -283,8 +289,28 @@ export function useArticleEditor() {
     }
 
     function updateArticleField<Key extends keyof ArticleFormState>(key: Key, value: ArticleFormState[Key]) {
-        setArticleForm((current) => ({ ...current, [key]: value }));
+        setArticleForm((current) => {
+            const next = { ...current, [key]: value };
+            if (key === 'title' && !selectedArticleIdRef.current) {
+                next.slug = followNameUrlKey(current.slug, current.title, String(value));
+            }
+            return next;
+        });
         setNotice(null);
+    }
+
+    // Save on a live article (or a live section of a live article) changes the public page
+    // immediately, so it asks first. New and draft articles save without a dialog.
+    function confirmLiveArticleSave(nextStatus: ArticleStatus) {
+        if (!selectedArticle || selectedArticle.status !== 'published') return Promise.resolve(true);
+        return confirmLiveSave(
+            liveSaveRequest({
+                kind: 'article',
+                name: selectedArticle.title,
+                publicPath: `/articles/${selectedArticle.slug}`,
+                nextStatus,
+            }),
+        );
     }
 
     function updateBlockField<Key extends keyof BlockFormState>(key: Key, value: BlockFormState[Key]) {
@@ -322,7 +348,7 @@ export function useArticleEditor() {
         setBlockForm(rowToBlockForm(block));
     }
 
-    async function saveArticle(nextStatus: ArticleStatus) {
+    async function saveArticle(nextStatus: ArticleStatus, options: { confirmLive?: boolean } = {}) {
         if (!supabase || !canEdit || !user) return;
         if (savingArticleRef.current || savingBlockRef.current) return;
 
@@ -336,6 +362,9 @@ export function useArticleEditor() {
             setError(validation.error);
             return;
         }
+
+        if (options.confirmLive && !(await confirmLiveArticleSave(nextStatus))) return;
+        if (savingArticleRef.current || savingBlockRef.current) return;
 
         const articleId = selectedArticleIdRef.current;
         savingArticleRef.current = true;
@@ -410,10 +439,10 @@ export function useArticleEditor() {
 
     async function handleArticleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
-        await saveArticle(articleForm.status);
+        await saveArticle(articleForm.status, { confirmLive: true });
     }
 
-    async function saveBlock(nextStatus: ArticleStatus) {
+    async function saveBlock(nextStatus: ArticleStatus, options: { confirmLive?: boolean } = {}) {
         if (!supabase || !canEdit || !user || !selectedArticle) return;
         if (savingArticleRef.current || savingBlockRef.current) return;
 
@@ -427,6 +456,9 @@ export function useArticleEditor() {
             setError(validation.error);
             return;
         }
+
+        if (options.confirmLive && isBlockLive && !(await confirmLiveArticleSave('published'))) return;
+        if (savingArticleRef.current || savingBlockRef.current) return;
 
         const articleId = selectedArticle.id;
         const blockId = selectedBlockIdRef.current;
@@ -498,6 +530,10 @@ export function useArticleEditor() {
     }
     return {
         canEdit,
+        isArticleLive,
+        isBlockLive,
+        isArticleUrlKeyLocked,
+        liveSaveDialog,
         articles,
         blocks,
         projectOptions,

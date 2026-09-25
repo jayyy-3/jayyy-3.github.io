@@ -20,6 +20,15 @@ import { useAdminAuth } from '../../lib/adminAuthHooks';
 import AdminShell from './AdminShell';
 import RequireAdmin from './RequireAdmin';
 import { CmsLiveRuleCard, CmsPublicPageLink, CmsStatusCounts, CmsStatusMeaning, CmsStatusPill } from './AdminCmsPrimitives';
+import { useLiveSaveConfirm } from './LiveSaveConfirm';
+import {
+    followNameUrlKey,
+    isUrlKeyLocked,
+    liveSaveRequest,
+    updateLivePageLabel,
+    urlKeyEditableHelp,
+    urlKeyLockedHelp,
+} from './liveSave';
 
 type ProductStatus = 'draft' | 'published' | 'archived';
 type ProductListFilter = ProductStatus | 'all';
@@ -206,6 +215,7 @@ function AdminProductsContent() {
     const productCatalogGenerationRef = useRef(0);
     const productSelectionGenerationRef = useRef(0);
     const activeSaveCountRef = useRef(0);
+    const { confirmLiveSave, liveSaveDialog } = useLiveSaveConfirm();
 
     const selectedProduct = useMemo(
         () => products.find((product) => product.id === selectedProductId) ?? null,
@@ -216,6 +226,9 @@ function AdminProductsContent() {
         [models, selectedModelId],
     );
     const productCounts = useMemo(() => summarizeProducts(products), [products]);
+    const isProductLive = selectedProduct?.status === 'published';
+    const isModelLive = isProductLive && selectedModel?.status === 'published';
+    const isProductUrlKeyLocked = isUrlKeyLocked(selectedProduct);
     const selectedHeroMedia = useMemo(
         () => findMediaOption(mediaOptions, productForm.heroMediaId),
         [mediaOptions, productForm.heroMediaId],
@@ -524,7 +537,13 @@ function AdminProductsContent() {
     }
 
     function updateProductField<Key extends keyof ProductFormState>(key: Key, value: ProductFormState[Key]) {
-        setProductForm((current) => ({ ...current, [key]: value }));
+        setProductForm((current) => {
+            const next = { ...current, [key]: value };
+            if (key === 'name' && !selectedProduct) {
+                next.slug = followNameUrlKey(current.slug, current.name, String(value));
+            }
+            return next;
+        });
         setNotice(null);
     }
 
@@ -546,7 +565,21 @@ function AdminProductsContent() {
         setNotice(null);
     }
 
-    async function saveProduct(nextStatus: ProductStatus) {
+    // Save on a live product (or a live product's model, specs or material choices) writes
+    // straight to the public page, so it asks first. New and draft products save immediately.
+    function confirmLiveProductSave(nextStatus: ProductStatus) {
+        if (!selectedProduct || selectedProduct.status !== 'published') return Promise.resolve(true);
+        return confirmLiveSave(
+            liveSaveRequest({
+                kind: 'product',
+                name: selectedProduct.name,
+                publicPath: `/products/${selectedProduct.slug}`,
+                nextStatus,
+            }),
+        );
+    }
+
+    async function saveProduct(nextStatus: ProductStatus, options: { confirmLive?: boolean } = {}) {
         if (!supabase || !canEdit || !user) return;
 
         if (nextStatus === 'published' && !canPublishProduct) {
@@ -559,6 +592,8 @@ function AdminProductsContent() {
             setError(validation.error);
             return;
         }
+
+        if (options.confirmLive && !(await confirmLiveProductSave(nextStatus))) return;
 
         if (!beginSaveOperation()) return;
 
@@ -643,10 +678,10 @@ function AdminProductsContent() {
 
     async function handleProductSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
-        await saveProduct(productForm.status);
+        await saveProduct(productForm.status, { confirmLive: true });
     }
 
-    async function saveModel(nextStatus: ProductStatus) {
+    async function saveModel(nextStatus: ProductStatus, options: { confirmLive?: boolean } = {}) {
         if (!supabase || !canEdit || !user || !selectedProduct) return;
 
         const operation = {
@@ -666,6 +701,8 @@ function AdminProductsContent() {
             setError(validation.error);
             return;
         }
+
+        if (options.confirmLive && isModelLive && !(await confirmLiveProductSave('published'))) return;
 
         if (!beginSaveOperation()) return;
 
@@ -774,6 +811,8 @@ function AdminProductsContent() {
             return;
         }
 
+        if (!(await confirmLiveProductSave('published'))) return;
+
         if (!beginSaveOperation()) return;
 
         const client: SupabaseClient = supabase;
@@ -870,6 +909,8 @@ function AdminProductsContent() {
             setError(validation.error);
             return;
         }
+
+        if (!(await confirmLiveProductSave('published'))) return;
 
         if (!beginSaveOperation()) return;
 
@@ -1133,8 +1174,9 @@ function AdminProductsContent() {
                             <TextField
                                 label="Website URL key"
                                 value={productForm.slug}
-                                disabled={!canEdit || isSavingProduct || isLoading || Boolean(selectedProduct)}
+                                disabled={!canEdit || isSavingProduct || isLoading || isProductUrlKeyLocked}
                                 required
+                                help={isProductUrlKeyLocked ? urlKeyLockedHelp : urlKeyEditableHelp}
                                 onChange={(value) => updateProductField('slug', value)}
                             />
                             <SelectField
@@ -1207,7 +1249,7 @@ function AdminProductsContent() {
                             disabled={!canEdit || isLoading}
                             canPublish={canPublishProduct}
                             publishLockedLabel="Complete the product publish checklist first."
-                            saveLabel={isSavingProduct ? 'Saving' : 'Save product'}
+                            saveLabel={isSavingProduct ? 'Saving' : isProductLive ? updateLivePageLabel : 'Save product'}
                             publishLabel="Publish product"
                             archiveLabel="Archive product"
                             onPublish={() => void saveProduct('published')}
@@ -1295,10 +1337,10 @@ function AdminProductsContent() {
                                 disabled={!canEdit || !selectedProduct}
                                 canPublish={canPublishModel}
                                 publishLockedLabel="Complete the Model publish checklist first."
-                                saveLabel={isSavingModel ? 'Saving' : 'Save model'}
+                                saveLabel={isSavingModel ? 'Saving' : isModelLive ? updateLivePageLabel : 'Save model'}
                                 publishLabel="Publish model"
                                 archiveLabel="Archive model"
-                                onSave={() => void saveModel(modelForm.status)}
+                                onSave={() => void saveModel(modelForm.status, { confirmLive: true })}
                                 onPublish={() => void saveModel('published')}
                                 onArchive={() => void saveModel('archived')}
                                 compact
@@ -1490,6 +1532,7 @@ function AdminProductsContent() {
                     ) : null}
                 </aside>
             </div>
+            {liveSaveDialog}
         </AdminShell>
     );
 }
@@ -1521,6 +1564,7 @@ function TextField({
     required,
     type = 'text',
     inputMode,
+    help,
     onChange,
 }: {
     label: string;
@@ -1529,9 +1573,10 @@ function TextField({
     required?: boolean;
     type?: string;
     inputMode?: 'numeric';
+    help?: string;
     onChange: (value: string) => void;
 }) {
-    return (
+    const field = (
         <label className="block text-xs font-bold uppercase tracking-[0.14em] text-black/55">
             {label}
             <input
@@ -1541,9 +1586,18 @@ function TextField({
                 disabled={disabled}
                 required={required}
                 inputMode={inputMode}
+                aria-description={help}
                 className={fieldClass}
             />
         </label>
+    );
+    if (!help) return field;
+    // Help sits outside the label so the field's accessible name stays exactly `label`.
+    return (
+        <div>
+            {field}
+            <p className="mt-2 text-xs font-semibold leading-5 text-black/45">{help}</p>
+        </div>
     );
 }
 

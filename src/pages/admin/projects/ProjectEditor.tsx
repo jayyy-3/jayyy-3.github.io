@@ -56,6 +56,8 @@ export type ProjectEditorAction = "save" | "publish" | "archive";
 
 interface ProjectEditorProps {
   draft: ProjectAggregateDraft;
+  /** Public address when visitors can open this Project now, even if a newer draft is saved. */
+  liveSlug?: string | null;
   isDirty: boolean;
   media: readonly ProjectMediaOption[];
   stones: readonly ProjectStoneOption[];
@@ -94,6 +96,7 @@ const editorSections: readonly {
 
 export default function ProjectEditor({
   draft,
+  liveSlug = null,
   isDirty,
   media,
   stones,
@@ -141,6 +144,11 @@ export default function ProjectEditor({
   const hasPendingMedia = pendingMediaKeys.size > 0;
   const hasActiveMediaRequest = busyMediaKeys.size > 0;
   const mutationDisabled = !canEdit || isSaving || showReload;
+  const livePageSlug =
+    liveSlug ??
+    (draft.project.status === "published" && draft.project.slug
+      ? draft.project.slug
+      : null);
   const editorFieldsDisabled = mutationDisabled || hasPendingMedia;
   const sectionCounts: Record<ProjectEditorSection, number | null> = {
     overview: null,
@@ -712,7 +720,10 @@ export default function ProjectEditor({
           <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <LifecycleLabel status={draft.project.status} />
+                <LifecycleLabel
+                  status={draft.project.status}
+                  isLive={liveSlug !== null}
+                />
                 <p className="text-sm font-semibold text-black/58">
                   {isSaving
                     ? "Working…"
@@ -811,9 +822,9 @@ export default function ProjectEditor({
                 <Eye className="h-4 w-4" />
                 Open preview
               </button>
-              {draft.project.status === "published" && draft.project.slug ? (
+              {livePageSlug ? (
                 <a
-                  href={`/projects/${draft.project.slug}`}
+                  href={`/projects/${livePageSlug}`}
                   target="_blank"
                   rel="noreferrer"
                   className={`${actionButtonClass} border-black/15 bg-white text-black hover:border-black`}
@@ -910,7 +921,23 @@ function factValueForEditor(structuredValue: unknown, fallbackValue: string) {
   return fallbackValue;
 }
 
-function LifecycleLabel({ status }: { status: ProjectLifecycleStatus }) {
+function LifecycleLabel({
+  status,
+  isLive,
+}: {
+  status: ProjectLifecycleStatus;
+  isLive: boolean;
+}) {
+  // The server reports "draft" whenever the private draft is ahead of the published revision,
+  // including for a Project that is still live; only a never-published or unlisted draft is
+  // "not live".
+  if (status === "draft" && isLive) {
+    return (
+      <span className="inline-flex min-h-8 items-center rounded border border-[var(--urblo-lime)] bg-[rgba(0,255,25,0.14)] px-3 text-[11px] font-bold uppercase tracking-[0.12em] text-black">
+        Live · unpublished changes
+      </span>
+    );
+  }
   const meta: Record<
     ProjectLifecycleStatus,
     { label: string; className: string }

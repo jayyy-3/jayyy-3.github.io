@@ -33,11 +33,16 @@ import {
     statusOptions,
 } from './forms';
 import type { ArticleBlockType, ArticleStatus } from './types';
+import { updateLivePageLabel, urlKeyEditableHelp, urlKeyLockedHelp } from '../liveSave';
 import { useArticleEditor } from './useArticleEditor';
 
 export default function ArticlesWorkspace() {
     const {
         canEdit,
+        isArticleLive,
+        isBlockLive,
+        isArticleUrlKeyLocked,
+        liveSaveDialog,
         articles,
         blocks,
         projectOptions,
@@ -258,8 +263,9 @@ export default function ArticlesWorkspace() {
                             <TextField
                                 label="Website URL key"
                                 value={articleForm.slug}
-                                disabled={!canEdit || isSavingArticle || isLoading || Boolean(selectedArticle)}
+                                disabled={!canEdit || isSavingArticle || isLoading || isArticleUrlKeyLocked}
                                 required
+                                help={isArticleUrlKeyLocked ? urlKeyLockedHelp : urlKeyEditableHelp}
                                 onChange={(value) => updateArticleField('slug', value)}
                             />
                             <SelectField
@@ -366,7 +372,7 @@ export default function ArticlesWorkspace() {
                             disabled={!canEdit || isLoading}
                             canPublish={canPublishArticle}
                             publishLockedLabel="Complete the Article publish checklist first."
-                            saveLabel={isSavingArticle ? 'Saving' : 'Save article'}
+                            saveLabel={isSavingArticle ? 'Saving' : isArticleLive ? updateLivePageLabel : 'Save article'}
                             publishLabel="Publish article"
                             archiveLabel="Archive article"
                             onPublish={() => void saveArticle('published')}
@@ -468,10 +474,10 @@ export default function ArticlesWorkspace() {
                             disabled={!canEdit || !selectedArticle}
                             canPublish={canPublishBlock}
                             publishLockedLabel="Fill the selected section content before publishing."
-                            saveLabel={isSavingBlock ? 'Saving' : 'Save section'}
+                            saveLabel={isSavingBlock ? 'Saving' : isBlockLive ? updateLivePageLabel : 'Save section'}
                             publishLabel="Publish section"
                             archiveLabel="Archive section"
-                            onSave={() => void saveBlock(blockForm.status)}
+                            onSave={() => void saveBlock(blockForm.status, { confirmLive: true })}
                             onPublish={() => void saveBlock('published')}
                             onArchive={() => void saveBlock('archived')}
                             compact
@@ -518,6 +524,7 @@ export default function ArticlesWorkspace() {
                     ) : null}
                 </aside>
             </div>
+            {liveSaveDialog}
         </AdminShell>
     );
 }
