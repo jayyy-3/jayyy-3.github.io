@@ -7,6 +7,12 @@ import {
   projectImageProfiles,
   toProjectImageVariantUrl,
 } from '../src/lib/projectImageDelivery.ts';
+import {
+  STONE_RENDER_MAX_WIDTH,
+  getStoneImageDelivery,
+  getStoneShareImageUrl,
+  stoneImageProfiles,
+} from '../src/lib/stoneImageDelivery.ts';
 import { parsePublicEntitySeo, validatePublicEntitySeoDraft } from '../src/lib/publicEntitySeo.ts';
 import { parseProjectFactJsonDraft } from '../src/lib/projectFactValue.ts';
 import { toSafePublicContentDestination } from '../src/lib/publicContentLink.ts';
@@ -111,6 +117,63 @@ assert.ok(
   projectImageProfiles.hero.quality > projectImageProfiles.card.quality,
   'Project hero delivery must retain a higher visual-quality setting than archive cards',
 );
+
+// Stone media: every rendered image uses a sized render variant; the original is
+// reserved for the explicit "View original" link on the Stone detail stage.
+const stoneStorageImage =
+  'https://project-ref.supabase.co/storage/v1/object/public/urblo-public-media/stone-assets/256/example.jpeg';
+const swatchDelivery = getStoneImageDelivery(stoneStorageImage, 'swatch');
+assert.equal(swatchDelivery.optimized, true);
+assert.equal(
+  swatchDelivery.src,
+  'https://project-ref.supabase.co/storage/v1/render/image/public/urblo-public-media/stone-assets/256/example.jpeg?width=240&quality=82&format=webp&resize=contain',
+  'Stone swatches must request a small WebP render variant, not the Storage original',
+);
+for (const profile of Object.keys(stoneImageProfiles)) {
+  const delivery = getStoneImageDelivery(stoneStorageImage, profile);
+  assert.ok(!delivery.src.includes('/storage/v1/object/public/'), `Stone ${profile} src must not be the original`);
+  assert.ok(!(delivery.srcSet ?? '').includes('/storage/v1/object/public/'), `Stone ${profile} srcset must not include the original`);
+}
+assert.ok(
+  Math.max(...stoneImageProfiles.stage.widths) >= 2560 && Math.max(...stoneImageProfiles.zoom.widths) >= 2560,
+  'Stone detail stage and zoom must offer at least a 2560px variant for texture inspection',
+);
+assert.match(getStoneImageDelivery(stoneStorageImage, 'zoom').srcSet ?? '', new RegExp(`width=${STONE_RENDER_MAX_WIDTH}&quality=90&format=webp.* ${STONE_RENDER_MAX_WIDTH}w`));
+assert.ok(
+  stoneImageProfiles.zoom.quality >= 90 && stoneImageProfiles.stage.quality >= projectImageProfiles.detail.quality,
+  'Large Stone variants must keep a high visual-quality setting',
+);
+assert.equal(
+  getStoneShareImageUrl(stoneStorageImage),
+  'https://project-ref.supabase.co/storage/v1/render/image/public/urblo-public-media/stone-assets/256/example.jpeg?width=1200&height=630&quality=82&format=origin&resize=cover',
+  'Stone og:image must be a 1200x630 variant in the uploaded format',
+);
+assert.equal(getStoneShareImageUrl('/media/launch/stone.jpg'), '/media/launch/stone.jpg');
+assert.deepEqual(getStoneImageDelivery('/products/primeBlock/core.png', 'swatch'), {
+  optimized: false,
+  src: '/products/primeBlock/core.png',
+  srcSet: undefined,
+  sizes: undefined,
+});
+const stoneDataUri = 'data:image/svg+xml;utf8,%3Csvg%3E';
+assert.equal(getStoneImageDelivery(stoneDataUri, 'swatch').src, stoneDataUri, 'Pending-image placeholders stay untouched');
+for (const file of [
+  'src/components/OptionSelector.tsx',
+  'src/components/stone-library/StoneCard.tsx',
+  'src/components/stone-library/ImageStage.tsx',
+  'src/components/stone-library/FinishLightbox.tsx',
+  'src/components/projects/ProjectPageView.tsx',
+  'src/components/projects/ProjectHotspotImage.tsx',
+]) {
+  const source = readFileSync(new URL(`../${file}`, import.meta.url), 'utf8');
+  assert.ok(source.includes('StoneResponsiveImage'), `${file} must render Stone media through StoneResponsiveImage`);
+}
+{
+  const stageSource = readFileSync(new URL('../src/components/stone-library/ImageStage.tsx', import.meta.url), 'utf8');
+  assert.ok(stageSource.includes('View original') && stageSource.includes('href={activeFinish.imageUrl}'), 'Stone detail stage keeps an explicit View original link to the untouched source');
+  const stoneViewSource = readFileSync(new URL('../src/pages/StonePageView.tsx', import.meta.url), 'utf8');
+  assert.ok(stoneViewSource.includes('getStoneShareImageUrl(activeFinish?.imageUrl)'), 'Stone detail og:image uses the sized share variant');
+}
 assert.equal(
   resolvePublicMediaUrl(
     {

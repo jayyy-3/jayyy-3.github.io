@@ -1,5 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { FinishVM } from '../../types/stone-library';
+import StoneResponsiveImage from './StoneResponsiveImage';
+
+// The viewer is max-w-7xl with 16px gutters; 2x zoom doubles the rendered width
+// so the browser swaps to a denser variant for texture inspection.
+const LIGHTBOX_SIZES = '(min-width: 1280px) 1248px, calc(100vw - 32px)';
+const LIGHTBOX_ZOOM_SIZES = '(min-width: 1280px) 2496px, calc(200vw - 64px)';
 
 interface FinishLightboxProps {
     isOpen: boolean;
@@ -210,7 +216,19 @@ export default function FinishLightbox({
                         </p>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center justify-end gap-2">
+                        {activeFrame?.imageUrl ? (
+                            <a
+                                href={activeFrame.imageUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                data-stone-original-link=""
+                                className="rounded-[4px] border border-white/40 px-3 py-1 text-xs font-semibold uppercase tracking-[0.08em] transition hover:bg-[var(--urblo-lime)] hover:text-black"
+                                aria-label={`View original full-resolution image of ${stoneName} ${activeFinish.label} (opens in a new tab)`}
+                            >
+                                View original
+                            </a>
+                        ) : null}
                         <button
                             type="button"
                             onClick={() => {
@@ -255,8 +273,9 @@ export default function FinishLightbox({
                                     aria-pressed={isActiveFrame}
                                 >
                                     <span className="block aspect-[3/2] overflow-hidden bg-black/30">
-                                        <img
+                                        <StoneResponsiveImage
                                             src={frame.thumbUrl || frame.imageUrl}
+                                            profile="thumb"
                                             alt=""
                                             aria-hidden="true"
                                             className="h-full w-full object-cover"
@@ -276,8 +295,11 @@ export default function FinishLightbox({
                     className="relative mt-4 flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-[4px] border border-white/20 bg-black"
                 >
                     {activeFrame?.imageUrl ? (
-                        <img
+                        <StoneResponsiveImage
+                            key={activeFrame.imageUrl}
                             src={activeFrame.imageUrl}
+                            profile="zoom"
+                            sizes={zoom === 2 ? LIGHTBOX_ZOOM_SIZES : LIGHTBOX_SIZES}
                             alt={
                                 activeFrame.imageAlt ||
                                 `${stoneName} ${activeFinish.label}`

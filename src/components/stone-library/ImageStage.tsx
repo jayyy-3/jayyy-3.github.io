@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 import type { FinishVM } from '../../types/stone-library';
+import StoneResponsiveImage from './StoneResponsiveImage';
 
 interface ImageStageProps {
     stoneName: string;
@@ -348,8 +349,9 @@ export default function ImageStage({
                                     className="absolute inset-0 text-left outline-none focus-visible:ring-2 focus-visible:ring-[#00FF19] focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950"
                                 >
                                     {finish.imageUrl ? (
-                                        <img
+                                        <StoneResponsiveImage
                                             src={finish.imageUrl}
+                                            profile="stage"
                                             alt={
                                                 finish.imageAlt ||
                                                 `${stoneName} ${finish.label}`.trim()
@@ -360,7 +362,8 @@ export default function ImageStage({
                                                     ? 'opacity-100'
                                                     : 'opacity-70 group-hover:opacity-94 group-focus-within:opacity-94',
                                             ].join(' ')}
-                                            loading="eager"
+                                            loading={isActive ? 'eager' : 'lazy'}
+                                            fetchPriority={isActive ? 'high' : 'auto'}
                                         />
                                     ) : (
                                         <div className="absolute inset-0 flex items-center justify-center bg-[#242424] px-3 text-center">
@@ -417,16 +420,30 @@ export default function ImageStage({
                 </div>
             </div>
 
-            <div className="flex items-center justify-between rounded-[4px] border border-black/10 bg-white px-4 py-2.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-black/55 shadow-none">
+            <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 rounded-[4px] border border-black/10 bg-white px-4 py-2.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-black/55 shadow-none">
                 <span>{stoneName}</span>
                 {activeFinish ? (
-                    <span className="text-right">
-                        {activeFinish.label}
-                        {activeFinish.imageRole === 'finish-specific'
-                            ? ''
-                            : activeFinish.imageRole === 'reference'
-                                ? ' - confirm sample'
-                                : ' - image pending'}
+                    <span className="flex flex-wrap items-center justify-end gap-x-4 gap-y-1 text-right">
+                        <span>
+                            {activeFinish.label}
+                            {activeFinish.imageRole === 'finish-specific'
+                                ? ''
+                                : activeFinish.imageRole === 'reference'
+                                    ? ' - confirm sample'
+                                    : ' - image pending'}
+                        </span>
+                        {activeFinish.imageUrl ? (
+                            <a
+                                href={activeFinish.imageUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                data-stone-original-link=""
+                                className="inline-flex min-h-6 items-center text-black underline decoration-black/30 underline-offset-4 transition hover:decoration-[var(--urblo-lime)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--urblo-lime)]"
+                                aria-label={`View original full-resolution image of ${stoneName} ${activeFinish.label} (opens in a new tab)`}
+                            >
+                                View original
+                            </a>
+                        ) : null}
                     </span>
                 ) : null}
             </div>
@@ -451,8 +468,9 @@ export default function ImageStage({
                                 className="group flex w-[120px] flex-none flex-col overflow-hidden rounded-[4px] border border-black/10 bg-white text-left transition hover:border-black/35 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--urblo-lime)]"
                             >
                                 <span className="block aspect-[3/2] overflow-hidden bg-black/5">
-                                    <img
+                                    <StoneResponsiveImage
                                         src={image.thumbUrl || image.imageUrl}
+                                        profile="thumb"
                                         alt=""
                                         aria-hidden="true"
                                         className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"

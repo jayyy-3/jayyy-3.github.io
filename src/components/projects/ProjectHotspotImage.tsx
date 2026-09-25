@@ -12,6 +12,7 @@ import type { ProjectHotspot } from '../../data/projectData';
 import StoneLibraryService from '../../service/StoneLibraryService';
 import type { StoneDetailVM } from '../../types/stone-library';
 import ProjectResponsiveImage from './ProjectResponsiveImage';
+import StoneResponsiveImage from '../stone-library/StoneResponsiveImage';
 
 interface ProjectHotspotImageProps {
     image: string;
@@ -341,8 +342,9 @@ export default function ProjectHotspotImage({
                                     <div className="grid grid-cols-[72px_minmax(0,1fr)] gap-3">
                                         <div className="h-[72px] w-[72px] overflow-hidden bg-black">
                                             {material.previewImage ? (
-                                                <img
+                                                <StoneResponsiveImage
                                                     src={material.previewImage}
+                                                    profile="thumb"
                                                     alt={material.previewAlt}
                                                     className="h-full w-full object-cover"
                                                     loading="lazy"

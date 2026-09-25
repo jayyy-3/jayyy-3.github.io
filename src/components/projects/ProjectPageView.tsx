@@ -10,6 +10,7 @@ import StoneLibraryService from '../../service/StoneLibraryService';
 import type { StoneDetailVM } from '../../types/stone-library';
 import ProjectHotspotImage from './ProjectHotspotImage';
 import ProjectResponsiveImage from './ProjectResponsiveImage';
+import StoneResponsiveImage from '../stone-library/StoneResponsiveImage';
 
 interface ProjectPageViewProps {
   project: ProjectData;
@@ -409,7 +410,7 @@ function FeaturedMaterials({ project }: { project: ProjectData }) {
               >
                 <div className="overflow-hidden bg-black">
                   {resolved.image ? (
-                    <img src={resolved.image} alt={resolved.imageAlt} className="aspect-[4/3] w-full object-cover" loading="lazy" />
+                    <StoneResponsiveImage src={resolved.image} profile="material" alt={resolved.imageAlt} className="aspect-[4/3] w-full object-cover" loading="lazy" />
                   ) : null}
                 </div>
                 <div>

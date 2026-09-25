@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import type { StoneCardVM } from '../../types/stone-library';
 import StatusPill from './StatusPill';
+import StoneResponsiveImage from './StoneResponsiveImage';
 
 interface StoneCardProps {
   stone: StoneCardVM;
@@ -18,8 +19,9 @@ export default function StoneCard({ stone }: StoneCardProps) {
     >
       <div className="relative aspect-[1.08/1] overflow-hidden bg-[rgba(239,239,239,0.78)]">
         {stone.coverImageUrl ? (
-          <img
+          <StoneResponsiveImage
             src={stone.coverImageUrl}
+            profile="card"
             alt={stone.coverImageAlt || `${stone.name} finish preview`}
             className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.025] group-hover:opacity-95"
             loading="lazy"
