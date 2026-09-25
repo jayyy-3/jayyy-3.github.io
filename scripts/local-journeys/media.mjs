@@ -39,6 +39,9 @@ export async function mediaJourney({ page, check, id, directory }) {
   await check('Media expired sign-in is translated, keeps the edit, and live Archive asks first', async () => {
     await openFixture()
     await caption.fill(`Expired session caption ${id}`)
+    // The seeded fixture has no usage notes, so the publish checklist would stop Save before
+    // the live confirmation; add them in the form only (the simulated 401 means nothing is written).
+    await page.getByRole('textbox', { name: 'Usage notes', exact: true }).fill(`Synthetic usage notes ${id}`)
     const pattern = '**/rest/v1/media_assets?*'
     const expired = route => route.request().method() === 'PATCH'
       ? route.fulfill({ status: 401, contentType: 'application/json', body: JSON.stringify({ code: 'PGRST301', message: 'JWT expired', details: null, hint: null }) })
