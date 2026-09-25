@@ -1039,7 +1039,7 @@ function SpamCheckPill({ value }: { value: boolean | null }) {
     );
 }
 
-function leadToForm(
+export function leadToForm(
     kind: LeadKind | null,
     id: number | null,
     enquiries: EnquiryRow[],
@@ -1070,7 +1070,7 @@ function leadToForm(
     return emptyForm;
 }
 
-function getWorkflowGuidance(kind: LeadKind | null, status: string) {
+export function getWorkflowGuidance(kind: LeadKind | null, status: string) {
     if (status === 'spam') {
         return {
             title: 'No customer follow-up',
@@ -1130,7 +1130,7 @@ function getWorkflowGuidance(kind: LeadKind | null, status: string) {
     return enquiryGuidance[status] ?? enquiryGuidance.new;
 }
 
-function getLeadWorkflowStatusSummary(
+export function getLeadWorkflowStatusSummary(
     kind: LeadKind | null,
     status: string,
     hasOwner: boolean,
@@ -1217,7 +1217,7 @@ function formatSourceRoute(route: string | null) {
     return label;
 }
 
-function buildLeadExportCsv(
+export function buildLeadExportCsv(
     enquiries: EnquiryRow[],
     sampleRequests: SampleRequestRow[],
     sampleItems: SampleRequestItemRow[],

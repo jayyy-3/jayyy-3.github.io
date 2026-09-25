@@ -285,12 +285,13 @@
         ]
       },
       "status": "now",
-      "phase": "implementation",
-      "nextAction": "Opus implements on its own branch and worktree; Claude reports to Jay before merge.",
-      "blocker": "",
+      "phase": "awaiting_external",
+      "nextAction": "Claude reviews PR claude/opt-vitest-runner (stacked on PR #60) and reports to Jay; merge only after required CI passes and Jay approves. Rebase package.json/package-lock.json onto the repo-hygiene and framer-motion branches if they merge first.",
+      "blocker": "Jay review and merge decision; PR CI (runtime classification because package.json changed) must pass.",
       "notes": [
         "2026-09-25: created from the 2026-09-24 four-track optimization audit (session scratch, not repository state). Wave 1 of 3; Jay decides on wave 2 after Claude's report.",
-        "New files to create: vitest.config.ts, src/**/*.test.ts (not listed because the path check requires existing files)."
+        "New files to create: vitest.config.ts, src/**/*.test.ts (not listed because the path check requires existing files).",
+        "2026-09-25 implementation: vitest 4.1.11 (Node 20 compatible; vitest 5 needs Node 22) with npm test; 461 migrated assertions in tests/*.test.ts equal the 461 in the six source scripts; 20 admin editor tests (Products 8, Media 6, Settings 4, Leads 2) against exported pure helpers with Supabase mocked; graph node unit replaces forms-api/overlay/stone-workspace/admin-runtime; tests/**, src/**/*.test.ts(x) and vitest.config.* classify as tooling (deploy=false). Mutation proof and gate evidence: WORKLOG 2026-09-25 Test runner."
       ]
     },
     {

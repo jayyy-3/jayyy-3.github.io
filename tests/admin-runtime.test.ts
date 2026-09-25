@@ -1,11 +1,9 @@
+import { afterEach, beforeEach, test } from 'vitest'
 import assert from 'node:assert/strict'
 import { handleAdminImageQrRequest } from '../functions/_lib/admin-image-qr.js'
 import { handleAdminProjectsRequest } from '../functions/_lib/admin-projects.js'
 import { readServiceConfig } from '../functions/_lib/admin-runtime.js'
 
-if (typeof globalThis.WebSocket === 'undefined') globalThis.WebSocket = class {
-  constructor() { throw new Error('Identity tests do not permit realtime connections') }
-}
 const originalFetch = globalThis.fetch
 const env = { SUPABASE_URL: 'https://local-identity.example.test/', SUPABASE_SERVICE_ROLE_KEY: 'synthetic-service-key' }
 const modules = [
@@ -25,7 +23,7 @@ async function expectError(handler, code, status, config = env, token = 'synthet
   assert.equal(response.headers.get('cache-control'), 'no-store')
   return body
 }
-try {
+beforeEach(() => {
   globalThis.fetch = async (input, init) => {
     const url = new URL(typeof input === 'string' ? input : input.url)
     assert.equal(url.origin, 'https://local-identity.example.test')
@@ -42,8 +40,15 @@ try {
     if (scenario === 'missing') return Response.json([])
     return Response.json({ user_id: 'synthetic-user', role: scenario, is_active: true })
   }
+})
+afterEach(() => { globalThis.fetch = originalFetch })
+
+test('readServiceConfig accepts the legacy service key name and trims the URL', () => {
   assert.deepEqual(readServiceConfig({ SUPABASE_URL: env.SUPABASE_URL, SUPABASE_SERVICE_KEY: 'legacy-key' }), { url: 'https://local-identity.example.test', serviceKey: 'legacy-key' })
-  for (const [label, handler, missingConfigMessage, deniedMessage] of modules) {
+})
+
+for (const [label, handler, missingConfigMessage, deniedMessage] of modules) {
+  test(`${label}: missing config/session, invalid identity, inactive/missing profile, backend error, unknown role, viewer denial and editor/admin/owner admission`, async () => {
     requests = []; scenario = 'owner'
     await expectError(handler, 'missing_session', 401, {}, null)
     assert.deepEqual(requests, [])
@@ -67,6 +72,5 @@ try {
       assert.equal(response.status, 400, `${label} ${scenario} reaches body validation`)
       assert.deepEqual(requests, ['/auth/v1/user', '/rest/v1/admin_profiles'])
     }
-    console.log(`PASS ${label}: missing config/session, invalid identity, inactive/missing profile, backend error, unknown role, viewer denial and editor/admin/owner admission`)
-  }
-} finally { globalThis.fetch = originalFetch }
+  })
+}

@@ -21,6 +21,14 @@ for (const suite of Object.keys(suites)) {
 assert.equal(resolveChecks('container').filter(id => id === 'build').length, 1)
 assert.ok(resolveChecks('runtime').includes('browser'))
 for (const suite of ['tooling', 'container', 'runtime', 'migrations']) assert.ok(resolveChecks(suite).includes('knip'), `${suite} runs knip`)
+// Unit tests: test-only changes run the full source graph (container) but never deploy.
+for (const path of ['tests/forms-api.test.ts', 'tests/setup/no-network.ts', 'src/pages/admin/AdminProductsPage.test.ts', 'vitest.config.ts']) {
+  assert.deepEqual([classify([path]).category, classify([path]).suite, classify([path]).deploy], ['tooling', 'container', false], path)
+}
+for (const path of ['functions/api/example.test.ts', 'public/example.test.ts', 'src/pages/admin/AdminProductsPage.tsx']) assert.equal(classify([path]).deploy, true, path)
+assert.equal(classify(['src/pages/admin/AdminProductsPage.test.ts', 'src/pages/admin/AdminProductsPage.tsx']).deploy, true)
+for (const suite of ['smoke', 'admin', 'container', 'runtime', 'migrations']) assert.ok(resolveChecks(suite).includes('unit'), `${suite} includes unit`)
+assert.ok(!resolveChecks('docs').includes('unit'))
 console.log('Verification classification, rename/delete fail-closed handling, dependencies and deduplication passed.')
 
 // Exercise actual Git records and fingerprints, not just handcrafted path arrays.
