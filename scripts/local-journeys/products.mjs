@@ -101,11 +101,12 @@ export async function productJourney({ page, check, id, directory }) {
     assert.equal(response.status(), 200)
     assert.equal((await response.json()).short_description, `Offline edit ${id}`)
     await page.waitForURL(`${LOCAL_APP}/admin/media`)
-    const refreshBlocked = await page.evaluate(() => {
+    // The URL changes before the lazily loaded Media screen replaces Products; judge the settled page.
+    await expect(page.getByRole('button', { name: 'External media', exact: true })).toBeEnabled()
+    await expect.poll(() => page.evaluate(() => {
       const event = new Event('beforeunload', { cancelable: true })
       window.dispatchEvent(event)
       return event.defaultPrevented
-    })
-    assert.equal(refreshBlocked, false, 'A clean page must not warn on refresh')
+    }), { message: 'A clean page must not warn on refresh' }).toBe(false)
   })
 }
