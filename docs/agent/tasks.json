@@ -1,71 +1,344 @@
 {
   "version": 2,
-  "lastUpdated": "2026-09-13",
+  "lastUpdated": "2026-09-26",
   "archive": "docs/archive/2026-09-09/completed-tasks.json",
   "tasks": [
     {
-      "id": "NOW-STONE-PROJECT-REFS-001",
+      "id": "NOW-OPT-PROJECT-POINT-MARKER-001",
       "status": "now",
       "priority": 0,
-      "summary": "Link Stone Library and Projects both ways: quiet public material-point cards with deep links, Stone \"Used in projects\", and material points on any Project media image in a reshaped admin editor.",
+      "modules": [
+        "projects",
+        "public-ui"
+      ],
+      "summary": "Restyle the public Project material-point markers to Jay's approved spec: 14px white dot with lime border and 1px dark outer stroke, invisible 44px hit area, three pulse cycles then rest, enlarge on hover/active, no pulse under reduced motion.",
       "files": [
         "src/components/projects/ProjectHotspotImage.tsx",
-        "src/components/projects/ProjectPageView.tsx",
-        "src/pages/ProjectDetails.tsx",
-        "src/service/ProjectService.ts",
-        "src/components/stone-library/StoneProjectsSection.tsx",
-        "src/pages/StonePageView.tsx",
-        "src/pages/StoneLibraryDetailPage.tsx",
-        "src/pages/admin/projects/ProjectEditor.tsx",
-        "src/pages/admin/projects/sections/MediaSection.tsx",
-        "src/pages/admin/projects/sections/MaterialsSection.tsx",
-        "src/pages/admin/projects/sections/EditorControls.tsx",
-        "src/pages/admin/AdminProjectsPage.tsx",
-        "src/features/projects/projectAggregate.ts",
-        "scripts/check-admin-projects-aggregate.mjs",
-        "scripts/local-journeys/projects.mjs"
+        "src/index.css",
+        "docs/DESIGN.md"
       ],
       "acceptance": [
-        "Public material points are quiet by default; hover/focus opens a card, tap toggles, Esc/outside closes, cards stay inside the image, View stone deep-links variant and finish; a legend works at 375px.",
-        "/projects/<slug>?point=<id> scrolls to the image and pins that point.",
-        "Stone detail shows Used in projects only when referenced, ordered/highlighted by the current finish, with See placement deep links; the admin preview does not render it; Featured Materials remains.",
-        "Admin Projects has no Maps section: four expandable sections with a section rail and blocker dots; any media image can enable/disable points (disable deletes after confirmation), image replacement keeps points with a notice, and removing a point image cascades.",
-        "The point panel can create a material in place; Materials show point counts; older projects with maps open clean and persist on Save; publish blockers never reference maps.",
-        "No Function/RPC/migration change (git diff main -- functions supabase is empty); each phase PR has green CI, gate, Preview smoke and clean diff check; check-script changes are justified and every forbid assertion is kept."
+        "Marker renders as a 14px circle, white fill, 2px lime (--urblo-lime) border and 1px dark outer stroke; the centre black dot is removed.",
+        "A lime halo expands and fades about every 2s for three cycles after the image enters the viewport, then stops; hover or focus restarts it; prefers-reduced-motion shows the static dot only.",
+        "Hover, focus and the open-card state scale the dot up (about 1.3x); the hit area stays >= 44px on touch and pointer.",
+        "Existing behaviour is unchanged: hover/focus opens the card, tap toggles, Esc/outside closes, ?point= deep link pins, legend works at 375px.",
+        "DESIGN.md records the marker spec as a durable decision; before/after screenshots at 1440px and 375px on a light and a dark image."
       ],
       "verification": [
         "npm run agent:verify -- --plan",
         "npm run gate",
-        "npm run local:start && npm run local:verify (Phase 2)",
         "npm run agent:cloudflare-preview-smoke -- --base-url <branch Preview>",
         "git diff --check"
       ],
-      "notes": [
-        "2026-09-11: Phase 1 (public point cards, Stone Used in projects, ?point= deep links) implemented on claude/stone-project-refs-phase1-public. Plan: docs/plans/TMP-stone-project-bidirectional-refs.md (temporary; Claude deletes it after acceptance).",
-        "2026-09-11: Phase 1 PR #50 (1fba735) CI 34594618314 passed; Preview https://27097513.urblo-site.pages.dev smoke and read-only QA passed. Awaiting acceptance; not merged.",
-        "2026-09-11: Phase 2 (four-section editor, section rail, points on any page image, legacy map adoption, inline confirmations) implemented on claude/stone-project-refs-phase2-admin, stacked on phase 1. Local stack has no Stone Library records, so the local journey stops at the publish blocker.",
-        "2026-09-11: Phase 2 PR #51 (d368738) CI 34597059624 passed, including local:verify and Preview https://f267fac3.urblo-site.pages.dev smoke; separate preview smoke and read-only public regression passed.",
-        "2026-09-11: Phase 3 cleanup on claude/stone-project-refs-phase3-cleanup: ProjectMaterialMap wrapper retired, editor split into projects/sections, docs closed out. Stone page Project reads measured at 6 requests / ~217 ms median in parallel with the catalogue (threshold >6 or >400 ms not met), so no Stone-projects RPC follow-up task.",
-        "2026-09-11: Phase 3 PR #52 CI 34598051213 passed; Preview https://b03a03ab.urblo-site.pages.dev smoke passed. All three stacked PRs await Claude acceptance and Jay merge approval.",
-        "2026-09-11: Claude acceptance passed on f71b95b (source review, host checks, read-only Preview 6454b862 desktop/mobile QA). Temporary plan file removed. Merge #50 → #51 → #52 in order awaits Jay.",
-        "2026-09-12: Jay approved merge and release. #50 → aa4f299, #51 → 3957622, #52 → 7de1af7 merged in order; production CI 34606801956 deployed immutable https://905e7161.urblo-site.pages.dev and passed immutable/apex/www smoke; separate apex/www readback against that reference and read-only live feature checks passed."
-      ],
-      "phase": "awaiting_external",
-      "modules": [
-        "projects",
-        "stone-library"
-      ],
+      "phase": "implementation",
       "authorization": {
-        "source": "Jay approved the Stone Library ⇄ Projects bidirectional references plan on 2026-09-11.",
+        "source": "Jay approved the marker spec on 2026-09-26 (14px white/lime dot, dark outer stroke, three pulse cycles then rest) and asked for it alongside wave 1.",
         "included": [
-          "Branch implementation, isolated local tests, git push, pull requests, Cloudflare branch Preview and deployed smoke, docs/agent state updates."
+          "Branch implementation, isolated local tests, git push, pull request, Cloudflare branch Preview and smoke, DESIGN.md and docs/agent state updates."
         ],
         "excluded": [
-          "Merge to main, production data or Storage writes, real email, DNS, credentials and any migration apply."
+          "Merge to main, production data writes, email, DNS, credentials, migrations."
         ]
       },
-      "nextAction": "Jay tries the Projects editor in production: mark materials on one project image, Save, Publish and check the public point card and the Stone page Used in projects.",
-      "blocker": "Jay usability acceptance of the Projects points editor in production."
+      "nextAction": "Opus implements on its own branch; Claude reports to Jay before merge.",
+      "blocker": "",
+      "notes": [
+        "2026-09-26: Jay's request from a production screenshot of /projects/artisan-park-yarrabend; the current 36px white/lime/black-dot marker is replaced. Not a keyboard focus-ring change."
+      ]
+    },
+    {
+      "id": "NOW-OPT-PERF-STONE-IMG-001",
+      "priority": 0,
+      "modules": [
+        "stone-library",
+        "public-ui"
+      ],
+      "summary": "Serve Stone Library and product-option stone media through sized variants (srcset/sizes/lazy) instead of raw Supabase originals; keep a full-resolution original link for designers on the stone detail stage.",
+      "files": [
+        "src/components/OptionSelector.tsx",
+        "src/components/stone-library/",
+        "src/pages/StonePageView.tsx",
+        "src/pages/StoneLibraryDetailPage.tsx",
+        "src/features/projects/",
+        "src/lib/"
+      ],
+      "acceptance": [
+        "No public page requests a raw stone-assets storage original except through an explicit View original / Download original link on the stone detail stage.",
+        "Swatches and cards load a variant sized to their rendered box; detail stage uses srcset up to at least 2560px so texture stays inspectable on Retina displays.",
+        "Production-equivalent Lighthouse mobile: /products/prime-block transfer < 3MB, /stone-library desktop transfer < 5MB, one stone detail desktop LCP < 2.5s (measured on branch Preview).",
+        "og:image for stone pages points at a sized variant, not the original.",
+        "No Function/RPC/migration change unless justified; existing resize endpoint reused."
+      ],
+      "verification": [
+        "npm run agent:verify -- --plan",
+        "npm run gate",
+        "npm run agent:cloudflare-preview-smoke -- --base-url <branch Preview>",
+        "git diff --check",
+        "npx lighthouse against branch Preview for /stone-library, one stone detail and /products/prime-block (mobile + desktop), results saved in .tmp/"
+      ],
+      "authorization": {
+        "source": "Jay approved the 2026-09-24 optimization audit wave 1 and instructed Opus execution on 2026-09-25 (\"第一波6个任务开工，让Opus去干\").",
+        "included": [
+          "Branch implementation, isolated local tests, git push, pull request, Cloudflare branch Preview and smoke, docs/agent state updates."
+        ],
+        "excluded": [
+          "Merge to main (Jay approves after Claude report), production data or Storage writes, real email, DNS or credential changes, migrations."
+        ]
+      },
+      "status": "now",
+      "phase": "implementation",
+      "nextAction": "Opus implements on its own branch and worktree; Claude reports to Jay before merge.",
+      "blocker": "",
+      "notes": [
+        "2026-09-25: created from the 2026-09-24 four-track optimization audit (session scratch, not repository state). Wave 1 of 3; Jay decides on wave 2 after Claude's report."
+      ]
+    },
+    {
+      "id": "NOW-OPT-PERF-CLS-SHELL-001",
+      "priority": 0,
+      "modules": [
+        "public-ui"
+      ],
+      "summary": "Remove the footer layout shift and route fade-in that make CLS fail on 8 of 9 public pages; scope the homepage poster preload to /; replace framer-motion with CSS for the route transition.",
+      "files": [
+        "src/App.tsx",
+        "src/components/site/",
+        "index.html",
+        "vite.config.ts",
+        "package.json",
+        "src/components/Footer.tsx",
+        "src/components/Header.tsx"
+      ],
+      "acceptance": [
+        "Lighthouse CLS < 0.1 on all 9 audited public URLs, mobile and desktop, measured on branch Preview.",
+        "Homepage LCP element is the hero, not the footer.",
+        "Non-homepage routes do not request hero-poster.jpg.",
+        "Entry JS gzip size reduced (target < 105KB) with framer-motion removed or confined to a lazy chunk; visual result of the route transition preserved as a simple CSS fade.",
+        "No visible change to layout at 375px and 1440px other than the removed jump (before/after screenshots kept in .tmp/)."
+      ],
+      "verification": [
+        "npm run agent:verify -- --plan",
+        "npm run gate",
+        "npm run agent:cloudflare-preview-smoke -- --base-url <branch Preview>",
+        "git diff --check",
+        "npx lighthouse against branch Preview for the 9 audited URLs (mobile + desktop)",
+        "dist chunk size table before/after in the PR"
+      ],
+      "authorization": {
+        "source": "Jay approved the 2026-09-24 optimization audit wave 1 and instructed Opus execution on 2026-09-25 (\"第一波6个任务开工，让Opus去干\").",
+        "included": [
+          "Branch implementation, dependency removal, isolated local tests, git push, pull request, Cloudflare branch Preview and smoke, docs/agent state updates."
+        ],
+        "excluded": [
+          "Merge to main (Jay approves after Claude report), production data or Storage writes, real email, DNS or credential changes, migrations."
+        ]
+      },
+      "status": "now",
+      "phase": "implementation",
+      "nextAction": "Opus implements on its own branch and worktree; Claude reports to Jay before merge.",
+      "blocker": "",
+      "notes": [
+        "2026-09-25: created from the 2026-09-24 four-track optimization audit (session scratch, not repository state). Wave 1 of 3; Jay decides on wave 2 after Claude's report.",
+        "2026-09-26: Homepage LCP element being the logo/acknowledgement rather than the hero is accepted for wave 1; the hero headline animation decision goes to wave 2."
+      ]
+    },
+    {
+      "id": "NOW-OPT-UI-CASCADE-FIXES-001",
+      "priority": 0,
+      "modules": [
+        "public-ui",
+        "stone-library"
+      ],
+      "summary": "Fix the four confirmed visible UI defects: urblo-* utilities overriding Tailwind modifiers (dark-background eyebrows unreadable), StatusPill unreadable on dark stones, inconsistent keyboard focus rings, and wrapping button labels on Contact.",
+      "files": [
+        "src/index.css",
+        "src/components/stone-library/StatusPill.tsx",
+        "src/pages/ContactPage.tsx",
+        "src/pages/CapabilitiesPage.tsx",
+        "tailwind.config.js"
+      ],
+      "acceptance": [
+        "urblo-* component classes live in @layer components so Tailwind modifiers such as text-white/62 and text-[10px] apply again; no page gains a new body/meta text below 4.5:1 contrast (spot-check screenshots of Home, Capabilities, Contact, Stone Library, Projects before/after).",
+        "Eyebrow labels on dark sections of Contact and Capabilities render white/near-white.",
+        "StatusPill on stone cards meets DESIGN.md (dark backing, white text) and is readable on Angola Black.",
+        "Every focusable element on Home, Stone Library, Projects, Contact, Capabilities shows a visible focus-visible ring of >= 3:1 contrast; no default blue outline mix.",
+        "STONE LIBRARY and SEND ENQUIRY buttons on Contact stay on one line at 1440px and 375px.",
+        "No token/type-scale redesign in this task (wave 2)."
+      ],
+      "verification": [
+        "npm run agent:verify -- --plan",
+        "npm run gate",
+        "npm run agent:cloudflare-preview-smoke -- --base-url <branch Preview>",
+        "git diff --check",
+        "Playwright or built-in browser screenshots desktop 1440px and mobile 375px, before/after, stored in .tmp/"
+      ],
+      "authorization": {
+        "source": "Jay approved the 2026-09-24 optimization audit wave 1 and instructed Opus execution on 2026-09-25 (\"第一波6个任务开工，让Opus去干\").",
+        "included": [
+          "Branch implementation, isolated local tests, git push, pull request, Cloudflare branch Preview and smoke, docs/agent state updates."
+        ],
+        "excluded": [
+          "Merge to main (Jay approves after Claude report), production data or Storage writes, real email, DNS or credential changes, migrations."
+        ]
+      },
+      "status": "now",
+      "phase": "implementation",
+      "nextAction": "Opus implements on its own branch and worktree; Claude reports to Jay before merge.",
+      "blocker": "",
+      "notes": [
+        "2026-09-25: created from the 2026-09-24 four-track optimization audit (session scratch, not repository state). Wave 1 of 3; Jay decides on wave 2 after Claude's report.",
+        "2026-09-26: Jay approved the open design choices: light-grey eyebrows on dark backgrounds (not pure white) and the black/white focus ring."
+      ]
+    },
+    {
+      "id": "NOW-OPT-ADMIN-SAFETY-001",
+      "priority": 0,
+      "modules": [
+        "products",
+        "articles",
+        "media",
+        "auth-settings",
+        "projects"
+      ],
+      "summary": "Stop-gap safety for the older admin modules used by non-technical colleagues: remove the Settings Status dropdown, require confirmation before Save changes a published Product/Article/Media record, auto-generate URL keys from names, and correct the Projects 'Saved — not live' label for live projects with unpublished changes.",
+      "files": [
+        "src/pages/admin/AdminSettingsPage.tsx",
+        "src/pages/admin/AdminProductsPage.tsx",
+        "src/pages/admin/AdminMediaPage.tsx",
+        "src/pages/admin/AdminArticlesPage.tsx",
+        "src/pages/admin/projects/sections/EditorControls.tsx",
+        "scripts/check-admin-crud-coverage.mjs"
+      ],
+      "acceptance": [
+        "Settings page has no Status control; saved settings stay Published.",
+        "Saving an already-published Product, Article or Media record shows a confirmation naming the live effect (\"Update live page\") before writing; new drafts save without confirmation.",
+        "New Products and Articles derive the URL key from the name automatically, editable until first publish, locked after.",
+        "A live Project with unpublished changes shows \"Live · unpublished changes\", never \"Saved — not live\".",
+        "No schema, Function or RLS change; local synthetic journeys pass; check-admin-crud-coverage assertions updated to behavior-level where strings changed, every forbid assertion kept."
+      ],
+      "verification": [
+        "npm run agent:verify -- --plan",
+        "npm run gate",
+        "npm run agent:cloudflare-preview-smoke -- --base-url <branch Preview>",
+        "git diff --check",
+        "npm run local:start && npm run local:verify",
+        "npm run agent:admin-crud-coverage"
+      ],
+      "authorization": {
+        "source": "Jay approved the 2026-09-24 optimization audit wave 1 and instructed Opus execution on 2026-09-25 (\"第一波6个任务开工，让Opus去干\").",
+        "included": [
+          "Branch implementation, isolated local synthetic tests, git push, pull request, Cloudflare branch Preview and smoke, docs/agent state updates."
+        ],
+        "excluded": [
+          "Merge to main (Jay approves after Claude report), production data or Storage writes, real email, DNS or credential changes, migrations."
+        ]
+      },
+      "status": "now",
+      "phase": "implementation",
+      "nextAction": "Opus implements on its own branch and worktree; Claude reports to Jay before merge.",
+      "blocker": "",
+      "notes": [
+        "2026-09-25: created from the 2026-09-24 four-track optimization audit (session scratch, not repository state). Wave 1 of 3; Jay decides on wave 2 after Claude's report.",
+        "2026-09-26: Jay approved keeping the single \"Update live page\" wording everywhere (product and model both show it when both are live; media uses the same). Confirmation for Archive/Hide on live records is deferred to wave 2."
+      ]
+    },
+    {
+      "id": "NOW-OPT-TEST-RUNNER-001",
+      "priority": 0,
+      "modules": [
+        "harness",
+        "delivery"
+      ],
+      "summary": "Add vitest as the repository test runner, migrate the existing behavior assertions from scripts/check-*.mjs into *.test.ts, register a unit node in agent:verify, and write the first 20 behavior tests for the admin editors (Products 8, Media 6, Settings 4, Leads 2).",
+      "files": [
+        "package.json",
+        "scripts/_lib/verification.mjs",
+        "scripts/agent-verify.mjs",
+        "docs/agent/verification.md",
+        "scripts/"
+      ],
+      "acceptance": [
+        "npm test runs vitest; assertion count after migration >= count before (per-file table in the PR).",
+        "One deliberate mutation of a tested function makes the suite fail (mutation proof recorded).",
+        "agent:verify --plan includes unit when src/ changes; test-only changes classify as tooling with deploy=false.",
+        "The 20 new tests cover save/publish/validation behavior of Products, Media, Settings and Leads without touching production.",
+        "gate and CI green; verification.md documents the unit node in <= 15 added lines."
+      ],
+      "verification": [
+        "npm test",
+        "npm run agent:verify -- --plan",
+        "npm run gate",
+        "git diff --check"
+      ],
+      "authorization": {
+        "source": "Jay approved the 2026-09-24 optimization audit wave 1 and instructed Opus execution on 2026-09-25 (\"第一波6个任务开工，让Opus去干\").",
+        "included": [
+          "Dev dependency addition, script migration, isolated local tests, git push, pull request, docs/agent state updates."
+        ],
+        "excluded": [
+          "Runtime behavior changes in src/, deployment, production access."
+        ]
+      },
+      "status": "now",
+      "phase": "implementation",
+      "nextAction": "Opus implements on its own branch and worktree; Claude reports to Jay before merge.",
+      "blocker": "",
+      "notes": [
+        "2026-09-25: created from the 2026-09-24 four-track optimization audit (session scratch, not repository state). Wave 1 of 3; Jay decides on wave 2 after Claude's report.",
+        "New files to create: vitest.config.ts, src/**/*.test.ts (not listed because the path check requires existing files)."
+      ]
+    },
+    {
+      "id": "NOW-OPT-REPO-HYGIENE-001",
+      "priority": 0,
+      "modules": [
+        "harness",
+        "delivery"
+      ],
+      "summary": "Dependency and repository hygiene: fix react-router advisories (7.18.x), untrack .vite/deps, delete dead files (ProjectCard.tsx, utils/articles.ts, src/scripts/generate-article-index.ts, App.css), remove unused dependencies (lodash.throttle and types, clsx), move runtime libraries out of devDependencies, commit a knip config and add it to the tooling graph, and delete the 34 merged remote branches.",
+      "files": [
+        "package.json",
+        "package-lock.json",
+        ".gitignore",
+        "src/components/ProjectCard.tsx",
+        "src/utils/articles.ts",
+        "src/scripts/generate-article-index.ts",
+        "src/App.css",
+        "scripts/_lib/verification.mjs"
+      ],
+      "acceptance": [
+        "npm audit --omit=dev reports no high or critical.",
+        "knip reports 0 unused files and 0 unused dependencies with the committed config; knip runs in the tooling graph.",
+        ".vite/ is ignored and removed from the index; git status clean after build.",
+        "Full source graph, local:verify and branch Preview smoke pass (runtime dependency change requires the full release profile).",
+        "Merged remote branches deleted only after confirming each is merged into main (list recorded in WORKLOG); gh-pages left untouched unless Jay confirms separately."
+      ],
+      "verification": [
+        "npm run agent:verify -- --plan",
+        "npm run gate",
+        "npm run agent:cloudflare-preview-smoke -- --base-url <branch Preview>",
+        "git diff --check",
+        "npm audit --omit=dev",
+        "npx knip",
+        "npm run local:verify"
+      ],
+      "authorization": {
+        "source": "Jay approved the 2026-09-24 optimization audit wave 1 and instructed Opus execution on 2026-09-25 (\"第一波6个任务开工，让Opus去干\").",
+        "included": [
+          "Dependency changes, dead-code removal, git push, pull request, branch Preview and smoke, deletion of remote branches already merged into main (Jay approved 2026-09-25), docs/agent state updates."
+        ],
+        "excluded": [
+          "Deleting gh-pages or any unmerged branch; merge to main; production access."
+        ]
+      },
+      "status": "now",
+      "phase": "implementation",
+      "nextAction": "Opus implements on its own branch and worktree; Claude reports to Jay before merge.",
+      "blocker": "",
+      "notes": [
+        "2026-09-25: created from the 2026-09-24 four-track optimization audit (session scratch, not repository state). Wave 1 of 3; Jay decides on wave 2 after Claude's report.",
+        "New file to create: knip.json (not listed because the path check requires existing files)."
+      ]
     },
     {
       "id": "NOW-ADMIN-STONE-WORKSPACE-001",
