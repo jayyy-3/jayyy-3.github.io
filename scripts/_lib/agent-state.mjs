@@ -16,7 +16,7 @@ export function renderState({ status, queue }) {
   const currentSummary = current
     ? `**${current.id}** — ${current.summary}\n\n阶段：${current.phase}。状态：${current.status}。\n\n下一步：${current.nextAction ?? '按当前任务验收与验证要求继续。'}`
     : `当前没有正在执行的实现任务。${status.lastCompletedTask ? `最近完成：**${status.lastCompletedTask.id}** — ${status.lastCompletedTask.summary}` : ''}\n\n从任务总览选择下一项；归档和候选任务不会自动变成已授权开发。`;
-  const handoff = `# 当前任务与交接\n\n${intro}\n## 正在执行\n\n${currentSummary}\n\n${release}\n## 外部依赖\n\n${blockers}\n\n## 接手入口\n\n运行 \`npm run agent:init\`，只读当前任务及列出的模块规则。\`docs/agent/status.json\` 是发布观察来源，\`docs/agent/tasks.json\` 是任务来源。历史索引在 \`docs/WORKLOG.md\`。\n`;
+  const handoff = `# 当前任务与交接\n\n${intro}\n## 正在执行\n\n${currentSummary}\n\n${release}\n## 外部依赖\n\n${blockers}\n\n## 接手入口\n\n运行 \`npm run agent:init\`，只读当前任务及列出的模块规则。本文件是给人看的摘要，agent 启动不必再读：init 已输出同样的任务、发布观察和外部依赖。\`docs/agent/status.json\` 是发布观察来源，\`docs/agent/tasks.json\` 是任务来源。历史索引在 \`docs/WORKLOG.md\`。\n`;
   const tasks = [...queue.tasks].sort((a, b) => a.priority - b.priority);
   const overview = `# 项目执行总览\n\n${intro}\n## 任务\n\n| ID | 状态 / 阶段 | 内容 | 阻塞 |\n|---|---|---|---|\n${tasks.map((task) => `| ${task.id} | ${task.status} / ${task.phase} | ${cell(task.summary)} | ${cell(task.blocker || '—')} |`).join('\n')}\n\n已完成任务归档：\`${queue.archive}\`。本表不把等待客户验收当作代码开发。\n`;
   const readme = `<!-- agent:status:start -->\n## Current status\n\nObserved ${status.release.observedAt}: public site **${status.production.site}**, QR **${status.production.qr}**, CMS handoff **${status.production.adminCmsHandoff}**.\n\nCurrent task: **${status.currentTaskId ?? 'none (completed work is archived)'}**. See [handoff](docs/HANDOFF.md), [task overview](docs/NEXT_STEPS.md) and [project map](docs/PROJECT_MAP.md). These summaries are generated from repository-owned state.\n<!-- agent:status:end -->`;
@@ -49,7 +49,7 @@ export function validateState(bundle, root = process.cwd()) {
   if (status.production.content !== 'published_cms_overlay_with_static_fallback') errors.push('Public content fallback contract changed.');
   const cms = JSON.parse(readFileSync(join(root, 'docs/agent/admin-handoff-evidence.json'), 'utf8'));
   if (status.production.adminCmsHandoff !== cms.state) errors.push('CMS status contradicts structured production handoff evidence.');
-  for (const [id, module] of Object.entries(modules.modules)) for (const path of [...module.paths, ...module.rules]) if (!existsSync(join(root, path))) errors.push(`Module ${id} has missing path ${path}`);
+  for (const [id, module] of Object.entries(modules.modules)) for (const path of [...module.paths, ...module.rules, ...(module.references || [])]) if (!existsSync(join(root, path))) errors.push(`Module ${id} has missing path ${path}`);
   const archive = JSON.parse(readFileSync(join(root, queue.archive), 'utf8'));
   for (const task of archive.tasks) if (ids.has(task.id)) errors.push(`Task ${task.id} appears in active and completed queues.`);
   let startupBytes = 0;
@@ -75,5 +75,13 @@ export function verifyArchive(root = process.cwd()) {
   const sha = (data) => createHash('sha256').update(data).digest('hex');
   const errors = manifest.parts.flatMap((part, index) => sha(chunks[index]) === part.sha256 ? [] : [`Historical archive modified: ${part.path}`]);
   if (sha(Buffer.concat(chunks)) !== manifest.originalSha256) errors.push('Historical WORKLOG no longer reproduces original bytes.');
+  // 2026-09-26 archive: retired status history, verification text and the executed Stone adoption plan.
+  const slim = JSON.parse(readFileSync(join(root, 'docs/archive/2026-09-26/manifest.json'), 'utf8'));
+  for (const file of slim.files) {
+    const path = join(root, file.path);
+    if (!existsSync(path)) { errors.push(`Archived file missing: ${file.path}`); continue; }
+    const data = readFileSync(path);
+    if (data.length !== file.bytes || sha(data) !== file.sha256) errors.push(`Historical archive modified: ${file.path}`);
+  }
   return errors;
 }

@@ -2,7 +2,7 @@
 import { createHash, createHmac } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
-const plan = 'docs/agent/stone-library-adoption-plan.json';
+const plan = 'docs/archive/2026-09-26/stone-library-adoption-plan.json';
 const sha = createHash('sha256').update(readFileSync(plan)).digest('hex');
 const base = [
   { alg: 'HS256', typ: 'JWT' },

@@ -29,6 +29,8 @@ const allowedMissing = new Set([
   'src/utils/articles.ts',
   // Retired 2026-09-25: assertions moved to tests/forms-api.test.ts; archived evidence still cites it.
   'scripts/check-forms-api.mjs',
+  // Archived 2026-09-26 to docs/archive/2026-09-26/ (byte manifest there); WORKLOG evidence still cites the old path.
+  'docs/agent/stone-library-adoption-plan.json',
 ])
 const pathPrefixes = [
   '.github/',

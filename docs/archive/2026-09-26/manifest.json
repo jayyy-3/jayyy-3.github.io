@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "archivedAt": "2026-09-26",
+  "task": "NOW-OPT-AGENT-DOCS-SLIM-001",
+  "policy": "Immutable. Files are verified byte-for-byte by the harness (verifyArchive). Add a new dated directory instead of editing these files.",
+  "files": [
+    {
+      "path": "docs/archive/2026-09-26/stone-library-adoption-plan.json",
+      "source": "docs/agent/stone-library-adoption-plan.json",
+      "bytes": 229392,
+      "sha256": "b9a4e1f1c3fce163793263641139cc69c7620cce3853b2e03ed1a5a114784f9f",
+      "reason": "Executed 2026-09-10 Stone Library adoption plan (approved plan SHA recorded in docs/STONE_LIBRARY_WORKSPACE_RELEASE.md); moved unchanged."
+    },
+    {
+      "path": "docs/archive/2026-09-26/docs__agent__status.json",
+      "source": "docs/agent/status.json",
+      "bytes": 5715,
+      "sha256": "4bf43cacc9c6240164042ac2a6cadf4a5304a0b983e1dc9ca29ae239c24b1a36",
+      "reason": "Complete status.json before the 2026-09-26 trim (includes the stoneWorkspace release history)."
+    },
+    {
+      "path": "docs/archive/2026-09-26/status-stone-workspace.json",
+      "source": "docs/agent/status.json#stoneWorkspace",
+      "bytes": 2704,
+      "sha256": "750605c88487e24d5129c0a7b15488b9ec70f40e3bb2700827580d15a2d36caa",
+      "reason": "The stoneWorkspace block removed from live status, unchanged, with provenance fields."
+    },
+    {
+      "path": "docs/archive/2026-09-26/docs__agent__verification.md",
+      "source": "docs/agent/verification.md",
+      "bytes": 27371,
+      "sha256": "4f40f5ae8bd746cb55ad78ab5268dae598ff971b3afd6023572d9f33361bd5b9",
+      "reason": "Complete verification.md before it was reduced to live rules; specialized sections moved to docs/agent/live-verification.md."
+    }
+  ]
+}

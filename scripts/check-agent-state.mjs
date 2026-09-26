@@ -36,6 +36,13 @@ try {
   writeFileSync(join(dir, 'README.md'), readFileSync(join(dir, 'README.md'), 'utf8') + '\nCMS handoff passed.\n');
   assert(checkGenerated(bundle, dir).some((error) => error.includes('unverified')));
 } finally { rmSync(dir, { recursive: true, force: true }); }
+const archiveDir = mkdtempSync(join(tmpdir(), 'urblo-archive-test-'));
+try {
+  cpSync('docs/archive', join(archiveDir, 'docs/archive'), { recursive: true });
+  assert.deepEqual(verifyArchive(archiveDir), []);
+  writeFileSync(join(archiveDir, 'docs/archive/2026-09-26/status-stone-workspace.json'), '{}\n');
+  assert(verifyArchive(archiveDir).some((error) => error.includes('status-stone-workspace.json')));
+} finally { rmSync(archiveDir, { recursive: true, force: true }); }
 const idleDir = mkdtempSync(join(tmpdir(), 'urblo-idle-init-'));
 try {
   mkdirSync(join(idleDir, 'docs/agent'), { recursive: true });
