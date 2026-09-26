@@ -2552,6 +2552,289 @@
         "Merged 2026-09-26 via PR #67 as e1548af with Jay's approval; production CI 36157672301.",
         "Final production readback 2026-09-26 on e1548af3df842874e0f995d7cb34afcd18a3fb40, immutable https://21ec9a4c.urblo-site.pages.dev, CI 36157672301: immutable/apex/www smoke passed; see WORKLOG 2026-09-26 Optimization wave 1 release."
       ]
+    },
+    {
+      "id": "NOW-OPT-ADMIN-GUIDE-001",
+      "priority": 1,
+      "modules": [
+        "auth-settings",
+        "harness"
+      ],
+      "summary": "Split ADMIN_EDITOR_GUIDE.md into a one-screen English task-based quick guide for colleagues (change an image, edit a product, handle a lead, update addresses) and a developer operations runbook; remove the stale Stone workflow text; add an in-app Help entry in the admin shell that shows the quick guide.",
+      "files": [
+        "docs/ADMIN_EDITOR_GUIDE.md",
+        "docs/ADMIN_OPERATIONS_RUNBOOK.md",
+        "docs/ADMIN_UX_RESHAPE_PLAN.md",
+        "docs/PROJECT_MAP.md",
+        "docs/ARCHITECTURE.md",
+        "docs/agent/admin-handoff-evidence.json",
+        "src/pages/admin/AdminHelp.tsx",
+        "src/pages/admin/adminGuide.ts",
+        "src/pages/admin/AdminShell.tsx",
+        "scripts/check-admin-guide.mjs",
+        "scripts/_lib/verification.mjs"
+      ],
+      "acceptance": [
+        "Quick guide fits one screen, contains no Supabase/bucket/migration/localhost terms, and every step names a control that exists in the current UI (checked by a script against the admin source).",
+        "Developer content moved to a runbook and linked from PROJECT_MAP.",
+        "Admin shell shows a Help link or drawer with the quick guide on every admin route.",
+        "ADMIN_UX_RESHAPE_PLAN completed sections absorbed; admin-handoff-evidence editorGuideUsability updated with what was verified and what still needs a colleague."
+      ],
+      "verification": [
+        "npm run agent:verify -- --plan",
+        "npm run gate",
+        "git diff --check"
+      ],
+      "authorization": {
+        "source": "Jay approved optimization wave 2 on 2026-09-26 (\"开第二波\") after the wave 1 report; www redirect, CMS SEO data fixes and merged-branch deletion were authorized on 2026-09-25 (\"可以\").",
+        "included": [
+          "Docs and admin shell changes, git push, pull request, branch Preview and smoke, docs/agent state updates."
+        ],
+        "excluded": [
+          "Merge to main (Jay approves after Claude report), production data or Storage writes beyond the items listed, real email, credentials, migrations."
+        ]
+      },
+      "status": "done",
+      "phase": "complete",
+      "nextAction": "A colleague completes two guide tasks on the live admin; record in admin-handoff-evidence editorGuideUsability.",
+      "blocker": "",
+      "notes": [
+        "2026-09-26: wave 2 of the 2026-09-24 optimization audit. Jay decided the homepage hero headline keeps its letter-by-letter animation (homepage LCP element stays non-hero by design).",
+        "2026-09-26: runtime commit 86b648e passed the Node 20 container gate (26 checks), npm test 77/77 and config gate 12 routes; PR #69 CI run 36160848011 passed (verify-and-deploy, quality); branch Preview https://445df750.urblo-site.pages.dev passed agent:cloudflare-preview-smoke and a read-only headless check of the login-page Help sheet.",
+        "2026-09-26: rebased onto main by Claude (docs union; conflicts recorded in WORKLOG) and merged #69."
+      ],
+      "completedAt": "2026-09-26",
+      "evidence": [
+        "Merged 2026-09-26 via PR #69 as 9732e9d under Jay's standing merge authorization; production CI 36207742405.",
+        "Final production readback 2026-09-26 on 194976d50b79bbad89b949f85aba3903e1a99ee7, immutable https://21b51af8.urblo-site.pages.dev, CI 36209299045 (first run of the convergence wait): immutable/apex/www smoke passed; see WORKLOG 2026-09-26 Optimization wave 2 release."
+      ]
+    },
+    {
+      "id": "NOW-OPT-SEO-EDGE-HEAD-001",
+      "priority": 0,
+      "modules": [
+        "delivery",
+        "public-ui"
+      ],
+      "summary": "Per-route HTML head at the edge (title, description, canonical, share image, JSON-LD) for every public route including CMS-published details, real 404 responses for unknown paths, a generated sitemap with every published project/stone/product/article, trailing-slash 301s, and the www to apex 301.",
+      "files": [
+        "functions/",
+        "src/components/PublicContentSeo.tsx",
+        "public/sitemap.xml",
+        "public/robots.txt",
+        "scripts/check-seo-readiness.mjs",
+        "docs/SEO_PHASE_2_PLAN.md"
+      ],
+      "acceptance": [
+        "curl of any published project, stone, product or article URL returns first-response HTML with that entity's title, description, self canonical and og:image (sized variant), verified on Preview and production.",
+        "Unknown paths return HTTP 404 with the SPA not-found page; trailing-slash variants 301 to the canonical form.",
+        "/sitemap.xml is generated from static routes plus published records with edge caching; it contains the 19 URLs the audit found missing and no draft URLs.",
+        "https://www.urblo.com.au/<path> returns 301 to https://urblo.com.au/<path> (Cloudflare zone rule; if the available token cannot create it, record the exact rule for Jay instead).",
+        "Homepage rendered title restored to the descriptive SEO title via the CMS setting or code fallback; agent:seo-readiness updated and passing; NEXT-SEO-CONTENT-GROWTH-001 acceptance item 5 closed."
+      ],
+      "verification": [
+        "npm run agent:verify -- --plan",
+        "npm run gate",
+        "npm test",
+        "npm run agent:cloudflare-preview-smoke -- --base-url <branch Preview>",
+        "git diff --check"
+      ],
+      "authorization": {
+        "source": "Jay approved optimization wave 2 on 2026-09-26 (\"开第二波\") after the wave 1 report; www redirect, CMS SEO data fixes and merged-branch deletion were authorized on 2026-09-25 (\"可以\").",
+        "included": [
+          "Branch implementation, Pages Functions middleware, sitemap generation, Cloudflare zone redirect rule creation (read back and recorded), the approved homepage SEO title CMS setting update, git push, pull request, branch Preview and smoke, docs/agent state updates."
+        ],
+        "excluded": [
+          "Merge to main (Jay approves after Claude report), production data or Storage writes beyond the items listed, real email, credentials, migrations."
+        ]
+      },
+      "status": "done",
+      "phase": "complete",
+      "nextAction": "Jay adds the www→apex 301 redirect rule in the Cloudflare zone (exact rule in WORKLOG); CI switches to asserting the 301 automatically.",
+      "blocker": "",
+      "notes": [
+        "2026-09-26: wave 2 of the 2026-09-24 optimization audit. Jay decided the homepage hero headline keeps its letter-by-letter animation (homepage LCP element stays non-hero by design).",
+        "2026-09-26: implemented on branch claude/opt-seo-edge-head (stacked on PR #68): functions/_middleware.js + functions/_lib/edge-seo.js + src/lib/edgeSeo.ts; public/_routes.json now includes /* and excludes static asset/media folders. Homepage title restored by a code floor (CMS SEO title under 20 characters is ignored); no production Settings write was made. No Cloudflare API token is available to the agent, so the www to apex rule is recorded for Jay in WORKLOG instead of created.",
+        "2026-09-26: evidence: clean Node 20 gate 25/25 then 26/26 after the local-app fix; npm test 89 passed; CI run 36161583511 failed at local:verify (local Functions copy lacked public/articles/index.json), fixed in 4cd9942; CI run 36162258620 passed both jobs and deployed Preview https://614c9ceb.urblo-site.pages.dev; agent:cloudflare-preview-smoke passed there (sitemap 54 URLs including all 19 audit-missing URLs; unknown path 404; trailing slash 301). Production verification and www rule pending.",
+        "2026-09-26: rebased onto main by Claude (docs union; conflicts recorded in WORKLOG) and merged #71."
+      ],
+      "completedAt": "2026-09-26",
+      "evidence": [
+        "Merged 2026-09-26 via PR #71 as d3c688d under Jay's standing merge authorization; production CI 36208117841.",
+        "Final production readback 2026-09-26 on 194976d50b79bbad89b949f85aba3903e1a99ee7, immutable https://21b51af8.urblo-site.pages.dev, CI 36209299045 (first run of the convergence wait): immutable/apex/www smoke passed; see WORKLOG 2026-09-26 Optimization wave 2 release."
+      ]
+    },
+    {
+      "id": "NOW-OPT-DESIGN-TOKENS-COMPONENTS-001",
+      "priority": 0,
+      "modules": [
+        "public-ui"
+      ],
+      "summary": "Define the colour, type-scale (about 8 steps), tracking, gutter and section-spacing tokens in Tailwind and DESIGN.md; build shared Button (4 variants), SectionHeading (2 levels), PageIntro (Projects page as template), Card and Reveal components; align the header gutter with page content; adopt them on Home and Capabilities first.",
+      "files": [
+        "tailwind.config.js",
+        "src/index.css",
+        "docs/DESIGN.md",
+        "src/components/",
+        "src/pages/",
+        "src/layouts/"
+      ],
+      "acceptance": [
+        "DESIGN.md has a referenceable token table matching tailwind.config.js; a check script counts arbitrary text-[Npx] utilities on public pages and fails on new additions (baseline 344 recorded).",
+        "Shared Button, SectionHeading, PageIntro, Card and Reveal exist with tests; the duplicated fade-in component in HomepageSections and CapabilitiesPage is removed.",
+        "Home and Capabilities use only shared Button variants and the two heading levels; arbitrary font-size count on those two files drops by at least 70%.",
+        "Logo left edge aligns with the page content edge within 2px at 375, 768 and 1440.",
+        "No visual regression on Projects, Stone Library or 404 (before/after screenshots); other pages unchanged in this task (per-page convergence is wave 3)."
+      ],
+      "verification": [
+        "npm run agent:verify -- --plan",
+        "npm run gate",
+        "npm test",
+        "npm run agent:cloudflare-preview-smoke -- --base-url <branch Preview>",
+        "git diff --check"
+      ],
+      "authorization": {
+        "source": "Jay approved optimization wave 2 on 2026-09-26 (\"开第二波\") after the wave 1 report; www redirect, CMS SEO data fixes and merged-branch deletion were authorized on 2026-09-25 (\"可以\").",
+        "included": [
+          "Branch implementation, isolated local tests, git push, pull request, branch Preview and smoke, DESIGN.md and docs/agent state updates."
+        ],
+        "excluded": [
+          "Merge to main (Jay approves after Claude report), production data or Storage writes beyond the items listed, real email, credentials, migrations."
+        ]
+      },
+      "status": "done",
+      "phase": "complete",
+      "nextAction": "No automatic follow-on work; wave 3 carries the remaining items.",
+      "blocker": "",
+      "notes": [
+        "2026-09-26: wave 2 of the 2026-09-24 optimization audit. Jay decided the homepage hero headline keeps its letter-by-letter animation (homepage LCP element stays non-hero by design).",
+        "2026-09-26: implemented on claude/opt-design-tokens-components (24e442e). Clean Node 20 gate passed 26 checks incl. ui-tokens and unit (92 tests); host no-config browser gate 12 routes; PR #72 CI run 36162027777 passed; branch Preview https://79c51662.urblo-site.pages.dev passed agent:cloudflare-preview-smoke. Arbitrary public text-[Npx] 327 -> 159 (Home 100 -> 0, Capabilities 68 -> 0); logo vs content edge 0px at 375/768/1440 on Home, Capabilities, Projects, Stone Library, 404 locally and on the Preview.",
+        "2026-09-26: rebased onto main by Claude (docs union; conflicts recorded in WORKLOG) and merged #72."
+      ],
+      "completedAt": "2026-09-26",
+      "evidence": [
+        "Merged 2026-09-26 via PR #72 as f90b723 under Jay's standing merge authorization; production CI 36208496155.",
+        "Final production readback 2026-09-26 on 194976d50b79bbad89b949f85aba3903e1a99ee7, immutable https://21b51af8.urblo-site.pages.dev, CI 36209299045 (first run of the convergence wait): immutable/apex/www smoke passed; see WORKLOG 2026-09-26 Optimization wave 2 release."
+      ]
+    },
+    {
+      "id": "NOW-OPT-ADMIN-SHARED-UX-001",
+      "priority": 0,
+      "modules": [
+        "products",
+        "articles",
+        "media",
+        "auth-settings",
+        "forms"
+      ],
+      "summary": "Shared admin UX layer for the older modules: one feedback component next to the action bar with a live region, an error translator that replaces raw Supabase/Postgres/network/JWT messages with plain English, an unsaved-changes guard on record switch, navigation, refresh and sign-out, and confirmation dialogs for Archive/Hide on live records; wired into Products, Articles, Media, Leads and Settings.",
+      "files": [
+        "src/pages/admin/",
+        "src/lib/",
+        "functions/_lib/admin-projects.js",
+        "scripts/check-admin-crud-coverage.mjs"
+      ],
+      "acceptance": [
+        "Duplicate URL key, permission denied, expired session and network failure each show a plain-English message in all five modules (vitest table test on the translator; no setError(x.message) of raw Supabase errors remains, enforced by a check).",
+        "Save result is visible within 1s next to the button and announced to screen readers.",
+        "Switching records or navigating with unsaved edits prompts Save / Discard / Keep editing in the five modules; refresh and sign-out warn.",
+        "Archive and Hide on live Products, Articles and Media require a confirmation naming the public effect.",
+        "Local synthetic journeys extended for at least Products and Media; admin-crud-coverage assertions updated at behaviour level, every forbid assertion kept."
+      ],
+      "verification": [
+        "npm run agent:verify -- --plan",
+        "npm run gate",
+        "npm test",
+        "npm run agent:cloudflare-preview-smoke -- --base-url <branch Preview>",
+        "git diff --check",
+        "npm run local:verify"
+      ],
+      "authorization": {
+        "source": "Jay approved optimization wave 2 on 2026-09-26 (\"开第二波\") after the wave 1 report; www redirect, CMS SEO data fixes and merged-branch deletion were authorized on 2026-09-25 (\"可以\").",
+        "included": [
+          "Branch implementation, isolated local synthetic tests, git push, pull request, branch Preview and smoke, docs/agent state updates."
+        ],
+        "excluded": [
+          "Merge to main (Jay approves after Claude report), production data or Storage writes beyond the items listed, real email, credentials, migrations."
+        ]
+      },
+      "status": "done",
+      "phase": "complete",
+      "nextAction": "No automatic follow-on work; wave 3 carries the remaining items.",
+      "blocker": "",
+      "notes": [
+        "2026-09-26: wave 2 of the 2026-09-24 optimization audit. Jay decided the homepage hero headline keeps its letter-by-letter animation (homepage LCP element stays non-hero by design).",
+        "2026-09-26: Implemented on claude/opt-admin-shared-ux: src/lib/adminErrors.ts translator, AdminFeedback + useAdminFeedback beside each action bar (status/alert live regions, auto-dismissed success, persistent error with Details), useUnsavedGuard (record switch, in-app links, Back, Sign out, Refresh, beforeunload; StoneDialog Save / Discard / Keep editing), Archive confirmation on live Products/Articles/Media (models and sections of live parents included). Wired into Products, Articles, Media, Leads and Settings; no schema, Function or RLS change. Save in the guard dialog is offered only when exactly one form section is unsaved.",
+        "2026-09-26: PR #73. CI run 36162088858 and retry 36172238648 each failed local:verify on a journey timing or fixture issue, never on product code; both are recorded in WORKLOG. Run 36172983504 on 2d1d222 passed the classified graph and local:verify (26 journeys, including 5 Products and 3 Media shared-UX steps). It deployed Preview https://de547bd5.urblo-site.pages.dev; a workstation agent:cloudflare-preview-smoke against that Preview passed (read-only, no login). Not merged; production unverified.",
+        "2026-09-26: rebased onto main by Claude (docs union; conflicts recorded in WORKLOG) and merged #73."
+      ],
+      "completedAt": "2026-09-26",
+      "evidence": [
+        "Merged 2026-09-26 via PR #73 as fc4ff3e under Jay's standing merge authorization; production CI 36208902070.",
+        "Final production readback 2026-09-26 on 194976d50b79bbad89b949f85aba3903e1a99ee7, immutable https://21b51af8.urblo-site.pages.dev, CI 36209299045 (first run of the convergence wait): immutable/apex/www smoke passed; see WORKLOG 2026-09-26 Optimization wave 2 release."
+      ]
+    },
+    {
+      "id": "NOW-OPT-AGENT-DOCS-SLIM-001",
+      "priority": 1,
+      "modules": [
+        "harness",
+        "delivery"
+      ],
+      "summary": "Cut agent startup reading to 40KB or less per task: split ARCHITECTURE.md into per-module contract files referenced by modules.json, trim status.json history and verification.md to the live rules, archive the executed Stone adoption plan, fix NOW/NEXT prefixes, record the per-wave release-record policy in OPERATING_PROTOCOL, and make the CI production readback step wait and retry for edge convergence.",
+      "files": [
+        "docs/ARCHITECTURE.md",
+        "docs/agent/",
+        "docs/OPERATING_PROTOCOL.md",
+        "docs/PROJECT_MAP.md",
+        "scripts/agent-init.mjs",
+        "scripts/check-harness-gc.mjs",
+        ".github/workflows/deploy.yml",
+        "docs/architecture/",
+        "docs/agent/live-verification.md",
+        "docs/archive/2026-09-26/manifest.json",
+        "scripts/check-agent-startup-budget.mjs",
+        "scripts/wait-for-domain-convergence.mjs",
+        "scripts/_lib/deployment-readiness.mjs",
+        "tests/domain-convergence.test.ts",
+        "tests/agent-startup-budget.test.ts"
+      ],
+      "acceptance": [
+        "For three representative tasks (projects, products, public-ui) the bytes of AGENTS.md + startup files + listed module rules are <= 40KB, measured by a script added to the harness check.",
+        "Every module rule file is <= 8KB; ARCHITECTURE.md becomes an index; archived material keeps byte-integrity manifests; check-doc-paths and harness-gc pass.",
+        "OPERATING_PROTOCOL records: code PRs carry Preview evidence, production readback is recorded once per wave.",
+        "deploy.yml production-domain readback retries for up to 3 minutes before failing; a WORKLOG note references the 2026-09-26 false failure on run 36153157216.",
+        "Cold-start drill: a fresh agent states the task, boundaries and verification commands from the trimmed set without reading history."
+      ],
+      "verification": [
+        "npm run agent:verify -- --plan",
+        "npm run gate",
+        "git diff --check"
+      ],
+      "authorization": {
+        "source": "Jay approved optimization wave 2 on 2026-09-26 (\"开第二波\") after the wave 1 report; www redirect, CMS SEO data fixes and merged-branch deletion were authorized on 2026-09-25 (\"可以\").",
+        "included": [
+          "Docs restructuring, harness scripts, CI workflow readback step change, git push, pull request, docs/agent state updates."
+        ],
+        "excluded": [
+          "Runtime src/ changes, deployment behaviour changes other than the readback wait, production access."
+        ]
+      },
+      "status": "done",
+      "phase": "complete",
+      "nextAction": "No automatic follow-on work; wave 3 carries the remaining items.",
+      "blocker": "",
+      "notes": [
+        "2026-09-26: wave 2 of the 2026-09-24 optimization audit. Jay decided the homepage hero headline keeps its letter-by-letter animation (homepage LCP element stays non-hero by design).",
+        "2026-09-26: Implemented on claude/opt-agent-docs-slim (stacked on PR #68): startup budget check, ARCHITECTURE split into docs/architecture/, status/verification trim with docs/archive/2026-09-26 byte manifest, Stone adoption plan archived, OPERATING_PROTOCOL release-record/ID/merge rules, CI apex/www convergence wait. Evidence in WORKLOG.",
+        "2026-09-26: Verification passed (clean Node 20 gate 27 checks, 82 unit tests, host no-config browser gate 12 routes, agent:check/state/GC/doc-paths). Startup sets: projects 35,617, products 26,835, public-ui 23,130 bytes (before 175,619 / 246,526 / 83,995). PR #70 (base main, stacked on #68): CI run 36161231695 on ccc4fc4 passed (verify-and-deploy and quality); branch Preview https://e4c29c01.urblo-site.pages.dev passed agent:cloudflare-preview-smoke from the workstation. Awaiting Claude review and Jay's merge decision; not merged. The CI convergence wait is only exercised on the next main release.",
+        "2026-09-26: rebased onto main by Claude (docs union; conflicts recorded in WORKLOG) and merged #70."
+      ],
+      "completedAt": "2026-09-26",
+      "evidence": [
+        "Merged 2026-09-26 via PR #70 as 194976d under Jay's standing merge authorization; production CI 36209299045.",
+        "Final production readback 2026-09-26 on 194976d50b79bbad89b949f85aba3903e1a99ee7, immutable https://21b51af8.urblo-site.pages.dev, CI 36209299045 (first run of the convergence wait): immutable/apex/www smoke passed; see WORKLOG 2026-09-26 Optimization wave 2 release."
+      ]
     }
   ]
 }
