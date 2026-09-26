@@ -273,12 +273,11 @@ export function getSeoMetaForPathname(pathname: string, defaults: SeoMetaDefault
 
     if (seoRoute) {
         const isHomepage = normalizedPath === '/';
+        const homepageTitle = isHomepage ? toDescriptiveHomepageTitle(defaults.homepageTitle) : null;
+        const homepageDescription = isHomepage ? toDescriptiveHomepageDescription(defaults.homepageDescription) : null;
         return {
-            title: isHomepage && defaults.homepageTitle ? defaults.homepageTitle : seoRoute.title,
-            description:
-                isHomepage && defaults.homepageDescription
-                    ? toMetaDescription(defaults.homepageDescription)
-                    : seoRoute.description,
+            title: homepageTitle || seoRoute.title,
+            description: homepageDescription ? toMetaDescription(homepageDescription) : seoRoute.description,
             canonicalUrl: canonicalUrlForPath(seoRoute.path),
             image: toAbsoluteUrl(seoRoute.image || defaults.defaultShareImage || DEFAULT_SHARE_IMAGE),
             ogType: seoRoute.ogType || 'website',
@@ -297,11 +296,15 @@ export function getSeoMetaForPathname(pathname: string, defaults: SeoMetaDefault
         };
     }
 
+    return getNotFoundSeoMeta(normalizedPath, defaults);
+}
+
+export function getNotFoundSeoMeta(pathname: string, defaults: SeoMetaDefaults = {}): SeoMeta {
     return {
         title: 'Page Not Found | Urblo',
         description:
             'The requested Urblo page could not be found. Explore projects, products, Stone Library, or contact pathways.',
-        canonicalUrl: canonicalUrlForPath(normalizedPath),
+        canonicalUrl: canonicalUrlForPath(normalizePath(pathname)),
         image: toAbsoluteUrl(defaults.defaultShareImage || DEFAULT_SHARE_IMAGE),
         ogType: 'website',
         robots: 'noindex,follow',
@@ -326,6 +329,24 @@ export function getStructuredDataForPathname(pathname: string, locations: Compan
     return structuredData;
 }
 
+/**
+ * The CMS homepage SEO title only replaces the registry title when it is descriptive.
+ * A bare brand title (the 2026-09 production setting was just "Urblo") would drop the
+ * non-brand "natural stone streetscape" intent from the most important SERP entry.
+ */
+export const MIN_DESCRIPTIVE_HOMEPAGE_TITLE_LENGTH = 20;
+export const MIN_DESCRIPTIVE_HOMEPAGE_DESCRIPTION_LENGTH = 50;
+
+function toDescriptiveHomepageTitle(value: string | null | undefined): string | null {
+    const normalized = value?.replace(/\s+/g, ' ').trim();
+    return normalized && normalized.length >= MIN_DESCRIPTIVE_HOMEPAGE_TITLE_LENGTH ? normalized : null;
+}
+
+function toDescriptiveHomepageDescription(value: string | null | undefined): string | null {
+    const normalized = value?.replace(/\s+/g, ' ').trim();
+    return normalized && normalized.length >= MIN_DESCRIPTIVE_HOMEPAGE_DESCRIPTION_LENGTH ? normalized : null;
+}
+
 function route(input: Omit<SeoRoute, 'lastModified' | 'isIndexable'>): SeoRoute {
     return {
         ...input,
@@ -335,7 +356,7 @@ function route(input: Omit<SeoRoute, 'lastModified' | 'isIndexable'>): SeoRoute 
     };
 }
 
-function normalizePath(pathname: string): string {
+export function normalizePath(pathname: string): string {
     if (!pathname || pathname === '/') {
         return '/';
     }
@@ -356,7 +377,7 @@ function toAbsoluteUrl(pathOrUrl: string): string {
     }
 }
 
-function toMetaDescription(value: string, maxLength = 158): string {
+export function toMetaDescription(value: string, maxLength = 158): string {
     const normalized = value.replace(/\s+/g, ' ').trim();
 
     if (normalized.length <= maxLength) {
@@ -366,7 +387,8 @@ function toMetaDescription(value: string, maxLength = 158): string {
     const clipped = normalized.slice(0, maxLength - 1);
     const lastSpace = clipped.lastIndexOf(' ');
 
-    return `${clipped.slice(0, lastSpace > 80 ? lastSpace : clipped.length).trim()}.`;
+    // Drop a dangling comma/colon before closing the clipped sentence ("preparation,." read badly).
+    return `${clipped.slice(0, lastSpace > 80 ? lastSpace : clipped.length).trim().replace(/[\s,;:.\-–—]+$/, '')}…`;
 }
 
 const organizationSchema: JsonLd = {

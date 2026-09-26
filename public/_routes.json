@@ -1,8 +1,13 @@
 {
   "version": 1,
   "include": [
-    "/api/*",
-    "/image/*"
+    "/*"
   ],
-  "exclude": []
+  "exclude": [
+    "/assets/*",
+    "/fonts/*",
+    "/media/*",
+    "/images/*",
+    "/downloads/*"
+  ]
 }

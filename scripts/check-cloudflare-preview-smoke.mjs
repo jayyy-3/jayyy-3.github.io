@@ -34,6 +34,14 @@ const adminRoutes = [
 
 const stateRoutes = ['/not-a-real-urblo-route'];
 
+const CANONICAL_ORIGIN = 'https://urblo.com.au';
+// Static registry routes alone are 35; Published CMS records only add to it.
+const MIN_SITEMAP_URLS = 35;
+const trailingSlashContracts = [
+  ['/projects/', '/projects'],
+  ['/stone-library/alpine-white/', '/stone-library/alpine-white'],
+];
+
 const redirectContracts = [
   {
     from: '/products/primeBlock',
@@ -216,9 +224,12 @@ function assert(condition, message) {
   }
 }
 
-function assertHtmlShell(path, response, html) {
+function assertHtmlShell(path, response, html, expectedStatuses = [200]) {
   assert(!response.redirected, `${path} unexpectedly redirected to ${response.url}`);
-  assert(response.status === 200, `${path} returned ${response.status}, expected 200`);
+  assert(
+    expectedStatuses.includes(response.status),
+    `${path} returned ${response.status}, expected ${expectedStatuses.join(' or ')}`,
+  );
 
   const contentType = response.headers.get('content-type') || '';
   assert(contentType.includes('text/html'), `${path} returned non-HTML content type: ${contentType}`);
@@ -271,7 +282,13 @@ async function checkHtmlRoutes(options) {
 
   for (const route of allRoutes) {
     const { response, text } = await fetchText(route, options);
-    assertHtmlShell(route, response, text);
+    // The edge SEO middleware answers unknown paths with 404 plus the SPA shell (the client
+    // renders the not-found page); a local static server without Functions still returns 200.
+    const expectedStatuses = stateRoutes.includes(route) ? (options.isLocalBaseUrl ? [200, 404] : [404]) : [200];
+    assertHtmlShell(route, response, text, expectedStatuses);
+    if (publicRoutes.includes(route) && !options.isLocalBaseUrl) {
+      assertEdgeHead(route, text);
+    }
     const routeAssetIdentity = collectAssetPaths(text).sort();
     if (route === '/') {
       rootHtml = text;
@@ -286,6 +303,74 @@ async function checkHtmlRoutes(options) {
   }
 
   return rootHtml;
+}
+
+function assertEdgeHead(route, html) {
+  const canonical = `${CANONICAL_ORIGIN}${route === '/' ? '/' : route}`;
+  const canonicalTags = [...html.matchAll(/<link rel="canonical" href="([^"]+)"/g)].map((match) => match[1]);
+  assert(
+    canonicalTags.length === 1 && canonicalTags[0] === canonical,
+    `${route} first-response canonical is ${canonicalTags.join(', ') || '(missing)'}, expected exactly ${canonical}`,
+  );
+  const titles = [...html.matchAll(/<title>([^<]*)<\/title>/g)].map((match) => match[1]);
+  assert(titles.length === 1 && titles[0].length > 0, `${route} first response must carry exactly one non-empty <title>`);
+  assert(/<meta property="og:image" content="https?:\/\/[^"]+"/.test(html), `${route} first response is missing og:image`);
+  assert(html.includes(`<meta name="urblo:edge-seo" content="${route}"`), `${route} first response is missing the edge SEO marker`);
+  console.log(`edge head ok: ${route} -> ${titles[0]}`);
+}
+
+async function checkEdgeSeoContracts(options) {
+  if (options.isLocalBaseUrl) {
+    console.log('edge SEO contract checks skipped for local base URL.');
+    return;
+  }
+
+  for (const [from, to] of trailingSlashContracts) {
+    const response = await timedFetch(`${options.baseUrl}${from}`, { ...options, fetch: { redirect: 'manual' } });
+    const location = response.headers.get('location') || '';
+    const locationPath = location.startsWith('http') ? new URL(location).pathname : location;
+    assert(response.status === 301, `${from} returned ${response.status}, expected 301 to ${to}`);
+    assert(locationPath === to, `${from} redirected to ${location || '(missing location)'}, expected ${to}`);
+    console.log(`trailing slash ok: ${from} -> ${to}`);
+  }
+
+  const { response, text } = await fetchText('/sitemap.xml', options, { redirect: 'manual' });
+  assert(response.status === 200, `/sitemap.xml returned ${response.status}, expected 200`);
+  assert(
+    (response.headers.get('content-type') || '').includes('xml'),
+    `/sitemap.xml returned non-XML content type: ${response.headers.get('content-type')}`,
+  );
+  assert(text.includes('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'), '/sitemap.xml is not a urlset');
+  const locs = [...text.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1]);
+  assert(locs.length >= MIN_SITEMAP_URLS, `/sitemap.xml lists ${locs.length} URLs, expected at least ${MIN_SITEMAP_URLS}`);
+  assert(new Set(locs).size === locs.length, '/sitemap.xml contains duplicate URLs');
+  for (const loc of locs) {
+    const url = new URL(loc);
+    assert(url.origin === CANONICAL_ORIGIN, `/sitemap.xml URL outside ${CANONICAL_ORIGIN}: ${loc}`);
+    assert(!/^\/(?:admin|api)(?:\/|$)/.test(url.pathname), `/sitemap.xml exposes a private path: ${loc}`);
+  }
+  console.log(`sitemap ok: ${locs.length} URLs`);
+}
+
+/**
+ * www.urblo.com.au is expected to 301 to the apex once the zone redirect rule exists. In that
+ * state the host serves no content of its own, so the smoke proves the redirect (path and query
+ * preserved) instead of the SPA contract. Before the rule exists the full smoke still runs.
+ */
+async function checkHostRedirect(options) {
+  const parsed = new URL(options.baseUrl);
+  if (parsed.hostname !== 'www.urblo.com.au') return false;
+  const probe = await timedFetch(`${options.baseUrl}/`, { ...options, fetch: { redirect: 'manual' } });
+  if (probe.status < 300 || probe.status >= 400) return false;
+
+  for (const path of ['/', '/projects/xavier-college?view=list', '/sitemap.xml', '/not-a-real-urblo-route']) {
+    const response = await timedFetch(`${options.baseUrl}${path}`, { ...options, fetch: { redirect: 'manual' } });
+    const expected = `${CANONICAL_ORIGIN}${path}`;
+    assert(response.status === 301, `www ${path} returned ${response.status}, expected 301 to ${expected}`);
+    assert(response.headers.get('location') === expected, `www ${path} redirected to ${response.headers.get('location')}, expected ${expected}`);
+    console.log(`www redirect ok: ${path} -> ${expected}`);
+  }
+  return true;
 }
 
 async function checkDeploymentReference(rootHtml, options) {
@@ -614,10 +699,16 @@ async function run() {
     console.log('Local base URL detected; Cloudflare-only redirect and Function checks will be skipped.');
   }
 
+  if (await checkHostRedirect(options)) {
+    console.log('Cloudflare preview smoke passed (host redirects to the apex).');
+    return;
+  }
+
   const rootHtml = await checkHtmlRoutes(options);
   await checkDeploymentReference(rootHtml, options);
   await checkAssets(rootHtml, options);
   await checkRedirects(options);
+  await checkEdgeSeoContracts(options);
   await checkFunctions(options);
 
   console.log('Cloudflare preview smoke passed.');

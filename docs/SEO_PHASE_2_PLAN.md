@@ -46,7 +46,7 @@ These retired groups are intentionally not added to `public/_redirects` because 
 
 ## Phase 2 Priorities
 1. **Refresh Google's source of truth**
-   - Monitor whether Google reads the 36 current canonical URLs from the refreshed sitemap.
+   - Monitor whether Google reads the current canonical URLs from the sitemap. Once the edge middleware is released, `/sitemap.xml` is generated (static routes plus Published CMS records) instead of the 35-URL static file.
    - Keep `/admin`, `/api`, draft content, private lead/admin surfaces, and legacy alias paths out of the sitemap.
 
 2. **Map old URLs before changing redirects**
@@ -72,6 +72,7 @@ These retired groups are intentionally not added to `public/_redirects` because 
 5. **Review the technical SEO ceiling after data comes back**
    - If Google still struggles to index important detail pages after sitemap refresh, redirects, and content improvements, decide whether public detail routes need pre-rendered/static HTML or another server-rendered approach.
    - This is a Phase 2 technical decision, not a Phase 1 blocker.
+   - Status (2026-09-26, NOW-OPT-SEO-EDGE-HEAD-001, branch `claude/opt-seo-edge-head`, not yet merged): an edge Pages Function middleware now writes each route's title, description, self canonical, Open Graph/Twitter and JSON-LD into the first HTML response (body still the SPA shell), answers unknown paths with 404, 301s trailing-slash variants, and generates `/sitemap.xml` from static routes plus every Published project/stone/product/article. Full pre-rendering of page bodies remains undecided until GSC data returns. `www` → apex needs a Cloudflare zone Redirect Rule recorded for Jay in `docs/WORKLOG.md`.
 
 ## Acceptance Criteria
 - GSC has a current successful read for `https://urblo.com.au/sitemap.xml`.

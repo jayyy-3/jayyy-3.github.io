@@ -31,10 +31,9 @@ Before running live form/admin/preview checks, `npm run agent:live-readiness` ca
 - Vite `base` is `/`, matching a root-domain Cloudflare Pages deployment.
 - `public/_redirects` provides the SPA fallback:
   - `/* /index.html 200`
-- `public/_routes.json` limits future Pages Functions invocation to:
-  - `/api/*`
-  - `/image/*`
-- Static site requests should remain static and should not invoke Functions after API endpoints are added.
+- `public/_routes.json` includes `/*` so the edge SEO middleware (`functions/_middleware.js`) sees page navigations, and excludes `/assets/*`, `/fonts/*`, `/media/*`, `/images/*` and `/downloads/*` so hashed assets and media never invoke Functions.
+- The middleware passes `/api/*` and `/image/*` straight to their Functions, lets static files and `_redirects` answer first, rewrites only the SPA shell's head, returns 404 for unknown paths, 301s trailing-slash variants, and generates `/sitemap.xml`. It reads Published rows with the browser-safe key from the build-emitted `seo-edge-config.json`; no service-role key is used.
+- `https://www.urblo.com.au/*` should 301 to `https://urblo.com.au/$1` through a Cloudflare zone Redirect Rule (not repository config). Until that rule exists the `www` production smoke runs the full SPA contract; once it exists the smoke verifies the path/query-preserving 301 instead.
 - Current Pages Function routes:
   - `/api/enquiries`
   - `/api/sample-requests`
