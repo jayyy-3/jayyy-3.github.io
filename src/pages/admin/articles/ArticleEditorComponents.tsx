@@ -330,6 +330,7 @@ export function ArticleActionBar({
     onSave,
     onPublish,
     onArchive,
+    feedback,
     compact = false,
 }: {
     label: string;
@@ -344,6 +345,8 @@ export function ArticleActionBar({
     onSave?: () => void;
     onPublish: () => void;
     onArchive: () => void;
+    /** Save result for this action bar (AdminFeedback), shown right below the buttons. */
+    feedback?: ReactNode;
     compact?: boolean;
 }) {
     const isDisabled = disabled || isSaving;
@@ -396,6 +399,7 @@ export function ArticleActionBar({
                     </button>
                 </div>
             </div>
+            {feedback}
         </section>
     );
 }

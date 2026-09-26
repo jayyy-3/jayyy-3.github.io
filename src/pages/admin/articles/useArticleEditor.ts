@@ -4,8 +4,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { recordAdminAuditEvent, withAuditNotice } from '../../../lib/adminAudit';
 import { useAdminAuth } from '../../../lib/adminAuthHooks';
 import { supabase } from '../../../lib/supabaseClient';
+import { useAdminFeedback } from '../useAdminFeedback';
 import { useLiveSaveConfirm } from '../LiveSaveConfirm';
-import { followNameUrlKey, isUrlKeyLocked, liveSaveRequest } from '../liveSave';
+import { archiveConfirmRequest, followNameUrlKey, isUrlKeyLocked, liveSaveRequest } from '../liveSave';
+import { isFormDirty, type UnsavedSection } from '../unsavedGuard';
+import { useUnsavedGuard } from '../useUnsavedGuard';
 import { readArticleBlocks, readArticleWorkspace, writeArticle, writeArticleBlock } from './data';
 import {
     compareArticleBlockRows,
@@ -54,8 +57,7 @@ export function useArticleEditor() {
     const [isLoading, setIsLoading] = useState(true);
     const [isSavingArticle, setIsSavingArticle] = useState(false);
     const [isSavingBlock, setIsSavingBlock] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [notice, setNotice] = useState<string | null>(null);
+    const { feedback, setError, setNotice, setInfo, reportError, clearFeedback } = useAdminFeedback();
     const articleLoadGenerationRef = useRef(0);
     const blockLoadGenerationRef = useRef(0);
     const selectedArticleIdRef = useRef<number | null>(null);
@@ -135,7 +137,8 @@ export function useArticleEditor() {
             const { data, error: blockError } = await readArticleBlocks(client, articleId);
 
             if (blockError) {
-                throw new Error(blockError.message);
+                // Thrown raw so the caller translates it for the editor.
+                throw blockError;
             }
 
             if (
@@ -172,25 +175,25 @@ export function useArticleEditor() {
             if (generation !== articleLoadGenerationRef.current) return;
 
             if (articlesResult.error) {
-                setError(articlesResult.error.message);
+                reportError(articlesResult, { entity: 'article list', action: 'load' });
                 setIsLoading(false);
                 return;
             }
 
             if (projectsResult.error) {
-                setError(projectsResult.error.message);
+                reportError(projectsResult, { entity: 'project list', action: 'load' });
                 setIsLoading(false);
                 return;
             }
 
             if (stonesResult.error) {
-                setError(stonesResult.error.message);
+                reportError(stonesResult, { entity: 'Stone Library list', action: 'load' });
                 setIsLoading(false);
                 return;
             }
 
             if (mediaResult.error) {
-                setError(mediaResult.error.message);
+                reportError(mediaResult, { entity: 'Media library list', action: 'load' });
                 setIsLoading(false);
                 return;
             }
@@ -219,13 +222,13 @@ export function useArticleEditor() {
                     generation === articleLoadGenerationRef.current &&
                     selectedArticleIdRef.current === nextArticle.id
                 ) {
-                    setError(loadError instanceof Error ? loadError.message : 'Article sections failed to load.');
+                    reportError(loadError, { entity: 'article sections', action: 'load' });
                 }
             }
 
             setIsLoading(false);
         },
-        [loadArticleBlocks],
+        [loadArticleBlocks, reportError, setError],
     );
 
     useEffect(() => {
@@ -242,7 +245,7 @@ export function useArticleEditor() {
 
     async function selectArticle(article: ArticleRow) {
         if (savingArticleRef.current || savingBlockRef.current) {
-            setNotice('A save is still finishing. Wait for it to complete before switching articles.');
+            setInfo('A save is still finishing. Wait for it to complete before switching articles.');
             return;
         }
         if (!supabase) {
@@ -261,7 +264,7 @@ export function useArticleEditor() {
             await loadArticleBlocks(supabase, article.id);
         } catch (loadError) {
             if (selectedArticleIdRef.current === article.id) {
-                setError(loadError instanceof Error ? loadError.message : 'Article sections failed to load.');
+                reportError(loadError, { entity: 'article sections', action: 'load' });
             }
         } finally {
             if (selectedArticleIdRef.current === article.id) {
@@ -272,11 +275,11 @@ export function useArticleEditor() {
 
     function startNewArticle() {
         if (isLoading) {
-            setNotice('Wait for the article library to finish loading before starting a new article.');
+            setInfo('Wait for the article library to finish loading before starting a new article.');
             return;
         }
         if (savingArticleRef.current || savingBlockRef.current) {
-            setNotice('A save is still finishing. Wait for it to complete before starting a new article.');
+            setInfo('A save is still finishing. Wait for it to complete before starting a new article.');
             return;
         }
         articleLoadGenerationRef.current += 1;
@@ -285,7 +288,7 @@ export function useArticleEditor() {
         setArticleForm(emptyArticleForm);
         resetBlockState();
         setError(null);
-        setNotice('New article started.');
+        setInfo('New article started. Fill in the title, then save.', { scope: 'article' });
     }
 
     function updateArticleField<Key extends keyof ArticleFormState>(key: Key, value: ArticleFormState[Key]) {
@@ -329,7 +332,7 @@ export function useArticleEditor() {
 
     function startNewBlock() {
         if (savingArticleRef.current || savingBlockRef.current) {
-            setNotice('A save is still finishing. Wait for it to complete before starting a new section.');
+            setInfo('A save is still finishing. Wait for it to complete before starting a new section.', { scope: 'section' });
             return;
         }
         selectedBlockIdRef.current = null;
@@ -340,7 +343,7 @@ export function useArticleEditor() {
     function selectBlock(block: ArticleBlockRow) {
         if (block.id === selectedBlockIdRef.current) return;
         if (savingArticleRef.current || savingBlockRef.current) {
-            setNotice('A save is still finishing. Wait for it to complete before switching sections.');
+            setInfo('A save is still finishing. Wait for it to complete before switching sections.', { scope: 'section' });
             return;
         }
         selectedBlockIdRef.current = block.id;
@@ -349,22 +352,22 @@ export function useArticleEditor() {
     }
 
     async function saveArticle(nextStatus: ArticleStatus, options: { confirmLive?: boolean } = {}) {
-        if (!supabase || !canEdit || !user) return;
-        if (savingArticleRef.current || savingBlockRef.current) return;
+        if (!supabase || !canEdit || !user) return false;
+        if (savingArticleRef.current || savingBlockRef.current) return false;
 
         if (nextStatus === 'published' && !canPublishArticle) {
-            setError(formatArticlePublishError('article', publishChecklist));
-            return;
+            setError(formatArticlePublishError('article', publishChecklist), { scope: 'article' });
+            return false;
         }
 
         const validation = validateArticleForm({ ...articleForm, status: nextStatus });
         if (validation.error !== null) {
-            setError(validation.error);
-            return;
+            setError(validation.error, { scope: 'article' });
+            return false;
         }
 
-        if (options.confirmLive && !(await confirmLiveArticleSave(nextStatus))) return;
-        if (savingArticleRef.current || savingBlockRef.current) return;
+        if (options.confirmLive && !(await confirmLiveArticleSave(nextStatus))) return false;
+        if (savingArticleRef.current || savingBlockRef.current) return false;
 
         const articleId = selectedArticleIdRef.current;
         savingArticleRef.current = true;
@@ -397,8 +400,8 @@ export function useArticleEditor() {
             const response = await writeArticle(supabase, articleId, payload, user.id);
 
             if (response.error) {
-                setError(response.error.message);
-                return;
+                reportError(response, { entity: 'article', scope: 'article' });
+                return false;
             }
 
             const auditError = await recordAdminAuditEvent(supabase, {
@@ -419,7 +422,7 @@ export function useArticleEditor() {
                 },
             });
             if (selectedArticleIdRef.current !== articleId) {
-                return;
+                return true;
             }
 
             selectedArticleIdRef.current = response.data.id;
@@ -428,9 +431,17 @@ export function useArticleEditor() {
                 [...current.filter((article) => article.id !== response.data.id), response.data].sort(compareArticleRows),
             );
             setArticleForm(rowToArticleForm(response.data));
-            setNotice(withAuditNotice(nextStatus === 'published' ? 'Article published.' : 'Article saved.', auditError));
+            setNotice(
+                withAuditNotice(
+                    nextStatus === 'published' ? 'Article published.' : nextStatus === 'archived' ? 'Article archived.' : 'Article saved.',
+                    auditError,
+                ),
+                { scope: 'article' },
+            );
+            return true;
         } catch (saveError) {
-            setError(saveError instanceof Error ? saveError.message : 'The article could not be saved. Try again.');
+            reportError(saveError, { entity: 'article', scope: 'article' });
+            return false;
         } finally {
             savingArticleRef.current = false;
             setIsSavingArticle(false);
@@ -443,22 +454,22 @@ export function useArticleEditor() {
     }
 
     async function saveBlock(nextStatus: ArticleStatus, options: { confirmLive?: boolean } = {}) {
-        if (!supabase || !canEdit || !user || !selectedArticle) return;
-        if (savingArticleRef.current || savingBlockRef.current) return;
+        if (!supabase || !canEdit || !user || !selectedArticle) return false;
+        if (savingArticleRef.current || savingBlockRef.current) return false;
 
         if (nextStatus === 'published' && !canPublishBlock) {
-            setError(formatArticlePublishError('section', blockPublishChecklist));
-            return;
+            setError(formatArticlePublishError('section', blockPublishChecklist), { scope: 'section' });
+            return false;
         }
 
         const validation = validateBlockForm({ ...blockForm, status: nextStatus });
         if (validation.error !== null) {
-            setError(validation.error);
-            return;
+            setError(validation.error, { scope: 'section' });
+            return false;
         }
 
-        if (options.confirmLive && isBlockLive && !(await confirmLiveArticleSave('published'))) return;
-        if (savingArticleRef.current || savingBlockRef.current) return;
+        if (options.confirmLive && isBlockLive && !(await confirmLiveArticleSave('published'))) return false;
+        if (savingArticleRef.current || savingBlockRef.current) return false;
 
         const articleId = selectedArticle.id;
         const blockId = selectedBlockIdRef.current;
@@ -486,8 +497,8 @@ export function useArticleEditor() {
             const response = await writeArticleBlock(supabase, articleId, blockId, payload, user.id);
 
             if (response.error) {
-                setError(response.error.message);
-                return;
+                reportError(response, { entity: 'article section', scope: 'section' });
+                return false;
             }
 
             const auditError = await recordAdminAuditEvent(supabase, {
@@ -511,7 +522,7 @@ export function useArticleEditor() {
                 selectedArticleIdRef.current !== articleId ||
                 selectedBlockIdRef.current !== blockId
             ) {
-                return;
+                return true;
             }
 
             selectedBlockIdRef.current = response.data.id;
@@ -520,20 +531,109 @@ export function useArticleEditor() {
                 [...current.filter((block) => block.id !== response.data.id), response.data].sort(compareArticleBlockRows),
             );
             setBlockForm(rowToBlockForm(response.data));
-            setNotice(withAuditNotice(nextStatus === 'published' ? 'Section published.' : 'Section saved.', auditError));
+            setNotice(
+                withAuditNotice(
+                    nextStatus === 'published' ? 'Section published.' : nextStatus === 'archived' ? 'Section archived.' : 'Section saved.',
+                    auditError,
+                ),
+                { scope: 'section' },
+            );
+            return true;
         } catch (saveError) {
-            setError(saveError instanceof Error ? saveError.message : 'The section could not be saved. Try again.');
+            reportError(saveError, { entity: 'article section', scope: 'section' });
+            return false;
         } finally {
             savingBlockRef.current = false;
             setIsSavingBlock(false);
         }
     }
+    // Unsaved-changes guard: the article and its selected section save separately, so the dialog
+    // offers Save only when one of them has changes.
+    const unsavedSections: UnsavedSection[] = [];
+    if (canEdit && !isLoading) {
+        if (isFormDirty(articleForm, rowToArticleForm(selectedArticle))) {
+            unsavedSections.push({
+                key: 'article',
+                label: 'Article details',
+                save: () => saveArticle(articleForm.status, { confirmLive: true }),
+            });
+        }
+        if (selectedArticle && isFormDirty(blockForm, rowToBlockForm(selectedBlock))) {
+            unsavedSections.push({
+                key: 'section',
+                label: 'Article sections',
+                save: () => saveBlock(blockForm.status, { confirmLive: true }),
+            });
+        }
+    }
+    const { confirmLeave, unsavedDialog } = useUnsavedGuard({
+        sections: unsavedSections,
+        isBusy: isSavingArticle || isSavingBlock,
+        onBlockedWhileBusy: () => setInfo('A save is still finishing. Wait for it to complete before leaving this article.'),
+    });
+
+    function requestSelectArticle(article: ArticleRow) {
+        if (article.id === selectedArticleIdRef.current) return;
+        confirmLeave(() => void selectArticle(article), { actionLabel: 'switch articles' });
+    }
+
+    function requestNewArticle() {
+        confirmLeave(startNewArticle, { actionLabel: 'start a new article' });
+    }
+
+    function requestSelectBlock(block: ArticleBlockRow) {
+        if (block.id === selectedBlockIdRef.current) return;
+        confirmLeave(() => selectBlock(block), { keys: ['section'], actionLabel: 'switch sections' });
+    }
+
+    function requestNewBlock() {
+        confirmLeave(startNewBlock, { keys: ['section'], actionLabel: 'start a new section' });
+    }
+
+    // Archive on a live article (or a published section of a live article) removes it from the
+    // public page straight away, so it asks first and names the page.
+    async function archiveArticle() {
+        if (
+            selectedArticle?.status === 'published' &&
+            !(await confirmLiveSave(
+                archiveConfirmRequest({
+                    kind: 'article',
+                    name: selectedArticle.title,
+                    publicPath: `/articles/${selectedArticle.slug}`,
+                    confirmLabel: 'Archive article',
+                }),
+            ))
+        ) {
+            return;
+        }
+        await saveArticle('archived');
+    }
+
+    async function archiveBlock() {
+        if (
+            isBlockLive &&
+            selectedArticle &&
+            !(await confirmLiveSave(
+                archiveConfirmRequest({
+                    kind: 'article section',
+                    name: '',
+                    publicPath: `/articles/${selectedArticle.slug}`,
+                    confirmLabel: 'Archive section',
+                }),
+            ))
+        ) {
+            return;
+        }
+        await saveBlock('archived');
+    }
+
     return {
         canEdit,
         isArticleLive,
         isBlockLive,
         isArticleUrlKeyLocked,
         liveSaveDialog,
+        unsavedDialog,
         articles,
         blocks,
         projectOptions,
@@ -550,8 +650,8 @@ export function useArticleEditor() {
         isLoading,
         isSavingArticle,
         isSavingBlock,
-        error,
-        notice,
+        feedback,
+        clearFeedback,
         selectedArticle,
         articleCounts,
         selectedCoverMedia,
@@ -561,15 +661,17 @@ export function useArticleEditor() {
         blockPublishChecklist,
         canPublishBlock,
         filteredArticles,
-        selectArticle,
-        startNewArticle,
+        selectArticle: requestSelectArticle,
+        startNewArticle: requestNewArticle,
         updateArticleField,
         updateBlockField,
         updateBlockType,
-        startNewBlock,
-        selectBlock,
+        startNewBlock: requestNewBlock,
+        selectBlock: requestSelectBlock,
         saveArticle,
+        archiveArticle,
         handleArticleSubmit,
         saveBlock,
+        archiveBlock,
     };
 }

@@ -35,7 +35,12 @@ export async function articleJourney({ page, context, check, id, directory }) {
     await page.route(pattern, fail)
     try {
       await page.getByRole('button', { name: 'Save article', exact: true }).click()
-      await expect(page.getByText('Synthetic article save failure', { exact: true })).toBeVisible()
+      // NOW-OPT-ADMIN-SHARED-UX-001: the server failure is shown in plain English beside the
+      // article action bar; the raw API text stays behind Details.
+      const alert = page.locator('[data-admin-feedback~="article"] [role="alert"]')
+      await expect(alert).toContainText('The website server had a problem and did not finish this change. Wait a minute and try again.')
+      await expect(alert).toContainText('Synthetic article save failure')
+      await expect(alert.getByText('Synthetic article save failure', { exact: false })).toBeHidden()
       await expect(field('Title')).toHaveValue(title)
       await assertArticleSaveUnlocked(page)
       await page.screenshot({ path: `${directory}/article-failed-save.png`, fullPage: true })
@@ -138,7 +143,17 @@ export async function articleJourney({ page, context, check, id, directory }) {
       assert.equal(writes.length, 1)
     } finally { page.off('request', recordWrite) }
     await expect(articleLiveSave).toBeEnabled()
-    await save('Archive article', 'articles')
+    // NOW-OPT-ADMIN-SHARED-UX-001: Archive on a live article names the public page first.
+    await page.getByRole('button', { name: 'Archive article', exact: true }).click()
+    const archiveDialog = page.getByRole('dialog', { name: 'Archive this live article?', exact: true })
+    await expect(archiveDialog).toContainText(`/articles/${a.slug}`)
+    const [archived] = await Promise.all([
+      page.waitForResponse(r => new URL(r.url()).pathname === '/rest/v1/articles' && r.request().method() === 'PATCH'),
+      archiveDialog.getByRole('button', { name: 'Archive article', exact: true }).click(),
+    ])
+    assert.equal(archived.status(), 200)
+    assert.equal((await archived.json()).status, 'archived')
+    await expect(page.getByRole('button', { name: 'Save article', exact: true })).toBeEnabled()
     const credentials = readLocalCredentials()
     const response = await localFetch(`${credentials.apiUrl}/rest/v1/articles?slug=eq.${a.slug}&select=id`, { headers: { apikey: credentials.anonKey } })
     assert.equal(response.status, 200)
@@ -154,5 +169,11 @@ export async function articleJourney({ page, context, check, id, directory }) {
     await field('Title').fill(`Local Draft Key Renamed ${id}`)
     await expect(field('Website URL key')).toHaveValue(`custom-key-${id}`)
     await expect(page.getByRole('button', { name: 'Save article', exact: true })).toBeEnabled()
+    // NOW-OPT-ADMIN-SHARED-UX-001: the unsaved new article is guarded; Discard leaves nothing behind.
+    await page.getByRole('button', { name: 'New article', exact: true }).click()
+    const guard = page.getByRole('dialog', { name: 'Save your changes first?', exact: true })
+    await expect(guard).toContainText('Article details')
+    await guard.getByRole('button', { name: 'Discard changes', exact: true }).click()
+    await expect(field('Title')).toHaveValue('')
   })
 }

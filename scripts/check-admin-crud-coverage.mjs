@@ -1463,6 +1463,114 @@ function checkLegacyModuleSafetyStopGap() {
   }
 }
 
+// NOW-OPT-ADMIN-SHARED-UX-001: the older modules share one feedback/error/unsaved layer.
+// Raw Supabase, Storage, Auth or network text must go through reportError() (translated, raw
+// text only in Details); a record switch or navigation with unsaved edits goes through the
+// guard; Archive on a live record names the public effect before writing.
+function extractCallArguments(text, callee) {
+  const calls = [];
+  const pattern = new RegExp(`\\b${callee}\\(`, 'g');
+  let match;
+  while ((match = pattern.exec(text))) {
+    let depth = 1;
+    let index = match.index + match[0].length;
+    const start = index;
+    while (index < text.length && depth > 0) {
+      const char = text[index];
+      if (char === '(') depth += 1;
+      else if (char === ')') depth -= 1;
+      index += 1;
+    }
+    calls.push(text.slice(start, index - 1));
+  }
+  return calls;
+}
+
+function checkAdminSharedUxLayer() {
+  const modules = [
+    ['src/pages/admin/AdminProductsPage.tsx', readRequired('src/pages/admin/AdminProductsPage.tsx'), true],
+    ['src/pages/admin/AdminArticlesPage.tsx', readArticleSource(), true],
+    ['src/pages/admin/AdminMediaPage.tsx', readRequired('src/pages/admin/AdminMediaPage.tsx'), true],
+    ['src/pages/admin/AdminLeadsPage.tsx', readRequired('src/pages/admin/AdminLeadsPage.tsx'), false],
+    ['src/pages/admin/AdminSettingsPage.tsx', readRequired('src/pages/admin/AdminSettingsPage.tsx'), false],
+  ];
+  requireIncludes(readRequired('src/lib/adminErrors.ts'), 'export function translateAdminError', 'src/lib/adminErrors.ts');
+  requireIncludes(readRequired('src/pages/admin/useAdminFeedback.ts'), 'translateAdminError(', 'src/pages/admin/useAdminFeedback.ts reportError translation');
+  const feedbackComponent = readRequired('src/pages/admin/AdminFeedback.tsx');
+  for (const needle of ['role="status"', 'aria-live="polite"', 'role="alert"', '>Details</summary>']) {
+    requireIncludes(feedbackComponent, needle, 'src/pages/admin/AdminFeedback.tsx live region and Details disclosure');
+  }
+  const guard = readRequired('src/pages/admin/useUnsavedGuard.tsx');
+  for (const needle of ["'beforeunload'", "addEventListener('click', click, true)", "'popstate'", 'Keep editing', 'Discard changes', 'Save and continue', 'StoneDialog']) {
+    requireIncludes(guard, needle, 'src/pages/admin/useUnsavedGuard.tsx');
+  }
+
+  for (const [path, text, archivesLiveContent] of modules) {
+    requireIncludes(text, 'useAdminFeedback(', `${path} shared feedback state`);
+    requireIncludes(text, '<AdminFeedback', `${path} feedback next to the action bar`);
+    requireIncludes(text, 'useUnsavedGuard(', `${path} unsaved-changes guard`);
+    requireIncludes(text, '{unsavedDialog}', `${path} rendered unsaved-changes dialog`);
+    requireIncludes(text, 'isFormDirty(', `${path} dirty tracking against the loaded record`);
+    requireNotIncludes(text, 'const [error, setError] = useState', `${path} page-local raw error state`);
+    requireNotIncludes(text, 'window.confirm', `${path} browser confirm dialog`);
+    for (const callee of ['setError', 'setNotice', 'setInfo']) {
+      for (const args of extractCallArguments(text, callee)) {
+        if (/\.message\b/.test(args)) failures.push(`${path}: ${callee}() receives raw error text (${args.trim().slice(0, 80)}); use reportError()`);
+      }
+    }
+    for (const args of extractCallArguments(text, 'reportError')) {
+      if (/\bmessage:\s*[^,\n}]*\.message\b/.test(args)) failures.push(`${path}: reportError() message override uses raw error text`);
+    }
+    requireNotIncludes(text, '.error.message);', `${path} raw Supabase message passed straight to a call`);
+    if (/new Error\([^)]*\.message\)/.test(text)) failures.push(`${path}: re-wraps a raw Supabase message in new Error(); throw the result so it can be translated`);
+    if (archivesLiveContent) {
+      requireIncludes(text, 'archiveConfirmRequest(', `${path} live Archive confirmation`);
+      if (/onArchive=\{\(\) => void save[A-Z][A-Za-z]+\('archived'\)\}/.test(text)) {
+        failures.push(`${path}: Archive writes without the live-record confirmation`);
+      }
+    }
+  }
+  for (const journey of ['scripts/local-journeys/products.mjs', 'scripts/local-journeys/media.mjs', 'scripts/local-journeys/articles.mjs']) {
+    requireIncludes(readRequired(journey), 'NOW-OPT-ADMIN-SHARED-UX-001', `${journey} shared UX browser assertion`);
+  }
+  requireIncludes(readRequired('scripts/check-local-journeys.mjs'), 'productJourney', 'scripts/check-local-journeys.mjs Products journey');
+  requireIncludes(readRequired('scripts/check-local-journeys.mjs'), 'mediaJourney', 'scripts/check-local-journeys.mjs Media journey');
+
+  if (process.argv.includes('--self-only')) return;
+  const behavior = spawnSync(
+    execPath,
+    ['--import', 'tsx', '--input-type=module', '-e', `
+      import assert from 'node:assert/strict';
+      import { translateAdminError } from './src/lib/adminErrors.ts';
+      import { classifyGuardedClick, describeUnsavedPrompt, isFormDirty } from './src/pages/admin/unsavedGuard.ts';
+      const t = (error, entity) => translateAdminError(error, { entity });
+      assert.match(t({ code: '23505', message: 'duplicate key value violates unique constraint "products_slug_key"' }, 'product').message, /URL key is already used by another product/);
+      assert.match(t({ code: '42501', message: 'new row violates row-level security policy' }, 'article').message, /not allowed to make this change/);
+      assert.match(t({ code: 'PGRST301', message: 'JWT expired' }, 'media item').message, /sign-in has expired/);
+      assert.match(t(new TypeError('Failed to fetch'), 'lead').message, /Could not reach the website server/);
+      assert.match(t({ error: { message: 'boom', code: '' }, status: 502 }, 'settings').message, /server had a problem/);
+      for (const raw of ['violates', 'JWT', 'Failed to fetch', 'row-level']) {
+        assert.ok(![t({ code: '42501', message: 'row-level' }), t({ code: 'PGRST301', message: 'JWT expired' }), t(new TypeError('Failed to fetch'))].some((r) => r.message.includes(raw)));
+      }
+      assert.equal(isFormDirty({ a: 1, b: 2 }, { b: 2, a: 1 }), false);
+      assert.equal(isFormDirty({ a: 1 }, { a: 2 }), true);
+      assert.equal(describeUnsavedPrompt([{ key: 'p', label: 'Product details', save: async () => true }], 'switch products').canSave, true);
+      assert.equal(describeUnsavedPrompt([{ key: 'p', label: 'A', save: async () => true }, { key: 'm', label: 'B', save: async () => true }], 'leave').canSave, false);
+      const here = 'https://urblo.example.test/admin/products';
+      const click = (o) => ({ href: null, target: null, download: false, modified: false, buttonText: null, ...o });
+      assert.deepEqual(classifyGuardedClick(click({ href: '/admin/media' }), here), { kind: 'path', to: '/admin/media' });
+      assert.deepEqual(classifyGuardedClick(click({ buttonText: 'Sign out' }), here), { kind: 'session', label: 'Sign out' });
+      assert.equal(classifyGuardedClick(click({ href: '/products/x', target: '_blank' }), here), null);
+    `],
+    { cwd: root, encoding: 'utf8' },
+  );
+  if (behavior.status !== 0) {
+    failures.push('Shared admin UX behaviour failed: ' + [behavior.stdout, behavior.stderr].filter(Boolean).join('\n'));
+  } else {
+    notes.push('- Older modules: translated errors (raw text only in Details), feedback beside the action bar, unsaved-changes guard, live Archive confirmation');
+  }
+}
+
 function checkProjectsAggregateContract() {
   if (process.argv.includes('--self-only')) return;
   const result = spawnSync(
@@ -1505,6 +1613,7 @@ checkAdminMediaSafety();
 checkAdminParentOwnershipSafety();
 checkAdminLoadingAndSaveLockSafety();
 checkLegacyModuleSafetyStopGap();
+checkAdminSharedUxLayer();
 checkProjectsAggregateContract();
 checkStoneWorkspaceContract();
 

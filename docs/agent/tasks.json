@@ -141,11 +141,13 @@
         ]
       },
       "status": "now",
-      "phase": "planned",
-      "nextAction": "Opus implements on its own branch; Claude reports to Jay before merge.",
+      "phase": "awaiting_external",
+      "nextAction": "Claude reports PR #73 (stacked on #68) to Jay; Jay decides merge and colleague acceptance. Do not merge before approval.",
       "blocker": "",
       "notes": [
-        "2026-09-26: wave 2 of the 2026-09-24 optimization audit. Jay decided the homepage hero headline keeps its letter-by-letter animation (homepage LCP element stays non-hero by design)."
+        "2026-09-26: wave 2 of the 2026-09-24 optimization audit. Jay decided the homepage hero headline keeps its letter-by-letter animation (homepage LCP element stays non-hero by design).",
+        "2026-09-26: Implemented on claude/opt-admin-shared-ux: src/lib/adminErrors.ts translator, AdminFeedback + useAdminFeedback beside each action bar (status/alert live regions, auto-dismissed success, persistent error with Details), useUnsavedGuard (record switch, in-app links, Back, Sign out, Refresh, beforeunload; StoneDialog Save / Discard / Keep editing), Archive confirmation on live Products/Articles/Media (models and sections of live parents included). Wired into Products, Articles, Media, Leads and Settings; no schema, Function or RLS change. Save in the guard dialog is offered only when exactly one form section is unsaved.",
+        "2026-09-26: PR #73. CI run 36162088858 and retry 36172238648 each failed local:verify on a journey timing or fixture issue, never on product code; both are recorded in WORKLOG. Run 36172983504 on 2d1d222 passed the classified graph and local:verify (26 journeys, including 5 Products and 3 Media shared-UX steps). It deployed Preview https://de547bd5.urblo-site.pages.dev; a workstation agent:cloudflare-preview-smoke against that Preview passed (read-only, no login). Not merged; production unverified."
       ]
     },
     {

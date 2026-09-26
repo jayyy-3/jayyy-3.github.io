@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { ChangeEvent, FormEvent } from 'react';
+import type { ChangeEvent, FormEvent, ReactNode } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import {
     Archive,
@@ -19,8 +19,12 @@ import { useAdminAuth } from '../../lib/adminAuthHooks';
 import AdminShell from './AdminShell';
 import RequireAdmin from './RequireAdmin';
 import { CmsLiveRuleCard, CmsStatusCounts, CmsStatusMeaning, CmsStatusPill } from './AdminCmsPrimitives';
+import { AdminFeedback } from './AdminFeedback';
+import { useAdminFeedback } from './useAdminFeedback';
 import { useLiveSaveConfirm } from './LiveSaveConfirm';
-import { liveSaveRequest, updateLivePageLabel } from './liveSave';
+import { archiveConfirmRequest, liveSaveRequest, updateLivePageLabel } from './liveSave';
+import { isFormDirty } from './unsavedGuard';
+import { useUnsavedGuard } from './useUnsavedGuard';
 
 type MediaStatus = 'draft' | 'published' | 'archived';
 type MediaListFilter = MediaStatus | 'all';
@@ -165,8 +169,9 @@ function AdminMediaContent() {
     const [isSaving, setIsSaving] = useState(false);
     const [isExporting, setIsExporting] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [notice, setNotice] = useState<string | null>(null);
+    const { feedback, setError, setNotice, setInfo, reportError, clearFeedback } = useAdminFeedback();
+    // Form a brand-new (not yet saved) media item started from; used for unsaved-change tracking.
+    const [newItemBaseline, setNewItemBaseline] = useState<MediaFormState>(emptyForm);
 
     const selectedAsset = useMemo(
         () => assets.find((asset) => asset.id === selectedId) ?? null,
@@ -194,7 +199,7 @@ function AdminMediaContent() {
             .returns<MediaAssetRow[]>();
 
         if (loadError) {
-            setError(loadError.message);
+            reportError(loadError, { entity: 'Media library', action: 'load' });
             setIsLoading(false);
             return;
         }
@@ -208,8 +213,9 @@ function AdminMediaContent() {
         selectedIdRef.current = nextSelected?.id ?? null;
         setSelectedId(nextSelected?.id ?? null);
         setForm(rowToForm(nextSelected ?? null));
+        setNewItemBaseline(emptyForm);
         setIsLoading(false);
-    }, []);
+    }, [reportError, setError]);
 
     useEffect(() => {
         void loadAssets();
@@ -229,36 +235,42 @@ function AdminMediaContent() {
     }
 
     function startExternalRecord() {
-        selectedIdRef.current = null;
-        setSelectedId(null);
-        setForm({
+        const started: MediaFormState = {
             ...emptyForm,
             sourceKind: 'external_legacy',
             bucket: 'urblo-public-media',
-        });
-        setNotice('New external media item started.');
+        };
+        selectedIdRef.current = null;
+        setSelectedId(null);
+        setForm(started);
+        setNewItemBaseline(started);
         setError(null);
+        setInfo('New external media item started. Add the link and details, then save.', { scope: 'media' });
     }
 
-    async function handleUpload(event: FormEvent<HTMLFormElement>) {
+    function handleUploadSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
+        // A successful upload opens the new file in the editor, replacing the current form.
+        confirmLeave(() => void handleUpload(), { actionLabel: 'upload a new file' });
+    }
 
+    async function handleUpload() {
         if (!supabase || !canEdit || !user) {
             return;
         }
 
         if (!file) {
-            setError('Choose a media file before uploading.');
+            setError('Choose a media file before uploading.', { scope: 'upload' });
             return;
         }
 
         if (!allowedMimeTypes.has(file.type)) {
-            setError('This file type is not allowed for the launch media buckets.');
+            setError('This file type is not allowed for the launch media buckets.', { scope: 'upload' });
             return;
         }
 
         if (file.size > bucketLimits[PRIVATE_MEDIA_BUCKET]) {
-            setError(`File is too large for ${formatBucketLabel(PRIVATE_MEDIA_BUCKET)}.`);
+            setError(`File is too large for ${formatBucketLabel(PRIVATE_MEDIA_BUCKET)}.`, { scope: 'upload' });
             return;
         }
 
@@ -276,7 +288,7 @@ function AdminMediaContent() {
 
         if (uploadResult.error) {
             setIsUploading(false);
-            setError(uploadResult.error.message);
+            reportError(uploadResult.error, { entity: 'file', action: 'upload', scope: 'upload' });
             return;
         }
 
@@ -325,16 +337,26 @@ function AdminMediaContent() {
                 const metadataError = metadataResponse.error?.message ?? 'No media metadata row was returned.';
 
                 if (metadataReadback.error) {
-                    setError(
-                        `The file was uploaded privately, but the media record response failed and readback could not confirm whether it committed: ${metadataError}; readback: ${metadataReadback.error.message}. The private object was not deleted because a record may exist. Ask an Owner or Admin to inspect ${objectPath}.`,
-                    );
+                    reportError(metadataResponse, {
+                        entity: 'media item',
+                        action: 'upload',
+                        scope: 'upload',
+                        message:
+                            'The file was uploaded, but the Media library could not confirm it was added. Reload the page to check before uploading it again. If it is missing, ask a Website owner or CMS manager to check the upload.',
+                        detail: `The file was uploaded privately, but the media record response failed and readback could not confirm whether it committed: ${metadataError}; readback: ${metadataReadback.error.message}. The private object was not deleted because a record may exist. Inspect ${objectPath}.`,
+                    });
                     return;
                 }
 
                 if (!canCleanUpStorage) {
-                    setError(
-                        `The file was uploaded privately, but media metadata could not be created: ${metadataError}. Editors cannot delete Storage objects, so a private orphan may remain at ${objectPath}. Ask an Owner or Admin to clean it up. It is not in the public media bucket.`,
-                    );
+                    reportError(metadataResponse, {
+                        entity: 'media item',
+                        action: 'upload',
+                        scope: 'upload',
+                        message:
+                            'The file could not be added to the Media library. Nothing is on the website. Ask a Website owner or CMS manager to tidy up the leftover private copy, then try again.',
+                        detail: `The file was uploaded privately, but media metadata could not be created: ${metadataError}. Editors cannot delete Storage objects, so a private orphan may remain at ${objectPath}. It is not in the public media bucket.`,
+                    });
                     return;
                 }
 
@@ -343,11 +365,17 @@ function AdminMediaContent() {
                     PRIVATE_MEDIA_BUCKET,
                     objectPath,
                 );
-                setError(
-                    cleanupError
+                reportError(metadataResponse, {
+                    entity: 'media item',
+                    action: 'upload',
+                    scope: 'upload',
+                    message: cleanupError
+                        ? 'The file could not be added to the Media library, and its leftover private copy could not be removed. Nothing is on the website. Ask a Website owner or CMS manager to check it before you try again.'
+                        : undefined,
+                    detail: cleanupError
                         ? `The file was uploaded privately, but media metadata could not be created: ${metadataError}. Cleanup also failed: ${cleanupError}. A private orphan may remain at ${objectPath}; inspect it before retrying.`
                         : `The media record could not be created: ${metadataError}. The private upload was removed during cleanup, so no public object was created.`,
-                );
+                });
                 return;
             }
         }
@@ -378,6 +406,7 @@ function AdminMediaContent() {
                     : 'Media uploaded privately as a Draft. Add alt text and usage notes before publishing.',
                 auditError,
             ),
+            { scope: 'upload' },
         );
     }
 
@@ -388,7 +417,7 @@ function AdminMediaContent() {
 
     async function saveAsset(nextStatus: MediaStatus, options: { confirmLive?: boolean } = {}) {
         if (!supabase || !canEdit || !user) {
-            return;
+            return false;
         }
 
         const privatePromotionRequested =
@@ -405,8 +434,8 @@ function AdminMediaContent() {
             const originalObjectPath = selectedAsset?.object_path?.trim() ?? '';
 
             if (!canCleanUpStorage) {
-                setError('Private-to-public promotion requires an Owner or Admin so rollback can be completed safely.');
-                return;
+                setError('Private-to-public promotion requires an Owner or Admin so rollback can be completed safely.', { scope: 'media' });
+                return false;
             }
 
             if (
@@ -416,15 +445,19 @@ function AdminMediaContent() {
                 selectedAsset.bucket !== PRIVATE_MEDIA_BUCKET ||
                 !originalObjectPath
             ) {
-                setError('Reload and select an existing private upload before publishing it.');
-                return;
+                setError('Reload and select an existing private upload before publishing it.', { scope: 'media' });
+                return false;
             }
 
             if (form.objectPath.trim() !== originalObjectPath) {
                 setError(
-                    'Publishing stopped because the uploaded file location no longer matches the selected private media record. Reload the item before publishing; Storage paths cannot be repaired through the publish action.',
+                    'Publishing stopped because this file changed since you opened it. Reload the page and select the item again before publishing.',
+                    {
+                        scope: 'media',
+                        detail: 'The uploaded file location no longer matches the selected private media record. Storage paths cannot be repaired through the publish action.',
+                    },
                 );
-                return;
+                return false;
             }
 
             privateStoragePromotion = {
@@ -435,8 +468,8 @@ function AdminMediaContent() {
         }
 
         if (nextStatus === 'published' && !canPublishMedia) {
-            setError(formatMediaPublishError(publishChecklist));
-            return;
+            setError(formatMediaPublishError(publishChecklist), { scope: 'media' });
+            return false;
         }
 
         const shouldPromotePrivateStorage = Boolean(privateStoragePromotion);
@@ -445,8 +478,8 @@ function AdminMediaContent() {
             { allowPrivateStoragePublish: shouldPromotePrivateStorage },
         );
         if (validation.error) {
-            setError(validation.error);
-            return;
+            setError(validation.error, { scope: 'media' });
+            return false;
         }
 
         // Published media is already used by public pages: Save changes them straight away.
@@ -462,7 +495,7 @@ function AdminMediaContent() {
                 }),
             ))
         ) {
-            return;
+            return false;
         }
 
         const now = new Date().toISOString();
@@ -500,10 +533,13 @@ function AdminMediaContent() {
 
             if (privateDownload.error || !privateDownload.data) {
                 setIsSaving(false);
-                setError(
-                    `Publishing stopped before the database was changed because the private source file could not be downloaded: ${privateDownload.error?.message ?? 'No file was returned.'}`,
-                );
-                return;
+                reportError(privateDownload.error ?? 'No file was returned.', {
+                    entity: 'media item',
+                    scope: 'media',
+                    message: 'Publishing stopped before anything changed: the private file could not be read. Try again in a minute.',
+                    detail: `Publishing stopped before the database was changed because the private source file could not be downloaded: ${privateDownload.error?.message ?? 'No file was returned.'}`,
+                });
+                return false;
             }
 
             promotedContentType =
@@ -522,10 +558,14 @@ function AdminMediaContent() {
 
             if (publicUpload.error) {
                 setIsSaving(false);
-                setError(
-                    `Publishing stopped before the database was changed because a new public copy could not be created: ${publicUpload.error.message}. The destination was not overwritten. If this path already exists, inspect it before retrying.`,
-                );
-                return;
+                reportError(publicUpload.error, {
+                    entity: 'media item',
+                    scope: 'media',
+                    message:
+                        'Publishing stopped before anything changed: a public copy of the file could not be created. A file with the same name may already be public. Ask a Website owner or CMS manager to check it.',
+                    detail: `Publishing stopped before the database was changed because a new public copy could not be created: ${publicUpload.error.message}. The destination was not overwritten. If this path already exists, inspect it before retrying.`,
+                });
+                return false;
             }
         }
 
@@ -571,8 +611,8 @@ function AdminMediaContent() {
 
             if (!privateStoragePromotion) {
                 setIsSaving(false);
-                setError(responseFailure);
-                return;
+                reportError(response.error ? response : responseFailure, { entity: 'media item', scope: 'media' });
+                return false;
             }
 
             const publishReadback = await supabase
@@ -585,10 +625,14 @@ function AdminMediaContent() {
 
             if (publishReadback.error || !publishReadback.data) {
                 setIsSaving(false);
-                setError(
-                    `The database publish response failed and readback could not confirm the final state: ${responseFailure}; readback: ${publishReadback.error?.message ?? 'No media record was returned.'}. The new public object was not deleted because the database may have committed. Inspect asset ${privateStoragePromotion.assetId} and ${privateStoragePromotion.objectPath} before retrying. Storage and database changes are not atomic in this browser workflow.`,
-                );
-                return;
+                reportError(response.error ? response : responseFailure, {
+                    entity: 'media item',
+                    scope: 'media',
+                    message:
+                        'Publishing may not have finished. Reload the page to check this item before you try again. If it looks wrong, ask a Website owner or CMS manager to check it.',
+                    detail: `The database publish response failed and readback could not confirm the final state: ${responseFailure}; readback: ${publishReadback.error?.message ?? 'No media record was returned.'}. The new public object was not deleted because the database may have committed. Inspect asset ${privateStoragePromotion.assetId} and ${privateStoragePromotion.objectPath} before retrying. Storage and database changes are not atomic in this browser workflow.`,
+                });
+                return false;
             }
 
             const publishWasCommitted =
@@ -602,12 +646,17 @@ function AdminMediaContent() {
                     privateStoragePromotion.objectPath,
                 );
                 setIsSaving(false);
-                setError(
-                    publicRollback.removed
+                reportError(response.error ? response : responseFailure, {
+                    entity: 'media item',
+                    scope: 'media',
+                    message: publicRollback.removed
+                        ? 'Publishing did not finish, so the change was undone. Nothing changed on the website. Try again.'
+                        : 'Publishing did not finish. A public copy of the file was kept because it may be in use elsewhere. Ask a Website owner or CMS manager to check it before you try again.',
+                    detail: publicRollback.removed
                         ? `The database did not publish the media after a new public object was created: ${responseFailure}. The unreferenced public object was removed during rollback.`
                         : `The database did not publish the media after a new public object was created: ${responseFailure}. The public object was retained: ${publicRollback.detail}. Inspect ${privateStoragePromotion.objectPath} before retrying; rollback never deletes an object referenced by another media record.`,
-                );
-                return;
+                });
+                return false;
             }
 
             persistedAsset = publishReadback.data;
@@ -616,8 +665,11 @@ function AdminMediaContent() {
 
         if (!persistedAsset) {
             setIsSaving(false);
-            setError('The media save returned no database row, so the final state could not be confirmed.');
-            return;
+            setError('The save could not be confirmed. Reload the page to check this media item.', {
+                scope: 'media',
+                detail: 'The media save returned no database row, so the final state could not be confirmed.',
+            });
+            return false;
         }
 
         let privateSourceCleanup = shouldPromotePrivateStorage ? 'retained' : 'not_applicable';
@@ -676,7 +728,7 @@ function AdminMediaContent() {
             ? privateSourceCleanup === 'removed_after_publish'
                 ? 'Media copied to the Public website library and published. The original private file was removed after the database update succeeded.'
                 : privateSourceCleanup === 'retained'
-                  ? `Media copied to the Public website library and published. The private source copy remains: ${privateSourceCleanupError}`
+                  ? 'Media copied to the Public website library and published. The private source copy was kept.'
                   : 'Media copied to the Public website library and published.'
             : 'Media published.';
         const databaseConfirmationNotice = databaseWriteConfirmedByReadback
@@ -687,10 +739,14 @@ function AdminMediaContent() {
             withAuditNotice(
                 nextStatus === 'published'
                     ? `${publishNotice}${databaseConfirmationNotice}`
-                    : 'Media metadata saved.',
+                    : nextStatus === 'archived'
+                      ? 'Media archived.'
+                      : 'Media metadata saved.',
                 auditError,
             ),
+            { scope: 'media', detail: privateSourceCleanup === 'retained' ? privateSourceCleanupError : null },
         );
+        return true;
     }
 
     async function exportMediaManifest() {
@@ -717,7 +773,10 @@ function AdminMediaContent() {
 
         if (auditError) {
             setIsExporting(false);
-            setError(`Media export was blocked because change history could not be recorded: ${auditError}`);
+            setError(
+                'Media export was blocked because change history could not be recorded. Try again, or ask a Website owner or CMS manager to check Change history.',
+                { detail: auditError },
+            );
             return;
         }
 
@@ -775,6 +834,45 @@ function AdminMediaContent() {
         [assets, mediaSearch, mediaStatusFilter],
     );
 
+    // Unsaved-changes guard: the media form compares with the item it was loaded from (or the
+    // new external item it started as).
+    const saveCurrentAsset = () => (isAssetLive ? saveAsset(form.status, { confirmLive: true }) : saveAsset('draft'));
+    const isMediaFormDirty =
+        canEdit && !isLoading && isFormDirty(form, selectedAsset ? rowToForm(selectedAsset) : newItemBaseline);
+    const { confirmLeave, unsavedDialog } = useUnsavedGuard({
+        sections: isMediaFormDirty ? [{ key: 'media', label: 'Media details', save: saveCurrentAsset }] : [],
+        isBusy: isSaving || isUploading,
+        onBlockedWhileBusy: () => setInfo('Wait for the current save or upload to finish before leaving this item.'),
+    });
+
+    function requestSelectAsset(asset: MediaAssetRow) {
+        if (asset.id === selectedIdRef.current) return;
+        confirmLeave(() => selectAsset(asset), { actionLabel: 'switch media items' });
+    }
+
+    function requestExternalRecord() {
+        confirmLeave(startExternalRecord, { actionLabel: 'start a new media item' });
+    }
+
+    // Archive on published media removes it from every public page that shows it, so it asks first.
+    async function archiveAsset() {
+        if (
+            isAssetLive &&
+            selectedAsset &&
+            !(await confirmLiveSave(
+                archiveConfirmRequest({
+                    kind: 'media item',
+                    name: selectedAsset.alt?.trim() || `Asset ${selectedAsset.id}`,
+                    liveTarget: 'every public page that shows this media',
+                    confirmLabel: 'Archive media',
+                }),
+            ))
+        ) {
+            return;
+        }
+        await saveAsset('archived');
+    }
+
     return (
         <AdminShell
             title="Media Library"
@@ -792,7 +890,7 @@ function AdminMediaContent() {
                     </button>
                     <button
                         type="button"
-                        onClick={startExternalRecord}
+                        onClick={requestExternalRecord}
                         disabled={!canEdit || isLoading}
                         className="inline-flex min-h-10 items-center gap-2 rounded border border-black/15 bg-white px-3 text-xs font-bold uppercase tracking-[0.12em] text-black transition hover:border-black disabled:cursor-not-allowed disabled:text-black/35"
                     >
@@ -864,7 +962,7 @@ function AdminMediaContent() {
                                     <button
                                         key={asset.id}
                                         type="button"
-                                        onClick={() => selectAsset(asset)}
+                                        onClick={() => requestSelectAsset(asset)}
                                         className={[
                                             'block w-full p-4 text-left transition hover:bg-[#f8f9f5]',
                                             selectedId === asset.id ? 'bg-[#f8f9f5]' : 'bg-white',
@@ -904,6 +1002,7 @@ function AdminMediaContent() {
                 </section>
 
                 <form onSubmit={(event) => void handleSubmit(event)} className="space-y-5">
+                    <AdminFeedback feedback={feedback} scope="page" onDismiss={clearFeedback} />
                     <section className="border border-black/10 bg-white p-5 md:p-6">
                         <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                             <div>
@@ -1049,7 +1148,8 @@ function AdminMediaContent() {
                             onSaveDraft={() => void saveAsset('draft')}
                             onSaveLive={() => void saveAsset(form.status, { confirmLive: true })}
                             onPublish={() => void saveAsset('published')}
-                            onArchive={() => void saveAsset('archived')}
+                            onArchive={() => void archiveAsset()}
+                            feedback={<AdminFeedback feedback={feedback} scope="media" onDismiss={clearFeedback} className="mt-3" />}
                         />
                     </section>
 
@@ -1147,7 +1247,7 @@ function AdminMediaContent() {
                 </form>
 
                 <aside className="space-y-5">
-                    <form onSubmit={(event) => void handleUpload(event)} className="border border-black/10 bg-black p-5 text-white">
+                    <form onSubmit={handleUploadSubmit} className="border border-black/10 bg-black p-5 text-white">
                         <FileUp className="h-5 w-5 text-[var(--urblo-lime)]" />
                         <h2 className="mt-5 text-xl font-semibold">Upload draft media</h2>
                         <p className="mt-3 text-sm leading-6 text-white/68">
@@ -1184,6 +1284,7 @@ function AdminMediaContent() {
                             <FileUp className="h-4 w-4" />
                             {isUploading ? 'Uploading' : 'Upload media'}
                         </button>
+                        <AdminFeedback feedback={feedback} scope="upload" onDismiss={clearFeedback} className="mt-4" />
                     </form>
 
                     <section className="border border-black/10 bg-white p-5">
@@ -1225,18 +1326,6 @@ function AdminMediaContent() {
                         </section>
                     ) : null}
 
-                    {error ? (
-                        <section className="border border-red-200 bg-red-50 p-4 text-sm font-semibold leading-6 text-red-700">
-                            {error}
-                        </section>
-                    ) : null}
-
-                    {notice ? (
-                        <section className="border border-[var(--urblo-lime)] bg-[rgba(0,255,25,0.10)] p-4 text-sm font-semibold leading-6 text-black">
-                            {notice}
-                        </section>
-                    ) : null}
-
                     {!canEdit ? (
                         <section className="border border-black/10 bg-white p-5 text-sm leading-6 text-black/62">
                             Current role is read-only for Media. Ask a CMS editor to upload or publish media.
@@ -1253,12 +1342,13 @@ function AdminMediaContent() {
                         onSaveDraft={() => void saveAsset('draft')}
                         onSaveLive={() => void saveAsset(form.status, { confirmLive: true })}
                         onPublish={() => void saveAsset('published')}
-                        onArchive={() => void saveAsset('archived')}
+                        onArchive={() => void archiveAsset()}
                         compact
                     />
                 </aside>
             </div>
             {liveSaveDialog}
+            {unsavedDialog}
         </AdminShell>
     );
 }
@@ -1392,6 +1482,7 @@ function MediaActionBar({
     onSaveLive,
     onPublish,
     onArchive,
+    feedback,
     compact = false,
 }: {
     status: MediaStatus;
@@ -1404,6 +1495,8 @@ function MediaActionBar({
     onSaveLive: () => void;
     onPublish: () => void;
     onArchive: () => void;
+    /** Save result for this action bar (AdminFeedback), shown right below the buttons. */
+    feedback?: ReactNode;
     compact?: boolean;
 }) {
     const isDisabled = disabled || isSaving;
@@ -1464,6 +1557,7 @@ function MediaActionBar({
                     </button>
                 </div>
             </div>
+            {feedback}
         </section>
     );
 }

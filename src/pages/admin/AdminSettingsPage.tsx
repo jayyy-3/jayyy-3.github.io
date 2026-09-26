@@ -1,5 +1,6 @@
 import { defaultCompanyLocations, readCompanyLocations, writeCompanyLocations, isCompanyAddressItem, companyAddressMaxLength } from '../../lib/companyLocations';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
 import type { FormEvent } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { CheckCircle2, KeyRound, Pencil, Plus, Save, ShieldCheck, UserPlus, Users, X } from 'lucide-react';
@@ -16,7 +17,11 @@ import {
 } from '../../lib/siteSettingsPublicContract';
 import { supabase } from '../../lib/supabaseClient';
 import { useAdminAuth } from '../../lib/adminAuthHooks';
+import { AdminFeedback } from './AdminFeedback';
+import { useAdminFeedback } from './useAdminFeedback';
 import AdminShell from './AdminShell';
+import { isFormDirty, type UnsavedSection } from './unsavedGuard';
+import { useUnsavedGuard } from './useUnsavedGuard';
 import RequireAdmin from './RequireAdmin';
 import { CmsLiveRuleCard, CmsStatusMeaning, CmsStatusPill } from './AdminCmsPrimitives';
 
@@ -165,8 +170,8 @@ function AdminSettingsContent() {
     const [form, setForm] = useState<SettingsFormState>(emptyForm);
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [notice, setNotice] = useState<string | null>(null);
+    const { feedback, setError, setNotice, reportError, clearFeedback } = useAdminFeedback();
+    const [unsavedAccessForms, setUnsavedAccessForms] = useState<UnsavedSection[]>([]);
 
     const loadSettings = useCallback(async () => {
         if (!supabase) {
@@ -187,7 +192,7 @@ function AdminSettingsContent() {
             .maybeSingle<SiteSettingsRow>();
 
         if (loadError) {
-            setError(loadError.message);
+            reportError(loadError, { entity: 'website settings', action: 'load' });
             setIsLoading(false);
             return;
         }
@@ -195,7 +200,7 @@ function AdminSettingsContent() {
         setRow(data ?? null);
         setForm(rowToForm(data));
         setIsLoading(false);
-    }, []);
+    }, [reportError, setError, setNotice]);
 
     useEffect(() => {
         void loadSettings();
@@ -242,17 +247,20 @@ function AdminSettingsContent() {
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
+        await saveSettings();
+    }
 
+    async function saveSettings() {
         if (!supabase || !canEdit || !user) {
-            return;
+            return false;
         }
 
         // Website settings have no draft workflow: the public site falls back to built-in contact
         // details for anything that is not Published, so every Save keeps (or makes) them Published.
         const validation = validateSettings({ ...form, status: 'published' });
         if (validation.error) {
-            setError(validation.error);
-            return;
+            setError(validation.error, { scope: 'settings' });
+            return false;
         }
 
         const now = new Date().toISOString();
@@ -305,8 +313,8 @@ function AdminSettingsContent() {
         setIsSaving(false);
 
         if (response.error) {
-            setError(response.error.message);
-            return;
+            reportError(response, { entity: 'settings page', scope: 'settings' });
+            return false;
         }
 
         setRow(response.data);
@@ -321,8 +329,19 @@ function AdminSettingsContent() {
                 status: response.data.status,
             },
         });
-        setNotice(withAuditNotice('Site settings saved.', auditError));
+        setNotice(withAuditNotice('Site settings saved.', auditError), { scope: 'settings' });
+        return true;
     }
+
+    // Unsaved-changes guard: website settings compare with the saved row; the access forms below
+    // report their own unsaved state (they have no background save, so the dialog offers Discard).
+    const unsavedSections: UnsavedSection[] = [
+        ...(canEdit && !isLoading && isFormDirty(form, rowToForm(row))
+            ? [{ key: 'settings', label: 'Website settings', save: saveSettings }]
+            : []),
+        ...unsavedAccessForms,
+    ];
+    const { unsavedDialog } = useUnsavedGuard({ sections: unsavedSections, isBusy: isSaving });
 
     return (
         <AdminShell title="Site Settings" eyebrow={canEdit ? 'Website settings' : 'Read only'}>
@@ -352,6 +371,7 @@ function AdminSettingsContent() {
                             canEdit={canEdit}
                             isSaving={isSaving}
                             isLoading={isLoading}
+                            feedback={<AdminFeedback feedback={feedback} scope={['settings', 'page']} onDismiss={clearFeedback} className="mt-4" />}
                         />
 
                         {isLoading ? (
@@ -527,18 +547,6 @@ function AdminSettingsContent() {
                         </ul>
                     </section>
 
-                    {error ? (
-                        <section className="border border-red-200 bg-red-50 p-4 text-sm font-semibold leading-6 text-red-700">
-                            {error}
-                        </section>
-                    ) : null}
-
-                    {notice ? (
-                        <section className="border border-[var(--urblo-lime)] bg-[rgba(0,255,25,0.10)] p-4 text-sm font-semibold leading-6 text-black">
-                            {notice}
-                        </section>
-                    ) : null}
-
                     {!canEdit ? (
                         <section className="border border-black/10 bg-white p-5 text-sm leading-6 text-black/62">
                             Current role is read-only for Settings. Ask a CMS manager to make global site identity
@@ -554,6 +562,8 @@ function AdminSettingsContent() {
                         <Save className="h-4 w-4" />
                         {isSaving ? 'Saving' : 'Save settings'}
                     </button>
+                    {/* Same message as the action bar, repeated beside this Save button without a second announcement. */}
+                    <AdminFeedback feedback={feedback} scope="settings" announce={false} />
                 </aside>
                 </form>
 
@@ -561,8 +571,10 @@ function AdminSettingsContent() {
                     canManage={canEdit}
                     currentRole={profile?.role ?? null}
                     currentUserId={user?.id ?? null}
+                    onUnsavedChange={setUnsavedAccessForms}
                 />
             </div>
+            {unsavedDialog}
         </AdminShell>
     );
 }
@@ -571,10 +583,13 @@ function AdminProfilesManager({
     canManage,
     currentRole,
     currentUserId,
+    onUnsavedChange,
 }: {
     canManage: boolean;
     currentRole: AdminRole | null;
     currentUserId: string | null;
+    /** Reports which access forms hold unsaved input, for the page's unsaved-changes guard. */
+    onUnsavedChange?: (sections: UnsavedSection[]) => void;
 }) {
     const [profiles, setProfiles] = useState<AdminProfileRow[]>([]);
     const [form, setForm] = useState<AdminProfileFormState>(emptyProfileForm);
@@ -582,8 +597,7 @@ function AdminProfilesManager({
     const [isLoading, setIsLoading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [isInviting, setIsInviting] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [notice, setNotice] = useState<string | null>(null);
+    const { feedback, setError, setNotice, reportError, clearFeedback } = useAdminFeedback('access');
     const [copiedAccountId, setCopiedAccountId] = useState<string | null>(null);
     const [inviteForm, setInviteForm] = useState<AdminInviteFormState>(emptyInviteForm);
 
@@ -604,7 +618,7 @@ function AdminProfilesManager({
         setIsLoading(false);
 
         if (loadError) {
-            setError(loadError.message);
+            reportError(loadError, { entity: 'CMS team list', action: 'load' });
             return;
         }
 
@@ -614,7 +628,7 @@ function AdminProfilesManager({
         });
 
         setProfiles(rows);
-    }, [canManage]);
+    }, [canManage, reportError, setError]);
 
     useEffect(() => {
         void loadProfiles();
@@ -681,7 +695,7 @@ function AdminProfilesManager({
         });
 
         if (validation) {
-            setError(validation);
+            setError(validation, { scope: 'profile' });
             return;
         }
 
@@ -715,7 +729,7 @@ function AdminProfilesManager({
         setIsSaving(false);
 
         if (response.error) {
-            setError(response.error.message);
+            reportError(response, { entity: 'CMS access', scope: 'profile' });
             return;
         }
 
@@ -732,7 +746,7 @@ function AdminProfilesManager({
             },
         });
 
-        setNotice(withAuditNotice(editingUserId ? 'CMS access updated.' : 'CMS access granted.', auditError));
+        setNotice(withAuditNotice(editingUserId ? 'CMS access updated.' : 'CMS access granted.', auditError), { scope: 'profile' });
         setEditingUserId(null);
         setForm(emptyProfileForm);
         await loadProfiles();
@@ -751,7 +765,7 @@ function AdminProfilesManager({
         });
 
         if (validation) {
-            setError(validation);
+            setError(validation, { scope: 'invite' });
             return;
         }
 
@@ -766,7 +780,7 @@ function AdminProfilesManager({
 
         if (sessionError || !session?.access_token) {
             setIsInviting(false);
-            setError(sessionError?.message || 'Sign in again before inviting a CMS user.');
+            reportError(sessionError ?? { status: 401, message: 'No active session.' }, { entity: 'invite', scope: 'invite' });
             return;
         }
 
@@ -793,7 +807,11 @@ function AdminProfilesManager({
         setIsInviting(false);
 
         if (!response.ok || !result?.profile) {
-            setError(result?.message || 'The invite could not be sent. Ask a Website owner or CMS manager to review it.');
+            // The invite endpoint can relay Supabase Auth text, so it is translated like any other error.
+            reportError(
+                { ...(result ?? {}), status: response.status },
+                { entity: 'invite', scope: 'invite' },
+            );
             return;
         }
 
@@ -803,11 +821,23 @@ function AdminProfilesManager({
                 `Invite sent to ${result.profile.email}. CMS access is ready when they accept the email and sign in.`,
                 result.auditRecorded ? null : result.auditError || 'Change history was not recorded.',
             ),
+            { scope: 'invite' },
         );
         await loadProfiles();
     }
 
     const activeOwnerCount = profiles.filter((profile) => profile.role === 'owner' && profile.is_active).length;
+    const editingProfile = editingUserId ? profiles.find((profile) => profile.user_id === editingUserId) ?? null : null;
+    const isInviteDirty = canManage && isFormDirty(inviteForm, emptyInviteForm);
+    const isProfileDirty =
+        canManage && isFormDirty(form, editingProfile ? profileRowToForm(editingProfile) : emptyProfileForm);
+
+    useEffect(() => {
+        onUnsavedChange?.([
+            ...(isInviteDirty ? [{ key: 'invite', label: 'the invite form' }] : []),
+            ...(isProfileDirty ? [{ key: 'profile', label: 'the CMS access form' }] : []),
+        ]);
+    }, [isInviteDirty, isProfileDirty, onUnsavedChange]);
 
     return (
         <section className="grid gap-5 xl:grid-cols-[1fr_360px]">
@@ -941,17 +971,7 @@ function AdminProfilesManager({
                     </dl>
                 </section>
 
-                {error ? (
-                    <section className="border border-red-200 bg-red-50 p-4 text-sm font-semibold leading-6 text-red-700">
-                        {error}
-                    </section>
-                ) : null}
-
-                {notice ? (
-                    <section className="border border-[var(--urblo-lime)] bg-[rgba(0,255,25,0.10)] p-4 text-sm font-semibold leading-6 text-black">
-                        {notice}
-                    </section>
-                ) : null}
+                <AdminFeedback feedback={feedback} scope="access" onDismiss={clearFeedback} />
 
                 <form onSubmit={(event) => void handleInviteSubmit(event)} className="border border-black/10 bg-white p-5">
                     <div className="flex items-center gap-2">
@@ -1012,6 +1032,7 @@ function AdminProfilesManager({
                         <UserPlus className="h-4 w-4" />
                         {isInviting ? 'Sending invite' : 'Send invite'}
                     </button>
+                    <AdminFeedback feedback={feedback} scope="invite" onDismiss={clearFeedback} className="mt-4" />
                 </form>
 
                 <form onSubmit={(event) => void handleProfileSubmit(event)} className="border border-black/10 bg-white p-5">
@@ -1099,6 +1120,7 @@ function AdminProfilesManager({
                             <ShieldCheck className="h-4 w-4" />
                             {isSaving ? 'Saving' : editingUserId ? 'Save access' : 'Grant access'}
                         </button>
+                        <AdminFeedback feedback={feedback} scope="profile" onDismiss={clearFeedback} />
                         {editingUserId ? (
                             <button
                                 type="button"
@@ -1202,11 +1224,14 @@ function SiteSettingsActionBar({
     canEdit,
     isSaving,
     isLoading,
+    feedback,
 }: {
     status: SiteSettingsStatus;
     canEdit: boolean;
     isSaving: boolean;
     isLoading: boolean;
+    /** Save result (AdminFeedback), shown right below the Save button. */
+    feedback?: ReactNode;
 }) {
     const statusNote =
         status === 'published'
@@ -1239,6 +1264,7 @@ function SiteSettingsActionBar({
                 <p>2. Review footer links</p>
                 <p>3. Save website settings</p>
             </div>
+            {feedback}
         </section>
     );
 }

@@ -20,8 +20,13 @@ import { useAdminAuth } from '../../lib/adminAuthHooks';
 import AdminShell from './AdminShell';
 import RequireAdmin from './RequireAdmin';
 import { CmsLiveRuleCard, CmsPublicPageLink, CmsStatusCounts, CmsStatusMeaning, CmsStatusPill } from './AdminCmsPrimitives';
+import { AdminFeedback } from './AdminFeedback';
+import { useAdminFeedback } from './useAdminFeedback';
 import { useLiveSaveConfirm } from './LiveSaveConfirm';
+import { isFormDirty, type UnsavedSection } from './unsavedGuard';
+import { useUnsavedGuard } from './useUnsavedGuard';
 import {
+    archiveConfirmRequest,
     followNameUrlKey,
     isUrlKeyLocked,
     liveSaveRequest,
@@ -206,8 +211,7 @@ function AdminProductsContent() {
     const [isSavingModel, setIsSavingModel] = useState(false);
     const [isSavingMaterialDefault, setIsSavingMaterialDefault] = useState(false);
     const [isSavingSpec, setIsSavingSpec] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [notice, setNotice] = useState<string | null>(null);
+    const { feedback, setError, setNotice, setInfo, reportError, clearFeedback } = useAdminFeedback();
     const selectedProductIdRef = useRef<number | null>(null);
     const selectedModelIdRef = useRef<number | null>(null);
     const selectedMaterialDefaultIdRef = useRef<number | null>(null);
@@ -308,9 +312,9 @@ function AdminProductsContent() {
         );
     }
 
-    function beginSaveOperation() {
+    function beginSaveOperation(scope: string) {
         if (activeSaveCountRef.current > 0) {
-            setError('Wait for the current save to finish before starting another change.');
+            setInfo('Wait for the current save to finish before starting another change.', { scope });
             return false;
         }
         activeSaveCountRef.current += 1;
@@ -325,7 +329,7 @@ function AdminProductsContent() {
         if (activeSaveCountRef.current === 0) {
             return false;
         }
-        setError('Wait for the current save to finish before switching products.');
+        setInfo('Wait for the current save to finish before switching products.');
         return true;
     }
 
@@ -372,9 +376,10 @@ function AdminProductsContent() {
                     .returns<ProductSpecRow[]>(),
             ]);
 
-            if (modelsResult.error) throw new Error(modelsResult.error.message);
-            if (defaultsResult.error) throw new Error(defaultsResult.error.message);
-            if (specsResult.error) throw new Error(specsResult.error.message);
+            // Raw results are thrown as-is so the caller can translate them for the editor.
+            if (modelsResult.error) throw modelsResult;
+            if (defaultsResult.error) throw defaultsResult;
+            if (specsResult.error) throw specsResult;
 
             const modelRows = modelsResult.data ?? [];
             const defaultRows = defaultsResult.data ?? [];
@@ -436,19 +441,19 @@ function AdminProductsContent() {
             }
 
             if (productsResult.error) {
-                setError(productsResult.error.message);
+                reportError(productsResult, { entity: 'product library', action: 'load' });
                 setIsLoading(false);
                 return;
             }
 
             if (stonesResult.error) {
-                setError(stonesResult.error.message);
+                reportError(stonesResult, { entity: 'Stone Library list', action: 'load' });
                 setIsLoading(false);
                 return;
             }
 
             if (mediaResult.error) {
-                setError(mediaResult.error.message);
+                reportError(mediaResult, { entity: 'Media library list', action: 'load' });
                 setIsLoading(false);
                 return;
             }
@@ -471,7 +476,7 @@ function AdminProductsContent() {
                 await loadProductBundle(client, nextProduct.id, null, selectionGeneration);
             } catch (loadError) {
                 if (isCurrentProductSelection(nextProduct.id, selectionGeneration)) {
-                    setError(loadError instanceof Error ? loadError.message : 'Product detail load failed.');
+                    reportError(loadError, { entity: 'product details', action: 'load' });
                 }
             }
 
@@ -479,7 +484,7 @@ function AdminProductsContent() {
                 setIsLoading(false);
             }
         },
-        [loadProductBundle, resetChildState, setCurrentProductId],
+        [loadProductBundle, reportError, resetChildState, setCurrentProductId, setError],
     );
 
     useEffect(() => {
@@ -510,7 +515,7 @@ function AdminProductsContent() {
             await loadProductBundle(supabase, product.id, null, selectionGeneration);
         } catch (loadError) {
             if (isCurrentProductSelection(product.id, selectionGeneration)) {
-                setError(loadError instanceof Error ? loadError.message : 'Product detail load failed.');
+                reportError(loadError, { entity: 'product details', action: 'load' });
             }
         } finally {
             if (isCurrentProductSelection(product.id, selectionGeneration)) {
@@ -521,7 +526,7 @@ function AdminProductsContent() {
 
     function startNewProduct() {
         if (isLoading) {
-            setNotice('Wait for the product library to finish loading before starting a new product.');
+            setInfo('Wait for the product library to finish loading before starting a new product.');
             return;
         }
         if (blockProductSwitchWhileSaving()) {
@@ -533,7 +538,7 @@ function AdminProductsContent() {
         setProductForm(emptyProductForm);
         resetChildState();
         setError(null);
-        setNotice('New product started.');
+        setInfo('New product started. Fill in the name, then save.', { scope: 'product' });
     }
 
     function updateProductField<Key extends keyof ProductFormState>(key: Key, value: ProductFormState[Key]) {
@@ -580,22 +585,22 @@ function AdminProductsContent() {
     }
 
     async function saveProduct(nextStatus: ProductStatus, options: { confirmLive?: boolean } = {}) {
-        if (!supabase || !canEdit || !user) return;
+        if (!supabase || !canEdit || !user) return false;
 
         if (nextStatus === 'published' && !canPublishProduct) {
-            setError(formatPublishChecklistError('product', publishChecklist));
-            return;
+            setError(formatPublishChecklistError('product', publishChecklist), { scope: 'product' });
+            return false;
         }
 
         const validation = validateProductForm({ ...productForm, status: nextStatus });
         if (validation.error !== null) {
-            setError(validation.error);
-            return;
+            setError(validation.error, { scope: 'product' });
+            return false;
         }
 
-        if (options.confirmLive && !(await confirmLiveProductSave(nextStatus))) return;
+        if (options.confirmLive && !(await confirmLiveProductSave(nextStatus))) return false;
 
-        if (!beginSaveOperation()) return;
+        if (!beginSaveOperation('product')) return false;
 
         const client: SupabaseClient = supabase;
         const operationProductId = selectedProductIdRef.current;
@@ -639,9 +644,9 @@ function AdminProductsContent() {
 
             if (response.error) {
                 if (selectedProductIdRef.current === operationProductId) {
-                    setError(response.error.message);
+                    reportError(response, { entity: 'product', scope: 'product' });
                 }
-                return;
+                return false;
             }
 
             const auditError = await recordAdminAuditEvent(client, {
@@ -662,14 +667,22 @@ function AdminProductsContent() {
             });
 
             if (selectedProductIdRef.current !== operationProductId) {
-                return;
+                return true;
             }
-            setNotice(withAuditNotice(nextStatus === 'published' ? 'Product published.' : 'Product saved.', auditError));
+            setNotice(
+                withAuditNotice(
+                    nextStatus === 'published' ? 'Product published.' : nextStatus === 'archived' ? 'Product archived.' : 'Product saved.',
+                    auditError,
+                ),
+                { scope: 'product' },
+            );
             await loadProducts(response.data.id);
+            return true;
         } catch (saveError) {
             if (selectedProductIdRef.current === operationProductId) {
-                setError(saveError instanceof Error ? saveError.message : 'Product save failed.');
+                reportError(saveError, { entity: 'product', scope: 'product' });
             }
+            return false;
         } finally {
             endSaveOperation();
             setIsSavingProduct(false);
@@ -682,29 +695,29 @@ function AdminProductsContent() {
     }
 
     async function saveModel(nextStatus: ProductStatus, options: { confirmLive?: boolean } = {}) {
-        if (!supabase || !canEdit || !user || !selectedProduct) return;
+        if (!supabase || !canEdit || !user || !selectedProduct) return false;
 
         const operation = {
             productId: selectedProduct.id,
             rowId: selectedModelIdRef.current,
             editors: getCurrentEditorSelection(),
         };
-        if (selectedProductIdRef.current !== operation.productId) return;
+        if (selectedProductIdRef.current !== operation.productId) return false;
 
         if (nextStatus === 'published' && !canPublishModel) {
-            setError(formatPublishChecklistError('model', modelPublishChecklist));
-            return;
+            setError(formatPublishChecklistError('model', modelPublishChecklist), { scope: 'model' });
+            return false;
         }
 
         const validation = validateModelForm({ ...modelForm, status: nextStatus });
         if (validation.error !== null) {
-            setError(validation.error);
-            return;
+            setError(validation.error, { scope: 'model' });
+            return false;
         }
 
-        if (options.confirmLive && isModelLive && !(await confirmLiveProductSave('published'))) return;
+        if (options.confirmLive && isModelLive && !(await confirmLiveProductSave('published'))) return false;
 
-        if (!beginSaveOperation()) return;
+        if (!beginSaveOperation('model')) return false;
 
         const client: SupabaseClient = supabase;
 
@@ -745,9 +758,9 @@ function AdminProductsContent() {
                     selectedProductIdRef.current === operation.productId &&
                     selectedModelIdRef.current === operation.rowId
                 ) {
-                    setError(response.error.message);
+                    reportError(response, { entity: 'model', scope: 'model' });
                 }
-                return;
+                return false;
             }
 
             const auditError = await recordAdminAuditEvent(client, {
@@ -772,9 +785,15 @@ function AdminProductsContent() {
                 selectedProductIdRef.current !== operation.productId ||
                 selectedModelIdRef.current !== operation.rowId
             ) {
-                return;
+                return true;
             }
-            setNotice(withAuditNotice(nextStatus === 'published' ? 'Model published.' : 'Model saved.', auditError));
+            setNotice(
+                withAuditNotice(
+                    nextStatus === 'published' ? 'Model published.' : nextStatus === 'archived' ? 'Model archived.' : 'Model saved.',
+                    auditError,
+                ),
+                { scope: 'model' },
+            );
             await loadProductBundle(
                 client,
                 operation.productId,
@@ -782,13 +801,15 @@ function AdminProductsContent() {
                 productSelectionGenerationRef.current,
                 operation.editors,
             );
+            return true;
         } catch (saveError) {
             if (
                 selectedProductIdRef.current === operation.productId &&
                 selectedModelIdRef.current === operation.rowId
             ) {
-                setError(saveError instanceof Error ? saveError.message : 'Model save failed.');
+                reportError(saveError, { entity: 'model', scope: 'model' });
             }
+            return false;
         } finally {
             endSaveOperation();
             setIsSavingModel(false);
@@ -796,24 +817,24 @@ function AdminProductsContent() {
     }
 
     async function saveMaterialDefault() {
-        if (!supabase || !canEdit || !user || !selectedProduct) return;
+        if (!supabase || !canEdit || !user || !selectedProduct) return false;
 
         const operation = {
             productId: selectedProduct.id,
             rowId: selectedMaterialDefaultIdRef.current,
             editors: getCurrentEditorSelection(),
         };
-        if (selectedProductIdRef.current !== operation.productId) return;
+        if (selectedProductIdRef.current !== operation.productId) return false;
 
         const validation = validateMaterialDefaultForm(materialDefaultForm);
         if (validation.error !== null) {
-            setError(validation.error);
-            return;
+            setError(validation.error, { scope: 'material' });
+            return false;
         }
 
-        if (!(await confirmLiveProductSave('published'))) return;
+        if (!(await confirmLiveProductSave('published'))) return false;
 
-        if (!beginSaveOperation()) return;
+        if (!beginSaveOperation('material')) return false;
 
         const client: SupabaseClient = supabase;
 
@@ -850,9 +871,9 @@ function AdminProductsContent() {
                     selectedProductIdRef.current === operation.productId &&
                     selectedMaterialDefaultIdRef.current === operation.rowId
                 ) {
-                    setError(response.error.message);
+                    reportError(response, { entity: 'material default', scope: 'material' });
                 }
-                return;
+                return false;
             }
 
             const auditError = await recordAdminAuditEvent(client, {
@@ -871,9 +892,9 @@ function AdminProductsContent() {
                 selectedProductIdRef.current !== operation.productId ||
                 selectedMaterialDefaultIdRef.current !== operation.rowId
             ) {
-                return;
+                return true;
             }
-            setNotice(withAuditNotice('Material default saved.', auditError));
+            setNotice(withAuditNotice('Material default saved.', auditError), { scope: 'material' });
             await loadProductBundle(
                 client,
                 operation.productId,
@@ -881,13 +902,15 @@ function AdminProductsContent() {
                 productSelectionGenerationRef.current,
                 operation.editors,
             );
+            return true;
         } catch (saveError) {
             if (
                 selectedProductIdRef.current === operation.productId &&
                 selectedMaterialDefaultIdRef.current === operation.rowId
             ) {
-                setError(saveError instanceof Error ? saveError.message : 'Material default save failed.');
+                reportError(saveError, { entity: 'material default', scope: 'material' });
             }
+            return false;
         } finally {
             endSaveOperation();
             setIsSavingMaterialDefault(false);
@@ -895,24 +918,24 @@ function AdminProductsContent() {
     }
 
     async function saveSpec() {
-        if (!supabase || !canEdit || !user || !selectedProduct) return;
+        if (!supabase || !canEdit || !user || !selectedProduct) return false;
 
         const operation = {
             productId: selectedProduct.id,
             rowId: selectedSpecIdRef.current,
             editors: getCurrentEditorSelection(),
         };
-        if (selectedProductIdRef.current !== operation.productId) return;
+        if (selectedProductIdRef.current !== operation.productId) return false;
 
         const validation = validateSpecForm(specForm);
         if (validation.error !== null) {
-            setError(validation.error);
-            return;
+            setError(validation.error, { scope: 'spec' });
+            return false;
         }
 
-        if (!(await confirmLiveProductSave('published'))) return;
+        if (!(await confirmLiveProductSave('published'))) return false;
 
-        if (!beginSaveOperation()) return;
+        if (!beginSaveOperation('spec')) return false;
 
         const client: SupabaseClient = supabase;
 
@@ -948,9 +971,9 @@ function AdminProductsContent() {
                     selectedProductIdRef.current === operation.productId &&
                     selectedSpecIdRef.current === operation.rowId
                 ) {
-                    setError(response.error.message);
+                    reportError(response, { entity: 'specification', scope: 'spec' });
                 }
-                return;
+                return false;
             }
 
             const auditError = await recordAdminAuditEvent(client, {
@@ -968,9 +991,9 @@ function AdminProductsContent() {
                 selectedProductIdRef.current !== operation.productId ||
                 selectedSpecIdRef.current !== operation.rowId
             ) {
-                return;
+                return true;
             }
-            setNotice(withAuditNotice('Specification saved.', auditError));
+            setNotice(withAuditNotice('Specification saved.', auditError), { scope: 'spec' });
             await loadProductBundle(
                 client,
                 operation.productId,
@@ -978,17 +1001,103 @@ function AdminProductsContent() {
                 productSelectionGenerationRef.current,
                 operation.editors,
             );
+            return true;
         } catch (saveError) {
             if (
                 selectedProductIdRef.current === operation.productId &&
                 selectedSpecIdRef.current === operation.rowId
             ) {
-                setError(saveError instanceof Error ? saveError.message : 'Specification save failed.');
+                reportError(saveError, { entity: 'specification', scope: 'spec' });
             }
+            return false;
         } finally {
             endSaveOperation();
             setIsSavingSpec(false);
         }
+    }
+
+    // Unsaved-changes guard: each editor on this screen compares its form with the record it was
+    // loaded from. Product, model, material default and specification save separately, so the
+    // dialog offers Save only when exactly one of them has changes.
+    const selectedMaterialDefault = materialDefaults.find((row) => row.id === selectedMaterialDefaultId) ?? null;
+    const selectedSpec = specs.find((row) => row.id === selectedSpecId) ?? null;
+    const unsavedSections: UnsavedSection[] = [];
+    if (canEdit && !isLoading) {
+        if (isFormDirty(productForm, rowToProductForm(selectedProduct))) {
+            unsavedSections.push({
+                key: 'product',
+                label: 'Product details',
+                save: () => saveProduct(productForm.status, { confirmLive: true }),
+            });
+        }
+        if (selectedProduct && isFormDirty(modelForm, rowToModelForm(selectedModel))) {
+            unsavedSections.push({
+                key: 'model',
+                label: 'Models',
+                save: () => saveModel(modelForm.status, { confirmLive: true }),
+            });
+        }
+        if (selectedProduct && isFormDirty(materialDefaultForm, rowToMaterialDefaultForm(selectedMaterialDefault))) {
+            unsavedSections.push({ key: 'material', label: 'Material default', save: saveMaterialDefault });
+        }
+        if (selectedProduct && isFormDirty(specForm, rowToSpecForm(selectedSpec))) {
+            unsavedSections.push({ key: 'spec', label: 'Specifications', save: saveSpec });
+        }
+    }
+    const { confirmLeave, unsavedDialog } = useUnsavedGuard({
+        sections: unsavedSections,
+        isBusy: isAnySaving,
+        onBlockedWhileBusy: () => setInfo('Wait for the current save to finish before leaving this product.'),
+    });
+
+    function requestSelectProduct(product: ProductRow) {
+        if (product.id === selectedProductIdRef.current) return;
+        confirmLeave(() => void selectProduct(product), { actionLabel: 'switch products' });
+    }
+
+    function requestNewProduct() {
+        confirmLeave(startNewProduct, { actionLabel: 'start a new product' });
+    }
+
+    function requestSubrecord(key: 'model' | 'material' | 'spec', action: () => void, actionLabel: string) {
+        confirmLeave(action, { keys: [key], actionLabel });
+    }
+
+    // Archive on a live product (or a published model of a live product) removes it from the
+    // public page straight away, so it asks first and names the page.
+    async function archiveProduct() {
+        if (
+            selectedProduct?.status === 'published' &&
+            !(await confirmLiveSave(
+                archiveConfirmRequest({
+                    kind: 'product',
+                    name: selectedProduct.name,
+                    publicPath: `/products/${selectedProduct.slug}`,
+                    confirmLabel: 'Archive product',
+                }),
+            ))
+        ) {
+            return;
+        }
+        await saveProduct('archived');
+    }
+
+    async function archiveModel() {
+        if (
+            isModelLive &&
+            selectedProduct &&
+            !(await confirmLiveSave(
+                archiveConfirmRequest({
+                    kind: 'model',
+                    name: selectedModel?.label ?? modelForm.label,
+                    publicPath: `/products/${selectedProduct.slug}`,
+                    confirmLabel: 'Archive model',
+                }),
+            ))
+        ) {
+            return;
+        }
+        await saveModel('archived');
     }
 
     return (
@@ -998,7 +1107,7 @@ function AdminProductsContent() {
             actions={
                 <button
                     type="button"
-                    onClick={startNewProduct}
+                    onClick={requestNewProduct}
                     disabled={!canEdit || isLoading || isAnySaving}
                     className="inline-flex min-h-10 items-center gap-2 rounded border border-black/15 bg-white px-3 text-xs font-bold uppercase tracking-[0.12em] text-black transition hover:border-black disabled:cursor-not-allowed disabled:text-black/35"
                 >
@@ -1075,7 +1184,7 @@ function AdminProductsContent() {
                                     <button
                                         key={product.id}
                                         type="button"
-                                        onClick={() => void selectProduct(product)}
+                                        onClick={() => requestSelectProduct(product)}
                                         disabled={isAnySaving}
                                         className={[
                                             'block w-full p-4 text-left transition hover:bg-[#f8f9f5] disabled:cursor-wait disabled:opacity-55',
@@ -1116,6 +1225,7 @@ function AdminProductsContent() {
                 </section>
 
                 <section className="space-y-5">
+                    <AdminFeedback feedback={feedback} scope="page" onDismiss={clearFeedback} />
                     <form
                         onSubmit={(event) => void handleProductSubmit(event)}
                         className="border border-black/10 bg-white p-5 md:p-6"
@@ -1253,7 +1363,8 @@ function AdminProductsContent() {
                             publishLabel="Publish product"
                             archiveLabel="Archive product"
                             onPublish={() => void saveProduct('published')}
-                            onArchive={() => void saveProduct('archived')}
+                            onArchive={() => void archiveProduct()}
+                            feedback={<AdminFeedback feedback={feedback} scope="product" onDismiss={clearFeedback} className="mt-3" />}
                         />
                     </form>
 
@@ -1261,20 +1372,32 @@ function AdminProductsContent() {
                         <SubrecordEditor
                             title="Models"
                             eyebrow={`${models.length} rows`}
-                            onNew={() => {
-                                setCurrentModelId(null);
-                                setModelForm(emptyModelForm);
-                            }}
+                            onNew={() =>
+                                requestSubrecord(
+                                    'model',
+                                    () => {
+                                        setCurrentModelId(null);
+                                        setModelForm(emptyModelForm);
+                                    },
+                                    'start a new model',
+                                )
+                            }
                             disabled={!canEdit || !selectedProduct}
                         >
                             <RecordChips
                                 rows={models}
                                 selectedId={selectedModelId}
                                 getLabel={(row) => row.label}
-                                onSelect={(row) => {
-                                    setCurrentModelId(row.id);
-                                    setModelForm(rowToModelForm(row));
-                                }}
+                                onSelect={(row) =>
+                                    requestSubrecord(
+                                        'model',
+                                        () => {
+                                            setCurrentModelId(row.id);
+                                            setModelForm(rowToModelForm(row));
+                                        },
+                                        'switch models',
+                                    )
+                                }
                             />
                             <SelectField
                                 label="Status"
@@ -1342,7 +1465,8 @@ function AdminProductsContent() {
                                 archiveLabel="Archive model"
                                 onSave={() => void saveModel(modelForm.status, { confirmLive: true })}
                                 onPublish={() => void saveModel('published')}
-                                onArchive={() => void saveModel('archived')}
+                                onArchive={() => void archiveModel()}
+                                feedback={<AdminFeedback feedback={feedback} scope="model" onDismiss={clearFeedback} className="mt-3" />}
                                 compact
                             />
                         </SubrecordEditor>
@@ -1350,20 +1474,32 @@ function AdminProductsContent() {
                         <SubrecordEditor
                             title="Specifications"
                             eyebrow={`${specs.length} rows`}
-                            onNew={() => {
-                                setCurrentSpecId(null);
-                                setSpecForm(emptySpecForm);
-                            }}
+                            onNew={() =>
+                                requestSubrecord(
+                                    'spec',
+                                    () => {
+                                        setCurrentSpecId(null);
+                                        setSpecForm(emptySpecForm);
+                                    },
+                                    'start a new specification',
+                                )
+                            }
                             disabled={!canEdit || !selectedProduct}
                         >
                             <RecordChips
                                 rows={specs}
                                 selectedId={selectedSpecId}
                                 getLabel={(row) => row.spec_label}
-                                onSelect={(row) => {
-                                    setCurrentSpecId(row.id);
-                                    setSpecForm(rowToSpecForm(row));
-                                }}
+                                onSelect={(row) =>
+                                    requestSubrecord(
+                                        'spec',
+                                        () => {
+                                            setCurrentSpecId(row.id);
+                                            setSpecForm(rowToSpecForm(row));
+                                        },
+                                        'switch specifications',
+                                    )
+                                }
                             />
                             <TextField
                                 label="Spec label"
@@ -1393,6 +1529,7 @@ function AdminProductsContent() {
                                 <Save className="h-4 w-4" />
                                 {isSavingSpec ? 'Saving' : 'Save spec'}
                             </button>
+                            <AdminFeedback feedback={feedback} scope="spec" onDismiss={clearFeedback} />
                         </SubrecordEditor>
                     </section>
                 </section>
@@ -1423,10 +1560,16 @@ function AdminProductsContent() {
                             </div>
                             <button
                                 type="button"
-                                onClick={() => {
-                                    setCurrentMaterialDefaultId(null);
-                                    setMaterialDefaultForm(emptyMaterialDefaultForm);
-                                }}
+                                onClick={() =>
+                                    requestSubrecord(
+                                        'material',
+                                        () => {
+                                            setCurrentMaterialDefaultId(null);
+                                            setMaterialDefaultForm(emptyMaterialDefaultForm);
+                                        },
+                                        'start a new material default',
+                                    )
+                                }
                                 disabled={!canEdit || !selectedProduct}
                                 className="inline-flex min-h-9 items-center gap-2 rounded border border-black/15 px-3 text-[11px] font-bold uppercase tracking-[0.12em] text-black disabled:text-black/35"
                             >
@@ -1438,10 +1581,16 @@ function AdminProductsContent() {
                             rows={materialDefaults}
                             selectedId={selectedMaterialDefaultId}
                             getLabel={(row) => `${row.material_category}: ${row.display_label ?? row.material_slug ?? 'Needs label'}`}
-                            onSelect={(row) => {
-                                setCurrentMaterialDefaultId(row.id);
-                                setMaterialDefaultForm(rowToMaterialDefaultForm(row));
-                            }}
+                            onSelect={(row) =>
+                                requestSubrecord(
+                                    'material',
+                                    () => {
+                                        setCurrentMaterialDefaultId(row.id);
+                                        setMaterialDefaultForm(rowToMaterialDefaultForm(row));
+                                    },
+                                    'switch material defaults',
+                                )
+                            }
                         />
                         <SelectField
                             label="Category"
@@ -1502,6 +1651,7 @@ function AdminProductsContent() {
                             <Save className="h-4 w-4" />
                             {isSavingMaterialDefault ? 'Saving' : 'Save material default'}
                         </button>
+                        <AdminFeedback feedback={feedback} scope="material" onDismiss={clearFeedback} className="mt-3" />
                     </section>
 
                     <section className="border border-black/10 bg-white p-5">
@@ -1515,16 +1665,6 @@ function AdminProductsContent() {
                         </ul>
                     </section>
 
-                    {error ? (
-                        <section className="border border-red-200 bg-red-50 p-4 text-sm font-semibold leading-6 text-red-700">
-                            {error}
-                        </section>
-                    ) : null}
-                    {notice ? (
-                        <section className="border border-[var(--urblo-lime)] bg-[rgba(0,255,25,0.10)] p-4 text-sm font-semibold leading-6 text-black">
-                            {notice}
-                        </section>
-                    ) : null}
                     {!canEdit ? (
                         <section className="border border-black/10 bg-white p-5 text-sm leading-6 text-black/62">
                             Current role is read-only for Products. Ask a CMS editor to update product content.
@@ -1533,6 +1673,7 @@ function AdminProductsContent() {
                 </aside>
             </div>
             {liveSaveDialog}
+            {unsavedDialog}
         </AdminShell>
     );
 }
@@ -1883,6 +2024,7 @@ function ProductActionBar({
     onSave,
     onPublish,
     onArchive,
+    feedback,
     compact = false,
 }: {
     label: string;
@@ -1897,6 +2039,8 @@ function ProductActionBar({
     onSave?: () => void;
     onPublish: () => void;
     onArchive: () => void;
+    /** Save result for this action bar (AdminFeedback), shown right below the buttons. */
+    feedback?: ReactNode;
     compact?: boolean;
 }) {
     const isDisabled = disabled || isSaving;
@@ -1949,6 +2093,7 @@ function ProductActionBar({
                     </button>
                 </div>
             </div>
+            {feedback}
         </section>
     );
 }
