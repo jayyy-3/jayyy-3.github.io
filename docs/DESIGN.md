@@ -93,6 +93,44 @@ Avoid:
 - heavy dark-blue/slate dashboards
 - color systems that overpower stone texture
 
+### Tokens
+Defined in `tailwind.config.js` (`theme.extend`) and, for responsive layout values, as CSS variables in `src/index.css`. Use these names instead of arbitrary values; `scripts/check-public-ui-tokens.mjs` fails when public `text-[Npx]` utilities grow past `scripts/public-ui-tokens-baseline.json`.
+
+| Group | Token (utility) | Value | Use |
+| --- | --- | --- | --- |
+| Colour | `ink` (`text-ink`, `bg-ink`) | `#000000` | Strongest text, black fills |
+| Colour | `body` (`text-body`) | `#33363F` | Body text on light surfaces |
+| Colour | `muted` (`text-muted`) | `#63666D` (5.7:1 on white) | Labels, meta, secondary copy |
+| Colour | `lime` (`text-lime`, `bg-lime`) | `#00FF19` | Signal only: active state, key proof, decisive CTA |
+| Text on dark | `inverse` / `inverse-body` / `inverse-muted` | `#FFFFFF` / white 72% / white 56% | Strong, body and muted text on black and photography |
+| Border | `line` (`border-line`) | black 12% | Hairlines on light surfaces |
+| Border | `line-inverse` (`border-line-inverse`) | white 14% | Hairlines on dark surfaces |
+| Surface | `surface` (`bg-surface`) | `rgba(239,239,239,0.28)` | Quiet tool bands and panels |
+| Type | `text-meta` | 12px / 1.5 | Uppercase labels, meta, buttons |
+| Type | `text-small` | 14px / 1.6 | Secondary copy, lists, card copy |
+| Type | `text-copy` | 16px / 1.75 | Body copy |
+| Type | `text-lead` | 20px / 1.6 | Ledes, section copy, small headings |
+| Type | `text-title-sm` | 24px / 1.2 | Card and step titles |
+| Type | `text-title` | 34px / 1.15 | Mobile H2 |
+| Type | `text-title-lg` | 44px / 1.1 | Desktop section H2, mobile hero H1 |
+| Type | `text-display` | 64px / 1.1 | Desktop display H2, page H1 at md+ |
+| Type (hero) | `text-hero` / `text-hero-lg` | 104px / 140px, line-height 1 | Capabilities hero H1, Home manifesto |
+| Type (hero) | `.urblo-hero-title` | 52 → 66 → 88 → 112 → 132 → 148px | Home first-viewport verb stack only (approved ramp) |
+| Tracking | `tracking-caps` | 0.12em | Uppercase buttons, meta, chips |
+| Tracking | `tracking-eyebrow` | 0.18em | Eyebrows and small section labels |
+| Layout | `--urblo-gutter` (`px-gutter`, `.urblo-page-container`) | 24px / 40px at 768 / 94px at 1024 | The one page gutter: header, page container, sections |
+| Layout | `--urblo-section` (`py-section`, `.urblo-section`) | 72px / 96px at 1024 | Standard section rhythm |
+| Layout | `--urblo-section-tight` (`py-section-tight`) | 48px / 64px at 1024 | Compact bands (next-step CTA, tool bands) |
+
+Shared components (`src/components/ui/`, used on Home and Capabilities first; other pages converge in wave 3):
+- `Button`: `primary` (black fill), `inverse` (lime fill for dark surfaces), `ghost` (quiet hairline outline that warms to lime), `link` (uppercase underlined text). `surface="dark"` adapts primary, ghost and link; `size="sm"` gives a 40px control. `to` renders a router link, `href` an anchor, otherwise a button. Built on the `urblo-button*` classes; the older black-outline `.urblo-button` stays for pages not yet converted.
+- `SectionHeading`: two levels only. `display` is Avenir light 34 → 44 → 64 for editorial statements; `section` is Avenir semibold, sentence case, 34 → 44 (Projects pattern). Optional eyebrow and copy.
+- `PageIntro`: breadcrumb or eyebrow, light H1 (`urblo-page-title`, or the `hero` size over media), lede and actions, modelled on the Projects archive.
+- `Card`: `bordered` (1px hairline, 4px radius) or `borderless` (Projects card, top hairline only); no resting shadow; optional 4:3 media, meta, title, copy and footer.
+- `Reveal`: the one scroll reveal (fade and 24px rise, once; fade only under reduced motion).
+
+The header uses the page gutter, so the logo lines up with page content at every width. Media controls (carousel arrows, rail thumbnails, the video Play disc, modal close) are not Buttons.
+
 ### Typography
 Known brand typography:
 - Primary: `Avenir LT Std`
@@ -163,7 +201,7 @@ Hero behavior:
 - The first homepage viewport should feel full-screen on desktop and mobile.
 - Desktop video is acceptable when it does not slow first meaningfully visible content; mobile uses an optimized portrait MP4 with the poster retained as the immediate fallback. In embedded browsers such as WeChat, autoplay should be attempted when policy allows it, but a rejected play promise must expose one restrained, accessible tap-to-play control instead of leaving a silently frozen hero.
 - The homepage hero poster should be available immediately as a visual fallback, and heavy non-hero homepage media should not request during initial hero load.
-- The homepage hero and global header may use the edge-aligned container instead of the standard page container when the first viewport needs a full-bleed editorial composition.
+- The global header and the homepage hero use the page gutter (`--urblo-gutter`), so the logo, the hero verb stack and the page content share one left edge (2026-09-26, design tokens task). Full-bleed media still runs edge to edge; only text and controls follow the gutter.
 - Homepage hero title motion should be restrained, sequential, and reduced-motion aware. Letter-by-letter left-to-right reveals are acceptable when they clarify hierarchy rather than delaying access to content.
 - The approved first-viewport verb stack is all-caps, with a deliberate second-line offset, no terminal punctuation on `DESIGN` or `SOURCE`, only the final `DELIVER.` terminal dot in Urblo lime, and enough bottom proximity to feel anchored without clipping on mobile.
 

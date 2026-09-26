@@ -19,6 +19,8 @@ export const checks = {
   routes: { command: ['bash', 'scripts/agent-smoke-core.sh'], deps: ['build'] },
   'forms-ui': node('check-contact-form-ui-source.mjs'),
   capabilities: node('check-capabilities-page-source.mjs'),
+  // Public type-scale ratchet: arbitrary text-[Npx] may not grow past scripts/public-ui-tokens-baseline.json.
+  'ui-tokens': node('check-public-ui-tokens.mjs'),
   'homepage-video': node('check-homepage-hero-video.mjs'),
   'product-images': node('check-product-model-image-mapping.mjs'),
   'stone-library': node('check-stone-library-detail-integrity.mjs'),
@@ -35,7 +37,7 @@ export const checks = {
   handoff: node('check-admin-handoff-readiness.mjs', ['--base-url', 'https://urblo.com.au', '--admin-email', 'info@urblo.com.au']),
   browser: node('check-admin-config-gate.mjs', [], ['build']),
 }
-const smoke = ['routes', 'unit', 'forms-ui', 'capabilities', 'homepage-video', 'product-images', 'stone-library', 'stone-adoption-snapshot', 'qr', 'projects']
+const smoke = ['routes', 'unit', 'forms-ui', 'capabilities', 'ui-tokens', 'homepage-video', 'product-images', 'stone-library', 'stone-adoption-snapshot', 'qr', 'projects']
 const admin = ['unit', 'coverage', 'guide', 'qr', 'projects', 'build', 'lint', 'foundation', 'media-plan', 'public-readiness', 'cloudflare', 'harness', 'handoff']
 export const suites = {
   docs: ['state', 'paths', 'harness', 'classifier', 'guide'],

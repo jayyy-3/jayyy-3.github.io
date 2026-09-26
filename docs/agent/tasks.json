@@ -91,11 +91,12 @@
         ]
       },
       "status": "now",
-      "phase": "planned",
-      "nextAction": "Opus implements on its own branch; Claude reports to Jay before merge.",
-      "blocker": "",
+      "phase": "awaiting_external",
+      "nextAction": "Jay reviews the deliberate visual changes listed in PR #72 (stacked on #68) and decides on merge; no merge without approval.",
+      "blocker": "Jay's visual approval and merge decision on PR #72.",
       "notes": [
-        "2026-09-26: wave 2 of the 2026-09-24 optimization audit. Jay decided the homepage hero headline keeps its letter-by-letter animation (homepage LCP element stays non-hero by design)."
+        "2026-09-26: wave 2 of the 2026-09-24 optimization audit. Jay decided the homepage hero headline keeps its letter-by-letter animation (homepage LCP element stays non-hero by design).",
+        "2026-09-26: implemented on claude/opt-design-tokens-components (24e442e). Clean Node 20 gate passed 26 checks incl. ui-tokens and unit (92 tests); host no-config browser gate 12 routes; PR #72 CI run 36162027777 passed; branch Preview https://79c51662.urblo-site.pages.dev passed agent:cloudflare-preview-smoke. Arbitrary public text-[Npx] 327 -> 159 (Home 100 -> 0, Capabilities 68 -> 0); logo vs content edge 0px at 375/768/1440 on Home, Capabilities, Projects, Stone Library, 404 locally and on the Preview."
       ]
     },
     {
