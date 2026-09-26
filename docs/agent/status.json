@@ -1,7 +1,7 @@
 {
   "version": 2,
   "lastUpdated": "2026-09-26",
-  "currentTaskId": "NOW-OPT-SEO-EDGE-HEAD-001",
+  "currentTaskId": "NOW-ADMIN-STONE-WORKSPACE-001",
   "sourceOfTruth": {
     "currentState": "docs/agent/status.json",
     "taskQueue": "docs/agent/tasks.json",
@@ -11,11 +11,11 @@
   },
   "release": {
     "observedAt": "2026-09-26",
-    "repositorySha": "e1548af3df842874e0f995d7cb34afcd18a3fb40",
-    "runtimeSha": "e1548af3df842874e0f995d7cb34afcd18a3fb40",
-    "verifiedRuntimeUrl": "https://21ec9a4c.urblo-site.pages.dev",
-    "ciRunId": 36157672301,
-    "note": "Optimization wave 1 (PRs #60–#67) merged in order on 2026-09-26 with Jay approval: stone media variants, footer CLS and CSS route fade, UI cascade/status pill/focus/Contact button fixes, admin safety stop-gap, vitest runner with 74 tests, repository hygiene, and the 14px project point marker. Production readback: immutable/apex/www smoke passed; Lighthouse mobile performance 79–93, CLS <= 0.002 on five pages; no stone originals requested; markers 14px in a 44px hit area. This batch record does not deploy.",
+    "repositorySha": "194976d50b79bbad89b949f85aba3903e1a99ee7",
+    "runtimeSha": "194976d50b79bbad89b949f85aba3903e1a99ee7",
+    "verifiedRuntimeUrl": "https://21b51af8.urblo-site.pages.dev",
+    "ciRunId": 36209299045,
+    "note": "Optimization wave 2 (PRs #69–#73) merged in order on 2026-09-26 under Jay's standing merge authorization: colleague quick guide with admin Help drawer, edge SEO head/404/sitemap, design tokens and shared components on Home and Capabilities, admin shared feedback/error/unsaved-guard layer, agent docs slimming with CI convergence wait. Production readback: immutable/apex/www smoke passed; per-route titles, 404 and 301 confirmed by curl; sitemap 54 URLs; Lighthouse mobile performance 80–92, CLS <= 0.002. www still returns 200 until Jay adds the zone redirect rule. This batch record does not deploy.",
     "evidenceRefs": [
       "docs/WORKLOG.md"
     ]
@@ -76,8 +76,8 @@
     ]
   },
   "lastCompletedTask": {
-    "id": "NOW-OPT-PROJECT-POINT-MARKER-001",
-    "summary": "Optimization wave 1 (seven tasks) released to production 2026-09-26 and read back; wave 2 registered."
+    "id": "NOW-OPT-AGENT-DOCS-SLIM-001",
+    "summary": "Optimization wave 2 (five tasks) released to production 2026-09-26 and read back; wave 3 not yet registered."
   },
   "historicalObservations": "docs/archive/2026-09-26/manifest.json"
 }

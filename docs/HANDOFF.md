@@ -6,19 +6,19 @@ Last updated: 2026-09-26
 
 ## 正在执行
 
-**NOW-OPT-SEO-EDGE-HEAD-001** — Per-route HTML head at the edge (title, description, canonical, share image, JSON-LD) for every public route including CMS-published details, real 404 responses for unknown paths, a generated sitemap with every published project/stone/product/article, trailing-slash 301s, and the www to apex 301.
+**NOW-ADMIN-STONE-WORKSPACE-001** — Deliver the page-shaped Stone Library workspace and approved current-public-baseline adoption.
 
 阶段：awaiting_external。状态：now。
 
-下一步：PR #71 (stacked on #68) awaits Jay: review and merge approval, then production readback; Jay creates the www to apex zone redirect rule recorded in WORKLOG.
+下一步：Jay performs the five-minute image replacement/publish acceptance in production. Complete live Viewer proof only after explicit approval for the named QA account role change; broader CMS handoff remains separate.
 
 ## 已观察的发布状态
 
-观察日期：2026-09-26。仓库版本：`e1548af3df842874e0f995d7cb34afcd18a3fb40`。已验证运行时代码：`e1548af3df842874e0f995d7cb34afcd18a3fb40`。
+观察日期：2026-09-26。仓库版本：`194976d50b79bbad89b949f85aba3903e1a99ee7`。已验证运行时代码：`194976d50b79bbad89b949f85aba3903e1a99ee7`。
 
-验证地址：https://21ec9a4c.urblo-site.pages.dev
+验证地址：https://21b51af8.urblo-site.pages.dev
 
-Optimization wave 1 (PRs #60–#67) merged in order on 2026-09-26 with Jay approval: stone media variants, footer CLS and CSS route fade, UI cascade/status pill/focus/Contact button fixes, admin safety stop-gap, vitest runner with 74 tests, repository hygiene, and the 14px project point marker. Production readback: immutable/apex/www smoke passed; Lighthouse mobile performance 79–93, CLS <= 0.002 on five pages; no stone originals requested; markers 14px in a 44px hit area. This batch record does not deploy.
+Optimization wave 2 (PRs #69–#73) merged in order on 2026-09-26 under Jay's standing merge authorization: colleague quick guide with admin Help drawer, edge SEO head/404/sitemap, design tokens and shared components on Home and Capabilities, admin shared feedback/error/unsaved-guard layer, agent docs slimming with CI convergence wait. Production readback: immutable/apex/www smoke passed; per-route titles, 404 and 301 confirmed by curl; sitemap 54 URLs; Lighthouse mobile performance 80–92, CLS <= 0.002. www still returns 200 until Jay adds the zone redirect rule. This batch record does not deploy.
 
 CMS handoff: **revalidation_required**。QR: material_page_deployed。
 
