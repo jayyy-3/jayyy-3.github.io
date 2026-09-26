@@ -78,7 +78,7 @@
     "editorGuideUsability": {
       "status": "missing",
       "evidenceRefs": [],
-      "note": "Requires a non-technical editor to use the deployed interface with docs/ADMIN_EDITOR_GUIDE.md and identify where to start, how to save safely, and how to confirm a public result without technical assistance."
+      "note": "Requires a non-technical editor to use the deployed interface with docs/ADMIN_EDITOR_GUIDE.md and identify where to start, how to save safely, and how to confirm a public result without technical assistance. 2026-09-26 (NOW-OPT-ADMIN-GUIDE-001, source and local synthetic checks only): the guide is now a one-screen, task-based English quick guide rendered by the admin Help button on every admin route; scripts/check-admin-guide.mjs verifies its length, the absence of technical terms and that every bold control label exists in the admin source; a headless local run with synthetic auth showed the Help button on all ten module routes and the login page and the whole guide fitting one 1440x900 screen. Still required for a pass: a non-technical colleague completes two guide tasks (for example change a project image and edit a product) on the deployed interface without verbal help, recorded with the deployment SHA."
     }
   },
   "notes": [

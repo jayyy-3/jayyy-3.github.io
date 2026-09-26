@@ -155,11 +155,13 @@
       ],
       "rules": [
         "docs/ADMIN_IA_ACCESS.md",
-        "docs/ADMIN_EDITOR_GUIDE.md"
+        "docs/ADMIN_EDITOR_GUIDE.md",
+        "docs/ADMIN_OPERATIONS_RUNBOOK.md"
       ],
       "checks": [
         "agent:admin-config-gate",
-        "agent:admin-auth-browser"
+        "agent:admin-auth-browser",
+        "agent:admin-guide"
       ]
     },
     "public-ui": {

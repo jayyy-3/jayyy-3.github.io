@@ -155,9 +155,16 @@
       "summary": "Split ADMIN_EDITOR_GUIDE.md into a one-screen English task-based quick guide for colleagues (change an image, edit a product, handle a lead, update addresses) and a developer operations runbook; remove the stale Stone workflow text; add an in-app Help entry in the admin shell that shows the quick guide.",
       "files": [
         "docs/ADMIN_EDITOR_GUIDE.md",
+        "docs/ADMIN_OPERATIONS_RUNBOOK.md",
         "docs/ADMIN_UX_RESHAPE_PLAN.md",
-        "src/pages/admin/AdminApp.tsx",
-        "docs/agent/admin-handoff-evidence.json"
+        "docs/PROJECT_MAP.md",
+        "docs/ARCHITECTURE.md",
+        "docs/agent/admin-handoff-evidence.json",
+        "src/pages/admin/AdminHelp.tsx",
+        "src/pages/admin/adminGuide.ts",
+        "src/pages/admin/AdminShell.tsx",
+        "scripts/check-admin-guide.mjs",
+        "scripts/_lib/verification.mjs"
       ],
       "acceptance": [
         "Quick guide fits one screen, contains no Supabase/bucket/migration/localhost terms, and every step names a control that exists in the current UI (checked by a script against the admin source).",
@@ -180,11 +187,12 @@
         ]
       },
       "status": "now",
-      "phase": "planned",
-      "nextAction": "Opus implements on its own branch; Claude reports to Jay before merge.",
-      "blocker": "",
+      "phase": "awaiting_external",
+      "nextAction": "PR #69 (stacked on #68) verified on branch Preview; Claude reports to Jay for merge approval, then a colleague runs two guide tasks and editorGuideUsability is recorded.",
+      "blocker": "A non-technical colleague must complete two quick-guide tasks on the deployed admin, and Jay must approve the merge of PR #69 (after #68).",
       "notes": [
-        "2026-09-26: wave 2 of the 2026-09-24 optimization audit. Jay decided the homepage hero headline keeps its letter-by-letter animation (homepage LCP element stays non-hero by design)."
+        "2026-09-26: wave 2 of the 2026-09-24 optimization audit. Jay decided the homepage hero headline keeps its letter-by-letter animation (homepage LCP element stays non-hero by design).",
+        "2026-09-26: runtime commit 86b648e passed the Node 20 container gate (26 checks), npm test 77/77 and config gate 12 routes; PR #69 CI run 36160848011 passed (verify-and-deploy, quality); branch Preview https://445df750.urblo-site.pages.dev passed agent:cloudflare-preview-smoke and a read-only headless check of the login-page Help sheet."
       ]
     },
     {

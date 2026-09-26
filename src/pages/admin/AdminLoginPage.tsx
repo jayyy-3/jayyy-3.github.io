@@ -4,6 +4,7 @@ import { Navigate, useLocation, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, KeyRound, LogIn, Mail } from 'lucide-react';
 import { useAdminAuth } from '../../lib/adminAuthHooks';
 import { AdminConfigMissingState, AdminErrorState, AdminLoadingState } from './AdminState';
+import { AdminHelpButton } from './AdminHelp';
 
 export default function AdminLoginPage() {
     const auth = useAdminAuth();
@@ -75,7 +76,10 @@ export default function AdminLoginPage() {
                 <div className="w-full">
                     <div className="mb-6 flex items-center justify-between">
                         <p className="text-sm font-black uppercase tracking-[0.18em]">Urblo</p>
-                        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-black/45">Admin</p>
+                        <div className="flex items-center gap-3">
+                            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-black/45">Admin</p>
+                            <AdminHelpButton />
+                        </div>
                     </div>
 
                     <form

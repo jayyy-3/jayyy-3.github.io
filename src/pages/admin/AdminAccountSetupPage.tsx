@@ -10,6 +10,7 @@ import {
 } from '../../lib/supabaseClient';
 import type { SupabaseAuthRedirectVerification } from '../../lib/supabaseClient';
 import { AdminConfigMissingState, AdminErrorState, AdminLoadingState } from './AdminState';
+import { AdminHelpButton } from './AdminHelp';
 
 const minimumPasswordLength = 12;
 type RedirectVerificationState = SupabaseAuthRedirectVerification | { status: 'checking' };
@@ -203,7 +204,10 @@ function AdminAccountCard({
                 <div className="w-full">
                     <div className="mb-6 flex items-center justify-between">
                         <p className="text-sm font-black uppercase tracking-[0.18em]">Urblo</p>
-                        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-black/45">Admin</p>
+                        <div className="flex items-center gap-3">
+                            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-black/45">Admin</p>
+                            <AdminHelpButton />
+                        </div>
                     </div>
                     <div className="border border-black/12 bg-white p-6 shadow-[0_24px_70px_rgba(0,0,0,0.1)] md:p-8">
                         <div className="flex h-11 w-11 items-center justify-center rounded bg-black text-[var(--urblo-lime)]">

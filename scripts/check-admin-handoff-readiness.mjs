@@ -254,7 +254,8 @@ function main() {
   const checks = [];
 
   const pkgText = readRequiredFile('package.json', failures);
-  const editorGuide = readRequiredFile('docs/ADMIN_EDITOR_GUIDE.md', failures);
+  readRequiredFile('docs/ADMIN_EDITOR_GUIDE.md', failures);
+  const runbook = readRequiredFile('docs/ADMIN_OPERATIONS_RUNBOOK.md', failures);
   const walkthrough = readRequiredFile('docs/ADMIN_PRODUCTION_WALKTHROUGH.md', failures);
   const worklog = readRequiredFile('docs/WORKLOG.md', failures);
   const evidenceText = readRequiredFile('docs/agent/admin-handoff-evidence.json', failures);
@@ -271,19 +272,19 @@ function main() {
     }
   }
 
+  // The colleague quick guide is validated by scripts/check-admin-guide.mjs; handoff facts live in the runbook.
   includesAll(
-    'docs/ADMIN_EDITOR_GUIDE.md',
-    editorGuide,
+    'docs/ADMIN_OPERATIONS_RUNBOOK.md',
+    runbook,
     [
-      'One-Page Editor Handoff',
-      'Admin address: `https://urblo.com.au/admin`.',
-      'Account setup: a Website owner or CMS manager invites the editor from Settings, People and access, using the lowest useful role.',
-      'Start screen: Dashboard shows Recommended next action, What the website can show now, and the Content health queue.',
-      'Find content: open the relevant module, then use search and status filters before selecting an item.',
-      'Publish carefully: Published can appear on the public website. Publish only when the checklist is clear.',
-      'CMS coverage: Projects, Stone Library, Products, Articles, Media, Image QR, Leads, Settings, and Change history are in the CMS.',
-      'Imported content: Projects, Stone Library, Products, Articles, and Media candidates are already in the CMS as Draft items.',
-      'Static fallback: Draft and Archived CMS versions remain hidden, but a matching legacy static page can stay visible during migration until CMS-only cutover is approved.',
+      'Production admin: `https://urblo.com.au/admin`',
+      'The CMS is not certified handoff-ready.',
+      'In Settings, People and access, use Invite and grant access',
+      'Give colleagues the lowest useful role.',
+      'Only Published content can appear publicly; Draft and Archived never do.',
+      'Imported Projects, Stone Library, Products, Articles and Media candidates entered the CMS as Draft.',
+      'unrelated static records remain until CMS-only cutover is approved.',
+      'docs/agent/admin-handoff-evidence.json',
     ],
     failures,
   );

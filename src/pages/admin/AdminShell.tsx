@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { LogOut, RefreshCw } from 'lucide-react';
 import { useAdminAuth } from '../../lib/adminAuthHooks';
 import { adminModules } from './adminContent';
+import { AdminHelpButton } from './AdminHelp';
 
 const navGroups = [
     { key: 'work', label: 'Work queue' },
@@ -89,6 +90,7 @@ export default function AdminShell({ title, eyebrow = 'Urblo Admin', actions, ch
 
                             <div className="flex min-w-0 flex-wrap items-center gap-2 xl:shrink-0 xl:justify-end">
                                 {actions}
+                                <AdminHelpButton />
                                 <button
                                     type="button"
                                     onClick={() => void refresh()}

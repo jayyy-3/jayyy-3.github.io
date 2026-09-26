@@ -26,6 +26,8 @@ export const checks = {
   qr: tsx('check-admin-image-qr.mjs', ['--source-only']),
   projects: tsx('check-admin-projects-aggregate.mjs', ['--source-only']),
   coverage: node('check-admin-crud-coverage.mjs', ['--self-only'], ['projects']),
+  // Colleague quick guide: one screen, plain words, every bold control label present in the admin source.
+  guide: node('check-admin-guide.mjs'),
   'public-readiness': node('check-public-supabase-readiness.mjs'),
   cloudflare: node('check-cloudflare-pages-readiness.mjs'),
   'deployment-readiness': node('check-deployment-readiness.mjs'),
@@ -34,9 +36,9 @@ export const checks = {
   browser: node('check-admin-config-gate.mjs', [], ['build']),
 }
 const smoke = ['routes', 'unit', 'forms-ui', 'capabilities', 'homepage-video', 'product-images', 'stone-library', 'stone-adoption-snapshot', 'qr', 'projects']
-const admin = ['unit', 'coverage', 'qr', 'projects', 'build', 'lint', 'foundation', 'media-plan', 'public-readiness', 'cloudflare', 'harness', 'handoff']
+const admin = ['unit', 'coverage', 'guide', 'qr', 'projects', 'build', 'lint', 'foundation', 'media-plan', 'public-readiness', 'cloudflare', 'harness', 'handoff']
 export const suites = {
-  docs: ['state', 'paths', 'harness', 'classifier'],
+  docs: ['state', 'paths', 'harness', 'classifier', 'guide'],
   tooling: ['harness', 'classifier', 'lint', 'knip'],
   smoke,
   admin,
@@ -62,6 +64,8 @@ export function pathCategory(path) {
   // Tests and their config never enter the deployed bundle (functions/ and public/ files always deploy).
   if (/^(?:tests\/|vitest\.config\.[cm]?[jt]s$|src\/.*\.test\.tsx?$)/.test(path)) return 'tooling'
   if (/^supabase\/migrations\//.test(path)) return 'migrations'
+  // The colleague quick guide is bundled into the admin Help drawer, so it is a build input.
+  if (path === 'docs/ADMIN_EDITOR_GUIDE.md') return 'runtime'
   if (/^(src\/|public\/|functions\/|supabase\/|\.github\/|Dockerfile|\.dockerignore$|package(?:-lock)?\.json$|(?:vite|tsconfig|tailwind|postcss|eslint|wrangler)[^/]*|index\.html$)/.test(path)) return 'runtime'
   if (/^(scripts\/|\.nvmrc$|\.node-version$)/.test(path)) return 'tooling'
   if (/^(docs\/|AGENTS\.md$|README\.md$|\.gitattributes$)/.test(path)) return 'docs'
