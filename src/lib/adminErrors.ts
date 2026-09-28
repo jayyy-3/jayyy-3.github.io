@@ -148,7 +148,7 @@ export function translateAdminError(error: unknown, context: AdminErrorContext =
     if (looksLikeExpiredSession(fields)) {
         return result(
             'session',
-            `Your sign-in has expired. Open the admin in a new tab, sign in again, then come back here and save. ${keepYourChanges}`,
+            `Your sign-in has expired. Sign in again to continue. ${keepYourChanges}`,
         );
     }
     if (
@@ -200,4 +200,78 @@ export function translateAdminError(error: unknown, context: AdminErrorContext =
         'unknown',
         `Something went wrong. ${notDone}. Try again, and if it keeps happening send the details below to the website team.`,
     );
+}
+
+export type AdminSignInErrorKind = 'credentials' | 'unconfirmed' | 'rate_limited' | 'config' | 'network' | 'server' | 'unknown';
+
+export interface TranslatedAdminSignInError {
+    kind: AdminSignInErrorKind;
+    message: string;
+    detail: string | null;
+}
+
+/**
+ * Plain-English sign-in and password-reset errors for the login page and the in-place re-login
+ * panel. Supabase Auth returns short English codes ("Invalid login credentials") that read as
+ * system text; the original stays available for Details.
+ */
+export function translateAdminSignInError(error: unknown, mode: 'sign-in' | 'reset' = 'sign-in'): TranslatedAdminSignInError {
+    const fields = readFields(error);
+    const detail = describeRawAdminError(error);
+    const text = `${fields.code} ${fields.message}`.toLowerCase();
+    const result = (kind: AdminSignInErrorKind, message: string): TranslatedAdminSignInError => ({ kind, message, detail });
+
+    if (/browser configuration is missing|vite_supabase/.test(text)) {
+        return result('config', 'The admin login is not connected on this website yet. Ask the website team to finish the login setup.');
+    }
+    if ((typeof navigator !== 'undefined' && navigator.onLine === false) || looksLikeNetworkFailure(fields)) {
+        return result('network', 'Could not reach the login server. Check your internet connection, then try again.');
+    }
+    if (fields.status === 429 || /rate limit|too many|over_request_rate_limit|over_email_send_rate_limit/.test(text)) {
+        return result(
+            'rate_limited',
+            mode === 'reset'
+                ? 'Too many password emails were requested. Wait a few minutes, then try again.'
+                : 'Too many sign-in attempts. Wait a few minutes, then try again.',
+        );
+    }
+    if (/invalid login credentials|invalid_credentials|invalid grant|invalid_grant/.test(text)) {
+        return result('credentials', 'That email and password do not match an Urblo CMS login. Check both and try again, or use Forgot password.');
+    }
+    if (/email not confirmed|email_not_confirmed/.test(text)) {
+        return result(
+            'unconfirmed',
+            'This login is not active yet. Open your invite email and set a password first, or ask a Website owner or CMS manager to send a new invite.',
+        );
+    }
+    if ((fields.status !== null && fields.status >= 500) || /timeout|timed out|service unavailable|bad gateway/.test(text)) {
+        return result('server', 'The login server had a problem. Wait a minute and try again.');
+    }
+    return result(
+        'unknown',
+        mode === 'reset'
+            ? 'The password email could not be requested. Try again, and if it keeps happening send the details below to the website team.'
+            : 'Sign-in did not work. Try again, and if it keeps happening send the details below to the website team.',
+    );
+}
+
+// Must match withAuditNotice() in src/lib/adminAudit.ts, which appends the raw audit error to a
+// success sentence. splitAuditNotice() turns that into a plain sentence plus Details text.
+const auditNoticeMarker = ' Change history was not recorded. Ask a Website owner or CMS manager to review this save: ';
+
+export interface SplitAuditNotice {
+    message: string;
+    /** Raw audit error for the Details disclosure; null when the history was recorded. */
+    detail: string | null;
+}
+
+export function splitAuditNotice(text: string): SplitAuditNotice {
+    const index = text.indexOf(auditNoticeMarker);
+    if (index === -1) return { message: text, detail: null };
+    const saved = text.slice(0, index);
+    const raw = text.slice(index + auditNoticeMarker.length).trim();
+    return {
+        message: `${saved} The change is saved, but it was not added to Change history. Ask a Website owner or CMS manager to note it there.`,
+        detail: raw || null,
+    };
 }

@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent, ReactNode } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { CheckCircle2, Download, Inbox, Mail, PackageCheck, Save, Search, ShieldAlert } from 'lucide-react';
+import { CheckCircle2, ChevronLeft, ChevronRight, Download, Inbox, Mail, PackageCheck, Save, Search, ShieldAlert } from 'lucide-react';
 import { recordAdminAuditEvent, withAuditNotice } from '../../lib/adminAudit';
 import { supabase } from '../../lib/supabaseClient';
 import { useAdminAuth } from '../../lib/adminAuthHooks';
@@ -102,6 +102,22 @@ interface CombinedLead {
     createdAt: string;
 }
 
+interface LeadCounts {
+    enquiries: number;
+    samples: number;
+    newEnquiries: number;
+    newSamples: number;
+}
+
+/** Leads read per table per load; "Load older leads" adds another batch. */
+export const LEADS_BATCH_SIZE = 100;
+/** Leads shown per page in the queue. */
+export const LEADS_PAGE_SIZE = 25;
+/** Sample request ids per items query (keeps the request URL short). */
+const SAMPLE_ITEM_ID_CHUNK = 100;
+/** Rows per items request; at or below the PostgREST max_rows cap (1000). */
+const SAMPLE_ITEM_PAGE_SIZE = 1000;
+
 const emptyForm: LeadFormState = {
     status: 'new',
     assignedTo: '',
@@ -139,7 +155,12 @@ export default function AdminLeadsPage() {
 
 function AdminLeadsContent() {
     const { profile, user } = useAdminAuth();
-    const canManageLeads = profile?.role === 'owner' || profile?.role === 'admin';
+    // Sales colleagues use the Editor role (Jay, 2026-09-28): Editors work leads (status, owner,
+    // notes) as the existing RLS already allows; export and the full team list stay with
+    // Website owners and CMS managers.
+    const canManageLeads = profile?.role === 'owner' || profile?.role === 'admin' || profile?.role === 'editor';
+    const canExportLeads = profile?.role === 'owner' || profile?.role === 'admin';
+    const canSeeTeam = canExportLeads;
     const [enquiries, setEnquiries] = useState<EnquiryRow[]>([]);
     const [sampleRequests, setSampleRequests] = useState<SampleRequestRow[]>([]);
     const [sampleItems, setSampleItems] = useState<SampleRequestItemRow[]>([]);
@@ -152,6 +173,11 @@ function AdminLeadsContent() {
     const [leadSearch, setLeadSearch] = useState('');
     const [kindFilter, setKindFilter] = useState<LeadKindFilter>('all');
     const [statusFilter, setStatusFilter] = useState<LeadStatusFilter>('all');
+    const [leadCounts, setLeadCounts] = useState<LeadCounts | null>(null);
+    const [loadLimit, setLoadLimit] = useState(LEADS_BATCH_SIZE);
+    const [exhausted, setExhausted] = useState({ enquiry: true, sample: true });
+    const [page, setPage] = useState(0);
+    const [isLoadingOlder, setIsLoadingOlder] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [isExporting, setIsExporting] = useState(false);
@@ -159,8 +185,8 @@ function AdminLeadsContent() {
 
     const combinedLeads = useMemo(
         () =>
-            [
-                ...enquiries.map((lead): CombinedLead => ({
+            mergeLeadTimeline(
+                enquiries.map((lead): CombinedLead => ({
                     kind: 'enquiry',
                     id: lead.id,
                     status: lead.status,
@@ -172,7 +198,7 @@ function AdminLeadsContent() {
                     assignedTo: lead.assigned_to,
                     createdAt: lead.created_at,
                 })),
-                ...sampleRequests.map((lead): CombinedLead => ({
+                sampleRequests.map((lead): CombinedLead => ({
                     kind: 'sample',
                     id: lead.id,
                     status: lead.status,
@@ -184,8 +210,9 @@ function AdminLeadsContent() {
                     assignedTo: lead.assigned_to,
                     createdAt: lead.created_at,
                 })),
-            ].sort((left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime()),
-        [enquiries, sampleRequests],
+                exhausted,
+            ),
+        [enquiries, exhausted, sampleRequests],
     );
 
     const selectedEnquiry = useMemo(
@@ -204,7 +231,11 @@ function AdminLeadsContent() {
                 : [],
         [sampleItems, selectedId, selectedKind],
     );
-    const inboxSummary = useMemo(() => summarizeInbox(enquiries, sampleRequests), [enquiries, sampleRequests]);
+    const inboxSummary = useMemo(
+        () => summarizeInbox(enquiries, sampleRequests, leadCounts),
+        [enquiries, leadCounts, sampleRequests],
+    );
+    const allLeadsLoaded = exhausted.enquiry && exhausted.sample;
     const filteredLeads = useMemo(
         () =>
             combinedLeads.filter((lead) => {
@@ -220,24 +251,46 @@ function AdminLeadsContent() {
             }),
         [combinedLeads, kindFilter, leadSearch, statusFilter],
     );
+    const pageCount = Math.max(1, Math.ceil(filteredLeads.length / LEADS_PAGE_SIZE));
+    const currentPage = Math.min(page, pageCount - 1);
+    const pageLeads = filteredLeads.slice(currentPage * LEADS_PAGE_SIZE, (currentPage + 1) * LEADS_PAGE_SIZE);
+    const isLastPage = currentPage >= pageCount - 1;
 
     const loadLeads = useCallback(
-        async (preferred?: { kind: LeadKind; id: number } | null) => {
-            if (!supabase) return;
+        async (
+            preferred?: { kind: LeadKind; id: number } | null,
+            { limit = LEADS_BATCH_SIZE, keepForm = false }: { limit?: number; keepForm?: boolean } = {},
+        ) => {
+            if (!supabase) return false;
 
             const client: SupabaseClient = supabase;
-            setIsLoading(true);
+            if (!keepForm) setIsLoading(true);
             setError(null);
 
-            const [enquiriesResult, samplesResult, itemsResult, profilesResult, stonesResult, finishesResult] =
-                await Promise.all([
+            const countLeads = (table: 'enquiries' | 'sample_requests', status?: string) => {
+                const query = client.from(table).select('id', { count: 'exact', head: true });
+                return status ? query.eq('status', status) : query;
+            };
+
+            const [
+                enquiriesResult,
+                samplesResult,
+                profilesResult,
+                stonesResult,
+                finishesResult,
+                enquiryCount,
+                sampleCount,
+                newEnquiryCount,
+                newSampleCount,
+            ] = await Promise.all([
                     client
                         .from('enquiries')
                         .select(
                             'id,status,name,email,phone,company,project_type,message,source_route,turnstile_success,notification_status,assigned_to,internal_notes,created_at,updated_at',
                         )
                         .order('created_at', { ascending: false })
-                        .limit(160)
+                        .order('id', { ascending: false })
+                        .limit(limit)
                         .returns<EnquiryRow[]>(),
                     client
                         .from('sample_requests')
@@ -245,14 +298,9 @@ function AdminLeadsContent() {
                             'id,status,name,email,phone,company,shipping_address,project_name,message,source_route,turnstile_success,notification_status,assigned_to,internal_notes,created_at,updated_at',
                         )
                         .order('created_at', { ascending: false })
-                        .limit(160)
+                        .order('id', { ascending: false })
+                        .limit(limit)
                         .returns<SampleRequestRow[]>(),
-                    client
-                        .from('sample_request_items')
-                        .select('id,sample_request_id,stone_group_id,finish_definition_id,quantity,notes')
-                        .order('id', { ascending: true })
-                        .limit(500)
-                        .returns<SampleRequestItemRow[]>(),
                     client
                         .from('admin_profiles')
                         .select('user_id,email,display_name,role,is_active')
@@ -269,23 +317,36 @@ function AdminLeadsContent() {
                         .select('id,display_name')
                         .order('display_name', { ascending: true })
                         .returns<FinishOptionRow[]>(),
+                    countLeads('enquiries'),
+                    countLeads('sample_requests'),
+                    countLeads('enquiries', 'new'),
+                    countLeads('sample_requests', 'new'),
                 ]);
 
-            const loadError =
-                enquiriesResult.error ??
-                samplesResult.error ??
-                itemsResult.error ??
-                profilesResult.error ??
-                stonesResult.error ??
-                finishesResult.error;
+            const failed = [
+                enquiriesResult,
+                samplesResult,
+                profilesResult,
+                stonesResult,
+                finishesResult,
+                enquiryCount,
+                sampleCount,
+                newEnquiryCount,
+                newSampleCount,
+            ].find((result) => result.error);
+            const nextEnquiries = enquiriesResult.data ?? [];
+            const nextSamples = samplesResult.data ?? [];
+            // Items are read for exactly the loaded requests, so the newest requests always show
+            // their complete item lists however many items exist in total.
+            const itemsResult = failed
+                ? null
+                : await fetchSampleItemsForRequests(client, nextSamples.map((lead) => lead.id));
+            const loadError = failed ?? (itemsResult?.error ? itemsResult : null);
             if (loadError) {
                 reportError(loadError, { entity: 'lead inbox', action: 'load' });
                 setIsLoading(false);
-                return;
+                return false;
             }
-
-            const nextEnquiries = enquiriesResult.data ?? [];
-            const nextSamples = samplesResult.data ?? [];
             const nextCombined = [
                 ...nextEnquiries.map((lead) => ({ kind: 'enquiry' as const, id: lead.id, createdAt: lead.created_at })),
                 ...nextSamples.map((lead) => ({ kind: 'sample' as const, id: lead.id, createdAt: lead.created_at })),
@@ -298,21 +359,49 @@ function AdminLeadsContent() {
 
             setEnquiries(nextEnquiries);
             setSampleRequests(nextSamples);
-            setSampleItems(itemsResult.data ?? []);
+            setSampleItems(itemsResult?.data ?? []);
             setAdminProfiles(profilesResult.data ?? []);
             setStoneOptions(stonesResult.data ?? []);
             setFinishOptions(finishesResult.data ?? []);
-            setSelectedKind(nextSelected?.kind ?? null);
-            setSelectedId(nextSelected?.id ?? null);
-            setForm(leadToForm(nextSelected?.kind ?? null, nextSelected?.id ?? null, nextEnquiries, nextSamples));
+            setLeadCounts({
+                enquiries: enquiryCount.count ?? nextEnquiries.length,
+                samples: sampleCount.count ?? nextSamples.length,
+                newEnquiries: newEnquiryCount.count ?? 0,
+                newSamples: newSampleCount.count ?? 0,
+            });
+            setExhausted({ enquiry: nextEnquiries.length < limit, sample: nextSamples.length < limit });
+            setLoadLimit(limit);
+            if (!keepForm) {
+                setSelectedKind(nextSelected?.kind ?? null);
+                setSelectedId(nextSelected?.id ?? null);
+                setForm(leadToForm(nextSelected?.kind ?? null, nextSelected?.id ?? null, nextEnquiries, nextSamples));
+            }
             setIsLoading(false);
+            return true;
         },
         [reportError, setError],
     );
+    const loadLeadsRef = useRef(loadLeads);
+    useEffect(() => {
+        loadLeadsRef.current = loadLeads;
+    }, [loadLeads]);
 
     useEffect(() => {
         void loadLeads();
     }, [loadLeads]);
+
+    // Older leads are added to the loaded set without touching the open lead or its unsaved form.
+    async function loadOlderLeads() {
+        setIsLoadingOlder(true);
+        const loaded = await loadLeads(null, { limit: loadLimit + LEADS_BATCH_SIZE, keepForm: true });
+        setIsLoadingOlder(false);
+        if (loaded) setPage(currentPage + 1);
+    }
+
+    function changeFilters(update: () => void) {
+        update();
+        setPage(0);
+    }
 
     function selectLead(lead: CombinedLead) {
         setSelectedKind(lead.kind);
@@ -362,7 +451,8 @@ function AdminLeadsContent() {
         setIsSaving(false);
 
         if (response.error) {
-            reportError(response, { entity: 'lead', scope: 'lead' });
+            // An expired sign-in opens the re-login panel; this save runs again once signed in.
+            reportError(response, { entity: 'lead', scope: 'lead', retry: saveLead });
             return false;
         }
 
@@ -378,12 +468,12 @@ function AdminLeadsContent() {
             },
         });
         setNotice(withAuditNotice('Lead workflow updated.', auditError), { scope: 'lead' });
-        await loadLeads({ kind: selectedKind, id: selectedId });
+        await loadLeadsRef.current({ kind: selectedKind, id: selectedId }, { limit: loadLimit });
         return true;
     }
 
     async function exportLeadCsv() {
-        if (!supabase || !canManageLeads || !user || filteredLeads.length === 0) return;
+        if (!supabase || !canExportLeads || !user || filteredLeads.length === 0) return;
 
         const visibleEnquiryIds = new Set(
             filteredLeads.filter((lead) => lead.kind === 'enquiry').map((lead) => lead.id),
@@ -468,12 +558,14 @@ function AdminLeadsContent() {
                     <button
                         type="button"
                         onClick={() => void exportLeadCsv()}
-                        disabled={!canManageLeads || isExporting || filteredLeads.length === 0}
+                        disabled={!canExportLeads || isExporting || filteredLeads.length === 0}
                         className="inline-flex min-h-10 items-center justify-center gap-2 rounded border border-black/15 bg-white px-3 text-xs font-bold uppercase tracking-[0.12em] text-black transition hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:bg-black/[0.04] disabled:text-black/35"
                         title={
-                            filteredLeads.length
-                                ? 'Export only the leads currently visible after search and filters.'
-                                : 'No visible leads match the current search and filters.'
+                            !canExportLeads
+                                ? 'Only Website owners and CMS managers can export leads.'
+                                : filteredLeads.length
+                                  ? 'Export the leads that match the current search and filters, across all loaded pages.'
+                                  : 'No visible leads match the current search and filters.'
                         }
                     >
                         <Download className="h-4 w-4" />
@@ -498,13 +590,16 @@ function AdminLeadsContent() {
                         </p>
                         <p className="mt-2 text-xs font-semibold uppercase tracking-[0.12em] text-black/45">
                             Export uses the current search and filters: {filteredLeads.length} visible of{' '}
-                            {inboxSummary.total} loaded.
+                            {inboxSummary.loaded} loaded ({inboxSummary.total} in total).
                         </p>
                         <label className="mt-4 flex min-h-11 items-center gap-2 border border-black/10 bg-[#f8f9f5] px-3 text-sm text-black">
                             <Search className="h-4 w-4 shrink-0 text-black/42" />
                             <input
                                 value={leadSearch}
-                                onChange={(event) => setLeadSearch(event.target.value)}
+                                onChange={(event) => {
+                                    const value = event.target.value;
+                                    changeFilters(() => setLeadSearch(value));
+                                }}
                                 placeholder="Search name, email, company, context"
                                 className="min-w-0 flex-1 bg-transparent text-sm font-medium outline-none placeholder:text-black/36"
                             />
@@ -514,7 +609,8 @@ function AdminLeadsContent() {
                                 <button
                                     key={filter}
                                     type="button"
-                                    onClick={() => setKindFilter(filter)}
+                                    onClick={() => changeFilters(() => setKindFilter(filter))}
+                                    aria-pressed={kindFilter === filter}
                                     className={[
                                         'min-h-9 rounded border px-2 text-[11px] font-bold uppercase tracking-[0.1em] transition',
                                         kindFilter === filter
@@ -530,7 +626,10 @@ function AdminLeadsContent() {
                             Workflow status
                             <select
                                 value={statusFilter}
-                                onChange={(event) => setStatusFilter(event.target.value as LeadStatusFilter)}
+                                onChange={(event) => {
+                                    const value = event.target.value as LeadStatusFilter;
+                                    changeFilters(() => setStatusFilter(value));
+                                }}
                                 className={fieldClass}
                             >
                                 <option value="all">All statuses</option>
@@ -546,7 +645,7 @@ function AdminLeadsContent() {
                             </select>
                         </label>
                     </div>
-                    <div className="max-h-[760px] overflow-auto">
+                    <div className="max-h-[760px] overflow-auto" data-testid="lead-queue">
                         {isLoading ? (
                             <div className="space-y-3 p-4">
                                 {Array.from({ length: 6 }).map((_, index) => (
@@ -558,7 +657,7 @@ function AdminLeadsContent() {
                             </div>
                         ) : filteredLeads.length ? (
                             <div className="divide-y divide-black/10">
-                                {filteredLeads.map((lead) => (
+                                {pageLeads.map((lead) => (
                                     <button
                                         key={`${lead.kind}-${lead.id}`}
                                         type="button"
@@ -602,6 +701,19 @@ function AdminLeadsContent() {
                             </div>
                         )}
                     </div>
+                    {!isLoading && (filteredLeads.length > LEADS_PAGE_SIZE || !allLeadsLoaded) ? (
+                        <LeadPagination
+                            page={currentPage}
+                            pageCount={pageCount}
+                            shownFrom={filteredLeads.length ? currentPage * LEADS_PAGE_SIZE + 1 : 0}
+                            shownTo={currentPage * LEADS_PAGE_SIZE + pageLeads.length}
+                            matching={filteredLeads.length}
+                            canLoadOlder={isLastPage && !allLeadsLoaded}
+                            isLoadingOlder={isLoadingOlder}
+                            onNewer={() => setPage(Math.max(0, currentPage - 1))}
+                            onOlder={() => (isLastPage ? void loadOlderLeads() : setPage(currentPage + 1))}
+                        />
+                    ) : null}
                 </section>
 
                 <section className="space-y-5">
@@ -640,7 +752,7 @@ function AdminLeadsContent() {
                                             value={selectedSample?.project_name ?? 'Not supplied'}
                                         />
                                     )}
-                                    <InfoBlock label="Assigned" value={assigneeName(selectedLead.assigned_to, adminProfiles)} />
+                                    <InfoBlock label="Assigned" value={assigneeName(selectedLead.assigned_to, adminProfiles, canSeeTeam)} />
                                 </div>
 
                                 {selectedKind === 'sample' ? (
@@ -700,6 +812,7 @@ function AdminLeadsContent() {
                                     assignedTo={form.assignedTo}
                                     internalNotes={form.internalNotes}
                                     admins={adminProfiles}
+                                    canSeeTeam={canSeeTeam}
                                 />
                                 <WorkflowGuidance kind={selectedKind} status={form.status} />
                             </>
@@ -727,6 +840,9 @@ function AdminLeadsContent() {
                                 disabled={!canManageLeads || isSaving || !selectedLead}
                                 options={[
                                     ['', 'Unassigned'],
+                                    ...(form.assignedTo && !adminProfiles.some((admin) => admin.user_id === form.assignedTo)
+                                        ? [[form.assignedTo, assigneeName(form.assignedTo, adminProfiles, canSeeTeam)] as [string, string]]
+                                        : []),
                                     ...adminProfiles.map(
                                         (admin) =>
                                             [
@@ -772,8 +888,9 @@ function AdminLeadsContent() {
                         <h2 className="mt-5 text-xl font-semibold text-black">Workflow rules</h2>
                         <ul className="mt-4 space-y-3 text-sm leading-6 text-black/62">
                             <li>New leads enter this inbox from the public Contact and Sample Request forms.</li>
-                            <li>Lead managers can update workflow status, assignment, and internal notes.</li>
-                            <li>CSV export is recorded in change history and only includes the currently visible filtered queue.</li>
+                            <li>Website owners, CMS managers and Editors can update workflow status, assigned owner and internal notes.</li>
+                            <li>Only Website owners and CMS managers can export. CSV export is recorded in change history and only includes the currently visible filtered queue.</li>
+                            <li>The queue shows {LEADS_PAGE_SIZE} leads per page, newest first. Use Older to reach earlier leads.</li>
                             <li>Use Closed to finish a real conversation while keeping its history.</li>
                             <li>Use Spam only for junk submissions so real customer conversations stay visible.</li>
                         </ul>
@@ -796,7 +913,8 @@ function AdminLeadsContent() {
 
                     {!canManageLeads ? (
                         <section className="border border-black/10 bg-white p-5 text-sm leading-6 text-black/62">
-                            Current role is read-only for Leads. Ask a lead manager to update workflow status, assignment, or internal notes.
+                            Current role is read-only for Leads. Viewers can read leads but cannot change them. If you
+                            handle customer requests, ask a Website owner or CMS manager to give you the Editor role.
                         </section>
                     ) : null}
                 </aside>
@@ -911,12 +1029,14 @@ function LeadWorkflowStatusCard({
     assignedTo,
     internalNotes,
     admins,
+    canSeeTeam,
 }: {
     kind: LeadKind | null;
     status: string;
     assignedTo: string;
     internalNotes: string;
     admins: AdminProfileRow[];
+    canSeeTeam: boolean;
 }) {
     const summary = getLeadWorkflowStatusSummary(kind, status, Boolean(assignedTo), Boolean(internalNotes.trim()));
 
@@ -945,7 +1065,7 @@ function LeadWorkflowStatusCard({
             </div>
             <div className="mt-4 grid gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-black/42 md:grid-cols-3">
                 <p>Lead type: {kind === 'sample' ? 'Sample request' : 'Enquiry'}</p>
-                <p>Owner: {assigneeName(assignedTo || null, admins)}</p>
+                <p>Owner: {assigneeName(assignedTo || null, admins, canSeeTeam)}</p>
                 <p>Notes: {internalNotes.trim() ? 'Recorded' : 'Needed for handoff'}</p>
             </div>
         </section>
@@ -973,7 +1093,7 @@ function LeadWorkflowActionBar({
     const actionNote = !hasSelectedLead
         ? 'Select a lead before changing workflow status or internal notes.'
         : !canManageLeads
-          ? 'This role can review Leads, but only lead managers can save workflow changes.'
+          ? 'This role can review Leads. Editors, CMS managers and Website owners can save workflow changes.'
           : `${guidance.title}. Save after you have updated the status, owner, and internal notes.`;
 
     return (
@@ -1183,7 +1303,7 @@ export function getLeadWorkflowStatusSummary(
     if (!hasOwner) {
         return {
             title: 'Needs an owner before handoff',
-            detail: 'Assign a CMS manager or lead owner so the next response is clear to the team.',
+            detail: 'Assign a team member as the owner so the next response is clear to the team.',
             badge: 'Assign owner',
             tone: 'attention' as const,
         };
@@ -1206,12 +1326,15 @@ export function getLeadWorkflowStatusSummary(
     };
 }
 
-function summarizeInbox(enquiries: EnquiryRow[], samples: SampleRequestRow[]) {
+function summarizeInbox(enquiries: EnquiryRow[], samples: SampleRequestRow[], counts: LeadCounts | null) {
     return {
-        total: enquiries.length + samples.length,
-        enquiries: enquiries.length,
-        samples: samples.length,
-        newCount: enquiries.filter((lead) => lead.status === 'new').length + samples.filter((lead) => lead.status === 'new').length,
+        loaded: enquiries.length + samples.length,
+        total: counts ? counts.enquiries + counts.samples : enquiries.length + samples.length,
+        enquiries: counts?.enquiries ?? enquiries.length,
+        samples: counts?.samples ?? samples.length,
+        newCount: counts
+            ? counts.newEnquiries + counts.newSamples
+            : enquiries.filter((lead) => lead.status === 'new').length + samples.filter((lead) => lead.status === 'new').length,
         spamCount:
             enquiries.filter((lead) => lead.status === 'spam').length +
             samples.filter((lead) => lead.status === 'spam').length,
@@ -1294,7 +1417,7 @@ export function buildLeadExportCsv(
             formatSourceRoute(lead.source_route),
             notificationExportLabel(lead.notification_status),
             turnstileLabel(lead.turnstile_success),
-            assigneeName(lead.assigned_to, admins),
+            assigneeName(lead.assigned_to, admins, true),
             lead.message ?? '',
             '',
             '',
@@ -1314,7 +1437,7 @@ export function buildLeadExportCsv(
             formatSourceRoute(lead.source_route),
             notificationExportLabel(lead.notification_status),
             turnstileLabel(lead.turnstile_success),
-            assigneeName(lead.assigned_to, admins),
+            assigneeName(lead.assigned_to, admins, true),
             lead.message ?? '',
             lead.shipping_address ?? '',
             formatSampleItems(sampleItemsByRequest.get(lead.id) ?? [], stoneMap, finishMap),
@@ -1382,17 +1505,23 @@ function downloadTextFile(content: string, filename: string) {
     URL.revokeObjectURL(url);
 }
 
-function assigneeName(userId: string | null, admins: AdminProfileRow[]) {
+/**
+ * Name of the assigned team member. Editors only see their own CMS profile (RLS), so for them an
+ * owner who is not in the list is another colleague rather than a missing account.
+ */
+export function assigneeName(userId: string | null, admins: AdminProfileRow[], canSeeTeam: boolean) {
     if (!userId) return 'Unassigned';
     const admin = admins.find((profile) => profile.user_id === userId);
-    return admin?.display_name || admin?.email || 'Team member not found';
+    if (admin) return admin.display_name || admin.email;
+    return canSeeTeam ? 'Team member not found' : 'Another team member';
 }
 
 function formatTeamRole(role: string) {
     const labels: Record<string, string> = {
-        owner: 'Team owner',
-        admin: 'Lead manager',
+        owner: 'Website owner',
+        admin: 'CMS manager',
         editor: 'Editor',
+        viewer: 'Viewer',
     };
 
     return labels[role] ?? 'Team member';
@@ -1404,4 +1533,104 @@ function formatDate(value: string) {
         month: 'short',
         year: 'numeric',
     }).format(new Date(value));
+}
+
+function LeadPagination({
+    page,
+    pageCount,
+    shownFrom,
+    shownTo,
+    matching,
+    canLoadOlder,
+    isLoadingOlder,
+    onNewer,
+    onOlder,
+}: {
+    page: number;
+    pageCount: number;
+    shownFrom: number;
+    shownTo: number;
+    matching: number;
+    canLoadOlder: boolean;
+    isLoadingOlder: boolean;
+    onNewer: () => void;
+    onOlder: () => void;
+}) {
+    const buttonClass =
+        'inline-flex min-h-10 items-center gap-1 rounded border border-black/15 bg-white px-3 text-xs font-bold uppercase tracking-[0.12em] text-black transition hover:border-black disabled:cursor-not-allowed disabled:text-black/30 disabled:hover:border-black/15';
+    const olderDisabled = isLoadingOlder || (page >= pageCount - 1 && !canLoadOlder);
+
+    return (
+        <nav aria-label="Lead pages" className="flex items-center justify-between gap-2 border-t border-black/10 p-3" data-testid="lead-pagination">
+            <button type="button" onClick={onNewer} disabled={page === 0} className={buttonClass}>
+                <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+                Newer
+            </button>
+            <p className="text-center text-xs font-semibold text-black/55" aria-live="polite">
+                {matching ? `${shownFrom}–${shownTo} of ${matching}` : 'No matches'}
+                <span className="block text-[11px] uppercase tracking-[0.12em] text-black/40">
+                    Page {page + 1} of {pageCount}
+                    {canLoadOlder || page < pageCount - 1 ? '' : ' · all loaded'}
+                </span>
+            </p>
+            <button type="button" onClick={onOlder} disabled={olderDisabled} className={buttonClass}>
+                {isLoadingOlder ? 'Loading' : page >= pageCount - 1 && canLoadOlder ? 'Load older' : 'Older'}
+                <ChevronRight className="h-4 w-4" aria-hidden="true" />
+            </button>
+        </nav>
+    );
+}
+
+/**
+ * Newest-first queue from both lead tables. Each table was read newest-first with a limit, so
+ * below the oldest loaded row of a table that still has more rows, the other table's rows would
+ * appear out of order next to missing ones. Rows older than that horizon are held back until
+ * "Load older" reads the next batch.
+ */
+export function mergeLeadTimeline<Lead extends { createdAt: string; id: number }>(
+    enquiries: Lead[],
+    samples: Lead[],
+    exhausted: { enquiry: boolean; sample: boolean },
+): Lead[] {
+    const time = (lead: Lead) => new Date(lead.createdAt).getTime();
+    const oldest = (rows: Lead[]) => (rows.length ? Math.min(...rows.map(time)) : Number.NEGATIVE_INFINITY);
+    const horizon = Math.max(
+        exhausted.enquiry ? Number.NEGATIVE_INFINITY : oldest(enquiries),
+        exhausted.sample ? Number.NEGATIVE_INFINITY : oldest(samples),
+    );
+    return [...enquiries, ...samples]
+        .filter((lead) => time(lead) >= horizon)
+        .sort((left, right) => time(right) - time(left) || right.id - left.id);
+}
+
+type SampleItemsClient = Pick<SupabaseClient, 'from'>;
+
+/**
+ * Items for the given sample requests only, in request/item order. Ids are queried in chunks and
+ * each chunk is paged, so no global row cap can hide the items of the newest requests.
+ */
+export async function fetchSampleItemsForRequests(
+    client: SampleItemsClient,
+    requestIds: number[],
+): Promise<{ data: SampleRequestItemRow[]; error: null } | { data: null; error: unknown; status?: number }> {
+    const ids = Array.from(new Set(requestIds));
+    const items: SampleRequestItemRow[] = [];
+    for (let start = 0; start < ids.length; start += SAMPLE_ITEM_ID_CHUNK) {
+        const chunk = ids.slice(start, start + SAMPLE_ITEM_ID_CHUNK);
+        for (let offset = 0; ; offset += SAMPLE_ITEM_PAGE_SIZE) {
+            const response = await client
+                .from('sample_request_items')
+                .select('id,sample_request_id,stone_group_id,finish_definition_id,quantity,notes')
+                .in('sample_request_id', chunk)
+                .order('sample_request_id', { ascending: true })
+                .order('id', { ascending: true })
+                .range(offset, offset + SAMPLE_ITEM_PAGE_SIZE - 1)
+                .returns<SampleRequestItemRow[]>();
+            if (response.error) return { data: null, error: response.error, status: response.status };
+            const rows = response.data ?? [];
+            items.push(...rows);
+            if (rows.length < SAMPLE_ITEM_PAGE_SIZE) break;
+        }
+    }
+    return { data: items, error: null };
 }

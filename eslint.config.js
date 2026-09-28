@@ -44,6 +44,7 @@ export default tseslint.config(
           'removePublicObjectIfUnreferenced', 'removePrivatePromotionSourceIfUnreferenced',
           'validateSettings', 'normalizeFooterColumns', 'serializeFooterColumns', 'validateAdminProfileForm', 'validateAdminInviteForm',
           'leadToForm', 'getWorkflowGuidance', 'getLeadWorkflowStatusSummary', 'buildLeadExportCsv',
+          'assigneeName', 'mergeLeadTimeline', 'fetchSampleItemsForRequests',
         ],
       }],
     },

@@ -6,6 +6,8 @@ import { supabase } from '../../lib/supabaseClient';
 import AdminShell from './AdminShell';
 import RequireAdmin from './RequireAdmin';
 import { adminModules } from './adminContent';
+import { AdminFeedback } from './AdminFeedback';
+import { useAdminFeedback } from './useAdminFeedback';
 import { CmsLiveRuleCard, CmsStatusCounts, CmsStatusMeaning, CmsWorkflowSteps } from './AdminCmsPrimitives';
 
 interface DashboardMetric {
@@ -48,7 +50,6 @@ interface ContentStatusSnapshot {
 
 interface DashboardState {
     isLoading: boolean;
-    error: string | null;
     metrics: DashboardMetric[];
     contentStatus: ContentStatusSnapshot[];
     healthItems: DashboardHealthItem[];
@@ -84,13 +85,14 @@ const editorStartActions: DashboardNextAction[] = [
 ];
 
 async function resolveCount(
-    query: PromiseLike<{ count: number | null; error: { message?: string } | null }>,
+    query: PromiseLike<{ count: number | null; error: { message?: string } | null; status?: number }>,
 ) {
-    const { count, error } = await query;
-    if (error) {
-        throw error;
+    const response = await query;
+    if (response.error) {
+        // The whole response keeps the HTTP status for the translated message.
+        throw response;
     }
-    return count ?? 0;
+    return response.count ?? 0;
 }
 
 function healthItem(label: string, value: number, action: string, path: string): DashboardHealthItem {
@@ -120,9 +122,9 @@ export default function AdminDashboardPage() {
 }
 
 function AdminDashboardContent() {
+    const { feedback, reportError, clearFeedback } = useAdminFeedback();
     const [dashboard, setDashboard] = useState<DashboardState>({
         isLoading: true,
-        error: null,
         metrics: [],
         contentStatus: [],
         healthItems: [],
@@ -136,21 +138,17 @@ function AdminDashboardContent() {
 
         const client: SupabaseClient = supabase;
 
-        setDashboard((current) => ({ ...current, isLoading: true, error: null }));
+        clearFeedback();
+        setDashboard((current) => ({ ...current, isLoading: true }));
 
         const metricRequests = contentTables.map(async ({ table, label }) => {
-            const { count, error } = await client
-                .from(table)
-                .select('id', { count: 'exact', head: true })
-                .eq('status', 'published');
-
-            if (error) {
-                throw error;
-            }
+            const value = await resolveCount(
+                client.from(table).select('id', { count: 'exact', head: true }).eq('status', 'published'),
+            );
 
             return {
                 label,
-                value: count ?? 0,
+                value,
                 note: 'Live on website',
             };
         });
@@ -267,10 +265,10 @@ function AdminDashboardContent() {
                     recentSamplesRequest,
                 ]);
 
-            if (newEnquiries.error) throw newEnquiries.error;
-            if (newSamples.error) throw newSamples.error;
-            if (recentEnquiries.error) throw recentEnquiries.error;
-            if (recentSamples.error) throw recentSamples.error;
+            if (newEnquiries.error) throw newEnquiries;
+            if (newSamples.error) throw newSamples;
+            if (recentEnquiries.error) throw recentEnquiries;
+            if (recentSamples.error) throw recentSamples;
 
             const leadMetrics = [
                 {
@@ -303,23 +301,22 @@ function AdminDashboardContent() {
 
             setDashboard({
                 isLoading: false,
-                error: null,
                 metrics: [...leadMetrics, ...contentMetrics],
                 contentStatus,
                 healthItems,
                 recentLeads,
             });
         } catch (error) {
+            reportError(error, { entity: 'dashboard', action: 'load' });
             setDashboard({
                 isLoading: false,
-                error: error instanceof Error ? error.message : 'Dashboard query failed.',
                 metrics: [],
                 contentStatus: [],
                 healthItems: [],
                 recentLeads: [],
             });
         }
-    }, []);
+    }, [clearFeedback, reportError]);
 
     useEffect(() => {
         void loadDashboard();
@@ -534,11 +531,7 @@ function AdminDashboardContent() {
                               ))}
                     </div>
 
-                    {dashboard.error ? (
-                        <div className="border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700">
-                            {dashboard.error}
-                        </div>
-                    ) : null}
+                    <AdminFeedback feedback={feedback} scope="page" onDismiss={clearFeedback} />
 
                     <section className="border border-black/10 bg-white">
                         <div className="border-b border-black/10 p-4">

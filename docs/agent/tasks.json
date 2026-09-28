@@ -363,11 +363,12 @@
         ]
       },
       "status": "now",
-      "phase": "planned",
-      "nextAction": "Opus implements on its own branch; Claude reports to Jay, then merges under standing authorization.",
+      "phase": "verification",
+      "nextAction": "Push branch claude/opt-admin-small-fixes, open the PR, confirm CI local:verify (new Leads journey) and the branch Preview smoke; Claude reports to Jay, then merges under standing authorization.",
       "blocker": "",
       "notes": [
-        "2026-09-28: wave 3 of the 2026-09-24 optimization audit. Products module split is deferred to wave 4 (after the media picker and database types land)."
+        "2026-09-28: wave 3 of the 2026-09-24 optimization audit. Products module split is deferred to wave 4 (after the media picker and database types land).",
+        "2026-09-28: implemented on claude/opt-admin-small-fixes. Owner decisions applied: leads keep forwarding to the info email; sales colleagues use the Editor role, so Editors now save Leads workflow (status, owner, notes) as the existing RLS already allowed; export stays owner/admin; English only; desktop. No schema, Function or RLS change. Evidence in WORKLOG '2026-09-28 — Admin small fixes (NOW-OPT-ADMIN-SMALL-FIXES-001)'."
       ]
     },
     {

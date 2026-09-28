@@ -1,5 +1,12 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { describeRawAdminError, translateAdminError, type AdminErrorKind } from './adminErrors';
+import { withAuditNotice } from './adminAudit';
+import {
+    describeRawAdminError,
+    splitAuditNotice,
+    translateAdminError,
+    translateAdminSignInError,
+    type AdminErrorKind,
+} from './adminErrors';
 
 // Raw text that must never reach a colleague as the main message.
 const technicalFragments = [
@@ -101,7 +108,7 @@ const cases: Array<{
         error: { code: 'PGRST301', message: 'JWT expired', details: null, hint: null },
         entity: 'article',
         kind: 'session',
-        message: /^Your sign-in has expired\. Open the admin in a new tab, sign in again/,
+        message: /^Your sign-in has expired\. Sign in again to continue\. Your changes are still on this page\.$/,
     },
     {
         name: 'expired sign-in reported only by HTTP 401',
@@ -240,5 +247,56 @@ describe('translateAdminError', () => {
 
     it('uses a neutral entity when none is given', () => {
         expect(translateAdminError({ code: '23514', message: 'violates check constraint' }).message).toMatch(/this item/);
+    });
+});
+
+describe('translateAdminSignInError', () => {
+    afterEach(() => {
+        vi.unstubAllGlobals();
+    });
+
+    it.each([
+        ['Invalid login credentials', 'credentials', /^That email and password do not match an Urblo CMS login\./],
+        ['Email not confirmed', 'unconfirmed', /^This login is not active yet\./],
+        [{ message: 'Request rate limit reached', status: 429 }, 'rate_limited', /^Too many sign-in attempts\./],
+        [new TypeError('Failed to fetch'), 'network', /^Could not reach the login server\./],
+        [
+            'Supabase browser configuration is missing. Set VITE_SUPABASE_ANON_KEY or VITE_SUPABASE_PUBLISHABLE_KEY.',
+            'config',
+            /^The admin login is not connected on this website yet\./,
+        ],
+        [{ message: 'upstream error', status: 503 }, 'server', /^The login server had a problem\./],
+        ['Something odd', 'unknown', /^Sign-in did not work\./],
+    ] as const)('%s → %s', (error, kind, message) => {
+        const translated = translateAdminSignInError(error);
+        expect(translated.kind).toBe(kind);
+        expect(translated.message).toMatch(message);
+        expect(translated.detail).toBe(describeRawAdminError(error));
+        for (const fragment of ['Invalid login credentials', 'VITE_', 'Failed to fetch', 'rate limit']) {
+            expect(translated.message).not.toContain(fragment);
+        }
+    });
+
+    it('words password-reset failures for the reset form', () => {
+        expect(translateAdminSignInError({ message: 'email rate limit exceeded', status: 429 }, 'reset').message).toMatch(
+            /^Too many password emails were requested\./,
+        );
+        expect(translateAdminSignInError('Unexpected', 'reset').message).toMatch(/^The password email could not be requested\./);
+    });
+});
+
+describe('splitAuditNotice', () => {
+    it('turns a failed change-history write into a plain sentence with the raw error in Details', () => {
+        const raw = 'new row violates row-level security policy for table "admin_audit_events"';
+        const split = splitAuditNotice(withAuditNotice('Lead workflow updated.', raw));
+        expect(split.message).toBe(
+            'Lead workflow updated. The change is saved, but it was not added to Change history. Ask a Website owner or CMS manager to note it there.',
+        );
+        expect(split.message).not.toContain('row-level');
+        expect(split.detail).toBe(raw);
+    });
+
+    it('leaves a recorded save untouched', () => {
+        expect(splitAuditNotice(withAuditNotice('Product saved.', null))).toEqual({ message: 'Product saved.', detail: null });
     });
 });

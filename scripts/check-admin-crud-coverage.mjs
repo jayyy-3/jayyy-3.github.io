@@ -462,7 +462,7 @@ const pageChecks = [
       'Spam check passed',
       'Email sent',
       'Workflow rules',
-      'Lead managers can update workflow status',
+      'Website owners, CMS managers and Editors can update workflow status',
       'Email delivery failed',
       'Lead type',
       'Reference',
@@ -796,7 +796,7 @@ function checkRoutes() {
   requireIncludes(adminState, 'CMS access is not connected yet', 'src/pages/admin/AdminState.tsx');
   requireIncludes(adminState, 'finish the login connection', 'src/pages/admin/AdminState.tsx');
   requireIncludes(adminState, 'Your login and CMS access are being checked', 'src/pages/admin/AdminState.tsx');
-  requireIncludes(adminState, 'The CMS returned an unexpected error while checking this account.', 'src/pages/admin/AdminState.tsx');
+  requireIncludes(adminState, 'Your CMS access could not be checked just now.', 'src/pages/admin/AdminState.tsx');
   requireIncludes(adminState, 'Return to site', 'src/pages/admin/AdminState.tsx');
   requireNotIncludes(adminState, 'Supabase Auth and the admin profile gate', 'src/pages/admin/AdminState.tsx');
   requireNotIncludes(adminState, 'Supabase returned an unexpected error while checking the admin profile.', 'src/pages/admin/AdminState.tsx');
@@ -1572,6 +1572,45 @@ function checkAdminSharedUxLayer() {
   }
 }
 
+// NOW-OPT-ADMIN-SMALL-FIXES-001: Login, Dashboard, access-check and Change history errors are
+// translated (raw text only under Details); an expired sign-in keeps the screen and offers
+// re-login in place; Leads reads sample items for the loaded requests only, is paginated, lets
+// Editors work leads (export stays owner/admin) and names no "lead manager" role.
+function checkAdminSmallFixes() {
+  const login = readRequired('src/pages/admin/AdminLoginPage.tsx');
+  requireIncludes(login, 'translateAdminSignInError(', 'src/pages/admin/AdminLoginPage.tsx translated sign-in errors');
+  requireIncludes(login, '<AdminFeedback', 'src/pages/admin/AdminLoginPage.tsx shared feedback');
+  requireNotIncludes(login, 'setFormError(result.error)', 'src/pages/admin/AdminLoginPage.tsx raw Auth error');
+  const state = readRequired('src/pages/admin/AdminState.tsx');
+  requireIncludes(state, 'translateAdminError(error', 'src/pages/admin/AdminState.tsx translated access-check error');
+  requireNotIncludes(state, 'copy={error ??', 'src/pages/admin/AdminState.tsx raw access-check error');
+  const dashboard = readRequired('src/pages/admin/AdminDashboardPage.tsx');
+  requireIncludes(dashboard, "reportError(error, { entity: 'dashboard', action: 'load' })", 'src/pages/admin/AdminDashboardPage.tsx translated load error');
+  requireNotIncludes(dashboard, 'error.message', 'src/pages/admin/AdminDashboardPage.tsx raw error text');
+  const audit = readRequired('src/pages/admin/AdminAuditPage.tsx');
+  requireIncludes(audit, "reportError(loadError, { entity: 'change history', action: 'load' })", 'src/pages/admin/AdminAuditPage.tsx translated load error');
+  requireNotIncludes(audit, 'setError(loadError.message)', 'src/pages/admin/AdminAuditPage.tsx raw error text');
+  const feedback = readRequired('src/pages/admin/useAdminFeedback.ts');
+  requireIncludes(feedback, 'splitAuditNotice(message)', 'src/pages/admin/useAdminFeedback.ts change-history notice split into message and Details');
+  requireIncludes(feedback, 'requestReLogin(', 'src/pages/admin/useAdminFeedback.ts expired sign-in opens re-login');
+  const guard = readRequired('src/pages/admin/RequireAdmin.tsx');
+  for (const needle of ['shouldKeepScreen(', '<AdminReLoginPanel', 'intentionalSignOut.current = true', 'AdminSessionRecoveryContext.Provider']) {
+    requireIncludes(guard, needle, 'src/pages/admin/RequireAdmin.tsx in-place re-login');
+  }
+  const leads = readRequired('src/pages/admin/AdminLeadsPage.tsx');
+  for (const needle of ['fetchSampleItemsForRequests(client', 'mergeLeadTimeline(', '<LeadPagination', "profile?.role === 'editor'", 'canExportLeads', 'retry: saveLead']) {
+    requireIncludes(leads, needle, 'src/pages/admin/AdminLeadsPage.tsx Leads fixes');
+  }
+  requireNotIncludes(leads, '.limit(500)', 'src/pages/admin/AdminLeadsPage.tsx global sample item cap');
+  if (/lead manager/i.test(leads)) failures.push('src/pages/admin/AdminLeadsPage.tsx names a "lead manager" role that does not exist');
+  const journey = readRequired('scripts/local-journeys/leads.mjs');
+  for (const needle of ['NOW-OPT-ADMIN-SMALL-FIXES-001', 'refresh_token_not_found', 'Sign in and save', 'ITEMS_PER_OLD_REQUEST', 'lead-pagination', 'LOCAL_ACCOUNTS.editor']) {
+    requireIncludes(journey, needle, 'scripts/local-journeys/leads.mjs');
+  }
+  requireIncludes(readRequired('scripts/check-local-journeys.mjs'), 'leadsJourney', 'scripts/check-local-journeys.mjs Leads journey');
+  notes.push('- Admin small fixes: translated Login/Dashboard/Change history errors, in-place re-login, Leads items per loaded request, pagination, Editor lead workflow');
+}
+
 function checkProjectsAggregateContract() {
   if (process.argv.includes('--self-only')) return;
   const result = spawnSync(
@@ -1615,6 +1654,7 @@ checkAdminParentOwnershipSafety();
 checkAdminLoadingAndSaveLockSafety();
 checkLegacyModuleSafetyStopGap();
 checkAdminSharedUxLayer();
+checkAdminSmallFixes();
 checkProjectsAggregateContract();
 checkStoneWorkspaceContract();
 
