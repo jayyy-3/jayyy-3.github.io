@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import type { SiteHeaderSurface } from '../components/site/SiteHeader';
+import StaticResponsiveImage from '../components/StaticResponsiveImage';
 
 interface Props {
   children: ReactNode;
@@ -17,7 +18,15 @@ function LayoutBanner({ bgImage }: { bgImage?: string }) {
 
   return (
     <div className="relative h-[240px] overflow-hidden bg-black md:h-[280px]" aria-hidden="true">
-      <img src={bgImage} alt="" className="h-full w-full object-cover" />
+      {/* Route banner is the LCP element on banner routes: eager, high priority, sized to the viewport. */}
+      <StaticResponsiveImage
+        src={bgImage}
+        alt=""
+        sizes="100vw"
+        loading="eager"
+        fetchPriority="high"
+        className="h-full w-full object-cover"
+      />
       <div className="absolute inset-0 bg-black/60" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(0,255,25,0.18),transparent_35%)]" />
     </div>

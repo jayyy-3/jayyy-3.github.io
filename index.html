@@ -15,11 +15,13 @@
     <meta name="msapplication-TileImage" content="/mstile-270x270.png" />
     <script>
       // Preload the homepage hero poster only on the homepage; other routes have their own LCP image.
+      // Must equal the hero's poster URL (full-width WebP variant, see src/lib/staticImageDelivery.ts).
       if (window.location.pathname === '/') {
         var heroPosterPreload = document.createElement('link');
         heroPosterPreload.rel = 'preload';
         heroPosterPreload.as = 'image';
-        heroPosterPreload.href = '/media/launch/home/hero-poster.jpg';
+        heroPosterPreload.href = '/media/variants/media/launch/home/hero-poster-1280w.webp';
+        heroPosterPreload.type = 'image/webp';
         heroPosterPreload.setAttribute('fetchpriority', 'high');
         document.head.appendChild(heroPosterPreload);
       }

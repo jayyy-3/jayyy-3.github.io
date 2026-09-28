@@ -13,6 +13,7 @@
     "scripts/**/*.mjs"
   ],
   "ignoreDependencies": ["supabase"],
+  "ignoreBinaries": ["ffmpeg"],
   "rules": {
     "exports": "warn",
     "types": "warn",

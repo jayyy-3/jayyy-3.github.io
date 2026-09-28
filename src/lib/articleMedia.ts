@@ -1,3 +1,5 @@
+import { getStaticImageDelivery } from './staticImageDelivery';
+
 const ARTICLE_IMAGE_REPLACEMENTS: Record<string, string | null> = {
   'e5ca1a01-2f2b-4a8b-937b-cda74b36a915': '/media/launch/identity/urblo-logo.png',
   '46806a34-afb6-40eb-a9d8-852268088911':
@@ -91,8 +93,16 @@ export function prepareArticleHtml(rawHtml: string): string {
     }
 
     if (replacement) {
-      image.setAttribute('src', resolveArticleAssetPath(replacement));
+      const delivery = getStaticImageDelivery(
+        resolveArticleAssetPath(replacement),
+        '(min-width: 980px) 900px, 100vw',
+      );
+      image.setAttribute('src', delivery.src);
       image.removeAttribute('srcset');
+      if (delivery.srcSet && delivery.sizes) {
+        image.setAttribute('srcset', delivery.srcSet);
+        image.setAttribute('sizes', delivery.sizes);
+      }
     }
 
     image.setAttribute('loading', 'lazy');

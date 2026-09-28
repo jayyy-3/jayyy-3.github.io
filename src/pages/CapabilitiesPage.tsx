@@ -16,6 +16,7 @@ import {
   ShieldCheck,
   type LucideIcon,
 } from 'lucide-react';
+import StaticResponsiveImage from '../components/StaticResponsiveImage';
 import TurnstileField from '../components/TurnstileField';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
@@ -479,8 +480,10 @@ export default function CapabilitiesPage() {
   return (
     <div className="bg-white">
       <section className="relative min-h-[88svh] overflow-hidden bg-ink pt-[112px] text-inverse md:pt-[124px]">
-        <img
+        <StaticResponsiveImage
           src="/media/launch/capabilities/west-side-place-aerial.jpg"
+          sizes="100vw"
+          fetchPriority="high"
           alt="Urblo public realm stone project seen from above"
           className="absolute inset-0 h-full w-full object-cover opacity-72"
         />
@@ -586,8 +589,10 @@ export default function CapabilitiesPage() {
 
                     <div className="grid gap-6 md:grid-cols-[0.92fr_1.08fr] md:items-stretch">
                       <div className="overflow-hidden rounded bg-ink">
-                        <img
+                        <StaticResponsiveImage
                           src={module.image}
+                          sizes="(min-width: 768px) 45vw, 100vw"
+                          loading="lazy"
                           alt={module.alt}
                           className="aspect-[4/3] h-full w-full object-cover opacity-95 transition duration-700 hover:scale-[1.03]"
                         />
@@ -630,8 +635,10 @@ export default function CapabilitiesPage() {
       <section className="bg-ink py-section text-inverse">
         <div className="urblo-page-container grid gap-12 lg:grid-cols-[1.08fr_0.92fr] lg:items-center">
           <Reveal className="overflow-hidden rounded">
-            <img
+            <StaticResponsiveImage
               src="/media/launch/capabilities/factory-preassembly.jpg"
+              sizes="(min-width: 1024px) 55vw, 100vw"
+              loading="lazy"
               alt="Urblo factory pre-assembly of shaped natural stone seating"
               className="aspect-[5/3] w-full object-cover"
             />
@@ -741,8 +748,10 @@ export default function CapabilitiesPage() {
             </div>
           </Reveal>
           <Reveal delay={0.08} className="overflow-hidden rounded">
-            <img
+            <StaticResponsiveImage
               src="/media/launch/capabilities/site-install-review.jpg"
+              sizes="(min-width: 1024px) 50vw, 100vw"
+              loading="lazy"
               alt="Urblo site review during stone installation"
               className="aspect-[4/3] w-full object-cover"
             />
@@ -771,8 +780,10 @@ export default function CapabilitiesPage() {
                   surface="dark"
                   className="h-full"
                   media={
-                    <img
+                    <StaticResponsiveImage
                       src={project.image}
+                      sizes="(min-width: 768px) 33vw, 100vw"
+                      loading="lazy"
                       alt={`${project.title} Urblo stone project`}
                       className="aspect-[4/3] w-full object-cover transition duration-700 group-hover:scale-[1.03]"
                     />
@@ -844,8 +855,10 @@ export default function CapabilitiesPage() {
             <Card variant="bordered" surface="dark" className="p-5">
               <div className="grid gap-5 md:grid-cols-[0.95fr_1.05fr] md:items-center">
                 <div className="overflow-hidden bg-white">
-                  <img
+                  <StaticResponsiveImage
                     src="/media/launch/capabilities/west-side-place-aerial.jpg"
+                    sizes="(min-width: 768px) 30vw, 100vw"
+                    loading="lazy"
                     alt="Capability statement preview showing Urblo public realm stone work"
                     className="aspect-[4/5] h-full w-full object-cover"
                   />

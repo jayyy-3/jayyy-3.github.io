@@ -1,3 +1,5 @@
+import { getStaticImageDelivery } from './staticImageDelivery.ts';
+
 export type ProjectImageProfile = 'card' | 'list' | 'hero' | 'detail' | 'hotspot';
 
 type ProjectImageProfileConfig = {
@@ -112,12 +114,14 @@ export function getProjectImageDelivery(source: string, profile: ProjectImagePro
   const fallback = toProjectImageVariantUrl(source, config.fallbackWidth, config.quality);
 
   if (!fallback) {
+    // Curated static sources (launch media, static project fallbacks) use their generated WebP variants.
+    const staticDelivery = getStaticImageDelivery(source, config.sizes, config.fallbackWidth);
     return {
-      optimized: false,
-      src: source,
-      srcSet: undefined,
-      sizes: undefined,
-    } as const;
+      optimized: staticDelivery.optimized,
+      src: staticDelivery.src,
+      srcSet: staticDelivery.srcSet,
+      sizes: staticDelivery.sizes,
+    };
   }
 
   return {
@@ -127,5 +131,5 @@ export function getProjectImageDelivery(source: string, profile: ProjectImagePro
       .map((width) => `${toProjectImageVariantUrl(source, width, config.quality)} ${width}w`)
       .join(', '),
     sizes: config.sizes,
-  } as const;
+  };
 }

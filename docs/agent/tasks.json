@@ -202,11 +202,12 @@
         ]
       },
       "status": "now",
-      "phase": "planned",
-      "nextAction": "Opus implements on its own branch; Claude reports to Jay, then merges under standing authorization.",
-      "blocker": "",
+      "phase": "verification",
+      "nextAction": "Push branch claude/opt-static-assets, run branch Preview smoke, Lighthouse and curl readback, then hand the PR to Claude for Jay.",
+      "blocker": "Immutable/long Cache-Control is deliberately not added: missing /assets/* and /media/* paths still return the SPA shell with HTTP 200 (the 2026-07-13 cache-poisoning mechanism); needs a decision on a missing-asset 404 guard. Font WOFF2 conversion/preload needs a confirmed web-font licence.",
       "notes": [
-        "2026-09-28: wave 3 of the 2026-09-24 optimization audit. Products module split is deferred to wave 4 (after the media picker and database types land)."
+        "2026-09-28: wave 3 of the 2026-09-24 optimization audit. Products module split is deferred to wave 4 (after the media picker and database types land).",
+        "2026-09-28: implemented on claude/opt-static-assets: scripts/generate-static-image-variants.mjs (82 originals, 282 WebP variants, deterministic, --check graph node static-images), StaticResponsiveImage/staticImageDelivery, hero re-encode (desktop 2.65MB, mobile 1.75MB) with preload=metadata and reduced-motion/Save-Data poster-only fallback. Cache header and font items recorded as blocked with reasons in docs/architecture/public-media.md."
       ]
     },
     {

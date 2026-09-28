@@ -1,4 +1,6 @@
 import { motion } from 'framer-motion';
+import StaticResponsiveImage from '../components/StaticResponsiveImage';
+import { getStaticImageUrl } from '../lib/staticImageDelivery';
 
 export default function OurStory() {
   const proofVariants = {
@@ -104,7 +106,7 @@ export default function OurStory() {
       <section className="relative flex min-h-[420px] items-center justify-center overflow-hidden text-white">
         <motion.div
           className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: 'url(/media/launch/banners/our-story.jpg)' }}
+          style={{ backgroundImage: `url(${getStaticImageUrl('/media/launch/banners/our-story.jpg', window.innerWidth)})` }}
           initial={{ scale: 1.08 }}
           whileInView={{ scale: 1 }}
           viewport={{ once: true }}
@@ -147,8 +149,10 @@ export default function OurStory() {
               <article key={member.name} className="group">
                 <div className="overflow-hidden rounded-[4px] border border-white/10 bg-white/5">
                   <div className="relative overflow-hidden">
-                    <img
+                    <StaticResponsiveImage
                       src={member.img}
+                      sizes="(min-width: 768px) 450px, 100vw"
+                      loading="lazy"
                       alt={member.name}
                       className="aspect-[2/3] w-full object-cover transition duration-500 group-hover:scale-[1.02]"
                     />

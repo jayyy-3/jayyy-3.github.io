@@ -12,6 +12,10 @@ const requiredSourceContracts = [
   ["video.addEventListener('playing', handlePlaying)", 'successful playback state'],
   ['setVideoNeedsGesture(true)', 'blocked playback state'],
   ['onClick={attemptVideoPlay}', 'user-gesture playback control'],
+  ['preload="metadata"', 'metadata-only video preload'],
+  ["matchMedia?.('(prefers-reduced-motion: reduce)')", 'reduced-motion poster fallback'],
+  ['connection?.saveData === true', 'Save-Data poster fallback'],
+  ['{staticHero ? null : (', 'no video element when the poster fallback applies'],
 ]
 
 for (const [contract, label] of requiredSourceContracts) {
@@ -92,14 +96,32 @@ if (Math.abs(averageFrameRate - 30) > 0.01) {
   throw new Error(`Mobile hero MP4 must remain 30fps; found ${averageFrameRate.toFixed(3)}fps`)
 }
 
-const maxMobileVideoBytes = 4 * 1024 * 1024
+const maxMobileVideoBytes = 2 * 1024 * 1024
 if (mobileVideo.length > maxMobileVideoBytes) {
   throw new Error(
-    `Mobile hero MP4 exceeds the 4MB mobile delivery budget (${mobileVideo.length} bytes)`,
+    `Mobile hero MP4 exceeds the 2MB mobile delivery budget (${mobileVideo.length} bytes)`,
   )
 }
 
+const desktopVideoBytes = fs.statSync('public/media/launch/home/urblo-hero.mp4').size
+if (desktopVideoBytes > 3 * 1024 * 1024) {
+  throw new Error(`Desktop hero MP4 exceeds the 3MB delivery budget (${desktopVideoBytes} bytes)`)
+}
+
+// The homepage-only poster preload must name the exact URL the hero renders (the full-width WebP
+// variant), otherwise the browser downloads the poster twice.
+const posterPath = '/media/launch/home/hero-poster.jpg'
+const variantManifest = JSON.parse(fs.readFileSync('src/data/staticImageVariants.json', 'utf8'))
+const posterEntry = variantManifest.images[posterPath]
+if (!posterEntry || posterEntry[3]) throw new Error('Hero poster must have a full-width WebP variant')
+const posterVariant = `${variantManifest.variantRoot}${posterPath.replace(/\.jpg$/, '')}-${posterEntry[2].at(-1)}w.webp`
+if (!fs.readFileSync('index.html', 'utf8').includes(`heroPosterPreload.href = '${posterVariant}'`)) {
+  throw new Error(`index.html must preload the hero poster variant ${posterVariant}`)
+}
+if (!fs.existsSync(`public${posterVariant}`)) throw new Error(`Missing hero poster variant public${posterVariant}`)
+
 console.log('Homepage hero video compatibility passed.')
+console.log(`Desktop MP4: ${(desktopVideoBytes / 1024 / 1024).toFixed(2)}MB; poster preload ${posterVariant}.`)
 console.log(
   `Mobile MP4: Constrained Baseline level ${level / 10}, ${width}x${height}, ${averageFrameRate.toFixed(0)}fps, no audio, fast start, ${(mobileVideo.length / 1024 / 1024).toFixed(2)}MB.`,
 )

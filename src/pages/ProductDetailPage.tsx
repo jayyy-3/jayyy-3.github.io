@@ -5,6 +5,7 @@ import OptionSelector from '../components/OptionSelector';
 import RouteState from '../components/RouteState';
 import PublicContentSeo from '../components/PublicContentSeo';
 import SpecTable from '../components/SpecTable';
+import StaticResponsiveImage from '../components/StaticResponsiveImage';
 import StoneResponsiveImage from '../components/stone-library/StoneResponsiveImage';
 import { battenOptions } from '../data/battenData';
 import { frameFinishes } from '../data/frameFinishData';
@@ -192,7 +193,12 @@ export default function ProductDetailPage() {
         <div className="urblo-page-container grid gap-8 lg:grid-cols-[minmax(0,1.05fr)_minmax(360px,0.95fr)] lg:items-start">
           <div className="urblo-card overflow-hidden bg-white p-4">
             <div className="aspect-square overflow-hidden rounded-[4px] bg-black/5">
-              <img src={currentModel.img} alt={product.name} className="h-full w-full object-contain" />
+              <StaticResponsiveImage
+                src={currentModel.img}
+                sizes="(min-width: 1024px) 50vw, 100vw"
+                alt={product.name}
+                className="h-full w-full object-contain"
+              />
             </div>
             <div className="mt-4 border-t border-black/10 pt-4">
               <p className="urblo-meta text-black/60">Model preview</p>
