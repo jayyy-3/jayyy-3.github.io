@@ -1,8 +1,268 @@
 {
   "version": 2,
-  "lastUpdated": "2026-09-26",
+  "lastUpdated": "2026-09-28",
   "archive": "docs/archive/2026-09-09/completed-tasks.json",
   "tasks": [
+    {
+      "id": "NOW-OPT-PAGE-CONVERGENCE-001",
+      "priority": 0,
+      "modules": [
+        "public-ui",
+        "stone-library",
+        "projects",
+        "articles",
+        "products"
+      ],
+      "summary": "Bring the remaining public pages onto the wave 2 tokens and shared components: Our Story, Contact, Products, Product detail, Articles, Article page (layout only), Stone detail and Project detail; remove the empty decorative banner page tops; unify CTA wording, phone number format, en-AU dates and singular/plural copy.",
+      "files": [
+        "src/pages/OurStory.tsx",
+        "src/pages/ContactPage.tsx",
+        "src/pages/ProductsPage.tsx",
+        "src/pages/ProductDetailPage.tsx",
+        "src/pages/ArticlesPage.tsx",
+        "src/pages/ArticlePage.tsx",
+        "src/pages/StonePageView.tsx",
+        "src/pages/ProjectDetails.tsx",
+        "src/layouts/DefaultLayout.tsx",
+        "src/components/ui/",
+        "scripts/public-ui-tokens-baseline.json",
+        "docs/DESIGN.md"
+      ],
+      "acceptance": [
+        "Every listed page uses Button variants, the two SectionHeading levels, PageIntro and Card from src/components/ui; no page-local button or heading styles remain there.",
+        "DefaultLayout no longer renders the text-less decorative banner; each page opens with a PageIntro (Projects page as template).",
+        "Arbitrary text-[Npx] count across public pages drops from 159 to <= 48 and the baseline file is lowered accordingly.",
+        "CTAs use one phrasing set (recorded in DESIGN.md), the phone number is written one way everywhere, article dates render en-AU.",
+        "Before/after screenshots at 375/768/1440 for each page; Home, Capabilities, Projects, Stone Library and 404 are pixel-unchanged below the header; article body content and claims are not rewritten (that is NOW-ARTICLE-STRUCTURE-CLAIMS-001)."
+      ],
+      "verification": [
+        "npm run agent:verify -- --plan",
+        "npm run gate",
+        "npm test",
+        "npm run agent:cloudflare-preview-smoke -- --base-url <branch Preview>",
+        "git diff --check"
+      ],
+      "authorization": {
+        "source": "Jay approved optimization wave 3 on 2026-09-28 (\"开第三波，让Opus去干\") after the wave 2 report; merge to main is standing authorization since 2026-09-26.",
+        "included": [
+          "Branch implementation, isolated local tests, git push, pull request, branch Preview and smoke, DESIGN.md and docs/agent state updates, merge after Claude's report."
+        ],
+        "excluded": [
+          "Production data or Storage writes, real email, DNS or credential changes, migrations, physical content deletion."
+        ]
+      },
+      "status": "now",
+      "phase": "planned",
+      "nextAction": "Opus implements on its own branch; Claude reports to Jay, then merges under standing authorization.",
+      "blocker": "",
+      "notes": [
+        "2026-09-28: wave 3 of the 2026-09-24 optimization audit. Products module split is deferred to wave 4 (after the media picker and database types land)."
+      ]
+    },
+    {
+      "id": "NOW-OPT-STATIC-ASSETS-001",
+      "priority": 0,
+      "modules": [
+        "public-ui"
+      ],
+      "summary": "Static asset delivery: generate multi-size WebP variants with srcset for the launch banners, homepage, article and product PNG/JPG images; re-encode the hero videos with preload=metadata and a reduced-motion / Save-Data poster fallback; immutable cache headers for hashed assets; fonts converted to WOFF2 and preloaded.",
+      "files": [
+        "public/media/",
+        "public/images/",
+        "public/products/",
+        "public/fonts/",
+        "public/_headers",
+        "index.html",
+        "src/components/homepage/",
+        "src/lib/",
+        "scripts/"
+      ],
+      "acceptance": [
+        "A repeatable script (scripts/build-static-image-variants.mjs or similar) produces the variants; committed outputs are deterministic and the originals are kept.",
+        "Every static image over 300KB referenced by public pages is delivered via srcset with a variant sized to its box; no public page requests a >1MB static image on mobile.",
+        "Hero video: desktop <= 3MB, mobile <= 2MB, preload=metadata, poster shown under prefers-reduced-motion and Save-Data; visual result approved by screenshots.",
+        "curl -I on a hashed /assets/*.js returns Cache-Control max-age=31536000, immutable; fonts are WOFF2 with preload (or the licence reason for not converting is recorded).",
+        "Lighthouse on Preview: /products, /articles, /contact mobile LCP < 3.0s; homepage mobile transfer < 2.5MB; total public/ size reduction reported."
+      ],
+      "verification": [
+        "npm run agent:verify -- --plan",
+        "npm run gate",
+        "npm test",
+        "npm run agent:cloudflare-preview-smoke -- --base-url <branch Preview>",
+        "git diff --check",
+        "npx lighthouse against the branch Preview for /, /products, /articles, /contact (mobile + desktop)"
+      ],
+      "authorization": {
+        "source": "Jay approved optimization wave 3 on 2026-09-28 (\"开第三波，让Opus去干\") after the wave 2 report; merge to main is standing authorization since 2026-09-26.",
+        "included": [
+          "Branch implementation, asset generation committed to public/, git push, pull request, branch Preview and smoke, docs/agent state updates, merge after Claude's report."
+        ],
+        "excluded": [
+          "Production data or Storage writes, real email, DNS or credential changes, migrations, physical content deletion.",
+          "Replacing any photograph with different content; font conversion only if the licence allows."
+        ]
+      },
+      "status": "now",
+      "phase": "planned",
+      "nextAction": "Opus implements on its own branch; Claude reports to Jay, then merges under standing authorization.",
+      "blocker": "",
+      "notes": [
+        "2026-09-28: wave 3 of the 2026-09-24 optimization audit. Products module split is deferred to wave 4 (after the media picker and database types land)."
+      ]
+    },
+    {
+      "id": "NOW-OPT-ADMIN-MEDIA-PICKER-001",
+      "priority": 0,
+      "modules": [
+        "media",
+        "products",
+        "articles",
+        "auth-settings"
+      ],
+      "summary": "One shared admin media picker (generalised from the Projects InlineMediaField) used by Products hero and model images, Articles cover and section images and Settings share image; client-side compression via imageQrOptimization with stated limits; alt text never prefilled with the file name; HEIC guidance; Media page stripped of bucket/Storage/promotion/rollback jargon.",
+      "files": [
+        "src/pages/admin/projects/InlineMediaField.tsx",
+        "src/pages/admin/AdminProductsPage.tsx",
+        "src/pages/admin/AdminMediaPage.tsx",
+        "src/pages/admin/articles/",
+        "src/pages/admin/AdminSettingsPage.tsx",
+        "src/lib/imageQrOptimization.ts",
+        "scripts/local-journeys/",
+        "scripts/check-admin-crud-coverage.mjs"
+      ],
+      "acceptance": [
+        "In Products a colleague can upload, pick and save an image without leaving the page; the same picker serves Articles and Settings.",
+        "A 20MB JPG is compressed client-side before upload within the stated limit; the limit and accepted types are shown before choosing a file; HEIC gets a clear message.",
+        "Alt text starts empty with a prompt, never the file name; existing media is searchable in the picker (not a 120-item dropdown).",
+        "Media page has no user-visible bucket/Storage/promotion/rollback wording (check script assertion); technical detail stays under Details.",
+        "Local synthetic journeys cover Products and Articles picker flows with the Editor role; no schema, Function or RLS change; media promotion on publish reuses the existing Projects server path or is recorded as a follow-up."
+      ],
+      "verification": [
+        "npm run agent:verify -- --plan",
+        "npm run gate",
+        "npm test",
+        "npm run agent:cloudflare-preview-smoke -- --base-url <branch Preview>",
+        "git diff --check",
+        "npm run local:verify",
+        "npm run agent:admin-crud-coverage"
+      ],
+      "authorization": {
+        "source": "Jay approved optimization wave 3 on 2026-09-28 (\"开第三波，让Opus去干\") after the wave 2 report; merge to main is standing authorization since 2026-09-26.",
+        "included": [
+          "Branch implementation, isolated local synthetic tests, git push, pull request, branch Preview and smoke (read-only), docs/agent state updates, merge after Claude's report."
+        ],
+        "excluded": [
+          "Production data or Storage writes, real email, DNS or credential changes, migrations, physical content deletion."
+        ]
+      },
+      "status": "now",
+      "phase": "planned",
+      "nextAction": "Opus implements on its own branch; Claude reports to Jay, then merges under standing authorization.",
+      "blocker": "",
+      "notes": [
+        "2026-09-28: wave 3 of the 2026-09-24 optimization audit. Products module split is deferred to wave 4 (after the media picker and database types land)."
+      ]
+    },
+    {
+      "id": "NOW-OPT-DB-TYPES-FUNCTIONS-RUNTIME-001",
+      "priority": 1,
+      "modules": [
+        "harness",
+        "delivery",
+        "forms",
+        "qr"
+      ],
+      "summary": "Generate Supabase database types from the isolated local stack and use them in the service layer (createClient<Database>, Tables<> instead of hand-written Row interfaces and as-unknown-as casts in src/service and src/lib); make every Pages Function use the shared admin-runtime (admin-stones, admin-invite), define the production URL default once, and add checkJs type checking for functions/.",
+      "files": [
+        "src/service/",
+        "src/lib/",
+        "src/types/",
+        "functions/_lib/",
+        "functions/api/",
+        "scripts/",
+        "tsconfig.json"
+      ],
+      "acceptance": [
+        "src/types/database.ts is generated by a committed script from the local stack; a check fails when a migration changes and the file is stale.",
+        "No `as unknown as` remains in src/service and src/lib; hand-written Row interfaces there are replaced by Tables<>; admin page files are not restructured (their local interfaces may stay for the later Products split).",
+        "Deliberately renaming a column in a scratch migration makes tsc fail (mutation proof recorded).",
+        "admin-stones.js and admin-invite.js use admin-runtime.js; jsonResponse and config reading exist once; the production Supabase URL default is defined in one place; tsconfig for functions with checkJs passes and runs in the graph.",
+        "Error codes, role contracts and response shapes of every Function match pre-change snapshots (vitest); unauthenticated requests make zero database calls; Preview returns structured 401 for protected endpoints."
+      ],
+      "verification": [
+        "npm run agent:verify -- --plan",
+        "npm run gate",
+        "npm test",
+        "npm run agent:cloudflare-preview-smoke -- --base-url <branch Preview>",
+        "git diff --check",
+        "npm run local:verify"
+      ],
+      "authorization": {
+        "source": "Jay approved optimization wave 3 on 2026-09-28 (\"开第三波，让Opus去干\") after the wave 2 report; merge to main is standing authorization since 2026-09-26.",
+        "included": [
+          "Branch implementation, type generation from the isolated local stack, Functions refactor without behaviour change, git push, pull request, branch Preview and smoke, docs/agent state updates, merge after Claude's report."
+        ],
+        "excluded": [
+          "Production data or Storage writes, real email, DNS or credential changes, migrations, physical content deletion."
+        ]
+      },
+      "status": "now",
+      "phase": "planned",
+      "nextAction": "Opus implements on its own branch; Claude reports to Jay, then merges under standing authorization.",
+      "blocker": "",
+      "notes": [
+        "2026-09-28: wave 3 of the 2026-09-24 optimization audit. Products module split is deferred to wave 4 (after the media picker and database types land)."
+      ]
+    },
+    {
+      "id": "NOW-OPT-ADMIN-SMALL-FIXES-001",
+      "priority": 1,
+      "modules": [
+        "auth-settings",
+        "forms"
+      ],
+      "summary": "Admin follow-ups from wave 2: translate Login, Dashboard and change-history errors through adminErrors; on session expiry keep the form and show a re-login panel instead of redirecting; fix the Leads sample-item 500-row oldest-first cap and the non-existent 'lead manager' role text; add pagination to Leads.",
+      "files": [
+        "src/pages/admin/AdminLoginPage.tsx",
+        "src/pages/admin/AdminDashboardPage.tsx",
+        "src/pages/admin/AdminLeadsPage.tsx",
+        "src/pages/admin/AdminApp.tsx",
+        "src/lib/adminErrors.ts",
+        "scripts/local-journeys/",
+        "scripts/check-admin-crud-coverage.mjs"
+      ],
+      "acceptance": [
+        "Login, Dashboard and the change-history notice show translated messages; raw text only under Details.",
+        "A simulated JWT expiry mid-edit keeps the unsaved form on screen and offers re-login in place; after re-login the save succeeds (local journey).",
+        "With 600+ synthetic sample items the newest requests show complete item lists; Leads list is paginated; no reference to a 'lead manager' role remains.",
+        "No schema, Function or RLS change; vitest and local journeys cover each item."
+      ],
+      "verification": [
+        "npm run agent:verify -- --plan",
+        "npm run gate",
+        "npm test",
+        "npm run agent:cloudflare-preview-smoke -- --base-url <branch Preview>",
+        "git diff --check",
+        "npm run local:verify",
+        "npm run agent:admin-crud-coverage"
+      ],
+      "authorization": {
+        "source": "Jay approved optimization wave 3 on 2026-09-28 (\"开第三波，让Opus去干\") after the wave 2 report; merge to main is standing authorization since 2026-09-26.",
+        "included": [
+          "Branch implementation, isolated local synthetic tests, git push, pull request, branch Preview and smoke (read-only), docs/agent state updates, merge after Claude's report."
+        ],
+        "excluded": [
+          "Production data or Storage writes, real email, DNS or credential changes, migrations, physical content deletion."
+        ]
+      },
+      "status": "now",
+      "phase": "planned",
+      "nextAction": "Opus implements on its own branch; Claude reports to Jay, then merges under standing authorization.",
+      "blocker": "",
+      "notes": [
+        "2026-09-28: wave 3 of the 2026-09-24 optimization audit. Products module split is deferred to wave 4 (after the media picker and database types land)."
+      ]
+    },
     {
       "id": "NOW-ADMIN-STONE-WORKSPACE-001",
       "status": "now",

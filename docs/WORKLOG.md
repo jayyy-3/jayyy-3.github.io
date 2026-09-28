@@ -1,6 +1,6 @@
 # WORKLOG — current execution evidence
 
-Last updated: 2026-09-26
+Last updated: 2026-09-28
 
 Historical evidence is immutable and is not current task state. Current state is generated from `docs/agent/status.json` and `docs/agent/tasks.json`.
 
@@ -486,3 +486,7 @@ Conflict resolutions: WORKLOG and task notes unioned; generated summaries regene
 Final readback on `194976d50b79bbad89b949f85aba3903e1a99ee7`, immutable `https://21b51af8.urblo-site.pages.dev`: `agent:cloudflare-preview-smoke` passed on the immutable URL and on apex and www with the immutable reference. curl on production: `/projects/the-glen`, `/stone-library/ausred` and `/products/prime-block` return 200 with entity titles in the first response; `/this-does-not-exist-xyz` returns 404 with "Page Not Found | Urblo"; `/projects/` returns 301 to `/projects`; `/sitemap.xml` lists 54 URLs; `https://www.urblo.com.au/` still returns 200 because the zone redirect rule is not yet created. Read-only Playwright on production: the header logo sits at 94px at 1440 (page gutter); "Our Capabilities" and "View project" render as 4px-radius outline buttons; `/admin/login` shows one Help button that opens the "Urblo admin quick guide" panel. Lighthouse 13.5 single runs on production: `/` mobile 82 (LCP 4.7s, CLS 0, 3.67MB), desktop 98; `/stone-library` mobile 92, desktop 99; `/stone-library/harcourt` mobile 91 (LCP 3.0s), desktop 98; `/products/prime-block` mobile 80, desktop 99; `/projects/artisan-park-yarrabend` mobile 91, desktop 98; CLS <= 0.002 everywhere.
 
 Pending for Jay: the www→apex redirect rule in the urblo.com.au Cloudflare zone (Rules → Redirect Rules: if `http.host eq "www.urblo.com.au"` then dynamic redirect to `concat("https://urblo.com.au", http.request.uri.path)`, status 301, preserve query string); optional descriptive homepage SEO title in Admin → Settings (code fallback already restores it); content review of the Harcourt stone title ("Mica Grey Granite") and AI-generated project share images. Not verified: real crawlers and social debuggers; Safari/iOS; colleague acceptance of the admin changes and the quick guide. Five wave 2 tasks are archived; wave 3 is not yet registered. This batch record does not deploy.
+
+## 2026-09-28 — www redirect confirmed and wave 3 registered
+
+Jay created the www→apex redirect rule in the Cloudflare zone ("做了"). Read-only readback: `https://www.urblo.com.au/` and `https://www.urblo.com.au/projects/the-glen?x=1` both return 301 to the apex path with the query string preserved. Jay approved wave 3 ("开第三波，让Opus去干"); five tasks are registered: public page convergence, static assets, admin media picker, database types plus Functions shared runtime, and admin small fixes. The Products module split is deferred to wave 4. Record-only; no deployment.
