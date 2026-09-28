@@ -157,6 +157,27 @@ describe('edge SEO dataset and head resolution', () => {
     assert.equal(result.head.description, 'CMS summary for Xavier College.');
   });
 
+  test('the Stone Library compare route answers 200 with a noindex head canonical to /stone-library', () => {
+    for (const data of [dataset, buildStaticEdgeSeoDataset(), buildStaticEdgeSeoDataset({ complete: true })]) {
+      const result = resolveEdgeSeoDocument('/stone-library/compare', data);
+      assert.equal(result.kind, 'document');
+      if (result.kind !== 'document') return;
+      assert.equal(result.status, 200);
+      assert.equal(result.head.source, 'static');
+      assert.equal(result.head.robots, 'noindex,follow');
+      assert.equal(result.head.canonicalUrl, 'https://urblo.com.au/stone-library');
+      assert.equal(result.head.title, 'Compare Stones | Urblo Stone Library');
+      assert.deepEqual(result.head.structuredData, []);
+      const html = renderEdgeHeadHtml(result.head);
+      assert.ok(html.includes('<meta name="robots" content="noindex,follow" />'));
+      assert.ok(html.includes('<link rel="canonical" href="https://urblo.com.au/stone-library" />'));
+    }
+    const client = getSeoMetaForPathname('/stone-library/compare');
+    assert.equal(client.robots, 'noindex,follow');
+    assert.equal(client.canonicalUrl, 'https://urblo.com.au/stone-library');
+    assert.ok(!buildSitemapXml(dataset).includes('/stone-library/compare'));
+  });
+
   test('archived static projects, managed stones and unknown slugs return 404', () => {
     for (const path of ['/projects/moon-gate-woolley-street', '/stone-library/harcourt', '/projects/not-a-project', '/nope', '/wp-content/uploads/x.jpg']) {
       const result = resolveEdgeSeoDocument(path, dataset);

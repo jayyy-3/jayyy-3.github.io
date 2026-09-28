@@ -24,6 +24,7 @@ const ProjectsPage = lazy(() => import('./pages/Projects'));
 const ProjectDetailsPage = lazy(() => import('./pages/ProjectDetails'));
 const StoneLibraryPage = lazy(() => import('./pages/StoneLibraryPage'));
 const StoneLibraryDetailPage = lazy(() => import('./pages/StoneLibraryDetailPage'));
+const StoneComparePage = lazy(() => import('./pages/StoneComparePage'));
 const OurStoryPage = lazy(() => import('./pages/OurStory'));
 const ArticlesPage = lazy(() => import('./pages/ArticlesPage'));
 const ArticlePage = lazy(() => import('./pages/ArticlePage'));
@@ -225,6 +226,15 @@ function AnimatedRoutes() {
                     element={
                         <DefaultLayout>
                             {loadPage(<StoneLibraryPage />)}
+                        </DefaultLayout>
+                    }
+                />
+
+                <Route
+                    path="/stone-library/compare"
+                    element={
+                        <DefaultLayout>
+                            {loadPage(<StoneComparePage />)}
                         </DefaultLayout>
                     }
                 />

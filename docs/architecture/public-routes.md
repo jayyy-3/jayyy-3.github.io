@@ -10,6 +10,7 @@ Routing uses clean paths through `BrowserRouter`. Cloudflare Pages direct refres
 |---|---|---|
 | `/` | `Home` | Wrapped by `HomepageLayout`; shared site chrome is used through homepage proxy components. |
 | `/stone-library` | `StoneLibraryPage` | Stone list and filter surface. |
+| `/stone-library/compare` | `StoneComparePage` | Lazy. `?stones=a,b,c` side-by-side comparison (max 4); noindex, canonical `/stone-library`. Contract: `docs/architecture/stone-library.md`. |
 | `/stone-library/:stoneGroupId` | `StoneLibraryDetailPage` | Stone detail with variant switch, synchronized finish controls, and lightbox preview. |
 | `/products` | `ProductsPage` | Bench/system product listing. |
 | `/products/:slug` | `ProductDetailPage` | Product detail and material options. |

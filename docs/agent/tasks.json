@@ -42,7 +42,7 @@
         "npm run agent:cloudflare-preview-smoke -- --base-url <branch Preview>",
         "git diff --check"
       ],
-      "phase": "planned",
+      "phase": "verification",
       "authorization": {
         "source": "Jay approved the comparison feature and its defaults on 2026-09-28 (\"按你说的做吧… 设计好看一点，符合我们设计。你开Opus去做吧\"): max 4 stones, price tier included, no finish behaviour text, sample request linkage in v1, code-level attribute registry now and CMS-managed attribute definitions later. Standing merge authorization applies.",
         "included": [
@@ -52,10 +52,11 @@
           "Schema, Function, RLS or migration changes; production data writes; CMS-managed attribute definitions (future task)."
         ]
       },
-      "nextAction": "Opus implements on its own branch; Claude reports with screenshots for Jay's design approval, then merges.",
+      "nextAction": "Opus finishes local verification, pushes claude/stone-compare, opens the PR and runs branch Preview smoke; Claude then reports screenshots to Jay.",
       "blocker": "",
       "notes": [
-        "2026-09-28: alignment in chat. Layer 1 (registry in code) now; layer 2 (stone_attribute_definitions/values managed in admin) deferred until Stone data is fully CMS-managed; the registry shape is designed to be swapped to a data source later."
+        "2026-09-28: alignment in chat. Layer 1 (registry in code) now; layer 2 (stone_attribute_definitions/values managed in admin) deferred until Stone data is fully CMS-managed; the registry shape is designed to be swapped to a data source later.",
+        "2026-09-28: implemented on claude/stone-compare: selection helpers and tray, Compare toggle on cards and detail, lazy /stone-library/compare page driven by src/lib/stoneCompareRegistry.ts (origin public:false), Differences only, sample CTA via the existing /contact?intent=sample-request&stone= prefill (ContactPage unchanged), noindex utility route in src/data/seoRoutes.ts honoured at the edge. Local: npm test, lint, tsc, agent:stone-library-detail, edge-seo tests passed; Playwright captures under .tmp/compare/."
       ]
     },
     {
