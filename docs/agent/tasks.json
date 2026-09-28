@@ -151,12 +151,13 @@
         ]
       },
       "status": "now",
-      "phase": "verification",
-      "nextAction": "Push branch claude/opt-page-convergence, open the PR, run branch Preview smoke; Claude reports the 1440 screenshots to Jay, then merges under standing authorization.",
+      "phase": "awaiting_external",
+      "nextAction": "Claude shows Jay the 1440 screenshots from PR #82 for visual acceptance, then merges under standing authorization; production immutable/apex/www readback is recorded once for the wave.",
       "blocker": "",
       "notes": [
         "2026-09-28: wave 3 of the 2026-09-24 optimization audit. Products module split is deferred to wave 4 (after the media picker and database types land).",
-        "2026-09-28: implemented on claude/opt-page-convergence. Decorative DefaultLayout banner retired; eight pages open with PageIntro band and use Button/SectionHeading/Card; CTA set, phone format (1300 1URBLO, tel:1300187256) and en-AU dates recorded in DESIGN.md \"Public page convergence\". Arbitrary text-[Npx] 159 -> 44; new text-micro (11px) token for dense stone tool labels. Home/Capabilities/Projects/404 pixel-identical below the header at 375/768/1440; Stone Library list differs only where a card now reads \"1 finish\". Clean Node 20 container gate, npm test (162) and the no-config browser gate passed on the working tree."
+        "2026-09-28: implemented on claude/opt-page-convergence. Decorative DefaultLayout banner retired; eight pages open with PageIntro band and use Button/SectionHeading/Card; CTA set, phone format (1300 1URBLO, tel:1300187256) and en-AU dates recorded in DESIGN.md \"Public page convergence\". Arbitrary text-[Npx] 159 -> 44; new text-micro (11px) token for dense stone tool labels. Home/Capabilities/Projects/404 pixel-identical below the header at 375/768/1440; Stone Library list differs only where a card now reads \"1 finish\". Clean Node 20 container gate, npm test (162) and the no-config browser gate passed on the working tree.",
+        "2026-09-28: PR #82 rebased onto main 0aa1066 (NEXT_STEPS.md conflict resolved by regenerating state); head 4de34b4. CI run 36430511925 passed verify-and-deploy and quality; branch Preview https://da2d1a3f.urblo-site.pages.dev passed agent:cloudflare-preview-smoke from the workstation. Preview vs production (read-only): Home, Capabilities, Projects and 404 have identical <main> markup and computed styles at 375/768/1440; Stone Library differs only in the \"1 finish\" cards. Awaiting Jay's visual acceptance."
       ]
     },
     {
