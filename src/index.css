@@ -636,6 +636,64 @@ html {
     100% { transform: scale(3); opacity: 0; }
 }
 
+/*
+ * Admin editor variant (VisualHotspotEditor). Same dot and 44px hit area, no halo. The selected
+ * point (aria-pressed) keeps the 1.3x scale and adds a lime ring framed in the dark stroke;
+ * keyboard focus still shows the site ring above. A small number beside the dot matches the
+ * editor's "Point N" tabs and never widens the hit area.
+ */
+.urblo-hotspot-marker--editor[data-draggable='true'] {
+    cursor: grab;
+}
+
+.urblo-hotspot-marker--editor[data-draggable='true']:active {
+    cursor: grabbing;
+}
+
+.urblo-hotspot-marker--editor:disabled {
+    cursor: default;
+}
+
+.urblo-hotspot-marker--editor[aria-pressed='true'] .urblo-hotspot-marker__dot {
+    transform: scale(1.3);
+}
+
+.urblo-hotspot-marker--editor[aria-pressed='true']:not(:focus-visible) .urblo-hotspot-marker__dot {
+    box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.72),
+        0 0 0 3px var(--urblo-lime),
+        0 0 0 4px rgba(0, 0, 0, 0.72),
+        0 1px 4px rgba(0, 0, 0, 0.35);
+}
+
+.urblo-hotspot-marker__label {
+    position: absolute;
+    top: 50%;
+    left: calc(50% + 16px);
+    min-width: 16px;
+    padding: 2px 4px;
+    border-radius: 2px;
+    background: rgba(0, 0, 0, 0.72);
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 12px;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+    pointer-events: none;
+    transform: translateY(-50%);
+}
+
+.urblo-hotspot-marker__label--start {
+    left: auto;
+    right: calc(50% + 16px);
+}
+
+.urblo-hotspot-marker--editor[aria-pressed='true'] .urblo-hotspot-marker__label {
+    background: var(--urblo-lime);
+    color: var(--urblo-black);
+}
+
 @media (prefers-reduced-motion: reduce) {
     .urblo-hotspot-marker__halo {
         display: none;

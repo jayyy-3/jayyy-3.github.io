@@ -85,7 +85,7 @@
         "npm run local:verify",
         "git diff --check"
       ],
-      "phase": "planned",
+      "phase": "awaiting_external",
       "authorization": {
         "source": "Jay reported on 2026-09-28 that the admin editor markers are still the old large style and asked for them to match; wave 3 approval and standing merge authorization apply.",
         "included": [
@@ -95,10 +95,11 @@
           "Production data writes, Function, RLS or migration changes."
         ]
       },
-      "nextAction": "Opus implements on its own branch; Claude reports to Jay, then merges.",
+      "nextAction": "Claude reviews PR and reports to Jay; merge under standing wave 3 authorization, then Jay checks the editor markers.",
       "blocker": "",
       "notes": [
-        "2026-09-28: follow-up to NOW-OPT-PROJECT-POINT-MARKER-001 (public marker shipped in wave 1); the editor's VisualHotspotEditor kept the old 28px marker."
+        "2026-09-28: follow-up to NOW-OPT-PROJECT-POINT-MARKER-001 (public marker shipped in wave 1); the editor's VisualHotspotEditor kept the old 28px marker.",
+        "2026-09-28: implemented on claude/opt-admin-point-marker. VisualHotspotEditor markers now use .urblo-hotspot-marker plus the .urblo-hotspot-marker--editor modifier (14px dot, 2px lime border, 1px dark stroke, 44px hit area, no halo); selected (aria-pressed) = 1.3x + lime ring; 10px number chip beside the dot matches the Point N tabs. data-testid selectors unchanged; MediaSection untouched. Mocked-network Playwright at 1440 (synthetic draft, no writes): hit 44x44, dot 14px idle / 18.2px selected, drag 58%,45% -> 72%,30%, keyboard nudge -> 73%,35%, focus-visible ring shown, no page errors. Evidence: ignored .tmp/adminmarker/ (before-*/after-* screenshots and results JSON). Workstation local:verify not run: the isolated stack belongs to another checkout; PR CI runs it."
       ]
     },
     {
