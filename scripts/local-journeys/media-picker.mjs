@@ -94,8 +94,11 @@ export async function mediaPickerJourney({ page, check, id, directory }) {
     const row = Array.isArray(created) ? created[0] : created
     uploadedId = row.id
     assert.equal(row.status, 'draft'); assert.equal(row.bucket, 'urblo-admin-media'); assert.equal(row.alt, description)
-    assert.ok(row.size_bytes < 10 * MB, `stored size ${row.size_bytes}`)
-    assert.equal(Math.max(row.width_px, row.height_px), 2560)
+    // The picker reads back only the columns it shows; the inserted metadata carries the file facts.
+    const inserted = metadataResponse.request().postDataJSON()
+    assert.ok(inserted.size_bytes < 10 * MB, `stored size ${inserted.size_bytes}`)
+    assert.equal(Math.max(inserted.width_px, inserted.height_px), 2560)
+    assert.notEqual(inserted.mime_type, 'image/jpeg', 'the resized copy is uploaded, not the original JPG')
     await expect(heroField).toContainText(description)
     await expect(heroField).toContainText('Ask a Website owner or CMS manager to publish it from Media.')
     const [saved] = await Promise.all([
