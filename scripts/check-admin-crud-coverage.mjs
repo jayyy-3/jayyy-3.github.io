@@ -182,7 +182,8 @@ const pageChecks = [
       'urblo-admin-media',
       'urblo-public-media',
       'Publish checklist',
-      'Public website library',
+      'Available to the website',
+      'Hidden until published',
       'Complete the media publish checklist before publishing this asset.',
       'Website media status',
       'Available to public pages',
@@ -197,9 +198,11 @@ const pageChecks = [
       'Ask a CMS editor to upload or publish media.',
       'CMS editor',
       'File or link type',
-      'Website visibility location',
+      'Website visibility',
       'Uploaded file location',
-      'Upload destination',
+      'data-testid="media-upload-limits"',
+      'data-testid="media-technical-details"',
+      'heicGuidance',
       'Publishing rules',
       'Hosted file link',
       'Hosted video link',
@@ -210,8 +213,9 @@ const pageChecks = [
       'visible media library items',
       'Untitled uploaded',
       'Untitled ${formatSourceKind(asset.source_kind).toLowerCase()} media',
-      'Every upload starts in the Private draft library.',
-      'Draft files are never uploaded directly into the public bucket.',
+      'Every upload starts as a Draft that is hidden from the website.',
+      'Only a Website owner or CMS manager can publish an uploaded file.',
+      'technicalDetail(',
       'metadataConfirmedByReadback',
       'removePublicObjectIfUnreferenced',
       'removePrivatePromotionSourceIfUnreferenced',
@@ -244,6 +248,10 @@ const pageChecks = [
       'Viewer roles can inspect but not mutate media records.',
       'Admin/Editor',
       'admin/editor',
+      'Private draft library',
+      'Public website library',
+      'Upload destination',
+      'Website visibility location',
     ],
     exportGate: 'media_assets.export_manifest',
   },
@@ -264,7 +272,6 @@ const pageChecks = [
       'product_material_defaults',
       'product_specs',
       'stone_groups',
-      'media_assets',
     ],
     actions: [
       'product.create',
@@ -310,16 +317,20 @@ const pageChecks = [
       'Stone Library items',
       'Add at least one default material choice or display label.',
       'Add at least one useful specification.',
-      'Media library items available for product images.',
+      'AdminMediaPicker',
+      'label="Hero image"',
+      'label="Model image"',
+      'auditSource="product_editor"',
       'model website key, label, and selected Media library image',
-      'This Media library item can support a public product image.',
       'Nothing added yet.',
       'Publishing rules',
       'Archive hides the CMS version. A matching legacy product can remain visible during migration until CMS-only cutover.',
-      'Published in Media',
       'Draft is safe to edit and will not appear on the public website.',
     ],
     forbiddenText: [
+      'MediaSelect',
+      'Published in Media',
+      '.limit(120)',
       'Publication guardrails',
       'Physical deletes remain hidden',
       'ID linking',
@@ -350,7 +361,7 @@ const pageChecks = [
     file: 'src/pages/admin/AdminArticlesPage.tsx',
     files: articleSourceFiles,
     lifecycle: true,
-    tables: ['articles', 'article_blocks', 'media_assets', 'projects', 'stone_groups'],
+    tables: ['articles', 'article_blocks', 'projects', 'stone_groups'],
     actions: [
       'article.create',
       'article.update',
@@ -391,15 +402,19 @@ const pageChecks = [
       'Migration source link',
       'Article sections',
       'Pair a selected Media library item with caption and placement notes.',
-      'Media library items available for article images.',
-      'This Media library item can support a public article image.',
+      'AdminMediaPicker',
+      'label="Cover image"',
+      'label="Section image"',
+      'auditSource="article_editor"',
       'Nothing added yet.',
       'Publishing rules',
-      'Published in Media',
       'Draft is safe to edit and will not appear on the public website.',
       'Archive hides the CMS version. A matching legacy article can remain visible during migration until CMS-only cutover.',
     ],
     forbiddenText: [
+      'MediaSelect',
+      'Published in Media',
+      '.limit(120)',
       'Legacy source path',
       'Legacy source URL',
       'Publication guardrails',
@@ -1337,6 +1352,85 @@ function checkAdminMediaSafety() {
   );
 }
 
+// NOW-OPT-ADMIN-MEDIA-PICKER-001: the Media screen speaks to colleagues, not to the database.
+// Every user-visible sentence (string literal with a space, or JSX text) must avoid internal
+// storage words. Technical text stays available behind "Details" by passing it through
+// technicalDetail(...), which this check skips together with console output and comments.
+const mediaJargon = /\b(buckets?|storage|promot(?:e|es|ed|ing|ion)|rollback|roll back|orphan|readback|object path)\b/i;
+export function findUserVisibleMediaJargon(source) {
+  let text = source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+  for (const callee of ['technicalDetail', 'console\\.error', 'console\\.warn']) {
+    for (const args of extractCallArguments(text, callee)) text = text.split(args).join('');
+  }
+  const literals = [...text.matchAll(/'(?:[^'\\\n]|\\.)*'|"(?:[^"\\\n]|\\.)*"|`(?:[^`\\]|\\.)*`/g)].map((match) => match[0]);
+  const jsxText = [...text.matchAll(/>\s*([A-Z][^<>{}=]*?)\s*</g)].map((match) => match[1]);
+  return [...literals, ...jsxText]
+    .map((candidate) => candidate.trim())
+    .filter((candidate) => /\s/.test(candidate) && mediaJargon.test(candidate));
+}
+
+function checkMediaPlainLanguage() {
+  const path = 'src/pages/admin/AdminMediaPage.tsx';
+  for (const phrase of findUserVisibleMediaJargon(readRequired(path))) {
+    failures.push(`${path}: user-visible wording uses internal storage terms (move it into technicalDetail): ${phrase.slice(0, 120)}`);
+  }
+  requireIncludes(readRequired(path), 'technicalDetail(', `${path} technical text kept behind Details`);
+  // Self-test: the detector must see jargon in visible text and ignore Details and identifiers.
+  const probe = findUserVisibleMediaJargon(
+    "setError('Copy to the public bucket failed.');\nreportError(x, { detail: technicalDetail(`Storage rollback failed`) });\n<p>Private draft library</p>\nconst canCleanUpStorage = row.bucket;\n",
+  );
+  if (probe.length !== 1 || !probe[0].includes('public bucket')) {
+    failures.push(`scripts/check-admin-crud-coverage.mjs: Media plain-language detector self-test failed (${JSON.stringify(probe)})`);
+  }
+}
+
+// NOW-OPT-ADMIN-MEDIA-PICKER-001: one shared picker serves Projects, Products, Articles and
+// Settings. It searches the whole library, shows limits and accepted types before a file is
+// chosen, resizes large photos in the browser, explains HEIC, and never prefills alt text.
+function checkSharedMediaPicker() {
+  const pickerPath = 'src/pages/admin/media/AdminMediaPicker.tsx';
+  const filesPath = 'src/pages/admin/media/mediaPickerFiles.ts';
+  const picker = readRequired(pickerPath);
+  const files = readRequired(filesPath);
+  for (const needle of [
+    ".from('media_assets')",
+    "action: 'media_asset.upload'",
+    "action: 'media_asset.update'",
+    "storagePosture: 'private-first'",
+    'metadataConfirmedByReadback',
+    'searchMediaLibrary',
+    "query.or(`alt.ilike.",
+    'describePickerUploadLimits(uploadPolicy)',
+    'preparePickerUpload(file, uploadPolicy)',
+    'isFileNameDescription(alt, pendingFile.name)',
+    'data-testid={`${testIdPrefix}-limits`}',
+    'accept={pickerAcceptAttribute}',
+    "setPendingAlt('')",
+    'keepEnterInPicker',
+  ]) requireIncludes(picker, needle, pickerPath);
+  if (/setPendingAlt\([^)]*\.name/.test(picker)) failures.push(`${pickerPath}: alt text must never be prefilled from the file name`);
+  requireNotIncludes(picker, 'upsert: true', `${pickerPath} create-only private upload`);
+  requireNotIncludes(picker, "from('urblo-public-media').upload", `${pickerPath} public upload`);
+  for (const needle of ['optimizeImageForQr', 'heicGuidance', 'pickerSourceMaximumBytes = imageQrMaximumSourceBytes', 'pickerOriginalMaximumBytes = 10 * 1024 * 1024']) {
+    requireIncludes(files, needle, filesPath);
+  }
+  const consumers = [
+    ['src/pages/admin/AdminProductsPage.tsx', readRequired('src/pages/admin/AdminProductsPage.tsx'), 2],
+    ['src/pages/admin/articles/ArticlesWorkspace.tsx', readRequired('src/pages/admin/articles/ArticlesWorkspace.tsx'), 2],
+    ['src/pages/admin/AdminSettingsPage.tsx', readRequired('src/pages/admin/AdminSettingsPage.tsx'), 1],
+    ['src/pages/admin/projects/InlineMediaField.tsx', readRequired('src/pages/admin/projects/InlineMediaField.tsx'), 1],
+  ];
+  for (const [path, text, count] of consumers) {
+    const uses = text.match(/<AdminMediaPicker\b/g) ?? [];
+    if (uses.length !== count) failures.push(`${path}: expected ${count} shared media picker field(s), found ${uses.length}`);
+  }
+  requireIncludes(consumers[2][1], 'selectable="published"', 'src/pages/admin/AdminSettingsPage.tsx share image uses published images only');
+  requireIncludes(consumers[2][1], 'publicUrlForPickerAsset(asset, supabase)', 'src/pages/admin/AdminSettingsPage.tsx share image stores the public address');
+  requireIncludes(readRequired('scripts/local-journeys/media-picker.mjs'), 'NOW-OPT-ADMIN-MEDIA-PICKER-001', 'scripts/local-journeys/media-picker.mjs Editor picker journey');
+  requireIncludes(readRequired('scripts/check-local-journeys.mjs'), 'mediaPickerJourney', 'scripts/check-local-journeys.mjs Editor picker journey');
+  notes.push('- Shared media picker: Projects, Products (hero, model), Articles (cover, section), Settings (share image)');
+}
+
 function checkAdminParentOwnershipSafety() {
   const products = readRequired('src/pages/admin/AdminProductsPage.tsx');
   const stones = readRequired('supabase/migrations/20260910064551_stone_library_workspace.sql');
@@ -1650,6 +1744,8 @@ checkDashboardEditorLanguage();
 checkAdminLiveVerifierBoundaries();
 checkAdminRemovalContract();
 checkAdminMediaSafety();
+checkMediaPlainLanguage();
+checkSharedMediaPicker();
 checkAdminParentOwnershipSafety();
 checkAdminLoadingAndSaveLockSafety();
 checkLegacyModuleSafetyStopGap();

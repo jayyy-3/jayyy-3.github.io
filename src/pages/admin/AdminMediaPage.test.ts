@@ -97,7 +97,7 @@ describe('Media editor', () => {
     it('locks Publish for private uploads without promotion, images without alt text and media without usage notes', () => {
         const publish: MediaForm = { ...privateUpload, status: 'published', alt: 'Honed granite bench', usageNotes: 'Product hero' };
         expect(validateMediaForm(publish).error).toBe(
-            'Select an existing private upload so Publish can copy the file into the Public website library.',
+            'Select an uploaded file so Publish can make a website copy of it.',
         );
         expect(validateMediaForm(publish, { allowPrivateStoragePublish: true }).error).toBeNull();
         expect(validateMediaForm({ ...publish, bucket: 'urblo-public-media' }).error).toBeNull();
@@ -131,7 +131,7 @@ describe('Media editor', () => {
             'Usage notes': true,
         });
         const editorDetail = getMediaPublishChecklist(privateUpload, false, true)[1].detail;
-        expect(editorDetail).toMatch(/requires an Owner or Admin/);
+        expect(editorDetail).toMatch(/Only a Website owner or CMS manager can publish an uploaded file/);
     });
 
     it('exports every media row as quoted CSV that survives commas, quotes, newlines and empty values', () => {

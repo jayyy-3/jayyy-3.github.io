@@ -255,11 +255,12 @@
         ]
       },
       "status": "now",
-      "phase": "planned",
-      "nextAction": "Opus implements on its own branch; Claude reports to Jay, then merges under standing authorization.",
+      "phase": "verification",
+      "nextAction": "Branch claude/opt-admin-media-picker: wait for PR CI (isolated local:verify with the Editor picker journey, Preview deploy and smoke); then Claude reports to Jay and merges under standing authorization.",
       "blocker": "",
       "notes": [
-        "2026-09-28: wave 3 of the 2026-09-24 optimization audit. Products module split is deferred to wave 4 (after the media picker and database types land)."
+        "2026-09-28: wave 3 of the 2026-09-24 optimization audit. Products module split is deferred to wave 4 (after the media picker and database types land).",
+        "2026-09-28: Shared AdminMediaPicker wired into Projects, Products (hero, model), Articles (cover, section) and Settings (share image); Media screen jargon moved behind Details with a check assertion. Publish-time media promotion for Products/Articles recorded as a follow-up (Projects promotion is bound to its aggregate RPC). Shared local stack was owned by another checkout, so local journeys run in PR CI; mocked Playwright evidence in ignored .tmp/picker/."
       ]
     },
     {

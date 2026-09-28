@@ -19,7 +19,6 @@ import {
     ArticlePublishChecklist,
     ArticlePublishStatusSummary,
     ArticleStatusHelp,
-    MediaSelect,
     RecordChips,
     SelectField,
     SubrecordEditor,
@@ -36,10 +35,14 @@ import {
 import type { ArticleBlockType, ArticleStatus } from './types';
 import { updateLivePageLabel, urlKeyEditableHelp, urlKeyLockedHelp } from '../liveSave';
 import { useArticleEditor } from './useArticleEditor';
+import AdminMediaPicker from '../media/AdminMediaPicker';
+import { mediaIdFromField } from '../media/mediaPickerFiles';
 
 export default function ArticlesWorkspace() {
     const {
         canEdit,
+        canManageMedia,
+        userId,
         isArticleLive,
         isBlockLive,
         isArticleUrlKeyLocked,
@@ -49,7 +52,6 @@ export default function ArticlesWorkspace() {
         blocks,
         projectOptions,
         stoneOptions,
-        mediaOptions,
         selectedArticleId,
         selectedBlockId,
         articleForm,
@@ -65,8 +67,6 @@ export default function ArticlesWorkspace() {
         clearFeedback,
         selectedArticle,
         articleCounts,
-        selectedCoverMedia,
-        selectedBlockMedia,
         publishChecklist,
         canPublishArticle,
         blockPublishChecklist,
@@ -293,15 +293,22 @@ export default function ArticlesWorkspace() {
                                 disabled={!canEdit || isSavingArticle || isLoading}
                                 onChange={(value) => updateArticleField('author', value)}
                             />
-                            <MediaSelect
-                                label="Cover image"
-                                value={articleForm.coverMediaId}
-                                disabled={!canEdit || isSavingArticle || isLoading}
-                                mediaOptions={mediaOptions}
-                                selectedMedia={selectedCoverMedia}
-                                emptyLabel="No cover image"
-                                onChange={(value) => updateArticleField('coverMediaId', value)}
-                            />
+                            <div className="md:col-span-2">
+                                <AdminMediaPicker
+                                    key={`article-cover-${selectedArticleId ?? 'new'}`}
+                                    label="Cover image"
+                                    description="Shown on the article card and at the top of the article."
+                                    value={mediaIdFromField(articleForm.coverMediaId)}
+                                    disabled={!canEdit || isSavingArticle || isLoading}
+                                    userId={userId}
+                                    canCleanUpStorage={canManageMedia}
+                                    auditSource="article_editor"
+                                    objectPathPrefix="article-editor"
+                                    instanceKey="article-cover"
+                                    testIdPrefix="article-cover-media"
+                                    onChange={(mediaId) => updateArticleField('coverMediaId', mediaId === null ? '' : String(mediaId))}
+                                />
+                            </div>
                             <TextField
                                 label="Tags"
                                 value={articleForm.tagsText}
@@ -413,14 +420,19 @@ export default function ArticlesWorkspace() {
                                 onChange={(value) => updateBlockType(value as ArticleBlockType)}
                                 options={blockTypeOptions}
                             />
-                            <MediaSelect
+                            <AdminMediaPicker
+                                key={`article-section-${selectedBlockId ?? 'new'}`}
                                 label="Section image"
-                                value={blockForm.mediaAssetId}
+                                description="Image for this section (image and gallery sections)."
+                                value={mediaIdFromField(blockForm.mediaAssetId)}
                                 disabled={!canEdit || isSavingBlock || !selectedArticle}
-                                mediaOptions={mediaOptions}
-                                selectedMedia={selectedBlockMedia}
-                                emptyLabel="No section image"
-                                onChange={(value) => updateBlockField('mediaAssetId', value)}
+                                userId={userId}
+                                canCleanUpStorage={canManageMedia}
+                                auditSource="article_editor"
+                                objectPathPrefix="article-editor"
+                                instanceKey="article-section"
+                                testIdPrefix="article-section-media"
+                                onChange={(mediaId) => updateBlockField('mediaAssetId', mediaId === null ? '' : String(mediaId))}
                             />
                             <TextField
                                 label="Sort order"
@@ -498,7 +510,6 @@ export default function ArticlesWorkspace() {
                         <h2 className="mt-5 text-xl font-semibold">Article section health</h2>
                         <div className="mt-5 grid gap-3 text-sm leading-6 text-white/72">
                             <p>{blocks.length} sections on the selected article.</p>
-                            <p>{mediaOptions.length} Media library items available for article images.</p>
                             <p>{projectOptions.length} project links and {stoneOptions.length} stone links available.</p>
                         </div>
                     </section>

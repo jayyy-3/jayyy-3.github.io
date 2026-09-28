@@ -70,7 +70,15 @@ const editorSectionPaths = [
 ];
 const editor = [editorPath, ...editorSectionPaths].map(readRequired).join("\n");
 const preview = readRequired(previewPath);
-const media = readRequired(mediaPath);
+// Projects configure the shared admin media picker (NOW-OPT-ADMIN-MEDIA-PICKER-001); the upload,
+// alt-text and audit contracts below apply to the wrapper plus the shared picker source.
+const media = [
+  mediaPath,
+  "src/pages/admin/media/AdminMediaPicker.tsx",
+  "src/pages/admin/media/mediaPickerFiles.ts",
+]
+  .map(readRequired)
+  .join("\n");
 const hotspot = readRequired(hotspotPath);
 const publicView = readRequired(publicViewPath);
 const responsiveImage = readRequired(responsiveImagePath);
@@ -689,7 +697,7 @@ requireMatches(
 );
 requireMatches(
   media,
-  /source:\s*['"]project_inline['"]/,
+  /auditSource=['"]project_inline['"]/,
   mediaPath,
   "project-inline audit source",
 );
@@ -713,13 +721,13 @@ requireMatches(
 );
 requireMatches(
   media,
-  /Inline project media upload audit failed/,
+  /media picker upload audit failed/,
   mediaPath,
   "raw upload audit error logging",
 );
 requireMatches(
   media,
-  /Inline project media description audit failed/,
+  /media picker description audit failed/,
   mediaPath,
   "raw alt audit error logging",
 );
@@ -734,6 +742,18 @@ requireIncludes(
   "maximumProjectImageBytes = 10 * 1024 * 1024",
   mediaPath,
   "10 MiB inline upload limit",
+);
+requireIncludes(
+  media,
+  'uploadPolicy="original"',
+  mediaPath,
+  "Projects keep the original upload",
+);
+forbidMatches(
+  media,
+  /setPendingAlt\([^)]*\.name/,
+  mediaPath,
+  "alt text prefilled from the file name",
 );
 requireIncludes(
   media,
