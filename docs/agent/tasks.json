@@ -4,6 +4,61 @@
   "archive": "docs/archive/2026-09-09/completed-tasks.json",
   "tasks": [
     {
+      "id": "NOW-STONE-COMPARE-001",
+      "status": "now",
+      "priority": 0,
+      "modules": [
+        "stone-library",
+        "public-ui",
+        "forms"
+      ],
+      "summary": "Stone Library comparison: select up to 4 stones from the list (compare tray), open a shareable /stone-library/compare?stones=… page that renders rows from a code-level comparison attribute registry (finish images with finish switch, type, price tier, finish capability matrix, cut options, block size, variants, used-in-projects), with a 'differences only' toggle, sticky first column, mobile horizontal scroll, and a 'Request samples of these stones' CTA that prefills the existing sample request form.",
+      "files": [
+        "src/pages/StoneLibraryPage.tsx",
+        "src/components/stone-library/",
+        "src/pages/StonePageView.tsx",
+        "src/App.tsx",
+        "src/service/",
+        "src/types/stone-library.ts",
+        "src/data/",
+        "src/pages/ContactPage.tsx",
+        "src/lib/",
+        "docs/DESIGN.md",
+        "docs/architecture/stone-library.md",
+        "scripts/check-stone-library-detail-integrity.mjs"
+      ],
+      "acceptance": [
+        "List cards and stone detail expose a Compare toggle; a bottom tray shows selected stones (thumbnail, name, remove), caps at 4 with a clear message, persists in URL and localStorage, and opens the compare page.",
+        "/stone-library/compare?stones=a,b,c renders one column per stone from src/lib/stoneCompareRegistry.ts: each attribute declares source, label, unit, kind (text | number | boolean | matrix | image | list), public flag and order; the page iterates the registry and never hard-codes attributes; origin is never rendered (public flag false, covered by a test); adding a registry entry in a test renders a new row without page changes.",
+        "Rows in v1: finish image (switchable finish, using the sized variants), type, price tier, finish capability matrix (yes/no/tbc icons), cut options, raw block size, variants, used-in-projects count with links; finish behaviour text is not included (Jay's decision).",
+        "'Differences only' toggle hides identical rows; first column sticky on desktop; horizontal scroll with sticky first column at 375px; page is noindex with a self canonical to /stone-library; 1–4 valid ids handled, invalid ids ignored with a notice, 0 stones shows an empty state linking back.",
+        "CTA 'Request samples of these stones' opens the existing sample request form with the selected stones prefilled (ContactPage reads a query parameter; minimal edit); submission path unchanged.",
+        "Design follows DESIGN.md and the wave 2 tokens/shared components (Button, SectionHeading, PageIntro, Card); Jay approves by screenshot at 375/768/1440; keyboard operable; vitest for the registry, selection state and differences logic; agent:stone-library-detail check extended."
+      ],
+      "verification": [
+        "npm run agent:verify -- --plan",
+        "npm run gate",
+        "npm test",
+        "npm run agent:cloudflare-preview-smoke -- --base-url <branch Preview>",
+        "git diff --check"
+      ],
+      "phase": "planned",
+      "authorization": {
+        "source": "Jay approved the comparison feature and its defaults on 2026-09-28 (\"按你说的做吧… 设计好看一点，符合我们设计。你开Opus去做吧\"): max 4 stones, price tier included, no finish behaviour text, sample request linkage in v1, code-level attribute registry now and CMS-managed attribute definitions later. Standing merge authorization applies.",
+        "included": [
+          "Branch implementation, isolated local tests, git push, pull request, branch Preview and smoke, DESIGN.md and architecture contract updates, docs/agent state updates, merge after Claude's report and Jay's screenshot approval."
+        ],
+        "excluded": [
+          "Schema, Function, RLS or migration changes; production data writes; CMS-managed attribute definitions (future task)."
+        ]
+      },
+      "nextAction": "Opus implements on its own branch; Claude reports with screenshots for Jay's design approval, then merges.",
+      "blocker": "",
+      "notes": [
+        "2026-09-28: alignment in chat. Layer 1 (registry in code) now; layer 2 (stone_attribute_definitions/values managed in admin) deferred until Stone data is fully CMS-managed; the registry shape is designed to be swapped to a data source later."
+      ]
+    },
+    {
       "id": "NOW-OPT-ADMIN-POINT-MARKER-001",
       "status": "now",
       "priority": 0,
