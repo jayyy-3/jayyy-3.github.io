@@ -1,0 +1,3001 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`protected admin Functions > image-qr: identity and role contracts 1`] = `
+{
+  "admin GET": {
+    "body": {
+      "resources": [],
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 200,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+      "GET /rest/v1/image_qr_resources",
+    ],
+  },
+  "admin POST malformed": {
+    "body": {
+      "error": "invalid_json",
+      "message": "Send a valid Image QR request.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 400,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "admin POST {}": {
+    "body": {
+      "error": "invalid_action",
+      "message": "Choose create, replace, rename, assign-material, hide or restore.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 400,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "editor GET": {
+    "body": {
+      "resources": [],
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 200,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+      "GET /rest/v1/image_qr_resources",
+    ],
+  },
+  "editor POST malformed": {
+    "body": {
+      "error": "invalid_json",
+      "message": "Send a valid Image QR request.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 400,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "editor POST {}": {
+    "body": {
+      "error": "invalid_action",
+      "message": "Choose create, replace, rename, assign-material, hide or restore.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 400,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "invalid GET": {
+    "body": {
+      "error": "invalid_session",
+      "message": "Sign in again before opening Image QR.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 401,
+    "upstream": [
+      "GET /auth/v1/user",
+    ],
+  },
+  "invalid POST malformed": {
+    "body": {
+      "error": "invalid_session",
+      "message": "Sign in again before opening Image QR.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 401,
+    "upstream": [
+      "GET /auth/v1/user",
+    ],
+  },
+  "invalid POST {}": {
+    "body": {
+      "error": "invalid_session",
+      "message": "Sign in again before opening Image QR.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 401,
+    "upstream": [
+      "GET /auth/v1/user",
+    ],
+  },
+  "missing GET": {
+    "body": {
+      "error": "not_allowed",
+      "message": "Active Image QR access is required.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 403,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "missing POST malformed": {
+    "body": {
+      "error": "not_allowed",
+      "message": "Active Image QR access is required.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 403,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "missing POST {}": {
+    "body": {
+      "error": "not_allowed",
+      "message": "Active Image QR access is required.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 403,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "owner GET": {
+    "body": {
+      "resources": [],
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 200,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+      "GET /rest/v1/image_qr_resources",
+    ],
+  },
+  "owner POST malformed": {
+    "body": {
+      "error": "invalid_json",
+      "message": "Send a valid Image QR request.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 400,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "owner POST {}": {
+    "body": {
+      "error": "invalid_action",
+      "message": "Choose create, replace, rename, assign-material, hide or restore.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 400,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "profile-error GET": {
+    "body": {
+      "error": "not_allowed",
+      "message": "Active Image QR access is required.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 403,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "profile-error POST malformed": {
+    "body": {
+      "error": "not_allowed",
+      "message": "Active Image QR access is required.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 403,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "profile-error POST {}": {
+    "body": {
+      "error": "not_allowed",
+      "message": "Active Image QR access is required.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 403,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "unknown-role GET": {
+    "body": {
+      "error": "not_allowed",
+      "message": "Active Image QR access is required.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 403,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "unknown-role POST malformed": {
+    "body": {
+      "error": "not_allowed",
+      "message": "Active Image QR access is required.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 403,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "unknown-role POST {}": {
+    "body": {
+      "error": "not_allowed",
+      "message": "Active Image QR access is required.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 403,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "viewer GET": {
+    "body": {
+      "resources": [],
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 200,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+      "GET /rest/v1/image_qr_resources",
+    ],
+  },
+  "viewer POST malformed": {
+    "body": {
+      "error": "read_only",
+      "message": "This account can view Image QR but cannot change it.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 403,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "viewer POST {}": {
+    "body": {
+      "error": "read_only",
+      "message": "This account can view Image QR but cannot change it.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 403,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+}
+`;
+
+exports[`protected admin Functions > image-qr: method, configuration and session gates make zero upstream calls 1`] = `
+{
+  "emptyBearer": {
+    "body": {
+      "error": "missing_session",
+      "message": "Sign in before opening Image QR.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 401,
+    "upstream": [],
+  },
+  "getWithoutSession": {
+    "body": {
+      "error": "missing_session",
+      "message": "Sign in before opening Image QR.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 401,
+    "upstream": [],
+  },
+  "malformedAuthorization": {
+    "body": {
+      "error": "missing_session",
+      "message": "Sign in before opening Image QR.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 401,
+    "upstream": [],
+  },
+  "options": {
+    "body": null,
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 204,
+    "upstream": [],
+  },
+  "postWithSessionUnconfigured": {
+    "body": {
+      "error": "server_not_configured",
+      "message": "Image QR is not configured on this deployment.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 500,
+    "upstream": [],
+  },
+  "postWithoutSession": {
+    "body": {
+      "error": "missing_session",
+      "message": "Sign in before opening Image QR.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 401,
+    "upstream": [],
+  },
+  "postWithoutSessionUnconfigured": {
+    "body": {
+      "error": "missing_session",
+      "message": "Sign in before opening Image QR.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 401,
+    "upstream": [],
+  },
+  "put": {
+    "body": {
+      "error": "method_not_allowed",
+      "message": "Use GET or POST for Image QR.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 405,
+    "upstream": [],
+  },
+}
+`;
+
+exports[`protected admin Functions > invite-user: identity and role contracts 1`] = `
+{
+  "admin POST malformed": {
+    "body": {
+      "error": "invalid_json",
+      "message": "Send a valid JSON invite request.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "content-type": "application/json",
+    },
+    "status": 400,
+    "upstream": [],
+  },
+  "admin POST {}": {
+    "body": {
+      "error": "invalid_email",
+      "message": "Enter a valid invite email address.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "content-type": "application/json",
+    },
+    "status": 400,
+    "upstream": [],
+  },
+  "editor POST malformed": {
+    "body": {
+      "error": "invalid_json",
+      "message": "Send a valid JSON invite request.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "content-type": "application/json",
+    },
+    "status": 400,
+    "upstream": [],
+  },
+  "editor POST {}": {
+    "body": {
+      "error": "invalid_email",
+      "message": "Enter a valid invite email address.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "content-type": "application/json",
+    },
+    "status": 400,
+    "upstream": [],
+  },
+  "invalid POST malformed": {
+    "body": {
+      "error": "invalid_json",
+      "message": "Send a valid JSON invite request.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "content-type": "application/json",
+    },
+    "status": 400,
+    "upstream": [],
+  },
+  "invalid POST {}": {
+    "body": {
+      "error": "invalid_email",
+      "message": "Enter a valid invite email address.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "content-type": "application/json",
+    },
+    "status": 400,
+    "upstream": [],
+  },
+  "missing POST malformed": {
+    "body": {
+      "error": "invalid_json",
+      "message": "Send a valid JSON invite request.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "content-type": "application/json",
+    },
+    "status": 400,
+    "upstream": [],
+  },
+  "missing POST {}": {
+    "body": {
+      "error": "invalid_email",
+      "message": "Enter a valid invite email address.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "content-type": "application/json",
+    },
+    "status": 400,
+    "upstream": [],
+  },
+  "owner POST malformed": {
+    "body": {
+      "error": "invalid_json",
+      "message": "Send a valid JSON invite request.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "content-type": "application/json",
+    },
+    "status": 400,
+    "upstream": [],
+  },
+  "owner POST {}": {
+    "body": {
+      "error": "invalid_email",
+      "message": "Enter a valid invite email address.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "content-type": "application/json",
+    },
+    "status": 400,
+    "upstream": [],
+  },
+  "profile-error POST malformed": {
+    "body": {
+      "error": "invalid_json",
+      "message": "Send a valid JSON invite request.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "content-type": "application/json",
+    },
+    "status": 400,
+    "upstream": [],
+  },
+  "profile-error POST {}": {
+    "body": {
+      "error": "invalid_email",
+      "message": "Enter a valid invite email address.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "content-type": "application/json",
+    },
+    "status": 400,
+    "upstream": [],
+  },
+  "unknown-role POST malformed": {
+    "body": {
+      "error": "invalid_json",
+      "message": "Send a valid JSON invite request.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "content-type": "application/json",
+    },
+    "status": 400,
+    "upstream": [],
+  },
+  "unknown-role POST {}": {
+    "body": {
+      "error": "invalid_email",
+      "message": "Enter a valid invite email address.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "content-type": "application/json",
+    },
+    "status": 400,
+    "upstream": [],
+  },
+  "viewer POST malformed": {
+    "body": {
+      "error": "invalid_json",
+      "message": "Send a valid JSON invite request.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "content-type": "application/json",
+    },
+    "status": 400,
+    "upstream": [],
+  },
+  "viewer POST {}": {
+    "body": {
+      "error": "invalid_email",
+      "message": "Enter a valid invite email address.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "content-type": "application/json",
+    },
+    "status": 400,
+    "upstream": [],
+  },
+}
+`;
+
+exports[`protected admin Functions > invite-user: method, configuration and session gates make zero upstream calls 1`] = `
+{
+  "emptyBearer": {
+    "body": {
+      "error": "missing_session",
+      "message": "Sign in before inviting a CMS user.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "content-type": "application/json",
+    },
+    "status": 401,
+    "upstream": [],
+  },
+  "getWithoutSession": {
+    "body": {
+      "error": "method_not_allowed",
+      "message": "Use POST to invite a CMS user.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "content-type": "application/json",
+    },
+    "status": 405,
+    "upstream": [],
+  },
+  "malformedAuthorization": {
+    "body": {
+      "error": "missing_session",
+      "message": "Sign in before inviting a CMS user.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "content-type": "application/json",
+    },
+    "status": 401,
+    "upstream": [],
+  },
+  "options": {
+    "body": null,
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "content-type": "application/json",
+    },
+    "status": 204,
+    "upstream": [],
+  },
+  "postWithSessionUnconfigured": {
+    "body": {
+      "error": "server_not_configured",
+      "message": "CMS invites are not configured yet. Add the server Supabase service key in Cloudflare Pages.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "content-type": "application/json",
+    },
+    "status": 500,
+    "upstream": [],
+  },
+  "postWithoutSession": {
+    "body": {
+      "error": "missing_session",
+      "message": "Sign in before inviting a CMS user.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "content-type": "application/json",
+    },
+    "status": 401,
+    "upstream": [],
+  },
+  "postWithoutSessionUnconfigured": {
+    "body": {
+      "error": "server_not_configured",
+      "message": "CMS invites are not configured yet. Add the server Supabase service key in Cloudflare Pages.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "content-type": "application/json",
+    },
+    "status": 500,
+    "upstream": [],
+  },
+  "put": {
+    "body": {
+      "error": "method_not_allowed",
+      "message": "Use POST to invite a CMS user.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "content-type": "application/json",
+    },
+    "status": 405,
+    "upstream": [],
+  },
+}
+`;
+
+exports[`protected admin Functions > invite-user: role, duplicate and upstream contracts 1`] = `
+{
+  "admin invalid email": {
+    "body": {
+      "error": "invalid_email",
+      "message": "Enter a valid invite email address.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "content-type": "application/json",
+    },
+    "status": 400,
+    "upstream": [],
+  },
+  "admin invites admin": {
+    "body": {
+      "error": "invite_failed",
+      "message": "Synthetic upstream failure",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "content-type": "application/json",
+    },
+    "status": 502,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+      "GET /rest/v1/admin_profiles",
+      "POST /auth/v1/invite",
+    ],
+  },
+  "admin invites editor": {
+    "body": {
+      "error": "invite_failed",
+      "message": "Synthetic upstream failure",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "content-type": "application/json",
+    },
+    "status": 502,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+      "GET /rest/v1/admin_profiles",
+      "POST /auth/v1/invite",
+    ],
+  },
+  "admin invites existing": {
+    "body": {
+      "error": "existing_cms_access",
+      "message": "This email already has CMS access. Edit the existing person instead of sending another invite.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "content-type": "application/json",
+    },
+    "status": 409,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "admin invites owner": {
+    "body": {
+      "error": "owner_required",
+      "message": "Only a Website owner can invite another Website owner.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "content-type": "application/json",
+    },
+    "status": 403,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "admin invites superuser": {
+    "body": {
+      "error": "invalid_role",
+      "message": "Choose a valid CMS role.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "content-type": "application/json",
+    },
+    "status": 400,
+    "upstream": [],
+  },
+  "admin invites viewer": {
+    "body": {
+      "error": "invite_failed",
+      "message": "Synthetic upstream failure",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "content-type": "application/json",
+    },
+    "status": 502,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+      "GET /rest/v1/admin_profiles",
+      "POST /auth/v1/invite",
+    ],
+  },
+  "editor invalid email": {
+    "body": {
+      "error": "invalid_email",
+      "message": "Enter a valid invite email address.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "content-type": "application/json",
+    },
+    "status": 400,
+    "upstream": [],
+  },
+  "editor invites admin": {
+    "body": {
+      "error": "not_allowed",
+      "message": "Only Website owners and CMS managers can invite CMS users.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "content-type": "application/json",
+    },
+    "status": 403,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "editor invites editor": {
+    "body": {
+      "error": "not_allowed",
+      "message": "Only Website owners and CMS managers can invite CMS users.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "content-type": "application/json",
+    },
+    "status": 403,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "editor invites existing": {
+    "body": {
+      "error": "not_allowed",
+      "message": "Only Website owners and CMS managers can invite CMS users.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "content-type": "application/json",
+    },
+    "status": 403,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "editor invites owner": {
+    "body": {
+      "error": "not_allowed",
+      "message": "Only Website owners and CMS managers can invite CMS users.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "content-type": "application/json",
+    },
+    "status": 403,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "editor invites superuser": {
+    "body": {
+      "error": "invalid_role",
+      "message": "Choose a valid CMS role.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "content-type": "application/json",
+    },
+    "status": 400,
+    "upstream": [],
+  },
+  "editor invites viewer": {
+    "body": {
+      "error": "not_allowed",
+      "message": "Only Website owners and CMS managers can invite CMS users.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "content-type": "application/json",
+    },
+    "status": 403,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "owner invalid email": {
+    "body": {
+      "error": "invalid_email",
+      "message": "Enter a valid invite email address.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "content-type": "application/json",
+    },
+    "status": 400,
+    "upstream": [],
+  },
+  "owner invites admin": {
+    "body": {
+      "error": "invite_failed",
+      "message": "Synthetic upstream failure",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "content-type": "application/json",
+    },
+    "status": 502,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+      "GET /rest/v1/admin_profiles",
+      "POST /auth/v1/invite",
+    ],
+  },
+  "owner invites editor": {
+    "body": {
+      "error": "invite_failed",
+      "message": "Synthetic upstream failure",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "content-type": "application/json",
+    },
+    "status": 502,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+      "GET /rest/v1/admin_profiles",
+      "POST /auth/v1/invite",
+    ],
+  },
+  "owner invites existing": {
+    "body": {
+      "error": "existing_cms_access",
+      "message": "This email already has CMS access. Edit the existing person instead of sending another invite.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "content-type": "application/json",
+    },
+    "status": 409,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "owner invites owner": {
+    "body": {
+      "error": "invite_failed",
+      "message": "Synthetic upstream failure",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "content-type": "application/json",
+    },
+    "status": 502,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+      "GET /rest/v1/admin_profiles",
+      "POST /auth/v1/invite",
+    ],
+  },
+  "owner invites superuser": {
+    "body": {
+      "error": "invalid_role",
+      "message": "Choose a valid CMS role.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "content-type": "application/json",
+    },
+    "status": 400,
+    "upstream": [],
+  },
+  "owner invites viewer": {
+    "body": {
+      "error": "invite_failed",
+      "message": "Synthetic upstream failure",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "content-type": "application/json",
+    },
+    "status": 502,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+      "GET /rest/v1/admin_profiles",
+      "POST /auth/v1/invite",
+    ],
+  },
+}
+`;
+
+exports[`protected admin Functions > projects: identity and role contracts 1`] = `
+{
+  "admin GET": {
+    "body": {
+      "error": "aggregate_failed",
+      "message": "The project change could not be committed.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 502,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+      "POST /rest/v1/rpc/admin_project_aggregate",
+    ],
+  },
+  "admin POST malformed": {
+    "body": {
+      "error": "invalid_json",
+      "message": "Send a valid JSON project request.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 400,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "admin POST {}": {
+    "body": {
+      "error": "invalid_action",
+      "message": "Choose Save, Publish, or Hide.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 400,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "editor GET": {
+    "body": {
+      "error": "aggregate_failed",
+      "message": "The project change could not be committed.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 502,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+      "POST /rest/v1/rpc/admin_project_aggregate",
+    ],
+  },
+  "editor POST malformed": {
+    "body": {
+      "error": "invalid_json",
+      "message": "Send a valid JSON project request.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 400,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "editor POST {}": {
+    "body": {
+      "error": "invalid_action",
+      "message": "Choose Save, Publish, or Hide.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 400,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "invalid GET": {
+    "body": {
+      "error": "invalid_session",
+      "message": "Sign in again before opening Projects.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 401,
+    "upstream": [
+      "GET /auth/v1/user",
+    ],
+  },
+  "invalid POST malformed": {
+    "body": {
+      "error": "invalid_session",
+      "message": "Sign in again before opening Projects.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 401,
+    "upstream": [
+      "GET /auth/v1/user",
+    ],
+  },
+  "invalid POST {}": {
+    "body": {
+      "error": "invalid_session",
+      "message": "Sign in again before opening Projects.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 401,
+    "upstream": [
+      "GET /auth/v1/user",
+    ],
+  },
+  "missing GET": {
+    "body": {
+      "error": "not_allowed",
+      "message": "Active Projects access is required.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 403,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "missing POST malformed": {
+    "body": {
+      "error": "not_allowed",
+      "message": "Active Projects access is required.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 403,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "missing POST {}": {
+    "body": {
+      "error": "not_allowed",
+      "message": "Active Projects access is required.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 403,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "owner GET": {
+    "body": {
+      "error": "aggregate_failed",
+      "message": "The project change could not be committed.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 502,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+      "POST /rest/v1/rpc/admin_project_aggregate",
+    ],
+  },
+  "owner POST malformed": {
+    "body": {
+      "error": "invalid_json",
+      "message": "Send a valid JSON project request.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 400,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "owner POST {}": {
+    "body": {
+      "error": "invalid_action",
+      "message": "Choose Save, Publish, or Hide.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 400,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "profile-error GET": {
+    "body": {
+      "error": "not_allowed",
+      "message": "Active Projects access is required.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 403,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "profile-error POST malformed": {
+    "body": {
+      "error": "not_allowed",
+      "message": "Active Projects access is required.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 403,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "profile-error POST {}": {
+    "body": {
+      "error": "not_allowed",
+      "message": "Active Projects access is required.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 403,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "unknown-role GET": {
+    "body": {
+      "error": "not_allowed",
+      "message": "Active Projects access is required.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 403,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "unknown-role POST malformed": {
+    "body": {
+      "error": "not_allowed",
+      "message": "Active Projects access is required.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 403,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "unknown-role POST {}": {
+    "body": {
+      "error": "not_allowed",
+      "message": "Active Projects access is required.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 403,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "viewer GET": {
+    "body": {
+      "error": "aggregate_failed",
+      "message": "The project change could not be committed.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 502,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+      "POST /rest/v1/rpc/admin_project_aggregate",
+    ],
+  },
+  "viewer POST malformed": {
+    "body": {
+      "error": "read_only",
+      "message": "This Projects account is read-only.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 403,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "viewer POST {}": {
+    "body": {
+      "error": "read_only",
+      "message": "This Projects account is read-only.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 403,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+}
+`;
+
+exports[`protected admin Functions > projects: method, configuration and session gates make zero upstream calls 1`] = `
+{
+  "emptyBearer": {
+    "body": {
+      "error": "missing_session",
+      "message": "Sign in before opening Projects.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 401,
+    "upstream": [],
+  },
+  "getWithoutSession": {
+    "body": {
+      "error": "missing_session",
+      "message": "Sign in before opening Projects.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 401,
+    "upstream": [],
+  },
+  "malformedAuthorization": {
+    "body": {
+      "error": "missing_session",
+      "message": "Sign in before opening Projects.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 401,
+    "upstream": [],
+  },
+  "options": {
+    "body": null,
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 204,
+    "upstream": [],
+  },
+  "postWithSessionUnconfigured": {
+    "body": {
+      "error": "server_not_configured",
+      "message": "The Projects workspace is not configured on this deployment.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 500,
+    "upstream": [],
+  },
+  "postWithoutSession": {
+    "body": {
+      "error": "missing_session",
+      "message": "Sign in before opening Projects.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 401,
+    "upstream": [],
+  },
+  "postWithoutSessionUnconfigured": {
+    "body": {
+      "error": "missing_session",
+      "message": "Sign in before opening Projects.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 401,
+    "upstream": [],
+  },
+  "put": {
+    "body": {
+      "error": "method_not_allowed",
+      "message": "Use GET or POST for the Projects workspace.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+    },
+    "status": 405,
+    "upstream": [],
+  },
+}
+`;
+
+exports[`protected admin Functions > stone-library: identity and role contracts 1`] = `
+{
+  "admin GET": {
+    "body": {
+      "error": "save_uncertain",
+      "message": "The result could not be confirmed. Retry this operation to check its result; do not start a second copy.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+      "x-content-type-options": "nosniff",
+    },
+    "status": 502,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+      "POST /rest/v1/rpc/admin_stone_workspace",
+    ],
+  },
+  "admin POST malformed": {
+    "body": {
+      "error": "invalid_json",
+      "message": "The stone draft could not be read.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+      "x-content-type-options": "nosniff",
+    },
+    "status": 400,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "admin POST {}": {
+    "body": {
+      "error": "invalid_request",
+      "message": "The save request is invalid.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+      "x-content-type-options": "nosniff",
+    },
+    "status": 400,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "editor GET": {
+    "body": {
+      "error": "save_uncertain",
+      "message": "The result could not be confirmed. Retry this operation to check its result; do not start a second copy.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+      "x-content-type-options": "nosniff",
+    },
+    "status": 502,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+      "POST /rest/v1/rpc/admin_stone_workspace",
+    ],
+  },
+  "editor POST malformed": {
+    "body": {
+      "error": "invalid_json",
+      "message": "The stone draft could not be read.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+      "x-content-type-options": "nosniff",
+    },
+    "status": 400,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "editor POST {}": {
+    "body": {
+      "error": "invalid_request",
+      "message": "The save request is invalid.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+      "x-content-type-options": "nosniff",
+    },
+    "status": 400,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "invalid GET": {
+    "body": {
+      "error": "invalid_session",
+      "message": "Sign in again to continue editing.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+      "x-content-type-options": "nosniff",
+    },
+    "status": 401,
+    "upstream": [
+      "GET /auth/v1/user",
+    ],
+  },
+  "invalid POST malformed": {
+    "body": {
+      "error": "invalid_session",
+      "message": "Sign in again to continue editing.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+      "x-content-type-options": "nosniff",
+    },
+    "status": 401,
+    "upstream": [
+      "GET /auth/v1/user",
+    ],
+  },
+  "invalid POST {}": {
+    "body": {
+      "error": "invalid_session",
+      "message": "Sign in again to continue editing.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+      "x-content-type-options": "nosniff",
+    },
+    "status": 401,
+    "upstream": [
+      "GET /auth/v1/user",
+    ],
+  },
+  "missing GET": {
+    "body": {
+      "error": "not_allowed",
+      "message": "Active Stone Library access is required.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+      "x-content-type-options": "nosniff",
+    },
+    "status": 403,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "missing POST malformed": {
+    "body": {
+      "error": "not_allowed",
+      "message": "Active Stone Library access is required.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+      "x-content-type-options": "nosniff",
+    },
+    "status": 403,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "missing POST {}": {
+    "body": {
+      "error": "not_allowed",
+      "message": "Active Stone Library access is required.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+      "x-content-type-options": "nosniff",
+    },
+    "status": 403,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "owner GET": {
+    "body": {
+      "error": "save_uncertain",
+      "message": "The result could not be confirmed. Retry this operation to check its result; do not start a second copy.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+      "x-content-type-options": "nosniff",
+    },
+    "status": 502,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+      "POST /rest/v1/rpc/admin_stone_workspace",
+    ],
+  },
+  "owner POST malformed": {
+    "body": {
+      "error": "invalid_json",
+      "message": "The stone draft could not be read.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+      "x-content-type-options": "nosniff",
+    },
+    "status": 400,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "owner POST {}": {
+    "body": {
+      "error": "invalid_request",
+      "message": "The save request is invalid.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+      "x-content-type-options": "nosniff",
+    },
+    "status": 400,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "profile-error GET": {
+    "body": {
+      "error": "not_allowed",
+      "message": "Active Stone Library access is required.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+      "x-content-type-options": "nosniff",
+    },
+    "status": 403,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "profile-error POST malformed": {
+    "body": {
+      "error": "not_allowed",
+      "message": "Active Stone Library access is required.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+      "x-content-type-options": "nosniff",
+    },
+    "status": 403,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "profile-error POST {}": {
+    "body": {
+      "error": "not_allowed",
+      "message": "Active Stone Library access is required.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+      "x-content-type-options": "nosniff",
+    },
+    "status": 403,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "unknown-role GET": {
+    "body": {
+      "error": "not_allowed",
+      "message": "Active Stone Library access is required.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+      "x-content-type-options": "nosniff",
+    },
+    "status": 403,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "unknown-role POST malformed": {
+    "body": {
+      "error": "not_allowed",
+      "message": "Active Stone Library access is required.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+      "x-content-type-options": "nosniff",
+    },
+    "status": 403,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "unknown-role POST {}": {
+    "body": {
+      "error": "not_allowed",
+      "message": "Active Stone Library access is required.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+      "x-content-type-options": "nosniff",
+    },
+    "status": 403,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "viewer GET": {
+    "body": {
+      "error": "save_uncertain",
+      "message": "The result could not be confirmed. Retry this operation to check its result; do not start a second copy.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+      "x-content-type-options": "nosniff",
+    },
+    "status": 502,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+      "POST /rest/v1/rpc/admin_stone_workspace",
+    ],
+  },
+  "viewer POST malformed": {
+    "body": {
+      "error": "read_only",
+      "message": "Your account can view stones but cannot edit them.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+      "x-content-type-options": "nosniff",
+    },
+    "status": 403,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "viewer POST {}": {
+    "body": {
+      "error": "read_only",
+      "message": "Your account can view stones but cannot edit them.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+      "x-content-type-options": "nosniff",
+    },
+    "status": 403,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+}
+`;
+
+exports[`protected admin Functions > stone-library: method, configuration and session gates make zero upstream calls 1`] = `
+{
+  "emptyBearer": {
+    "body": {
+      "error": "missing_session",
+      "message": "Sign in before opening Stone Library.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+      "x-content-type-options": "nosniff",
+    },
+    "status": 401,
+    "upstream": [],
+  },
+  "getWithoutSession": {
+    "body": {
+      "error": "missing_session",
+      "message": "Sign in before opening Stone Library.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+      "x-content-type-options": "nosniff",
+    },
+    "status": 401,
+    "upstream": [],
+  },
+  "malformedAuthorization": {
+    "body": {
+      "error": "missing_session",
+      "message": "Sign in before opening Stone Library.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+      "x-content-type-options": "nosniff",
+    },
+    "status": 401,
+    "upstream": [],
+  },
+  "options": {
+    "body": null,
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+      "x-content-type-options": "nosniff",
+    },
+    "status": 204,
+    "upstream": [],
+  },
+  "postWithSessionUnconfigured": {
+    "body": {
+      "error": "not_configured",
+      "message": "The stone editor is not connected on this deployment.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+      "x-content-type-options": "nosniff",
+    },
+    "status": 503,
+    "upstream": [],
+  },
+  "postWithoutSession": {
+    "body": {
+      "error": "missing_session",
+      "message": "Sign in before opening Stone Library.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+      "x-content-type-options": "nosniff",
+    },
+    "status": 401,
+    "upstream": [],
+  },
+  "postWithoutSessionUnconfigured": {
+    "body": {
+      "error": "missing_session",
+      "message": "Sign in before opening Stone Library.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+      "x-content-type-options": "nosniff",
+    },
+    "status": 401,
+    "upstream": [],
+  },
+  "put": {
+    "body": {
+      "error": "method_not_allowed",
+      "message": "Use GET or POST.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+      "x-content-type-options": "nosniff",
+    },
+    "status": 405,
+    "upstream": [],
+  },
+}
+`;
+
+exports[`protected admin Functions > stone-library: viewer read paths and editor write gate 1`] = `
+{
+  "editor GET ?stoneId=4&view=usage": {
+    "body": {
+      "error": "save_uncertain",
+      "message": "The result could not be confirmed. Retry this operation to check its result; do not start a second copy.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+      "x-content-type-options": "nosniff",
+    },
+    "status": 502,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+      "POST /rest/v1/rpc/admin_stone_workspace",
+    ],
+  },
+  "editor GET ?stoneId=abc": {
+    "body": {
+      "error": "invalid_field",
+      "message": "Stone is invalid.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+      "x-content-type-options": "nosniff",
+    },
+    "status": 400,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "editor GET ?view=finishes": {
+    "body": {
+      "error": "load_failed",
+      "message": "Finish choices could not load.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+      "x-content-type-options": "nosniff",
+    },
+    "status": 502,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+      "GET /rest/v1/finish_definitions",
+    ],
+  },
+  "editor GET ?view=media": {
+    "body": {
+      "error": "media_load_failed",
+      "message": "Images could not load. Try again.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+      "x-content-type-options": "nosniff",
+    },
+    "status": 502,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+      "GET /rest/v1/media_assets",
+    ],
+  },
+  "editor GET ?view=media&ids=0": {
+    "body": {
+      "error": "invalid_ids",
+      "message": "The image selection is invalid.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+      "x-content-type-options": "nosniff",
+    },
+    "status": 400,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "editor GET ?view=media&ids=1,2": {
+    "body": {
+      "error": "media_load_failed",
+      "message": "Images could not load. Try again.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+      "x-content-type-options": "nosniff",
+    },
+    "status": 502,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+      "GET /rest/v1/media_assets",
+    ],
+  },
+  "editor POST save": {
+    "body": {
+      "error": "invalid_request",
+      "message": "The save request is invalid.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+      "x-content-type-options": "nosniff",
+    },
+    "status": 400,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "viewer GET ?stoneId=4&view=usage": {
+    "body": {
+      "error": "save_uncertain",
+      "message": "The result could not be confirmed. Retry this operation to check its result; do not start a second copy.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+      "x-content-type-options": "nosniff",
+    },
+    "status": 502,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+      "POST /rest/v1/rpc/admin_stone_workspace",
+    ],
+  },
+  "viewer GET ?stoneId=abc": {
+    "body": {
+      "error": "invalid_field",
+      "message": "Stone is invalid.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+      "x-content-type-options": "nosniff",
+    },
+    "status": 400,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "viewer GET ?view=finishes": {
+    "body": {
+      "error": "load_failed",
+      "message": "Finish choices could not load.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+      "x-content-type-options": "nosniff",
+    },
+    "status": 502,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+      "GET /rest/v1/finish_definitions",
+    ],
+  },
+  "viewer GET ?view=media": {
+    "body": {
+      "error": "media_load_failed",
+      "message": "Images could not load. Try again.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+      "x-content-type-options": "nosniff",
+    },
+    "status": 502,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+      "GET /rest/v1/media_assets",
+    ],
+  },
+  "viewer GET ?view=media&ids=0": {
+    "body": {
+      "error": "invalid_ids",
+      "message": "The image selection is invalid.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+      "x-content-type-options": "nosniff",
+    },
+    "status": 400,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+  "viewer GET ?view=media&ids=1,2": {
+    "body": {
+      "error": "media_load_failed",
+      "message": "Images could not load. Try again.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+      "x-content-type-options": "nosniff",
+    },
+    "status": 502,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+      "GET /rest/v1/media_assets",
+    ],
+  },
+  "viewer POST save": {
+    "body": {
+      "error": "read_only",
+      "message": "Your account can view stones but cannot edit them.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+      "x-content-type-options": "nosniff",
+    },
+    "status": 403,
+    "upstream": [
+      "GET /auth/v1/user",
+      "GET /rest/v1/admin_profiles",
+    ],
+  },
+}
+`;
+
+exports[`public Image QR Functions > data and page resolvers: methods, unknown slug, configuration 1`] = `
+{
+  "dataEmptySlug": {
+    "body": {
+      "error": "not_found",
+      "message": "This image link is unavailable.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+      "x-robots-tag": "noindex, nofollow",
+    },
+    "status": 404,
+    "upstream": [],
+  },
+  "dataHead": {
+    "body": null,
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+      "x-robots-tag": "noindex, nofollow",
+    },
+    "status": 404,
+    "upstream": [
+      "GET /rest/v1/image_qr_resources",
+    ],
+  },
+  "dataPost": {
+    "body": "Method not allowed",
+    "headers": {
+      "allow": "GET, HEAD",
+      "cache-control": "no-store",
+      "content-type": "text/plain;charset=UTF-8",
+    },
+    "status": 405,
+    "upstream": [],
+  },
+  "dataUnconfigured": {
+    "body": {
+      "error": "unavailable",
+      "message": "This image link is temporarily unavailable.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+      "x-robots-tag": "noindex, nofollow",
+    },
+    "status": 503,
+    "upstream": [],
+  },
+  "dataUnknown": {
+    "body": {
+      "error": "not_found",
+      "message": "This image link is unavailable.",
+    },
+    "headers": {
+      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store",
+      "content-type": "application/json",
+      "x-robots-tag": "noindex, nofollow",
+    },
+    "status": 404,
+    "upstream": [
+      "GET /rest/v1/image_qr_resources",
+    ],
+  },
+  "pagePost": {
+    "body": "Method not allowed",
+    "headers": {
+      "allow": "GET, HEAD",
+      "content-type": "text/plain;charset=UTF-8",
+    },
+    "status": 405,
+    "upstream": [],
+  },
+  "pageUnconfigured": {
+    "body": "<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Please try again shortly | Urblo</title><body style="margin:0;padding:32px;font-family:Arial,sans-serif;color:#000;background:#fff"><a href="/"><img src="/media/launch/identity/urblo-logo.png" alt="Urblo" width="72"></a><main style="max-width:480px;margin:64px auto"><h1>Please try again shortly</h1><p>The material page could not load. Refresh this page or contact Urblo.</p><a href="/stone-library">Stone Library</a> · <a href="/contact">Contact Urblo</a></main></body></html>",
+    "headers": {
+      "cache-control": "no-store",
+      "content-type": "text/html; charset=utf-8",
+      "x-content-type-options": "nosniff",
+      "x-robots-tag": "noindex, nofollow",
+    },
+    "status": 503,
+    "upstream": [],
+  },
+  "pageUnknown": {
+    "body": "<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>This image link is unavailable | Urblo</title><body style="margin:0;padding:32px;font-family:Arial,sans-serif;color:#000;background:#fff"><a href="/"><img src="/media/launch/identity/urblo-logo.png" alt="Urblo" width="72"></a><main style="max-width:480px;margin:64px auto"><h1>This image link is unavailable</h1><p>The link may have been paused. Contact Urblo for help with this material.</p><a href="/stone-library">Stone Library</a> · <a href="/contact">Contact Urblo</a></main></body></html>",
+    "headers": {
+      "cache-control": "no-store",
+      "content-type": "text/html; charset=utf-8",
+      "x-content-type-options": "nosniff",
+      "x-robots-tag": "noindex, nofollow",
+    },
+    "status": 404,
+    "upstream": [
+      "GET /rest/v1/image_qr_resources",
+    ],
+  },
+}
+`;
+
+exports[`public form Functions > enquiries: method, validation and configuration contracts 1`] = `
+{
+  "empty": {
+    "body": {
+      "error": {
+        "code": "validation_failed",
+        "fields": {
+          "email": "Email is required.",
+          "message": "Project notes is required.",
+          "name": "Name is required.",
+        },
+        "message": "Check the highlighted fields.",
+      },
+      "ok": false,
+    },
+    "headers": {
+      "cache-control": "no-store",
+      "content-type": "application/json; charset=utf-8",
+    },
+    "status": 400,
+    "upstream": [],
+  },
+  "get": {
+    "body": {
+      "error": {
+        "code": "method_not_allowed",
+        "message": "Use POST for this endpoint.",
+      },
+      "ok": false,
+    },
+    "headers": {
+      "cache-control": "no-store",
+      "content-type": "application/json; charset=utf-8",
+    },
+    "status": 405,
+    "upstream": [],
+  },
+  "malformed": {
+    "body": {
+      "error": {
+        "code": "invalid_json",
+        "message": "Send a valid JSON object.",
+      },
+      "ok": false,
+    },
+    "headers": {
+      "cache-control": "no-store",
+      "content-type": "application/json; charset=utf-8",
+    },
+    "status": 400,
+    "upstream": [],
+  },
+  "options": {
+    "body": null,
+    "headers": {
+      "access-control-allow-headers": "content-type",
+      "access-control-allow-methods": "POST, OPTIONS",
+      "access-control-max-age": "86400",
+      "allow": "POST, OPTIONS",
+    },
+    "status": 204,
+    "upstream": [],
+  },
+  "validUnconfigured": {
+    "body": {
+      "error": {
+        "code": "server_not_configured",
+        "message": "The submission endpoint is not configured yet. Please contact Urblo directly.",
+      },
+      "ok": false,
+    },
+    "headers": {
+      "cache-control": "no-store",
+      "content-type": "application/json; charset=utf-8",
+    },
+    "status": 500,
+    "upstream": [],
+  },
+  "validUpstreamFailure": {
+    "body": {
+      "error": {
+        "code": "database_write_failed",
+        "message": "The request could not be stored. Please contact Urblo directly.",
+      },
+      "ok": false,
+    },
+    "headers": {
+      "cache-control": "no-store",
+      "content-type": "application/json; charset=utf-8",
+    },
+    "status": 502,
+    "upstream": [
+      "POST /rest/v1/enquiries",
+    ],
+  },
+}
+`;
+
+exports[`public form Functions > sample-requests: method, validation and configuration contracts 1`] = `
+{
+  "empty": {
+    "body": {
+      "error": {
+        "code": "validation_failed",
+        "fields": {
+          "email": "Email is required.",
+          "name": "Name is required.",
+          "sampleStone": "Stone or sample preference is required.",
+          "shippingAddress": "Shipping address is required.",
+        },
+        "message": "Check the highlighted fields.",
+      },
+      "ok": false,
+    },
+    "headers": {
+      "cache-control": "no-store",
+      "content-type": "application/json; charset=utf-8",
+    },
+    "status": 400,
+    "upstream": [],
+  },
+  "get": {
+    "body": {
+      "error": {
+        "code": "method_not_allowed",
+        "message": "Use POST for this endpoint.",
+      },
+      "ok": false,
+    },
+    "headers": {
+      "cache-control": "no-store",
+      "content-type": "application/json; charset=utf-8",
+    },
+    "status": 405,
+    "upstream": [],
+  },
+  "malformed": {
+    "body": {
+      "error": {
+        "code": "invalid_json",
+        "message": "Send a valid JSON object.",
+      },
+      "ok": false,
+    },
+    "headers": {
+      "cache-control": "no-store",
+      "content-type": "application/json; charset=utf-8",
+    },
+    "status": 400,
+    "upstream": [],
+  },
+  "options": {
+    "body": null,
+    "headers": {
+      "access-control-allow-headers": "content-type",
+      "access-control-allow-methods": "POST, OPTIONS",
+      "access-control-max-age": "86400",
+      "allow": "POST, OPTIONS",
+    },
+    "status": 204,
+    "upstream": [],
+  },
+  "validUnconfigured": {
+    "body": {
+      "error": {
+        "code": "server_not_configured",
+        "message": "The submission endpoint is not configured yet. Please contact Urblo directly.",
+      },
+      "ok": false,
+    },
+    "headers": {
+      "cache-control": "no-store",
+      "content-type": "application/json; charset=utf-8",
+    },
+    "status": 500,
+    "upstream": [],
+  },
+  "validUpstreamFailure": {
+    "body": {
+      "error": {
+        "code": "database_write_failed",
+        "message": "The request could not be stored. Please contact Urblo directly.",
+      },
+      "ok": false,
+    },
+    "headers": {
+      "cache-control": "no-store",
+      "content-type": "application/json; charset=utf-8",
+    },
+    "status": 502,
+    "upstream": [
+      "POST /rest/v1/rpc/submit_sample_request_with_item",
+    ],
+  },
+}
+`;
