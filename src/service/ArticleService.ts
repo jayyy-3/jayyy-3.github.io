@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
+import type { Database, Tables } from '../types/database.ts';
 import { getPublicContentClient } from '../lib/publicContentClient.ts';
 import { parsePublicEntitySeo } from '../lib/publicEntitySeo.ts';
 import { resolvePublicMediaUrl, type PublicMediaLocation } from '../lib/publicMediaUrl.ts';
@@ -19,17 +20,14 @@ export type PublicArticleBlockType =
   | 'video_embed'
   | 'callout';
 
-type ArticleRow = {
-  id?: number;
-  slug: string;
-  title: string;
-  published_on: string | null;
-  author: string | null;
-  excerpt: string | null;
-  tags: string[] | null;
-  legacy_source_path: string | null;
-  seo: unknown;
-  cover_media?: PublicMediaLocation | PublicMediaLocation[] | null;
+type Relation<T> = T | T[] | null;
+type PublicClient = SupabaseClient<Database>;
+
+type ArticleRow = Pick<
+  Tables<'articles'>,
+  'slug' | 'title' | 'published_on' | 'author' | 'excerpt' | 'tags' | 'legacy_source_path' | 'seo'
+> & {
+  cover_media?: Relation<PublicMediaLocation>;
 };
 
 export interface PublicArticleBlock {
@@ -54,22 +52,16 @@ export interface ArticleBody {
   blocks?: PublicArticleBlock[];
 }
 
-type ArticleBodyRow = ArticleRow & { id: number };
-
 type ArticleMediaRef = PublicMediaLocation & {
   alt: string | null;
   caption: string | null;
   media_type: string | null;
 };
 
-type ArticleBlockRow = {
-  id: number;
-  block_type: PublicArticleBlockType;
-  content: unknown;
-  sort_order: number;
-  media_asset?: ArticleMediaRef | ArticleMediaRef[] | null;
-  linked_project?: { slug: string; title: string } | { slug: string; title: string }[] | null;
-  linked_stone_group?: { stone_group_key: string; display_name: string } | { stone_group_key: string; display_name: string }[] | null;
+type ArticleBlockRow = Pick<Tables<'article_blocks'>, 'id' | 'block_type' | 'content' | 'sort_order'> & {
+  media_asset?: Relation<ArticleMediaRef>;
+  linked_project?: Relation<Pick<Tables<'projects'>, 'slug' | 'title'>>;
+  linked_stone_group?: Relation<Pick<Tables<'stone_groups'>, 'stone_group_key' | 'display_name'>>;
 };
 
 function firstRelation<T>(value: T | T[] | null | undefined): T | null {
@@ -89,7 +81,7 @@ function sourceSlugFromPath(path: string | null): string | undefined {
   return match?.[1];
 }
 
-function mapArticle(row: ArticleRow, supabase: SupabaseClient): ArticleMeta {
+function mapArticle(row: ArticleRow, supabase: PublicClient): ArticleMeta {
   return {
     slug: row.slug,
     sourceSlug: sourceSlugFromPath(row.legacy_source_path),
@@ -104,7 +96,7 @@ function mapArticle(row: ArticleRow, supabase: SupabaseClient): ArticleMeta {
   };
 }
 
-function mapArticleBlock(row: ArticleBlockRow, supabase: SupabaseClient): PublicArticleBlock {
+function mapArticleBlock(row: ArticleBlockRow, supabase: PublicClient): PublicArticleBlock {
   const media = firstRelation(row.media_asset);
   const project = firstRelation(row.linked_project);
   const stone = firstRelation(row.linked_stone_group);
@@ -112,7 +104,8 @@ function mapArticleBlock(row: ArticleBlockRow, supabase: SupabaseClient): Public
 
   return {
     id: row.id,
-    blockType: row.block_type,
+    // The article_blocks block_type check constraint limits the column to these values.
+    blockType: row.block_type as PublicArticleBlockType,
     content: objectRecord(row.content),
     media: media
       ? {
@@ -164,7 +157,8 @@ async function getPublishedArticles(): Promise<ArticleMeta[]> {
     .order('published_on', { ascending: false });
 
   if (error || !data?.length) return [];
-  return (data as unknown as ArticleRow[]).map((row) => mapArticle(row, supabase));
+  const rows: ArticleRow[] = data;
+  return rows.map((row) => mapArticle(row, supabase));
 }
 
 async function getPublishedArticleBody(slug: string): Promise<ArticleBody | null> {
@@ -176,7 +170,7 @@ async function getPublishedArticleBody(slug: string): Promise<ArticleBody | null
     .select('id,slug,title,published_on,author,excerpt,tags,legacy_source_path')
     .eq('slug', slug)
     .eq('status', 'published')
-    .maybeSingle<ArticleBodyRow>();
+    .maybeSingle();
 
   if (articleError || !article) return null;
 
@@ -220,7 +214,7 @@ async function getPublishedArticleBody(slug: string): Promise<ArticleBody | null
 
   return {
     kind: 'structured',
-    blocks: (blocks as unknown as ArticleBlockRow[]).map((block) => mapArticleBlock(block, supabase)),
+    blocks: blocks.map((block: ArticleBlockRow) => mapArticleBlock(block, supabase)),
     legacySourceSlug: sourceSlugFromPath(article.legacy_source_path) ?? article.slug,
   };
 }

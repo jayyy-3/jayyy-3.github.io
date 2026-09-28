@@ -1,7 +1,14 @@
-const DEFAULT_SUPABASE_URL = 'https://npkidywzwddbnfrnxlmo.supabase.co';
+import { createJsonResponder, readServiceConfig } from './admin-runtime.js';
+
 const MAX_JSON_BYTES = 32_000;
 
 class ApiError extends Error {
+  /**
+   * @param {number} status
+   * @param {string} code
+   * @param {string} message
+   * @param {object} [fields]
+   */
   constructor(status, code, message, fields = undefined) {
     super(message);
     this.name = 'ApiError';
@@ -11,17 +18,10 @@ class ApiError extends Error {
   }
 }
 
-const jsonHeaders = {
+const respond = createJsonResponder({
   'content-type': 'application/json; charset=utf-8',
   'cache-control': 'no-store',
-};
-
-function jsonResponse(body, status = 200) {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: jsonHeaders,
-  });
-}
+});
 
 export function optionsResponse() {
   return new Response(null, {
@@ -36,7 +36,7 @@ export function optionsResponse() {
 }
 
 export function methodNotAllowedResponse() {
-  return jsonResponse(
+  return respond(
     {
       ok: false,
       error: {
@@ -44,13 +44,13 @@ export function methodNotAllowedResponse() {
         message: 'Use POST for this endpoint.',
       },
     },
-    405,
+    { status: 405 },
   );
 }
 
 function errorResponse(error) {
   if (error instanceof ApiError) {
-    return jsonResponse(
+    return respond(
       {
         ok: false,
         error: {
@@ -59,11 +59,11 @@ function errorResponse(error) {
           fields: error.fields,
         },
       },
-      error.status,
+      { status: error.status },
     );
   }
 
-  return jsonResponse(
+  return respond(
     {
       ok: false,
       error: {
@@ -71,7 +71,7 @@ function errorResponse(error) {
         message: 'The request could not be submitted. Please contact Urblo directly.',
       },
     },
-    500,
+    { status: 500 },
   );
 }
 
@@ -273,8 +273,7 @@ async function verifyTurnstile(request, env, token) {
 }
 
 function getSupabaseConfig(env) {
-  const url = (env.SUPABASE_URL || DEFAULT_SUPABASE_URL).replace(/\/$/, '');
-  const serviceKey = env.SUPABASE_SERVICE_ROLE_KEY || env.SUPABASE_SERVICE_KEY;
+  const { url, serviceKey } = readServiceConfig(env);
 
   if (!serviceKey) {
     throw new ApiError(
@@ -580,13 +579,13 @@ export async function handleEnquiryRequest(request, env) {
       notificationStatus,
     );
 
-    return jsonResponse(
+    return respond(
       {
         ok: true,
         id: inserted.id,
         notificationStatus: finalNotificationStatus,
       },
-      201,
+      { status: 201 },
     );
   });
 }
@@ -633,14 +632,14 @@ export async function handleSampleRequest(request, env) {
       notificationStatus,
     );
 
-    return jsonResponse(
+    return respond(
       {
         ok: true,
         id: inserted.id,
         itemId: inserted.itemId,
         notificationStatus: finalNotificationStatus,
       },
-      201,
+      { status: 201 },
     );
   });
 }

@@ -8,6 +8,10 @@ export const checks = {
   build: { command: ['npm', 'run', 'build'], deps: [] },
   lint: { command: ['npm', 'run', 'lint'], deps: [] },
   knip: { command: ['node', 'node_modules/knip/bin/knip.js', '--no-progress'], deps: [] },
+  // src/types/database.ts must carry the current migrations hash; a stale header regenerates from this checkout's isolated stack or fails.
+  'db-types': node('generate-database-types.mjs', ['--check']),
+  // Pages Functions JavaScript under checkJs (tsconfig.functions.json).
+  'functions-types': { command: ['node', 'node_modules/typescript/bin/tsc', '-p', 'tsconfig.functions.json'], deps: [] },
   state: node('check-agent-state.mjs'),
   paths: node('check-doc-paths.mjs'),
   foundation: node('check-supabase-foundation-readiness.mjs'),
@@ -39,10 +43,10 @@ export const checks = {
   browser: node('check-admin-config-gate.mjs', [], ['build']),
 }
 const smoke = ['routes', 'unit', 'forms-ui', 'capabilities', 'ui-tokens', 'homepage-video', 'product-images', 'stone-library', 'stone-adoption-snapshot', 'qr', 'projects']
-const admin = ['unit', 'coverage', 'guide', 'qr', 'projects', 'build', 'lint', 'foundation', 'media-plan', 'public-readiness', 'cloudflare', 'harness', 'handoff']
+const admin = ['unit', 'coverage', 'guide', 'qr', 'projects', 'build', 'lint', 'db-types', 'functions-types', 'foundation', 'media-plan', 'public-readiness', 'cloudflare', 'harness', 'handoff']
 export const suites = {
   docs: ['state', 'paths', 'harness', 'classifier', 'guide'],
-  tooling: ['harness', 'classifier', 'lint', 'knip'],
+  tooling: ['harness', 'classifier', 'lint', 'knip', 'db-types', 'functions-types'],
   smoke,
   admin,
   container: [...smoke, ...admin, 'classifier', 'local-boundary', 'deployment-readiness', 'knip'],

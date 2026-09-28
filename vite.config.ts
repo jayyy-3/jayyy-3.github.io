@@ -1,7 +1,6 @@
 import { defineConfig, loadEnv, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
-
-const DEFAULT_SUPABASE_URL = 'https://npkidywzwddbnfrnxlmo.supabase.co'
+import { PRODUCTION_SUPABASE_URL } from './src/lib/supabaseProject.ts'
 
 /**
  * Emits the public Supabase target the browser bundle was built with, so the edge SEO
@@ -26,7 +25,7 @@ function edgePublicContentConfig(): Plugin {
         type: 'asset',
         fileName: 'seo-edge-config.json',
         source: `${JSON.stringify({
-          supabaseUrl: (env.VITE_SUPABASE_URL || DEFAULT_SUPABASE_URL).replace(/\/+$/, ''),
+          supabaseUrl: (env.VITE_SUPABASE_URL || PRODUCTION_SUPABASE_URL).replace(/\/+$/, ''),
           publicKey: publicKey || null,
         })}\n`,
       })

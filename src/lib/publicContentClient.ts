@@ -1,15 +1,17 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
+import type { Database } from '../types/database.ts';
+import { PRODUCTION_SUPABASE_URL } from './supabaseProject.ts';
 
-const DEFAULT_SUPABASE_URL = 'https://npkidywzwddbnfrnxlmo.supabase.co';
+export type PublicContentClient = SupabaseClient<Database>;
 
-let publicContentClient: SupabaseClient | null | undefined;
-let publicContentClientPromise: Promise<SupabaseClient | null> | null = null;
+let publicContentClient: PublicContentClient | null | undefined;
+let publicContentClientPromise: Promise<PublicContentClient | null> | null = null;
 
 export function isPublicContentConfigured(): boolean {
   return Boolean(import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY);
 }
 
-export async function getPublicContentClient(): Promise<SupabaseClient | null> {
+export async function getPublicContentClient(): Promise<PublicContentClient | null> {
   if (publicContentClient !== undefined) {
     return publicContentClient;
   }
@@ -26,8 +28,8 @@ export async function getPublicContentClient(): Promise<SupabaseClient | null> {
   if (!publicContentClientPromise) {
     publicContentClientPromise = import('@supabase/supabase-js')
       .then(({ createClient }) => {
-        publicContentClient = createClient(
-          import.meta.env.VITE_SUPABASE_URL || DEFAULT_SUPABASE_URL,
+        publicContentClient = createClient<Database>(
+          import.meta.env.VITE_SUPABASE_URL || PRODUCTION_SUPABASE_URL,
           key,
           {
             auth: {

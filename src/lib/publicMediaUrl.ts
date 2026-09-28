@@ -1,5 +1,3 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
-
 export const PUBLIC_MEDIA_BUCKET = 'urblo-public-media';
 
 export type PublicMediaLocation = {
@@ -10,7 +8,15 @@ export type PublicMediaLocation = {
   object_path: string | null;
 };
 
-type PublicStorageClient = Pick<SupabaseClient, 'storage'>;
+/**
+ * The single Storage call this module makes. A supabase-js client satisfies it structurally, and
+ * the edge SEO middleware supplies a URL-only adapter without bundling the client.
+ */
+export type PublicStorageClient = {
+  storage: {
+    from(bucket: string): { getPublicUrl(path: string): { data: { publicUrl: string } } };
+  };
+};
 
 export function toSafePublicMediaSourceUrl(value: string | null | undefined): string | undefined {
   const normalized = value?.trim();

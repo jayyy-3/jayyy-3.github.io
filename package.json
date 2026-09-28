@@ -61,6 +61,9 @@
     "local:verify": "node scripts/verify-local-stack.mjs",
     "local:journeys": "node scripts/check-local-journeys.mjs",
     "local:migrations": "node scripts/check-local-migrations.mjs",
+    "db:types": "node scripts/generate-database-types.mjs",
+    "db:types:check": "node scripts/generate-database-types.mjs --check",
+    "typecheck:functions": "tsc -p tsconfig.functions.json",
     "agent:stone-workspace": "node --import tsx scripts/check-stone-workspace.mjs",
     "agent:stone-adoption-plan": "node scripts/apply-stone-library-adoption.mjs"
   },

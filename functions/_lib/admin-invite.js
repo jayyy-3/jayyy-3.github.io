@@ -1,6 +1,5 @@
-import { createClient } from '@supabase/supabase-js';
+import { corsHeaders, createJsonResponder, createServiceClient, readAdminIdentity, readBearerToken, readServiceConfig } from './admin-runtime.js';
 
-const DEFAULT_SUPABASE_URL = 'https://npkidywzwddbnfrnxlmo.supabase.co';
 const VALID_ROLES = ['owner', 'admin', 'editor', 'viewer'];
 
 class AdminInviteError extends Error {
@@ -109,8 +108,7 @@ export async function handleAdminInviteUserRequest(request, env) {
 }
 
 function getSupabaseConfig(env) {
-  const url = (env.SUPABASE_URL || DEFAULT_SUPABASE_URL).replace(/\/$/, '');
-  const serviceKey = env.SUPABASE_SERVICE_ROLE_KEY || env.SUPABASE_SERVICE_KEY;
+  const { url, serviceKey } = readServiceConfig(env);
 
   if (!serviceKey) {
     throw new AdminInviteError(
@@ -123,25 +121,14 @@ function getSupabaseConfig(env) {
   return { url, serviceKey };
 }
 
-function createServiceClient(config) {
-  return createClient(config.url, config.serviceKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-      detectSessionInUrl: false,
-    },
-  });
-}
-
 function getBearerToken(request) {
-  const authorization = request.headers.get('authorization') || '';
-  const match = /^Bearer\s+(.+)$/i.exec(authorization);
+  const token = readBearerToken(request);
 
-  if (!match?.[1]) {
+  if (token === null) {
     throw new AdminInviteError(401, 'missing_session', 'Sign in before inviting a CMS user.');
   }
 
-  return match[1].trim();
+  return token;
 }
 
 async function parseInviteInput(request) {
@@ -168,21 +155,11 @@ async function parseInviteInput(request) {
 }
 
 async function requireManagingAdmin(supabase, accessToken, requestedRole) {
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser(accessToken);
+  const { user, userError, profile, profileError } = await readAdminIdentity(supabase, accessToken);
 
   if (userError || !user) {
     throw new AdminInviteError(401, 'invalid_session', 'Sign in again before inviting a CMS user.');
   }
-
-  const { data: profile, error: profileError } = await supabase
-    .from('admin_profiles')
-    .select('user_id,email,role,is_active')
-    .eq('user_id', user.id)
-    .eq('is_active', true)
-    .maybeSingle();
 
   if (profileError || !profile || !['owner', 'admin'].includes(profile.role)) {
     throw new AdminInviteError(403, 'not_allowed', 'Only Website owners and CMS managers can invite CMS users.');
@@ -221,18 +198,7 @@ async function assertNoExistingCmsAccess(supabase, email) {
   }
 }
 
-function jsonResponse(body, init = {}) {
-  return new Response(init.status === 204 ? null : JSON.stringify(body), {
-    status: init.status || 200,
-    headers: {
-      'content-type': 'application/json',
-      'access-control-allow-origin': '*',
-      'access-control-allow-methods': 'POST, OPTIONS',
-      'access-control-allow-headers': 'authorization, content-type',
-      ...(init.headers || {}),
-    },
-  });
-}
+const jsonResponse = createJsonResponder(corsHeaders('POST, OPTIONS'));
 
 function normalizeEmail(value) {
   return value.trim().toLowerCase();

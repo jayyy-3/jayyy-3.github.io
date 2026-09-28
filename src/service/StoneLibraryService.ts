@@ -397,6 +397,13 @@ function placeholderStoneImage(label: string): string {
     return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 }
 
+// public_stone_catalogue returns jsonb; only its three top-level arrays are checked here, as before.
+function isCatalogueEnvelope(value: unknown): value is StoneCatalogue {
+    if (!value || typeof value !== 'object') return false;
+    const envelope = value as Partial<Record<keyof StoneCatalogue, unknown>>;
+    return Array.isArray(envelope.stones) && Array.isArray(envelope.managedKeys) && Array.isArray(envelope.finishes);
+}
+
 let cataloguePending: Promise<StoneCatalogue | null> | null = null;
 async function loadCatalogue(): Promise<StoneCatalogue | null> {
     const client = await getPublicContentClient();
@@ -405,8 +412,9 @@ async function loadCatalogue(): Promise<StoneCatalogue | null> {
         return null;
     }
     const { data, error } = await client.rpc('public_stone_catalogue');
-    if (error || !data || !Array.isArray(data.stones) || !Array.isArray(data.managedKeys) || !Array.isArray(data.finishes)) throw new Error('Stone catalogue unavailable');
-    return { ...data, stones: data.stones.map((record: StoneCatalogue['stones'][number]) => ({ ...record,
+    if (error || !isCatalogueEnvelope(data)) throw new Error('Stone catalogue unavailable');
+    const catalogue: StoneCatalogue = data;
+    return { ...catalogue, stones: catalogue.stones.map((record) => ({ ...record,
         media: record.media.map((m) => {
             const raw = m as typeof m & { sourceUrl: string | null; bucket: string | null; objectPath: string | null };
             return { ...m, url: resolvePublicMediaUrl({status: m.status, source_kind: raw.bucket ? 'storage' : 'external', source_url: raw.sourceUrl, bucket: raw.bucket, object_path: raw.objectPath}, client) || null };

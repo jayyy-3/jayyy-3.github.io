@@ -1,9 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import type { Database } from '../types/database.ts';
+import { PRODUCTION_SUPABASE_URL } from './supabaseProject.ts';
 
-const DEFAULT_SUPABASE_URL = 'https://npkidywzwddbnfrnxlmo.supabase.co';
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || DEFAULT_SUPABASE_URL;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || PRODUCTION_SUPABASE_URL;
 const supabaseAnonKey =
     import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
@@ -40,7 +40,7 @@ type CapturedSupabaseAuthRedirect = SupabaseAuthRedirectContext & {
 };
 
 type IsolatedAuthRedirectSession = {
-    client: SupabaseClient;
+    client: SupabaseClient<Database>;
     type: SupabaseAuthRedirectType;
     userId: string;
 };
@@ -66,7 +66,7 @@ export const supabaseConfig = {
 };
 
 export const supabase = supabaseConfig.hasBrowserKey
-    ? createClient(supabaseUrl, supabaseAnonKey, {
+    ? createClient<Database>(supabaseUrl, supabaseAnonKey, {
           auth: {
               persistSession: true,
               autoRefreshToken: true,
@@ -186,7 +186,7 @@ async function verifyCapturedSupabaseAuthRedirectSession(): Promise<SupabaseAuth
     // Keep password-link credentials out of the shared browser client. A unique,
     // non-persistent client cannot be replaced by a sign-in or token refresh in
     // another tab between verification and the password update.
-    const isolatedClient = createClient(supabaseUrl, supabaseAnonKey, {
+    const isolatedClient = createClient<Database>(supabaseUrl, supabaseAnonKey, {
         auth: {
             autoRefreshToken: false,
             detectSessionInUrl: false,

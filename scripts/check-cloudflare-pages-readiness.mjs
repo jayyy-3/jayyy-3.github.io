@@ -162,11 +162,27 @@ function checkHeaders() {
 function checkFunctions() {
   const enquiries = readRequired('functions/api/enquiries.js');
   const samples = readRequired('functions/api/sample-requests.js');
-  const forms = readRequired('functions/_lib/forms.js');
-  const adminInviteRoute = readRequired('functions/api/admin/invite-user.js');
-  const adminInvite = readRequired('functions/_lib/admin-invite.js');
-  const adminProjectsRoute = readRequired('functions/api/admin/projects.js');
   const adminRuntime = readRequired('functions/_lib/admin-runtime.js');
+  // Service configuration, client options, bearer parsing and identity live once in admin-runtime.js.
+  const formsSource = readRequired('functions/_lib/forms.js');
+  const forms = formsSource + '\n' + adminRuntime;
+  const adminInviteRoute = readRequired('functions/api/admin/invite-user.js');
+  const adminInviteSource = readRequired('functions/_lib/admin-invite.js');
+  const adminInvite = adminInviteSource + '\n' + adminRuntime;
+  const adminStonesSource = readRequired('functions/_lib/admin-stones.js');
+  const adminProjectsRoute = readRequired('functions/api/admin/projects.js');
+  for (const [label, text] of [
+    ['functions/_lib/forms.js', formsSource],
+    ['functions/_lib/admin-invite.js', adminInviteSource],
+    ['functions/_lib/admin-stones.js', adminStonesSource],
+    ['functions/_lib/admin-projects.js', readRequired('functions/_lib/admin-projects.js')],
+    ['functions/_lib/admin-image-qr.js', readRequired('functions/_lib/admin-image-qr.js')],
+  ]) {
+    if (!text.includes("from './admin-runtime.js'")) failures.push(`${label}: must use the shared functions/_lib/admin-runtime.js`);
+    if (/from ['"]@supabase\/supabase-js['"]|function jsonResponse\(|supabase\.co['"]/.test(text)) {
+      failures.push(`${label}: Supabase client creation, jsonResponse and the Supabase URL default belong to admin-runtime.js`);
+    }
+  }
   const adminProjects = readRequired('functions/_lib/admin-projects.js') + '\n' + adminRuntime;
   const adminImageQrRoute = readRequired('functions/api/admin/image-qr.js');
   const adminImageQr = readRequired('functions/_lib/admin-image-qr.js') + '\n' + adminRuntime;

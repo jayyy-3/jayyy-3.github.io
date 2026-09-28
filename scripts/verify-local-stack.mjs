@@ -39,6 +39,8 @@ try {
   run('local-stack.mjs', ['reset'])
   run('local-stack.mjs', ['reset'])
   run('check-local-migrations.mjs')
+  // Regenerate the database types from the freshly migrated stack; the committed file must match byte for byte.
+  run('generate-database-types.mjs', ['--check', '--regenerate', '--out', `${attempt}/database.ts`])
   app = spawn(process.execPath, ['scripts/local-app.mjs'], { env: cleanLocalEnv(), detached: true, stdio: ['ignore', 'pipe', 'pipe'] })
   let output = ''
   app.stdout.on('data', chunk => { output += chunk.toString(); writeFileSync(`${attempt}/app.log`, output) })

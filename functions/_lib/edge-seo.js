@@ -84,6 +84,12 @@ export function createEdgeSeoHandler(deps = {}) {
     return inflight;
   }
 
+  /**
+   * @param {any} context
+   * @param {any} config
+   * @param {string} origin
+   * @param {{ maxAgeMs?: number }} [options]
+   */
   async function getDataset(context, config, origin, { maxAgeMs } = {}) {
     if (!config || config.staticOnly) {
       return { fetchedAt: now(), dataset: buildStaticEdgeSeoDataset({ complete: Boolean(config?.staticOnly) }) };
