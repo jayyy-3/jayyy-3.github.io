@@ -34,6 +34,7 @@ Published CMS overlay with static fallback, content import readiness, access con
   - `ArticlePage` renders sanitized article HTML
 - Runtime fetches:
   - Static JSON/HTML from `public/articles` remains the legacy Article fallback.
+  - Browser and Function Supabase reads are typed by the generated `src/types/database.ts` (`createClient<Database>`); service/lib row types derive from `Tables<>` and are never forced with `as unknown as`. Admin page files may keep local interfaces until their module split.
   - `src/lib/publicContentClient.ts` creates a non-session browser client from `VITE_SUPABASE_PUBLISHABLE_KEY` or `VITE_SUPABASE_ANON_KEY`; no public client is created when neither key exists.
   - Projects, Products, Articles, Stone Library, and default site settings read Published Supabase data directly through that browser client and public RLS, then apply their documented static fallback/overlay contracts.
   - Published Storage media resolves only from `urblo-public-media`; Draft, private, invalid, or unsafe media locations do not become public URLs.
