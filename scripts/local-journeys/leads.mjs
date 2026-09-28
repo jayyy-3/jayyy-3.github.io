@@ -152,8 +152,9 @@ export async function leadsJourney({ page, check, id, directory }) {
     await page.getByLabel('Email', { exact: true }).fill(LOCAL_ACCOUNTS.editor)
     await page.getByLabel('Password', { exact: true }).fill(LOCAL_PASSWORD)
     await page.getByRole('button', { name: 'Sign in', exact: true }).click()
-    await page.waitForURL(`${LOCAL_APP}/admin`)
-    await page.goto(`${LOCAL_APP}/admin/leads`)
+    // Sign out from Leads keeps /admin/leads as the login "next" target.
+    await page.waitForURL(`${LOCAL_APP}/admin/leads`)
+    await expect(page.getByRole('heading', { name: 'Leads', exact: true })).toBeVisible()
     const lead = newest[1]
     await openLead(lead.name)
     await expect(page.getByRole('button', { name: 'Export visible queue', exact: true })).toBeDisabled()
