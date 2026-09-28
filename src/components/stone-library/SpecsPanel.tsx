@@ -6,6 +6,7 @@ import type {
     StonePriceTierLevel,
 } from '../../types/stone-library';
 import StatusPill from './StatusPill';
+import { cardTitleClassName } from '../ui/styles';
 import type { StatusPillTone } from './StatusPill';
 
 interface SpecsPanelProps {
@@ -105,14 +106,14 @@ export default function SpecsPanel({
                                 className={[
                                     'h-2 flex-1 rounded-sm transition-colors',
                                     priceTierLevel !== null && level <= priceTierLevel
-                                        ? 'bg-[#00FF19]'
+                                        ? 'bg-lime'
                                         : 'bg-black/10',
                                 ].join(' ')}
                             />
                         ))}
                     </div>
                     {priceRange && priceRange !== pricePrimaryLabel ? (
-                        <p className="mt-3 text-[11px] uppercase tracking-[0.08em] text-black/55">
+                        <p className="mt-3 text-micro uppercase tracking-caps text-muted">
                             Source notation: {priceRange}
                         </p>
                     ) : null}
@@ -120,8 +121,8 @@ export default function SpecsPanel({
             </div>
 
             <div className="space-y-3">
-                <h2 className="font-display text-[24px] font-semibold uppercase leading-[1.08] tracking-[0.02em] text-black">
-                    Finish Capability
+                <h2 className={cardTitleClassName()}>
+                    Finish capability
                 </h2>
                 <div className="divide-y divide-black/10 overflow-hidden rounded-[4px] border border-black/10 bg-white shadow-none">
                     {finishCapabilities.map((finish) => (
@@ -140,8 +141,8 @@ export default function SpecsPanel({
             </div>
 
             <div className="space-y-3">
-                <h2 className="font-display text-[24px] font-semibold uppercase leading-[1.08] tracking-[0.02em] text-black">
-                    Cut Options
+                <h2 className={cardTitleClassName()}>
+                    Cut options
                 </h2>
                 {cutOptions.length ? (
                     <div className="divide-y divide-black/10 overflow-hidden rounded-[4px] border border-black/10 bg-white shadow-none">

@@ -21,7 +21,7 @@ export default function OptionSelector({ title, category, options, whitelist }: 
 
   return (
     <section className="mb-8">
-      <h4 className="urblo-meta mb-4 text-black/65">{title}</h4>
+      <h3 className="mb-4 text-meta font-semibold uppercase tracking-caps text-muted">{title}</h3>
       <div className="flex flex-wrap gap-4">
         {visible.map((option) => {
           const active = selected === option.slug;
@@ -34,10 +34,10 @@ export default function OptionSelector({ title, category, options, whitelist }: 
               onClick={() => setMaterial(category, option.slug)}
               aria-pressed={active}
               className={[
-                'overflow-hidden rounded-[4px] border bg-white text-left transition',
+                'overflow-hidden rounded border bg-white text-left transition',
                 active
-                  ? 'border-[var(--urblo-lime)] shadow-[0_0_0_1px_rgba(0,255,25,0.32)]'
-                  : 'border-black/10 hover:border-black/30',
+                  ? 'border-lime shadow-[0_0_0_1px_rgba(0,255,25,0.32)]'
+                  : 'border-line hover:border-black/30',
               ].join(' ')}
             >
               <span className="relative block h-20 w-28 overflow-hidden bg-black/5">
@@ -55,13 +55,13 @@ export default function OptionSelector({ title, category, options, whitelist }: 
                 {imagePending ? (
                   <span
                     aria-hidden="true"
-                    className="absolute inset-x-1 bottom-1 rounded-[3px] bg-white/92 px-1.5 py-1 text-center text-[9px] font-semibold uppercase leading-none tracking-[0.08em] text-black/70"
+                    className="absolute inset-x-1 bottom-1 rounded-sm bg-white/92 px-1.5 py-1 text-center text-micro font-semibold leading-none text-ink"
                   >
                     Image pending
                   </span>
                 ) : null}
               </span>
-              <span className="block w-28 px-2 py-2 text-center text-[11px] font-semibold leading-tight text-black">
+              <span className="block w-28 px-2 py-2 text-center text-micro font-semibold text-ink">
                 {option.name}
               </span>
             </button>

@@ -292,7 +292,7 @@ export default function ImageStage({
 
     if (!finishes.length) {
         return (
-            <section className="urblo-card self-start overflow-hidden border-black/10 shadow-none">
+            <section className="self-start overflow-hidden rounded border border-line bg-white">
                 <div className="flex h-[320px] items-center justify-center bg-[rgba(239,239,239,0.78)] px-6 text-center">
                     <p className="urblo-meta text-black/60">
                         Image coming soon
@@ -378,7 +378,7 @@ export default function ImageStage({
                                     <button
                                         type="button"
                                         onClick={() => onOpenLightbox(finish.finishKey)}
-                                        className="absolute right-2 top-2 min-h-8 rounded-[4px] border border-white/25 bg-black/80 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.06em] text-white shadow-[0_8px_18px_rgba(0,0,0,0.22)] backdrop-blur-sm transition hover:border-[var(--urblo-lime)] hover:bg-black/90 hover:text-[var(--urblo-lime)]"
+                                        className="absolute right-2 top-2 min-h-8 rounded-[4px] border border-white/25 bg-black/80 px-3 py-1.5 text-micro font-bold uppercase tracking-[0.06em] text-white shadow-[0_8px_18px_rgba(0,0,0,0.22)] backdrop-blur-sm transition hover:border-[var(--urblo-lime)] hover:bg-black/90 hover:text-[var(--urblo-lime)]"
                                         aria-label={`Open ${finish.label} in large view`}
                                     >
                                         Zoom
@@ -386,7 +386,7 @@ export default function ImageStage({
                                 ) : null}
 
                                 {isActive ? (
-                                    <div className="pointer-events-none absolute left-2 top-2 flex max-w-[calc(100%-6.75rem)] items-center gap-1.5 rounded-[4px] border border-white/20 bg-black/80 px-2.5 py-1.5 text-[10px] font-bold uppercase leading-[1.12] tracking-[0.04em] text-white shadow-[0_8px_18px_rgba(0,0,0,0.24)] backdrop-blur-sm sm:text-[11px]">
+                                    <div className="pointer-events-none absolute left-2 top-2 flex max-w-[calc(100%-6.75rem)] items-center gap-1.5 rounded-[4px] border border-white/20 bg-black/80 px-2.5 py-1.5 text-micro font-bold uppercase leading-[1.12] tracking-[0.04em] text-white shadow-[0_8px_18px_rgba(0,0,0,0.24)] backdrop-blur-sm">
                                         <span
                                             className={[
                                                 'h-1.5 w-1.5 flex-none rounded-full',
@@ -405,7 +405,7 @@ export default function ImageStage({
                                     ].join(' ')}
                                 >
                                     <span
-                                        className="rounded border border-white/20 bg-black/80 px-1.5 py-2.5 text-[10px] font-bold uppercase leading-none tracking-[0.04em] text-white shadow-[0_6px_14px_rgba(0,0,0,0.24)] backdrop-blur-sm transition group-hover:border-[var(--urblo-lime)] group-hover:bg-black/90"
+                                        className="rounded border border-white/20 bg-black/80 px-1.5 py-2.5 text-micro font-bold uppercase leading-none tracking-[0.04em] text-white shadow-[0_6px_14px_rgba(0,0,0,0.24)] backdrop-blur-sm transition group-hover:border-[var(--urblo-lime)] group-hover:bg-black/90"
                                         style={{
                                             writingMode: 'vertical-rl',
                                             textOrientation: 'mixed',
@@ -420,7 +420,7 @@ export default function ImageStage({
                 </div>
             </div>
 
-            <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 rounded-[4px] border border-black/10 bg-white px-4 py-2.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-black/55 shadow-none">
+            <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 rounded-[4px] border border-black/10 bg-white px-4 py-2.5 text-micro font-semibold uppercase tracking-caps text-muted shadow-none">
                 <span>{stoneName}</span>
                 {activeFinish ? (
                     <span className="flex flex-wrap items-center justify-end gap-x-4 gap-y-1 text-right">
@@ -454,7 +454,7 @@ export default function ImageStage({
                         <p className="urblo-meta text-black/58">
                             Secondary frame
                         </p>
-                        <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-black/45">
+                        <span className="text-micro font-semibold uppercase tracking-caps text-muted">
                             Same finish, alternate source view
                         </span>
                     </div>
@@ -477,7 +477,7 @@ export default function ImageStage({
                                         loading="lazy"
                                     />
                                 </span>
-                                <span className="px-2 py-2 text-[10px] font-semibold uppercase leading-tight tracking-[0.08em] text-black">
+                                <span className="px-2 py-2 text-micro font-semibold uppercase leading-tight tracking-[0.08em] text-black">
                                     {image.label}
                                 </span>
                             </button>

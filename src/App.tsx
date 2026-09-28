@@ -32,15 +32,6 @@ const CapabilitiesPage = lazy(() => import('./pages/CapabilitiesPage'));
 const AdminApp = lazy(() => import('./pages/admin/AdminApp'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
-const ROUTE_BANNERS = {
-    products: '/media/launch/banners/products.jpg',
-    materials: '/media/launch/banners/materials.jpg',
-    projects: '/media/launch/banners/projects.jpg',
-    ourStory: '/media/launch/banners/our-story.jpg',
-    contact: '/media/launch/banners/our-story.jpg',
-    articles: '/media/launch/banners/articles.jpg',
-} as const;
-
 function TitleUpdater() {
     const location = useLocation();
     const settings = usePublicSiteSettings();
@@ -250,7 +241,7 @@ function AnimatedRoutes() {
                 <Route
                     path="/products"
                     element={
-                        <DefaultLayout bgImage={ROUTE_BANNERS.products}>
+                        <DefaultLayout>
                             {loadPage(<ProductsPage />)}
                         </DefaultLayout>
                     }
@@ -259,7 +250,7 @@ function AnimatedRoutes() {
                 <Route
                     path="/products/:slug"
                     element={
-                        <DefaultLayout bgImage={ROUTE_BANNERS.materials}>
+                        <DefaultLayout>
                             {loadPage(<ProductDetailPage />)}
                         </DefaultLayout>
                     }
@@ -286,7 +277,7 @@ function AnimatedRoutes() {
                 <Route
                     path="/our-story"
                     element={
-                        <DefaultLayout bgImage={ROUTE_BANNERS.ourStory}>
+                        <DefaultLayout>
                             {loadPage(<OurStoryPage />)}
                         </DefaultLayout>
                     }
@@ -304,7 +295,7 @@ function AnimatedRoutes() {
                 <Route
                     path="/contact"
                     element={
-                        <DefaultLayout bgImage={ROUTE_BANNERS.contact}>
+                        <DefaultLayout>
                             {loadPage(<ContactPage />)}
                         </DefaultLayout>
                     }
@@ -313,7 +304,7 @@ function AnimatedRoutes() {
                 <Route
                     path="/articles"
                     element={
-                        <DefaultLayout bgImage={ROUTE_BANNERS.articles}>
+                        <DefaultLayout>
                             {loadPage(<ArticlesPage />)}
                         </DefaultLayout>
                     }
@@ -322,8 +313,8 @@ function AnimatedRoutes() {
                 <Route
                     path="/articles/:slug"
                     element={
-                        <DefaultLayout showBanner={false} headerSurface="overlay">
-                            {loadPage(<ArticlePage />, { headerOffset: true })}
+                        <DefaultLayout>
+                            {loadPage(<ArticlePage />)}
                         </DefaultLayout>
                     }
                 />

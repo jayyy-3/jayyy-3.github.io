@@ -8,9 +8,9 @@ Last updated: 2026-09-28
 
 **NOW-OPT-PAGE-CONVERGENCE-001** — Bring the remaining public pages onto the wave 2 tokens and shared components: Our Story, Contact, Products, Product detail, Articles, Article page (layout only), Stone detail and Project detail; remove the empty decorative banner page tops; unify CTA wording, phone number format, en-AU dates and singular/plural copy.
 
-阶段：planned。状态：now。
+阶段：verification。状态：now。
 
-下一步：Opus implements on its own branch; Claude reports to Jay, then merges under standing authorization.
+下一步：Push branch claude/opt-page-convergence, open the PR, run branch Preview smoke; Claude reports the 1440 screenshots to Jay, then merges under standing authorization.
 
 ## 已观察的发布状态
 

@@ -106,6 +106,7 @@ Defined in `tailwind.config.js` (`theme.extend`) and, for responsive layout valu
 | Border | `line` (`border-line`) | black 12% | Hairlines on light surfaces |
 | Border | `line-inverse` (`border-line-inverse`) | white 14% | Hairlines on dark surfaces |
 | Surface | `surface` (`bg-surface`) | `rgba(239,239,239,0.28)` | Quiet tool bands and panels |
+| Type | `text-micro` | 11px / 1.3 | Dense tool labels only: image overlay tags, swatch captions, finish chips (2026-09-28) |
 | Type | `text-meta` | 12px / 1.5 | Uppercase labels, meta, buttons |
 | Type | `text-small` | 14px / 1.6 | Secondary copy, lists, card copy |
 | Type | `text-copy` | 16px / 1.75 | Body copy |
@@ -122,11 +123,11 @@ Defined in `tailwind.config.js` (`theme.extend`) and, for responsive layout valu
 | Layout | `--urblo-section` (`py-section`, `.urblo-section`) | 72px / 96px at 1024 | Standard section rhythm |
 | Layout | `--urblo-section-tight` (`py-section-tight`) | 48px / 64px at 1024 | Compact bands (next-step CTA, tool bands) |
 
-Shared components (`src/components/ui/`, used on Home and Capabilities first; other pages converge in wave 3):
+Shared components (`src/components/ui/`; Home and Capabilities adopted them first, every other public page converged on 2026-09-28):
 - `Button`: `primary` (black fill), `inverse` (lime fill for dark surfaces), `ghost` (quiet hairline outline that warms to lime), `link` (uppercase underlined text). `surface="dark"` adapts primary, ghost and link; `size="sm"` gives a 40px control. `to` renders a router link, `href` an anchor, otherwise a button. Built on the `urblo-button*` classes; the older black-outline `.urblo-button` stays for pages not yet converted.
 - `SectionHeading`: two levels only. `display` is Avenir light 34 → 44 → 64 for editorial statements; `section` is Avenir semibold, sentence case, 34 → 44 (Projects pattern). Optional eyebrow and copy.
-- `PageIntro`: breadcrumb or eyebrow, light H1 (`urblo-page-title`, or the `hero` size over media), lede and actions, modelled on the Projects archive.
-- `Card`: `bordered` (1px hairline, 4px radius) or `borderless` (Projects card, top hairline only); no resting shadow; optional 4:3 media, meta, title, copy and footer.
+- `PageIntro`: breadcrumb or eyebrow, light H1 (`urblo-page-title`, or the oversized `hero` size), lede and actions, modelled on the Projects archive. `band` renders the white-start opening band (bottom hairline, page container, Projects padding); `meta` holds small labels or pills above the title; `aside` is the right-hand column from lg (previous/next, counts).
+- `Card`: `bordered` (1px hairline, 4px radius) or `borderless` (Projects card, top hairline only); no resting shadow; optional media (4:3, or `mediaAspect="2/3"` for portraits; `mediaTone="light"` for product renders on white), meta, title, copy and footer. Card and panel titles below the two section levels use `cardTitleClassName()` (Avenir semibold 24, or 34 for `lg`), sentence case.
 - `Reveal`: the one scroll reveal (fade and 24px rise, once; fade only under reduced motion).
 
 The header uses the page gutter, so the logo lines up with page content at every width. Media controls (carousel arrows, rail thumbnails, the video Play disc, modal close) are not Buttons.
@@ -510,3 +511,27 @@ Implementation: stroke `rgba(0,0,0,0.72)` plus a soft `0 1px 4px` shadow; halo s
 Remember: the dot signals that a point exists; it should never outweigh the stone in the photograph. Motion stops by itself and never loops.
 
 Admin editor variant (Jay, 2026-09-28): the Projects editor's point canvas uses the same dot and 44px hit area through `.urblo-hotspot-marker--editor`, with no halo. The selected point scales to 1.3x and adds a 2px lime ring framed by the dark stroke; keyboard focus keeps the site ring. A small 10px number sits beside the dot (dark chip, lime when selected, flipped to the left past 90% x) to match the editor's `Point N` tabs; it never enlarges the hit area.
+
+## Public page convergence — 2026-09-28
+
+Review: after wave 2 only Home, Capabilities and Projects used the tokens and shared components. Our Story, Contact, Products, Articles opened with a 240/280px text-less image banner (dark overlay plus a lime radial gradient), headings used four styles (Space Grotesk caps, light, semibold, bold caps), and CTA wording, phone format and dates varied by page.
+
+Decisions (NOW-OPT-PAGE-CONVERGENCE-001, pending Jay's screenshot acceptance):
+- Page openings: `DefaultLayout` no longer renders the decorative banner; it keeps only the light 102px header clearance and the `light-page` header. Every white-start page opens with `PageIntro band` and a `Home / … / current` breadcrumb, as Projects does. Home and Capabilities keep their media heroes. Article detail joins the white-start pattern: breadcrumb, date eyebrow and title, then the cover photograph full width and undimmed (it was a 75%-opacity backdrop behind the title). Project detail keeps its oversized title through `PageIntro size="hero"` with previous/next in the aside.
+- Headings: section H2s use `SectionHeading` (`section` semibold, or `display` light for the Our Story carbon statement); Space Grotesk caps headings are retired from these pages; headings are sentence case (`Streamlined construction`, `Finish capability`, `Cut options`). Lime is no longer used as eyebrow text on white (Project detail); eyebrows use the shared muted eyebrow.
+- Cards: Products, Articles, Our Story team, Contact panels and Stone `Used in projects` use `Card`; no resting shadow or hover lift; card titles in Avenir sentence case, so long article titles no longer run to four uppercase lines.
+- Our Story: the proof band follows the Home metric pattern (left-aligned number, hairline under, plain label); the carbon and workflow blocks are left-aligned like the rest of the site.
+
+CTA set (use these labels; the destination decides the verb):
+- `Discuss a project` → `/contact` (`siteCtas.contact`). The main conversation action everywhere, including Product detail, Project closing CTA and the default label of an Article CTA block.
+- `Request samples` → `/contact?intent=sample-request` (`siteCtas.sampleRequest`); also the Contact form submit label in sample mode. The enquiry-mode submit is `Send enquiry`.
+- `Explore Stone Library` → `/stone-library` (`siteCtas.stoneLibrary`). `Explore …` opens a collection; `View …` opens one record (`View project`, `View stone`, `View capabilities`). `See placement` stays for the point deep link.
+- Direct channels: `Email Urblo` (mailto; on Product detail the email is prefilled with the configuration) and `Call 1300 1URBLO`.
+- Navigation and route-state recovery links keep the navigation names (`Contact Us`, `Projects`, `Articles`).
+
+Copy formats:
+- Phone: displayed `1300 1URBLO`, dialled `tel:1300187256`; where a label is read aloud it adds the digits (`1300 1URBLO (1300 187 256)`). Source of truth `siteContact` in `src/data/siteChrome.ts`. Legacy article HTML bodies keep their own wording until NOW-ARTICLE-STRUCTURE-CLAIMS-001.
+- Dates: `formatPublicDate` (`src/components/ui/format.ts`) renders `10 Jun 2024` (day, three-letter month, year; UTC calendar day) regardless of the visitor's locale.
+- Counts agree with their noun: `1 finish`, `4 finishes`, `1 result`.
+
+Remember: a page opens with words, not an empty picture; imagery appears where it shows the stone, project or product. The Projects archive stays the reference for new public pages.

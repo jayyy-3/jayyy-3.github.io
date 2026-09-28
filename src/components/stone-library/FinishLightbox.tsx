@@ -281,7 +281,7 @@ export default function FinishLightbox({
                                             className="h-full w-full object-cover"
                                         />
                                     </span>
-                                    <span className="px-2 py-2 text-[10px] font-semibold uppercase leading-tight tracking-[0.08em]">
+                                    <span className="px-2 py-2 text-micro font-semibold uppercase leading-tight tracking-[0.08em]">
                                         {frame.label}
                                     </span>
                                 </button>
@@ -366,7 +366,7 @@ export default function FinishLightbox({
                         />
                     ) : (
                         <div className="flex h-full w-full items-center justify-center px-6 text-center">
-                            <p className="text-sm font-semibold uppercase tracking-[0.12em] text-[#00FF19]">
+                            <p className="text-sm font-semibold uppercase tracking-caps text-lime">
                                 Image coming soon
                             </p>
                         </div>

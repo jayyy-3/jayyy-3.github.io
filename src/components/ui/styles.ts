@@ -52,6 +52,11 @@ export function headingClassName(level: HeadingLevel = 'section', surface: Surfa
   return cx(headingLevelClasses[level], 'tracking-normal', surface === 'dark' ? 'text-inverse' : 'text-ink');
 }
 
+/** Card and panel titles (below the two section levels): Avenir semibold 24, or 34 for `lg`. */
+export function cardTitleClassName(size: 'sm' | 'lg' = 'sm', surface: Surface = 'light') {
+  return cx(size === 'lg' ? 'text-title' : 'text-title-sm', 'font-semibold leading-tight', surface === 'dark' ? 'text-inverse' : 'text-ink');
+}
+
 export function eyebrowClassName(surface: Surface = 'light') {
   return cx('urblo-eyebrow', surface === 'dark' && 'text-inverse-muted');
 }
