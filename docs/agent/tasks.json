@@ -4,6 +4,49 @@
   "archive": "docs/archive/2026-09-09/completed-tasks.json",
   "tasks": [
     {
+      "id": "NOW-OPT-ADMIN-POINT-MARKER-001",
+      "status": "now",
+      "priority": 0,
+      "modules": [
+        "projects"
+      ],
+      "summary": "Apply the approved public material-point marker spec (14px white dot, lime border, dark outer stroke, 44px hit area) to the admin Projects editor's VisualHotspotEditor, keeping the editing affordances (selected state, drag, keyboard nudge) visually distinct but on the same spec.",
+      "files": [
+        "src/pages/admin/projects/VisualHotspotEditor.tsx",
+        "src/pages/admin/projects/sections/MediaSection.tsx",
+        "src/index.css",
+        "docs/DESIGN.md"
+      ],
+      "acceptance": [
+        "Admin editor markers reuse the public .urblo-hotspot-marker styles (same dot size, colours, stroke, hit area); no halo pulse in the editor.",
+        "Selected marker shows a clear editing state (e.g. 1.3x scale plus a lime ring) and a small numbered or lettered label if the editor already numbers points; dragging and keyboard nudging still work and the hit area stays >= 44px.",
+        "DESIGN.md marker section notes the editor variant; before/after screenshots at 1440 on the local synthetic stack or a mocked editor.",
+        "No data contract, Function or RLS change; local Projects journey passes."
+      ],
+      "verification": [
+        "npm run agent:verify -- --plan",
+        "npm run gate",
+        "npm test",
+        "npm run local:verify",
+        "git diff --check"
+      ],
+      "phase": "planned",
+      "authorization": {
+        "source": "Jay reported on 2026-09-28 that the admin editor markers are still the old large style and asked for them to match; wave 3 approval and standing merge authorization apply.",
+        "included": [
+          "Branch implementation, isolated local tests, git push, pull request, branch Preview and smoke (read-only), docs/agent state updates, merge after Claude's report."
+        ],
+        "excluded": [
+          "Production data writes, Function, RLS or migration changes."
+        ]
+      },
+      "nextAction": "Opus implements on its own branch; Claude reports to Jay, then merges.",
+      "blocker": "",
+      "notes": [
+        "2026-09-28: follow-up to NOW-OPT-PROJECT-POINT-MARKER-001 (public marker shipped in wave 1); the editor's VisualHotspotEditor kept the old 28px marker."
+      ]
+    },
+    {
       "id": "NOW-OPT-PAGE-CONVERGENCE-001",
       "priority": 0,
       "modules": [
