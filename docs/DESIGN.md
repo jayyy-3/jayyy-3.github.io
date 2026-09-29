@@ -508,3 +508,5 @@ Jay's decisions:
 Implementation: stroke `rgba(0,0,0,0.72)` plus a soft `0 1px 4px` shadow; halo scales 1x to 3x while fading from 0.6 opacity over the first 70% of each 2s cycle; it starts when 35% of the image is visible and a hover/focus replays all three cycles for that point. Hover scaling applies only on hover-capable pointers. Keyboard focus draws the site's black ring framed in white around the dot, not around the hit area.
 
 Remember: the dot signals that a point exists; it should never outweigh the stone in the photograph. Motion stops by itself and never loops.
+
+Admin editor variant (Jay, 2026-09-28): the Projects editor's point canvas uses the same dot and 44px hit area through `.urblo-hotspot-marker--editor`, with no halo. The selected point scales to 1.3x and adds a 2px lime ring framed by the dark stroke; keyboard focus keeps the site ring. A small 10px number sits beside the dot (dark chip, lime when selected, flipped to the left past 90% x) to match the editor's `Point N` tabs; it never enlarges the hit area.

@@ -148,19 +148,30 @@ export default function VisualHotspotEditor({
             onKeyDown={(event) => handleMarkerKeyDown(event, hotspot)}
             onClick={() => onSelect(hotspot.key)}
             disabled={disabled || selectionDisabled}
+            // Public point spec (docs/DESIGN.md, Project point marker) plus the editor modifier:
+            // no halo, a lime ring on the selected point and a small number beside the dot that
+            // matches the "Point N" tabs.
             className={[
-              "absolute z-10 grid h-9 w-9 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-2 text-xs font-black shadow-[0_4px_16px_rgba(0,0,0,0.24)] transition focus:outline-none focus:ring-4 focus:ring-[rgba(0,255,25,0.34)]",
-              selectedKey === hotspot.key
-                ? "border-black bg-[var(--urblo-lime)] text-black scale-110"
-                : "border-white bg-black text-white hover:bg-[var(--urblo-lime)] hover:text-black",
+              "urblo-hotspot-marker urblo-hotspot-marker--editor absolute -translate-x-1/2 -translate-y-1/2",
+              selectedKey === hotspot.key ? "z-20" : "z-10",
             ].join(" ")}
+            data-draggable={disabled || readOnly ? undefined : "true"}
             style={{
               left: `${hotspot.xPercent}%`,
               top: `${hotspot.yPercent}%`,
             }}
             data-testid="project-hotspot-marker"
           >
-            {index + 1}
+            <span className="urblo-hotspot-marker__dot" aria-hidden="true" />
+            <span
+              className={[
+                "urblo-hotspot-marker__label",
+                hotspot.xPercent > 90 ? "urblo-hotspot-marker__label--start" : "",
+              ].join(" ")}
+              aria-hidden="true"
+            >
+              {index + 1}
+            </span>
           </button>
         ))}
       </div>
