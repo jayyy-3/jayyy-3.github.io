@@ -7,7 +7,7 @@
     font-style: normal;
     font-weight: 300;
     font-display: swap;
-    src: url('/fonts/urblo/Avenir-LT-Std-35-Light.ttf') format('truetype');
+    src: url('/fonts/urblo/Avenir-LT-Std-35-Light.woff2') format('woff2'), url('/fonts/urblo/Avenir-LT-Std-35-Light.ttf') format('truetype');
 }
 
 @font-face {
@@ -15,7 +15,7 @@
     font-style: normal;
     font-weight: 400;
     font-display: swap;
-    src: url('/fonts/urblo/Avenir-LT-Std-45-Book.ttf') format('truetype');
+    src: url('/fonts/urblo/Avenir-LT-Std-45-Book.woff2') format('woff2'), url('/fonts/urblo/Avenir-LT-Std-45-Book.ttf') format('truetype');
 }
 
 @font-face {
@@ -23,7 +23,7 @@
     font-style: normal;
     font-weight: 500;
     font-display: swap;
-    src: url('/fonts/urblo/Avenir-LT-Std-55-Roman.ttf') format('truetype');
+    src: url('/fonts/urblo/Avenir-LT-Std-55-Roman.woff2') format('woff2'), url('/fonts/urblo/Avenir-LT-Std-55-Roman.ttf') format('truetype');
 }
 
 @font-face {
@@ -31,7 +31,7 @@
     font-style: normal;
     font-weight: 600;
     font-display: swap;
-    src: url('/fonts/urblo/Avenir-LT-Std-65-Medium.ttf') format('truetype');
+    src: url('/fonts/urblo/Avenir-LT-Std-65-Medium.woff2') format('woff2'), url('/fonts/urblo/Avenir-LT-Std-65-Medium.ttf') format('truetype');
 }
 
 @font-face {
@@ -39,7 +39,7 @@
     font-style: normal;
     font-weight: 800;
     font-display: swap;
-    src: url('/fonts/urblo/Avenir-LT-Std-85-Heavy.ttf') format('truetype');
+    src: url('/fonts/urblo/Avenir-LT-Std-85-Heavy.woff2') format('woff2'), url('/fonts/urblo/Avenir-LT-Std-85-Heavy.ttf') format('truetype');
 }
 
 @font-face {
@@ -47,7 +47,7 @@
     font-style: italic;
     font-weight: 400;
     font-display: swap;
-    src: url('/fonts/urblo/Didot-LT-Std-Italic.ttf') format('truetype');
+    src: url('/fonts/urblo/Didot-LT-Std-Italic.woff2') format('woff2'), url('/fonts/urblo/Didot-LT-Std-Italic.ttf') format('truetype');
 }
 
 @font-face {
@@ -55,7 +55,7 @@
     font-style: normal;
     font-weight: 600;
     font-display: swap;
-    src: url('/fonts/urblo/Didot-LT-Std-Bold.ttf') format('truetype');
+    src: url('/fonts/urblo/Didot-LT-Std-Bold.woff2') format('woff2'), url('/fonts/urblo/Didot-LT-Std-Bold.ttf') format('truetype');
 }
 
 @font-face {
