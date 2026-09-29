@@ -486,56 +486,6 @@
         }
       }
     },
-    "/media/launch/banners/articles.jpg": {
-      "bytes": 659245,
-      "sha256": "33ebe91ade4a28a4",
-      "encoder": "overlay",
-      "variants": {
-        "480": {
-          "bytes": 32830,
-          "sha256": "6b6beda28f83116f"
-        },
-        "768": {
-          "bytes": 80976,
-          "sha256": "67ba5ee607efe436"
-        },
-        "1200": {
-          "bytes": 177768,
-          "sha256": "1ed8b58d19b88868"
-        },
-        "1600": {
-          "bytes": 283918,
-          "sha256": "a68225b13802475b"
-        },
-        "1800": {
-          "bytes": 367160,
-          "sha256": "084bc7629c1e58a8"
-        }
-      }
-    },
-    "/media/launch/banners/materials.jpg": {
-      "bytes": 497151,
-      "sha256": "4bf5b9388fa6abe0",
-      "encoder": "overlay",
-      "variants": {
-        "480": {
-          "bytes": 21690,
-          "sha256": "c0c90185d75f00f5"
-        },
-        "768": {
-          "bytes": 51422,
-          "sha256": "d4d65374d4972e43"
-        },
-        "1200": {
-          "bytes": 106614,
-          "sha256": "e6597ef7ebf78edf"
-        },
-        "1440": {
-          "bytes": 146282,
-          "sha256": "ed51715457bc7ab8"
-        }
-      }
-    },
     "/media/launch/banners/our-story.jpg": {
       "bytes": 271004,
       "sha256": "88955777062b97e0",
@@ -560,56 +510,6 @@
         "1800": {
           "bytes": 61900,
           "sha256": "262bdb4dbba85cfb"
-        }
-      }
-    },
-    "/media/launch/banners/products.jpg": {
-      "bytes": 654304,
-      "sha256": "55d0fd7a95b284a6",
-      "encoder": "overlay",
-      "variants": {
-        "480": {
-          "bytes": 48528,
-          "sha256": "4209be8cfdac01c5"
-        },
-        "768": {
-          "bytes": 119210,
-          "sha256": "9ee0002f29d092b0"
-        },
-        "1200": {
-          "bytes": 253214,
-          "sha256": "39ffb5bdffd77142"
-        },
-        "1440": {
-          "bytes": 366744,
-          "sha256": "2a4bf728a995f5a6"
-        }
-      }
-    },
-    "/media/launch/banners/projects.jpg": {
-      "bytes": 393214,
-      "sha256": "7535c917949b7509",
-      "encoder": "overlay",
-      "variants": {
-        "480": {
-          "bytes": 15618,
-          "sha256": "1ec148612cd3b727"
-        },
-        "768": {
-          "bytes": 38002,
-          "sha256": "93004731e3884a53"
-        },
-        "1200": {
-          "bytes": 82448,
-          "sha256": "a67dd41aeaea6ca4"
-        },
-        "1600": {
-          "bytes": 129532,
-          "sha256": "da597cf9f00943c6"
-        },
-        "1800": {
-          "bytes": 161114,
-          "sha256": "1df2abf72f2031b1"
         }
       }
     },
