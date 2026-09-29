@@ -13,6 +13,11 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
     <meta name="msapplication-TileImage" content="/mstile-270x270.png" />
+    <!-- Avenir 45 Book and 35 Light render text in the first viewport of every public route at 1440 and 375
+         (measured 2026-09-29, NOW-OPT-WEB-FONTS-001); other faces load on demand. Must equal the @font-face
+         WOFF2 URLs in src/index.css. Font preloads always need crossorigin. -->
+    <link rel="preload" href="/fonts/urblo/Avenir-LT-Std-45-Book.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/urblo/Avenir-LT-Std-35-Light.woff2" as="font" type="font/woff2" crossorigin />
     <script>
       // Preload the homepage hero poster only on the homepage; other routes have their own LCP image.
       // Must equal the hero's poster URL (full-width WebP variant, see src/lib/staticImageDelivery.ts).

@@ -1,0 +1,65 @@
+{
+  "generator": {
+    "script": "scripts/convert-fonts-woff2.mjs",
+    "tool": "wawoff2",
+    "version": "2.0.1"
+  },
+  "fonts": {
+    "Avenir-LT-Std-35-Light.ttf": {
+      "bytes": 27124,
+      "sha256": "58bb2b7ecde4d435",
+      "woff2": {
+        "bytes": 10836,
+        "sha256": "85e9f7ae0705de0a"
+      }
+    },
+    "Avenir-LT-Std-45-Book.ttf": {
+      "bytes": 27432,
+      "sha256": "a803842bef932cf0",
+      "woff2": {
+        "bytes": 10984,
+        "sha256": "0e404fda6a8de0d0"
+      }
+    },
+    "Avenir-LT-Std-55-Roman.ttf": {
+      "bytes": 27304,
+      "sha256": "02c59991f98c4133",
+      "woff2": {
+        "bytes": 11032,
+        "sha256": "2103179e109d75ce"
+      }
+    },
+    "Avenir-LT-Std-65-Medium.ttf": {
+      "bytes": 27044,
+      "sha256": "51b6a9b5e3d3dbef",
+      "woff2": {
+        "bytes": 10980,
+        "sha256": "91c0ee26f0480685"
+      }
+    },
+    "Avenir-LT-Std-85-Heavy.ttf": {
+      "bytes": 27072,
+      "sha256": "b8fc979414f104d3",
+      "woff2": {
+        "bytes": 10992,
+        "sha256": "0acba5b48fc5cb26"
+      }
+    },
+    "Didot-LT-Std-Bold.ttf": {
+      "bytes": 41512,
+      "sha256": "1bf5b5996a3ed3c3",
+      "woff2": {
+        "bytes": 15168,
+        "sha256": "03c7340fbd1a7bdb"
+      }
+    },
+    "Didot-LT-Std-Italic.ttf": {
+      "bytes": 44352,
+      "sha256": "1a2d39986c751634",
+      "woff2": {
+        "bytes": 15856,
+        "sha256": "2fb47811adef7635"
+      }
+    }
+  }
+}

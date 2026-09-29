@@ -35,7 +35,7 @@
         "npm run agent:cloudflare-preview-smoke -- --base-url <branch Preview>",
         "git diff --check"
       ],
-      "phase": "planned",
+      "phase": "verification",
       "authorization": {
         "source": "Jay confirmed on 2026-09-29 that a web font licence exists (\"有，你直接做，以前设计师弄的\") and asked for the conversion; standing merge authorization applies.",
         "included": [
@@ -45,10 +45,11 @@
           "Cache headers for /assets/*, any photograph or content change, production data writes."
         ]
       },
-      "nextAction": "Opus implements on its own branch; Claude reports to Jay, then merges.",
+      "nextAction": "Opus runs the gate, pushes claude/opt-web-fonts and records branch Preview evidence; Claude reports to Jay, then merges.",
       "blocker": "",
       "notes": [
-        "2026-09-29: follow-up to NOW-OPT-STATIC-ASSETS-001, which left fonts unconverted pending the licence. Jay also closed the open content items: the Harcourt stone title and the AI-generated project share images stay as they are; the media promotion endpoint and the colleague trial are parked."
+        "2026-09-29: follow-up to NOW-OPT-STATIC-ASSETS-001, which left fonts unconverted pending the licence. Jay also closed the open content items: the Harcourt stone title and the AI-generated project share images stay as they are; the media promotion endpoint and the colleague trial are parked.",
+        "2026-09-29: licence basis: Jay confirmed on 2026-09-29 that a web font licence exists (obtained by the previous designer), which authorizes the WOFF2 conversion. Implemented on claude/opt-web-fonts: scripts/convert-fonts-woff2.mjs (wawoff2 2.0.1, pinned; graph node web-fonts), seven WOFF2 files beside the kept TTFs (221,840 -> 85,848 bytes), @font-face woff2-first, preload of Avenir 45 Book and 35 Light only. _headers unchanged: the readiness check forbids any Cache-Control and a missing /fonts/* path returns the SPA shell with 200. Local before/after pixel diff 0 px on Home and Stone Library at 1440 and 375 (viewport and full page)."
       ]
     },
     {

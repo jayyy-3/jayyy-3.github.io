@@ -29,6 +29,8 @@ export const checks = {
   'homepage-video': node('check-homepage-hero-video.mjs'),
   // Static WebP variants + manifest match their originals and the lock (no re-encoding).
   'static-images': node('generate-static-image-variants.mjs', ['--check']),
+  // WOFF2 fonts match their TTF sources, the lock (wawoff2 version) and the @font-face src order.
+  'web-fonts': node('convert-fonts-woff2.mjs', ['--check']),
   'product-images': node('check-product-model-image-mapping.mjs'),
   'stone-library': node('check-stone-library-detail-integrity.mjs'),
   'stone-adoption-snapshot': node('check-stone-adoption-snapshot.mjs'),
@@ -44,7 +46,7 @@ export const checks = {
   handoff: node('check-admin-handoff-readiness.mjs', ['--base-url', 'https://urblo.com.au', '--admin-email', 'info@urblo.com.au']),
   browser: node('check-admin-config-gate.mjs', [], ['build']),
 }
-const smoke = ['routes', 'unit', 'forms-ui', 'capabilities', 'ui-tokens', 'homepage-video', 'static-images', 'product-images', 'stone-library', 'stone-adoption-snapshot', 'qr', 'projects']
+const smoke = ['routes', 'unit', 'forms-ui', 'capabilities', 'ui-tokens', 'homepage-video', 'static-images', 'web-fonts', 'product-images', 'stone-library', 'stone-adoption-snapshot', 'qr', 'projects']
 const admin = ['unit', 'coverage', 'guide', 'qr', 'projects', 'build', 'lint', 'db-types', 'functions-types', 'foundation', 'media-plan', 'public-readiness', 'cloudflare', 'harness', 'handoff']
 export const suites = {
   docs: ['state', 'paths', 'harness', 'classifier', 'guide'],
