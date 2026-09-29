@@ -3,6 +3,9 @@ import type { FormEvent } from 'react';
 import { Navigate, useLocation, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, KeyRound, LogIn, Mail } from 'lucide-react';
 import { useAdminAuth } from '../../lib/adminAuthHooks';
+import { translateAdminSignInError } from '../../lib/adminErrors';
+import { AdminFeedback } from './AdminFeedback';
+import { useAdminFeedback } from './useAdminFeedback';
 import { AdminConfigMissingState, AdminErrorState, AdminLoadingState } from './AdminState';
 import { AdminHelpButton } from './AdminHelp';
 
@@ -13,8 +16,7 @@ export default function AdminLoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [mode, setMode] = useState<'sign-in' | 'reset'>('sign-in');
-    const [formError, setFormError] = useState<string | null>(null);
-    const [formNotice, setFormNotice] = useState<string | null>(null);
+    const { feedback, setError, setInfo, clearFeedback } = useAdminFeedback('login');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const nextPath = useMemo(() => {
@@ -43,8 +45,7 @@ export default function AdminLoginPage() {
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
-        setFormError(null);
-        setFormNotice(null);
+        clearFeedback();
         setIsSubmitting(true);
 
         if (mode === 'reset') {
@@ -52,11 +53,12 @@ export default function AdminLoginPage() {
             setIsSubmitting(false);
 
             if (result.error) {
-                setFormError(result.error);
+                const translated = translateAdminSignInError(result.error, 'reset');
+                setError(translated.message, { detail: translated.detail });
                 return;
             }
 
-            setFormNotice(
+            setInfo(
                 'If this email has a login, a secure password link is on its way. You can close this page after checking your inbox.',
             );
             return;
@@ -66,7 +68,8 @@ export default function AdminLoginPage() {
         setIsSubmitting(false);
 
         if (result.error) {
-            setFormError(result.error);
+            const translated = translateAdminSignInError(result.error, 'sign-in');
+            setError(translated.message, { detail: translated.detail });
         }
     }
 
@@ -126,17 +129,7 @@ export default function AdminLoginPage() {
                             </label>
                         ) : null}
 
-                        {formError ? (
-                            <p role="alert" className="mt-4 border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700">
-                                {formError}
-                            </p>
-                        ) : null}
-
-                        {formNotice ? (
-                            <p role="status" aria-live="polite" className="mt-4 border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold leading-6 text-emerald-800">
-                                {formNotice}
-                            </p>
-                        ) : null}
+                        <AdminFeedback feedback={feedback} scope="login" onDismiss={clearFeedback} className="mt-4" />
 
                         <button
                             type="submit"
@@ -157,8 +150,7 @@ export default function AdminLoginPage() {
                             type="button"
                             onClick={() => {
                                 setMode(mode === 'sign-in' ? 'reset' : 'sign-in');
-                                setFormError(null);
-                                setFormNotice(null);
+                                clearFeedback();
                             }}
                             className="mt-4 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded text-sm font-semibold text-black/62 transition hover:text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--urblo-lime)]"
                         >

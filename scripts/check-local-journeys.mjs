@@ -12,6 +12,7 @@ import { articleJourney } from './local-journeys/articles.mjs'
 import { formsJourney } from './local-journeys/forms.mjs'
 import { productJourney } from './local-journeys/products.mjs'
 import { mediaJourney } from './local-journeys/media.mjs'
+import { leadsJourney } from './local-journeys/leads.mjs'
 import { runtimeFingerprint } from './_lib/verification.mjs'
 const args = process.argv.slice(2)
 if (args.length && (args.length !== 2 || args[0] !== '--base-url')) throw new Error('Only --base-url is supported')
@@ -114,6 +115,7 @@ try {
   await productJourney({ page, context, check, id, directory })
   await mediaJourney({ page, context, check, id, directory })
   await formsJourney({ page, context, check, id, directory })
+  await leadsJourney({ page, context, check, id, directory })
   await check('A valid local account without an admin profile cannot enter protected modules', async () => {
     await page.getByRole('button', { name: 'Sign out', exact: true }).click()
     await page.waitForURL(url => url.origin === LOCAL_APP && url.pathname === '/admin/login')

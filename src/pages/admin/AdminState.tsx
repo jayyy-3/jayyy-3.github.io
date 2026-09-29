@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { AlertCircle, RefreshCw, ShieldAlert } from 'lucide-react';
 import { useAdminAuth } from '../../lib/adminAuthHooks';
+import { translateAdminError } from '../../lib/adminErrors';
 import { AdminHelpButton } from './AdminHelp';
 
 interface AdminStateProps {
@@ -10,9 +11,11 @@ interface AdminStateProps {
     copy: string;
     variant?: 'default' | 'warning';
     action?: ReactNode;
+    /** Original technical text, shown only behind a Details disclosure. */
+    detail?: string | null;
 }
 
-export function AdminState({ eyebrow, title, copy, variant = 'default', action }: AdminStateProps) {
+export function AdminState({ eyebrow, title, copy, variant = 'default', action, detail }: AdminStateProps) {
     const Icon = variant === 'warning' ? ShieldAlert : AlertCircle;
 
     return (
@@ -31,6 +34,12 @@ export function AdminState({ eyebrow, title, copy, variant = 'default', action }
                     {title}
                 </h1>
                 <p className="mt-5 max-w-[38rem] text-lg font-medium leading-8 text-[#33363f]">{copy}</p>
+                {detail ? (
+                    <details className="mt-4 max-w-[38rem] text-xs font-medium text-black/60">
+                        <summary className="cursor-pointer font-bold uppercase tracking-[0.12em]">Details</summary>
+                        <p className="mt-2 whitespace-pre-wrap break-words font-mono">{detail}</p>
+                    </details>
+                ) : null}
                 {action ? <div className="mt-8 flex flex-wrap gap-3">{action}</div> : null}
             </section>
         </main>
@@ -65,12 +74,20 @@ export function AdminConfigMissingState() {
 
 export function AdminErrorState() {
     const { error, refresh } = useAdminAuth();
+    const translated = error ? translateAdminError(error, { entity: 'admin access', action: 'load' }) : null;
+    const copy =
+        translated?.kind === 'network'
+            ? 'Could not reach the website server to check your CMS access. Check your internet connection, then press Retry.'
+            : translated?.kind === 'session'
+              ? 'Your sign-in has ended. Press Retry, or sign in again from the login page.'
+              : 'Your CMS access could not be checked just now. Press Retry, and if it keeps happening send the details below to the website team.';
 
     return (
         <AdminState
             eyebrow="Access check failed"
             title="Admin access could not be verified"
-            copy={error ?? 'The CMS returned an unexpected error while checking this account.'}
+            copy={copy}
+            detail={translated?.detail ?? null}
             variant="warning"
             action={
                 <button

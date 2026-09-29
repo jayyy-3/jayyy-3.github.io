@@ -534,7 +534,7 @@ async function waitForUnauthorizedRoute(page) {
     await waitForText(page, 'This account is not an active Urblo admin', 'unauthorized admin route', 30000);
   } catch (error) {
     const visibleFailure = await firstVisibleText(page, [
-      'Invalid login credentials',
+      'That email and password do not match an Urblo CMS login',
       'Configuration required',
       'CMS access is not connected yet',
       'Admin access could not be verified',
@@ -572,7 +572,7 @@ async function waitForAuthenticatedRoute(page, expectedText) {
   } catch (error) {
     const visibleFailure = await firstVisibleText(page, [
       'This account is not an active Urblo admin',
-      'Invalid login credentials',
+      'That email and password do not match an Urblo CMS login',
       'Configuration required',
       'CMS access is not connected yet',
       'Admin access could not be verified',

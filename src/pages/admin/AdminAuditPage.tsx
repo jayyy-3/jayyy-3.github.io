@@ -3,7 +3,9 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { Activity, Database, ShieldAlert } from 'lucide-react';
 import { supabase } from '../../lib/supabaseClient';
 import { useAdminAuth } from '../../lib/adminAuthHooks';
+import { AdminFeedback } from './AdminFeedback';
 import AdminShell from './AdminShell';
+import { useAdminFeedback } from './useAdminFeedback';
 import RequireAdmin from './RequireAdmin';
 
 interface AuditEventRow {
@@ -43,7 +45,7 @@ function AdminAuditContent() {
     const [entityFilter, setEntityFilter] = useState('');
     const [actionFilter, setActionFilter] = useState('');
     const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const { feedback, reportError, clearFeedback } = useAdminFeedback();
 
     const selectedEvent = useMemo(
         () => events.find((event) => event.id === selectedId) ?? events[0] ?? null,
@@ -74,7 +76,7 @@ function AdminAuditContent() {
 
         const client: SupabaseClient = supabase;
         setIsLoading(true);
-        setError(null);
+        clearFeedback();
 
         const [eventsResult, profilesResult] = await Promise.all([
             client
@@ -90,9 +92,10 @@ function AdminAuditContent() {
                 .returns<AdminProfileRow[]>(),
         ]);
 
-        const loadError = eventsResult.error ?? profilesResult.error;
+        // The whole response keeps the HTTP status for the translated message.
+        const loadError = [eventsResult, profilesResult].find((result) => result.error);
         if (loadError) {
-            setError(loadError.message);
+            reportError(loadError, { entity: 'change history', action: 'load' });
             setIsLoading(false);
             return;
         }
@@ -102,7 +105,7 @@ function AdminAuditContent() {
         setAdminProfiles(profilesResult.data ?? []);
         setSelectedId((current) => (current && rows.some((event) => event.id === current) ? current : rows[0]?.id ?? null));
         setIsLoading(false);
-    }, [canViewAudit]);
+    }, [canViewAudit, clearFeedback, reportError]);
 
     useEffect(() => {
         void loadAudit();
@@ -290,11 +293,7 @@ function AdminAuditContent() {
                             </ul>
                         </section>
 
-                        {error ? (
-                            <section className="border border-red-200 bg-red-50 p-4 text-sm font-semibold leading-6 text-red-700">
-                                {error}
-                            </section>
-                        ) : null}
+                        <AdminFeedback feedback={feedback} scope="page" onDismiss={clearFeedback} />
                     </aside>
                 </div>
             )}

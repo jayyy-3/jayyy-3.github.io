@@ -52,10 +52,16 @@ export async function mediaJourney({ page, check, id, directory }) {
       await liveSave.click()
       const confirm = page.getByRole('dialog', { name: 'Update the live media item?', exact: true })
       await confirm.getByRole('button', { name: 'Update live page', exact: true }).click()
-      await expect(mediaAlert).toContainText('Your sign-in has expired. Open the admin in a new tab, sign in again, then come back here and save.')
+      await expect(mediaAlert).toContainText('Your sign-in has expired. Sign in again to continue.')
       await expect(mediaAlert).toContainText('JWT expired')
       await expect(caption).toHaveValue(`Expired session caption ${id}`)
       await page.screenshot({ path: `${directory}/media-expired-session.png`, fullPage: true })
+      // NOW-OPT-ADMIN-SMALL-FIXES-001: the expired sign-in opens the in-place re-login panel.
+      // Not now closes it without signing in; the edit stays and nothing is written.
+      const relogin = page.getByRole('dialog', { name: 'Sign in again to keep working', exact: true })
+      await relogin.getByRole('button', { name: 'Not now', exact: true }).click()
+      await expect(relogin).toHaveCount(0)
+      await expect(caption).toHaveValue(`Expired session caption ${id}`)
     } finally { await page.unroute(pattern, expired) }
 
     page.on('request', recordWrite)
