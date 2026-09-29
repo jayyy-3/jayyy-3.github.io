@@ -2835,6 +2835,426 @@
         "Merged 2026-09-26 via PR #70 as 194976d under Jay's standing merge authorization; production CI 36209299045.",
         "Final production readback 2026-09-26 on 194976d50b79bbad89b949f85aba3903e1a99ee7, immutable https://21b51af8.urblo-site.pages.dev, CI 36209299045 (first run of the convergence wait): immutable/apex/www smoke passed; see WORKLOG 2026-09-26 Optimization wave 2 release."
       ]
+    },
+    {
+      "id": "NOW-OPT-ADMIN-POINT-MARKER-001",
+      "status": "done",
+      "priority": 0,
+      "modules": [
+        "projects"
+      ],
+      "summary": "Apply the approved public material-point marker spec (14px white dot, lime border, dark outer stroke, 44px hit area) to the admin Projects editor's VisualHotspotEditor, keeping the editing affordances (selected state, drag, keyboard nudge) visually distinct but on the same spec.",
+      "files": [
+        "src/pages/admin/projects/VisualHotspotEditor.tsx",
+        "src/pages/admin/projects/sections/MediaSection.tsx",
+        "src/index.css",
+        "docs/DESIGN.md"
+      ],
+      "acceptance": [
+        "Admin editor markers reuse the public .urblo-hotspot-marker styles (same dot size, colours, stroke, hit area); no halo pulse in the editor.",
+        "Selected marker shows a clear editing state (e.g. 1.3x scale plus a lime ring) and a small numbered or lettered label if the editor already numbers points; dragging and keyboard nudging still work and the hit area stays >= 44px.",
+        "DESIGN.md marker section notes the editor variant; before/after screenshots at 1440 on the local synthetic stack or a mocked editor.",
+        "No data contract, Function or RLS change; local Projects journey passes."
+      ],
+      "verification": [
+        "npm run agent:verify -- --plan",
+        "npm run gate",
+        "npm test",
+        "npm run local:verify",
+        "git diff --check"
+      ],
+      "phase": "complete",
+      "authorization": {
+        "source": "Jay reported on 2026-09-28 that the admin editor markers are still the old large style and asked for them to match; wave 3 approval and standing merge authorization apply.",
+        "included": [
+          "Branch implementation, isolated local tests, git push, pull request, branch Preview and smoke (read-only), docs/agent state updates, merge after Claude's report."
+        ],
+        "excluded": [
+          "Production data writes, Function, RLS or migration changes."
+        ]
+      },
+      "nextAction": "No automatic follow-on work.",
+      "blocker": "",
+      "notes": [
+        "2026-09-28: follow-up to NOW-OPT-PROJECT-POINT-MARKER-001 (public marker shipped in wave 1); the editor's VisualHotspotEditor kept the old 28px marker.",
+        "2026-09-28: implemented on claude/opt-admin-point-marker. VisualHotspotEditor markers now use .urblo-hotspot-marker plus the .urblo-hotspot-marker--editor modifier (14px dot, 2px lime border, 1px dark stroke, 44px hit area, no halo); selected (aria-pressed) = 1.3x + lime ring; 10px number chip beside the dot matches the Point N tabs. data-testid selectors unchanged; MediaSection untouched. Mocked-network Playwright at 1440 (synthetic draft, no writes): hit 44x44, dot 14px idle / 18.2px selected, drag 58%,45% -> 72%,30%, keyboard nudge -> 73%,35%, focus-visible ring shown, no page errors. Evidence: ignored .tmp/adminmarker/ (before-*/after-* screenshots and results JSON). Workstation local:verify not run: the isolated stack belongs to another checkout; PR CI runs it.",
+        "2026-09-29: rebased onto main by Claude (docs union; code conflicts recorded in WORKLOG) and merged #77."
+      ],
+      "completedAt": "2026-09-29",
+      "evidence": [
+        "Merged 2026-09-29 via PR #77 as 5da2b01 under Jay's standing merge authorization (\"合并\"); production CI 36510457038 (failed only at the domain convergence wait; see #84).",
+        "Final production readback 2026-09-29 on b4d9d826f366384d007bcb9655bac0d99408cefa, immutable https://fcc57ce4.urblo-site.pages.dev, CI 36516612553: immutable/apex/www smoke passed; see WORKLOG 2026-09-29 Optimization wave 3 release."
+      ]
+    },
+    {
+      "id": "NOW-OPT-DB-TYPES-FUNCTIONS-RUNTIME-001",
+      "priority": 1,
+      "modules": [
+        "harness",
+        "delivery",
+        "forms",
+        "qr"
+      ],
+      "summary": "Generate Supabase database types from the isolated local stack and use them in the service layer (createClient<Database>, Tables<> instead of hand-written Row interfaces and as-unknown-as casts in src/service and src/lib); make every Pages Function use the shared admin-runtime (admin-stones, admin-invite), define the production URL default once, and add checkJs type checking for functions/.",
+      "files": [
+        "src/service/",
+        "src/lib/",
+        "src/types/",
+        "functions/_lib/",
+        "functions/api/",
+        "scripts/",
+        "tsconfig.json",
+        "tests/functions-contract.test.ts",
+        "tsconfig.functions.json",
+        "types/cloudflare-functions.d.ts",
+        "vite.config.ts",
+        ".github/workflows/deploy.yml"
+      ],
+      "acceptance": [
+        "src/types/database.ts is generated by a committed script from the local stack; a check fails when a migration changes and the file is stale.",
+        "No `as unknown as` remains in src/service and src/lib; hand-written Row interfaces there are replaced by Tables<>; admin page files are not restructured (their local interfaces may stay for the later Products split).",
+        "Deliberately renaming a column in a scratch migration makes tsc fail (mutation proof recorded).",
+        "admin-stones.js and admin-invite.js use admin-runtime.js; jsonResponse and config reading exist once; the production Supabase URL default is defined in one place; tsconfig for functions with checkJs passes and runs in the graph.",
+        "Error codes, role contracts and response shapes of every Function match pre-change snapshots (vitest); unauthenticated requests make zero database calls; Preview returns structured 401 for protected endpoints."
+      ],
+      "verification": [
+        "npm run agent:verify -- --plan",
+        "npm run gate",
+        "npm test",
+        "npm run agent:cloudflare-preview-smoke -- --base-url <branch Preview>",
+        "git diff --check",
+        "npm run local:verify"
+      ],
+      "authorization": {
+        "source": "Jay approved optimization wave 3 on 2026-09-28 (\"开第三波，让Opus去干\") after the wave 2 report; merge to main is standing authorization since 2026-09-26.",
+        "included": [
+          "Branch implementation, type generation from the isolated local stack, Functions refactor without behaviour change, git push, pull request, branch Preview and smoke, docs/agent state updates, merge after Claude's report."
+        ],
+        "excluded": [
+          "Production data or Storage writes, real email, DNS or credential changes, migrations, physical content deletion."
+        ]
+      },
+      "status": "done",
+      "phase": "complete",
+      "nextAction": "No automatic follow-on work.",
+      "blocker": "",
+      "notes": [
+        "2026-09-28: wave 3 of the 2026-09-24 optimization audit. Products module split is deferred to wave 4 (after the media picker and database types land).",
+        "2026-09-28: implemented on branch claude/opt-db-types-functions-runtime (commits da8a896 contract snapshot before refactor, c6bebfb types + runtime, then docs). The shared urblo-isolated-v1 stack belongs to another checkout, so the committed types were generated with the pinned CLI 2.117.0 from a separate throwaway local stack (project urblo-dbtypes-scratch, ports 583xx, stopped afterwards); a second reset + regeneration was byte-identical. local:verify now regenerates and compares in CI.",
+        "2026-09-28: counts in src/service + src/lib: `as unknown as` 10 -> 0; hand-written Row interfaces 15 -> 0 (14 row types now derive from Tables<>, ArticleBodyRow removed); production URL default runtime sites 7 (supabaseClient, publicContentClient, vite.config, forms, admin-invite, admin-runtime, admin-stones) -> 1 (src/lib/supabaseProject.ts); jsonResponse implementations 5 -> 1; service config readers 4 -> 1. Mutation proof: scratch migration renaming products.short_description made db-types report stale, and after regeneration tsc -b failed with 5 errors (ProductService, edgeSeo); admin pages were not caught (local interfaces, deferred to the Products split).",
+        "2026-09-28: the coordinator pushed the branch and opened PR #78. CI run 36427122249 on e562d97 passed verify-and-deploy and quality; its local:verify step regenerated the types byte-identically (sha256 b56c85a3…66f0, same as the committed file). Branch Preview https://4b6bf0b5.urblo-site.pages.dev passed agent:cloudflare-preview-smoke in CI and from the workstation. Curl returned structured JSON 401s from projects, image-qr, stone-library and invite-user when no token or a non-Bearer header was sent, and invalid_session 401s for a fake Bearer token (invite-user validates the body first: 400 invalid_email, unchanged order).",
+        "2026-09-29: rebased onto main by Claude (docs union; code conflicts recorded in WORKLOG) and merged #78."
+      ],
+      "completedAt": "2026-09-29",
+      "evidence": [
+        "Merged 2026-09-29 via PR #78 as 9d8b24e under Jay's standing merge authorization (\"合并\"); production CI 36511227480 (failed only at the domain convergence wait; see #84).",
+        "Final production readback 2026-09-29 on b4d9d826f366384d007bcb9655bac0d99408cefa, immutable https://fcc57ce4.urblo-site.pages.dev, CI 36516612553: immutable/apex/www smoke passed; see WORKLOG 2026-09-29 Optimization wave 3 release."
+      ]
+    },
+    {
+      "id": "NOW-OPT-ADMIN-SMALL-FIXES-001",
+      "priority": 1,
+      "modules": [
+        "auth-settings",
+        "forms"
+      ],
+      "summary": "Admin follow-ups from wave 2: translate Login, Dashboard and change-history errors through adminErrors; on session expiry keep the form and show a re-login panel instead of redirecting; fix the Leads sample-item 500-row oldest-first cap and the non-existent 'lead manager' role text; add pagination to Leads.",
+      "files": [
+        "src/pages/admin/AdminLoginPage.tsx",
+        "src/pages/admin/AdminDashboardPage.tsx",
+        "src/pages/admin/AdminLeadsPage.tsx",
+        "src/pages/admin/AdminApp.tsx",
+        "src/lib/adminErrors.ts",
+        "scripts/local-journeys/",
+        "scripts/check-admin-crud-coverage.mjs"
+      ],
+      "acceptance": [
+        "Login, Dashboard and the change-history notice show translated messages; raw text only under Details.",
+        "A simulated JWT expiry mid-edit keeps the unsaved form on screen and offers re-login in place; after re-login the save succeeds (local journey).",
+        "With 600+ synthetic sample items the newest requests show complete item lists; Leads list is paginated; no reference to a 'lead manager' role remains.",
+        "No schema, Function or RLS change; vitest and local journeys cover each item."
+      ],
+      "verification": [
+        "npm run agent:verify -- --plan",
+        "npm run gate",
+        "npm test",
+        "npm run agent:cloudflare-preview-smoke -- --base-url <branch Preview>",
+        "git diff --check",
+        "npm run local:verify",
+        "npm run agent:admin-crud-coverage"
+      ],
+      "authorization": {
+        "source": "Jay approved optimization wave 3 on 2026-09-28 (\"开第三波，让Opus去干\") after the wave 2 report; merge to main is standing authorization since 2026-09-26.",
+        "included": [
+          "Branch implementation, isolated local synthetic tests, git push, pull request, branch Preview and smoke (read-only), docs/agent state updates, merge after Claude's report."
+        ],
+        "excluded": [
+          "Production data or Storage writes, real email, DNS or credential changes, migrations, physical content deletion."
+        ]
+      },
+      "status": "done",
+      "phase": "complete",
+      "nextAction": "No automatic follow-on work.",
+      "blocker": "",
+      "notes": [
+        "2026-09-28: wave 3 of the 2026-09-24 optimization audit. Products module split is deferred to wave 4 (after the media picker and database types land).",
+        "2026-09-28: implemented on claude/opt-admin-small-fixes. Owner decisions applied: leads keep forwarding to the info email; sales colleagues use the Editor role, so Editors now save Leads workflow (status, owner, notes) as the existing RLS already allowed; export stays owner/admin; English only; desktop. No schema, Function or RLS change. Evidence in WORKLOG '2026-09-28 — Admin small fixes (NOW-OPT-ADMIN-SMALL-FIXES-001)'.",
+        "2026-09-29: PR #79 CI run 36431776706 on f47b00f passed (classified graph, isolated local:verify 31/31 journeys incl. 5 new Leads steps, branch Preview https://8faba36f.urblo-site.pages.dev and its smoke); workstation read-only preview smoke passed. Not merged; colleague acceptance and production readback pending.",
+        "2026-09-29: rebased onto main by Claude (docs union; code conflicts recorded in WORKLOG) and merged #79."
+      ],
+      "completedAt": "2026-09-29",
+      "evidence": [
+        "Merged 2026-09-29 via PR #79 as 55893fe under Jay's standing merge authorization (\"合并\"); production CI 36512084782.",
+        "Final production readback 2026-09-29 on b4d9d826f366384d007bcb9655bac0d99408cefa, immutable https://fcc57ce4.urblo-site.pages.dev, CI 36516612553: immutable/apex/www smoke passed; see WORKLOG 2026-09-29 Optimization wave 3 release."
+      ]
+    },
+    {
+      "id": "NOW-OPT-ADMIN-MEDIA-PICKER-001",
+      "priority": 0,
+      "modules": [
+        "media",
+        "products",
+        "articles",
+        "auth-settings"
+      ],
+      "summary": "One shared admin media picker (generalised from the Projects InlineMediaField) used by Products hero and model images, Articles cover and section images and Settings share image; client-side compression via imageQrOptimization with stated limits; alt text never prefilled with the file name; HEIC guidance; Media page stripped of bucket/Storage/promotion/rollback jargon.",
+      "files": [
+        "src/pages/admin/projects/InlineMediaField.tsx",
+        "src/pages/admin/AdminProductsPage.tsx",
+        "src/pages/admin/AdminMediaPage.tsx",
+        "src/pages/admin/articles/",
+        "src/pages/admin/AdminSettingsPage.tsx",
+        "src/lib/imageQrOptimization.ts",
+        "scripts/local-journeys/",
+        "scripts/check-admin-crud-coverage.mjs"
+      ],
+      "acceptance": [
+        "In Products a colleague can upload, pick and save an image without leaving the page; the same picker serves Articles and Settings.",
+        "A 20MB JPG is compressed client-side before upload within the stated limit; the limit and accepted types are shown before choosing a file; HEIC gets a clear message.",
+        "Alt text starts empty with a prompt, never the file name; existing media is searchable in the picker (not a 120-item dropdown).",
+        "Media page has no user-visible bucket/Storage/promotion/rollback wording (check script assertion); technical detail stays under Details.",
+        "Local synthetic journeys cover Products and Articles picker flows with the Editor role; no schema, Function or RLS change; media promotion on publish reuses the existing Projects server path or is recorded as a follow-up."
+      ],
+      "verification": [
+        "npm run agent:verify -- --plan",
+        "npm run gate",
+        "npm test",
+        "npm run agent:cloudflare-preview-smoke -- --base-url <branch Preview>",
+        "git diff --check",
+        "npm run local:verify",
+        "npm run agent:admin-crud-coverage"
+      ],
+      "authorization": {
+        "source": "Jay approved optimization wave 3 on 2026-09-28 (\"开第三波，让Opus去干\") after the wave 2 report; merge to main is standing authorization since 2026-09-26.",
+        "included": [
+          "Branch implementation, isolated local synthetic tests, git push, pull request, branch Preview and smoke (read-only), docs/agent state updates, merge after Claude's report."
+        ],
+        "excluded": [
+          "Production data or Storage writes, real email, DNS or credential changes, migrations, physical content deletion."
+        ]
+      },
+      "status": "done",
+      "phase": "complete",
+      "nextAction": "Follow-up candidate: publishing a Product or Article also publishes its Draft images (needs a new protected endpoint).",
+      "blocker": "",
+      "notes": [
+        "2026-09-28: wave 3 of the 2026-09-24 optimization audit. Products module split is deferred to wave 4 (after the media picker and database types land).",
+        "2026-09-28: Shared AdminMediaPicker wired into Projects, Products (hero, model), Articles (cover, section) and Settings (share image); Media screen jargon moved behind Details with a check assertion. Publish-time media promotion for Products/Articles recorded as a follow-up (Projects promotion is bound to its aggregate RPC). Shared local stack was owned by another checkout, so local journeys run in PR CI; mocked Playwright evidence in ignored .tmp/picker/.",
+        "2026-09-28: PR #80. CI 36427439986 (e1 head) failed in the new Editor journey: it read size_bytes from the picker readback, which selects only display columns; the journey now reads the inserted metadata. CI 36430352733 on e3e943a passed: isolated local:verify 31/31 journeys incl. the Editor picker steps (20 MB JPG resized before upload), Preview https://a5b37c0b.urblo-site.pages.dev deployed and smoked; workstation agent:cloudflare-preview-smoke passed (read-only). Not merged.",
+        "2026-09-29: rebased onto main by Claude (docs union; code conflicts recorded in WORKLOG) and merged #80."
+      ],
+      "completedAt": "2026-09-29",
+      "evidence": [
+        "Merged 2026-09-29 via PR #80 as 361c189 under Jay's standing merge authorization (\"合并\"); production CI 36512747531.",
+        "Final production readback 2026-09-29 on b4d9d826f366384d007bcb9655bac0d99408cefa, immutable https://fcc57ce4.urblo-site.pages.dev, CI 36516612553: immutable/apex/www smoke passed; see WORKLOG 2026-09-29 Optimization wave 3 release."
+      ]
+    },
+    {
+      "id": "NOW-OPT-STATIC-ASSETS-001",
+      "priority": 0,
+      "modules": [
+        "public-ui"
+      ],
+      "summary": "Static asset delivery: generate multi-size WebP variants with srcset for the launch banners, homepage, article and product PNG/JPG images; re-encode the hero videos with preload=metadata and a reduced-motion / Save-Data poster fallback; immutable cache headers for hashed assets; fonts converted to WOFF2 and preloaded.",
+      "files": [
+        "public/media/",
+        "public/images/",
+        "public/products/",
+        "public/fonts/",
+        "public/_headers",
+        "index.html",
+        "src/components/homepage/",
+        "src/lib/",
+        "scripts/"
+      ],
+      "acceptance": [
+        "A repeatable script (scripts/build-static-image-variants.mjs or similar) produces the variants; committed outputs are deterministic and the originals are kept.",
+        "Every static image over 300KB referenced by public pages is delivered via srcset with a variant sized to its box; no public page requests a >1MB static image on mobile.",
+        "Hero video: desktop <= 3MB, mobile <= 2MB, preload=metadata, poster shown under prefers-reduced-motion and Save-Data; visual result approved by screenshots.",
+        "curl -I on a hashed /assets/*.js returns Cache-Control max-age=31536000, immutable; fonts are WOFF2 with preload (or the licence reason for not converting is recorded).",
+        "Lighthouse on Preview: /products, /articles, /contact mobile LCP < 3.0s; homepage mobile transfer < 2.5MB; total public/ size reduction reported."
+      ],
+      "verification": [
+        "npm run agent:verify -- --plan",
+        "npm run gate",
+        "npm test",
+        "npm run agent:cloudflare-preview-smoke -- --base-url <branch Preview>",
+        "git diff --check",
+        "npx lighthouse against the branch Preview for /, /products, /articles, /contact (mobile + desktop)"
+      ],
+      "authorization": {
+        "source": "Jay approved optimization wave 3 on 2026-09-28 (\"开第三波，让Opus去干\") after the wave 2 report; merge to main is standing authorization since 2026-09-26.",
+        "included": [
+          "Branch implementation, asset generation committed to public/, git push, pull request, branch Preview and smoke, docs/agent state updates, merge after Claude's report."
+        ],
+        "excluded": [
+          "Production data or Storage writes, real email, DNS or credential changes, migrations, physical content deletion.",
+          "Replacing any photograph with different content; font conversion only if the licence allows."
+        ]
+      },
+      "status": "done",
+      "phase": "complete",
+      "nextAction": "Deferred by design: immutable cache headers wait for real 404s on missing assets; font WOFF2 conversion waits for a web font licence from Jay.",
+      "blocker": "",
+      "notes": [
+        "2026-09-28: wave 3 of the 2026-09-24 optimization audit. Products module split is deferred to wave 4 (after the media picker and database types land).",
+        "2026-09-28: implemented on claude/opt-static-assets: scripts/generate-static-image-variants.mjs (82 originals, 282 WebP variants, deterministic, --check graph node static-images), StaticResponsiveImage/staticImageDelivery, hero re-encode (desktop 2.65MB, mobile 1.75MB) with preload=metadata and reduced-motion/Save-Data poster-only fallback. Cache header and font items recorded as blocked with reasons in docs/architecture/public-media.md.",
+        "2026-09-28: PR #83 CI run 36430446140 passed (verify-and-deploy, quality); branch Preview https://fc5ae230.urblo-site.pages.dev passed agent:cloudflare-preview-smoke on retry (first attempt aborted on a network timeout). Lighthouse single runs on Preview, mobile: / 99 (LCP 1.8s, 0.69MB), /products 94 (3.0s), /articles 87 (3.9s), /contact 93 (3.2s); production before: 79/77/77/83. Preview /assets/*.js still serves max-age=0, must-revalidate (no header change by design).",
+        "2026-09-29: rebased onto main by Claude (docs union; code conflicts recorded in WORKLOG) and merged #83."
+      ],
+      "completedAt": "2026-09-29",
+      "evidence": [
+        "Merged 2026-09-29 via PR #83 as 9ccb058 under Jay's standing merge authorization (\"合并\"); production CI 36513375606.",
+        "Final production readback 2026-09-29 on b4d9d826f366384d007bcb9655bac0d99408cefa, immutable https://fcc57ce4.urblo-site.pages.dev, CI 36516612553: immutable/apex/www smoke passed; see WORKLOG 2026-09-29 Optimization wave 3 release."
+      ]
+    },
+    {
+      "id": "NOW-OPT-PAGE-CONVERGENCE-001",
+      "priority": 0,
+      "modules": [
+        "public-ui",
+        "stone-library",
+        "projects",
+        "articles",
+        "products"
+      ],
+      "summary": "Bring the remaining public pages onto the wave 2 tokens and shared components: Our Story, Contact, Products, Product detail, Articles, Article page (layout only), Stone detail and Project detail; remove the empty decorative banner page tops; unify CTA wording, phone number format, en-AU dates and singular/plural copy.",
+      "files": [
+        "src/pages/OurStory.tsx",
+        "src/pages/ContactPage.tsx",
+        "src/pages/ProductsPage.tsx",
+        "src/pages/ProductDetailPage.tsx",
+        "src/pages/ArticlesPage.tsx",
+        "src/pages/ArticlePage.tsx",
+        "src/pages/StonePageView.tsx",
+        "src/pages/ProjectDetails.tsx",
+        "src/layouts/DefaultLayout.tsx",
+        "src/components/ui/",
+        "scripts/public-ui-tokens-baseline.json",
+        "docs/DESIGN.md"
+      ],
+      "acceptance": [
+        "Every listed page uses Button variants, the two SectionHeading levels, PageIntro and Card from src/components/ui; no page-local button or heading styles remain there.",
+        "DefaultLayout no longer renders the text-less decorative banner; each page opens with a PageIntro (Projects page as template).",
+        "Arbitrary text-[Npx] count across public pages drops from 159 to <= 48 and the baseline file is lowered accordingly.",
+        "CTAs use one phrasing set (recorded in DESIGN.md), the phone number is written one way everywhere, article dates render en-AU.",
+        "Before/after screenshots at 375/768/1440 for each page; Home, Capabilities, Projects, Stone Library and 404 are pixel-unchanged below the header; article body content and claims are not rewritten (that is NOW-ARTICLE-STRUCTURE-CLAIMS-001)."
+      ],
+      "verification": [
+        "npm run agent:verify -- --plan",
+        "npm run gate",
+        "npm test",
+        "npm run agent:cloudflare-preview-smoke -- --base-url <branch Preview>",
+        "git diff --check"
+      ],
+      "authorization": {
+        "source": "Jay approved optimization wave 3 on 2026-09-28 (\"开第三波，让Opus去干\") after the wave 2 report; merge to main is standing authorization since 2026-09-26.",
+        "included": [
+          "Branch implementation, isolated local tests, git push, pull request, branch Preview and smoke, DESIGN.md and docs/agent state updates, merge after Claude's report."
+        ],
+        "excluded": [
+          "Production data or Storage writes, real email, DNS or credential changes, migrations, physical content deletion."
+        ]
+      },
+      "status": "done",
+      "phase": "complete",
+      "nextAction": "Jay approved the visuals on 2026-09-29. Follow-up candidate: preload the detail hero image from the edge head so the image LCP is discoverable earlier.",
+      "blocker": "",
+      "notes": [
+        "2026-09-28: wave 3 of the 2026-09-24 optimization audit. Products module split is deferred to wave 4 (after the media picker and database types land).",
+        "2026-09-28: implemented on claude/opt-page-convergence. Decorative DefaultLayout banner retired; eight pages open with PageIntro band and use Button/SectionHeading/Card; CTA set, phone format (1300 1URBLO, tel:1300187256) and en-AU dates recorded in DESIGN.md \"Public page convergence\". Arbitrary text-[Npx] 159 -> 44; new text-micro (11px) token for dense stone tool labels. Home/Capabilities/Projects/404 pixel-identical below the header at 375/768/1440; Stone Library list differs only where a card now reads \"1 finish\". Clean Node 20 container gate, npm test (162) and the no-config browser gate passed on the working tree.",
+        "2026-09-28: PR #82 rebased onto main 0aa1066 (NEXT_STEPS.md conflict resolved by regenerating state); head 4de34b4. CI run 36430511925 passed verify-and-deploy and quality; branch Preview https://da2d1a3f.urblo-site.pages.dev passed agent:cloudflare-preview-smoke from the workstation. Preview vs production (read-only): Home, Capabilities, Projects and 404 have identical <main> markup and computed styles at 375/768/1440; Stone Library differs only in the \"1 finish\" cards. Awaiting Jay's visual acceptance.",
+        "2026-09-29: rebased onto main 9ccb058 after #83 static assets (Jay approved merging); page structure kept with StaticResponsiveImage re-applied; four retired banner variants removed from the static-image manifest. agent:verify (32 nodes) and npm test (214) passed; CI run 36513810768 passed; Preview https://d98f6c0c.urblo-site.pages.dev smoke passed.",
+        "2026-09-29: rebased onto main by Claude (docs union; code conflicts recorded in WORKLOG) and merged #82."
+      ],
+      "completedAt": "2026-09-29",
+      "evidence": [
+        "Merged 2026-09-29 via PR #82 as a7cab39 under Jay's standing merge authorization (\"合并\"); production CI 36515196516.",
+        "Final production readback 2026-09-29 on b4d9d826f366384d007bcb9655bac0d99408cefa, immutable https://fcc57ce4.urblo-site.pages.dev, CI 36516612553: immutable/apex/www smoke passed; see WORKLOG 2026-09-29 Optimization wave 3 release."
+      ]
+    },
+    {
+      "id": "NOW-STONE-COMPARE-001",
+      "status": "done",
+      "priority": 0,
+      "modules": [
+        "stone-library",
+        "public-ui",
+        "forms"
+      ],
+      "summary": "Stone Library comparison: select up to 4 stones from the list (compare tray), open a shareable /stone-library/compare?stones=… page that renders rows from a code-level comparison attribute registry (finish images with finish switch, type, price tier, finish capability matrix, cut options, block size, variants, used-in-projects), with a 'differences only' toggle, sticky first column, mobile horizontal scroll, and a 'Request samples of these stones' CTA that prefills the existing sample request form.",
+      "files": [
+        "src/pages/StoneLibraryPage.tsx",
+        "src/components/stone-library/",
+        "src/pages/StonePageView.tsx",
+        "src/App.tsx",
+        "src/service/",
+        "src/types/stone-library.ts",
+        "src/data/",
+        "src/pages/ContactPage.tsx",
+        "src/lib/",
+        "docs/DESIGN.md",
+        "docs/architecture/stone-library.md",
+        "scripts/check-stone-library-detail-integrity.mjs"
+      ],
+      "acceptance": [
+        "List cards and stone detail expose a Compare toggle; a bottom tray shows selected stones (thumbnail, name, remove), caps at 4 with a clear message, persists in URL and localStorage, and opens the compare page.",
+        "/stone-library/compare?stones=a,b,c renders one column per stone from src/lib/stoneCompareRegistry.ts: each attribute declares source, label, unit, kind (text | number | boolean | matrix | image | list), public flag and order; the page iterates the registry and never hard-codes attributes; origin is never rendered (public flag false, covered by a test); adding a registry entry in a test renders a new row without page changes.",
+        "Rows in v1: finish image (switchable finish, using the sized variants), type, price tier, finish capability matrix (yes/no/tbc icons), cut options, raw block size, variants, used-in-projects count with links; finish behaviour text is not included (Jay's decision).",
+        "'Differences only' toggle hides identical rows; first column sticky on desktop; horizontal scroll with sticky first column at 375px; page is noindex with a self canonical to /stone-library; 1–4 valid ids handled, invalid ids ignored with a notice, 0 stones shows an empty state linking back.",
+        "CTA 'Request samples of these stones' opens the existing sample request form with the selected stones prefilled (ContactPage reads a query parameter; minimal edit); submission path unchanged.",
+        "Design follows DESIGN.md and the wave 2 tokens/shared components (Button, SectionHeading, PageIntro, Card); Jay approves by screenshot at 375/768/1440; keyboard operable; vitest for the registry, selection state and differences logic; agent:stone-library-detail check extended."
+      ],
+      "verification": [
+        "npm run agent:verify -- --plan",
+        "npm run gate",
+        "npm test",
+        "npm run agent:cloudflare-preview-smoke -- --base-url <branch Preview>",
+        "git diff --check"
+      ],
+      "phase": "complete",
+      "authorization": {
+        "source": "Jay approved the comparison feature and its defaults on 2026-09-28 (\"按你说的做吧… 设计好看一点，符合我们设计。你开Opus去做吧\"): max 4 stones, price tier included, no finish behaviour text, sample request linkage in v1, code-level attribute registry now and CMS-managed attribute definitions later. Standing merge authorization applies.",
+        "included": [
+          "Branch implementation, isolated local tests, git push, pull request, branch Preview and smoke, DESIGN.md and architecture contract updates, docs/agent state updates, merge after Claude's report and Jay's screenshot approval."
+        ],
+        "excluded": [
+          "Schema, Function, RLS or migration changes; production data writes; CMS-managed attribute definitions (future task)."
+        ]
+      },
+      "nextAction": "Jay approved the design on 2026-09-29. Layer 2 (CMS-managed attribute definitions) waits until Stone data is fully CMS-managed.",
+      "blocker": "",
+      "notes": [
+        "2026-09-28: alignment in chat. Layer 1 (registry in code) now; layer 2 (stone_attribute_definitions/values managed in admin) deferred until Stone data is fully CMS-managed; the registry shape is designed to be swapped to a data source later.",
+        "2026-09-28: implemented on claude/stone-compare: selection helpers and tray, Compare toggle on cards and detail, lazy /stone-library/compare page driven by src/lib/stoneCompareRegistry.ts (origin public:false), Differences only, sample CTA via the existing /contact?intent=sample-request&stone= prefill (ContactPage unchanged), noindex utility route in src/data/seoRoutes.ts honoured at the edge. Local: npm test, lint, tsc, agent:stone-library-detail, edge-seo tests passed; Playwright captures under .tmp/compare/.",
+        "2026-09-28: PR #81 (head b9048aa). Clean Node 20 gate 29 checks passed; CI 36428075112 passed (verify-and-deploy incl. isolated local:verify and Preview smoke; quality). Branch Preview https://c1041896.urblo-site.pages.dev passed agent:cloudflare-preview-smoke; curl /stone-library/compare?stones=juparana,zen-grey returned 200 with noindex,follow and canonical https://urblo.com.au/stone-library in the first response; sitemap has no compare URL. Read-only Preview Playwright at 1440 rendered production project usage (Golden Crust 1, Alpine White 2). Not merged.",
+        "2026-09-29: rebased onto main by Claude (docs union; code conflicts recorded in WORKLOG) and merged #81."
+      ],
+      "completedAt": "2026-09-29",
+      "evidence": [
+        "Merged 2026-09-29 via PR #81 as b4d9d82 under Jay's standing merge authorization (\"合并\"); production CI 36516612553.",
+        "Final production readback 2026-09-29 on b4d9d826f366384d007bcb9655bac0d99408cefa, immutable https://fcc57ce4.urblo-site.pages.dev, CI 36516612553: immutable/apex/www smoke passed; see WORKLOG 2026-09-29 Optimization wave 3 release."
+      ]
     }
   ]
 }
