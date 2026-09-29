@@ -130,4 +130,46 @@ assert(
   'The image stage must render a deliberate pending state when a finish has no image.',
 );
 
+// Stone Library comparison (NOW-STONE-COMPARE-001): lazy route ahead of the detail slug,
+// registry-driven rows, origin kept internal, noindex head canonical to the list.
+const [compareRegistrySource, compareViewSource, seoRoutesSource, edgeSeoSource] = await Promise.all([
+  readFile(new URL('../src/lib/stoneCompareRegistry.ts', import.meta.url), 'utf8'),
+  readFile(new URL('../src/components/stone-library/StoneCompareView.tsx', import.meta.url), 'utf8'),
+  readFile(new URL('../src/data/seoRoutes.ts', import.meta.url), 'utf8'),
+  readFile(new URL('../src/lib/edgeSeo.ts', import.meta.url), 'utf8'),
+]);
+const compareRouteIndex = appSource.indexOf('path="/stone-library/compare"');
+assert(
+  appSource.includes("lazy(() => import('./pages/StoneComparePage'))"),
+  'The compare page must be lazy-loaded.',
+);
+assert(
+  compareRouteIndex >= 0 && compareRouteIndex < appSource.indexOf('path="/stone-library/:stoneGroupId"'),
+  'The compare route must be registered before the Stone detail route.',
+);
+assert(
+  !stoneLibrary.stones.some((stone) => stone.stoneGroupId === 'compare'),
+  '"compare" is reserved for the comparison route and cannot be a Stone slug.',
+);
+assert(
+  /key: 'origin',[\s\S]*?public: false,/.test(compareRegistrySource),
+  'Origin must stay a non-public comparison attribute.',
+);
+assert(
+  compareRegistrySource.includes('.filter((attribute) => attribute.public === true)'),
+  'Only public registry attributes may reach the compare page.',
+);
+for (const label of ['Raw block', 'Price tier', 'Cut options', 'Used in projects', 'Origin']) {
+  assert(!compareViewSource.includes(`'${label}'`) && !compareViewSource.includes(`>${label}<`), `The compare view must not hard-code the "${label}" attribute.`);
+}
+assert(
+  /path: '\/stone-library\/compare',[\s\S]*?isIndexable: false,[\s\S]*?canonicalPath: '\/stone-library'/.test(seoRoutesSource),
+  'The compare route must be noindex with a canonical to /stone-library.',
+);
+assert(
+  seoRoutesSource.includes("seoRoute.isIndexable ? 'index,follow' : 'noindex,follow'") &&
+    edgeSeoSource.includes('!registryRoute.isIndexable'),
+  'Client and edge heads must honour non-indexable registry routes.',
+);
+
 console.log('Stone Library detail integrity checks passed.');

@@ -5,6 +5,7 @@ import ImageStage from '../components/stone-library/ImageStage';
 import SpecsPanel from '../components/stone-library/SpecsPanel';
 import StoneProjectsSection from '../components/stone-library/StoneProjectsSection';
 import StatusPill from '../components/stone-library/StatusPill';
+import StoneDetailCompare from '../components/stone-library/StoneDetailCompare';
 import VariantSwitch from '../components/stone-library/VariantSwitch';
 import PublicContentSeo from '../components/PublicContentSeo';
 import type { StoneProjectUsage } from '../service/ProjectService';
@@ -109,6 +110,9 @@ export default function StonePageView({
               label={statusLabel(detail.status)}
               tone={detail.status === 'tbc' ? 'upcoming' : 'available'}
             />
+            {!preview ? (
+              <StoneDetailCompare stoneGroupId={detail.stoneGroupId} stoneName={detail.name} />
+            ) : null}
           </>
         }
         title={detail.name}

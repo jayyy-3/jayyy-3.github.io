@@ -19,6 +19,8 @@ export interface SeoRoute {
     priority: number;
     lastModified: string;
     isIndexable: boolean;
+    /** Canonical target when it differs from `path` (non-indexable utility routes). */
+    canonicalPath?: string;
     ogType?: 'website' | 'article';
     image?: string;
     breadcrumbs: SeoBreadcrumb[];
@@ -249,8 +251,32 @@ const articleRoutes: SeoRoute[] = articleIndex.map((article) =>
     }),
 );
 
+/**
+ * Public utility routes that must answer 200 with a real head but stay out of search:
+ * noindex, excluded from the sitemap, canonical to their parent listing.
+ */
+const utilityRoutes: SeoRoute[] = [
+    {
+        path: '/stone-library/compare',
+        title: 'Compare Stones | Urblo Stone Library',
+        description:
+            'Compare selected Urblo Stone Library materials side by side: finish photography, price tier, raw block size and project use.',
+        changeFrequency: 'monthly',
+        priority: 0,
+        lastModified: SEO_LAST_MODIFIED,
+        isIndexable: false,
+        canonicalPath: '/stone-library',
+        breadcrumbs: [
+            { name: 'Home', path: '/' },
+            { name: 'Stone Library', path: '/stone-library' },
+            { name: 'Compare', path: '/stone-library/compare' },
+        ],
+    },
+];
+
 export const SEO_ROUTES: SeoRoute[] = [
     ...staticRoutes,
+    ...utilityRoutes,
     ...projectRoutes,
     ...stoneRoutes,
     ...productRoutes,
@@ -278,10 +304,10 @@ export function getSeoMetaForPathname(pathname: string, defaults: SeoMetaDefault
         return {
             title: homepageTitle || seoRoute.title,
             description: homepageDescription ? toMetaDescription(homepageDescription) : seoRoute.description,
-            canonicalUrl: canonicalUrlForPath(seoRoute.path),
+            canonicalUrl: canonicalUrlForPath(seoRoute.canonicalPath || seoRoute.path),
             image: toAbsoluteUrl(seoRoute.image || defaults.defaultShareImage || DEFAULT_SHARE_IMAGE),
             ogType: seoRoute.ogType || 'website',
-            robots: 'index,follow',
+            robots: seoRoute.isIndexable ? 'index,follow' : 'noindex,follow',
         };
     }
 
@@ -315,7 +341,7 @@ export function getStructuredDataForPathname(pathname: string, locations: Compan
     const normalizedPath = normalizePath(pathname);
     const seoRoute = getSeoRouteForPathname(normalizedPath);
 
-    if (!seoRoute) {
+    if (!seoRoute || !seoRoute.isIndexable) {
         return [];
     }
 

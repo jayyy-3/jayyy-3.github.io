@@ -203,7 +203,10 @@ export function resolveEdgeSeoDocument(pathname: string, dataset: EdgeSeoDataset
   const segments = path.split('/').filter(Boolean);
   const settings = dataset.settings;
 
-  if (segments.length <= 1 && getSeoRouteForPathname(path)) {
+  const registryRoute = getSeoRouteForPathname(path);
+  // Top-level pages, plus non-indexable utility routes nested under a collection
+  // (`/stone-library/compare`), come from the registry before any detail-slug lookup.
+  if (registryRoute && (segments.length <= 1 || !registryRoute.isIndexable)) {
     return { kind: 'document', status: 200, head: staticHead(path, settings) };
   }
 

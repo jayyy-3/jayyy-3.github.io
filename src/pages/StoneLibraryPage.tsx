@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
+import CompareTray from '../components/stone-library/CompareTray';
 import FilterBar from '../components/stone-library/FilterBar';
 import StoneCard from '../components/stone-library/StoneCard';
+import { useStoneCompareSelection } from '../components/stone-library/useStoneCompareSelection';
 import StoneLibraryService from '../service/StoneLibraryService';
 
 import type { StoneCardVM } from '../types/stone-library';
@@ -13,6 +15,8 @@ export default function StoneLibraryPage() {
   const [search, setSearch] = useState('');
   const [stoneType, setStoneType] = useState('');
   const [finishKey, setFinishKey] = useState('');
+  const compare = useStoneCompareSelection({ syncUrl: true });
+  const { retain } = compare;
   const facets = useMemo(
     () => StoneLibraryService.getFilterFacets(publicCards),
     [publicCards],
@@ -27,6 +31,19 @@ export default function StoneLibraryPage() {
       }),
     [publicCards, search, stoneType, finishKey],
   );
+
+  const comparedCards = useMemo(
+    () =>
+      compare.ids
+        .map((id) => publicCards.find((card) => card.stoneGroupId === id))
+        .filter((card): card is StoneCardVM => Boolean(card)),
+    [compare.ids, publicCards],
+  );
+
+  useEffect(() => {
+    // A shared or stored selection may name a stone that is no longer public.
+    if (loadState === 'ready') retain(publicCards.map((card) => card.stoneGroupId));
+  }, [loadState, publicCards, retain]);
 
   useEffect(() => {
     let isCurrent = true;
@@ -83,7 +100,12 @@ export default function StoneLibraryPage() {
           {loadState !== 'ready' ? <div role="status" className="py-12"><p>{loadState === 'loading' ? 'Loading stone information…' : 'Stone Library could not load.'}</p>{loadState === 'error' && <button className="urblo-button mt-4" onClick={() => setRetry((n) => n + 1)}>Try again</button>}</div> : cards.length ? (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {cards.map((card) => (
-                <StoneCard key={card.stoneGroupId} stone={card} />
+                <StoneCard
+                  key={card.stoneGroupId}
+                  stone={card}
+                  compareSelected={compare.isSelected(card.stoneGroupId)}
+                  onCompareToggle={() => compare.toggle(card.stoneGroupId, card.name)}
+                />
               ))}
             </div>
           ) : (
@@ -101,6 +123,13 @@ export default function StoneLibraryPage() {
           )}
         </div>
       </section>
+
+      <CompareTray
+        stones={comparedCards}
+        message={compare.message}
+        onRemove={compare.remove}
+        onClear={compare.clear}
+      />
     </div>
   );
 }

@@ -8,6 +8,7 @@ Contact and Sample Request forms, form Functions, notifications, Turnstile and t
 - Runtime behavior:
   - The main form submits through `/api/enquiries` by default.
   - Selecting `Sample request` or visiting `/contact?intent=sample-request` submits through `/api/sample-requests`.
+  - `stone=<text>` prefills the sample preference field; the Stone Library compare CTA uses `/contact?intent=sample-request&stone=<comma-separated names>`.
   - Sample Request mode shows sample preference, finish preference, quantity, project name, shipping address, and notes fields.
   - Visitor-facing success/failure states are rendered inline and no longer depend on opening a local email client.
   - Direct contact channels use `mailto:` and `tel:` links.

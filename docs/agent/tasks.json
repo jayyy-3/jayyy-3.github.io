@@ -42,7 +42,7 @@
         "npm run agent:cloudflare-preview-smoke -- --base-url <branch Preview>",
         "git diff --check"
       ],
-      "phase": "planned",
+      "phase": "awaiting_external",
       "authorization": {
         "source": "Jay approved the comparison feature and its defaults on 2026-09-28 (\"按你说的做吧… 设计好看一点，符合我们设计。你开Opus去做吧\"): max 4 stones, price tier included, no finish behaviour text, sample request linkage in v1, code-level attribute registry now and CMS-managed attribute definitions later. Standing merge authorization applies.",
         "included": [
@@ -52,10 +52,12 @@
           "Schema, Function, RLS or migration changes; production data writes; CMS-managed attribute definitions (future task)."
         ]
       },
-      "nextAction": "Opus implements on its own branch; Claude reports with screenshots for Jay's design approval, then merges.",
-      "blocker": "",
+      "nextAction": "Claude shows Jay the 1440/768/375 screenshots of PR #81; after Jay's design approval, merge under the standing authorization and record the wave readback.",
+      "blocker": "Jay's design approval by screenshot.",
       "notes": [
-        "2026-09-28: alignment in chat. Layer 1 (registry in code) now; layer 2 (stone_attribute_definitions/values managed in admin) deferred until Stone data is fully CMS-managed; the registry shape is designed to be swapped to a data source later."
+        "2026-09-28: alignment in chat. Layer 1 (registry in code) now; layer 2 (stone_attribute_definitions/values managed in admin) deferred until Stone data is fully CMS-managed; the registry shape is designed to be swapped to a data source later.",
+        "2026-09-28: implemented on claude/stone-compare: selection helpers and tray, Compare toggle on cards and detail, lazy /stone-library/compare page driven by src/lib/stoneCompareRegistry.ts (origin public:false), Differences only, sample CTA via the existing /contact?intent=sample-request&stone= prefill (ContactPage unchanged), noindex utility route in src/data/seoRoutes.ts honoured at the edge. Local: npm test, lint, tsc, agent:stone-library-detail, edge-seo tests passed; Playwright captures under .tmp/compare/.",
+        "2026-09-28: PR #81 (head b9048aa). Clean Node 20 gate 29 checks passed; CI 36428075112 passed (verify-and-deploy incl. isolated local:verify and Preview smoke; quality). Branch Preview https://c1041896.urblo-site.pages.dev passed agent:cloudflare-preview-smoke; curl /stone-library/compare?stones=juparana,zen-grey returned 200 with noindex,follow and canonical https://urblo.com.au/stone-library in the first response; sitemap has no compare URL. Read-only Preview Playwright at 1440 rendered production project usage (Golden Crust 1, Alpine White 2). Not merged."
       ]
     },
     {

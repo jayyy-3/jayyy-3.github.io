@@ -535,3 +535,23 @@ Copy formats:
 - Counts agree with their noun: `1 finish`, `4 finishes`, `1 result`.
 
 Remember: a page opens with words, not an empty picture; imagery appears where it shows the stone, project or product. The Projects archive stays the reference for new public pages.
+
+## Stone Library comparison — 2026-09-28
+
+Review: specifiers shortlisting stones had to open detail pages one at a time and hold finish, tier and block size in their heads. Jay approved a comparison of up to four stones with a sample request hand-off (NOW-STONE-COMPARE-001).
+
+Jay's decisions:
+- Maximum four stones; price tier is shown; finish behaviour text is not compared.
+- Rows come from a code registry now and from CMS-managed attribute definitions later.
+- The sample request is linked in v1.
+
+Implementation:
+- Selection: each Stone Library card gets a full-width `Compare` row under a hairline, outside the card link, with a checkbox-style mark (lime check on a black-outlined square only when selected; the selected card's border turns black). The stone detail page shows the same control beside the type and status pills, plus a `Compare N stones` text link from two stones.
+- Tray: a white-glass bar in the FilterBar family (hairline, soft upward shadow), sticky to the bottom of the list so it settles above the footer instead of covering it. It is not a modal and does not trap focus. Desktop shows `Compare n / 4`, `Clear`, one chip per stone (36px thumbnail, name, remove), dashed `Add a stone` slots up to four and a black `Compare N stones` button. At 375px the count, Clear and a short `Compare (N)` button share one row and the chips scroll. A fifth stone is refused with a visible note marked by a small lime dot; add and remove are announced to screen readers only.
+- Page: `PageIntro band` with `Home / Stone Library / Compare`, light H1, lede, black `Request samples` (CTA set; the link carries the stones) and ghost `Edit selection`. The empty state offers `Explore Stone Library`. Below it, a sticky control band holds the `Finish shown` chips (active chip uses the thin lime outline and wash, with an `n/N` offered count), the `Differences only` switch (black track, lime knob when on) and a hidden-row count. The table sits on the quiet surface band inside a hairline frame. The first column is sticky at every width, with an inset hairline. Stone columns are at least 208px, so 375px and 768px scroll horizontally with the labels fixed.
+- Column heads use the stone name in light Avenir with a small arrow to the detail page, a StatusPill and a quiet remove ×. Row labels are uppercase meta with the unit or hint in muted text.
+- Finish images are 4:3 and link to the stone at that finish. A missing photograph shows a `Photo pending` panel; a finish the stone does not offer shows a dashed `Not offered in <finish>` panel. Another finish's photograph never stands in. A reference view carries a dark `Reference view` label, and the caption names the finish and the variant that is shown.
+- Capability uses the StatusPill dot language: a lime dot in a thin lime ring for available, a hollow dot with `TBC` for to be confirmed, and a light dash for not offered, with a one-line legend. Finishes no compared stone offers get no row. The price tier shows three short black bars (not lime: tier is not a state) under the label, with an "indicative, confirmed per project" note under the table.
+- A closing `Samples` band (section heading "See them in hand") repeats the sample CTA and names the stones that will be prefilled.
+
+Remember: the comparison is a decision surface. Photographs and facts stay primary, lime marks state only, and an attribute appears only when the registry marks it public.

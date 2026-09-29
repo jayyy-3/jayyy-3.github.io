@@ -404,6 +404,29 @@ function isCatalogueEnvelope(value: unknown): value is StoneCatalogue {
     return Array.isArray(envelope.stones) && Array.isArray(envelope.managedKeys) && Array.isArray(envelope.finishes);
 }
 
+/** One compared stone: the default-variant detail plus every enabled variant's detail. */
+export interface StoneComparisonDetail {
+    detail: StoneDetailVM;
+    variants: StoneDetailVM[];
+}
+
+export interface StoneComparisonResult {
+    stones: StoneComparisonDetail[];
+    /** Requested ids that are not public stones, in request order. */
+    missingIds: string[];
+    /** Finish display order and labels for the catalogue that served the stones. */
+    finishOrder: Map<FinishKey, { label: string; sortOrder: number }>;
+}
+
+function staticStoneComparison(stoneGroupId: string): StoneComparisonDetail | null {
+    const detail = StoneLibraryService.getStoneDetail(stoneGroupId);
+    if (!detail) return null;
+    const variants = detail.variants
+        .map((variant) => StoneLibraryService.getStoneDetail(stoneGroupId, variant.stoneVariantId))
+        .filter((entry): entry is StoneDetailVM => Boolean(entry));
+    return { detail, variants: variants.length ? variants : [detail] };
+}
+
 let cataloguePending: Promise<StoneCatalogue | null> | null = null;
 async function loadCatalogue(): Promise<StoneCatalogue | null> {
     const client = await getPublicContentClient();
@@ -468,6 +491,43 @@ class StoneLibraryService {
         const record = catalogue.stones.find((s) => s.draft.stone.slug === stoneGroupId);
         if (record) return stoneDraftToDetail(record.draft, catalogue.finishes, record.media, variantId);
         return catalogue.managedKeys.includes(stoneGroupId) ? null : this.getStoneDetail(stoneGroupId, variantId);
+    }
+
+    /**
+     * Details for the compare page from one catalogue read: the same Published-first,
+     * static-fallback precedence as getPublishedStoneDetail, for every enabled variant.
+     */
+    static async getPublishedStoneComparison(stoneGroupIds: readonly string[]): Promise<StoneComparisonResult> {
+        const catalogue = await this.getCatalogue();
+        const finishOrder = new Map<FinishKey, { label: string; sortOrder: number }>();
+        for (const finish of stoneLibrary.finishes) {
+            finishOrder.set(toFinishKey(finish.finishId, finish.finishVariantId), {
+                label: finish.displayName,
+                sortOrder: finish.sortOrder,
+            });
+        }
+        for (const finish of catalogue?.finishes ?? []) {
+            finishOrder.set(finish.key, { label: finish.name, sortOrder: finish.sortOrder });
+        }
+
+        const stones: StoneComparisonDetail[] = [];
+        const missingIds: string[] = [];
+        for (const stoneGroupId of stoneGroupIds) {
+            let entry: StoneComparisonDetail | null = null;
+            const record = catalogue?.stones.find((s) => s.draft.stone.slug === stoneGroupId);
+            if (catalogue && record) {
+                const variants = record.draft.variants
+                    .filter((variant) => variant.enabled)
+                    .map((variant) => stoneDraftToDetail(record.draft, catalogue.finishes, record.media, variant.slug))
+                    .filter((detail): detail is StoneDetailVM => Boolean(detail));
+                entry = variants[0] ? { detail: variants[0], variants } : null;
+            } else if (!catalogue?.managedKeys.includes(stoneGroupId)) {
+                entry = staticStoneComparison(stoneGroupId);
+            }
+            if (entry) stones.push(entry);
+            else missingIds.push(stoneGroupId);
+        }
+        return { stones, missingIds, finishOrder };
     }
 
     static async getPublicStoneGroupOptionsForProducts(): Promise<OptionItem[]> {
