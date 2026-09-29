@@ -6,6 +6,7 @@ import {
   type SiteSocialLink,
 } from '../data/siteChrome.ts';
 import { getPublicContentClient } from './publicContentClient.ts';
+import type { Tables } from '../types/database.ts';
 import {
   siteSettingsFooterLimits,
   toSafeInternalFooterDestination,
@@ -19,16 +20,17 @@ import {
   toPublicSiteSettingsShareImage,
 } from './siteSettingsPublicContract.ts';
 
-interface PublicSiteSettingsRow {
-  settings_key: string;
-  status: string;
-  company_name: string;
-  primary_email: string | null;
-  primary_phone: string | null;
-  social_links: unknown;
-  footer_columns: unknown;
-  seo: unknown;
-}
+type PublicSiteSettingsRow = Pick<
+  Tables<'site_settings'>,
+  | 'settings_key'
+  | 'status'
+  | 'company_name'
+  | 'primary_email'
+  | 'primary_phone'
+  | 'social_links'
+  | 'footer_columns'
+  | 'seo'
+>;
 
 export type PublicFooterItem =
   | { label: string; kind: 'text'; value: string }
@@ -112,7 +114,7 @@ async function fetchPublicSiteSettings(): Promise<PublicSiteSettings> {
     )
     .eq('settings_key', 'default')
     .eq('status', 'published')
-    .maybeSingle<PublicSiteSettingsRow>();
+    .maybeSingle();
 
   if (error || !data) {
     return staticPublicSiteSettings;

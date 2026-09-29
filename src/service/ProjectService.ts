@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
+import type { Database, Tables } from '../types/database.ts';
 import {
   projects as staticProjects,
   type ProjectData,
@@ -14,93 +15,81 @@ import { resolvePublicMediaUrl, type PublicMediaLocation } from '../lib/publicMe
 import { overlayPublishedContent, toCanonicalContentKey } from './publicContentOverlay.ts';
 
 type MediaRef = PublicMediaLocation & { alt: string | null };
+type Relation<T> = T | T[] | null;
+type PublicClient = SupabaseClient<Database>;
 
-type ProjectRow = {
-  id: number;
-  slug: string;
-  title: string;
-  location: string | null;
-  project_date_label: string | null;
-  completed_on: string | null;
-  summary: string | null;
-  lead: string | null;
-  client: string | null;
-  landscape_architect: string | null;
-  contractor: string | null;
-  address: string | null;
-  quantity_label: string | null;
-  carbon_status: string | null;
-  carbon_note: string | null;
-  seo: unknown;
-  sort_order: number | null;
-  cover_media?: MediaRef | MediaRef[] | null;
-  hero_media?: MediaRef | MediaRef[] | null;
+type ProjectRow = Pick<
+  Tables<'projects'>,
+  | 'id'
+  | 'slug'
+  | 'title'
+  | 'location'
+  | 'project_date_label'
+  | 'completed_on'
+  | 'summary'
+  | 'lead'
+  | 'client'
+  | 'landscape_architect'
+  | 'contractor'
+  | 'address'
+  | 'quantity_label'
+  | 'carbon_status'
+  | 'carbon_note'
+  | 'seo'
+  | 'sort_order'
+> & {
+  cover_media?: Relation<MediaRef>;
+  hero_media?: Relation<MediaRef>;
 };
 
-type ProjectFactRow = {
-  fact_label: string;
-  fact_value: string | null;
-  fact_value_json: unknown;
-  sort_order: number | null;
-  status: string;
+type ProjectFactRow = Pick<
+  Tables<'project_facts'>,
+  'fact_label' | 'fact_value' | 'fact_value_json' | 'sort_order' | 'status'
+>;
+
+type ProjectMediaRow = Pick<
+  Tables<'project_media'>,
+  | 'id'
+  | 'project_material_map_id'
+  | 'media_role'
+  | 'label'
+  | 'caption'
+  | 'block_title'
+  | 'youtube_url'
+  | 'sort_order'
+> & {
+  media_assets?: Relation<MediaRef>;
 };
 
-type ProjectMediaRow = {
-  id: number;
-  project_material_map_id: number | null;
-  media_role: string;
-  label: string | null;
-  caption: string | null;
-  block_title: string | null;
-  youtube_url: string | null;
-  sort_order: number | null;
-  media_assets?: MediaRef | MediaRef[] | null;
+type ProjectMaterialRow = Pick<
+  Tables<'project_materials'>,
+  'id' | 'application' | 'note' | 'sort_order' | 'status'
+> & {
+  stone_groups?: Relation<Pick<Tables<'stone_groups'>, 'stone_group_key'>>;
+  stone_variants?: Relation<Pick<Tables<'stone_variants'>, 'variant_key'>>;
+  finish_definitions?: Relation<Pick<Tables<'finish_definitions'>, 'finish_key'>>;
 };
 
-type StoneGroupRef = {
-    stone_group_key: string;
+type ProjectMaterialMapRow = Pick<
+  Tables<'project_material_maps'>,
+  'id' | 'title' | 'intro' | 'sort_order' | 'status'
+> & {
+  media_assets?: Relation<MediaRef>;
 };
 
-type StoneVariantRef = {
-  variant_key: string;
-};
-
-type FinishDefinitionRef = {
-  finish_key: string;
-};
-
-type ProjectMaterialRow = {
-  id: number;
-  application: string;
-  note: string | null;
-  sort_order: number | null;
-  status: string;
-  stone_groups?: StoneGroupRef | StoneGroupRef[] | null;
-  stone_variants?: StoneVariantRef | StoneVariantRef[] | null;
-  finish_definitions?: FinishDefinitionRef | FinishDefinitionRef[] | null;
-};
-
-type ProjectMaterialMapRow = {
-  id: number;
-  title: string | null;
-  intro: string | null;
-  sort_order: number | null;
-  status: string;
-  media_assets?: MediaRef | MediaRef[] | null;
-};
-
-type ProjectHotspotRow = {
-  project_material_map_id: number;
-  project_material_id: number | null;
-  hotspot_key: string;
-  x_percent: number | string;
-  y_percent: number | string;
-  label: string | null;
-  application: string | null;
-  note: string | null;
-  sort_order: number | null;
-  status: string;
-};
+type ProjectHotspotRow = Pick<
+  Tables<'project_hotspots'>,
+  | 'project_material_map_id'
+  | 'project_material_id'
+  | 'hotspot_key'
+  | 'x_percent'
+  | 'y_percent'
+  | 'label'
+  | 'application'
+  | 'note'
+  | 'sort_order'
+  | 'status'
+>;
 
 function firstRelation<T>(value: T | T[] | null | undefined): T | null {
   return Array.isArray(value) ? value[0] ?? null : value ?? null;
@@ -172,7 +161,7 @@ function mapProjectMaterialMap(
   row: ProjectMaterialMapRow,
   hotspots: ProjectHotspotRow[],
   materialRowsById: Map<number, ProjectMaterialRow>,
-  supabase: SupabaseClient,
+  supabase: PublicClient,
 ): ProjectMaterialMap | null {
   const media = firstRelation(row.media_assets);
   const image = resolvePublicMediaUrl(media, supabase);
@@ -208,7 +197,7 @@ function extractYouTubeId(value: string): string {
 
 function mapProjectRow(
   row: ProjectRow,
-  supabase: SupabaseClient,
+  supabase: PublicClient,
   facts: ProjectFactRow[] = [],
   media: ProjectMediaRow[] = [],
   materials: ProjectMaterialRow[] = [],
@@ -389,7 +378,7 @@ function mapProjectRow(
 }
 
 export async function getPublishedProjects(
-  suppliedClient?: SupabaseClient | null,
+  suppliedClient?: PublicClient | null,
 ): Promise<ProjectData[]> {
   const supabase = suppliedClient === undefined
     ? await getPublicContentClient()
@@ -438,7 +427,7 @@ export async function getPublishedProjects(
 
   if (error || !data?.length) return [];
 
-  const projectRows = data as unknown as ProjectRow[];
+  const projectRows: ProjectRow[] = data;
   const ids = projectRows.map((row) => row.id);
   const factsByProject = new Map<number, ProjectFactRow[]>();
   const mediaByProject = new Map<number, ProjectMediaRow[]>();
@@ -536,9 +525,7 @@ export async function getPublishedProjects(
     return [];
   }
 
-  const materialMapRows = (materialMapsResult.data ?? []) as unknown as (
-    ProjectMaterialMapRow & { project_id: number }
-  )[];
+  const materialMapRows = materialMapsResult.data ?? [];
   const materialMapIds = materialMapRows.map((materialMap) => materialMap.id);
   const hotspotsResult = materialMapIds.length
     ? await supabase
@@ -563,17 +550,15 @@ export async function getPublishedProjects(
 
   if (hotspotsResult.error) return [];
 
-  for (const fact of (factsResult.data ?? []) as (ProjectFactRow & { project_id: number })[]) {
+  for (const fact of factsResult.data ?? []) {
     factsByProject.set(fact.project_id, [...(factsByProject.get(fact.project_id) ?? []), fact]);
   }
 
-  for (const item of (mediaResult.data ?? []) as unknown as (ProjectMediaRow & { project_id: number })[]) {
+  for (const item of mediaResult.data ?? []) {
     mediaByProject.set(item.project_id, [...(mediaByProject.get(item.project_id) ?? []), item]);
   }
 
-  for (const material of (materialsResult.data ?? []) as unknown as (
-    ProjectMaterialRow & { project_id: number }
-  )[]) {
+  for (const material of materialsResult.data ?? []) {
     materialsByProject.set(material.project_id, [
       ...(materialsByProject.get(material.project_id) ?? []),
       material,
@@ -589,7 +574,7 @@ export async function getPublishedProjects(
     ]);
   }
 
-  for (const hotspot of (hotspotsResult.data ?? []) as unknown as ProjectHotspotRow[]) {
+  for (const hotspot of hotspotsResult.data ?? []) {
     const projectId = projectIdByMaterialMapId.get(hotspot.project_material_map_id);
     if (!projectId) continue;
     hotspotsByProject.set(projectId, [...(hotspotsByProject.get(projectId) ?? []), hotspot]);
@@ -614,7 +599,7 @@ export async function getPublishedProjects(
 // visitors can open right now. It returns only ids and addresses, never draft content; null
 // means the check could not run.
 export async function getLiveProjectAddresses(
-  client: SupabaseClient,
+  client: PublicClient,
 ): Promise<Map<number, string> | null> {
   const { data, error } = await client
     .from('projects')
@@ -630,7 +615,7 @@ export async function getLiveProjectAddresses(
 }
 
 export async function getArchivedProjectSlugs(
-  suppliedClient?: SupabaseClient | null,
+  suppliedClient?: PublicClient | null,
 ): Promise<string[]> {
   const supabase = suppliedClient === undefined
     ? await getPublicContentClient()

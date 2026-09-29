@@ -1,8 +1,15 @@
-import { createClient } from '@supabase/supabase-js';
 import {
   prepareMediaPromotions,
   compensatePublicCopies,
 } from './admin-projects.js';
+import {
+  corsHeaders,
+  createJsonResponder,
+  createServiceClient,
+  readAdminIdentity,
+  readBearerToken,
+  readServiceConfig,
+} from './admin-runtime.js';
 
 const endpointName = 'Stone Library';
 const MAX_BYTES = 1_100_000;
@@ -11,23 +18,26 @@ const uuid =
 const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const variantSlugPattern = /^[a-z0-9]+(?:--?[a-z0-9]+)*$/;
 export class StoneError extends Error {
+  /**
+   * @param {number} status
+   * @param {string} code
+   * @param {string} message
+   * @param {Record<string, unknown>} [details]
+   */
   constructor(status, code, message, details = {}) {
     super(message);
-    Object.assign(this, { status, code, details });
+    this.status = status;
+    this.code = code;
+    this.details = details;
   }
 }
+const respond = createJsonResponder({
+  'cache-control': 'no-store',
+  ...corsHeaders('GET, POST, OPTIONS'),
+  'x-content-type-options': 'nosniff',
+});
 export function stoneResponse(body, status = 200) {
-  return new Response(status === 204 ? null : JSON.stringify(body), {
-    status,
-    headers: {
-      'content-type': 'application/json',
-      'cache-control': 'no-store',
-      'access-control-allow-origin': '*',
-      'access-control-allow-methods': 'GET, POST, OPTIONS',
-      'access-control-allow-headers': 'authorization, content-type',
-      'x-content-type-options': 'nosniff',
-    },
-  });
+  return respond(body, { status });
 }
 function integer(value, name, nullable = false) {
   if (nullable && value === null) return;
@@ -218,6 +228,7 @@ export function publishedMediaIds(draft) {
 }
 export function mapStoneError(error) {
   const code = error?.message || '';
+  /** @type {Record<string, [number, string, string]>} */
   const mappings = {
     stone_conflict: [
       409,
@@ -292,6 +303,7 @@ export function mapStoneError(error) {
     ],
   };
   if (mappings[code]) {
+    /** @type {Record<string, unknown>} */
     let details = {};
     if (code === 'stone_in_use') {
       try {
@@ -381,19 +393,13 @@ async function readBody(request) {
   return body;
 }
 async function actorFor(client, token) {
-  const { data, error } = await client.auth.getUser(token);
-  if (error || !data?.user)
+  const { user, userError, profile, profileError } = await readAdminIdentity(client, token);
+  if (userError || !user)
     throw new StoneError(
       401,
       'invalid_session',
       'Sign in again to continue editing.',
     );
-  const { data: profile, error: profileError } = await client
-    .from('admin_profiles')
-    .select('role,is_active')
-    .eq('user_id', data.user.id)
-    .eq('is_active', true)
-    .maybeSingle();
   if (
     profileError ||
     !profile ||
@@ -404,7 +410,7 @@ async function actorFor(client, token) {
       'not_allowed',
       'Active Stone Library access is required.',
     );
-  return { id: data.user.id, role: profile.role };
+  return { id: user.id, role: profile.role };
 }
 async function rpc(client, actor, body, action = body.action, promotions = []) {
   const { data, error } = await client.rpc('admin_stone_workspace', {
@@ -521,35 +527,22 @@ export async function handleStoneRequest(request, env, dependencies = {}) {
       405,
     );
   try {
-    const token = /^Bearer\s+(.+)$/i.exec(
-      request.headers.get('authorization') || '',
-    )?.[1];
+    const token = readBearerToken(request);
     if (!token)
       throw new StoneError(
         401,
         'missing_session',
         `Sign in before opening ${endpointName}.`,
       );
-    const key = env.SUPABASE_SERVICE_ROLE_KEY || env.SUPABASE_SERVICE_KEY;
-    if (!key && !dependencies.client)
+    const config = readServiceConfig(env);
+    if (!config.serviceKey && !dependencies.client)
       throw new StoneError(
         503,
         'not_configured',
         'The stone editor is not connected on this deployment.',
       );
-    const client =
-      dependencies.client ||
-      createClient(
-        env.SUPABASE_URL || 'https://npkidywzwddbnfrnxlmo.supabase.co',
-        key,
-        {
-          auth: {
-            autoRefreshToken: false,
-            persistSession: false,
-            detectSessionInUrl: false,
-          },
-        },
-      );
+    // Reached only with a configured service key (checked above) or an injected test client.
+    const client = dependencies.client || createServiceClient(/** @type {{ url: string, serviceKey: string }} */ (config));
     const actor = await actorFor(client, token);
     if (request.method === 'GET') {
       const url = new URL(request.url);
@@ -659,6 +652,7 @@ export async function handleStoneRequest(request, env, dependencies = {}) {
           m.status !== 'published' ||
           (m.source_kind === 'storage' && m.bucket !== 'urblo-public-media'),
       );
+      /** @type {Array<Record<string, unknown>>} */
       const promotions = await prepareMediaPromotions(
         client,
         needsPromotion,
@@ -704,6 +698,7 @@ export async function handleStoneRequest(request, env, dependencies = {}) {
       // Unknown commit outcomes retain copies. Retry the SAME request to read the receipt.
       const definiteRollback =
         !commitAttempted || (error instanceof StoneError && error.status < 500);
+      /** @type {{ removed: unknown[], retained: unknown[] }} */
       let cleanup = {
         removed: [],
         retained: copies.map((c) => ({

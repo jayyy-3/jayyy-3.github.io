@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { FormEvent } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import type { Json } from '../../types/database';
 import { CheckCircle2, KeyRound, Pencil, Plus, Save, ShieldCheck, UserPlus, Users, X } from 'lucide-react';
 import { recordAdminAuditEvent, withAuditNotice } from '../../lib/adminAudit';
 import {
@@ -1488,7 +1489,7 @@ function FooterItemRow({
 
 export function validateSettings(form: SettingsFormState): {
     error: string | null;
-    footerColumns: unknown[];
+    footerColumns: Json[];
     publishedFields: NormalizedPublishedSiteSettingsFields | null;
 } {
     if (!form.companyName.trim()) {
@@ -1560,7 +1561,7 @@ export function normalizeFooterColumns(columns: unknown[]): FooterColumnForm[] {
         .filter((column): column is FooterColumnForm => column !== null);
 }
 
-export function serializeFooterColumns(columns: FooterColumnForm[]): { error: string | null; value: unknown[] } {
+export function serializeFooterColumns(columns: FooterColumnForm[]): { error: string | null; value: Json[] } {
     if (columns.length > siteSettingsFooterLimits.columns) {
         return {
             error: `Footer content supports up to ${siteSettingsFooterLimits.columns} columns.`,

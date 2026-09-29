@@ -1,4 +1,4 @@
-import { createServiceClient, readServiceConfig, readBearerToken, readAdminIdentity } from './admin-runtime.js';
+import { corsHeaders, createJsonResponder, createServiceClient, readServiceConfig, readBearerToken, readAdminIdentity } from './admin-runtime.js';
 import { defaultQrMaterialForName, listQrMaterialOptions, sameQrMaterial, validateQrMaterialShape } from './image-qr-materials.js';
 
 const PRIVATE_MEDIA_BUCKET = 'urblo-admin-media';
@@ -526,16 +526,4 @@ function upstream(code, message, error) {
   return new AdminImageQrError(502, code, message);
 }
 
-function jsonResponse(body, init = {}) {
-  return new Response(init.status === 204 ? null : JSON.stringify(body), {
-    status: init.status || 200,
-    headers: {
-      'content-type': 'application/json',
-      'cache-control': 'no-store',
-      'access-control-allow-origin': '*',
-      'access-control-allow-methods': 'GET, POST, OPTIONS',
-      'access-control-allow-headers': 'authorization, content-type',
-      ...(init.headers || {}),
-    },
-  });
-}
+const jsonResponse = createJsonResponder({ 'cache-control': 'no-store', ...corsHeaders('GET, POST, OPTIONS') });

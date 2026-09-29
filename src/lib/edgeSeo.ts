@@ -7,6 +7,7 @@
  * Nothing here performs I/O; the Function supplies raw rows and caches the dataset.
  */
 import articleIndexJson from '../../public/articles/index.json';
+import type { Tables } from '../types/database';
 import stoneLibraryJson from '../../data/clean/stone_library.json';
 import { products as staticProducts } from '../data/productData';
 import { projects as staticProjects } from '../data/projectData';
@@ -56,43 +57,27 @@ const CASE_SENSITIVE_COLLECTIONS = new Set<EdgeCollectionKey>(['stone-library'])
 
 type MediaRelation = PublicMediaLocation | PublicMediaLocation[] | null | undefined;
 
-export interface EdgeSiteSettingsRow {
-  settings_key?: string | null;
-  status?: string | null;
-  company_name?: unknown;
-  footer_columns?: unknown;
-  seo?: unknown;
-}
+// Raw PostgREST rows read by functions/_lib/edge-seo.js. Columns come from the generated schema;
+// every optional column is still validated at runtime because the edge read is untyped JSON.
+export type EdgeSiteSettingsRow = Partial<
+  Pick<Tables<'site_settings'>, 'settings_key' | 'status' | 'company_name' | 'footer_columns' | 'seo'>
+>;
 
-export interface EdgeProjectRow {
-  slug: string;
-  title: string;
-  summary?: string | null;
-  lead?: string | null;
-  seo?: unknown;
-  updated_at?: string | null;
-  cover_media?: MediaRelation;
-  hero_media?: MediaRelation;
-}
+export type EdgeProjectRow = Pick<Tables<'projects'>, 'slug' | 'title'> &
+  Partial<Pick<Tables<'projects'>, 'summary' | 'lead' | 'seo' | 'updated_at'>> & {
+    cover_media?: MediaRelation;
+    hero_media?: MediaRelation;
+  };
 
-export interface EdgeProductRow {
-  slug: string;
-  name: string;
-  short_description?: string | null;
-  seo?: unknown;
-  updated_at?: string | null;
-  product_models?: { sort_order?: number | null; media_assets?: MediaRelation }[] | null;
-}
+export type EdgeProductRow = Pick<Tables<'products'>, 'slug' | 'name'> &
+  Partial<Pick<Tables<'products'>, 'short_description' | 'seo' | 'updated_at'>> & {
+    product_models?: (Partial<Pick<Tables<'product_models'>, 'sort_order'>> & { media_assets?: MediaRelation })[] | null;
+  };
 
-export interface EdgeArticleRow {
-  slug: string;
-  title: string;
-  excerpt?: string | null;
-  seo?: unknown;
-  updated_at?: string | null;
-  published_on?: string | null;
-  cover_media?: MediaRelation;
-}
+export type EdgeArticleRow = Pick<Tables<'articles'>, 'slug' | 'title'> &
+  Partial<Pick<Tables<'articles'>, 'excerpt' | 'seo' | 'updated_at' | 'published_on'>> & {
+    cover_media?: MediaRelation;
+  };
 
 /** Raw public reads. `null` means the read failed or was unavailable. */
 export interface EdgeSeoRawData {
@@ -576,7 +561,7 @@ function parseStoneCatalogue(value: unknown, supabaseUrl: string): StoneCatalogu
   }
   const storage = createPublicStorageAdapter(supabaseUrl);
   const stones = (value.stones as unknown[]).flatMap((record) => {
-    if (!isRecord(record) || !isRecord(record.draft) || !Array.isArray(record.media)) return [];
+    if (!isRecord(record) || !isPublishedStoneDraft(record.draft) || !Array.isArray(record.media)) return [];
     const media: StoneMedia[] = (record.media as unknown[]).flatMap((entry) => {
       if (!isRecord(entry) || typeof entry.id !== 'number') return [];
       const bucket = typeof entry.bucket === 'string' ? entry.bucket : null;
@@ -601,7 +586,7 @@ function parseStoneCatalogue(value: unknown, supabaseUrl: string): StoneCatalogu
         },
       ];
     });
-    return [{ draft: record.draft as unknown as StoneCatalogue['stones'][number]['draft'], media }];
+    return [{ draft: record.draft, media }];
   });
   return {
     managedKeys: (value.managedKeys as unknown[]).filter((key): key is string => typeof key === 'string'),
@@ -624,7 +609,7 @@ function createPublicStorageAdapter(supabaseUrl: string): PublicStorageAdapter {
         }),
       }),
     },
-  } as unknown as PublicStorageAdapter;
+  };
 }
 
 function resolveMedia(relation: MediaRelation, storage: PublicStorageAdapter | null): string | undefined {
@@ -656,6 +641,11 @@ function safeDecode(value: string): string {
 function toSitemapDate(value: string | null | undefined): string {
   const match = typeof value === 'string' ? /^(\d{4}-\d{2}-\d{2})/.exec(value) : null;
   return match ? match[1] : SEO_LAST_MODIFIED;
+}
+
+// public_stone_catalogue emits server-validated drafts; the edge keeps its object-only check.
+function isPublishedStoneDraft(value: unknown): value is StoneCatalogue['stones'][number]['draft'] {
+  return isRecord(value);
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

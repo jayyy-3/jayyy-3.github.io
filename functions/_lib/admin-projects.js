@@ -1,4 +1,4 @@
-import { createServiceClient, readServiceConfig, readBearerToken, readAdminIdentity } from './admin-runtime.js';
+import { corsHeaders, createJsonResponder, createServiceClient, readServiceConfig, readBearerToken, readAdminIdentity } from './admin-runtime.js';
 
 const PRIVATE_MEDIA_BUCKET = "urblo-admin-media";
 const PUBLIC_MEDIA_BUCKET = "urblo-public-media";
@@ -32,6 +32,12 @@ const PROJECT_IMAGE_MIME_TYPES = new Set([
 ]);
 
 class AdminProjectsError extends Error {
+  /**
+   * @param {number} status
+   * @param {string} code
+   * @param {string} message
+   * @param {Record<string, unknown> | null} [details]
+   */
   constructor(status, code, message, details = null) {
     super(message);
     this.status = status;
@@ -1415,6 +1421,10 @@ async function callAggregateRpc(
   return data;
 }
 
+/**
+ * @param {any} error
+ * @param {any} [responseStatus]
+ */
 export function mapRpcError(error, responseStatus = null) {
   const messagePayload = parseJsonObject(error?.message);
   const detailPayload = parseJsonObject(error?.details);
@@ -1518,19 +1528,10 @@ async function requireAdminActor(supabase, accessToken) {
   return { user, profile };
 }
 
-function jsonResponse(body, init = {}) {
-  return new Response(init.status === 204 ? null : JSON.stringify(body), {
-    status: init.status || 200,
-    headers: {
-      "content-type": "application/json",
-      "cache-control": "no-store",
-      "access-control-allow-origin": "*",
-      "access-control-allow-methods": "GET, POST, OPTIONS",
-      "access-control-allow-headers": "authorization, content-type",
-      ...(init.headers || {}),
-    },
-  });
-}
+const jsonResponse = createJsonResponder({
+  "cache-control": "no-store",
+  ...corsHeaders("GET, POST, OPTIONS"),
+});
 
 function validMediaBlock(block, mapKeys) {
   if (!MEDIA_ROLES.has(block.mediaRole)) return false;

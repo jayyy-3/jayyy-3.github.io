@@ -659,7 +659,8 @@ function checkRoutes() {
   const adminAuthBrowser = readRequired('scripts/check-admin-auth-browser.mjs');
   const firstAdminBootstrap = readRequired('scripts/bootstrap-first-admin.mjs');
   const adminLiveReadiness = readRequired('scripts/check-admin-live-readiness.mjs');
-  const adminInviteFunction = readRequired('functions/_lib/admin-invite.js');
+  // Service configuration and client options come from the shared Functions runtime.
+  const adminInviteFunction = readRequired('functions/_lib/admin-invite.js') + '\n' + readRequired('functions/_lib/admin-runtime.js');
   const adminInviteRoute = readRequired('functions/api/admin/invite-user.js');
   const adminProfileEmailMigration = readRequired(
     'supabase/migrations/202605290002_admin_profile_email_uniqueness.sql',

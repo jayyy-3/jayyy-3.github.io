@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
+import type { Database, Tables } from '../types/database.ts';
 import products from '../data/productData.ts';
 import { getPublicContentClient } from '../lib/publicContentClient.ts';
 import { parsePublicEntitySeo } from '../lib/publicEntitySeo.ts';
@@ -8,34 +9,27 @@ import { overlayPublishedContent, toCanonicalContentKey } from './publicContentO
 
 type MediaRef = PublicMediaLocation;
 
-type ProductRow = {
-    slug: string;
-    name: string;
-    short_description: string | null;
-    seo: unknown;
-    product_models?: {
-        model_key: string;
-        label: string;
-        sort_order: number | null;
-        media_assets?: MediaRef | MediaRef[] | null;
-    }[];
-    product_material_defaults?: {
-        material_category: string;
-        material_slug: string | null;
-        display_label: string | null;
-        stone_groups?: { stone_group_key: string | null } | { stone_group_key: string | null }[] | null;
-    }[];
-    product_specs?: {
-        spec_label: string;
-        spec_value: string;
-    }[];
+type Relation<T> = T | T[] | null;
+type PublicClient = SupabaseClient<Database>;
+
+type ProductRow = Pick<Tables<'products'>, 'slug' | 'name' | 'short_description' | 'seo'> & {
+    product_models?: (Pick<Tables<'product_models'>, 'model_key' | 'label' | 'sort_order'> & {
+        media_assets?: Relation<MediaRef>;
+    })[];
+    product_material_defaults?: (Pick<
+        Tables<'product_material_defaults'>,
+        'material_category' | 'material_slug' | 'display_label'
+    > & {
+        stone_groups?: Relation<Pick<Tables<'stone_groups'>, 'stone_group_key'>>;
+    })[];
+    product_specs?: Pick<Tables<'product_specs'>, 'spec_label' | 'spec_value'>[];
 };
 
 function firstRelation<T>(value: T | T[] | null | undefined): T | null {
     return Array.isArray(value) ? value[0] ?? null : value ?? null;
 }
 
-function mapPublishedProduct(row: ProductRow, supabase: SupabaseClient): Product {
+function mapPublishedProduct(row: ProductRow, supabase: PublicClient): Product {
     const models = (row.product_models ?? [])
         .slice()
         .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
@@ -117,7 +111,8 @@ async function getPublishedProducts(): Promise<Product[]> {
         return [];
     }
 
-    return (data as unknown as ProductRow[]).map((row) => mapPublishedProduct(row, supabase));
+    const rows: ProductRow[] = data;
+    return rows.map((row) => mapPublishedProduct(row, supabase));
 }
 
 function mergeProductsWithPublishedOverlay(publishedProducts: Product[]): Product[] {
