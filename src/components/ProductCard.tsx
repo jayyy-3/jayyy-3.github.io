@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import type { Product } from '../types/product';
+import StaticResponsiveImage from './StaticResponsiveImage';
 
 interface Props {
   product: Product;
@@ -14,8 +15,9 @@ export default function ProductCard({ product }: Props) {
       className="urblo-card group block overflow-hidden transition-transform duration-300 hover:-translate-y-1"
     >
       <div className="relative overflow-hidden bg-[rgba(239,239,239,0.42)]">
-        <img
+        <StaticResponsiveImage
           src={hero}
+          sizes="(min-width: 1280px) 33vw, (min-width: 640px) 50vw, 100vw"
           alt={product.name}
           className="h-72 w-full object-contain p-5 transition duration-500 group-hover:scale-[1.03]"
         />

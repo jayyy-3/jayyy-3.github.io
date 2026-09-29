@@ -4,6 +4,7 @@ import { Link, Navigate, useParams } from 'react-router-dom';
 import ReadingProgressBar from '../components/ReadingProgressBar';
 import PublicContentSeo from '../components/PublicContentSeo';
 import RouteState from '../components/RouteState';
+import StaticResponsiveImage from '../components/StaticResponsiveImage';
 import { prepareArticleHtml, resolveArticleAssetPath } from '../lib/articleMedia';
 import { toSafePublicContentDestination } from '../lib/publicContentLink';
 import ArticleService from '../service/ArticleService';
@@ -179,12 +180,13 @@ export default function ArticlePage() {
 
       <header className="relative overflow-hidden bg-black text-white">
         {meta.cover ? (
-          <img
+          <StaticResponsiveImage
             src={heroImage}
+            sizes="100vw"
             alt={meta.title}
             className="h-[520px] w-full object-cover opacity-75 md:h-[420px]"
-            loading="lazy"
-            decoding="async"
+            loading="eager"
+            fetchPriority="high"
           />
         ) : null}
         <div className="absolute inset-0 bg-black/45" />
@@ -257,8 +259,9 @@ function ArticleBlockRenderer({ block }: { block: PublicArticleBlock }) {
     return (
       <figure className="space-y-3">
         {block.media?.sourceUrl ? (
-          <img
+          <StaticResponsiveImage
             src={block.media.sourceUrl}
+            sizes="(min-width: 980px) 900px, 100vw"
             alt={block.media.alt || caption || 'Article image'}
             className="w-full object-cover"
             loading="lazy"

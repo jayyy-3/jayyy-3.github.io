@@ -1,4 +1,5 @@
 import { toPublicMediaRenderUrl } from './projectImageDelivery.ts';
+import { getStaticImageDelivery } from './staticImageDelivery.ts';
 
 /**
  * Responsive delivery for Stone Library media (finish, cover and swatch images).
@@ -99,7 +100,14 @@ export function getStoneImageDelivery(
   const fallback = variant(config.fallbackWidth);
 
   if (!fallback) {
-    return { optimized: false, src: source, srcSet: undefined, sizes: undefined };
+    // Static fallback imagery and product finish swatches use their generated WebP variants.
+    const staticDelivery = getStaticImageDelivery(source, config.sizes, config.fallbackWidth);
+    return {
+      optimized: staticDelivery.optimized,
+      src: staticDelivery.src,
+      srcSet: staticDelivery.srcSet,
+      sizes: staticDelivery.sizes,
+    };
   }
 
   return {

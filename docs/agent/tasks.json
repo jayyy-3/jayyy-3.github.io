@@ -202,11 +202,13 @@
         ]
       },
       "status": "now",
-      "phase": "planned",
-      "nextAction": "Opus implements on its own branch; Claude reports to Jay, then merges under standing authorization.",
-      "blocker": "",
+      "phase": "awaiting_external",
+      "nextAction": "Claude reports PR #83 to Jay; Jay decides the missing-asset 404 guard (needed before any immutable/long Cache-Control) and confirms whether a web-font licence exists; merge under standing authorization after the report (rebase against page-convergence PR #82, which also edits DefaultLayout).",
+      "blocker": "Immutable/long Cache-Control is deliberately not added: missing /assets/* and /media/* paths still return the SPA shell with HTTP 200 (the 2026-07-13 cache-poisoning mechanism); needs a decision on a missing-asset 404 guard. Font WOFF2 conversion/preload needs a confirmed web-font licence.",
       "notes": [
-        "2026-09-28: wave 3 of the 2026-09-24 optimization audit. Products module split is deferred to wave 4 (after the media picker and database types land)."
+        "2026-09-28: wave 3 of the 2026-09-24 optimization audit. Products module split is deferred to wave 4 (after the media picker and database types land).",
+        "2026-09-28: implemented on claude/opt-static-assets: scripts/generate-static-image-variants.mjs (82 originals, 282 WebP variants, deterministic, --check graph node static-images), StaticResponsiveImage/staticImageDelivery, hero re-encode (desktop 2.65MB, mobile 1.75MB) with preload=metadata and reduced-motion/Save-Data poster-only fallback. Cache header and font items recorded as blocked with reasons in docs/architecture/public-media.md.",
+        "2026-09-28: PR #83 CI run 36430446140 passed (verify-and-deploy, quality); branch Preview https://fc5ae230.urblo-site.pages.dev passed agent:cloudflare-preview-smoke on retry (first attempt aborted on a network timeout). Lighthouse single runs on Preview, mobile: / 99 (LCP 1.8s, 0.69MB), /products 94 (3.0s), /articles 87 (3.9s), /contact 93 (3.2s); production before: 79/77/77/83. Preview /assets/*.js still serves max-age=0, must-revalidate (no header change by design)."
       ]
     },
     {

@@ -21,8 +21,10 @@ import {
 } from '../../data/homepage';
 import type { ProjectData } from '../../data/projectData';
 import { siteCtas } from '../../data/siteChrome';
+import { getStaticImageAttributes, getStaticImageUrl } from '../../lib/staticImageDelivery';
 import ProjectService from '../../service/ProjectService';
 import AnimatedNumber from '../AnimatedNumber';
+import StaticResponsiveImage from '../StaticResponsiveImage';
 import Button from '../ui/Button';
 import Reveal from '../ui/Reveal';
 import SectionHeading from '../ui/SectionHeading';
@@ -152,8 +154,22 @@ function HeroStatementLine({
   );
 }
 
+// Hero poster: the full-width WebP variant. index.html preloads this exact URL on `/`.
+const heroPosterUrl = getStaticImageUrl(homepageData.hero.posterUrl, Infinity);
+
+/** Poster only (no video request) for reduced-motion users and Save-Data connections. */
+function prefersStaticHero() {
+  if (typeof window === 'undefined') return false;
+  const connection = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
+  return (
+    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true ||
+    connection?.saveData === true
+  );
+}
+
 function HeroSection() {
   const reduceMotion = useReducedMotion() ?? false;
+  const [staticHero] = useState(prefersStaticHero);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const videoPlaybackActiveRef = useRef(false);
   const [videoNeedsGesture, setVideoNeedsGesture] = useState(false);
@@ -271,23 +287,25 @@ function HeroSection() {
   return (
     <section
       className="relative min-h-[100svh] overflow-hidden bg-black bg-cover bg-center text-white"
-      style={{ backgroundImage: `url('${homepageData.hero.posterUrl}')` }}
+      style={{ backgroundImage: `url('${heroPosterUrl}')` }}
     >
-      <video
-        ref={videoRef}
-        className="absolute inset-0 h-full w-full object-cover"
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload="auto"
-        poster={homepageData.hero.posterUrl}
-        aria-label="Urblo stone streetscape project video"
-        {...mobileInlineVideoAttributes}
-      >
-        <source src={homepageData.hero.mobileVideoUrl} type="video/mp4" media="(max-width: 767px)" />
-        <source src={homepageData.hero.videoUrl} type="video/mp4" media="(min-width: 768px)" />
-      </video>
+      {staticHero ? null : (
+        <video
+          ref={videoRef}
+          className="absolute inset-0 h-full w-full object-cover"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          poster={heroPosterUrl}
+          aria-label="Urblo stone streetscape project video"
+          {...mobileInlineVideoAttributes}
+        >
+          <source src={homepageData.hero.mobileVideoUrl} type="video/mp4" media="(max-width: 767px)" />
+          <source src={homepageData.hero.videoUrl} type="video/mp4" media="(min-width: 768px)" />
+        </video>
+      )}
       <div className="absolute inset-0 bg-black/40" />
 
       {videoNeedsGesture ? (
@@ -332,9 +350,10 @@ function PartnerBannerSection() {
   return (
     <section ref={sectionRef} className="relative min-h-[258px] overflow-hidden bg-black text-white">
       {loadImage ? (
-        <img
+        <StaticResponsiveImage
           src={homepageData.partnerBanner.image}
           alt=""
+          sizes="100vw"
           {...lazyImageProps}
           className="absolute inset-0 h-full w-full object-cover"
         />
@@ -387,7 +406,7 @@ function ProductShowcaseSection() {
             className="homepage-product-display relative overflow-hidden rounded-[4px] bg-cover bg-center bg-no-repeat"
             style={
               loadBackground
-                ? { backgroundImage: `url('${homepageData.productShowcase.backgroundImage}')` }
+                ? { backgroundImage: `url('${getStaticImageUrl(homepageData.productShowcase.backgroundImage, window.innerWidth)}')` }
                 : undefined
             }
           >
@@ -771,7 +790,7 @@ function LatestProjectsSection() {
                 {loadProjectMedia ? (
                   <motion.img
                     key={activeFeatureImage}
-                    src={activeFeatureImage}
+                    {...getStaticImageAttributes(activeFeatureImage, '(min-width: 768px) 50vw, 100vw')}
                     alt={activeFeatureImageAlt}
                     loading="lazy"
                     decoding="async"
@@ -893,8 +912,9 @@ function LatestProjectsSection() {
                   >
                     <span className="homepage-project-thumb-media relative block h-full overflow-hidden bg-black/10">
                       {loadProjectMedia ? (
-                        <img
+                        <StaticResponsiveImage
                           src={project.image}
+                          sizes="(min-width: 768px) 25vw, (min-width: 640px) 50vw, 42vw"
                           alt=""
                           draggable={false}
                           {...lazyImageProps}
@@ -953,7 +973,7 @@ function ManifestoSection() {
           className="relative overflow-hidden bg-cover bg-center bg-no-repeat"
           style={
             loadBackground
-              ? { backgroundImage: `url('${homepageData.manifesto.backgroundImage}')` }
+              ? { backgroundImage: `url('${getStaticImageUrl(homepageData.manifesto.backgroundImage, window.innerWidth)}')` }
               : undefined
           }
         >
@@ -972,8 +992,9 @@ function ManifestoSection() {
                 {homepageData.manifesto.lines[1]}
               </p>
               <div className="mb-8 h-[80px] w-[140px] overflow-hidden rounded-[100px] sm:mb-0 sm:h-[150px] sm:w-[300px]">
-                <img
+                <StaticResponsiveImage
                   src={homepageData.manifesto.image}
+                  sizes="(min-width: 640px) 300px, 140px"
                   alt=""
                   {...lazyImageProps}
                   className="h-full w-full object-cover"
@@ -1116,8 +1137,9 @@ function VideoCTASection() {
     <>
       <section ref={sectionRef} className="relative min-h-[617px] overflow-hidden bg-black text-white">
         {loadBackground ? (
-          <img
+          <StaticResponsiveImage
             src={homepageData.videoCta.backgroundImage}
+            sizes="100vw"
             alt=""
             loading="lazy"
             decoding="async"

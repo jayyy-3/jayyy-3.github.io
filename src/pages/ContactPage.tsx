@@ -4,6 +4,7 @@ import { ArrowUpRight, CheckCircle, Mail, MapPin, Phone, Send } from 'lucide-rea
 import type { FormEvent } from 'react';
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import StaticResponsiveImage from '../components/StaticResponsiveImage';
 import TurnstileField from '../components/TurnstileField';
 import { turnstileSiteKey } from '../lib/turnstileConfig';
 
@@ -192,8 +193,9 @@ export default function ContactPage() {
           <aside className="space-y-6">
             <div className="urblo-card overflow-hidden border-black/10 bg-black text-white shadow-none">
               <div className="relative min-h-[360px]">
-                <img
+                <StaticResponsiveImage
                   src="/media/launch/contact/project-contact.jpg"
+                  sizes="(min-width: 1024px) 40vw, 100vw"
                   alt="Urblo stone seating project"
                   className="absolute inset-0 h-full w-full object-cover opacity-72"
                 />

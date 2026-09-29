@@ -1,0 +1,1740 @@
+{
+  "generator": {
+    "script": "scripts/generate-static-image-variants.mjs",
+    "sharp": "0.35.2",
+    "libvips": "8.18.3",
+    "webp": "1.6.0",
+    "encoders": {
+      "photo": {
+        "quality": 72,
+        "alphaQuality": 90,
+        "effort": 6,
+        "smartSubsample": false
+      },
+      "overlay": {
+        "quality": 60,
+        "alphaQuality": 90,
+        "effort": 6,
+        "smartSubsample": false
+      },
+      "texture": {
+        "quality": 88,
+        "alphaQuality": 90,
+        "effort": 6,
+        "smartSubsample": true
+      }
+    },
+    "ladder": [
+      480,
+      768,
+      1200,
+      1600,
+      2400
+    ],
+    "topVariantMaxRatio": 0.7
+  },
+  "images": {
+    "/images/projects/moon-gate/moon-gate-context-lanterns.jpg": {
+      "bytes": 566585,
+      "sha256": "600da3f88fb4c4e3",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 38714,
+          "sha256": "9de7a300201fe1a4"
+        },
+        "768": {
+          "bytes": 95660,
+          "sha256": "a29df70dac909f93"
+        },
+        "1200": {
+          "bytes": 215004,
+          "sha256": "a396c63911c81dde"
+        },
+        "1600": {
+          "bytes": 343186,
+          "sha256": "c78b5130cd687eed"
+        }
+      }
+    },
+    "/images/projects/moon-gate/moon-gate-front-alignment.jpg": {
+      "bytes": 511082,
+      "sha256": "443f4a0c272fd152",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 25096,
+          "sha256": "00744c718dba734e"
+        },
+        "768": {
+          "bytes": 59268,
+          "sha256": "b66791cb0edf7421"
+        },
+        "1200": {
+          "bytes": 131068,
+          "sha256": "39b9dac17fb4328d"
+        },
+        "1600": {
+          "bytes": 212796,
+          "sha256": "0a60699858087028"
+        },
+        "2000": {
+          "bytes": 315840,
+          "sha256": "3454bb7aedf3b544"
+        }
+      }
+    },
+    "/images/projects/moon-gate/moon-gate-hero.jpg": {
+      "bytes": 549077,
+      "sha256": "feafb75d217f5d59",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 34670,
+          "sha256": "4d0508e195b26e52"
+        },
+        "768": {
+          "bytes": 85738,
+          "sha256": "5694eb3054e58214"
+        },
+        "1200": {
+          "bytes": 196568,
+          "sha256": "976630bf21053a9b"
+        },
+        "1620": {
+          "bytes": 340426,
+          "sha256": "687cdd6853e8567b"
+        }
+      }
+    },
+    "/images/projects/moon-gate/moon-gate-landscape-threshold.jpg": {
+      "bytes": 741163,
+      "sha256": "3a30f7818ed7c31b",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 83792,
+          "sha256": "de1e1be993db1b03"
+        },
+        "768": {
+          "bytes": 194408,
+          "sha256": "df9d7dddb9567a05"
+        },
+        "1333": {
+          "bytes": 500334,
+          "sha256": "41c19e9b9b2990c5"
+        }
+      }
+    },
+    "/images/projects/moon-gate/moon-gate-seat-detail.jpg": {
+      "bytes": 373565,
+      "sha256": "9719f8984d0afdbd",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 28216,
+          "sha256": "360c94aa87a4b9d3"
+        },
+        "768": {
+          "bytes": 68258,
+          "sha256": "3c857bc30b04a80a"
+        },
+        "1333": {
+          "bytes": 193378,
+          "sha256": "b8b567a3ae68b156"
+        }
+      }
+    },
+    "/images/projects/moon-gate/moon-gate-seating-close.jpg": {
+      "bytes": 490243,
+      "sha256": "405c3b0f1570bdb7",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 44316,
+          "sha256": "34ce34834b612c5e"
+        },
+        "768": {
+          "bytes": 91834,
+          "sha256": "cd2977cf42fa551b"
+        },
+        "1200": {
+          "bytes": 175582,
+          "sha256": "7850e9fb3db19b14"
+        },
+        "1429": {
+          "bytes": 233884,
+          "sha256": "2ad7fe5756e783ce"
+        }
+      }
+    },
+    "/images/projects/moon-gate/moon-gate-seating-field.jpg": {
+      "bytes": 568720,
+      "sha256": "4e5083654b423d4c",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 60948,
+          "sha256": "04533f0ce656f81a"
+        },
+        "768": {
+          "bytes": 147034,
+          "sha256": "7e749385bb072ca1"
+        },
+        "1333": {
+          "bytes": 371840,
+          "sha256": "c7a27ed37ee5e961"
+        }
+      }
+    },
+    "/media/launch/articles/curving-greening-pipelines/01-greening-pipeline.webp": {
+      "bytes": 396982,
+      "sha256": "bdc2e6f6355c8f84",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 18692,
+          "sha256": "5fadf2756f170765"
+        },
+        "768": {
+          "bytes": 43414,
+          "sha256": "b7cd0ecb2ef51917"
+        },
+        "1200": {
+          "bytes": 94878,
+          "sha256": "2fe9fa20286a2ab0"
+        }
+      }
+    },
+    "/media/launch/articles/curving-greening-pipelines/02-greening-pipeline.webp": {
+      "bytes": 150774,
+      "sha256": "2a343690667dc31e",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 14510,
+          "sha256": "2bb1d25d99062f58"
+        },
+        "768": {
+          "bytes": 28452,
+          "sha256": "73e3393150c109c6"
+        },
+        "1200": {
+          "bytes": 50978,
+          "sha256": "d2cd6dfb25921ac2"
+        },
+        "1719": {
+          "bytes": 88224,
+          "sha256": "06cc64767eebbb3c"
+        }
+      }
+    },
+    "/media/launch/articles/curving-greening-pipelines/04-greening-pipeline.webp": {
+      "bytes": 306122,
+      "sha256": "89d1aa18016c4760",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 25772,
+          "sha256": "d60de3680b0b0dcd"
+        },
+        "768": {
+          "bytes": 56890,
+          "sha256": "0a4fd815d9ab71af"
+        },
+        "1200": {
+          "bytes": 118216,
+          "sha256": "411ec180f0588c80"
+        }
+      }
+    },
+    "/media/launch/articles/debunking-cost-myth/01-sports-centre.webp": {
+      "bytes": 754386,
+      "sha256": "ef3660b2678eebe7",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 27688,
+          "sha256": "fc7ba15fa3e67af2"
+        },
+        "768": {
+          "bytes": 63240,
+          "sha256": "8f656816312ff93e"
+        },
+        "1200": {
+          "bytes": 134456,
+          "sha256": "165fa6ad1934dd6a"
+        },
+        "1600": {
+          "bytes": 208604,
+          "sha256": "3abee1e8ba90cd10"
+        },
+        "2400": {
+          "bytes": 360596,
+          "sha256": "f7872775ded6f1d2"
+        }
+      }
+    },
+    "/media/launch/articles/debunking-cost-myth/02-sports-centre.webp": {
+      "bytes": 591356,
+      "sha256": "f5907031202e160f",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 21556,
+          "sha256": "42f1c27d924d1f36"
+        },
+        "768": {
+          "bytes": 49702,
+          "sha256": "1ee357bbca6f51aa"
+        },
+        "1200": {
+          "bytes": 103508,
+          "sha256": "c6594f684c7beced"
+        },
+        "1600": {
+          "bytes": 164614,
+          "sha256": "35c6e85c0d3d0882"
+        },
+        "2400": {
+          "bytes": 282730,
+          "sha256": "3eb5ea9f5a04c113"
+        }
+      }
+    },
+    "/media/launch/articles/debunking-cost-myth/04-sports-centre.webp": {
+      "bytes": 862838,
+      "sha256": "d6757d84b40e39f6",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 24566,
+          "sha256": "4f41b0429664576c"
+        },
+        "768": {
+          "bytes": 57454,
+          "sha256": "7c3c9b2165f27242"
+        },
+        "1200": {
+          "bytes": 132364,
+          "sha256": "42a37f59e0bd13d8"
+        },
+        "1600": {
+          "bytes": 215582,
+          "sha256": "6a9ccd8e132c5fd2"
+        },
+        "2400": {
+          "bytes": 406290,
+          "sha256": "9c8161876a362a5f"
+        }
+      }
+    },
+    "/media/launch/articles/modular-mastery-aitken/01-aitken-college.webp": {
+      "bytes": 156364,
+      "sha256": "9bd6310cc67d9ebd",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 11636,
+          "sha256": "cc12edaed788777d"
+        },
+        "768": {
+          "bytes": 23214,
+          "sha256": "1dd74845c274b9aa"
+        },
+        "1200": {
+          "bytes": 40868,
+          "sha256": "4a33caa18d4b614a"
+        },
+        "1600": {
+          "bytes": 57054,
+          "sha256": "3d16b9146d0620ab"
+        },
+        "2400": {
+          "bytes": 86960,
+          "sha256": "9a4b5fd02cba0576"
+        }
+      }
+    },
+    "/media/launch/articles/modular-mastery-aitken/02-aitken-college.webp": {
+      "bytes": 393156,
+      "sha256": "adfbc71e387dca99",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 28750,
+          "sha256": "5baeca181969b555"
+        },
+        "768": {
+          "bytes": 64852,
+          "sha256": "b25dea9ab79425c2"
+        },
+        "1200": {
+          "bytes": 134282,
+          "sha256": "b1aca8bebaa214c5"
+        }
+      }
+    },
+    "/media/launch/articles/modular-mastery-aitken/03-aitken-college.webp": {
+      "bytes": 521686,
+      "sha256": "052abf12e66e2a13",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 24096,
+          "sha256": "02adba65efe4b2f9"
+        },
+        "768": {
+          "bytes": 66016,
+          "sha256": "e0d89ef9d8b62c75"
+        },
+        "1200": {
+          "bytes": 162352,
+          "sha256": "44a18c96ac4a675f"
+        }
+      }
+    },
+    "/media/launch/articles/modular-mastery-aitken/05-aitken-college.webp": {
+      "bytes": 141116,
+      "sha256": "d062832b62411753",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 22368,
+          "sha256": "6fa5a76a7316d11d"
+        },
+        "768": {
+          "bytes": 43952,
+          "sha256": "5a579408729e9bb5"
+        }
+      }
+    },
+    "/media/launch/articles/shared/linkedin-banner.webp": {
+      "bytes": 371582,
+      "sha256": "81053f90f0ca1c6a",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 11418,
+          "sha256": "0ec13698ba4b8d7c"
+        },
+        "768": {
+          "bytes": 30278,
+          "sha256": "6ecc47ab288327aa"
+        },
+        "1200": {
+          "bytes": 71950,
+          "sha256": "45c53184d57057d0"
+        },
+        "1600": {
+          "bytes": 115854,
+          "sha256": "5b1a5f8ddf151b65"
+        },
+        "2400": {
+          "bytes": 203062,
+          "sha256": "9bfee26ed46bb06d"
+        }
+      }
+    },
+    "/media/launch/articles/stone-transformed/01-stone-finishes.webp": {
+      "bytes": 545960,
+      "sha256": "cc3c4a55752a332f",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 24918,
+          "sha256": "ef1dbe3124065bab"
+        },
+        "768": {
+          "bytes": 56116,
+          "sha256": "ce98b01ba4bb6cdb"
+        },
+        "1200": {
+          "bytes": 118006,
+          "sha256": "bb1aed6758d6fe64"
+        },
+        "1600": {
+          "bytes": 180356,
+          "sha256": "2af61ce17568bc6c"
+        }
+      }
+    },
+    "/media/launch/articles/stone-transformed/02-stone-finishes.webp": {
+      "bytes": 1196972,
+      "sha256": "e962face458267aa",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 30506,
+          "sha256": "a78519fc3dd88d7b"
+        },
+        "768": {
+          "bytes": 79886,
+          "sha256": "cd241eb0486edbdc"
+        },
+        "1200": {
+          "bytes": 182974,
+          "sha256": "995ded132c309b1b"
+        },
+        "1600": {
+          "bytes": 291784,
+          "sha256": "3bfb28bc895b24df"
+        },
+        "2400": {
+          "bytes": 518236,
+          "sha256": "ef558d3614acfe60"
+        }
+      }
+    },
+    "/media/launch/banners/articles.jpg": {
+      "bytes": 659245,
+      "sha256": "33ebe91ade4a28a4",
+      "encoder": "overlay",
+      "variants": {
+        "480": {
+          "bytes": 32830,
+          "sha256": "6b6beda28f83116f"
+        },
+        "768": {
+          "bytes": 80976,
+          "sha256": "67ba5ee607efe436"
+        },
+        "1200": {
+          "bytes": 177768,
+          "sha256": "1ed8b58d19b88868"
+        },
+        "1600": {
+          "bytes": 283918,
+          "sha256": "a68225b13802475b"
+        },
+        "1800": {
+          "bytes": 367160,
+          "sha256": "084bc7629c1e58a8"
+        }
+      }
+    },
+    "/media/launch/banners/materials.jpg": {
+      "bytes": 497151,
+      "sha256": "4bf5b9388fa6abe0",
+      "encoder": "overlay",
+      "variants": {
+        "480": {
+          "bytes": 21690,
+          "sha256": "c0c90185d75f00f5"
+        },
+        "768": {
+          "bytes": 51422,
+          "sha256": "d4d65374d4972e43"
+        },
+        "1200": {
+          "bytes": 106614,
+          "sha256": "e6597ef7ebf78edf"
+        },
+        "1440": {
+          "bytes": 146282,
+          "sha256": "ed51715457bc7ab8"
+        }
+      }
+    },
+    "/media/launch/banners/our-story.jpg": {
+      "bytes": 271004,
+      "sha256": "88955777062b97e0",
+      "encoder": "overlay",
+      "variants": {
+        "480": {
+          "bytes": 9544,
+          "sha256": "8fc2d81d81856f64"
+        },
+        "768": {
+          "bytes": 19058,
+          "sha256": "6d7bb1a20cd46468"
+        },
+        "1200": {
+          "bytes": 34480,
+          "sha256": "b8a30538a847f6a6"
+        },
+        "1600": {
+          "bytes": 50876,
+          "sha256": "f8413954b887ecd6"
+        },
+        "1800": {
+          "bytes": 61900,
+          "sha256": "262bdb4dbba85cfb"
+        }
+      }
+    },
+    "/media/launch/banners/products.jpg": {
+      "bytes": 654304,
+      "sha256": "55d0fd7a95b284a6",
+      "encoder": "overlay",
+      "variants": {
+        "480": {
+          "bytes": 48528,
+          "sha256": "4209be8cfdac01c5"
+        },
+        "768": {
+          "bytes": 119210,
+          "sha256": "9ee0002f29d092b0"
+        },
+        "1200": {
+          "bytes": 253214,
+          "sha256": "39ffb5bdffd77142"
+        },
+        "1440": {
+          "bytes": 366744,
+          "sha256": "2a4bf728a995f5a6"
+        }
+      }
+    },
+    "/media/launch/banners/projects.jpg": {
+      "bytes": 393214,
+      "sha256": "7535c917949b7509",
+      "encoder": "overlay",
+      "variants": {
+        "480": {
+          "bytes": 15618,
+          "sha256": "1ec148612cd3b727"
+        },
+        "768": {
+          "bytes": 38002,
+          "sha256": "93004731e3884a53"
+        },
+        "1200": {
+          "bytes": 82448,
+          "sha256": "a67dd41aeaea6ca4"
+        },
+        "1600": {
+          "bytes": 129532,
+          "sha256": "da597cf9f00943c6"
+        },
+        "1800": {
+          "bytes": 161114,
+          "sha256": "1df2abf72f2031b1"
+        }
+      }
+    },
+    "/media/launch/capabilities/multi-material-quality-review.jpg": {
+      "bytes": 284619,
+      "sha256": "4940c20a6ef510d7",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 26462,
+          "sha256": "77185f731cfed815"
+        },
+        "768": {
+          "bytes": 58006,
+          "sha256": "890e890f9526a817"
+        },
+        "960": {
+          "bytes": 87432,
+          "sha256": "bfa811d2582ae290"
+        }
+      }
+    },
+    "/media/launch/capabilities/site-install-review.jpg": {
+      "bytes": 113414,
+      "sha256": "91bc5be29a352be4",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 20158,
+          "sha256": "462734608bea9396"
+        },
+        "723": {
+          "bytes": 43884,
+          "sha256": "e4df3809a8d6e10f"
+        }
+      }
+    },
+    "/media/launch/capabilities/west-side-place-aerial.jpg": {
+      "bytes": 180743,
+      "sha256": "6266ecf17bb747b6",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 41818,
+          "sha256": "87c0558a6305d52b"
+        },
+        "768": {
+          "bytes": 103686,
+          "sha256": "cbf0c2571172c3e5"
+        }
+      }
+    },
+    "/media/launch/contact/project-contact.jpg": {
+      "bytes": 136239,
+      "sha256": "c2217138df113a69",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 11828,
+          "sha256": "e7e6207bcefbe5a2"
+        },
+        "768": {
+          "bytes": 23978,
+          "sha256": "02b2507d1f81c51c"
+        },
+        "1200": {
+          "bytes": 48966,
+          "sha256": "37557b5c70af7c7f"
+        }
+      }
+    },
+    "/media/launch/home/hero-poster.jpg": {
+      "bytes": 420933,
+      "sha256": "8810981c66d1b6e2",
+      "encoder": "overlay",
+      "variants": {
+        "480": {
+          "bytes": 29716,
+          "sha256": "105e346ac3e9e566"
+        },
+        "768": {
+          "bytes": 65282,
+          "sha256": "ca5fe6ecf494f11c"
+        },
+        "1280": {
+          "bytes": 157438,
+          "sha256": "73b4c056720d893e"
+        }
+      }
+    },
+    "/media/launch/homepage/co2-footprint.png": {
+      "bytes": 160291,
+      "sha256": "42b1d320de8e6010",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 30942,
+          "sha256": "c1a438755e8df510"
+        },
+        "545": {
+          "bytes": 37094,
+          "sha256": "49c0736fc6b77a16"
+        }
+      }
+    },
+    "/media/launch/homepage/collab-manufacture.jpg": {
+      "bytes": 261870,
+      "sha256": "855dbecb7d1d9e6e",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 19290,
+          "sha256": "52eda91aa7e71c22"
+        },
+        "768": {
+          "bytes": 40638,
+          "sha256": "1bcbdf6a6c925a84"
+        },
+        "1200": {
+          "bytes": 73766,
+          "sha256": "e6bdb3b530a4a899"
+        },
+        "1600": {
+          "bytes": 104272,
+          "sha256": "e3962af63e37cd9d"
+        },
+        "2400": {
+          "bytes": 171914,
+          "sha256": "38a34b7272a392ef"
+        }
+      }
+    },
+    "/media/launch/homepage/collab-shop-drawing.jpg": {
+      "bytes": 135305,
+      "sha256": "18d2dc6c577f1741",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 7724,
+          "sha256": "ccee874bcb821c68"
+        },
+        "768": {
+          "bytes": 17196,
+          "sha256": "3b7594c60c69b492"
+        },
+        "1200": {
+          "bytes": 36510,
+          "sha256": "e6813ca47368228c"
+        },
+        "1600": {
+          "bytes": 53756,
+          "sha256": "f9c7fe7f02779f15"
+        },
+        "2190": {
+          "bytes": 81308,
+          "sha256": "5d3f5b47275b8008"
+        }
+      }
+    },
+    "/media/launch/homepage/cost-concrete.jpg": {
+      "bytes": 183836,
+      "sha256": "549c59f5635ca14a",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 24190,
+          "sha256": "0af24759cd444f49"
+        },
+        "768": {
+          "bytes": 55780,
+          "sha256": "c9089406484b1215"
+        }
+      }
+    },
+    "/media/launch/homepage/installation-step-1.jpg": {
+      "bytes": 642330,
+      "sha256": "40d2b7deac63bd43",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 41424,
+          "sha256": "9d3743ca8d065029"
+        },
+        "768": {
+          "bytes": 110346,
+          "sha256": "3be9e2c446d93847"
+        },
+        "1200": {
+          "bytes": 242630,
+          "sha256": "b9b219da089e01b3"
+        },
+        "1600": {
+          "bytes": 376014,
+          "sha256": "15bb184f1efa7bd3"
+        }
+      }
+    },
+    "/media/launch/homepage/installation-step-2.jpg": {
+      "bytes": 388678,
+      "sha256": "9feb6c52a39cd222",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 35028,
+          "sha256": "7e0c8eb275953eb7"
+        },
+        "768": {
+          "bytes": 91362,
+          "sha256": "e9908fb3c430bb64"
+        },
+        "1200": {
+          "bytes": 219924,
+          "sha256": "0858dc724b5f7be7"
+        }
+      }
+    },
+    "/media/launch/homepage/installation-step-3.jpg": {
+      "bytes": 555758,
+      "sha256": "006931159dbd6be7",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 40268,
+          "sha256": "d76abb8664dc3e87"
+        },
+        "768": {
+          "bytes": 95022,
+          "sha256": "345d4c80e061bbb0"
+        },
+        "1200": {
+          "bytes": 187992,
+          "sha256": "1df2242003558a66"
+        },
+        "1600": {
+          "bytes": 268296,
+          "sha256": "078778f27ea45643"
+        },
+        "2400": {
+          "bytes": 425496,
+          "sha256": "2362243c6f83f4a0"
+        }
+      }
+    },
+    "/media/launch/homepage/manifesto-bg.png": {
+      "bytes": 513860,
+      "sha256": "3eaf54e54baa652b",
+      "encoder": "overlay",
+      "variants": {
+        "480": {
+          "bytes": 28536,
+          "sha256": "5d853a707c1dbd7c"
+        },
+        "768": {
+          "bytes": 68272,
+          "sha256": "a7c2783bafe1ca2b"
+        },
+        "1200": {
+          "bytes": 144810,
+          "sha256": "dbcf860bc74a1530"
+        }
+      }
+    },
+    "/media/launch/homepage/manifesto-stone-block.jpg": {
+      "bytes": 398224,
+      "sha256": "c1a4fd39eb959c64",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 12130,
+          "sha256": "12415645e7e14d87"
+        },
+        "768": {
+          "bytes": 29254,
+          "sha256": "90d8756969965a39"
+        },
+        "1200": {
+          "bytes": 65190,
+          "sha256": "e25721cd575e159d"
+        },
+        "1600": {
+          "bytes": 102102,
+          "sha256": "91b9372f5925e308"
+        },
+        "2400": {
+          "bytes": 186222,
+          "sha256": "10123dc10a477b4f"
+        }
+      }
+    },
+    "/media/launch/homepage/partner-banner-west-side-place.jpg": {
+      "bytes": 1061115,
+      "sha256": "565d21345412559f",
+      "encoder": "overlay",
+      "variants": {
+        "480": {
+          "bytes": 33950,
+          "sha256": "b3c50ae0b885f0ed"
+        },
+        "768": {
+          "bytes": 85236,
+          "sha256": "7fa68ac06de29499"
+        },
+        "1200": {
+          "bytes": 199530,
+          "sha256": "e2463c553bf22729"
+        },
+        "1600": {
+          "bytes": 331258,
+          "sha256": "4042cc4f88ba5583"
+        },
+        "2200": {
+          "bytes": 573038,
+          "sha256": "9935272193d7ec13"
+        }
+      }
+    },
+    "/media/launch/homepage/product-showcase-bg.jpg": {
+      "bytes": 193992,
+      "sha256": "6d9f6fa8d8829094",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 18624,
+          "sha256": "706f7756e48f9e66"
+        },
+        "768": {
+          "bytes": 45836,
+          "sha256": "947b18c682b4f7fa"
+        },
+        "1200": {
+          "bytes": 119162,
+          "sha256": "5d03a72f2234e9af"
+        }
+      }
+    },
+    "/media/launch/homepage/project-artisan-park.jpg": {
+      "bytes": 122383,
+      "sha256": "946ab84a909a905f",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 17458,
+          "sha256": "0f7c0a601a78bb82"
+        },
+        "768": {
+          "bytes": 39480,
+          "sha256": "e69898315d97773e"
+        },
+        "1024": {
+          "bytes": 65928,
+          "sha256": "5e1d39b067316dfc"
+        }
+      }
+    },
+    "/media/launch/homepage/project-moon-gate.jpg": {
+      "bytes": 469845,
+      "sha256": "6e3d13ad15d68724",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 34156,
+          "sha256": "d24bb7820e9bfa7e"
+        },
+        "768": {
+          "bytes": 81796,
+          "sha256": "ddb4903d9a5c4123"
+        },
+        "1200": {
+          "bytes": 183476,
+          "sha256": "7ec15368e704bac7"
+        },
+        "1600": {
+          "bytes": 292282,
+          "sha256": "6e1c43e3fae31b3e"
+        }
+      }
+    },
+    "/media/launch/homepage/project-west-side-place.jpg": {
+      "bytes": 1025033,
+      "sha256": "6a9ef0ea00f58f0a",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 29652,
+          "sha256": "fb71db917c1eccc0"
+        },
+        "768": {
+          "bytes": 80728,
+          "sha256": "327a4930234ab32f"
+        },
+        "1200": {
+          "bytes": 196468,
+          "sha256": "4a9da590e0f29f42"
+        },
+        "1600": {
+          "bytes": 316734,
+          "sha256": "fee383e3dbd5670a"
+        },
+        "2400": {
+          "bytes": 547058,
+          "sha256": "60bd6f915b644d76"
+        }
+      }
+    },
+    "/media/launch/homepage/project-xavier-college.jpg": {
+      "bytes": 724169,
+      "sha256": "f663428ce1996158",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 17150,
+          "sha256": "b3030dc768a588fe"
+        },
+        "768": {
+          "bytes": 45210,
+          "sha256": "b4f9ba9b31802e7d"
+        },
+        "1200": {
+          "bytes": 105942,
+          "sha256": "9c85322f49e8d289"
+        },
+        "1600": {
+          "bytes": 171514,
+          "sha256": "4bed791613e4a2a6"
+        },
+        "2400": {
+          "bytes": 316152,
+          "sha256": "3914952d1441a747"
+        }
+      }
+    },
+    "/media/launch/homepage/video-cta-bg.jpg": {
+      "bytes": 123161,
+      "sha256": "af01fc6974a0fde8",
+      "encoder": "overlay",
+      "variants": {
+        "480": {
+          "bytes": 12228,
+          "sha256": "1190632515645805"
+        },
+        "768": {
+          "bytes": 22544,
+          "sha256": "f08da6da9274abcf"
+        },
+        "1200": {
+          "bytes": 41272,
+          "sha256": "60b51387cd4ad9bb"
+        },
+        "1394": {
+          "bytes": 52256,
+          "sha256": "4bafecb36c6d4051"
+        }
+      }
+    },
+    "/media/launch/our-story/cameron.jpg": {
+      "bytes": 126177,
+      "sha256": "11f8a7d108421863",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 17732,
+          "sha256": "75892aa0390ed5a8"
+        },
+        "768": {
+          "bytes": 35088,
+          "sha256": "1faa9484c386d239"
+        },
+        "1200": {
+          "bytes": 70056,
+          "sha256": "dffb4ecd17f2af0f"
+        }
+      }
+    },
+    "/media/launch/projects/artisan-park-yarrabend/cover.png": {
+      "bytes": 513860,
+      "sha256": "3eaf54e54baa652b",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 32908,
+          "sha256": "a8cd6c8acdbdfed2"
+        },
+        "768": {
+          "bytes": 78390,
+          "sha256": "6716430414f3533d"
+        },
+        "1200": {
+          "bytes": 165816,
+          "sha256": "e343f1c475c385de"
+        }
+      }
+    },
+    "/media/launch/projects/artisan-park-yarrabend/detail-1.jpg": {
+      "bytes": 783480,
+      "sha256": "73ac4c5e393fc432",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 22634,
+          "sha256": "1e44907c47b8a1db"
+        },
+        "768": {
+          "bytes": 57220,
+          "sha256": "49a6cc341b39b4d3"
+        },
+        "1200": {
+          "bytes": 128462,
+          "sha256": "36e68e3714f1c01e"
+        },
+        "1600": {
+          "bytes": 206482,
+          "sha256": "1ff33ad671d5da9a"
+        },
+        "2400": {
+          "bytes": 373246,
+          "sha256": "1689535ddd6be6ea"
+        }
+      }
+    },
+    "/media/launch/projects/artisan-park-yarrabend/detail-2.png": {
+      "bytes": 625026,
+      "sha256": "1bd23a8e887c9c68",
+      "encoder": "photo",
+      "variants": {
+        "500": {
+          "bytes": 63358,
+          "sha256": "10c08abc59cd4956"
+        }
+      }
+    },
+    "/media/launch/projects/australian-catholic-university/detail-1.jpg": {
+      "bytes": 175060,
+      "sha256": "7bdb7d5d17c33e8c",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 17992,
+          "sha256": "04f5d3dfcc4d0e6c"
+        },
+        "768": {
+          "bytes": 37786,
+          "sha256": "75fb22d50f478ff4"
+        },
+        "1200": {
+          "bytes": 70700,
+          "sha256": "d7d62548c1c1ebcb"
+        },
+        "1500": {
+          "bytes": 97828,
+          "sha256": "097fd27716fae66b"
+        }
+      }
+    },
+    "/media/launch/projects/australian-catholic-university/detail-2.jpg": {
+      "bytes": 123161,
+      "sha256": "af01fc6974a0fde8",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 14532,
+          "sha256": "8615bf87619773b7"
+        },
+        "768": {
+          "bytes": 26838,
+          "sha256": "8b464ca421d50e79"
+        },
+        "1200": {
+          "bytes": 48420,
+          "sha256": "f024ed06b36aeac9"
+        },
+        "1394": {
+          "bytes": 61992,
+          "sha256": "43cdf4358e147b1a"
+        }
+      }
+    },
+    "/media/launch/projects/west-side-place/cover.jpg": {
+      "bytes": 193992,
+      "sha256": "6d9f6fa8d8829094",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 18624,
+          "sha256": "706f7756e48f9e66"
+        },
+        "768": {
+          "bytes": 45836,
+          "sha256": "947b18c682b4f7fa"
+        },
+        "1200": {
+          "bytes": 119162,
+          "sha256": "5d03a72f2234e9af"
+        }
+      }
+    },
+    "/media/launch/projects/west-side-place/detail-1.jpg": {
+      "bytes": 922697,
+      "sha256": "9cde56682cfad935",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 29860,
+          "sha256": "c9e74b8cbd2dc6a6"
+        },
+        "768": {
+          "bytes": 76494,
+          "sha256": "7c03385ded134765"
+        },
+        "1200": {
+          "bytes": 181984,
+          "sha256": "4f2eea355ad1b15d"
+        },
+        "1600": {
+          "bytes": 292716,
+          "sha256": "74686a40780fd8a6"
+        },
+        "2400": {
+          "bytes": 522090,
+          "sha256": "1452280b6573e1f9"
+        }
+      }
+    },
+    "/media/launch/projects/west-side-place/detail-2.jpg": {
+      "bytes": 1025033,
+      "sha256": "6a9ef0ea00f58f0a",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 29652,
+          "sha256": "fb71db917c1eccc0"
+        },
+        "768": {
+          "bytes": 80728,
+          "sha256": "327a4930234ab32f"
+        },
+        "1200": {
+          "bytes": 196468,
+          "sha256": "4a9da590e0f29f42"
+        },
+        "1600": {
+          "bytes": 316734,
+          "sha256": "fee383e3dbd5670a"
+        },
+        "2400": {
+          "bytes": 547058,
+          "sha256": "60bd6f915b644d76"
+        }
+      }
+    },
+    "/media/launch/projects/xavier-college/cover.jpg": {
+      "bytes": 170837,
+      "sha256": "40ba7cd38721f828",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 19930,
+          "sha256": "d45ae6fe2e6eff73"
+        },
+        "768": {
+          "bytes": 45772,
+          "sha256": "d18f40058851b315"
+        },
+        "1200": {
+          "bytes": 94334,
+          "sha256": "a578fcb6d1f5271a"
+        }
+      }
+    },
+    "/media/launch/projects/xavier-college/detail-1.jpg": {
+      "bytes": 915269,
+      "sha256": "49c424257d827e8f",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 23428,
+          "sha256": "e084fa8fc2aab911"
+        },
+        "768": {
+          "bytes": 62540,
+          "sha256": "e417280f92ec7fcb"
+        },
+        "1200": {
+          "bytes": 151176,
+          "sha256": "6f815c742a18cd72"
+        },
+        "1600": {
+          "bytes": 246758,
+          "sha256": "5922cf1d1c59cd0c"
+        },
+        "2400": {
+          "bytes": 446166,
+          "sha256": "590be802456f7ee1"
+        }
+      }
+    },
+    "/media/launch/projects/xavier-college/detail-2.jpg": {
+      "bytes": 724169,
+      "sha256": "f663428ce1996158",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 17150,
+          "sha256": "b3030dc768a588fe"
+        },
+        "768": {
+          "bytes": 45210,
+          "sha256": "b4f9ba9b31802e7d"
+        },
+        "1200": {
+          "bytes": 105942,
+          "sha256": "9c85322f49e8d289"
+        },
+        "1600": {
+          "bytes": 171514,
+          "sha256": "4bed791613e4a2a6"
+        },
+        "2400": {
+          "bytes": 316152,
+          "sha256": "3914952d1441a747"
+        }
+      }
+    },
+    "/products/battens/spotted-gum.jpg": {
+      "bytes": 768511,
+      "sha256": "7af58ed8a0cf794d",
+      "encoder": "texture",
+      "variants": {
+        "480": {
+          "bytes": 40612,
+          "sha256": "fdc2d4e6224e3889"
+        },
+        "700": {
+          "bytes": 67320,
+          "sha256": "0c4cc4c85665f5e0"
+        }
+      }
+    },
+    "/products/frame/galvanised.jpg": {
+      "bytes": 504025,
+      "sha256": "923217fd194726fa",
+      "encoder": "texture",
+      "variants": {
+        "480": {
+          "bytes": 12180,
+          "sha256": "226d555533a04808"
+        },
+        "658": {
+          "bytes": 19682,
+          "sha256": "91f0915f984770ca"
+        }
+      }
+    },
+    "/products/primeBlock/timberFlush.png": {
+      "bytes": 310575,
+      "sha256": "fc9e84917fac35e3",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 6560,
+          "sha256": "ba83355dbe85fe74"
+        },
+        "768": {
+          "bytes": 13576,
+          "sha256": "f2ebac7dad4bb4d2"
+        },
+        "900": {
+          "bytes": 18822,
+          "sha256": "6b0b4c6a9c1b261b"
+        }
+      }
+    },
+    "/products/primeBlock/timberFlushP.png": {
+      "bytes": 467004,
+      "sha256": "4a8d52723fbd6a3f",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 10368,
+          "sha256": "8b2527a6f76276dd"
+        },
+        "768": {
+          "bytes": 21970,
+          "sha256": "5e0a9e1917ad8fdd"
+        },
+        "860": {
+          "bytes": 28046,
+          "sha256": "b8361d66fab18a2a"
+        }
+      }
+    },
+    "/products/primeBlock/timberRise.png": {
+      "bytes": 309829,
+      "sha256": "11e26bd98a48b930",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 6472,
+          "sha256": "04a4b3a6884402a4"
+        },
+        "768": {
+          "bytes": 13432,
+          "sha256": "b3956092022fea5e"
+        },
+        "876": {
+          "bytes": 17830,
+          "sha256": "3a27fc655b1967e5"
+        }
+      }
+    },
+    "/products/primeBlock/timberRiseP.png": {
+      "bytes": 468960,
+      "sha256": "9fe5d184c9024071",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 10116,
+          "sha256": "ed8a7dadf1dbe9b3"
+        },
+        "768": {
+          "bytes": 21190,
+          "sha256": "836d7afc21ba2567"
+        },
+        "856": {
+          "bytes": 27062,
+          "sha256": "d5e65336a1c62cf7"
+        }
+      }
+    },
+    "/products/primeCurve/timberFlush.png": {
+      "bytes": 391787,
+      "sha256": "50fc81281728c137",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 15956,
+          "sha256": "52a461fa5ea1016a"
+        },
+        "687": {
+          "bytes": 28606,
+          "sha256": "453a3ea4279c3c60"
+        }
+      }
+    },
+    "/products/primeCurve/timberFlushP.png": {
+      "bytes": 388128,
+      "sha256": "4b76d8ff5d87ad39",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 15522,
+          "sha256": "f9e3bcb4516f6ce0"
+        },
+        "701": {
+          "bytes": 28694,
+          "sha256": "16a4b776131d0829"
+        }
+      }
+    },
+    "/products/primeCurve/timberRise.png": {
+      "bytes": 224777,
+      "sha256": "8b1b27a20623bfa0",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 9442,
+          "sha256": "420d9917d4b2b209"
+        },
+        "685": {
+          "bytes": 16844,
+          "sha256": "d2375c736c00b0ea"
+        }
+      }
+    },
+    "/products/primeCurve/timberRiseP.png": {
+      "bytes": 219824,
+      "sha256": "fbf4b5418cdd4e4d",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 10090,
+          "sha256": "88fd014f3c290f1c"
+        },
+        "676": {
+          "bytes": 17452,
+          "sha256": "d642119958c23575"
+        }
+      }
+    },
+    "/products/primeLume/timberFlush.png": {
+      "bytes": 333650,
+      "sha256": "ac78d789c2ee14dc",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 6232,
+          "sha256": "26b4b25f4b0de144"
+        },
+        "768": {
+          "bytes": 13074,
+          "sha256": "918d8615fc474c2f"
+        },
+        "938": {
+          "bytes": 20010,
+          "sha256": "857e4526341574b8"
+        }
+      }
+    },
+    "/products/primeLume/timberFlushP.png": {
+      "bytes": 479914,
+      "sha256": "4af4cfeb9bd10366",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 10300,
+          "sha256": "2f057e973d2d7b32"
+        },
+        "768": {
+          "bytes": 22216,
+          "sha256": "c5e29b6221378128"
+        },
+        "866": {
+          "bytes": 29120,
+          "sha256": "b6a9f72237c6a9d6"
+        }
+      }
+    },
+    "/products/primeLume/timberRise.png": {
+      "bytes": 331573,
+      "sha256": "c5a8168b9dbc374a",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 6102,
+          "sha256": "80a2e27bf0b8cf1d"
+        },
+        "768": {
+          "bytes": 12996,
+          "sha256": "e55e9e0135eca764"
+        },
+        "920": {
+          "bytes": 19124,
+          "sha256": "e9f1a017b2d4a5cd"
+        }
+      }
+    },
+    "/products/primeLume/timberRiseP.png": {
+      "bytes": 482393,
+      "sha256": "2b4ee7b2f2ebbea9",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 9902,
+          "sha256": "ab1c22f04d30a763"
+        },
+        "768": {
+          "bytes": 20800,
+          "sha256": "e6af83e07244e30e"
+        },
+        "882": {
+          "bytes": 28328,
+          "sha256": "26cd4f0ff04b6769"
+        }
+      }
+    },
+    "/products/strataBench/timberSpan.jpg": {
+      "bytes": 440550,
+      "sha256": "f5cad54036942172",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 12154,
+          "sha256": "88be5e9ae08a33a0"
+        },
+        "803": {
+          "bytes": 29812,
+          "sha256": "0c5a6cc4cb3ee47d"
+        }
+      }
+    },
+    "/products/strataBench/timberSpanP.jpg": {
+      "bytes": 514865,
+      "sha256": "b5d4bea11eddea89",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 11842,
+          "sha256": "55c8cedeb11eae4d"
+        },
+        "768": {
+          "bytes": 26316,
+          "sha256": "4fbb0da2aa14be06"
+        },
+        "877": {
+          "bytes": 35398,
+          "sha256": "747c700873458d7f"
+        }
+      }
+    },
+    "/products/terraArc/timberFlush.png": {
+      "bytes": 227326,
+      "sha256": "b94e1fef963802e6",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 9904,
+          "sha256": "8ed773bc3144ca13"
+        },
+        "678": {
+          "bytes": 17342,
+          "sha256": "e04e3d82c3bf9f1b"
+        }
+      }
+    },
+    "/products/terraArc/timberFlushP.png": {
+      "bytes": 398841,
+      "sha256": "85f664f8caab2f68",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 15538,
+          "sha256": "9b296f44c93195ba"
+        },
+        "708": {
+          "bytes": 29552,
+          "sha256": "b2c4139a0a312fc1"
+        }
+      }
+    },
+    "/products/terraArc/timberRise.png": {
+      "bytes": 227803,
+      "sha256": "22f38789add53377",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 10148,
+          "sha256": "862e690163a74f34"
+        },
+        "692": {
+          "bytes": 18256,
+          "sha256": "7dded43f02febba2"
+        }
+      }
+    },
+    "/products/terraArc/timberRiseP.png": {
+      "bytes": 397143,
+      "sha256": "e5cb372bb257b8c6",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 15268,
+          "sha256": "d9a21ea8abfbf818"
+        },
+        "721": {
+          "bytes": 29634,
+          "sha256": "0e20d3e08bdca8d5"
+        }
+      }
+    },
+    "/products/terraLine/timberFlush.png": {
+      "bytes": 328515,
+      "sha256": "cbc1e1d8deb616c7",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 7742,
+          "sha256": "29bf54f9616b7364"
+        },
+        "840": {
+          "bytes": 19910,
+          "sha256": "94b684626dd1f383"
+        }
+      }
+    },
+    "/products/terraLine/timberFlushP.png": {
+      "bytes": 322900,
+      "sha256": "2629f98990d87753",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 8138,
+          "sha256": "45fda80f4094d44e"
+        },
+        "768": {
+          "bytes": 16524,
+          "sha256": "b3e29298d45e3b67"
+        },
+        "856": {
+          "bytes": 20836,
+          "sha256": "0cd17c2750e92e44"
+        }
+      }
+    },
+    "/products/terraLine/timberRise.png": {
+      "bytes": 493623,
+      "sha256": "d043a760c49e18fe",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 10786,
+          "sha256": "420a946c92304dd8"
+        },
+        "768": {
+          "bytes": 22392,
+          "sha256": "2c8695a9a4558fd0"
+        },
+        "876": {
+          "bytes": 29526,
+          "sha256": "37d13de08de901bc"
+        }
+      }
+    },
+    "/products/terraLine/timberRiseP.png": {
+      "bytes": 481162,
+      "sha256": "df6b3ab0ae027524",
+      "encoder": "photo",
+      "variants": {
+        "480": {
+          "bytes": 11840,
+          "sha256": "d30fc51b4c967bf9"
+        },
+        "845": {
+          "bytes": 30198,
+          "sha256": "1e43c242df17962e"
+        }
+      }
+    }
+  }
+}
