@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "lastUpdated": "2026-09-28",
-  "currentTaskId": "NOW-OPT-PAGE-CONVERGENCE-001",
+  "lastUpdated": "2026-09-29",
+  "currentTaskId": "NOW-ADMIN-STONE-WORKSPACE-001",
   "sourceOfTruth": {
     "currentState": "docs/agent/status.json",
     "taskQueue": "docs/agent/tasks.json",
@@ -10,12 +10,12 @@
     "adminHandoffEvidence": "docs/agent/admin-handoff-evidence.json"
   },
   "release": {
-    "observedAt": "2026-09-26",
-    "repositorySha": "194976d50b79bbad89b949f85aba3903e1a99ee7",
-    "runtimeSha": "194976d50b79bbad89b949f85aba3903e1a99ee7",
-    "verifiedRuntimeUrl": "https://21b51af8.urblo-site.pages.dev",
-    "ciRunId": 36209299045,
-    "note": "Optimization wave 2 (PRs #69–#73) merged in order on 2026-09-26 under Jay's standing merge authorization: colleague quick guide with admin Help drawer, edge SEO head/404/sitemap, design tokens and shared components on Home and Capabilities, admin shared feedback/error/unsaved-guard layer, agent docs slimming with CI convergence wait. Production readback: immutable/apex/www smoke passed; per-route titles, 404 and 301 confirmed by curl; sitemap 54 URLs; Lighthouse mobile performance 80–92, CLS <= 0.002. www still returns 200 until Jay adds the zone redirect rule. This batch record does not deploy.",
+    "observedAt": "2026-09-29",
+    "repositorySha": "b4d9d826f366384d007bcb9655bac0d99408cefa",
+    "runtimeSha": "b4d9d826f366384d007bcb9655bac0d99408cefa",
+    "verifiedRuntimeUrl": "https://fcc57ce4.urblo-site.pages.dev",
+    "ciRunId": 36516612553,
+    "note": "Optimization wave 3 (PRs #77–#83, #84 CI fix) and the Stone Library comparison (#81) merged in order on 2026-09-29 under Jay's standing merge authorization: admin editor point marker, generated database types and shared Functions runtime, admin small fixes (translated errors, in-place re-login, Leads pagination), shared admin media picker, static image variants and lighter hero video, public page convergence, stone comparison. Production readback: immutable/apex/www smoke passed; compare route 200 noindex; protected endpoints 401; hero videos 2.78MB/1.84MB; Lighthouse desktop 95–98 on nine pages, mobile transfer down on every page (home 3.67MB→2.27MB) while mobile LCP on stone and project detail rose because the LCP element changed from title text to the hero image after page convergence. This batch record does not deploy.",
     "evidenceRefs": [
       "docs/WORKLOG.md"
     ]
@@ -76,8 +76,8 @@
     ]
   },
   "lastCompletedTask": {
-    "id": "NOW-OPT-AGENT-DOCS-SLIM-001",
-    "summary": "Optimization wave 2 (five tasks) released to production 2026-09-26 and read back; wave 3 not yet registered."
+    "id": "NOW-STONE-COMPARE-001",
+    "summary": "Optimization wave 3 (six tasks) and the Stone Library comparison released to production 2026-09-29 and read back; wave 4 not yet registered."
   },
   "historicalObservations": "docs/archive/2026-09-26/manifest.json"
 }
