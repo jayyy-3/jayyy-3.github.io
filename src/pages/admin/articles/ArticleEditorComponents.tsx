@@ -1,15 +1,14 @@
 import {
     Archive,
     CheckCircle2,
-    Image as ImageIcon,
     Plus,
     Save,
     ShieldAlert
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { CmsStatusPill } from '../AdminCmsPrimitives';
-import { fieldClass, formatMediaOption, getMediaUrl } from './forms';
-import type { ArticleStatus, MediaOptionRow } from './types';
+import { fieldClass } from './forms';
+import type { ArticleStatus } from './types';
 
 export function ArticleStatusHelp({ status }: { status: ArticleStatus }) {
     const messages: Record<ArticleStatus, string> = {
@@ -93,74 +92,6 @@ export function SelectField({
                 ))}
             </select>
         </label>
-    );
-}
-
-export function MediaSelect({
-    label,
-    value,
-    disabled,
-    mediaOptions,
-    selectedMedia,
-    emptyLabel,
-    onChange,
-}: {
-    label: string;
-    value: string;
-    disabled?: boolean;
-    mediaOptions: MediaOptionRow[];
-    selectedMedia: MediaOptionRow | null;
-    emptyLabel: string;
-    onChange: (value: string) => void;
-}) {
-    const previewUrl = getMediaUrl(selectedMedia);
-
-    return (
-        <div className="space-y-2">
-            <SelectField
-                label={label}
-                value={value}
-                disabled={disabled}
-                onChange={onChange}
-                options={[
-                    ['', emptyLabel],
-                    ...mediaOptions.map((media) => [String(media.id), formatMediaOption(media)] as [string, string]),
-                ]}
-            />
-            {selectedMedia ? (
-                <div className="flex gap-3 border border-black/10 bg-[#f8f9f5] p-3">
-                    <div className="flex h-20 w-24 shrink-0 items-center justify-center overflow-hidden bg-white">
-                        {previewUrl && selectedMedia.media_type === 'image' ? (
-                            <img
-                                src={previewUrl}
-                                alt={selectedMedia.alt || selectedMedia.caption || label}
-                                className="h-full w-full object-cover"
-                                loading="lazy"
-                            />
-                        ) : (
-                            <ImageIcon className="h-5 w-5 text-black/35" />
-                        )}
-                    </div>
-                    <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-black">
-                            {selectedMedia.alt || selectedMedia.caption || 'Untitled media'}
-                        </p>
-                        <p className="mt-1 text-xs font-bold uppercase tracking-[0.12em] text-black/45">
-                            {selectedMedia.status === 'published' ? 'Published in Media' : 'Not published in Media'}
-                        </p>
-                        <p className="mt-2 line-clamp-2 text-xs leading-5 text-black/52">
-                            {selectedMedia.status === 'published'
-                                ? 'This Media library item can support a public article image.'
-                                : 'Open Media, review the item, then publish it before relying on it for public article pages.'}
-                        </p>
-                    </div>
-                </div>
-            ) : value ? (
-                <p className="border border-amber-200 bg-amber-50 p-3 text-sm font-semibold leading-6 text-amber-800">
-                    Selected media is not in the available media list.
-                </p>
-            ) : null}
-        </div>
     );
 }
 

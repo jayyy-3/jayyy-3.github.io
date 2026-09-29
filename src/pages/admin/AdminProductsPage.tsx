@@ -6,7 +6,6 @@ import {
     Archive,
     Boxes,
     CheckCircle2,
-    Image as ImageIcon,
     Layers3,
     Plus,
     Save,
@@ -25,6 +24,8 @@ import { useAdminFeedback } from './useAdminFeedback';
 import { useLiveSaveConfirm } from './LiveSaveConfirm';
 import { isFormDirty, type UnsavedSection } from './unsavedGuard';
 import { useUnsavedGuard } from './useUnsavedGuard';
+import AdminMediaPicker from './media/AdminMediaPicker';
+import { mediaIdFromField } from './media/mediaPickerFiles';
 import {
     archiveConfirmRequest,
     followNameUrlKey,
@@ -90,16 +91,6 @@ interface StoneOptionRow {
     id: number;
     stone_group_key: string;
     display_name: string;
-    status: string;
-}
-
-interface MediaOptionRow {
-    id: number;
-    alt: string | null;
-    caption: string | null;
-    object_path: string | null;
-    source_url: string | null;
-    media_type: string;
     status: string;
 }
 
@@ -189,12 +180,12 @@ export default function AdminProductsPage() {
 function AdminProductsContent() {
     const { profile, user } = useAdminAuth();
     const canEdit = profile?.role === 'owner' || profile?.role === 'admin' || profile?.role === 'editor';
+    const canManageMedia = profile?.role === 'owner' || profile?.role === 'admin';
     const [products, setProducts] = useState<ProductRow[]>([]);
     const [models, setModels] = useState<ProductModelRow[]>([]);
     const [materialDefaults, setMaterialDefaults] = useState<ProductMaterialDefaultRow[]>([]);
     const [specs, setSpecs] = useState<ProductSpecRow[]>([]);
     const [stoneOptions, setStoneOptions] = useState<StoneOptionRow[]>([]);
-    const [mediaOptions, setMediaOptions] = useState<MediaOptionRow[]>([]);
     const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
     const [selectedModelId, setSelectedModelId] = useState<number | null>(null);
     const [selectedMaterialDefaultId, setSelectedMaterialDefaultId] = useState<number | null>(null);
@@ -233,14 +224,6 @@ function AdminProductsContent() {
     const isProductLive = selectedProduct?.status === 'published';
     const isModelLive = isProductLive && selectedModel?.status === 'published';
     const isProductUrlKeyLocked = isUrlKeyLocked(selectedProduct);
-    const selectedHeroMedia = useMemo(
-        () => findMediaOption(mediaOptions, productForm.heroMediaId),
-        [mediaOptions, productForm.heroMediaId],
-    );
-    const selectedModelImage = useMemo(
-        () => findMediaOption(mediaOptions, modelForm.imageMediaId),
-        [mediaOptions, modelForm.imageMediaId],
-    );
     const selectedDefaultStone = useMemo(
         () => findStoneOption(stoneOptions, materialDefaultForm.stoneGroupId),
         [materialDefaultForm.stoneGroupId, stoneOptions],
@@ -418,7 +401,7 @@ function AdminProductsContent() {
             setIsLoading(true);
             setError(null);
 
-            const [productsResult, stonesResult, mediaResult] = await Promise.all([
+            const [productsResult, stonesResult] = await Promise.all([
                 client
                     .from('products')
                     .select(
@@ -428,12 +411,6 @@ function AdminProductsContent() {
                     .order('name', { ascending: true })
                     .returns<ProductRow[]>(),
                 loadStoneGroupOptionResult(),
-                client
-                    .from('media_assets')
-                    .select('id,alt,caption,object_path,source_url,media_type,status')
-                    .order('updated_at', { ascending: false })
-                    .limit(120)
-                    .returns<MediaOptionRow[]>(),
             ]);
 
             if (catalogGeneration !== productCatalogGenerationRef.current) {
@@ -452,17 +429,10 @@ function AdminProductsContent() {
                 return;
             }
 
-            if (mediaResult.error) {
-                reportError(mediaResult, { entity: 'Media library list', action: 'load' });
-                setIsLoading(false);
-                return;
-            }
-
             const rows = productsResult.data ?? [];
             const nextProduct = rows.find((product) => product.id === preferredProductId) ?? rows[0] ?? null;
             setProducts(rows);
             setStoneOptions(stonesResult.data ?? []);
-            setMediaOptions(mediaResult.data ?? []);
             setCurrentProductId(nextProduct?.id ?? null);
             setProductForm(rowToProductForm(nextProduct));
 
@@ -1303,15 +1273,22 @@ function AdminProductsContent() {
                                 inputMode="numeric"
                                 onChange={(value) => updateProductField('sortOrder', value)}
                             />
-                            <MediaSelect
-                                label="Hero image"
-                                value={productForm.heroMediaId}
-                                disabled={!canEdit || isSavingProduct || isLoading}
-                                mediaOptions={mediaOptions}
-                                selectedMedia={selectedHeroMedia}
-                                emptyLabel="No hero image"
-                                onChange={(value) => updateProductField('heroMediaId', value)}
-                            />
+                            <div className="md:col-span-2">
+                                <AdminMediaPicker
+                                    key={`product-hero-${selectedProductId ?? 'new'}`}
+                                    label="Hero image"
+                                    description="The main image at the top of the product page."
+                                    value={mediaIdFromField(productForm.heroMediaId)}
+                                    disabled={!canEdit || isSavingProduct || isLoading}
+                                    userId={user?.id ?? null}
+                                    canCleanUpStorage={canManageMedia}
+                                    auditSource="product_editor"
+                                    objectPathPrefix="product-editor"
+                                    instanceKey="product-hero"
+                                    testIdPrefix="product-hero-media"
+                                    onChange={(mediaId) => updateProductField('heroMediaId', mediaId === null ? '' : String(mediaId))}
+                                />
+                            </div>
                         </div>
 
                         <div className="mt-3">
@@ -1418,14 +1395,19 @@ function AdminProductsContent() {
                                 disabled={!canEdit || isSavingModel || !selectedProduct}
                                 onChange={(value) => updateModelField('label', value)}
                             />
-                            <MediaSelect
+                            <AdminMediaPicker
+                                key={`product-model-${selectedModelId ?? 'new'}`}
                                 label="Model image"
-                                value={modelForm.imageMediaId}
+                                description="Shown when a visitor selects this model."
+                                value={mediaIdFromField(modelForm.imageMediaId)}
                                 disabled={!canEdit || isSavingModel || !selectedProduct}
-                                mediaOptions={mediaOptions}
-                                selectedMedia={selectedModelImage}
-                                emptyLabel="No model image"
-                                onChange={(value) => updateModelField('imageMediaId', value)}
+                                userId={user?.id ?? null}
+                                canCleanUpStorage={canManageMedia}
+                                auditSource="product_editor"
+                                objectPathPrefix="product-editor"
+                                instanceKey="product-model"
+                                testIdPrefix="product-model-media"
+                                onChange={(mediaId) => updateModelField('imageMediaId', mediaId === null ? '' : String(mediaId))}
                             />
                             <TextField
                                 label="Sort order"
@@ -1541,7 +1523,6 @@ function AdminProductsContent() {
                         <div className="mt-5 grid gap-3 text-sm leading-6 text-white/72">
                             <p>{models.length} models on the selected product.</p>
                             <p>{materialDefaults.length} material defaults configured.</p>
-                            <p>{mediaOptions.length} Media library items available for product images.</p>
                         </div>
                     </section>
 
@@ -1769,94 +1750,10 @@ function SelectField({
     );
 }
 
-function findMediaOption(mediaOptions: MediaOptionRow[], value: string) {
-    const mediaId = Number(value);
-    if (!Number.isFinite(mediaId)) return null;
-    return mediaOptions.find((media) => media.id === mediaId) ?? null;
-}
-
 function findStoneOption(stoneOptions: StoneOptionRow[], value: string) {
     const stoneId = Number(value);
     if (!Number.isFinite(stoneId)) return null;
     return stoneOptions.find((stone) => stone.id === stoneId) ?? null;
-}
-
-function getMediaUrl(asset: MediaOptionRow | null) {
-    if (!asset) return null;
-    return asset.source_url || asset.object_path;
-}
-
-function formatMediaOption(media: MediaOptionRow) {
-    const label = media.alt || media.caption || 'Untitled media';
-    return `${label} - ${media.status === 'published' ? 'Published in Media' : 'Not published in Media'}`;
-}
-
-function MediaSelect({
-    label,
-    value,
-    disabled,
-    mediaOptions,
-    selectedMedia,
-    emptyLabel,
-    onChange,
-}: {
-    label: string;
-    value: string;
-    disabled?: boolean;
-    mediaOptions: MediaOptionRow[];
-    selectedMedia: MediaOptionRow | null;
-    emptyLabel: string;
-    onChange: (value: string) => void;
-}) {
-    const previewUrl = getMediaUrl(selectedMedia);
-
-    return (
-        <div className="space-y-2">
-            <SelectField
-                label={label}
-                value={value}
-                disabled={disabled}
-                onChange={onChange}
-                options={[
-                    ['', emptyLabel],
-                    ...mediaOptions.map((media) => [String(media.id), formatMediaOption(media)] as [string, string]),
-                ]}
-            />
-            {selectedMedia ? (
-                <div className="flex gap-3 border border-black/10 bg-[#f8f9f5] p-3">
-                    <div className="flex h-20 w-24 shrink-0 items-center justify-center overflow-hidden bg-white">
-                        {previewUrl && selectedMedia.media_type === 'image' ? (
-                            <img
-                                src={previewUrl}
-                                alt={selectedMedia.alt || selectedMedia.caption || label}
-                                className="h-full w-full object-cover"
-                                loading="lazy"
-                            />
-                        ) : (
-                            <ImageIcon className="h-5 w-5 text-black/35" />
-                        )}
-                    </div>
-                    <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-black">
-                            {selectedMedia.alt || selectedMedia.caption || 'Untitled media'}
-                        </p>
-                        <p className="mt-1 text-xs font-bold uppercase tracking-[0.12em] text-black/45">
-                            {selectedMedia.status === 'published' ? 'Published in Media' : 'Not published in Media'}
-                        </p>
-                        <p className="mt-2 line-clamp-2 text-xs leading-5 text-black/52">
-                            {selectedMedia.status === 'published'
-                                ? 'This Media library item can support a public product image.'
-                                : 'Open Media, review the item, then publish it before relying on it for public product pages.'}
-                        </p>
-                    </div>
-                </div>
-            ) : value ? (
-                <p className="border border-amber-200 bg-amber-50 p-3 text-sm font-semibold leading-6 text-amber-800">
-                    Selected media is not in the available media list.
-                </p>
-            ) : null}
-        </div>
-    );
 }
 
 function PublishChecklist({
@@ -2329,7 +2226,7 @@ export function getProductPublishChecklist(
             ready: Boolean(form.heroMediaId.trim()),
             detail: form.heroMediaId.trim()
                 ? 'A hero image is selected.'
-                : 'Choose a product hero image from Media so the public page is not image-light.',
+                : 'Choose or upload a hero image so the public page is not image-light.',
         },
         {
             label: 'Published model',
@@ -2376,7 +2273,7 @@ export function getProductModelPublishChecklist(form: ModelFormState) {
             label: 'Model image',
             ready: Boolean(form.imageMediaId.trim()),
             detail: form.imageMediaId.trim()
-                ? 'A model image is selected from Media.'
+                ? 'A model image is selected.'
                 : 'Choose a model image so this model can satisfy the product publish checklist.',
         },
     ];

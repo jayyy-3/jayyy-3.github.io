@@ -255,11 +255,13 @@
         ]
       },
       "status": "now",
-      "phase": "planned",
-      "nextAction": "Opus implements on its own branch; Claude reports to Jay, then merges under standing authorization.",
-      "blocker": "",
+      "phase": "awaiting_external",
+      "nextAction": "Claude reports PR #80 to Jay and merges under standing authorization; production readback is recorded with the wave 3 release. Follow-up to register: a protected endpoint that publishes Draft images referenced by Products/Articles at Publish.",
+      "blocker": "Merge and wave release by Claude; colleague acceptance of the picker.",
       "notes": [
-        "2026-09-28: wave 3 of the 2026-09-24 optimization audit. Products module split is deferred to wave 4 (after the media picker and database types land)."
+        "2026-09-28: wave 3 of the 2026-09-24 optimization audit. Products module split is deferred to wave 4 (after the media picker and database types land).",
+        "2026-09-28: Shared AdminMediaPicker wired into Projects, Products (hero, model), Articles (cover, section) and Settings (share image); Media screen jargon moved behind Details with a check assertion. Publish-time media promotion for Products/Articles recorded as a follow-up (Projects promotion is bound to its aggregate RPC). Shared local stack was owned by another checkout, so local journeys run in PR CI; mocked Playwright evidence in ignored .tmp/picker/.",
+        "2026-09-28: PR #80. CI 36427439986 (e1 head) failed in the new Editor journey: it read size_bytes from the picker readback, which selects only display columns; the journey now reads the inserted metadata. CI 36430352733 on e3e943a passed: isolated local:verify 31/31 journeys incl. the Editor picker steps (20 MB JPG resized before upload), Preview https://a5b37c0b.urblo-site.pages.dev deployed and smoked; workstation agent:cloudflare-preview-smoke passed (read-only). Not merged."
       ]
     },
     {

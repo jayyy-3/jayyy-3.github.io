@@ -6,7 +6,6 @@ import type {
     ArticleFormState,
     ArticleRow,
     BlockFormState,
-    MediaOptionRow,
 } from './types';
 
 export const emptyArticleForm: ArticleFormState = {
@@ -74,22 +73,6 @@ export const statusOptions: Array<[string, string]> = [
     ['published', 'Published'],
     ['archived', 'Archived'],
 ];
-
-export function findMediaOption(mediaOptions: MediaOptionRow[], value: string) {
-    const mediaId = Number(value);
-    if (!Number.isFinite(mediaId)) return null;
-    return mediaOptions.find((media) => media.id === mediaId) ?? null;
-}
-
-export function getMediaUrl(asset: MediaOptionRow | null) {
-    if (!asset) return null;
-    return asset.source_url || asset.object_path;
-}
-
-export function formatMediaOption(media: MediaOptionRow) {
-    const label = media.alt || media.caption || 'Untitled media';
-    return `${label} - ${media.status === 'published' ? 'Published in Media' : 'Not published in Media'}`;
-}
 
 export function rowToArticleForm(row: ArticleRow | null): ArticleFormState {
     if (!row) return emptyArticleForm;

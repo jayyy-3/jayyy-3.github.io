@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { recordAdminAuditEvent, withAuditNotice } from '../../lib/adminAudit';
 import { PUBLIC_MEDIA_BUCKET, toSafePublicMediaSourceUrl } from '../../lib/publicMediaUrl';
+import { formatImageBytes } from '../../lib/imageQrOptimization';
 import { supabase } from '../../lib/supabaseClient';
 import { useAdminAuth } from '../../lib/adminAuthHooks';
 import AdminShell from './AdminShell';
@@ -25,6 +26,7 @@ import { useLiveSaveConfirm } from './LiveSaveConfirm';
 import { archiveConfirmRequest, liveSaveRequest, updateLivePageLabel } from './liveSave';
 import { isFormDirty } from './unsavedGuard';
 import { useUnsavedGuard } from './useUnsavedGuard';
+import { heicGuidance, isHeicFile } from './media/mediaPickerFiles';
 
 type MediaStatus = 'draft' | 'published' | 'archived';
 type MediaListFilter = MediaStatus | 'all';
@@ -100,6 +102,12 @@ const allowedMimeTypes = new Set([
     'video/mp4',
 ]);
 
+// Technical text (library names, file paths, cleanup results) is only shown behind "Details".
+// scripts/check-admin-crud-coverage.mjs rejects internal storage words anywhere else on this screen.
+const technicalDetail = (text: string) => text;
+
+const uploadTypesLabel = 'JPG, PNG, WebP, AVIF, GIF, PDF or MP4';
+
 const bucketLimits: Record<MediaBucket, number> = {
     'urblo-public-media': 26_214_400,
     'urblo-admin-media': 52_428_800,
@@ -108,12 +116,12 @@ const bucketLimits: Record<MediaBucket, number> = {
 const mediaBucketOptions: Array<{ value: MediaBucket; label: string; detail: string }> = [
     {
         value: 'urblo-admin-media',
-        label: 'Private draft library',
+        label: 'Hidden until published',
         detail: 'Hidden from the public website. Good for uploads that are still being checked or are only for the team.',
     },
     {
         value: 'urblo-public-media',
-        label: 'Public website library',
+        label: 'Available to the website',
         detail: 'Ready for public pages to use after this media item is Published.',
     },
 ];
@@ -264,13 +272,24 @@ function AdminMediaContent() {
             return;
         }
 
+        if (isHeicFile(file)) {
+            setError(heicGuidance, { scope: 'upload' });
+            return;
+        }
+
         if (!allowedMimeTypes.has(file.type)) {
-            setError('This file type is not allowed for the launch media buckets.', { scope: 'upload' });
+            setError(`This file type cannot be uploaded. Use ${uploadTypesLabel}.`, {
+                scope: 'upload',
+                detail: technicalDetail(`Rejected MIME type: ${file.type || 'unknown'}`),
+            });
             return;
         }
 
         if (file.size > bucketLimits[PRIVATE_MEDIA_BUCKET]) {
-            setError(`File is too large for ${formatBucketLabel(PRIVATE_MEDIA_BUCKET)}.`, { scope: 'upload' });
+            setError(
+                `This file is ${formatImageBytes(file.size)}. Files must be ${formatImageBytes(bucketLimits[PRIVATE_MEDIA_BUCKET])} or smaller; export a smaller copy and try again.`,
+                { scope: 'upload' },
+            );
             return;
         }
 
@@ -343,7 +362,9 @@ function AdminMediaContent() {
                         scope: 'upload',
                         message:
                             'The file was uploaded, but the Media library could not confirm it was added. Reload the page to check before uploading it again. If it is missing, ask a Website owner or CMS manager to check the upload.',
-                        detail: `The file was uploaded privately, but the media record response failed and readback could not confirm whether it committed: ${metadataError}; readback: ${metadataReadback.error.message}. The private object was not deleted because a record may exist. Inspect ${objectPath}.`,
+                        detail: technicalDetail(
+                            `The file was uploaded privately, but the media record response failed and readback could not confirm whether it committed: ${metadataError}; readback: ${metadataReadback.error.message}. The private object was not deleted because a record may exist. Inspect ${objectPath}.`,
+                        ),
                     });
                     return;
                 }
@@ -355,7 +376,9 @@ function AdminMediaContent() {
                         scope: 'upload',
                         message:
                             'The file could not be added to the Media library. Nothing is on the website. Ask a Website owner or CMS manager to tidy up the leftover private copy, then try again.',
-                        detail: `The file was uploaded privately, but media metadata could not be created: ${metadataError}. Editors cannot delete Storage objects, so a private orphan may remain at ${objectPath}. It is not in the public media bucket.`,
+                        detail: technicalDetail(
+                            `The file was uploaded privately, but media metadata could not be created: ${metadataError}. Editors cannot delete Storage objects, so a private orphan may remain at ${objectPath}. It is not in the public media bucket.`,
+                        ),
                     });
                     return;
                 }
@@ -372,9 +395,11 @@ function AdminMediaContent() {
                     message: cleanupError
                         ? 'The file could not be added to the Media library, and its leftover private copy could not be removed. Nothing is on the website. Ask a Website owner or CMS manager to check it before you try again.'
                         : undefined,
-                    detail: cleanupError
-                        ? `The file was uploaded privately, but media metadata could not be created: ${metadataError}. Cleanup also failed: ${cleanupError}. A private orphan may remain at ${objectPath}; inspect it before retrying.`
-                        : `The media record could not be created: ${metadataError}. The private upload was removed during cleanup, so no public object was created.`,
+                    detail: technicalDetail(
+                        cleanupError
+                            ? `The file was uploaded privately, but media metadata could not be created: ${metadataError}. Cleanup also failed: ${cleanupError}. A private orphan may remain at ${objectPath}; inspect it before retrying.`
+                            : `The media record could not be created: ${metadataError}. The private upload was removed during cleanup, so no public object was created.`,
+                    ),
                 });
                 return;
             }
@@ -401,12 +426,15 @@ function AdminMediaContent() {
         });
         setNotice(
             withAuditNotice(
-                metadataConfirmedByReadback
-                    ? 'The initial metadata response failed, but readback confirmed the private Draft media record. Add alt text and usage notes before publishing.'
-                    : 'Media uploaded privately as a Draft. Add alt text and usage notes before publishing.',
+                'Media uploaded as a Draft. It stays hidden from the website until it is published. Add alt text and usage notes before publishing.',
                 auditError,
             ),
-            { scope: 'upload' },
+            {
+                scope: 'upload',
+                detail: metadataConfirmedByReadback
+                    ? technicalDetail('The initial metadata response failed, but readback confirmed the private Draft media record.')
+                    : null,
+            },
         );
     }
 
@@ -434,7 +462,15 @@ function AdminMediaContent() {
             const originalObjectPath = selectedAsset?.object_path?.trim() ?? '';
 
             if (!canCleanUpStorage) {
-                setError('Private-to-public promotion requires an Owner or Admin so rollback can be completed safely.', { scope: 'media' });
+                setError(
+                    'Only a Website owner or CMS manager can publish an uploaded file. Save your changes as a draft and ask them to publish it.',
+                    {
+                        scope: 'media',
+                        detail: technicalDetail(
+                            'Private-to-public promotion requires an Owner or Admin so rollback can be completed safely.',
+                        ),
+                    },
+                );
                 return false;
             }
 
@@ -454,7 +490,9 @@ function AdminMediaContent() {
                     'Publishing stopped because this file changed since you opened it. Reload the page and select the item again before publishing.',
                     {
                         scope: 'media',
-                        detail: 'The uploaded file location no longer matches the selected private media record. Storage paths cannot be repaired through the publish action.',
+                        detail: technicalDetail(
+                            'The uploaded file location no longer matches the selected private media record. Storage paths cannot be repaired through the publish action.',
+                        ),
                     },
                 );
                 return false;
@@ -537,7 +575,9 @@ function AdminMediaContent() {
                     entity: 'media item',
                     scope: 'media',
                     message: 'Publishing stopped before anything changed: the private file could not be read. Try again in a minute.',
-                    detail: `Publishing stopped before the database was changed because the private source file could not be downloaded: ${privateDownload.error?.message ?? 'No file was returned.'}`,
+                    detail: technicalDetail(
+                        `Publishing stopped before the database was changed because the private source file could not be downloaded: ${privateDownload.error?.message ?? 'No file was returned.'}`,
+                    ),
                 });
                 return false;
             }
@@ -563,7 +603,9 @@ function AdminMediaContent() {
                     scope: 'media',
                     message:
                         'Publishing stopped before anything changed: a public copy of the file could not be created. A file with the same name may already be public. Ask a Website owner or CMS manager to check it.',
-                    detail: `Publishing stopped before the database was changed because a new public copy could not be created: ${publicUpload.error.message}. The destination was not overwritten. If this path already exists, inspect it before retrying.`,
+                    detail: technicalDetail(
+                        `Publishing stopped before the database was changed because a new public copy could not be created: ${publicUpload.error.message}. The destination was not overwritten. If this path already exists, inspect it before retrying.`,
+                    ),
                 });
                 return false;
             }
@@ -630,7 +672,9 @@ function AdminMediaContent() {
                     scope: 'media',
                     message:
                         'Publishing may not have finished. Reload the page to check this item before you try again. If it looks wrong, ask a Website owner or CMS manager to check it.',
-                    detail: `The database publish response failed and readback could not confirm the final state: ${responseFailure}; readback: ${publishReadback.error?.message ?? 'No media record was returned.'}. The new public object was not deleted because the database may have committed. Inspect asset ${privateStoragePromotion.assetId} and ${privateStoragePromotion.objectPath} before retrying. Storage and database changes are not atomic in this browser workflow.`,
+                    detail: technicalDetail(
+                        `The database publish response failed and readback could not confirm the final state: ${responseFailure}; readback: ${publishReadback.error?.message ?? 'No media record was returned.'}. The new public object was not deleted because the database may have committed. Inspect asset ${privateStoragePromotion.assetId} and ${privateStoragePromotion.objectPath} before retrying. Storage and database changes are not atomic in this browser workflow.`,
+                    ),
                 });
                 return false;
             }
@@ -652,9 +696,11 @@ function AdminMediaContent() {
                     message: publicRollback.removed
                         ? 'Publishing did not finish, so the change was undone. Nothing changed on the website. Try again.'
                         : 'Publishing did not finish. A public copy of the file was kept because it may be in use elsewhere. Ask a Website owner or CMS manager to check it before you try again.',
-                    detail: publicRollback.removed
-                        ? `The database did not publish the media after a new public object was created: ${responseFailure}. The unreferenced public object was removed during rollback.`
-                        : `The database did not publish the media after a new public object was created: ${responseFailure}. The public object was retained: ${publicRollback.detail}. Inspect ${privateStoragePromotion.objectPath} before retrying; rollback never deletes an object referenced by another media record.`,
+                    detail: technicalDetail(
+                        publicRollback.removed
+                            ? `The database did not publish the media after a new public object was created: ${responseFailure}. The unreferenced public object was removed during rollback.`
+                            : `The database did not publish the media after a new public object was created: ${responseFailure}. The public object was retained: ${publicRollback.detail}. Inspect ${privateStoragePromotion.objectPath} before retrying; rollback never deletes an object referenced by another media record.`,
+                    ),
                 });
                 return false;
             }
@@ -724,27 +770,30 @@ function AdminMediaContent() {
                     : null,
             },
         });
-        const publishNotice = shouldPromotePrivateStorage
-            ? privateSourceCleanup === 'removed_after_publish'
-                ? 'Media copied to the Public website library and published. The original private file was removed after the database update succeeded.'
-                : privateSourceCleanup === 'retained'
-                  ? 'Media copied to the Public website library and published. The private source copy was kept.'
-                  : 'Media copied to the Public website library and published.'
-            : 'Media published.';
-        const databaseConfirmationNotice = databaseWriteConfirmedByReadback
-            ? ' The initial database response failed, but a follow-up read confirmed the Published record before private-source cleanup.'
-            : '';
+        const publishDetail = [
+            shouldPromotePrivateStorage
+                ? privateSourceCleanup === 'removed_after_publish'
+                    ? 'Copied from the private library to the public library; the private source was removed after the database update succeeded.'
+                    : 'Copied from the private library to the public library; the private source copy was kept.'
+                : null,
+            databaseWriteConfirmedByReadback
+                ? 'The initial database response failed, but a follow-up read confirmed the Published record before private-source cleanup.'
+                : null,
+            privateSourceCleanup === 'retained' ? privateSourceCleanupError : null,
+        ]
+            .filter(Boolean)
+            .join(' ');
         setIsSaving(false);
         setNotice(
             withAuditNotice(
                 nextStatus === 'published'
-                    ? `${publishNotice}${databaseConfirmationNotice}`
+                    ? 'Media published. Website pages can now use it.'
                     : nextStatus === 'archived'
                       ? 'Media archived.'
                       : 'Media metadata saved.',
                 auditError,
             ),
-            { scope: 'media', detail: privateSourceCleanup === 'retained' ? privateSourceCleanupError : null },
+            { scope: 'media', detail: publishDetail ? technicalDetail(publishDetail) : null },
         );
         return true;
     }
@@ -1065,21 +1114,20 @@ function AdminMediaContent() {
                             </label>
 
                             <label className="text-xs font-bold uppercase tracking-[0.14em] text-black/55">
-                                Website visibility location (managed)
+                                Website visibility
                                 <input
                                     value={
                                         form.sourceKind === 'storage'
                                             ? formatBucketLabel(form.bucket)
-                                            : 'Not used for external links'
+                                            : 'Uses the link below'
                                     }
                                     readOnly
                                     disabled
                                     className={fieldClass}
                                 />
                                 <span className="mt-2 block text-xs font-semibold normal-case leading-5 tracking-normal text-black/45">
-                                    Upload decides the real Storage location. Owner/Admin publishing creates a
-                                    non-overwriting public copy before updating this record; Editor roles cannot run
-                                    that cross-library promotion because rollback may require file deletion.
+                                    Set automatically. Uploaded files stay hidden until they are published; only a
+                                    Website owner or CMS manager can publish an uploaded file.
                                 </span>
                             </label>
 
@@ -1103,25 +1151,30 @@ function AdminMediaContent() {
                             <MediaLocationHelp sourceKind={form.sourceKind} bucket={form.bucket} />
                         </div>
 
-                        <label className="mt-5 block text-xs font-bold uppercase tracking-[0.14em] text-black/55">
-                            Uploaded file location
-                            <input
-                                value={form.objectPath}
-                                onChange={(event) => updateField('objectPath', event.target.value)}
-                                disabled={
-                                    !canEdit ||
-                                    isSaving ||
-                                    isLoading ||
-                                    form.sourceKind !== 'storage' ||
-                                    selectedAsset?.source_kind === 'storage'
-                                }
-                                className={fieldClass}
-                            />
-                            <span className="mt-2 block text-xs font-semibold normal-case leading-5 tracking-normal text-black/45">
-                                Filled automatically after upload. Existing Storage paths are locked so publishing and
-                                cleanup cannot affect another media record; reload the item if this location looks wrong.
-                            </span>
-                        </label>
+                        <details className="mt-5 border border-black/10 bg-[#f8f9f5] p-3" data-testid="media-technical-details">
+                            <summary className="cursor-pointer text-xs font-bold uppercase tracking-[0.12em] text-black/55">
+                                Details
+                            </summary>
+                            <label className="mt-3 block text-xs font-bold uppercase tracking-[0.14em] text-black/55">
+                                Uploaded file location
+                                <input
+                                    value={form.objectPath}
+                                    onChange={(event) => updateField('objectPath', event.target.value)}
+                                    disabled={
+                                        !canEdit ||
+                                        isSaving ||
+                                        isLoading ||
+                                        form.sourceKind !== 'storage' ||
+                                        selectedAsset?.source_kind === 'storage'
+                                    }
+                                    className={fieldClass}
+                                />
+                                <span className="mt-2 block text-xs font-semibold normal-case leading-5 tracking-normal text-black/45">
+                                    Filled automatically after upload and locked afterwards, so publishing cannot affect
+                                    another media item. Reload the item if this looks wrong.
+                                </span>
+                            </label>
+                        </details>
 
                         <label className="mt-5 block text-xs font-bold uppercase tracking-[0.14em] text-black/55">
                             Public or reference URL
@@ -1251,22 +1304,17 @@ function AdminMediaContent() {
                         <FileUp className="h-5 w-5 text-[var(--urblo-lime)]" />
                         <h2 className="mt-5 text-xl font-semibold">Upload draft media</h2>
                         <p className="mt-3 text-sm leading-6 text-white/68">
-                            Every upload starts in the Private draft library. Publishing copies the selected file into
-                            the Public website library after alt text and usage notes are ready. Owner or Admin access
-                            is required for that promotion and its rollback.
+                            Every upload starts as a Draft that is hidden from the website. When alt text and usage
+                            notes are ready, Publish makes it available to website pages. Only a Website owner or CMS
+                            manager can publish an uploaded file.
                         </p>
-                        <label className="mt-5 block text-xs font-bold uppercase tracking-[0.14em] text-white/65">
-                            Upload destination
-                            <input
-                                value={formatBucketLabel(PRIVATE_MEDIA_BUCKET)}
-                                readOnly
-                                disabled
-                                className="mt-2 min-h-11 w-full rounded border border-white/20 bg-black px-3 text-sm font-semibold text-white outline-none transition focus:border-white disabled:text-white/35"
-                            />
-                            <span className="mt-2 block text-xs font-semibold normal-case leading-5 tracking-normal text-white/55">
-                                Draft files are never uploaded directly into the public bucket.
-                            </span>
-                        </label>
+                        <p className="mt-4 text-xs font-semibold leading-5 text-white/80" data-testid="media-upload-limits">
+                            {uploadTypesLabel}, up to {formatImageBytes(bucketLimits[PRIVATE_MEDIA_BUCKET])}.
+                        </p>
+                        <p className="mt-1 text-xs font-medium leading-5 text-white/55">
+                            iPhone HEIC photos: set the camera to Most Compatible, or share the photo as a JPG first.
+                            Product and article images can also be uploaded right where they are used.
+                        </p>
                         <input
                             type="file"
                             accept="image/jpeg,image/png,image/webp,image/avif,image/gif,application/pdf,video/mp4"
@@ -1291,10 +1339,9 @@ function AdminMediaContent() {
                         <ShieldCheck className="h-5 w-5 text-black" />
                         <h2 className="mt-5 text-xl font-semibold text-black">Publishing rules</h2>
                         <ul className="mt-4 space-y-3 text-sm leading-6 text-black/62">
-                            <li>Owner/Admin publishing creates a new public file without overwriting an existing path.</li>
-                            <li>If the database update fails, cleanup checks Media references first and retains the file whenever ownership is uncertain.</li>
-                            <li>Storage and database writes are sequential and are not one atomic transaction.</li>
-                            <li>Storage location is managed by upload and publish actions, not by editing a bucket label.</li>
+                            <li>Only a Website owner or CMS manager can publish an uploaded file. Editors can upload, describe and save drafts.</li>
+                            <li>Publishing makes a website copy of the file; an existing website file is never overwritten.</li>
+                            <li>If publishing stops part-way, anything that may be in use is kept, and the message says what to check.</li>
                             <li>Published media needs usage notes so editors know where it is safe to reuse.</li>
                             <li>Published images need alt text before they can support public pages.</li>
                             <li>CSV manifest exports are recorded in Change history and include only visible media items.</li>
@@ -1502,7 +1549,7 @@ function MediaActionBar({
     const isDisabled = disabled || isSaving;
     const actionNote = canPublish
         ? willPromotePrivateStorage
-            ? 'Publish creates a non-overwriting public copy, then updates the record. A failed database update checks Media references before cleanup and retains the object when ownership is uncertain; these writes are not atomic.'
+            ? 'Publish makes a website copy of this uploaded file, then marks it Published. If anything stops part-way, the message says what to check.'
             : status === 'published'
             ? 'Published media can be selected on public CMS-backed pages after you save.'
             : status === 'archived'
@@ -1538,7 +1585,7 @@ function MediaActionBar({
                         title={
                             canPublish
                                 ? willPromotePrivateStorage
-                                    ? 'Copy private file to public Storage and publish media'
+                                    ? 'Make a website copy of this file and publish it'
                                     : 'Publish media'
                                 : 'Complete the Media publish checklist first.'
                         }
@@ -1638,7 +1685,7 @@ export function validateMediaForm(
             !allowPrivateStoragePublish
         ) {
             return validationFailure(
-                'Select an existing private upload so Publish can copy the file into the Public website library.',
+                'Select an uploaded file so Publish can make a website copy of it.',
             );
         }
 
@@ -1692,12 +1739,12 @@ export function getMediaPublishChecklist(
             label: 'Public location',
             ready: publicLocationReady,
             detail: canAutoPromotePrivateStorage
-                ? 'An Owner or Admin can create a non-overwriting public copy at the same path, then update the database. If the database fails, cleanup checks Media references first and retains the object when ownership is uncertain; this browser workflow is not atomic.'
+                ? 'Publish makes a website copy of this uploaded file. An existing website file is never overwritten.'
                 : isPrivateStorageSelection
-                  ? 'Private-to-public promotion requires an Owner or Admin because a failed database update may require deleting the newly created public object during rollback.'
+                  ? 'Only a Website owner or CMS manager can publish an uploaded file. Save your changes and ask them to publish it.'
                 : publicLocationReady
                   ? 'The selected source can be used by public pages.'
-                  : 'Select an existing private upload so Publish can create a real public Storage copy.',
+                  : 'Select an uploaded file so Publish can make a website copy of it.',
         },
         {
             label: 'Alt text for images',
@@ -1878,7 +1925,7 @@ async function removeStorageObjectSafely(
         const removal = await client.storage.from(bucket).remove([objectPath]);
         return removal.error?.message ?? null;
     } catch (error) {
-        return error instanceof Error ? error.message : 'Unknown Storage cleanup error.';
+        return error instanceof Error ? error.message : technicalDetail('Unknown Storage cleanup error.');
     }
 }
 
@@ -1902,7 +1949,7 @@ export async function removePublicObjectIfUnreferenced(
     if (referenceCheck.error) {
         return {
             removed: false,
-            detail: `media-reference readback failed (${referenceCheck.error.message}), so deletion was skipped`,
+            detail: technicalDetail(`media-reference readback failed (${referenceCheck.error.message}), so deletion was skipped`),
         };
     }
 
@@ -1915,7 +1962,7 @@ export async function removePublicObjectIfUnreferenced(
 
     const removalError = await removeStorageObjectSafely(client, PUBLIC_MEDIA_BUCKET, objectPath);
     return removalError
-        ? { removed: false, detail: `Storage rollback failed (${removalError})` }
+        ? { removed: false, detail: technicalDetail(`Storage rollback failed (${removalError})`) }
         : { removed: true, detail: null };
 }
 
@@ -1934,7 +1981,9 @@ export async function removePrivatePromotionSourceIfUnreferenced(
     if (otherReferenceCheck.error) {
         return {
             removed: false,
-            detail: `private media-reference readback failed (${otherReferenceCheck.error.message}), so source deletion was skipped`,
+            detail: technicalDetail(
+                `private media-reference readback failed (${otherReferenceCheck.error.message}), so source deletion was skipped`,
+            ),
         };
     }
 
@@ -1970,8 +2019,8 @@ function formatSourceKind(sourceKind: SourceKind) {
 function formatMediaLocation(asset: MediaAssetRow) {
     if (asset.source_kind === 'storage') {
         const library =
-            mediaBucketOptions.find((item) => item.value === asset.bucket)?.label ?? 'Private draft library';
-        return `${library} / ${asset.object_path ? 'Uploaded file saved' : 'Missing uploaded file location'}`;
+            mediaBucketOptions.find((item) => item.value === asset.bucket)?.label ?? 'Hidden until published';
+        return `Uploaded file · ${asset.object_path ? library : 'file missing'}`;
     }
 
     return `${formatSourceKind(asset.source_kind)} / ${asset.source_url ? 'URL saved' : 'Missing URL'}`;

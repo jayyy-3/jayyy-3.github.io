@@ -16,7 +16,6 @@ import {
     defaultContentForBlockType,
     emptyArticleForm,
     emptyBlockForm,
-    findMediaOption,
     formatArticlePublishError,
     getArticlePublishChecklist,
     getArticleSectionPublishChecklist,
@@ -34,7 +33,6 @@ import type {
     ArticleRow,
     ArticleStatus,
     BlockFormState,
-    MediaOptionRow,
     ProjectOptionRow,
     StoneOptionRow,
 } from './types';
@@ -43,11 +41,11 @@ export function useArticleEditor() {
     const { profile, user } = useAdminAuth();
 
     const canEdit = profile?.role === 'owner' || profile?.role === 'admin' || profile?.role === 'editor';
+    const canManageMedia = profile?.role === 'owner' || profile?.role === 'admin';
     const [articles, setArticles] = useState<ArticleRow[]>([]);
     const [blocks, setBlocks] = useState<ArticleBlockRow[]>([]);
     const [projectOptions, setProjectOptions] = useState<ProjectOptionRow[]>([]);
     const [stoneOptions, setStoneOptions] = useState<StoneOptionRow[]>([]);
-    const [mediaOptions, setMediaOptions] = useState<MediaOptionRow[]>([]);
     const [selectedArticleId, setSelectedArticleId] = useState<number | null>(null);
     const [selectedBlockId, setSelectedBlockId] = useState<number | null>(null);
     const [articleForm, setArticleForm] = useState<ArticleFormState>(emptyArticleForm);
@@ -84,16 +82,6 @@ export function useArticleEditor() {
     const isArticleLive = selectedArticle?.status === 'published';
     const isBlockLive = isArticleLive && selectedBlock?.status === 'published';
     const isArticleUrlKeyLocked = isUrlKeyLocked(selectedArticle);
-
-    const selectedCoverMedia = useMemo(
-        () => findMediaOption(mediaOptions, articleForm.coverMediaId),
-        [articleForm.coverMediaId, mediaOptions],
-    );
-
-    const selectedBlockMedia = useMemo(
-        () => findMediaOption(mediaOptions, blockForm.mediaAssetId),
-        [blockForm.mediaAssetId, mediaOptions],
-    );
 
     const publishChecklist = useMemo(
         () => getArticlePublishChecklist(articleForm, blocks),
@@ -170,7 +158,7 @@ export function useArticleEditor() {
             setIsLoading(true);
             setError(null);
 
-            const [articlesResult, projectsResult, stonesResult, mediaResult] = await readArticleWorkspace(client);
+            const [articlesResult, projectsResult, stonesResult] = await readArticleWorkspace(client);
 
             if (generation !== articleLoadGenerationRef.current) return;
 
@@ -192,19 +180,12 @@ export function useArticleEditor() {
                 return;
             }
 
-            if (mediaResult.error) {
-                reportError(mediaResult, { entity: 'Media library list', action: 'load' });
-                setIsLoading(false);
-                return;
-            }
-
             const rows = articlesResult.data ?? [];
             const nextArticle = rows.find((article) => article.id === preferredArticleId) ?? rows[0] ?? null;
             selectedArticleIdRef.current = nextArticle?.id ?? null;
             setArticles(rows);
             setProjectOptions(projectsResult.data ?? []);
             setStoneOptions(stonesResult.data ?? []);
-            setMediaOptions(mediaResult.data ?? []);
             setSelectedArticleId(nextArticle?.id ?? null);
             setArticleForm(rowToArticleForm(nextArticle));
 
@@ -629,6 +610,8 @@ export function useArticleEditor() {
 
     return {
         canEdit,
+        canManageMedia,
+        userId: user?.id ?? null,
         isArticleLive,
         isBlockLive,
         isArticleUrlKeyLocked,
@@ -638,7 +621,6 @@ export function useArticleEditor() {
         blocks,
         projectOptions,
         stoneOptions,
-        mediaOptions,
         selectedArticleId,
         selectedBlockId,
         articleForm,
@@ -654,8 +636,6 @@ export function useArticleEditor() {
         clearFeedback,
         selectedArticle,
         articleCounts,
-        selectedCoverMedia,
-        selectedBlockMedia,
         publishChecklist,
         canPublishArticle,
         blockPublishChecklist,

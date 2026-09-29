@@ -48,7 +48,14 @@ export async function optimizeImageForQr(file: File): Promise<OptimizedQrImage> 
     context.imageSmoothingQuality = 'high';
     context.drawImage(decoded.source, 0, 0, width, height);
 
-    const webp = await canvasToBlob(canvas, 'image/webp', imageQrWebpQuality);
+    const encoded = await canvasToBlob(canvas, 'image/webp', imageQrWebpQuality);
+    // Safari cannot encode WebP and silently returns PNG from toBlob. Photos are then re-encoded
+    // as JPEG so they stay small, and the output is always labelled with the real format.
+    const webp =
+      encoded.type === 'image/webp' || file.type === 'image/png'
+        ? encoded
+        : await canvasToBlob(canvas, 'image/jpeg', imageQrWebpQuality);
+    const outputType = webp.type || 'image/webp';
     const canKeepOriginal =
       scale === 1 &&
       file.size <= webp.size &&
@@ -65,9 +72,9 @@ export async function optimizeImageForQr(file: File): Promise<OptimizedQrImage> 
       };
     }
 
-    const outputName = `${baseFileName(file.name)}.webp`;
+    const outputName = `${baseFileName(file.name)}.${outputExtension(outputType)}`;
     const optimizedFile = new File([webp], outputName, {
-      type: 'image/webp',
+      type: outputType,
       lastModified: Date.now(),
     });
     return {
@@ -95,6 +102,12 @@ export function formatImageBytes(bytes: number) {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(bytes >= 10 * 1024 * 1024 ? 0 : 1)} MB`;
+}
+
+function outputExtension(type: string) {
+  if (type === 'image/jpeg') return 'jpg';
+  if (type === 'image/png') return 'png';
+  return 'webp';
 }
 
 function baseFileName(fileName: string) {

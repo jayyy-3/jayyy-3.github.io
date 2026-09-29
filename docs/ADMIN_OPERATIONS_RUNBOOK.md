@@ -67,7 +67,7 @@ The invite flow uses a server endpoint and writes Change history. Auth callback 
 - Every upload lands in the private library first; the original is kept at full quality and the public site derives screen-sized versions.
 - Projects and Stone Library copy referenced private media to the public library server-side at Publish, with compensation on failure.
 - The standalone Media screen's Copy & publish is Website owner / CMS manager only (migration `20260714050750_media_public_bucket_role_hardening.sql`, applied and proven 2026-07-14) and is bound to the selected record's original path/version.
-- Products take images from Media records (Hero image, Model image); a private upload must be copied and published before it can appear publicly.
+- Products (Hero image, Model image), Articles (Cover image, Section image) and Settings (Default share image) use the shared media picker: search the library or upload in place (large photos resized in the browser, HEIC explained, description required). An uploaded image stays a Draft and hidden publicly until a Website owner / CMS manager publishes it on the Media screen.
 
 ## Leads export
 

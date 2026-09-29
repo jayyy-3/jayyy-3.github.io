@@ -65,16 +65,6 @@ export interface StoneOptionRow {
     status: string;
 }
 
-export interface MediaOptionRow {
-    id: number;
-    alt: string | null;
-    caption: string | null;
-    object_path: string | null;
-    source_url: string | null;
-    media_type: string;
-    status: string;
-}
-
 export interface ArticleFormState {
     status: ArticleStatus;
     slug: string;

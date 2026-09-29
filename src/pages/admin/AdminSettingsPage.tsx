@@ -24,6 +24,9 @@ import AdminShell from './AdminShell';
 import { isFormDirty, type UnsavedSection } from './unsavedGuard';
 import { useUnsavedGuard } from './useUnsavedGuard';
 import RequireAdmin from './RequireAdmin';
+import AdminMediaPicker from './media/AdminMediaPicker';
+import { publicUrlForPickerAsset } from './media/mediaPickerFiles';
+import { toSafePublicMediaSourceUrl } from '../../lib/publicMediaUrl';
 import { CmsLiveRuleCard, CmsStatusMeaning, CmsStatusPill } from './AdminCmsPrimitives';
 
 type SiteSettingsStatus = 'draft' | 'published' | 'archived';
@@ -167,6 +170,8 @@ export default function AdminSettingsPage() {
 function AdminSettingsContent() {
     const { profile, user } = useAdminAuth();
     const canEdit = profile?.role === 'owner' || profile?.role === 'admin';
+    // Picker selection for the share image in this session; the saved value is the image address.
+    const [shareImageMediaId, setShareImageMediaId] = useState<number | null>(null);
     const [row, setRow] = useState<SiteSettingsRow | null>(null);
     const [form, setForm] = useState<SettingsFormState>(emptyForm);
     const [isLoading, setIsLoading] = useState(true);
@@ -484,14 +489,41 @@ function AdminSettingsContent() {
                                     className={`${fieldClass} py-3 leading-6`}
                                 />
                             </label>
+                            <AdminMediaPicker
+                                label="Default share image"
+                                description="Shown when a page is shared on social media or in messages. Choose a published image; upload and publish new images in Media first."
+                                value={shareImageMediaId}
+                                currentImageUrl={
+                                    shareImageMediaId === null ? toSafePublicMediaSourceUrl(form.defaultShareImage) ?? null : null
+                                }
+                                disabled={!canEdit || isSaving || isLoading}
+                                userId={user?.id ?? null}
+                                canCleanUpStorage={canEdit}
+                                selectable="published"
+                                allowUpload={false}
+                                auditSource="settings_share_image"
+                                objectPathPrefix="settings"
+                                instanceKey="settings-share-image"
+                                testIdPrefix="settings-share-media"
+                                onChange={(mediaId, asset) => {
+                                    setShareImageMediaId(mediaId);
+                                    updateField('defaultShareImage', publicUrlForPickerAsset(asset, supabase) ?? '');
+                                }}
+                            />
                             <label className="text-xs font-bold uppercase tracking-[0.14em] text-black/55">
-                                Default share image
+                                Share image address
                                 <input
                                     value={form.defaultShareImage}
-                                    onChange={(event) => updateField('defaultShareImage', event.target.value)}
+                                    onChange={(event) => {
+                                        setShareImageMediaId(null);
+                                        updateField('defaultShareImage', event.target.value);
+                                    }}
                                     disabled={!canEdit || isSaving || isLoading}
                                     className={fieldClass}
                                 />
+                                <span className="mt-2 block text-xs font-semibold normal-case leading-5 tracking-normal text-black/45">
+                                    Filled in when you choose an image above. You can also paste a site path or web address.
+                                </span>
                             </label>
                         </div>
                     </div>

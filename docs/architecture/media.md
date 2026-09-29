@@ -17,3 +17,12 @@ Admin media upload, private-to-public promotion and Storage role boundary. Moved
 
 - Admin IA/access:
   - `/admin/media` is the first media CRUD screen and uses `media_assets` plus Supabase Storage buckets for upload-backed draft records, external records, metadata editing, audit-gated manifest export, and publish/archive guardrails.
+
+## Shared admin media picker — 2026-09-28 (NOW-OPT-ADMIN-MEDIA-PICKER-001)
+
+- `src/pages/admin/media/AdminMediaPicker.tsx` (UI, uploads, audit) and `mediaPickerFiles.ts` (pure file rules) serve Projects (`InlineMediaField` wrapper, page-loaded image list, `uploadPolicy="original"`, 10 MB, original kept), Products hero and model images, Articles cover and section images (self-loading, `uploadPolicy="optimize"`) and the Settings default share image (`selectable="published"`, no upload; stores the image's public address).
+- Self-loading search queries `media_assets` on the server (image, not archived, alt/caption `ilike`, newest 24) instead of a fixed recent list; the selected image is read by ID. Private Drafts preview through one-hour signed links.
+- Limits are shown before a file is chosen: optimize accepts JPG/PNG/WebP/AVIF up to 50 MB (resized in the browser to 2560 px by `optimizeImageForQr`, then at most 10 MB uploaded) and GIF up to 10 MB unchanged. HEIC gets plain guidance (no client transcode). Alt text starts empty, is required, and a file-name description (e.g. "IMG 4032") is rejected.
+- Uploads keep the existing private-first contract: create-only upload to `urblo-admin-media`, Draft `media_assets` row, metadata readback, owner/admin-only cleanup, `media_asset.upload`/`media_asset.update` audit with a per-module `source`. No schema, Function or RLS change.
+- Products and Articles still do not promote media at publish: a Draft image stays hidden publicly until a Website owner/CMS manager publishes it on the Media screen. The Projects server path copies storage objects with the exported `prepareMediaPromotions`, but the database side is bound to the `admin_project_aggregate` RPC (`p_promotions`), so reuse needs a new protected endpoint (follow-up).
+- The Media screen keeps library/path/cleanup text behind Details (`technicalDetail(...)`); `agent:admin-crud-coverage` fails on user-visible bucket/Storage/promotion/rollback wording there.
