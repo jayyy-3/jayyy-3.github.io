@@ -1,6 +1,6 @@
 # WORKLOG — current execution evidence
 
-Last updated: 2026-09-28
+Last updated: 2026-09-29
 
 Historical evidence is immutable and is not current task state. Current state is generated from `docs/agent/status.json` and `docs/agent/tasks.json`.
 
@@ -511,3 +511,7 @@ Scope: task authorization only (branch implementation, type generation from an i
 - Verification: `agent:verify --plan` → runtime suite with deploy; host `agent:verify --suite container` passed 30 checks; clean Node 20 container gate (`npm run gate`, v20.20.2) passed including `unit` (170 tests), `db-types`, `functions-types`, `knip`; `git diff --check` clean. Not run: `npm run local:verify` (the fixed-port stack belongs to another checkout; CI runs it), PR CI, branch Preview smoke and the Preview curl 401 proof — the implementing agent's `git push` was refused by its permission classifier, so the branch is committed locally only.
 - PR and CI (added after the coordinator pushed): PR #78. CI run 36427122249 on `e562d97` passed `verify-and-deploy` and `quality`. The isolated `local:verify` step `generate-database-types.mjs --check --regenerate` passed, and the uploaded `database.ts` is byte-identical to the committed file (sha256 `b56c85a3038e39256aa10bac6170aea1a7ff30de004998e8c4f6b239dfd266f0`); journeys and the article mutation also passed. Branch Preview `https://4b6bf0b5.urblo-site.pages.dev` passed `agent:cloudflare-preview-smoke` in CI and again from the workstation (read-only).
 - Preview 401 proof (curl, POST `{}` and GET, read-only). `/api/admin/projects`, `/api/admin/image-qr` and `/api/admin/stone-library` return JSON 401 `missing_session` with no header or with `Basic synthetic`, and 401 `invalid_session` with a fake Bearer token. `/api/admin/invite-user` returns 401 `missing_session` with no header or `Basic`; with a fake Bearer token it returns 400 `invalid_email`, because body validation precedes auth (the order before this change, and the snapshot is unchanged). GET on invite-user returns 405. Not merged.
+
+## 2026-09-29 — CI convergence wait accepts the www redirect
+
+Production runs 36510457038 (#77) and the following run (#78) failed only at the domain convergence wait: after Jay created the www→apex 301 zone rule on 2026-09-28, `https://www.urblo.com.au/` answers 301 and the wait from NOW-OPT-AGENT-DOCS-SLIM-001 treated that as "not yet serving" for the full 180s budget, while both smokes (apex, and www "host redirects to the apex") passed in the same step. The deployments themselves were healthy. Fix: `waitForDomainConvergence` treats a base origin whose root permanently redirects to another origin in the supplied list as converging with that origin (logged), still never follows redirects, and still rejects redirects to origins outside the list; two vitest cases cover both. Tooling change; no runtime change.

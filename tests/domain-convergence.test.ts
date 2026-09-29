@@ -87,6 +87,25 @@ test('treats redirects and transport errors as not converged and never follows t
   expect(run.logs.join('\n')).not.toMatch(/private-network-detail/)
 })
 
+test('treats a www alias that permanently redirects to the listed apex as converged with the apex (run 36510457038)', async () => {
+  const run = fixture((origin, path, attempt) => {
+    if (origin === reference) return fromGraph(newGraph, path)
+    if (origin === www) return new Response('', { status: 301, headers: { location: `${apex}${path}` } })
+    if (origin === apex && attempt < 2) return fromGraph(oldGraph, path)
+    return fromGraph(newGraph, path)
+  })
+  const result = await waitForDomainConvergence([apex, www], reference, run.options)
+  expect(result).toMatchObject({ converged: true, attempts: 2 })
+  expect(run.logs.some(line => line.includes(www) && line.includes('redirects to') && line.includes(apex))).toBe(true)
+  for (const { init } of run.requests) expect(init.redirect).toBe('manual')
+})
+
+test('a redirect to an origin outside the list is still not convergence', async () => {
+  const run = fixture((origin, path) => (origin === reference ? fromGraph(newGraph, path) : new Response('', { status: 301, headers: { location: 'https://elsewhere.example/' } })))
+  const result = await waitForDomainConvergence([www], reference, run.options)
+  expect(result).toMatchObject({ converged: false, pending: [www] })
+})
+
 test('rejects non-immutable references and non-origin targets before any request', async () => {
   for (const [bases, ref] of [[[apex], 'https://urblo-site.pages.dev'], [[`${apex}/path`], reference], [[reference], reference], [[], reference], [['http://urblo.com.au'], reference]] as const) {
     const run = fixture(() => ok(''))

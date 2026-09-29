@@ -116,6 +116,14 @@ export async function waitForDomainConvergence(baseUrls, referenceUrl, {
   const firstMismatch = async base => {
     try {
       const page = await get(`${base}/`)
+      if ([301, 302, 307, 308].includes(page.response.status)) {
+        // A production alias (www) may permanently redirect to another production origin in
+        // the list (the apex, zone redirect rule created 2026-09-28). The alias converges when
+        // its target does; the smoke separately verifies the redirect itself.
+        let target = null
+        try { target = new URL(page.response.headers.get('location') ?? '', base) } catch { target = null }
+        if (target && target.origin !== base && baseUrls.includes(target.origin)) return { redirectTo: target.origin }
+      }
       if (page.response.status !== 200) return `/ ${responseDiagnostic(page.response, page.text)}`
       if (JSON.stringify(referencedAssets(page.text)) !== JSON.stringify(rootAssets)) return '/ references a different entry asset set'
       for (const [path, hash] of reference) {
@@ -134,7 +142,10 @@ export async function waitForDomainConvergence(baseUrls, referenceUrl, {
     attempt++
     for (const base of [...pending]) {
       const mismatch = await firstMismatch(base)
-      if (mismatch) log(`Convergence attempt ${attempt}: ${base} not yet serving ${referenceUrl}: ${mismatch}`)
+      if (mismatch && typeof mismatch === 'object' && mismatch.redirectTo) {
+        pending.delete(base)
+        log(`Convergence attempt ${attempt}: ${base} redirects to ${mismatch.redirectTo}; it converges with that origin`)
+      } else if (mismatch) log(`Convergence attempt ${attempt}: ${base} not yet serving ${referenceUrl}: ${mismatch}`)
       else { pending.delete(base); log(`Convergence attempt ${attempt}: ${base} serves ${referenceUrl} (${reference.size} assets identical)`) }
     }
     if (!pending.size) return { converged: true, attempts: attempt, assets: reference.size }
