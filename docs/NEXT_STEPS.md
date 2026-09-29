@@ -8,7 +8,7 @@ Last updated: 2026-09-29
 
 | ID | 状态 / 阶段 | 内容 | 阻塞 |
 |---|---|---|---|
-| NOW-OPT-WEB-FONTS-001 | now / verification | Convert the self-hosted Avenir LT Std and Didot LT Std TTFs to WOFF2 (originals kept), serve them with long cache headers, preload the faces used above the fold, and keep font-display and metrics unchanged. | — |
+| NOW-OPT-WEB-FONTS-001 | now / awaiting_external | Convert the self-hosted Avenir LT Std and Didot LT Std TTFs to WOFF2 (originals kept), serve them with long cache headers, preload the faces used above the fold, and keep font-display and metrics unchanged. | — |
 | NOW-ADMIN-STONE-WORKSPACE-001 | now / awaiting_external | Deliver the page-shaped Stone Library workspace and approved current-public-baseline adoption. | Jay usability acceptance; automatic review requires specific approval to temporarily change QA Editor b0af7050-2565-4da5-ab26-3f2d5b2efc96 to Viewer and restore Editor. |
 | NOW-ADMIN-RELIABILITY-UX-001 | blocked / awaiting_external | Track outstanding production CMS handoff evidence after deployed incident repairs. | Broader production CMS golden workflows and user acceptance remain unverified; maintenance tests cannot certify them. |
 | NOW-ADMIN-UX-RESHAPE-001 | next / planned | Continue the separately scoped admin UX reshape after the maintenance refactoring; preserve deployed Projects and QR workflows. | — |
