@@ -2,6 +2,10 @@ import { Link } from 'react-router-dom';
 import { ArrowUpRight } from 'lucide-react';
 import ProjectResponsiveImage from '../projects/ProjectResponsiveImage';
 import type { StoneProjectUsage } from '../../service/ProjectService';
+import Button from '../ui/Button';
+import Card from '../ui/Card';
+import SectionHeading from '../ui/SectionHeading';
+import { cardTitleClassName } from '../ui/styles';
 
 function toFallbackLabel(value: string) {
     return value
@@ -36,16 +40,8 @@ export default function StoneProjectsSection({
         <section aria-labelledby="stone-projects-heading" className="mt-10 border-t border-black/10 pt-10 md:mt-12 md:pt-12">
             <div className="urblo-page-container">
                 <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-                    <div>
-                        <p className="urblo-eyebrow">Used in projects</p>
-                        <h2
-                            id="stone-projects-heading"
-                            className="mt-4 font-display text-[34px] font-semibold uppercase leading-[1.08] tracking-[0.03em] text-black md:text-[42px]"
-                        >
-                            Seen on site
-                        </h2>
-                    </div>
-                    <p className="max-w-[28rem] text-[15px] leading-7 text-[var(--urblo-text)]">
+                    <SectionHeading id="stone-projects-heading" eyebrow="Used in projects" title="Seen on site" />
+                    <p className="max-w-[28rem] text-copy text-body">
                         Project records that specify {stoneName}. See placement opens the project image where it sits.
                     </p>
                 </div>
@@ -53,7 +49,7 @@ export default function StoneProjectsSection({
                 <ul className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
                     {ordered.map(({ project, finishKeys, pointRef }) => {
                         return (
-                            <li key={project.slug} className="flex flex-col border-t border-black/12 pt-5">
+                            <Card key={project.slug} as="li" variant="borderless" className="flex flex-col">
                                 <Link
                                     to={`/projects/${project.slug}`}
                                     className="group block"
@@ -69,10 +65,10 @@ export default function StoneProjectsSection({
                                     </div>
                                     <div className="flex items-start justify-between gap-4 pt-5">
                                         <div className="min-w-0">
-                                            <p className="text-[12px] font-bold uppercase tracking-[0.14em] text-black/50">
+                                            <p className="text-meta font-bold uppercase tracking-caps text-muted">
                                                 {project.listing.location} / {project.listing.year}
                                             </p>
-                                            <h3 className="mt-3 text-[24px] font-semibold leading-[1.1] text-black">
+                                            <h3 className={`mt-3 ${cardTitleClassName()}`}>
                                                 {project.listing.title || project.name}
                                             </h3>
                                         </div>
@@ -86,9 +82,9 @@ export default function StoneProjectsSection({
                                                     <li
                                                         key={finishKey}
                                                         className={[
-                                                            'rounded-[4px] border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-black',
+                                                            'rounded border px-2.5 py-1 text-micro font-semibold uppercase tracking-caps text-ink',
                                                             active
-                                                                ? 'border-[var(--urblo-lime)] bg-[rgba(0,255,25,0.12)]'
+                                                                ? 'border-lime bg-lime/[0.12]'
                                                                 : 'border-black/15 bg-white',
                                                         ].join(' ')}
                                                     >
@@ -101,15 +97,16 @@ export default function StoneProjectsSection({
                                     ) : null}
                                 </Link>
                                 {pointRef ? (
-                                    <Link
+                                    <Button
+                                        variant="link"
                                         to={`/projects/${project.slug}?point=${encodeURIComponent(pointRef.hotspotId)}`}
-                                        className="mt-4 inline-flex self-start border-b border-black pb-1 text-[11px] font-bold uppercase tracking-[0.14em] text-black transition-colors hover:border-[var(--urblo-lime)]"
+                                        className="mt-4 self-start"
                                         aria-label={`See placement of ${stoneName} in ${project.listing.title || project.name}`}
                                     >
                                         See placement
-                                    </Link>
+                                    </Button>
                                 ) : null}
-                            </li>
+                            </Card>
                         );
                     })}
                 </ul>

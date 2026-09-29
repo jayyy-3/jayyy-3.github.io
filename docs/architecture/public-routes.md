@@ -14,17 +14,17 @@ Routing uses clean paths through `BrowserRouter`. Cloudflare Pages direct refres
 | `/products` | `ProductsPage` | Bench/system product listing. |
 | `/products/:slug` | `ProductDetailPage` | Product detail and material options. |
 | `/projects` | `Projects` | Project listing page. |
-| `/projects/:slug` | `ProjectDetails` | Project detail page. Uses page-owned project hero via `DefaultLayout showBanner={false}`. |
+| `/projects/:slug` | `ProjectDetails` | Project detail page. White-start `PageIntro` (oversized title, previous/next aside) followed by the full-width project hero image. |
 | `/our-story` | `OurStory` | About page. |
 | `/capabilities` | `CapabilitiesPage` | Web-native 2026 Capability Statement page sourced from the Founder PDF, including a service-style capability hub, lifecycle support, national reach, selected proof ledger, and an email-gated PDF download form. |
 | `/contact` | `ContactPage` | Contact surface with direct contact channels plus API-backed enquiry/sample-request submit flows. Sample mode is available at `/contact?intent=sample-request`; direct email and phone remain manual fallback channels. |
 | `/articles` | `ArticlesPage` | Article list page. |
-| `/articles/:slug` | `ArticlePage` | Article detail page. Uses page-owned article hero via `DefaultLayout showBanner={false}`. |
+| `/articles/:slug` | `ArticlePage` | Article detail page. White-start `PageIntro` (breadcrumb, en-AU date, title) followed by the full-width cover image (2026-09-28; previously an overlay hero). |
 | `/admin/*` | `AdminApp` | Protected admin shell outside public site chrome. Config-gated until browser-safe Supabase key is set; uses Supabase Auth plus `admin_profiles` once configured. Current source CRUD/workflow/review screens: Settings/admin profiles, Media, Stone Library, Projects, Products, Articles, Leads, Audit. |
 | `*` | `NotFoundPage` | Branded not-found state wrapped by `DefaultLayout showBanner={false}`. |
 
 Route state contract:
-- `src/components/site/SiteHeader.tsx` exposes two explicit surface modes: `overlay` for image/video-first openings and `light-page` for white-start content. `HomepageHeader` selects `overlay`; `DefaultLayout` derives `overlay` when `bgImage` is present, otherwise `light-page`, with an explicit `headerSurface` override for page-owned image heroes such as Capabilities and Article detail.
+- `src/components/site/SiteHeader.tsx` exposes two explicit surface modes: `overlay` for image/video-first openings and `light-page` for white-start content. `HomepageHeader` selects `overlay`; `DefaultLayout` uses `light-page` unless a route passes an explicit `headerSurface` for a page-owned image hero (Capabilities). The text-less decorative route banner (`bgImage`) was retired on 2026-09-28; every white-start page opens with `PageIntro band`.
 - `DefaultLayout` retains a shared 102px clearance for bannerless white-start routes, but the clearance is light rather than solid black. The header and opened menu own their translucent tint and the original light `backdrop-blur-sm`; route components must not add duplicate top offsets, heavier blur/saturation, or recreate the retired black support band.
 - Shared route-level loading states use `src/components/RouteState.tsx` instead of plain text placeholders.
 - Route states on no-banner routes use the `headerOffset` prop so loading, not-found, and error copy clears the absolute site header.

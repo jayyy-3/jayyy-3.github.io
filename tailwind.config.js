@@ -29,6 +29,8 @@ export default {
         surface: 'rgba(239, 239, 239, 0.28)',
       },
       fontSize: {
+        // Dense tool labels only: image overlay tags, swatch captions and finish chips.
+        micro: ['11px', { lineHeight: '1.3' }],
         meta: ['12px', { lineHeight: '1.5' }],
         small: ['14px', { lineHeight: '1.6' }],
         copy: ['16px', { lineHeight: '1.75' }],

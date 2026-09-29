@@ -262,7 +262,7 @@ const appSource = fs.readFileSync('src/App.tsx', 'utf8')
 for (const contract of [
   [siteHeaderSource, "export type SiteHeaderSurface = 'overlay' | 'light-page'", 'route-aware header surface modes'],
   [siteHeaderSource, 'data-header-surface={surface}', 'rendered header surface marker'],
-  [defaultLayoutSource, 'headerSurface ?? (bgImage ?', 'layout-derived header surface'],
+  [defaultLayoutSource, "headerSurface ?? 'light-page'", 'layout-derived header surface'],
   [defaultLayoutSource, 'h-[102px] bg-white', 'light-page header clearance'],
   [appSource, '<DefaultLayout showBanner={false} headerSurface="overlay">', 'no-banner image hero override'],
 ]) {
@@ -270,6 +270,10 @@ for (const contract of [
     throw new Error(`Missing public header contract: ${contract[2]}`)
   }
   console.log(`header contract ok: ${contract[2]}`)
+}
+
+if (defaultLayoutSource.includes('<img') || defaultLayoutSource.includes('bgImage')) {
+  throw new Error('DefaultLayout must not render the retired text-less decorative route banner')
 }
 
 if (defaultLayoutSource.includes('h-[102px] bg-black')) {

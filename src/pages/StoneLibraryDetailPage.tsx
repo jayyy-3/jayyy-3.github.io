@@ -5,6 +5,7 @@ import ProjectService, { type StoneProjectUsage } from '../service/ProjectServic
 import StoneLibraryService from '../service/StoneLibraryService';
 import StonePageView from './StonePageView';
 import type { StoneDetailVM } from '../types/stone-library';
+import Button from '../components/ui/Button';
 export default function StoneLibraryDetailPage() {
   const { stoneGroupId = '' } = useParams();
   const [params, setParams] = useSearchParams();
@@ -70,12 +71,9 @@ export default function StoneLibraryDetailPage() {
           headerOffset
         />
         <div className="urblo-page-container pb-12">
-          <button
-            className="urblo-button"
-            onClick={() => setRetry((n) => n + 1)}
-          >
+          <Button variant="ghost" onClick={() => setRetry((n) => n + 1)}>
             Try again
-          </button>
+          </Button>
         </div>
       </>
     );

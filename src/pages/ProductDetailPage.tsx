@@ -1,18 +1,23 @@
 import { useEffect, useState } from 'react';
-import { Link, Navigate, useParams } from 'react-router-dom';
+import { Navigate, useParams } from 'react-router-dom';
 import ModelSelector from '../components/ModelSelector';
 import OptionSelector from '../components/OptionSelector';
 import RouteState from '../components/RouteState';
 import PublicContentSeo from '../components/PublicContentSeo';
 import SpecTable from '../components/SpecTable';
-import StaticResponsiveImage from '../components/StaticResponsiveImage';
 import StoneResponsiveImage from '../components/stone-library/StoneResponsiveImage';
+import Button from '../components/ui/Button';
+import Card from '../components/ui/Card';
+import PageIntro from '../components/ui/PageIntro';
+import { cardTitleClassName } from '../components/ui/styles';
+import { siteContact, siteCtas } from '../data/siteChrome';
 import { battenOptions } from '../data/battenData';
 import { frameFinishes } from '../data/frameFinishData';
 import ProductService from '../service/ProductService';
 import StoneLibraryService from '../service/StoneLibraryService';
 import { useProductStore } from '../store/productStore';
 import type { MaterialCategory, OptionItem, Product } from '../types/product';
+import StaticResponsiveImage from '../components/StaticResponsiveImage';
 
 function findOption(options: readonly OptionItem[], slug?: string) {
   if (!slug) {
@@ -25,6 +30,8 @@ function findOption(options: readonly OptionItem[], slug?: string) {
 function encodeMailto(value: string) {
   return encodeURIComponent(value).replace(/%20/g, '+');
 }
+
+const labelClassName = 'text-meta font-semibold uppercase tracking-caps text-muted';
 
 export default function ProductDetailPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -163,7 +170,7 @@ export default function ProductDetailPage() {
     '',
     'Project notes:',
   ].join('\n');
-  const configurationMailto = `mailto:info@urblo.com.au?subject=${encodeMailto(
+  const configurationMailto = `mailto:${siteContact.email}?subject=${encodeMailto(
     mailSubject,
   )}&body=${encodeMailto(mailBody)}`;
 
@@ -181,18 +188,21 @@ export default function ProductDetailPage() {
           seo={product.seo}
         />
       ) : null}
-      <section className="urblo-section-tight border-b border-black/10">
-        <div className="urblo-page-container">
-          <p className="urblo-eyebrow">Product Details</p>
-          <h1 className="urblo-page-title">{product.name}</h1>
-          {product.shortDesc ? <p className="urblo-page-copy">{product.shortDesc}</p> : null}
-        </div>
-      </section>
+      <PageIntro
+        band
+        breadcrumb={[
+          { label: 'Home', to: '/' },
+          { label: 'Products', to: '/products' },
+          { label: product.name },
+        ]}
+        title={product.name}
+        lede={product.shortDesc || undefined}
+      />
 
-      <section className="urblo-section bg-[rgba(239,239,239,0.18)]">
+      <section className="urblo-section bg-surface">
         <div className="urblo-page-container grid gap-8 lg:grid-cols-[minmax(0,1.05fr)_minmax(360px,0.95fr)] lg:items-start">
-          <div className="urblo-card overflow-hidden bg-white p-4">
-            <div className="aspect-square overflow-hidden rounded-[4px] bg-black/5">
+          <Card className="p-4">
+            <div className="aspect-square overflow-hidden rounded bg-black/5">
               <StaticResponsiveImage
                 src={currentModel.img}
                 sizes="(min-width: 1024px) 50vw, 100vw"
@@ -200,9 +210,9 @@ export default function ProductDetailPage() {
                 className="h-full w-full object-contain"
               />
             </div>
-            <div className="mt-4 border-t border-black/10 pt-4">
-              <p className="urblo-meta text-black/60">Model preview</p>
-              <p className="mt-2 text-sm leading-6 text-black/62">
+            <div className="mt-4 border-t border-line pt-4">
+              <p className={labelClassName}>Model preview</p>
+              <p className="mt-2 text-small text-muted">
                 This render shows product geometry. Stone, frame, and batten selections are captured
                 below for sample confirmation rather than composited into the render.
               </p>
@@ -210,10 +220,8 @@ export default function ProductDetailPage() {
 
             <div className="mt-4 grid gap-3 sm:grid-cols-3">
               {previewRows.map(({ label, option }) => (
-                <div key={label} className="border border-black/10 bg-[rgba(239,239,239,0.24)] p-3">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-black/52">
-                    {label}
-                  </p>
+                <div key={label} className="border border-line bg-surface p-3">
+                  <p className={labelClassName}>{label}</p>
                   <div className="mt-3 aspect-[4/3] overflow-hidden bg-white">
                     {option ? (
                       <StoneResponsiveImage
@@ -229,81 +237,78 @@ export default function ProductDetailPage() {
                       />
                     ) : null}
                   </div>
-                  <p className="mt-2 text-[12px] font-semibold leading-5 text-black">
+                  <p className="mt-2 text-meta font-semibold text-ink">
                     {option?.name ?? 'To confirm'}
                   </p>
                 </div>
               ))}
             </div>
-          </div>
+          </Card>
 
-          <div className="urblo-card bg-white p-6 md:p-8">
-            <p className="urblo-meta mb-4 text-black/65">Configure for project discussion</p>
+          <Card className="p-6 md:p-8">
+            <p className={`${labelClassName} mb-4`}>Configure for project discussion</p>
             <ModelSelector models={product.models} />
-            <OptionSelector title="Body Stone" category="body" options={stoneOptions} />
-            <OptionSelector title="Frame Finish" category="frame" options={frameFinishes} />
-            <OptionSelector title="Batten Timber" category="battens" options={battenOptions} />
+            <OptionSelector title="Body stone" category="body" options={stoneOptions} />
+            <OptionSelector title="Frame finish" category="frame" options={frameFinishes} />
+            <OptionSelector title="Batten timber" category="battens" options={battenOptions} />
 
-            <section className="mt-8 border border-black/10 bg-[rgba(239,239,239,0.2)] p-5">
+            <section className="mt-8 border-t border-ink bg-surface p-5">
               <div className="flex flex-col gap-4">
                 <div>
-                  <p className="urblo-meta text-black/65">Selected configuration</p>
-                  <h2 className="mt-2 text-[22px] font-semibold leading-tight text-black">
+                  <p className={labelClassName}>Selected configuration</p>
+                  <h2 className={`mt-2 ${cardTitleClassName()}`}>
                     {product.name} / {currentModel.label}
                   </h2>
                 </div>
-                <a
+                <Button
                   href={configurationMailto}
-                  className="urblo-button-inverse w-full text-center sm:w-fit"
+                  aria-label={`Email Urblo about ${product.name} / ${currentModel.label}`}
+                  className="w-full sm:w-fit"
                 >
-                  Discuss this configuration
-                </a>
+                  Email Urblo
+                </Button>
               </div>
 
               <dl className="mt-5 grid gap-3 sm:grid-cols-2">
                 {configurationRows.map((row) => (
-                  <div key={row.label} className="border-t border-black/10 pt-3">
-                    <dt className="text-[11px] font-semibold uppercase tracking-[0.12em] text-black/55">
-                      {row.label}
-                    </dt>
-                    <dd className="mt-1 text-[15px] font-semibold leading-6 text-black">
-                      {row.value}
-                    </dd>
+                  <div key={row.label} className="border-t border-line pt-3">
+                    <dt className={labelClassName}>{row.label}</dt>
+                    <dd className="mt-1 text-copy font-semibold text-ink">{row.value}</dd>
                   </div>
                 ))}
               </dl>
 
               {hasPendingSelectionImage ? (
-                <p className="mt-4 text-sm leading-6 text-black/65">
+                <p className="mt-4 text-small text-muted">
                   One selected swatch is waiting on approved imagery. Confirm final sample and finish
                   before using this configuration for sign-off.
                 </p>
               ) : null}
 
-              <p className="mt-4 text-sm leading-6 text-black/65">
+              <p className="mt-4 text-small text-muted">
                 Body-stone finish is confirmed through Stone Library review and physical samples.
                 The product image remains a geometry preview until final project materials are approved.
               </p>
 
               <div className="mt-5 flex flex-wrap gap-3">
-                <Link to="/contact" className="urblo-button">
-                  Contact Urblo
-                </Link>
-                <Link to="/stone-library" className="urblo-button">
-                  Compare Stone Library
-                </Link>
+                <Button variant="ghost" to={siteCtas.contact.to}>
+                  {siteCtas.contact.label}
+                </Button>
+                <Button variant="ghost" to={siteCtas.stoneLibrary.to}>
+                  {siteCtas.stoneLibrary.label}
+                </Button>
               </div>
             </section>
 
             <div className="mt-8">
-              <p className="urblo-meta text-black/65">Specification cues</p>
-              <p className="mt-3 text-sm leading-6 text-black/60">
+              <p className={labelClassName}>Specification cues</p>
+              <p className="mt-3 text-small text-muted">
                 Treat these values as discussion cues. Final dimensions, engineering, fixings,
                 and lead time should be confirmed against the project scope.
               </p>
             </div>
             <SpecTable product={product} />
-          </div>
+          </Card>
         </div>
       </section>
     </div>

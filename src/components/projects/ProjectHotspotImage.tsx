@@ -7,11 +7,12 @@ import {
     type CSSProperties,
     type FocusEvent as ReactFocusEvent,
 } from 'react';
-import { Link } from 'react-router-dom';
 import type { ProjectHotspot } from '../../data/projectData';
 import StoneLibraryService from '../../service/StoneLibraryService';
 import type { StoneDetailVM } from '../../types/stone-library';
 import ProjectResponsiveImage from './ProjectResponsiveImage';
+import Button from '../ui/Button';
+import { cardTitleClassName } from '../ui/styles';
 import StoneResponsiveImage from '../stone-library/StoneResponsiveImage';
 
 interface ProjectHotspotImageProps {
@@ -281,8 +282,8 @@ export default function ProjectHotspotImage({
 
     const header = title || intro ? (
         <div className="grid gap-4 md:grid-cols-[0.42fr_1fr] md:items-end">
-            {title ? <h3 className="text-[28px] font-semibold leading-tight text-black">{title}</h3> : <span />}
-            {intro ? <p className="text-[17px] leading-8 text-[var(--urblo-text)]">{intro}</p> : null}
+            {title ? <h3 className={cardTitleClassName()}>{title}</h3> : <span />}
+            {intro ? <p className="text-copy text-body">{intro}</p> : null}
         </div>
     ) : null;
 
@@ -298,7 +299,7 @@ export default function ProjectHotspotImage({
                         className="aspect-[16/10] w-full object-cover"
                         loading="lazy"
                     />
-                    {caption ? <figcaption className="mt-4 text-[14px] leading-7 text-black/55">{caption}</figcaption> : null}
+                    {caption ? <figcaption className="mt-4 text-small text-muted">{caption}</figcaption> : null}
                 </figure>
             </div>
         );
@@ -384,7 +385,7 @@ export default function ProjectHotspotImage({
                                             ) : null}
                                         </div>
                                         <div className="min-w-0">
-                                            <p className="text-[17px] font-semibold leading-tight text-black">
+                                            <p className="text-copy font-semibold leading-tight text-ink">
                                                 {material.stoneName}
                                             </p>
                                             <p className="urblo-meta mt-1.5 text-black/60">
@@ -395,22 +396,19 @@ export default function ProjectHotspotImage({
 
                                     <dl className="mt-3 border-t border-black/10 pt-3">
                                         <dt className="urblo-meta text-black/60">Where it is used</dt>
-                                        <dd className="mt-1 text-[14px] font-semibold leading-6 text-black">
+                                        <dd className="mt-1 text-small font-semibold text-ink">
                                             {hotspot.application}
                                         </dd>
                                     </dl>
                                     {copy ? (
-                                        <p className="mt-2 line-clamp-2 text-[13px] leading-5 text-[var(--urblo-text)]">
+                                        <p className="mt-2 line-clamp-2 text-small text-body">
                                             {copy}
                                         </p>
                                     ) : null}
 
-                                    <Link
-                                        to={stoneHref(hotspot)}
-                                        className="mt-3 inline-flex border-b border-black pb-1 text-[11px] font-bold uppercase tracking-[0.14em] text-black transition-colors hover:border-[var(--urblo-lime)] hover:text-black"
-                                    >
+                                    <Button variant="link" to={stoneHref(hotspot)} className="mt-3">
                                         View stone
-                                    </Link>
+                                    </Button>
                                 </div>
                             </div>
                         );
@@ -442,7 +440,7 @@ export default function ProjectHotspotImage({
                     })}
                 </ol>
 
-                {caption ? <figcaption className="mt-3 text-[14px] leading-7 text-black/55">{caption}</figcaption> : null}
+                {caption ? <figcaption className="mt-3 text-small text-muted">{caption}</figcaption> : null}
             </figure>
         </div>
     );

@@ -49,19 +49,19 @@ export default function FinishAccordion({
                                 ].join(' ')}
                                 aria-pressed={isActive}
                             >
-                                <span className="text-[14px] font-semibold">{finish.label}</span>
+                                <span className="text-small font-semibold">{finish.label}</span>
                                 <StatusPill
                                     label={capabilityLabel(finish.capability)}
                                     tone={finish.capability === 'tbc' ? 'upcoming' : 'available'}
                                     surface={isActive ? 'dark' : 'light'}
-                                    className="py-1 text-[9px]"
+                                    className="py-1"
                                 />
                             </button>
 
                             {isActive ? (
-                                <div className="space-y-2 border-t border-white/10 bg-black px-4 pb-4 text-[13px] leading-6 text-white/90">
+                                <div className="space-y-2 border-t border-white/10 bg-black px-4 pb-4 text-small text-white/90">
                                     <p className="break-words">{finish.behavior.summary}</p>
-                                    <ul className="space-y-1 text-[11px] uppercase leading-5 tracking-[0.08em] text-white/76">
+                                    <ul className="space-y-1 text-micro uppercase leading-5 tracking-[0.08em] text-white/76">
                                         <li>Slip: {finish.behavior.slip}</li>
                                         <li>Glare: {finish.behavior.glare}</li>
                                         <li>Maintenance: {finish.behavior.maintenance}</li>

@@ -81,7 +81,7 @@ export default function FilterBar({
         </div>
 
         <div className="flex items-center justify-between gap-4 md:min-w-[142px] md:flex-col md:items-end md:justify-end md:gap-2">
-          <p className="urblo-meta text-black/62">{resultCount} results</p>
+          <p className="urblo-meta text-black/62">{resultCount}{resultCount === 1 ? ' result' : ' results'}</p>
           <button type="button" onClick={onClear} className="min-h-11 rounded-[4px] border border-black px-4 text-[11px] font-bold uppercase tracking-[0.12em] text-black transition hover:bg-black hover:text-white">
             Clear
           </button>

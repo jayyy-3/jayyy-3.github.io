@@ -38,7 +38,7 @@ export default function VariantSwitch({
                             onClick={() => onChange(variant.stoneVariantId)}
                             disabled={disabled}
                             className={[
-                                'inline-flex min-h-11 items-center justify-between gap-2 rounded-[4px] border px-3 py-2 text-left text-[13px] font-semibold uppercase tracking-[0.06em] transition disabled:cursor-wait disabled:opacity-60',
+                                'inline-flex min-h-11 items-center justify-between gap-2 rounded-[4px] border px-3 py-2 text-left text-small font-semibold uppercase tracking-[0.06em] transition disabled:cursor-wait disabled:opacity-60',
                                 isActive
                                     ? 'border-black bg-black text-white'
                                     : 'border-black/12 bg-white text-black hover:border-black/40',

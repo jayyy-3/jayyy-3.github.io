@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import FinishAccordion from '../components/stone-library/FinishAccordion';
 import FinishLightbox from '../components/stone-library/FinishLightbox';
 import ImageStage from '../components/stone-library/ImageStage';
@@ -11,6 +10,10 @@ import PublicContentSeo from '../components/PublicContentSeo';
 import type { StoneProjectUsage } from '../service/ProjectService';
 import type { StoneDetailVM } from '../types/stone-library';
 import { getStoneShareImageUrl } from '../lib/stoneImageDelivery';
+import Button from '../components/ui/Button';
+import PageIntro from '../components/ui/PageIntro';
+import SectionHeading from '../components/ui/SectionHeading';
+import { siteContact } from '../data/siteChrome';
 
 function statusLabel(status: 'active' | 'tbc') {
   return status === 'tbc' ? 'Upcoming' : 'Available';
@@ -90,38 +93,31 @@ export default function StonePageView({
           image={getStoneShareImageUrl(activeFinish?.imageUrl)}
         />
       ) : null}
-      <nav className="border-b border-black/10 bg-white/92 py-4">
-        <div className="urblo-page-container flex flex-wrap items-center gap-2 text-[13px] font-semibold uppercase tracking-[0.12em] text-black/55">
-          <Link to="/stone-library" className="hover:text-[var(--urblo-lime)]">
-            Stone Library
-          </Link>
-          <span>/</span>
-          <span className="text-black">{detail.name}</span>
-        </div>
-      </nav>
-
-      <section className="border-b border-black/10 py-10 md:py-12">
-        <div className="urblo-page-container">
-          <div className="flex flex-wrap items-center gap-3">
-            <span className="rounded-[4px] border border-black/10 bg-[rgba(239,239,239,0.55)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-black">
+      <PageIntro
+        band
+        breadcrumb={[
+          { label: 'Home', to: '/' },
+          { label: 'Stone Library', to: '/stone-library' },
+          { label: detail.name },
+        ]}
+        meta={
+          <>
+            <span className="rounded border border-line bg-surface px-3 py-1 text-micro font-semibold uppercase tracking-caps text-ink">
               {detail.stoneType}
             </span>
             <StatusPill
               label={statusLabel(detail.status)}
               tone={detail.status === 'tbc' ? 'upcoming' : 'available'}
             />
-          </div>
-          <p className="urblo-eyebrow mt-6">Stone Detail</p>
-          <h1 className="urblo-page-title">{detail.name}</h1>
-          <p className="mt-5 max-w-[48rem] text-[18px] font-medium leading-8 text-[var(--urblo-text)] md:text-[19px]">
-            {detail.summary ||
-              'Evaluate finish behavior, sourcing metadata, and variant options in one place.'}
-          </p>
-        </div>
-      </section>
+          </>
+        }
+        title={detail.name}
+        lede={detail.summary || 'Evaluate finish behavior, sourcing metadata, and variant options in one place.'}
+        ledeClassName="max-w-[48rem]"
+      />
 
-      <main className="bg-[rgba(239,239,239,0.26)] pb-14">
-        <section className="py-9 md:py-11">
+      <div className="bg-surface">
+        <section className="py-section-tight">
           <div className="urblo-page-container space-y-8">
             <div className="grid min-w-0 gap-5 lg:grid-cols-[minmax(0,1.58fr)_minmax(310px,0.92fr)] lg:items-start">
               <ImageStage
@@ -154,7 +150,7 @@ export default function StonePageView({
 
                 {isRefreshingVariant ? (
                   <p
-                    className="urblo-meta text-black/55"
+                    className="text-meta font-semibold uppercase tracking-caps text-muted"
                     role="status"
                   >
                     Updating cut and finish options
@@ -186,28 +182,24 @@ export default function StonePageView({
           ) : null}
         </section>
 
-        <section className="border-y border-black/10 bg-white">
-          <div className="urblo-page-container flex flex-col gap-5 py-10 md:flex-row md:items-center md:justify-between">
-            <div>
-              <p className="urblo-eyebrow">Enquiry</p>
-              <h2 className="mt-4 font-display text-[34px] font-semibold uppercase leading-[1.08] tracking-[0.03em] text-black md:text-[42px]">
-                Discuss {detail.name} for your next project
-              </h2>
-            </div>
+        <section className="border-y border-line bg-white">
+          <div className="urblo-page-container flex flex-col gap-6 py-section-tight md:flex-row md:items-end md:justify-between">
+            <SectionHeading
+              eyebrow="Enquiry"
+              title={`Discuss ${detail.name} for your next project`}
+              className="max-w-[48rem]"
+            />
             <div className="flex flex-wrap gap-3">
-              <a
-                href={'mailto:info@urblo.com.au?subject=' + mailSubject}
-                className="urblo-button"
-              >
-                Email Enquiry
-              </a>
-              <a href="tel:1300187256" className="urblo-button-inverse">
-                Call 1300 1 URBLO
-              </a>
+              <Button variant="ghost" href={`mailto:${siteContact.email}?subject=` + mailSubject}>
+                Email Urblo
+              </Button>
+              <Button href="tel:1300187256" aria-label={`Call ${siteContact.phoneDisplay} (${siteContact.phoneDigits})`}>
+                Call {siteContact.phoneDisplay}
+              </Button>
             </div>
           </div>
         </section>
-      </main>
+      </div>
 
       <FinishLightbox
         isOpen={isLightboxOpen}

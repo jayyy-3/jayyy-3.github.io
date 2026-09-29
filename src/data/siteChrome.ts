@@ -37,11 +37,26 @@ export const siteCtas = {
     label: 'Request samples',
     to: '/contact?intent=sample-request',
   },
+  stoneLibrary: {
+    label: 'Explore Stone Library',
+    to: '/stone-library',
+  },
   capabilityStatementDownload: {
     label: 'Download capability statement',
     href: '/downloads/urblo-capability-statement-2026.pdf',
     filename: 'urblo-capability-statement-2026.pdf',
   },
+} as const;
+
+/**
+ * Direct contact channels as written in public copy (docs/DESIGN.md "Copy formats"). The phone
+ * number is always displayed as the vanity `1300 1URBLO` and dialled as 1300 187 256.
+ */
+export const siteContact = {
+  email: 'info@urblo.com.au',
+  phoneDisplay: '1300 1URBLO',
+  phoneDigits: '1300 187 256',
+  phoneHref: 'tel:1300187256',
 } as const;
 
 export const siteNavLinks: SiteNavLink[] = [

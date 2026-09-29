@@ -1,13 +1,16 @@
 import type { ReactNode } from 'react';
-import { copyToneClassName, cx, type Surface } from './styles';
+import { cardTitleClassName, copyToneClassName, cx, type Surface } from './styles';
 
 type CardProps = {
   /** bordered: 1px hairline frame, 4px radius · borderless: Projects card, top hairline only. No resting shadow. */
   variant?: 'bordered' | 'borderless';
   surface?: Surface;
   as?: 'div' | 'article' | 'li';
-  /** Image (or placeholder) shown in a fixed 4:3 frame. */
+  /** Image (or placeholder) shown in a fixed frame: 4:3 by default, 2:3 for portraits. */
   media?: ReactNode;
+  mediaAspect?: '4/3' | '2/3';
+  /** Frame fill behind the media: dark for photography (default), light for product renders on white. */
+  mediaTone?: 'dark' | 'light';
   meta?: ReactNode;
   title?: ReactNode;
   titleAs?: 'h2' | 'h3';
@@ -24,6 +27,8 @@ export default function Card({
   surface = 'light',
   as: Tag = 'div',
   media,
+  mediaAspect = '4/3',
+  mediaTone = 'dark',
   meta,
   title,
   titleAs: Title = 'h3',
@@ -51,7 +56,17 @@ export default function Card({
 
   return (
     <Tag data-card={variant} className={cx('group', frame, className)}>
-      {media ? <div className={cx('aspect-[4/3] overflow-hidden', dark ? 'bg-white/5' : 'bg-ink')}>{media}</div> : null}
+      {media ? (
+        <div
+          className={cx(
+            mediaAspect === '2/3' ? 'aspect-[2/3]' : 'aspect-[4/3]',
+            'overflow-hidden',
+            mediaTone === 'light' ? 'bg-white' : dark ? 'bg-white/5' : 'bg-ink',
+          )}
+        >
+          {media}
+        </div>
+      ) : null}
       <div className={bodyClassName ?? (variant === 'bordered' ? 'p-5' : 'py-5')}>
         {meta ? (
           <p
@@ -64,14 +79,7 @@ export default function Card({
           </p>
         ) : null}
         {title ? (
-          <Title
-            className={cx(
-              meta ? 'mt-4' : undefined,
-              titleSize === 'lg' ? 'text-title' : 'text-title-sm',
-              'font-semibold leading-tight',
-              dark ? 'text-inverse' : 'text-ink',
-            )}
-          >
+          <Title className={cx(meta ? 'mt-4' : undefined, cardTitleClassName(titleSize === 'lg' ? 'lg' : 'sm', surface))}>
             {title}
           </Title>
         ) : null}

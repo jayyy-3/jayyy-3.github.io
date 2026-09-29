@@ -3,10 +3,15 @@ import { companyLocationLabels } from '../lib/companyLocations';
 import { ArrowUpRight, CheckCircle, Mail, MapPin, Phone, Send } from 'lucide-react';
 import type { FormEvent } from 'react';
 import { useEffect, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
-import StaticResponsiveImage from '../components/StaticResponsiveImage';
+import { useSearchParams } from 'react-router-dom';
 import TurnstileField from '../components/TurnstileField';
 import { turnstileSiteKey } from '../lib/turnstileConfig';
+import Button from '../components/ui/Button';
+import Card from '../components/ui/Card';
+import PageIntro from '../components/ui/PageIntro';
+import SectionHeading from '../components/ui/SectionHeading';
+import { siteContact, siteCtas } from '../data/siteChrome';
+import StaticResponsiveImage from '../components/StaticResponsiveImage';
 
 type ContactFormState = {
   name: string;
@@ -50,14 +55,17 @@ function createInitialFormState(projectType = 'Project enquiry', sampleStone = '
 
 function FieldLabel({ children, htmlFor }: { children: string; htmlFor: string }) {
   return (
-    <label htmlFor={htmlFor} className="urblo-meta mb-2 block text-black/62">
+    <label htmlFor={htmlFor} className="mb-2 block text-meta font-semibold uppercase tracking-caps text-muted">
       {children}
     </label>
   );
 }
 
 const inputClassName =
-  'w-full rounded-[4px] border border-black/15 bg-white px-4 py-3 text-[15px] font-medium text-black transition placeholder:text-black/35 focus:border-black';
+  'w-full rounded border border-black/15 bg-white px-4 py-3 text-copy font-medium text-ink transition placeholder:text-muted focus:border-ink';
+
+const channelLabelClassName = 'block text-meta font-semibold uppercase tracking-caps text-muted';
+const channelValueClassName = 'mt-1 block text-lead font-semibold text-ink';
 
 export default function ContactPage() {
   const settings = usePublicSiteSettings();
@@ -175,23 +183,17 @@ export default function ContactPage() {
 
   return (
     <div className="bg-white">
-      <section className="urblo-section-tight border-b border-black/10">
-        <div className="urblo-page-container grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
-          <div>
-            <p className="urblo-eyebrow">Contact Urblo</p>
-            <h1 className="urblo-page-title">Start a project conversation</h1>
-          </div>
-          <p className="max-w-[44rem] text-[20px] font-medium leading-8 text-[var(--urblo-text)]">
-            Share the project stage, stone intent, or sample need. We will help translate the brief
-            into practical next steps for design, specification, sourcing, and delivery.
-          </p>
-        </div>
-      </section>
+      <PageIntro
+        band
+        breadcrumb={[{ label: 'Home', to: '/' }, { label: 'Contact' }]}
+        title="Start a project conversation"
+        lede="Share the project stage, stone intent, or sample need. We will help translate the brief into practical next steps for design, specification, sourcing, and delivery."
+      />
 
-      <section className="urblo-section bg-[rgba(239,239,239,0.22)]">
+      <section className="urblo-section bg-surface">
         <div className="urblo-page-container grid gap-6 lg:grid-cols-[minmax(320px,0.82fr)_minmax(0,1.18fr)] lg:items-start">
           <aside className="space-y-6">
-            <div className="urblo-card overflow-hidden border-black/10 bg-black text-white shadow-none">
+            <Card surface="dark">
               <div className="relative min-h-[360px]">
                 <StaticResponsiveImage
                   src="/media/launch/contact/project-contact.jpg"
@@ -200,76 +202,68 @@ export default function ContactPage() {
                   className="absolute inset-0 h-full w-full object-cover opacity-72"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/45 to-black/10" />
-                <div className="absolute inset-x-0 bottom-0 p-6">
-                  <p className="urblo-meta text-white/62">WE BUILD. YOU DESIGN.</p>
-                  <h2 className="mt-4 font-display text-[30px] font-semibold uppercase leading-[1.08] tracking-[0.03em] text-white md:text-[38px]">
-                    Design-led stone support, from sketch to install.
-                  </h2>
-                </div>
+                <SectionHeading
+                  surface="dark"
+                  eyebrow="We build. You design."
+                  title="Design-led stone support, from sketch to install."
+                  className="absolute inset-x-0 bottom-0 p-6"
+                />
               </div>
-            </div>
+            </Card>
 
-            <div className="urblo-card divide-y divide-black/10 overflow-hidden bg-white shadow-none">
+            <Card className="divide-y divide-line">
               <a
                 href="mailto:info@urblo.com.au?subject=Contact%20Us"
-                className="urblo-focus-inset flex items-center justify-between gap-4 px-5 py-5 transition hover:bg-[rgba(239,239,239,0.45)]"
+                className="urblo-focus-inset flex items-center justify-between gap-4 px-5 py-5 transition hover:bg-surface"
               >
                 <span className="flex items-center gap-4">
-                  <Mail className="h-5 w-5 text-black" aria-hidden="true" />
+                  <Mail className="h-5 w-5 text-ink" aria-hidden="true" />
                   <span>
-                    <span className="block text-[13px] font-semibold uppercase tracking-[0.12em] text-black/52">
-                      Email
-                    </span>
-                    <span className="mt-1 block text-[18px] font-semibold text-black">
-                      info@urblo.com.au
-                    </span>
+                    <span className={channelLabelClassName}>Email</span>
+                    <span className={channelValueClassName}>{siteContact.email}</span>
                   </span>
                 </span>
-                <ArrowUpRight className="h-5 w-5 text-black/45" aria-hidden="true" />
+                <ArrowUpRight className="h-5 w-5 text-muted" aria-hidden="true" />
               </a>
 
               <a
                 href="tel:1300187256"
-                className="urblo-focus-inset flex items-center justify-between gap-4 px-5 py-5 transition hover:bg-[rgba(239,239,239,0.45)]"
+                aria-label={`Phone ${siteContact.phoneDisplay} (${siteContact.phoneDigits})`}
+                className="urblo-focus-inset flex items-center justify-between gap-4 px-5 py-5 transition hover:bg-surface"
               >
                 <span className="flex items-center gap-4">
-                  <Phone className="h-5 w-5 text-black" aria-hidden="true" />
+                  <Phone className="h-5 w-5 text-ink" aria-hidden="true" />
                   <span>
-                    <span className="block text-[13px] font-semibold uppercase tracking-[0.12em] text-black/52">
-                      Phone
-                    </span>
-                    <span className="mt-1 block text-[18px] font-semibold text-black">
-                      1300 1URBLO
-                    </span>
+                    <span className={channelLabelClassName}>Phone</span>
+                    <span className={channelValueClassName}>{siteContact.phoneDisplay}</span>
                   </span>
                 </span>
-                <ArrowUpRight className="h-5 w-5 text-black/45" aria-hidden="true" />
+                <ArrowUpRight className="h-5 w-5 text-muted" aria-hidden="true" />
               </a>
 
               {(['office', 'warehouse'] as const).map(key => (
                 <div key={key} className="flex items-start gap-4 px-5 py-5">
-                  <MapPin className="mt-1 h-5 w-5 flex-none text-black" aria-hidden="true" />
+                  <MapPin className="mt-1 h-5 w-5 flex-none text-ink" aria-hidden="true" />
                   <div className="min-w-0">
-                    <p className="text-[13px] font-semibold uppercase tracking-[0.12em] text-black/52">{companyLocationLabels[key]}</p>
-                    <p className="mt-1 break-words text-[18px] font-semibold leading-7 text-black">{settings.locations[key]}</p>
+                    <p className={channelLabelClassName}>{companyLocationLabels[key]}</p>
+                    <p className={`${channelValueClassName} break-words`}>{settings.locations[key]}</p>
                   </div>
                 </div>
               ))}
-            </div>
+            </Card>
           </aside>
 
-          <div className="urblo-card bg-white p-6 shadow-none md:p-8">
-            <div className="flex flex-col gap-4 border-b border-black/10 pb-6 md:flex-row md:items-start md:justify-between">
-              <div>
-                <p className="urblo-eyebrow">Project brief</p>
-                <h2 className="mt-4 font-display text-[32px] font-semibold uppercase leading-[1.08] tracking-[0.03em] text-black md:text-[44px]">
-                  Send a project brief
-                </h2>
-              </div>
-              <Link to="/stone-library" className="urblo-button shrink-0 self-start whitespace-nowrap">
-                Stone Library
+          <Card className="p-6 md:p-8">
+            <div className="flex flex-col gap-4 border-b border-line pb-6 md:flex-row md:items-start md:justify-between">
+              <SectionHeading eyebrow="Project brief" title="Send a project brief" />
+              <Button
+                variant="ghost"
+                to={siteCtas.stoneLibrary.to}
+                className="shrink-0 self-start whitespace-nowrap"
+              >
+                {siteCtas.stoneLibrary.label}
                 <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
-              </Link>
+              </Button>
             </div>
 
             <form className="mt-6 grid gap-5" onSubmit={handleSubmit}>
@@ -345,7 +339,7 @@ export default function ContactPage() {
               </div>
 
               {isSampleRequest ? (
-                <div className="grid gap-5 rounded-[4px] border border-black/10 bg-[rgba(239,239,239,0.28)] p-4 md:grid-cols-2 md:p-5">
+                <div className="grid gap-5 rounded border border-line bg-surface p-4 md:grid-cols-2 md:p-5">
                   <div>
                     <FieldLabel htmlFor="contact-sample-stone">Stone or sample preference</FieldLabel>
                     <input
@@ -400,7 +394,7 @@ export default function ContactPage() {
                       id="contact-shipping-address"
                       value={form.shippingAddress}
                       onChange={(event) => updateField('shippingAddress', event.target.value)}
-                      className={`${inputClassName} min-h-[110px] resize-y leading-7`}
+                      className={`${inputClassName} min-h-[110px] resize-y`}
                       placeholder="Address for sample delivery"
                       required={isSampleRequest}
                     />
@@ -416,7 +410,7 @@ export default function ContactPage() {
                   id="contact-message"
                   value={form.message}
                   onChange={(event) => updateField('message', event.target.value)}
-                  className={`${inputClassName} min-h-[170px] resize-y leading-7`}
+                  className={`${inputClassName} min-h-[170px] resize-y`}
                   placeholder="Tell us about location, project stage, stone intent, finish preference, timing, or sample needs."
                   aria-describedby={formError ? 'contact-form-error' : undefined}
                   required={!isSampleRequest}
@@ -433,7 +427,7 @@ export default function ContactPage() {
               {successMessage ? (
                 <p
                   role="status"
-                  className="flex items-start gap-3 rounded-[4px] border border-[var(--urblo-lime)]/40 bg-[rgba(0,255,25,0.12)] px-4 py-3 text-[14px] font-semibold leading-6 text-black"
+                  className="flex items-start gap-3 rounded border border-lime/40 bg-lime/[0.12] px-4 py-3 text-small font-semibold text-ink"
                 >
                   <CheckCircle className="mt-0.5 h-4 w-4 flex-none" aria-hidden="true" />
                   {successMessage}
@@ -444,32 +438,32 @@ export default function ContactPage() {
                 <p
                   id="contact-form-error"
                   role="alert"
-                  className="rounded-[4px] border border-black/10 bg-[rgba(0,255,25,0.14)] px-4 py-3 text-[14px] font-semibold leading-6 text-black"
+                  className="rounded border border-line bg-lime/[0.14] px-4 py-3 text-small font-semibold text-ink"
                 >
                   {formError}
                 </p>
               ) : null}
 
-              <div className="flex flex-col gap-4 border-t border-black/10 pt-6 md:flex-row md:items-center md:justify-between">
-                <p className="max-w-[30rem] text-[14px] leading-6 text-black/58">
+              <div className="flex flex-col gap-4 border-t border-line pt-6 md:flex-row md:items-center md:justify-between">
+                <p className="max-w-[30rem] text-small text-muted">
                   This stores the brief securely for Urblo. Direct email and phone remain available
                   if you prefer to speak first.
                 </p>
-                <button
+                <Button
                   type="submit"
-                  className="urblo-button-inverse shrink-0 whitespace-nowrap disabled:cursor-wait disabled:opacity-60"
+                  className="shrink-0 whitespace-nowrap"
                   disabled={submissionStatus === 'submitting'}
                 >
                   {submissionStatus === 'submitting'
                     ? 'Sending...'
                     : isSampleRequest
-                      ? 'Request samples'
+                      ? siteCtas.sampleRequest.label
                       : 'Send enquiry'}
                   <Send className="h-4 w-4" aria-hidden="true" />
-                </button>
+                </Button>
               </div>
             </form>
-          </div>
+          </Card>
         </div>
       </section>
     </div>

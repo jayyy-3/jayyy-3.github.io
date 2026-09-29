@@ -31,13 +31,13 @@ describe('static image variant manifest', () => {
 });
 
 describe('getStaticImageDelivery', () => {
-  test('route banner gets WebP srcset, sizes and intrinsic size', () => {
-    const delivery = getStaticImageDelivery('/media/launch/banners/products.jpg', '100vw');
+  test('full-width section image gets WebP srcset, sizes and intrinsic size', () => {
+    const delivery = getStaticImageDelivery('/media/launch/banners/our-story.jpg', '100vw');
     expect(delivery.optimized).toBe(true);
-    expect(delivery.src).toBe('/media/variants/media/launch/banners/products-1200w.webp');
-    expect(delivery.srcSet).toContain('/media/variants/media/launch/banners/products-480w.webp 480w');
+    expect(delivery.src).toBe('/media/variants/media/launch/banners/our-story-1200w.webp');
+    expect(delivery.srcSet).toContain('/media/variants/media/launch/banners/our-story-480w.webp 480w');
     expect(delivery.sizes).toBe('100vw');
-    expect([delivery.width, delivery.height]).toEqual([1440, 1800]);
+    expect([delivery.width, delivery.height]).toEqual([1800, 1200]);
   });
 
   test('CMS, remote, data and unknown sources pass through unchanged', () => {
@@ -54,7 +54,7 @@ describe('getStaticImageDelivery', () => {
   });
 
   test('absolute urblo.com.au URLs and query strings resolve to the manifest entry', () => {
-    expect(getStaticImageDelivery('https://urblo.com.au/media/launch/banners/products.jpg?v=1').optimized).toBe(true);
+    expect(getStaticImageDelivery('https://urblo.com.au/media/launch/banners/our-story.jpg?v=1').optimized).toBe(true);
   });
 
   test('original is the top candidate when the full-width WebP was not smaller', () => {
@@ -65,7 +65,7 @@ describe('getStaticImageDelivery', () => {
   });
 
   test('attribute helper exposes only DOM attributes', () => {
-    expect(Object.keys(getStaticImageAttributes('/media/launch/banners/products.jpg')).sort()).toEqual([
+    expect(Object.keys(getStaticImageAttributes('/media/launch/banners/our-story.jpg')).sort()).toEqual([
       'height',
       'sizes',
       'src',

@@ -4,12 +4,18 @@ import { Link, Navigate, useParams } from 'react-router-dom';
 import ReadingProgressBar from '../components/ReadingProgressBar';
 import PublicContentSeo from '../components/PublicContentSeo';
 import RouteState from '../components/RouteState';
-import StaticResponsiveImage from '../components/StaticResponsiveImage';
 import { prepareArticleHtml, resolveArticleAssetPath } from '../lib/articleMedia';
 import { toSafePublicContentDestination } from '../lib/publicContentLink';
 import ArticleService from '../service/ArticleService';
 import type { ArticleBody, PublicArticleBlock } from '../service/ArticleService';
 import type { ArticleMeta } from '../types/article';
+import Button from '../components/ui/Button';
+import Card from '../components/ui/Card';
+import PageIntro from '../components/ui/PageIntro';
+import { cardTitleClassName } from '../components/ui/styles';
+import { formatPublicDate } from '../components/ui/format';
+import { siteCtas } from '../data/siteChrome';
+import StaticResponsiveImage from '../components/StaticResponsiveImage';
 
 export default function ArticlePage() {
   const { slug = '' } = useParams<{ slug: string }>();
@@ -92,7 +98,6 @@ export default function ArticlePage() {
         eyebrow="Loading"
         title="Preparing article"
         copy="The article is loading. This should only take a moment."
-        headerOffset
       />
     );
   }
@@ -103,7 +108,6 @@ export default function ArticlePage() {
         eyebrow="Article Error"
         title="Articles could not load"
         copy="The article index could not be loaded right now. Return to articles or contact Urblo if this keeps happening."
-        headerOffset
         actions={[
           { label: 'Articles', to: '/articles' },
           { label: 'Contact Us', to: '/contact', variant: 'secondary' },
@@ -118,7 +122,6 @@ export default function ArticlePage() {
         eyebrow="Article Not Found"
         title="Article not found"
         copy="This article link does not match a published Urblo article. Browse the article library or contact Urblo for help."
-        headerOffset
         actions={[
           { label: 'Articles', to: '/articles' },
           { label: 'Contact Us', to: '/contact', variant: 'secondary' },
@@ -137,7 +140,6 @@ export default function ArticlePage() {
         eyebrow="Loading"
         title="Preparing article"
         copy="The article content is loading. This should only take a moment."
-        headerOffset
       />
     );
   }
@@ -150,7 +152,6 @@ export default function ArticlePage() {
         eyebrow="Article Error"
         title="Article could not load"
         copy="The article content could not be loaded right now. Return to articles or contact Urblo if this keeps happening."
-        headerOffset
         actions={[
           { label: 'Articles', to: '/articles' },
           { label: 'Contact Us', to: '/contact', variant: 'secondary' },
@@ -178,49 +179,56 @@ export default function ArticlePage() {
       ) : null}
       <ReadingProgressBar />
 
-      <header className="relative overflow-hidden bg-black text-white">
-        {meta.cover ? (
+      <PageIntro
+        band
+        breadcrumb={[
+          { label: 'Home', to: '/' },
+          { label: 'Articles', to: '/articles' },
+          { label: meta.title },
+        ]}
+        eyebrow={meta.date ? <time dateTime={meta.date}>{formatPublicDate(meta.date)}</time> : 'Article'}
+        title={meta.title}
+      />
+
+      {meta.cover ? (
+        <figure className="bg-ink">
           <StaticResponsiveImage
             src={heroImage}
             sizes="100vw"
             alt={meta.title}
-            className="h-[520px] w-full object-cover opacity-75 md:h-[420px]"
+            className="h-[48svh] min-h-[320px] w-full object-cover md:h-[60svh]"
             loading="eager"
             fetchPriority="high"
           />
-        ) : null}
-        <div className="absolute inset-0 bg-black/45" />
-        <div className="urblo-page-container absolute inset-0 flex items-end pb-14">
-          <div className="max-w-[60rem]">
-            <p className="urblo-eyebrow text-white/70">Article</p>
-            <h1 className="urblo-page-title urblo-page-title--inverse">
-              {meta.title}
-            </h1>
-          </div>
-        </div>
-      </header>
+        </figure>
+      ) : null}
 
-      <div className="article-wrapper border-y border-black/10 bg-[rgba(239,239,239,0.38)] px-6 py-14 md:px-10">
+      <div className="article-wrapper border-b border-line bg-surface px-gutter py-section">
         {hasStructuredBody ? (
           <StructuredArticleBody blocks={body.blocks ?? []} />
         ) : (
-          <div className="urblo-card w-full max-w-[980px] bg-white px-6 py-8 md:px-10 md:py-10" dangerouslySetInnerHTML={{ __html: html ?? '' }} />
+          <Card className="urblo-card w-full max-w-[980px] shadow-none">
+            <div className="px-6 py-8 md:px-10 md:py-10" dangerouslySetInnerHTML={{ __html: html ?? '' }} />
+          </Card>
         )}
       </div>
 
-      <nav className="urblo-page-container flex flex-col gap-4 py-10 md:flex-row md:items-center md:justify-between">
+      <nav
+        aria-label="More articles"
+        className="urblo-page-container flex flex-col gap-4 py-section-tight md:flex-row md:items-center md:justify-between"
+      >
         {prev ? (
-          <Link to={'/articles/' + prev.slug} className="urblo-button w-full whitespace-normal text-center md:w-auto">
+          <Button variant="ghost" to={'/articles/' + prev.slug} className="w-full whitespace-normal text-center md:w-auto">
             Previous article
-          </Link>
+          </Button>
         ) : (
           <span />
         )}
 
         {next ? (
-          <Link to={'/articles/' + next.slug} className="urblo-button-inverse w-full whitespace-normal text-center md:w-auto">
+          <Button to={'/articles/' + next.slug} className="w-full whitespace-normal text-center md:w-auto">
             Next article
-          </Link>
+          </Button>
         ) : (
           <span />
         )}
@@ -231,13 +239,13 @@ export default function ArticlePage() {
 
 function StructuredArticleBody({ blocks }: { blocks: PublicArticleBlock[] }) {
   return (
-    <article className="mx-auto w-full max-w-[980px] bg-white px-6 py-8 md:px-10 md:py-10">
+    <Card as="article" className="mx-auto w-full max-w-[980px] px-6 py-8 md:px-10 md:py-10">
       <div className="space-y-8">
         {blocks.map((block) => (
           <ArticleBlockRenderer key={block.id} block={block} />
         ))}
       </div>
-    </article>
+    </Card>
   );
 }
 
@@ -249,7 +257,7 @@ function ArticleBlockRenderer({ block }: { block: PublicArticleBlock }) {
     const headingLevel = contentNumber(content, 'headingLevel');
     if (!body) return null;
     if (headingLevel && headingLevel <= 3) {
-      return <h2 className="text-3xl font-semibold leading-tight text-black">{body}</h2>;
+      return <h2 className={cardTitleClassName('lg')}>{body}</h2>;
     }
     return <ParagraphText text={body} />;
   }
@@ -268,17 +276,17 @@ function ArticleBlockRenderer({ block }: { block: PublicArticleBlock }) {
             decoding="async"
           />
         ) : null}
-        {caption ? <figcaption className="text-sm leading-6 text-black/58">{caption}</figcaption> : null}
+        {caption ? <figcaption className="text-small text-muted">{caption}</figcaption> : null}
       </figure>
     );
   }
 
   if (block.blockType === 'quote') {
     return (
-      <blockquote className="border-l-4 border-[var(--urblo-lime)] bg-[#f8f9f5] px-5 py-4">
-        <p className="text-2xl font-light leading-snug text-black">{contentString(content, 'quote')}</p>
+      <blockquote className="border-l-4 border-lime bg-surface px-5 py-4">
+        <p className="text-title-sm font-light text-ink">{contentString(content, 'quote')}</p>
         {contentString(content, 'attribution') ? (
-          <cite className="mt-3 block text-sm font-semibold not-italic uppercase tracking-[0.12em] text-black/45">
+          <cite className="mt-3 block text-meta font-semibold not-italic uppercase tracking-caps text-muted">
             {contentString(content, 'attribution')}
           </cite>
         ) : null}
@@ -288,9 +296,9 @@ function ArticleBlockRenderer({ block }: { block: PublicArticleBlock }) {
 
   if (block.blockType === 'callout') {
     return (
-      <section className="border border-black/10 bg-[#f8f9f5] p-5">
+      <section className="border border-line bg-surface p-5">
         {contentString(content, 'heading') ? (
-          <h2 className="text-2xl font-semibold text-black">{contentString(content, 'heading')}</h2>
+          <h2 className={cardTitleClassName()}>{contentString(content, 'heading')}</h2>
         ) : null}
         <ParagraphText text={contentString(content, 'body')} className="mt-3" />
       </section>
@@ -300,20 +308,19 @@ function ArticleBlockRenderer({ block }: { block: PublicArticleBlock }) {
   if (block.blockType === 'cta') {
     const rawHref = contentString(content, 'href');
     const destination = toSafePublicContentDestination(rawHref || '/contact');
-    const label = contentString(content, 'label') || 'Contact Urblo';
-    const className = 'mt-5 inline-flex min-h-11 items-center justify-center rounded bg-[var(--urblo-lime)] px-5 text-xs font-bold uppercase tracking-[0.14em] text-black';
+    const label = contentString(content, 'label') || siteCtas.contact.label;
 
     return (
-      <section className="border border-black/10 bg-black p-5 text-white">
-        <ParagraphText text={contentString(content, 'body')} className="text-white/72" />
+      <section className="border border-line bg-ink p-5 text-inverse">
+        <ParagraphText text={contentString(content, 'body')} className="text-inverse-body" />
         {destination?.kind === 'internal' ? (
-          <Link to={destination.href} className={className}>
+          <Button variant="inverse" to={destination.href} className="mt-5">
             {label}
-          </Link>
+          </Button>
         ) : destination?.kind === 'external' ? (
-          <a href={destination.href} className={className} rel="noopener noreferrer">
+          <Button variant="inverse" href={destination.href} className="mt-5" rel="noopener noreferrer">
             {label}
-          </a>
+          </Button>
         ) : null}
       </section>
     );
@@ -327,8 +334,8 @@ function ArticleBlockRenderer({ block }: { block: PublicArticleBlock }) {
         {items.map((item, index) => {
           const record = objectRecord(item);
           return (
-            <div key={index} className="border border-black/10 p-4">
-              <h3 className="text-lg font-semibold text-black">{contentString(record, 'question')}</h3>
+            <div key={index} className="border border-line p-4">
+              <h3 className="text-lead font-semibold text-ink">{contentString(record, 'question')}</h3>
               <ParagraphText text={contentString(record, 'answer')} className="mt-2" />
             </div>
           );
@@ -343,9 +350,9 @@ function ArticleBlockRenderer({ block }: { block: PublicArticleBlock }) {
     if (!value && !label) return null;
 
     return (
-      <section className="border-y border-black/10 py-6">
-        {value ? <p className="text-[48px] font-light leading-none text-black">{value}</p> : null}
-        {label ? <h2 className="mt-2 text-xl font-semibold text-black">{label}</h2> : null}
+      <section className="border-y border-line py-6">
+        {value ? <p className="text-title-lg font-light leading-none text-ink md:text-display md:leading-none">{value}</p> : null}
+        {label ? <h2 className="mt-2 text-lead font-semibold text-ink">{label}</h2> : null}
         <ParagraphText text={contentString(content, 'note')} className="mt-3" />
       </section>
     );
@@ -385,12 +392,12 @@ function ArticleBlockRenderer({ block }: { block: PublicArticleBlock }) {
 
   if (block.blockType === 'comparison_table') {
     return (
-      <section className="border border-black/10 p-5">
+      <section className="border border-line p-5">
         {contentString(content, 'heading') ? (
-          <h2 className="text-2xl font-semibold text-black">{contentString(content, 'heading')}</h2>
+          <h2 className={cardTitleClassName()}>{contentString(content, 'heading')}</h2>
         ) : null}
         {contentString(content, 'columnsText') ? (
-          <p className="mt-4 text-xs font-bold uppercase tracking-[0.14em] text-black/48">
+          <p className="mt-4 text-meta font-bold uppercase tracking-caps text-muted">
             {contentString(content, 'columnsText')}
           </p>
         ) : null}
@@ -404,11 +411,11 @@ function ArticleBlockRenderer({ block }: { block: PublicArticleBlock }) {
 
 function ReferenceBlock({ title, body, href }: { title: string; body?: string; href?: string }) {
   const content = (
-    <section className="border border-black/10 bg-[#f8f9f5] p-5 transition hover:border-black/30">
-      <h2 className="text-2xl font-semibold text-black">{title}</h2>
+    <section className="border border-line bg-surface p-5 transition hover:border-black/30">
+      <h2 className={cardTitleClassName()}>{title}</h2>
       {body ? <ParagraphText text={body} className="mt-3" /> : null}
       {href ? (
-        <span className="mt-4 inline-flex text-xs font-bold uppercase tracking-[0.14em] text-black">
+        <span className="mt-4 inline-flex text-meta font-bold uppercase tracking-caps text-ink underline decoration-1 underline-offset-[5px]">
           Open reference
         </span>
       ) : null}
@@ -432,7 +439,7 @@ function ReferenceBlock({ title, body, href }: { title: string; body?: string; h
 function ParagraphText({ text, className = '' }: { text: string; className?: string }) {
   if (!text) return null;
   return (
-    <div className={`space-y-4 text-lg leading-8 text-black/72 ${className}`}>
+    <div className={`space-y-4 text-lead text-body ${className}`}>
       {text.split(/\n{2,}/).map((paragraph, index) => (
         <p key={index}>{paragraph}</p>
       ))}

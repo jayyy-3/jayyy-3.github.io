@@ -7,7 +7,8 @@ import Card from './Card';
 import PageIntro from './PageIntro';
 import Reveal from './Reveal';
 import SectionHeading from './SectionHeading';
-import { buttonClassName, headingClassName } from './styles';
+import { formatPublicDate } from './format';
+import { buttonClassName, cardTitleClassName, headingClassName } from './styles';
 
 const reducedMotion = vi.hoisted(() => ({ value: false }));
 vi.mock('framer-motion', async (importOriginal) => {
@@ -180,5 +181,51 @@ describe('Reveal', () => {
     expect(html).toMatch(/opacity:0/);
     expect(html).not.toMatch(/translateY/);
     reducedMotion.value = false;
+  });
+});
+
+describe('Page convergence additions', () => {
+  it('renders the white-start PageIntro band with meta and an aside column', () => {
+    const html = render(
+      <PageIntro
+        band
+        breadcrumb={[{ label: 'Home', to: '/' }, { label: 'Stone Library', to: '/stone-library' }, { label: 'Juparana' }]}
+        meta={<span>Granite</span>}
+        title="Juparana"
+        aside={<nav aria-label="More projects">Next</nav>}
+      />,
+    );
+    expect(html).toMatch(/^<section class="border-b border-line bg-white"><div class="urblo-page-container py-12 md:py-16">/);
+    expect(html).toContain('<div class="mb-6 flex flex-wrap items-center gap-3"><span>Granite</span></div>');
+    expect(html).toContain('lg:grid-cols-[minmax(0,1fr)_minmax(300px,0.34fr)]');
+    expect(classOf(html, 'h1')).toEqual(expect.arrayContaining(['urblo-page-title', 'mt-0']));
+  });
+
+  it('keeps the plain PageIntro markup unchanged when the new props are absent', () => {
+    const html = render(<PageIntro eyebrow="May 2026" title="Capability Statement" />);
+    expect(html).toBe(
+      '<div><p class="urblo-eyebrow">May 2026</p><h1 class="urblo-page-title">Capability Statement</h1></div>',
+    );
+  });
+
+  it('frames portrait and product media without changing the 4:3 photography default', () => {
+    expect(render(<Card media={<img alt="" />} />)).toContain('class="aspect-[4/3] overflow-hidden bg-ink"');
+    expect(render(<Card surface="dark" mediaAspect="2/3" media={<img alt="" />} />)).toContain(
+      'class="aspect-[2/3] overflow-hidden bg-white/5"',
+    );
+    expect(render(<Card mediaTone="light" media={<img alt="" />} />)).toContain('class="aspect-[4/3] overflow-hidden bg-white"');
+  });
+
+  it('shares one card/panel title style', () => {
+    expect(cardTitleClassName()).toBe('text-title-sm font-semibold leading-tight text-ink');
+    expect(cardTitleClassName('lg', 'dark')).toBe('text-title font-semibold leading-tight text-inverse');
+  });
+
+  it('formats public dates as en-AU day, short month, year in every time zone', () => {
+    expect(formatPublicDate('2024-06-10')).toBe('10 Jun 2024');
+    expect(formatPublicDate('2024-09-01')).toBe('1 Sep 2024');
+    expect(formatPublicDate('2024-04-28T00:00:00Z')).toBe('28 Apr 2024');
+    expect(formatPublicDate('not a date')).toBe('not a date');
+    expect(formatPublicDate(undefined)).toBe('');
   });
 });

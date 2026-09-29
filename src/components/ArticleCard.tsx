@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import type { ArticleMeta } from '../types/article';
 import { resolveArticleAssetPath } from '../lib/articleMedia';
+import Card from './ui/Card';
+import { formatPublicDate } from './ui/format';
 import StaticResponsiveImage from './StaticResponsiveImage';
 
 interface Props {
@@ -10,38 +11,27 @@ interface Props {
 
 export default function ArticleCard({ meta }: Props) {
   return (
-    <motion.article
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-      whileHover={{ y: -4 }}
-      className="urblo-card overflow-hidden"
-    >
-      <Link to={`/articles/${meta.slug}`} className="block">
-        {meta.cover ? (
-          <div className="aspect-[3/2] overflow-hidden bg-black/5">
+    <Link to={`/articles/${meta.slug}`} className="group block h-full">
+      <Card
+        as="article"
+        className="h-full transition-colors group-hover:border-ink"
+        media={
+          meta.cover ? (
             <StaticResponsiveImage
               src={resolveArticleAssetPath(meta.cover)}
               sizes="(min-width: 1280px) 33vw, (min-width: 640px) 50vw, 100vw"
               alt={meta.title}
-              className="h-full w-full object-cover"
+              className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.025]"
               loading="lazy"
               decoding="async"
             />
-          </div>
-        ) : null}
-        <div className="space-y-3 p-6">
-          <p className="urblo-meta">{new Date(meta.date).toLocaleDateString()}</p>
-          <h3 className="font-display text-[28px] font-semibold uppercase leading-[1.08] text-black">
-            {meta.title}
-          </h3>
-          {meta.excerpt ? (
-            <p className="line-clamp-3 text-[16px] leading-7 text-[var(--urblo-text)]">
-              {meta.excerpt}
-            </p>
-          ) : null}
-        </div>
-      </Link>
-    </motion.article>
+          ) : undefined
+        }
+        meta={<time dateTime={meta.date}>{formatPublicDate(meta.date)}</time>}
+        title={meta.title}
+      >
+        {meta.excerpt ? <p className="line-clamp-3 text-copy">{meta.excerpt}</p> : null}
+      </Card>
+    </Link>
   );
 }
