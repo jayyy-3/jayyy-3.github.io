@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "lastUpdated": "2026-09-29",
+  "lastUpdated": "2026-10-01",
   "currentTaskId": "NOW-ADMIN-STONE-WORKSPACE-001",
   "sourceOfTruth": {
     "currentState": "docs/agent/status.json",
@@ -10,12 +10,12 @@
     "adminHandoffEvidence": "docs/agent/admin-handoff-evidence.json"
   },
   "release": {
-    "observedAt": "2026-09-29",
-    "repositorySha": "b4d9d826f366384d007bcb9655bac0d99408cefa",
-    "runtimeSha": "b4d9d826f366384d007bcb9655bac0d99408cefa",
-    "verifiedRuntimeUrl": "https://fcc57ce4.urblo-site.pages.dev",
-    "ciRunId": 36516612553,
-    "note": "Optimization wave 3 (PRs #77–#83, #84 CI fix) and the Stone Library comparison (#81) merged in order on 2026-09-29 under Jay's standing merge authorization: admin editor point marker, generated database types and shared Functions runtime, admin small fixes (translated errors, in-place re-login, Leads pagination), shared admin media picker, static image variants and lighter hero video, public page convergence, stone comparison. Production readback: immutable/apex/www smoke passed; compare route 200 noindex; protected endpoints 401; hero videos 2.78MB/1.84MB; Lighthouse desktop 95–98 on nine pages, mobile transfer down on every page (home 3.67MB→2.27MB) while mobile LCP on stone and project detail rose because the LCP element changed from title text to the hero image after page convergence. This batch record does not deploy.",
+    "observedAt": "2026-10-01",
+    "repositorySha": "c13aaae57abd8e8164a1ec4a5a364f549b165798",
+    "runtimeSha": "c13aaae57abd8e8164a1ec4a5a364f549b165798",
+    "verifiedRuntimeUrl": "https://9adb1c40.urblo-site.pages.dev",
+    "ciRunId": 36536434949,
+    "note": "Web fonts WOFF2 (#87) merged 2026-09-30 after wave 3: seven licensed brand fonts served as WOFF2 with TTF fallback, two first-viewport faces preloaded; production readback confirms font/woff2 responses and the preload links; measured homepage font transfer down 28%, on-disk 61%, rendering pixel-identical. This record does not deploy.",
     "evidenceRefs": [
       "docs/WORKLOG.md"
     ]
@@ -76,8 +76,8 @@
     ]
   },
   "lastCompletedTask": {
-    "id": "NOW-STONE-COMPARE-001",
-    "summary": "Optimization wave 3 (six tasks) and the Stone Library comparison released to production 2026-09-29 and read back; wave 4 not yet registered."
+    "id": "NOW-OPT-WEB-FONTS-001",
+    "summary": "Licensed brand fonts served as WOFF2 with preloads, released 2026-09-30 and read back; wave 4 not yet registered."
   },
   "historicalObservations": "docs/archive/2026-09-26/manifest.json"
 }

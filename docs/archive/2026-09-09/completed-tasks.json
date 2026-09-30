@@ -3255,6 +3255,62 @@
         "Merged 2026-09-29 via PR #81 as b4d9d82 under Jay's standing merge authorization (\"合并\"); production CI 36516612553.",
         "Final production readback 2026-09-29 on b4d9d826f366384d007bcb9655bac0d99408cefa, immutable https://fcc57ce4.urblo-site.pages.dev, CI 36516612553: immutable/apex/www smoke passed; see WORKLOG 2026-09-29 Optimization wave 3 release."
       ]
+    },
+    {
+      "id": "NOW-OPT-WEB-FONTS-001",
+      "status": "done",
+      "priority": 0,
+      "modules": [
+        "public-ui",
+        "delivery"
+      ],
+      "summary": "Convert the self-hosted Avenir LT Std and Didot LT Std TTFs to WOFF2 (originals kept), serve them with long cache headers, preload the faces used above the fold, and keep font-display and metrics unchanged.",
+      "files": [
+        "public/fonts/",
+        "src/index.css",
+        "index.html",
+        "public/_headers",
+        "scripts/",
+        "docs/architecture/public-media.md",
+        "docs/DESIGN.md"
+      ],
+      "acceptance": [
+        "A committed script converts each TTF to WOFF2 deterministically (record tool and version); WOFF2 files are committed next to the TTFs; @font-face lists woff2 first with the TTF as fallback; font-display unchanged.",
+        "index.html preloads only the faces rendered above the fold on every route (as few as possible); no unused preload warnings in Chrome.",
+        "Total font transfer on the homepage drops by at least 50% versus the TTFs (record before/after bytes from Playwright network logs on the Preview).",
+        "Rendered text is visually unchanged: before/after screenshots at 1440 and 375 of Home and Stone Library with a pixel diff below 0.5%.",
+        "The licence basis is recorded (Jay confirmed on 2026-09-29 that a web font licence exists, obtained by the previous designer); no cache header is added for /assets/* (that still waits for real 404s)."
+      ],
+      "verification": [
+        "npm run agent:verify -- --plan",
+        "npm run gate",
+        "npm test",
+        "npm run agent:cloudflare-preview-smoke -- --base-url <branch Preview>",
+        "git diff --check"
+      ],
+      "phase": "complete",
+      "authorization": {
+        "source": "Jay confirmed on 2026-09-29 that a web font licence exists (\"有，你直接做，以前设计师弄的\") and asked for the conversion; standing merge authorization applies.",
+        "included": [
+          "Font conversion committed to public/fonts, CSS and preload changes, _headers for fonts only, git push, pull request, branch Preview and smoke, docs/agent state updates, merge after Claude's report."
+        ],
+        "excluded": [
+          "Cache headers for /assets/*, any photograph or content change, production data writes."
+        ]
+      },
+      "nextAction": "No automatic follow-on work. Fonts-only long cache headers wait for real 404s on missing static paths (wave 4 candidate).",
+      "blocker": "",
+      "notes": [
+        "2026-09-29: follow-up to NOW-OPT-STATIC-ASSETS-001, which left fonts unconverted pending the licence. Jay also closed the open content items: the Harcourt stone title and the AI-generated project share images stay as they are; the media promotion endpoint and the colleague trial are parked.",
+        "2026-09-29: licence basis: Jay confirmed on 2026-09-29 that a web font licence exists (obtained by the previous designer), which authorizes the WOFF2 conversion. Implemented on claude/opt-web-fonts: scripts/convert-fonts-woff2.mjs (wawoff2 2.0.1, pinned; graph node web-fonts), seven WOFF2 files beside the kept TTFs (221,840 -> 85,848 bytes), @font-face woff2-first, preload of Avenir 45 Book and 35 Light only. _headers unchanged: the readiness check forbids any Cache-Control and a missing /fonts/* path returns the SPA shell with 200. Local before/after pixel diff 0 px on Home and Stone Library at 1440 and 375 (viewport and full page).",
+        "2026-09-29: container gate passed (32 checks) and npm test 245 passed on 171450b; the push was refused by the agent session's permission classifier, so no PR, CI, branch Preview or Preview evidence exists yet. Projected homepage font transfer is about 31% lower (63,390 -> about 43,792 bytes) because Cloudflare already Brotli-compresses the TTFs, which would miss the 50% acceptance line.",
+        "2026-09-29: PR #87 (pushed 65ace9c by the coordinator), CI run 36534330139 passed; branch Preview https://387fab42.urblo-site.pages.dev passed agent:cloudflare-preview-smoke; a Preview WOFF2 answers 200 font/woff2. Homepage font transfer measured with Playwright: production TTF 63,390 B -> Preview WOFF2 45,618 B at 1440 (-28.0%), 63,402 -> 45,605 at 375 (-28.1%). This does not meet the acceptance line of at least 50% because production already Brotli-compresses the TTFs; the file size drop is 61.3%. Lighthouse mobile on the Preview: / 81, /stone-library 82. No preload warnings on the Preview. Not merged.",
+        "2026-10-01: merged and read back; the 50% acceptance line was Claude's estimation error, recorded as such."
+      ],
+      "completedAt": "2026-10-01",
+      "evidence": [
+        "Merged 2026-09-30 via PR #87 as c13aaae under Jay's standing merge authorization; production CI 36536434949 passed; immutable https://9adb1c40.urblo-site.pages.dev. Production readback 2026-10-01: /fonts/urblo/Avenir-LT-Std-45-Book.woff2 200 font/woff2 (10,984 bytes); homepage first response preloads Avenir 45 Book and 35 Light WOFF2. Measured homepage font transfer saving 28% against the 50% acceptance line Claude wrote (it assumed uncompressed TTF; Cloudflare already Brotli-compresses TTF); on-disk size down 61%; pixel diff 0."
+      ]
     }
   ]
 }
