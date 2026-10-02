@@ -66,9 +66,20 @@ export default function ImageQrPageView({ resource, material }: Props) {
               <dd className="mt-2 text-base">{material.detail.stoneType}</dd>
             </div>
             <div className="min-w-0 pb-3 pl-3">
-              <dt className="text-[11px] uppercase tracking-[0.12em] text-black/55">Availability</dt>
-              <dd className="mt-2 text-base"><span className="mr-2 inline-block h-2 w-2 rounded-full bg-[#00df16]" aria-hidden="true" />Available
-                <span className="mt-1 block text-sm leading-5 text-black/60">For project sourcing</span>
+              <dt className="text-[11px] uppercase tracking-[0.12em] text-black/55">Available as</dt>
+              <dd className="mt-2">
+                {material.detail.availableAs.length ? (
+                  <ul className="space-y-1">
+                    {material.detail.availableAs.map((option) => (
+                      <li key={option.key} data-offered={option.offered} className={`flex min-w-0 items-center gap-2 text-[15px] leading-6 ${option.offered ? '' : 'text-black/40'}`}>
+                        {option.offered
+                          ? <span className="inline-block h-2 w-2 flex-none rounded-full bg-[#00df16]" aria-hidden="true" />
+                          : <span className="inline-block w-2 flex-none text-center leading-none" aria-hidden="true">–</span>}
+                        <span className="min-w-0 break-words">{option.label}<span className="sr-only">{option.offered ? ', offered' : ', not offered'}</span></span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : <span className="text-base">Confirm for your project</span>}
               </dd>
             </div>
             <div className="min-w-0 border-r border-t border-black/10 pr-3 pt-3">

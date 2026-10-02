@@ -19,7 +19,7 @@ describe('attribute registry', () => {
         for (const attribute of stoneCompareRegistry) {
             expect(attribute.label).toBeTruthy();
             expect(attribute.source).toBeTruthy();
-            expect(['text', 'number', 'boolean', 'matrix', 'image', 'list']).toContain(attribute.kind);
+            expect(['text', 'number', 'boolean', 'matrix', 'image', 'list', 'checklist']).toContain(attribute.kind);
             expect(typeof attribute.public).toBe('boolean');
             expect(Number.isFinite(attribute.order)).toBe(true);
         }
@@ -29,6 +29,7 @@ describe('attribute registry', () => {
         expect(getPublicCompareAttributes().map((attribute) => attribute.key)).toEqual([
             'finish-image',
             'type',
+            'available-as',
             'price-tier',
             'finish-capability',
             'cut-options',
@@ -76,6 +77,39 @@ describe('row values', () => {
         expect(juparanaFlamed).toMatchObject({ kind: 'image', state: 'image' });
         // Tuscany offers Honed only.
         expect(attribute.resolve(tuscany, flamed)).toEqual({ kind: 'image', state: 'not-offered' });
+    });
+
+    it('lists every Available as option with its offered state', () => {
+        const subject = staticSubject('juparana');
+        subject.detail = {
+            ...subject.detail,
+            availableAs: [
+                { key: 'blocks', label: 'Blocks', offered: true },
+                { key: 'pavers', label: 'Pavers', offered: false },
+                { key: 'cladding', label: 'Cladding', offered: true },
+            ],
+        };
+        const cell = stoneCompareRegistry.find((entry) => entry.key === 'available-as')!.resolve(subject, {
+            finishKey: null,
+            finishOrder,
+        });
+        expect(cell).toEqual({
+            kind: 'checklist',
+            entries: [
+                { label: 'Blocks', offered: true },
+                { label: 'Pavers', offered: false },
+                { label: 'Cladding', offered: true },
+            ],
+        });
+        // Static stones offer every fallback option.
+        const fallback = stoneCompareRegistry.find((entry) => entry.key === 'available-as')!.resolve(staticSubject('tuscany'), {
+            finishKey: null,
+            finishOrder,
+        });
+        expect(fallback).toEqual({
+            kind: 'checklist',
+            entries: ['Blocks', 'Pavers', 'Cladding'].map((label) => ({ label, offered: true })),
+        });
     });
 
     it('aggregates finish capability across variants', () => {
@@ -165,6 +199,36 @@ describe('differences rule', () => {
             expect(matrix.matrixRows!.every((row) => row.identical)).toBe(true);
         }
         expect(filterCompareRows(rows, false)).toHaveLength(rows.length);
+    });
+
+    it('detects Available as differences per option and ignores order', () => {
+        const entries = (pavers: boolean) => [
+            { label: 'Blocks', offered: true },
+            { label: 'Pavers', offered: pavers },
+        ];
+        expect(
+            areCompareCellsEqual(
+                { kind: 'checklist', entries: entries(true) },
+                { kind: 'checklist', entries: [...entries(true)].reverse() },
+            ),
+        ).toBe(true);
+        expect(
+            areCompareCellsEqual({ kind: 'checklist', entries: entries(true) }, { kind: 'checklist', entries: entries(false) }),
+        ).toBe(false);
+
+        const alpine = staticSubject('alpine-white');
+        const angola = staticSubject('angola-black');
+        const same = buildCompareRows([alpine, angola], { finishKey: null, finishOrder });
+        expect(same.find((row) => row.attribute.key === 'available-as')?.identical).toBe(true);
+        expect(filterCompareRows(same, true).some((row) => row.attribute.key === 'available-as')).toBe(false);
+        angola.detail = {
+            ...angola.detail,
+            availableAs: angola.detail.availableAs.map((option) =>
+                option.key === 'cladding' ? { ...option, offered: false } : option,
+            ),
+        };
+        const differ = buildCompareRows([alpine, angola], { finishKey: null, finishOrder });
+        expect(filterCompareRows(differ, true).some((row) => row.attribute.key === 'available-as')).toBe(true);
     });
 
     it('treats every row as identical for a single stone', () => {

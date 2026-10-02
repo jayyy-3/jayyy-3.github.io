@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom';
 import type { StoneCardVM } from '../../types/stone-library';
 import CompareToggle from './CompareToggle';
-import StatusPill from './StatusPill';
 import StoneResponsiveImage from './StoneResponsiveImage';
 
 interface StoneCardProps {
@@ -9,10 +8,6 @@ interface StoneCardProps {
   /** Compare selection; the toggle renders only when a handler is passed. */
   compareSelected?: boolean;
   onCompareToggle?: () => void;
-}
-
-function statusBadgeLabel(status: StoneCardVM['status']): string {
-  return status === 'tbc' ? 'Upcoming' : 'Available';
 }
 
 export default function StoneCard({ stone, compareSelected = false, onCompareToggle }: StoneCardProps) {
@@ -40,13 +35,6 @@ export default function StoneCard({ stone, compareSelected = false, onCompareTog
               <p className="urblo-meta text-black/60">Image coming soon</p>
             </div>
           )}
-
-          <StatusPill
-            label={statusBadgeLabel(stone.status)}
-            tone={stone.status === 'tbc' ? 'upcoming' : 'available'}
-            surface="overlay"
-            className="absolute left-3 top-3"
-          />
         </div>
 
         <div className="space-y-2.5 p-4">
