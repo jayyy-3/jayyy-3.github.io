@@ -8,7 +8,17 @@ export {
   StoneSaveQueue,
   type StoneWrite,
 } from '../features/stone-library/stoneSaveQueue';
-export async function stoneApi<T>(query = '', body?: StoneWrite): Promise<T> {
+/** Owner/admin change to the "Available as" option list. */
+export interface StoneOptionWrite {
+  action: 'availability-option';
+  op: 'create' | 'rename' | 'reorder' | 'archive' | 'restore';
+  requestId: string;
+  option: { name?: string; id?: number; ids?: number[] };
+}
+export async function stoneApi<T>(
+  query = '',
+  body?: StoneWrite | StoneOptionWrite,
+): Promise<T> {
   const session = await supabase?.auth.getSession();
   const token = session?.data.session?.access_token;
   if (!token)

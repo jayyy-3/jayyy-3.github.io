@@ -1,4 +1,10 @@
 import { getFinishBehaviorMeta } from '../../data/finishBehaviorMeta';
+import {
+  STATIC_AVAILABILITY_OPTIONS,
+  allAvailabilityKeys,
+  expandAvailableAs,
+  type StoneAvailabilityOption,
+} from './availableAs';
 import type {
   StoneCardVM,
   StoneDetailVM,
@@ -36,7 +42,8 @@ export interface StoneDraft {
     slug: string;
     name: string;
     type: string;
-    availability: 'active' | 'tbc';
+    /** Published "Available as" option keys this stone is offered in. */
+    availableAs: string[];
     summary: string;
     sourceName: string;
     originRegion: string;
@@ -91,7 +98,6 @@ export interface StoneListItem {
   name: string;
   type: string;
   status: StoneLifecycle;
-  availability: 'active' | 'tbc';
   isTest: boolean;
   hasChanges: boolean;
   cover: string | null;
@@ -105,6 +111,8 @@ export interface StoneCatalogue {
   managedKeys: string[];
   stones: PublicStoneRecord[];
   finishes: StoneFinishDefinition[];
+  /** Absent only in a catalogue read before the Available as migration. */
+  availabilityOptions?: StoneAvailabilityOption[];
 }
 
 export function stoneSlug(name: string): string {
@@ -139,7 +147,11 @@ export function emptyVariant(
   };
 }
 
-export function emptyStone(finishes: StoneFinishDefinition[]): StoneDraft {
+/** A new stone is offered in every published option until the editor unticks one. */
+export function emptyStone(
+  finishes: StoneFinishDefinition[],
+  availabilityOptions: readonly StoneAvailabilityOption[] = [],
+): StoneDraft {
   return {
     schemaVersion: 1,
     stone: {
@@ -147,7 +159,7 @@ export function emptyStone(finishes: StoneFinishDefinition[]): StoneDraft {
       slug: '',
       name: '',
       type: '',
-      availability: 'active',
+      availableAs: allAvailabilityKeys(availabilityOptions),
       summary: '',
       sourceName: '',
       originRegion: '',
@@ -170,6 +182,7 @@ export function stoneDraftToDetail(
   definitions: StoneFinishDefinition[],
   media: readonly StoneMedia[],
   variantSlug?: string,
+  availabilityOptions: readonly StoneAvailabilityOption[] = STATIC_AVAILABILITY_OPTIONS,
 ): StoneDetailVM | null {
   const variants = draft.variants.filter((v) => v.enabled);
   const variant = variants.find((v) => v.slug === variantSlug) || variants[0];
@@ -222,12 +235,11 @@ export function stoneDraftToDetail(
     });
   const s = draft.stone;
   const tiers = { 1: 'Budget', 2: 'Balanced', 3: 'Premium' } as const;
-  const tier = s.availability === 'active' ? s.priceTier : null;
+  const tier = s.priceTier;
   return {
     stoneGroupId: s.slug,
     name: s.name,
     stoneType: s.type,
-    status: s.availability,
     originLabel: '',
     rawBlockLabel: [s.blockLength, s.blockWidth, s.blockHeight].every(Boolean)
       ? `${s.blockLength} × ${s.blockWidth} × ${s.blockHeight} mm`
@@ -237,16 +249,12 @@ export function stoneDraftToDetail(
     priceTierLevel: tier,
     priceTierLabel: tier ? tiers[tier] : null,
     pricePrimaryLabel: tier ? tiers[tier] : 'Price on request',
-    availabilityLabel:
-      s.availability === 'tbc'
-        ? 'Availability to be confirmed'
-        : 'Available for project sourcing',
+    availableAs: expandAvailableAs(availabilityOptions, s.availableAs),
     cutOptions: s.cutOptions,
     variants: variants.map((v) => ({
       stoneVariantId: v.slug,
       label: v.label || 'Standard',
       variantType: v.type,
-      status: s.availability,
       sortOrder: variants.indexOf(v),
     })),
     activeVariantId: variant.slug,
@@ -279,7 +287,6 @@ export function stoneRecordToCard(
     stoneGroupId: record.draft.stone.slug,
     name: record.draft.stone.name,
     stoneType: record.draft.stone.type,
-    status: record.draft.stone.availability,
     originLabel: '',
     finishCount: keys.length,
     availableFinishKeys: keys,
