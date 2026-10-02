@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "lastUpdated": "2026-10-01",
+  "lastUpdated": "2026-10-03",
   "currentTaskId": "NOW-ADMIN-STONE-WORKSPACE-001",
   "sourceOfTruth": {
     "currentState": "docs/agent/status.json",
@@ -10,12 +10,12 @@
     "adminHandoffEvidence": "docs/agent/admin-handoff-evidence.json"
   },
   "release": {
-    "observedAt": "2026-10-01",
-    "repositorySha": "c13aaae57abd8e8164a1ec4a5a364f549b165798",
-    "runtimeSha": "c13aaae57abd8e8164a1ec4a5a364f549b165798",
-    "verifiedRuntimeUrl": "https://9adb1c40.urblo-site.pages.dev",
-    "ciRunId": 36536434949,
-    "note": "Web fonts WOFF2 (#87) merged 2026-09-30 after wave 3: seven licensed brand fonts served as WOFF2 with TTF fallback, two first-viewport faces preloaded; production readback confirms font/woff2 responses and the preload links; measured homepage font transfer down 28%, on-disk 61%, rendering pixel-identical. This record does not deploy.",
+    "observedAt": "2026-10-03",
+    "repositorySha": "f87d6027085a02f9169bae3668d33fe44f2f0e76",
+    "runtimeSha": "f87d6027085a02f9169bae3668d33fe44f2f0e76",
+    "verifiedRuntimeUrl": "https://9fac331f.urblo-site.pages.dev",
+    "ciRunId": 37039983513,
+    "note": "Stone Library \"Available as\" (#89) released 2026-10-03: migration 20261003120000_stone_available_as.sql applied to production as recorded version 20261002171852 with Jay's SHA approval, then merge f87d602 deployed as immutable 9fac331f. SQL readback: 18/18 published stones offer blocks/pavers/cladding, 20/20 private drafts in the new shape, 58 history rows unchanged, option RPC service-role only. Immutable/apex/www deployment-bound smoke, production admin auth gate (10 routes) and public detail/list/compare/QR readback passed. Jay acceptance open.",
     "evidenceRefs": [
       "docs/WORKLOG.md"
     ]
@@ -76,8 +76,8 @@
     ]
   },
   "lastCompletedTask": {
-    "id": "NOW-OPT-WEB-FONTS-001",
-    "summary": "Licensed brand fonts served as WOFF2 with preloads, released 2026-09-30 and read back; wave 4 not yet registered."
+    "id": "NOW-STONE-AVAILABLE-AS-001",
+    "summary": "Editable \"Available as\" option list (Blocks, Pavers, Cladding) replaced the retired Available / Upcoming state; migration applied and runtime released 2026-10-03; Jay acceptance open."
   },
   "historicalObservations": "docs/archive/2026-09-26/manifest.json"
 }

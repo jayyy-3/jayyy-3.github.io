@@ -62,7 +62,7 @@
     {
       "id": "NOW-STONE-AVAILABLE-AS-001",
       "status": "now",
-      "phase": "release",
+      "phase": "awaiting_external",
       "priority": 1,
       "summary": "Replace the retired stone-level Available / Upcoming state with an editable \"Available as\" option list (Blocks, Pavers, Cladding) shown as Offered / Not offered on Stone detail, compare and QR pages.",
       "modules": [
@@ -102,18 +102,19 @@
       ],
       "evidenceRefs": [
         "docs/WORKLOG.md",
-        "docs/plans/TMP-stone-available-as.md"
+        "supabase/migrations/README.md"
       ],
       "authorization": {
         "source": "Jay approved the Available as plan (docs/plans/TMP-stone-available-as.md §0.2) on 2026-10-03, including the production backfill of all three options; the reviewer (Claude) delegated Phases 1-3 to the execution agent.",
         "included": [
-          "Branch implementation, isolated local tests, git push and PR with branch Preview."
+          "Branch implementation, isolated local tests, git push and PR with branch Preview.",
+          "Phase 4 executed 2026-10-03 after Jay confirmed migration SHA-256 452c026a…: production migration applied (recorded version 20261002171852), PR #89 merged as f87d602, production readback recorded in docs/WORKLOG.md."
         ],
         "excluded": [
-          "Merge to main, production migration and any production data/Storage write (Phase 4, reviewer with Jay's SHA confirmation), email, DNS, credentials."
+          "Email, DNS, credentials. No further production data write is authorized by this task."
         ]
       },
-      "nextAction": "Phase 4 (reviewer): Jay confirms the migration SHA; apply supabase/migrations/20261003120000_stone_available_as.sql to production and read back; merge the PR in the same window; production readback.",
+      "nextAction": "Jay reviews the live result (Stone detail Available as card, compare row, QR cell, admin options block and editor checkbox group); if accepted, the task is complete and the form filter remains a later candidate.",
       "notes": [
         "2026-10-03: Phases 1-3 implemented on claude/stone-available-as; isolated database fixture and synthetic local browser journey passed. Production database and main unchanged."
       ]
