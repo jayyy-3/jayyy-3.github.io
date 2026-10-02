@@ -3,7 +3,7 @@
 
 ## QR material decision page — 2026-09-09
 
-Use Jay’s selected option 1: a white, narrow mobile page with green supplied Urblo logo, light stone-name heading and fixed finish. Lead with the actual QR product 3D image, then a distinct real Stone Library surface image for that exact finish. Keep both inspectable with enlargement and zoom; preserve image proportions and never substitute a default stone image for an unavailable finish. Follow with a compact two-column Type / Availability / Raw block / Price range grid and library/enquiry actions. Use project-sourcing and indicative-tier qualifiers. No public site header, footer, welcome popup or finish picker appears on the QR page. The staff drawer selects stone → variant/cut direction → finish, previews the surface and distinguishes Default from Saved selections. This is a material decision surface; product-render and real-surface captions keep the evidence roles explicit.
+Use Jay’s selected option 1: a white, narrow mobile page with green supplied Urblo logo, light stone-name heading and fixed finish. Lead with the actual QR product 3D image, then a distinct real Stone Library surface image for that exact finish. Keep both inspectable with enlargement and zoom; preserve image proportions and never substitute a default stone image for an unavailable finish. Follow with a compact two-column Type / Available as / Raw block / Price range grid and library/enquiry actions. Use the indicative-tier qualifier; the Available as cell lists every published option with a lime dot for offered and a muted dash for not offered. No public site header, footer, welcome popup or finish picker appears on the QR page. The staff drawer selects stone → variant/cut direction → finish, previews the surface and distinguishes Default from Saved selections. This is a material decision surface; product-render and real-surface captions keep the evidence roles explicit.
 
 Last updated: 2026-07-19
 
@@ -215,12 +215,15 @@ Priorities:
 - texture visibility
 - finish comparison
 - compact filters
-- fast scan of type, tone, status, finish range, and price tier
+- fast scan of type, tone, finish range, available forms, and price tier
 - specs close to imagery
 - direct path to sample/contact behavior
 
 Public display rule:
 - Origin remains an internal sourcing/admin field but is intentionally omitted from public Stone Library cards, detail specifications, search matching, and route metadata.
+- Public pages no longer express a stone-level Available / Upcoming state (retired 2026-10-03). List cards, the detail hero, variant buttons and compare column heads carry no status pill.
+- `Available as` lists every published option (Blocks, Pavers, Cladding, …, in the admin order) and marks each one explicitly: a light lime `Offered` pill or a muted `Not offered` pill on the detail page; a lime dot or a dash plus visible `Not offered` text in compare; a lime dot or a muted dash on the QR page. Never list only the offered forms and never rely on colour alone.
+- Finish capability (`Available / Upcoming / No`), the compare finish legend (`Available / To be confirmed / Not offered`) and Cut options (`Available / No`) are finish- and cut-level states and keep their wording.
 
 Interaction rules:
 - Click or explicit controls should change material state. Hover may preview only when it does not create ambiguity.
@@ -231,7 +234,7 @@ Interaction rules:
 - Secondary frame thumbnails should appear only when approved source images exist; do not show placeholder secondary frames.
 - Finish imagery must disclose whether the active image is finish-specific, a reference/default view, or pending. Never let fallback imagery read as a confirmed finish photo.
 - A cover/reference image may not silently stand in for multiple finishes. When a finish has no truthful image, show an explicit quiet pending state and omit Zoom rather than repeating another finish's photograph.
-- Image overlay labels on Stone Library media, including list-card status badges and detail-stage provenance labels, must stay readable across light, dark, and patterned stone: use dark translucent backplates with white text, and reserve Urblo lime for small confirmed/interactive signals rather than broad label fills.
+- Image overlay labels on Stone Library media, such as detail-stage provenance labels, must stay readable across light, dark, and patterned stone: use dark translucent backplates with white text, and reserve Urblo lime for small confirmed/interactive signals rather than broad label fills.
 - Availability/status pills outside imagery should stay light: use a thin Urblo lime outline/wash and medium-weight type for confirmed available states, muted white/neutral pills for upcoming or unavailable states, and avoid heavy black status blocks or full lime badge fills in selectors or data tables.
 - Mobile layout must prioritize readable finish names and image inspection over decorative layout.
 - Placeholder usage must be visible enough to be honest but quiet enough not to dominate the tool.
@@ -546,12 +549,25 @@ Jay's decisions:
 - The sample request is linked in v1.
 
 Implementation:
-- Selection: each Stone Library card gets a full-width `Compare` row under a hairline, outside the card link, with a checkbox-style mark (lime check on a black-outlined square only when selected; the selected card's border turns black). The stone detail page shows the same control beside the type and status pills, plus a `Compare N stones` text link from two stones.
+- Selection: each Stone Library card gets a full-width `Compare` row under a hairline, outside the card link, with a checkbox-style mark (lime check on a black-outlined square only when selected; the selected card's border turns black). The stone detail page shows the same control beside the type pill, plus a `Compare N stones` text link from two stones.
 - Tray: a white-glass bar in the FilterBar family (hairline, soft upward shadow), sticky to the bottom of the list so it settles above the footer instead of covering it. It is not a modal and does not trap focus. Desktop shows `Compare n / 4`, `Clear`, one chip per stone (36px thumbnail, name, remove), dashed `Add a stone` slots up to four and a black `Compare N stones` button. At 375px the count, Clear and a short `Compare (N)` button share one row and the chips scroll. A fifth stone is refused with a visible note marked by a small lime dot; add and remove are announced to screen readers only.
 - Page: `PageIntro band` with `Home / Stone Library / Compare`, light H1, lede, black `Request samples` (CTA set; the link carries the stones) and ghost `Edit selection`. The empty state offers `Explore Stone Library`. Below it, a sticky control band holds the `Finish shown` chips (active chip uses the thin lime outline and wash, with an `n/N` offered count), the `Differences only` switch (black track, lime knob when on) and a hidden-row count. The table sits on the quiet surface band inside a hairline frame. The first column is sticky at every width, with an inset hairline. Stone columns are at least 208px, so 375px and 768px scroll horizontally with the labels fixed.
-- Column heads use the stone name in light Avenir with a small arrow to the detail page, a StatusPill and a quiet remove ×. Row labels are uppercase meta with the unit or hint in muted text.
+- Column heads use the stone name in light Avenir with a small arrow to the detail page and a quiet remove × (the stone status pill was retired on 2026-10-03; see Stone Library "Available as"). Row labels are uppercase meta with the unit or hint in muted text.
 - Finish images are 4:3 and link to the stone at that finish. A missing photograph shows a `Photo pending` panel; a finish the stone does not offer shows a dashed `Not offered in <finish>` panel. Another finish's photograph never stands in. A reference view carries a dark `Reference view` label, and the caption names the finish and the variant that is shown.
 - Capability uses the StatusPill dot language: a lime dot in a thin lime ring for available, a hollow dot with `TBC` for to be confirmed, and a light dash for not offered, with a one-line legend. Finishes no compared stone offers get no row. The price tier shows three short black bars (not lime: tier is not a state) under the label, with an "indicative, confirmed per project" note under the table.
 - A closing `Samples` band (section heading "See them in hand") repeats the sample CTA and names the stones that will be prefilled.
 
 Remember: the comparison is a decision surface. Photographs and facts stay primary, lime marks state only, and an attribute appears only when the registry marks it public.
+
+## Stone Library "Available as" — 2026-10-03
+
+Review: the stone-level `Available` / `Upcoming` pill told specifiers little and was repeated on cards, the detail hero, variant buttons, compare heads and the QR page. Jay asked instead to show which product forms a stone can be supplied as (NOW-STONE-AVAILABLE-AS-001).
+
+Jay's decisions:
+- The stone-level Available / Upcoming state is removed everywhere (public, compare, QR, admin). The list-card corner badge is removed and not replaced.
+- The detail card is titled `Available as` and lists every published option with Offered or Not offered, not only the offered ones. Each value is a simple tick (no to-be-confirmed state).
+- Options are managed in one `Available as options` block at the top of the admin Stone Library list: owner/admin edit, editor/viewer read. At release every live stone offers Blocks, Pavers and Cladding.
+
+Implementation: the detail specs grid keeps four cards; the second card lists one row per option with the existing StatusPill (`Offered` uses the light lime wash, `Not offered` the neutral pill and a muted name). Compare adds an `Available as` row after Type using the finish-capability dot language plus visible `Not offered` text; Differences only compares the offered state per option. The QR grid keeps two columns; its cell lists the options with a small lime dot or a muted dash. Admin: a summary line with `Manage`; managing shows Up / Down, Rename, Hide (inline confirmation explaining it removes the option from every stone) and a `Hidden options` disclosure with Restore. The stone editor's Basic information uses an `Available as` checkbox group.
+
+Remember: forms are facts about supply, not marketing badges. Lime marks the offered state only; text always carries the state.
