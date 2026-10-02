@@ -6,7 +6,6 @@ import PageIntro from '../ui/PageIntro';
 import SectionHeading from '../ui/SectionHeading';
 import { cx } from '../ui/styles';
 import { siteCtas } from '../../data/siteChrome';
-import StatusPill from './StatusPill';
 import StoneResponsiveImage from './StoneResponsiveImage';
 import {
     buildCompareRows,
@@ -112,6 +111,49 @@ function CapabilityLegend() {
                 Not offered
             </span>
         </span>
+    );
+}
+
+function OfferedMark({ offered }: { offered: boolean }) {
+    // Same dot language as the finish capability rows: lime dot in a thin lime ring for
+    // offered, a quiet dash for not offered. The visible label carries the state as text.
+    return offered ? (
+        <span
+            aria-hidden="true"
+            className="inline-flex h-5 w-5 flex-none items-center justify-center rounded-full border border-[rgba(0,255,25,0.55)] bg-[rgba(0,255,25,0.12)]"
+        >
+            <span className="h-1.5 w-1.5 rounded-full bg-lime" />
+        </span>
+    ) : (
+        <span aria-hidden="true" className="inline-flex h-5 w-5 flex-none items-center justify-center text-black/30">
+            –
+        </span>
+    );
+}
+
+function ChecklistCell({ cell }: { cell: CompareCellOf<'checklist'> }) {
+    if (!cell.entries.length) return <Muted>Confirm for your project</Muted>;
+    return (
+        <ul className="space-y-1.5">
+            {cell.entries.map((entry) => (
+                <li
+                    key={entry.label}
+                    data-offered={entry.offered}
+                    className="flex items-center gap-2 text-small"
+                >
+                    <OfferedMark offered={entry.offered} />
+                    <span className={cx('min-w-0 break-words', entry.offered ? 'text-ink' : 'text-muted')}>
+                        {entry.label}
+                        <span className="sr-only">{entry.offered ? ': offered' : ': not offered'}</span>
+                    </span>
+                    {entry.offered ? null : (
+                        <span aria-hidden="true" className="flex-none text-meta uppercase tracking-caps text-muted">
+                            Not offered
+                        </span>
+                    )}
+                </li>
+            ))}
+        </ul>
     );
 }
 
@@ -230,6 +272,8 @@ function ValueCell({ cell, stoneName, finishName }: { cell: CompareCell; stoneNa
             return <p className="text-copy text-ink">{cell.value ? 'Yes' : 'No'}</p>;
         case 'list':
             return cell.items.length ? <LinkList items={cell.items} /> : <Muted>Not listed</Muted>;
+        case 'checklist':
+            return <ChecklistCell cell={cell} />;
         case 'matrix':
             // Rendered as one row per finish by the table body.
             return null;
@@ -340,7 +384,7 @@ export default function StoneCompareView({
             title="Compare stones"
             lede={
                 stones.length
-                    ? 'Finish photography, availability tier, block size and project use, side by side.'
+                    ? 'Finish photography, available forms, price tier, block size and project use, side by side.'
                     : undefined
             }
             actions={
@@ -505,11 +549,6 @@ export default function StoneCompareView({
                                                         <X className="h-4 w-4" aria-hidden="true" />
                                                     </Link>
                                                 </div>
-                                                <StatusPill
-                                                    className="mt-3"
-                                                    label={detail.status === 'tbc' ? 'Upcoming' : 'Available'}
-                                                    tone={detail.status === 'tbc' ? 'upcoming' : 'available'}
-                                                />
                                             </th>
                                         );
                                     })}

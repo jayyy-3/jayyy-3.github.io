@@ -555,6 +555,15 @@ function checkPublicRuntimeBoundary() {
   requireIncludes(stoneService, "client.rpc('public_stone_catalogue')", 'One published catalogue read');
   const stoneWorkspaceSql=readRequired('supabase/migrations/20260910064551_stone_library_workspace.sql');
   requireIncludes(stoneWorkspaceSql, "where g.status='published'", 'Catalogue published-parent boundary');
+  // NOW-STONE-AVAILABLE-AS-001 redefines public_stone_catalogue(): the latest definition keeps
+  // the published-parent boundary and adds only published Available as options.
+  const stoneAvailableAsSql = readRequired('supabase/migrations/20261003120000_stone_available_as.sql');
+  requireIncludes(stoneAvailableAsSql, "where g.status='published'", 'Latest catalogue published-parent boundary');
+  requireIncludes(stoneAvailableAsSql, "'availabilityOptions'", 'Catalogue Available as option list');
+  requireIncludes(stoneAvailableAsSql, "from public.stone_availability_options where status='published'", 'Catalogue lists published options only');
+  requireNotIncludes(stoneSpecs, 'availabilityLabel', 'Retired stone-level availability label');
+  requireIncludes(stoneSpecs, 'Available as', 'Stone specs Available as card');
+  requireNotIncludes(stoneCard, 'StatusPill', 'Stone list card status badge removed');
   requireIncludes(stoneDetailPage, 'StoneLibraryService.getPublishedStoneDetail', 'Shared public catalogue detail');
   requireNotIncludes(stoneDetailPage, 'StoneLibraryService.getStoneDetail', 'Detail page cannot bypass managed tombstones');
   requireIncludes(stoneDetailPage, 'Try again', 'Production read failure has an explicit retry state');

@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "lastUpdated": "2026-10-01",
+  "lastUpdated": "2026-10-03",
   "archive": "docs/archive/2026-09-09/completed-tasks.json",
   "tasks": [
     {
@@ -58,6 +58,65 @@
       },
       "nextAction": "Jay performs the five-minute image replacement/publish acceptance in production. Complete live Viewer proof only after explicit approval for the named QA account role change; broader CMS handoff remains separate.",
       "blocker": "Jay usability acceptance; automatic review requires specific approval to temporarily change QA Editor b0af7050-2565-4da5-ab26-3f2d5b2efc96 to Viewer and restore Editor."
+    },
+    {
+      "id": "NOW-STONE-AVAILABLE-AS-001",
+      "status": "now",
+      "phase": "release",
+      "priority": 1,
+      "summary": "Replace the retired stone-level Available / Upcoming state with an editable \"Available as\" option list (Blocks, Pavers, Cladding) shown as Offered / Not offered on Stone detail, compare and QR pages.",
+      "modules": [
+        "stone-library",
+        "qr"
+      ],
+      "files": [
+        "supabase/migrations/20261003120000_stone_available_as.sql",
+        "functions/_lib/admin-stones.js",
+        "src/features/stone-library/availableAs.ts",
+        "src/features/stone-library/stoneDraft.ts",
+        "src/service/StoneLibraryService.ts",
+        "src/components/stone-library/SpecsPanel.tsx",
+        "src/lib/stoneCompareRegistry.ts",
+        "src/components/image-qr/ImageQrPageView.tsx",
+        "src/pages/admin/AdminStoneLibraryPage.tsx",
+        "src/pages/admin/stone-library/AvailableAsOptions.tsx",
+        "scripts/fixtures/stone-workspace.sql"
+      ],
+      "acceptance": [
+        "Public pages show no stone-level Available / Upcoming / Available for project sourcing; list cards carry no status badge.",
+        "Detail Available as card, compare Available as row and QR Available as cell list every published option with a visible Offered / Not offered state; no horizontal overflow at 390px.",
+        "Only owner/admin add, rename, reorder, hide and restore options; editor/viewer see the summary only and the API refuses with a translated message; hiding removes the key from every stone and private draft; restore never re-ticks; new stones default to every published option.",
+        "Single-transaction expand-only migration with read-back self-check; no column dropped; history snapshots unchanged; after Phase 4 every published production stone offers all three options.",
+        "Jay accepts the result (not self-certified)."
+      ],
+      "verification": [
+        "npm run gate",
+        "npm run agent:stone-workspace",
+        "npm run agent:admin-crud-coverage",
+        "npm run agent:public-supabase-readiness",
+        "npm run agent:supabase-foundation-readiness",
+        "npm run agent:stone-library-detail",
+        "npm run agent:admin-cms-predeploy",
+        "npm run agent:admin-config-gate",
+        "scripts/fixtures/stone-workspace.sql on a disposable database (manual)"
+      ],
+      "evidenceRefs": [
+        "docs/WORKLOG.md",
+        "docs/plans/TMP-stone-available-as.md"
+      ],
+      "authorization": {
+        "source": "Jay approved the Available as plan (docs/plans/TMP-stone-available-as.md §0.2) on 2026-10-03, including the production backfill of all three options; the reviewer (Claude) delegated Phases 1-3 to the execution agent.",
+        "included": [
+          "Branch implementation, isolated local tests, git push and PR with branch Preview."
+        ],
+        "excluded": [
+          "Merge to main, production migration and any production data/Storage write (Phase 4, reviewer with Jay's SHA confirmation), email, DNS, credentials."
+        ]
+      },
+      "nextAction": "Phase 4 (reviewer): Jay confirms the migration SHA; apply supabase/migrations/20261003120000_stone_available_as.sql to production and read back; merge the PR in the same window; production readback.",
+      "notes": [
+        "2026-10-03: Phases 1-3 implemented on claude/stone-available-as; isolated database fixture and synthetic local browser journey passed. Production database and main unchanged."
+      ]
     },
     {
       "id": "NOW-FORMS-SUPABASE-001",

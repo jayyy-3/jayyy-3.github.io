@@ -7,6 +7,7 @@ import {
 import { getPublicContentClient, isPublicContentConfigured } from '../lib/publicContentClient';
 import { resolvePublicMediaUrl } from '../lib/publicMediaUrl';
 import { stoneDraftToDetail, stoneRecordToCard, type StoneCatalogue } from '../features/stone-library/stoneDraft';
+import { STATIC_AVAILABILITY_OPTIONS, expandAvailableAs } from '../features/stone-library/availableAs';
 import type { OptionItem } from '../types/product';
 import type {
     FinishCapabilityVM,
@@ -23,7 +24,6 @@ import type {
     StoneLibraryRaw,
     StonePriceTierLabel,
     StonePriceTierLevel,
-    StoneStatus,
     StoneVariantRaw,
 } from '../types/stone-library';
 
@@ -46,16 +46,6 @@ function toTitleCase(token: string): string {
     return token
         .replace(/[-_]/g, ' ')
         .replace(/\b\w/g, (char) => char.toUpperCase());
-}
-
-function toStatusLabel(status: StoneStatus): string {
-    return status === 'tbc' ? 'Upcoming' : 'Available';
-}
-
-function toAvailabilityLabel(status: StoneStatus): string {
-    return status === 'tbc'
-        ? 'Upcoming (TBC)'
-        : 'Available for project sourcing';
 }
 
 function normalizeText(value: string): string {
@@ -121,7 +111,8 @@ function toPricePresentation(stone: StoneGroupRaw): {
 } {
     const priceRange = stone.price.source?.trim() || 'Price on request';
 
-    if (stone.status !== 'active' || !isPriceTierLevel(stone.price.tier)) {
+    // Price depends on the tier only; the retired stone status no longer affects rendering.
+    if (!isPriceTierLevel(stone.price.tier)) {
         return {
             priceRange,
             priceTierLevel: null,
@@ -279,7 +270,6 @@ function mapStoneCard(stone: StoneGroupRaw): StoneCardVM {
     return {
         stoneGroupId: stone.stoneGroupId,
         name: stone.displayName,
-        status: stone.status,
         stoneType: stone.type.display,
         originLabel: toOriginLabel(stone),
         finishCount: availableFinishKeys.length,
@@ -437,7 +427,9 @@ async function loadCatalogue(): Promise<StoneCatalogue | null> {
     const { data, error } = await client.rpc('public_stone_catalogue');
     if (error || !isCatalogueEnvelope(data)) throw new Error('Stone catalogue unavailable');
     const catalogue: StoneCatalogue = data;
-    return { ...catalogue, stones: catalogue.stones.map((record) => ({ ...record,
+    // A catalogue read before the Available as migration has no option list: use the fallback set.
+    const availabilityOptions = Array.isArray(catalogue.availabilityOptions) ? catalogue.availabilityOptions : [...STATIC_AVAILABILITY_OPTIONS];
+    return { ...catalogue, availabilityOptions, stones: catalogue.stones.map((record) => ({ ...record,
         media: record.media.map((m) => {
             const raw = m as typeof m & { sourceUrl: string | null; bucket: string | null; objectPath: string | null };
             return { ...m, url: resolvePublicMediaUrl({status: m.status, source_kind: raw.bucket ? 'storage' : 'external', source_url: raw.sourceUrl, bucket: raw.bucket, object_path: raw.objectPath}, client) || null };
@@ -489,7 +481,7 @@ class StoneLibraryService {
         const catalogue = await this.getCatalogue();
         if (!catalogue) return this.getStoneDetail(stoneGroupId, variantId);
         const record = catalogue.stones.find((s) => s.draft.stone.slug === stoneGroupId);
-        if (record) return stoneDraftToDetail(record.draft, catalogue.finishes, record.media, variantId);
+        if (record) return stoneDraftToDetail(record.draft, catalogue.finishes, record.media, variantId, catalogue.availabilityOptions);
         return catalogue.managedKeys.includes(stoneGroupId) ? null : this.getStoneDetail(stoneGroupId, variantId);
     }
 
@@ -518,7 +510,7 @@ class StoneLibraryService {
             if (catalogue && record) {
                 const variants = record.draft.variants
                     .filter((variant) => variant.enabled)
-                    .map((variant) => stoneDraftToDetail(record.draft, catalogue.finishes, record.media, variant.slug))
+                    .map((variant) => stoneDraftToDetail(record.draft, catalogue.finishes, record.media, variant.slug, catalogue.availabilityOptions))
                     .filter((detail): detail is StoneDetailVM => Boolean(detail));
                 entry = variants[0] ? { detail: variants[0], variants } : null;
             } else if (!catalogue?.managedKeys.includes(stoneGroupId)) {
@@ -593,7 +585,6 @@ class StoneLibraryService {
         return {
             stoneGroupId: stone.stoneGroupId,
             name: stone.displayName,
-            status: stone.status,
             stoneType: stone.type.display,
             originLabel: toOriginLabel(stone),
             rawBlockLabel: toRawBlockLabel(stone),
@@ -602,13 +593,13 @@ class StoneLibraryService {
             priceTierLevel: pricePresentation.priceTierLevel,
             priceTierLabel: pricePresentation.priceTierLabel,
             pricePrimaryLabel: pricePresentation.pricePrimaryLabel,
-            availabilityLabel: toAvailabilityLabel(stone.status),
+            // Static records carry no selection: every fallback option is offered.
+            availableAs: expandAvailableAs(STATIC_AVAILABILITY_OPTIONS, undefined),
             cutOptions: stone.cutOptions,
             variants: sortedVariants.map((variant) => ({
                 stoneVariantId: variant.stoneVariantId,
                 label: variant.displayVariant || 'Standard',
                 variantType: variant.variantType,
-                status: variant.status,
                 sortOrder: variant.sortOrder,
             })),
             activeVariantId: activeVariant.stoneVariantId,
@@ -659,10 +650,6 @@ class StoneLibraryService {
                 };
             })
             .sort((a, b) => a.name.localeCompare(b.name));
-    }
-
-    static getStatusLabel(status: StoneStatus): string {
-        return toStatusLabel(status);
     }
 }
 

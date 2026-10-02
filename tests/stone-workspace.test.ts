@@ -11,6 +11,7 @@ import {
 } from '../src/features/stone-library/stoneDraft.ts';
 import {
   validateStoneDraft,
+  validateOptionWrite,
   handleStoneRequest,
   publishedMediaIds,
 } from '../functions/_lib/admin-stones.js';
@@ -142,6 +143,71 @@ test('flush waits for the latest draft before publication or navigation can proc
   assert.equal(navigated, true);
   q.dispose();
 });
+test('Available as validation strips the retired state, de-duplicates and rejects invalid keys', () => {
+  const legacy = { ...draft(), stone: { ...draft().stone, availability: 'tbc', availableAs: ['blocks', 'blocks', 'pavers'] } };
+  const clean = validateStoneDraft(legacy);
+  assert.equal('availability' in clean.stone, false);
+  assert.deepEqual(clean.stone.availableAs, ['blocks', 'pavers']);
+  for (const bad of [undefined, 'blocks', ['Blocks'], ['ok', 7], Array.from({ length: 25 }, (_, i) => `k${i}`)]) {
+    const d = draft();
+    d.stone.availableAs = bad;
+    assert.throws(() => validateStoneDraft(d), /Available as/);
+  }
+});
+test('option writes are validated, owner/admin only, and forwarded to the option RPC', async () => {
+  assert.deepEqual(
+    validateOptionWrite({ action: 'availability-option', op: 'create', requestId: crypto.randomUUID(), option: { name: '  Kerbs ', extra: 1 } }).option,
+    { name: 'Kerbs' },
+  );
+  for (const bad of [
+    { action: 'availability-option', op: 'delete', requestId: crypto.randomUUID(), option: { id: 1 } },
+    { action: 'availability-option', op: 'create', requestId: 'nope', option: { name: 'Kerbs' } },
+    { action: 'availability-option', op: 'create', requestId: crypto.randomUUID(), option: { name: 'x'.repeat(61) } },
+    { action: 'availability-option', op: 'reorder', requestId: crypto.randomUUID(), option: { ids: [1, 1] } },
+    { action: 'availability-option', op: 'archive', requestId: crypto.randomUUID(), option: { id: 'one' } },
+  ])
+    assert.throws(() => validateOptionWrite(bad));
+  const post = (client, body) =>
+    handleStoneRequest(
+      new Request('https://fixture.invalid/api/admin/stone-library', {
+        method: 'POST',
+        headers: { authorization: 'Bearer fixture' },
+        body: JSON.stringify(body),
+      }),
+      {},
+      { client },
+    );
+  const body = { action: 'availability-option', op: 'create', requestId: crypto.randomUUID(), option: { name: 'Kerbs' } };
+  const editor = clientFor('editor').client;
+  editor.rpc = () => {
+    throw new Error('must not mutate');
+  };
+  const denied = await post(editor, body);
+  assert.equal(denied.status, 403);
+  assert.equal((await denied.json()).message, 'Only owners and admins can change these options.');
+  const calls = [];
+  const owner = clientFor('owner').client;
+  owner.rpc = async (name, args) => {
+    calls.push([name, args]);
+    return { data: { published: [{ id: 4, key: 'kerbs', name: 'Kerbs', sortOrder: 40 }], archived: [] }, error: null };
+  };
+  const created = await post(owner, body);
+  assert.equal(created.status, 200);
+  assert.equal(calls[0][0], 'admin_stone_availability_options');
+  assert.deepEqual(calls[0][1], { p_action: 'create', p_actor: '00000000-0000-4000-8000-000000000091', p_role: 'owner', p_request_id: body.requestId, p_option: { name: 'Kerbs' } });
+  owner.rpc = async () => ({ data: null, error: { code: '23505', message: 'stone_option_duplicate' } });
+  const duplicate = await post(owner, { ...body, requestId: crypto.randomUUID() });
+  assert.equal(duplicate.status, 409);
+  assert.equal((await duplicate.json()).message, 'An option with this name already exists.');
+  owner.rpc = async () => ({ data: null, error: { code: '23514', message: 'stone_availability_option_unavailable' } });
+  const stale = await post(owner, { action: 'save', requestId: crypto.randomUUID(), stoneId: null, revision: 0, liveVersion: null, draft: draft() });
+  assert.equal((await stale.json()).message, 'One of the selected options is no longer available. Reload the page.');
+  const viewer = clientFor('viewer').client;
+  viewer.rpc = async (name, args) => ({ data: { published: [], archived: [], name, role: args.p_role }, error: null });
+  const listed = await get('?view=availability-options', viewer);
+  assert.equal(listed.status, 200);
+  assert.deepEqual(await listed.json(), { published: [], archived: [], name: 'admin_stone_availability_options', role: 'viewer' });
+});
 test('whole draft validation rejects forged shapes and duplicate child ownership IDs', () => {
   assert.equal(validateStoneDraft(draft()).stone.name, 'Fixture');
   for (const bad of [
@@ -163,7 +229,7 @@ test('whole draft validation rejects forged shapes and duplicate child ownership
 });
 test('preview uses exact finish photography and never fills Sawn with Flamed', () => {
   const d = draft();
-  d.stone.availability = 'tbc';
+  d.stone.availableAs = ['pavers'];
   d.stone.originCountry = 'Internal origin';
   d.variants[0].finishes[0].images = [
     { id: null, key: 'one', mediaAssetId: 22, role: 'primary' },
@@ -181,7 +247,14 @@ test('preview uses exact finish photography and never fills Sawn with Flamed', (
   assert.equal(vm.finishes[0].imageUrl, 'https://local.invalid/flamed.jpg');
   assert.equal(vm.finishes[1].imageUrl, undefined);
   assert.equal(vm.finishes[1].imageRole, 'placeholder');
-  assert.equal(vm.status, 'tbc');
+  assert.deepEqual(
+    vm.availableAs.map((o) => [o.key, o.offered]),
+    [
+      ['blocks', false],
+      ['pavers', true],
+      ['cladding', false],
+    ],
+  );
   assert.equal(vm.originLabel, '');
   d.variants[0].enabled = false;
   assert.deepEqual(publishedMediaIds(d), []);
@@ -473,13 +546,14 @@ test('failed copy and failed commit compensate only public copies; uncertain com
   }
 });
 test('source retains protected boundary, parent ownership, reference serialization and tombstones', async () => {
-  const [sql, lock, api, editor, service] = await Promise.all(
+  const [sql, lock, api, editor, service, availableAs] = await Promise.all(
     [
       'supabase/migrations/20260910064551_stone_library_workspace.sql',
       'supabase/migrations/20260910065803_stone_library_reference_lockdown.sql',
       'functions/_lib/admin-stones.js',
       'src/pages/admin/AdminStoneLibraryPage.tsx',
       'src/service/StoneLibraryService.ts',
+      'supabase/migrations/20261003120000_stone_available_as.sql',
     ].map((f) => readFile(f, 'utf8')),
   );
   for (const needle of [
@@ -493,6 +567,20 @@ test('source retains protected boundary, parent ownership, reference serializati
     'stone_in_use',
   ])
     assert.ok(sql.includes(needle), needle);
+  // The Available as migration redefines the workspace RPC; its latest body keeps every guard.
+  for (const needle of [
+    'stone_variant_mismatch',
+    'stone_image_mismatch',
+    'stone_conflict',
+    'stone_request_reused',
+    'private.stone_history',
+    'stone_in_use',
+    'stone_availability_option_unavailable',
+    'stone_option_forbidden',
+  ])
+    assert.ok(availableAs.includes(needle), `latest ${needle}`);
+  assert.ok(!/drop\s+column/i.test(availableAs), 'Available as migration drops no column');
+  assert.ok(!/update\s+private\.stone_history/i.test(availableAs), 'history snapshots are not rewritten');
   assert.match(
     lock,
     /before insert or update or delete[\s\S]+for each statement/,

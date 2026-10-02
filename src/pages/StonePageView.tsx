@@ -4,7 +4,6 @@ import FinishLightbox from '../components/stone-library/FinishLightbox';
 import ImageStage from '../components/stone-library/ImageStage';
 import SpecsPanel from '../components/stone-library/SpecsPanel';
 import StoneProjectsSection from '../components/stone-library/StoneProjectsSection';
-import StatusPill from '../components/stone-library/StatusPill';
 import StoneDetailCompare from '../components/stone-library/StoneDetailCompare';
 import VariantSwitch from '../components/stone-library/VariantSwitch';
 import PublicContentSeo from '../components/PublicContentSeo';
@@ -16,9 +15,6 @@ import PageIntro from '../components/ui/PageIntro';
 import SectionHeading from '../components/ui/SectionHeading';
 import { siteContact } from '../data/siteChrome';
 
-function statusLabel(status: 'active' | 'tbc') {
-  return status === 'tbc' ? 'Upcoming' : 'Available';
-}
 export default function StonePageView({
   detail,
   onVariantChange,
@@ -106,10 +102,6 @@ export default function StonePageView({
             <span className="rounded border border-line bg-surface px-3 py-1 text-micro font-semibold uppercase tracking-caps text-ink">
               {detail.stoneType}
             </span>
-            <StatusPill
-              label={statusLabel(detail.status)}
-              tone={detail.status === 'tbc' ? 'upcoming' : 'available'}
-            />
             {!preview ? (
               <StoneDetailCompare stoneGroupId={detail.stoneGroupId} stoneName={detail.name} />
             ) : null}
@@ -166,8 +158,7 @@ export default function StonePageView({
             <SpecsPanel
               stoneType={detail.stoneType}
               rawBlockLabel={detail.rawBlockLabel}
-              availabilityStatus={detail.status}
-              availabilityLabel={detail.availabilityLabel}
+              availableAs={detail.availableAs}
               priceRange={detail.priceRange}
               priceTierLevel={detail.priceTierLevel}
               priceTierLabel={detail.priceTierLabel}

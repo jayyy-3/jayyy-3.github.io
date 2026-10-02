@@ -24,7 +24,7 @@ describe('StoneCompareView', () => {
         expect(html).toContain('data-compare-count="3"');
         for (const stone of stones) expect(html).toContain(`Remove ${stone.detail.name} from comparison`);
         const keys = rowKeys(html);
-        for (const key of ['finish-image', 'type', 'price-tier', 'finish-capability', 'cut-options', 'raw-block', 'variants', 'used-in-projects']) {
+        for (const key of ['finish-image', 'type', 'available-as', 'price-tier', 'finish-capability', 'cut-options', 'raw-block', 'variants', 'used-in-projects']) {
             expect(keys).toContain(key);
         }
         expect(keys.filter((key) => key.startsWith('finish-capability:')).length).toBeGreaterThan(0);
@@ -81,6 +81,26 @@ describe('StoneCompareView', () => {
         expect(differences).not.toContain('type');
         expect(differences).toContain('price-tier');
         expect(differences.length).toBeLessThan(all.length);
+    });
+
+    it('shows Available as with visible states and no stone-level status pill', () => {
+        const juparana = staticSubject('juparana');
+        juparana.detail = {
+            ...juparana.detail,
+            availableAs: [
+                { key: 'blocks', label: 'Blocks', offered: true },
+                { key: 'pavers', label: 'Pavers', offered: false },
+            ],
+        };
+        const html = render({ stones: [juparana, staticSubject('zen-grey')] });
+        expect(rowKeys(html)).toContain('available-as');
+        expect(html).toContain('Available as');
+        expect(html).toContain('Not offered');
+        expect(html).toContain('data-offered="false"');
+        expect(html).not.toContain('data-status-pill');
+        // Finish capability keeps its own legend; the stone column heads carry no state.
+        const head = html.slice(html.indexOf('<thead>'), html.indexOf('</thead>'));
+        expect(head).not.toMatch(/Available|Upcoming/);
     });
 
     it('links the sample request CTA with the stones prefilled', () => {

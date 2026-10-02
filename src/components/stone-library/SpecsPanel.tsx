@@ -1,6 +1,6 @@
 import type {
     FinishCapabilityVM,
-    StoneStatus,
+    StoneAvailableAsVM,
     StoneCutOptionRaw,
     StonePriceTierLabel,
     StonePriceTierLevel,
@@ -12,8 +12,7 @@ import type { StatusPillTone } from './StatusPill';
 interface SpecsPanelProps {
     stoneType: string;
     rawBlockLabel: string;
-    availabilityStatus: StoneStatus;
-    availabilityLabel: string;
+    availableAs: StoneAvailableAsVM[];
     priceRange: string;
     priceTierLevel: StonePriceTierLevel | null;
     priceTierLabel: StonePriceTierLabel | null;
@@ -42,10 +41,6 @@ function capabilityTone(capability: FinishCapabilityVM['capability']): StatusPil
     return 'unavailable';
 }
 
-function availabilityBadgeLabel(status: StoneStatus): string {
-    return status === 'tbc' ? 'Upcoming' : 'Available';
-}
-
 function cutOrientationLabel(value: string): string {
     return value
         .replace(/[-_]/g, ' ')
@@ -55,8 +50,7 @@ function cutOrientationLabel(value: string): string {
 export default function SpecsPanel({
     stoneType,
     rawBlockLabel,
-    availabilityStatus,
-    availabilityLabel,
+    availableAs,
     priceRange,
     priceTierLevel,
     priceTierLabel,
@@ -74,15 +68,38 @@ export default function SpecsPanel({
                     <p className="mt-2 text-base text-black">{stoneType}</p>
                 </div>
                 <div className="rounded-[4px] border border-black/10 bg-white p-4 shadow-none">
-                    <p className="urblo-meta text-black/55">
-                        Availability
+                    <p className="urblo-meta text-black/55" id="stone-available-as">
+                        Available as
                     </p>
-                    <StatusPill
-                        label={availabilityBadgeLabel(availabilityStatus)}
-                        tone={availabilityStatus === 'tbc' ? 'upcoming' : 'available'}
-                        className="mt-3"
-                    />
-                    <p className="mt-3 text-sm leading-6 text-black/62">{availabilityLabel}</p>
+                    {availableAs.length ? (
+                        // Every published option is listed with an explicit text state, never colour alone.
+                        <ul className="mt-3 space-y-2" aria-labelledby="stone-available-as">
+                            {availableAs.map((option) => (
+                                <li
+                                    key={option.key}
+                                    data-available-as={option.key}
+                                    data-offered={option.offered}
+                                    className="flex items-center justify-between gap-3 text-sm"
+                                >
+                                    <span
+                                        className={[
+                                            'min-w-0 break-words',
+                                            option.offered ? 'text-black' : 'text-black/55',
+                                        ].join(' ')}
+                                    >
+                                        {option.label}
+                                    </span>
+                                    <StatusPill
+                                        label={option.offered ? 'Offered' : 'Not offered'}
+                                        tone={option.offered ? 'available' : 'unavailable'}
+                                        className="flex-none"
+                                    />
+                                </li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <p className="mt-2 text-base text-black">Confirm for your project</p>
+                    )}
                 </div>
                 <div className="rounded-[4px] border border-black/10 bg-white p-4 shadow-none">
                     <p className="urblo-meta text-black/55">

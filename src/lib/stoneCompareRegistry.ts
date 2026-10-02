@@ -18,7 +18,7 @@ import type {
     StoneFinishImageRole,
 } from '../types/stone-library';
 
-export type CompareAttributeKind = 'text' | 'number' | 'boolean' | 'matrix' | 'image' | 'list';
+export type CompareAttributeKind = 'text' | 'number' | 'boolean' | 'matrix' | 'image' | 'list' | 'checklist';
 
 export interface CompareLink {
     label: string;
@@ -45,7 +45,9 @@ export type CompareCell =
           caption?: string;
           to?: string;
       }
-    | { kind: 'list'; items: CompareLink[] };
+    | { kind: 'list'; items: CompareLink[] }
+    /** Every option with an explicit offered state (Available as). */
+    | { kind: 'checklist'; entries: { label: string; offered: boolean }[] };
 
 export type CompareCellOf<K extends CompareAttributeKind> = Extract<CompareCell, { kind: K }>;
 
@@ -175,6 +177,18 @@ export const stoneCompareRegistry: readonly StoneCompareAttribute[] = [
         resolve: ({ detail }) => ({ kind: 'text', text: detail.stoneType || null }),
     },
     {
+        key: 'available-as',
+        label: 'Available as',
+        kind: 'checklist',
+        public: true,
+        order: 25,
+        source: 'StoneDetailVM.availableAs (published options ∩ stone selection)',
+        resolve: ({ detail }) => ({
+            kind: 'checklist',
+            entries: detail.availableAs.map((option) => ({ label: option.label, offered: option.offered })),
+        }),
+    },
+    {
         key: 'price-tier',
         label: 'Price tier',
         hint: 'Indicative',
@@ -298,7 +312,7 @@ function linkSignature(links: readonly CompareLink[] | undefined): string {
  * linked labels) · boolean: value · list: the same set of labels in any order · image: the
  * same state and the same photograph (two stones never share one, so images differ unless
  * every column is equally without a photograph) · matrix: compared per finish by the row
- * builder, never as a whole.
+ * builder, never as a whole · checklist: the same offered state for every option label.
  */
 export function areCompareCellsEqual(a: CompareCell, b: CompareCell): boolean {
     if (a.kind !== b.kind) return false;
@@ -318,6 +332,14 @@ export function areCompareCellsEqual(a: CompareCell, b: CompareCell): boolean {
             return a.value === (b as CompareCellOf<'boolean'>).value;
         case 'list':
             return linkSignature(a.items) === linkSignature((b as CompareCellOf<'list'>).items);
+        case 'checklist': {
+            const signature = (cell: CompareCellOf<'checklist'>) =>
+                cell.entries
+                    .map((entry) => `${normalizeText(entry.label)}:${entry.offered ? 1 : 0}`)
+                    .sort()
+                    .join('|');
+            return signature(a) === signature(b as CompareCellOf<'checklist'>);
+        }
         case 'image': {
             const other = b as CompareCellOf<'image'>;
             return a.state === other.state && (a.src ?? null) === (other.src ?? null);

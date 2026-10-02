@@ -42,8 +42,8 @@ Stone detail interaction and Stone Library data contract. Admin workspace: `docs
 ## Stone Library Comparison Contract (NOW-STONE-COMPARE-001)
 - Selection (`src/lib/stoneCompareSelection.ts`): ordered stone ids, max 4; list cards (`StoneCard`) and the detail page (`StoneDetailCompare`) toggle it. The list keeps it in `?compare=a,b` (a URL selection wins on arrival) and localStorage `urblo:stone-compare`; the detail page uses storage only. The list tray (`CompareTray`) is sticky to the list bottom; a fifth stone is refused with a visible message; unknown ids are dropped once the list loads.
 - Route `/stone-library/compare?stones=a,b,c` (lazy `StoneComparePage`, before `:stoneGroupId`; `compare` is a reserved slug). Ids beyond 4 and ids that are not public stones are left out with a notice; none shows an empty state linking back. `StoneLibraryService.getPublishedStoneComparison` reads the catalogue once with Published-first precedence, per enabled variant; Project usage comes from `findStoneProjectUsages` and never blocks the page.
-- Registry rule (`src/lib/stoneCompareRegistry.ts`): the page renders only `getPublicCompareAttributes()` in `order`; it never hard-codes an attribute. Descriptor: `key, label, unit?, hint?, kind (text|number|boolean|matrix|image|list), public, order, source, resolve(stone, ctx)`. v1: finish image (shared finish switch, sized `card` variants, pending/not-offered states, never another finish's photo), type, price tier, finish capability (per finish across variants), cut options, raw block, variants, used in projects. Origin is `public: false`; finish behaviour text is excluded. Tests cover both.
-- Differences only: text by normalised value and meter, number by value and links, boolean by value, list as a label set, image by state and source, matrix per finish (rows no stone offers are omitted).
+- Registry rule (`src/lib/stoneCompareRegistry.ts`): the page renders only `getPublicCompareAttributes()` in `order`; it never hard-codes an attribute. Descriptor: `key, label, unit?, hint?, kind (text|number|boolean|matrix|image|list|checklist), public, order, source, resolve(stone, ctx)`. v1: finish image (shared finish switch, sized `card` variants, pending/not-offered states, never another finish's photo), type, Available as (`checklist` kind, order 25), price tier, finish capability (per finish across variants), cut options, raw block, variants, used in projects. Origin is `public: false`; finish behaviour text is excluded. Tests cover both.
+- Differences only: checklist by offered state per option label, text by normalised value and meter, number by value and links, boolean by value, list as a label set, image by state and source, matrix per finish (rows no stone offers are omitted).
 - Sample CTA links to `/contact?intent=sample-request&stone=<names>` (existing prefill, 160 characters); no Contact change.
 - SEO: noindex, canonical `/stone-library`, out of the sitemap (utility route in `src/data/seoRoutes.ts`; edge honours it).
 - Future: attribute definitions become CMS-managed once Stone data is fully in the CMS; the descriptor shape is the contract to keep.
@@ -60,6 +60,7 @@ Stone detail interaction and Stone Library data contract. Admin workspace: `docs
     - `priceTierLevel` (`1 | 2 | 3 | null`)
     - `priceTierLabel` (`Budget | Balanced | Premium | null`)
     - `pricePrimaryLabel` (`Budget | Balanced | Premium | Price on request`)
+  - `availableAs: { key, label, offered }[]`: every published option, in order; static/pre-migration records offer all (`src/features/stone-library/availableAs.ts`). No stone-level `status`/`availabilityLabel` on any VM.
 - Service contract: `src/service/StoneLibraryService.ts`
   - `getStoneCards(filters)`
   - `getStoneDetail(stoneGroupId, variantId?)`
@@ -67,8 +68,7 @@ Stone detail interaction and Stone Library data contract. Admin workspace: `docs
   - `getStoneOptionsForProducts()`
   - `getStoneGroupOptionsForProducts()`
   - Price mapping contract in `getStoneDetail`:
-    - Active stones with valid tier (`1/2/3`) map to `Budget/Balanced/Premium`.
-    - `tbc` status or missing/invalid tier degrades to `Price on request`.
+    - A valid tier (`1/2/3`) maps to `Budget/Balanced/Premium`; a missing/invalid tier degrades to `Price on request`. The retired `tbc` status no longer affects price.
 - Supplemental metadata:
   - `src/data/finishBehaviorMeta.ts`
   - `src/data/stoneFinishImages.ts`

@@ -149,7 +149,9 @@ const stones = raw.stones.map((stone) => {
       slug: stone.stoneGroupId,
       name: stone.displayName,
       type: stone.type.display,
-      availability: stone.status,
+      // NOW-STONE-AVAILABLE-AS-001: the retired stone status is replaced by the approved
+      // default selection of every seeded option.
+      availableAs: ['blocks', 'pavers', 'cladding'],
       summary: '',
       sourceName: stone.sourceName || '',
       originRegion: stone.origin.regionDisplay || '',
@@ -181,7 +183,7 @@ const stones = raw.stones.map((stone) => {
     oldStatus: existing.status,
     oldName: existing.display_name,
     newName: stone.displayName,
-    availability: stone.status,
+    availableAs: ['blocks', 'pavers', 'cladding'],
     imageCount,
     preserveVariantIds: variants.map((v) => v.id),
     retireVariantIds: removedVariants.map((v) => v.id),

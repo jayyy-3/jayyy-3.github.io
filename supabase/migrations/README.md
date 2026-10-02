@@ -42,6 +42,10 @@ Applied production migrations:
 - `20260802103337_restrict_archived_project_tombstones.sql` — applied/read back on 2026-08-02 after separate migration-only approval. It limits the public RPC to archived canonical Projects intersecting the five bundled fallback slugs, never reads private drafts, and changed the live result from four QA slugs to the expected empty list without changing content rows.
 - `20260802105537_project_aggregate_write_lockdown.sql` — applied/read back on 2026-08-02 after separate migration-only approval and aggregate runtime promotion. It removes authenticated direct writes from all six Project tables/sequences and legacy mutation policies, retains the service-role aggregate path, and hardens public parent/child reads. Do not Cloudflare-only roll back to the legacy direct-write UI.
 
+Pending production migration (not applied; Phase 4 of NOW-STONE-AVAILABLE-AS-001 needs Jay's confirmation of the exact SHA):
+
+- `20261003120000_stone_available_as.sql` — expand-only. Adds `stone_availability_options` (seeded Blocks/Pavers/Cladding) and `stone_groups.available_as`, backfills every stone and private draft to all three options, neutralises the retired availability state (`availability_status` kept, deprecated), redefines the Stone draft/workspace/catalogue functions and adds the service-only option RPC. It ends with a read-back self-check that aborts the transaction if the backfill is incomplete. Apply before merging the runtime.
+
 Migration A is already applied and remains byte-for-byte immutable. Its historical comment names the originally planned contract step; production-history alignment inserted C at recorded version `20260802103337`, and contract B was applied/read back at recorded version `20260802105537` after the aggregate runtime reached production.
 
 Do not commit Supabase service role keys, database passwords, Turnstile secrets, or email provider secrets here.

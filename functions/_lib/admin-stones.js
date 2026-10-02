@@ -16,6 +16,8 @@ const MAX_BYTES = 1_100_000;
 const uuid =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const MAX_AVAILABILITY_OPTIONS = 24;
+const OPTION_OPS = ['create', 'rename', 'reorder', 'archive', 'restore'];
 const variantSlugPattern = /^[a-z0-9]+(?:--?[a-z0-9]+)*$/;
 export class StoneError extends Error {
   /**
@@ -92,15 +94,17 @@ export function validateStoneDraft(draft) {
       'name_required',
       'Name this stone before saving.',
     );
-  if (
-    !['active', 'tbc'].includes(s.availability) ||
-    ![null, 1, 2, 3].includes(s.priceTier)
-  )
-    throw new StoneError(
-      400,
-      'invalid_field',
-      'Choose a valid availability and price tier.',
-    );
+  if (![null, 1, 2, 3].includes(s.priceTier))
+    throw new StoneError(400, 'invalid_field', 'Choose a valid price tier.');
+  // The stone-level Available / Upcoming state is retired; older cached editors may still send it.
+  delete s.availability;
+  array(s.availableAs, 'Available as', MAX_AVAILABILITY_OPTIONS);
+  for (const key of s.availableAs) {
+    string(key, 'Available as option', 60);
+    if (!slugPattern.test(key))
+      throw new StoneError(400, 'invalid_field', 'Available as option is invalid.');
+  }
+  s.availableAs = [...new Set(s.availableAs)];
   for (const key of ['blockLength', 'blockWidth', 'blockHeight']) {
     integer(s[key], key, true);
     if (s[key] > 2147483647)
@@ -301,6 +305,37 @@ export function mapStoneError(error) {
       'media_unavailable',
       'An image could not be prepared. Your stone has not been published.',
     ],
+    stone_availability_option_unavailable: [
+      422,
+      'option_unavailable',
+      'One of the selected options is no longer available. Reload the page.',
+    ],
+    stone_option_forbidden: [
+      403,
+      'option_forbidden',
+      'Only owners and admins can change these options.',
+    ],
+    stone_option_duplicate: [
+      409,
+      'option_duplicate',
+      'An option with this name already exists.',
+    ],
+    stone_option_limit: [422, 'option_limit', 'You can keep up to 24 options.'],
+    stone_option_name_required: [
+      422,
+      'option_name_required',
+      'Enter an option name of up to 60 characters.',
+    ],
+    stone_option_not_found: [
+      404,
+      'option_not_found',
+      'This option could not be found. Reload the page.',
+    ],
+    stone_option_order_stale: [
+      409,
+      'option_order_stale',
+      'The options changed in another session. Reload the page.',
+    ],
   };
   if (mappings[code]) {
     /** @type {Record<string, unknown>} */
@@ -332,7 +367,7 @@ export function mapStoneError(error) {
     'The result could not be confirmed. Retry this operation to check its result; do not start a second copy.',
   );
 }
-async function readBody(request) {
+async function readJsonBody(request) {
   if (Number(request.headers.get('content-length')) > MAX_BYTES)
     throw new StoneError(413, 'too_large', 'The stone draft is too large.');
   const reader = request.body?.getReader();
@@ -361,6 +396,46 @@ async function readBody(request) {
     );
   }
   object(body, 'Request');
+  return body;
+}
+/** Owner/admin option-list writes: `{ action: 'availability-option', op, requestId, option }`. */
+export function validateOptionWrite(body) {
+  object(body, 'Request');
+  if (
+    body.action !== 'availability-option' ||
+    !OPTION_OPS.includes(body.op) ||
+    !uuid.test(body.requestId || '')
+  )
+    throw new StoneError(400, 'invalid_request', 'The option request is invalid.');
+  object(body.option, 'Option');
+  const option = body.option;
+  if (['create', 'rename'].includes(body.op)) {
+    string(option.name, 'Option name', 200);
+    if (!option.name.trim() || option.name.trim().length > 60)
+      throw new StoneError(
+        422,
+        'option_name_required',
+        'Enter an option name of up to 60 characters.',
+      );
+  }
+  if (['rename', 'archive', 'restore'].includes(body.op))
+    integer(option.id, 'Option');
+  if (body.op === 'reorder') {
+    array(option.ids, 'Option order', MAX_AVAILABILITY_OPTIONS);
+    option.ids.forEach((id) => integer(id, 'Option'));
+    unique(option.ids, 'option');
+  }
+  const clean =
+    body.op === 'create'
+      ? { name: option.name.trim() }
+      : body.op === 'rename'
+        ? { id: option.id, name: option.name.trim() }
+        : body.op === 'reorder'
+          ? { ids: option.ids }
+          : { id: option.id };
+  return { action: body.action, op: body.op, requestId: body.requestId, option: clean };
+}
+function validateStoneWrite(body) {
   if (
     !['save', 'publish', 'archive'].includes(body.action) ||
     !uuid.test(body.requestId || '') ||
@@ -391,6 +466,23 @@ async function readBody(request) {
       'The stone selection changed. Reload before saving.',
     );
   return body;
+}
+async function optionRpc(client, actor, op, requestId = null, option = {}) {
+  const { data, error } = await client.rpc('admin_stone_availability_options', {
+    p_action: op,
+    p_actor: actor.id,
+    p_role: actor.role,
+    p_request_id: requestId,
+    p_option: option,
+  });
+  if (error) throw mapStoneError(error);
+  if (!data || typeof data !== 'object' || !Array.isArray(data.published))
+    throw new StoneError(
+      502,
+      'invalid_response',
+      'The editor returned an incomplete result.',
+    );
+  return data;
 }
 async function actorFor(client, token) {
   const { user, userError, profile, profileError } = await readAdminIdentity(client, token);
@@ -548,6 +640,8 @@ export async function handleStoneRequest(request, env, dependencies = {}) {
       const url = new URL(request.url);
       if (url.searchParams.get('view') === 'media')
         return stoneResponse(await getMedia(client, url));
+      if (url.searchParams.get('view') === 'availability-options')
+        return stoneResponse(await optionRpc(client, actor, 'list'));
       if (url.searchParams.get('view') === 'finishes') {
         const { data, error } = await client
           .from('finish_definitions')
@@ -615,7 +709,20 @@ export async function handleStoneRequest(request, env, dependencies = {}) {
         'read_only',
         'Your account can view stones but cannot edit them.',
       );
-    const body = await readBody(request);
+    const raw = await readJsonBody(request);
+    if (raw.action === 'availability-option') {
+      const write = validateOptionWrite(raw);
+      if (!['owner', 'admin'].includes(actor.role))
+        throw new StoneError(
+          403,
+          'option_forbidden',
+          'Only owners and admins can change these options.',
+        );
+      return stoneResponse(
+        await optionRpc(client, actor, write.op, write.requestId, write.option),
+      );
+    }
+    const body = validateStoneWrite(raw);
     if (body.action !== 'publish')
       return stoneResponse(await rpc(client, actor, body));
     const preflight = await rpc(client, actor, body, 'prepare');

@@ -1,3 +1,4 @@
+/** Static source status. Retired from public rendering (NOW-STONE-AVAILABLE-AS-001). */
 export type StoneStatus = 'active' | 'tbc';
 export type FinishCapability = 'yes' | 'no' | 'tbc';
 export type FinishKey = string;
@@ -112,14 +113,19 @@ export interface StoneVariantVM {
     stoneVariantId: string;
     label: string;
     variantType: string;
-    status: StoneStatus;
     sortOrder: number;
+}
+
+/** One published "Available as" option and whether this stone is offered in that form. */
+export interface StoneAvailableAsVM {
+    key: string;
+    label: string;
+    offered: boolean;
 }
 
 export interface StoneCardVM {
     stoneGroupId: string;
     name: string;
-    status: StoneStatus;
     stoneType: string;
     originLabel: string;
     finishCount: number;
@@ -133,7 +139,6 @@ export interface StoneDetailVM {
     summary?: string;
     stoneGroupId: string;
     name: string;
-    status: StoneStatus;
     stoneType: string;
     originLabel: string;
     rawBlockLabel: string;
@@ -142,7 +147,8 @@ export interface StoneDetailVM {
     priceTierLevel: StonePriceTierLevel | null;
     priceTierLabel: StonePriceTierLabel | null;
     pricePrimaryLabel: string;
-    availabilityLabel: string;
+    /** Every published option in option order, each marked offered or not. */
+    availableAs: StoneAvailableAsVM[];
     cutOptions: StoneCutOptionRaw[];
     variants: StoneVariantVM[];
     activeVariantId: string;

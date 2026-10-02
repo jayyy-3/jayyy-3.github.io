@@ -432,11 +432,27 @@ Fields:
 - `raw_block_height_mm integer`
 - `summary text`
 - `notes text`
+- `catalog_managed boolean`, `cut_options jsonb` (workspace migration)
+- `availability_status text` — **deprecated** (NOW-STONE-AVAILABLE-AS-001): kept, set to `active`, no longer read or written
+- `available_as text[] not null default '{}'` — keys of `stone_availability_options` this stone is offered as; readers intersect with published options
 - shared audit fields
 
 Public behavior:
 - Stone Library uses one published catalogue snapshot; managed keys never fall back to static content. `public_stone_catalogue()` exposes only public fields, with managed keys suppressing hidden/retired fallback entries. The workspace candidate adds private drafts, idempotent receipts and history, plus service-only atomic publish/archive and a separately applied direct-write/reference lockdown. See `docs/STONE_LIBRARY_WORKSPACE_RELEASE.md` for the two unapplied production migrations.
-- `tbc` can remain admin-visible until approved for public display.
+- `tbc` is retired: the Available as migration maps existing `tbc` rows to `draft` (the admin already showed them as Draft); public pages show no stone-level availability state.
+
+### `stone_availability_options`
+Purpose: the editable "Available as" product-form list (Blocks, Pavers, Cladding, …).
+
+Fields:
+- `id bigint identity primary key`
+- `option_key text not null unique` — slug from the first name, fixed after creation
+- `display_name text not null` (1–60 characters)
+- `sort_order integer not null default 0`
+- `status text not null default 'published' check (status in ('published','archived'))`
+- `created_at`, `updated_at`, `created_by`, `updated_by`, `archived_at`
+
+Behavior: RLS on; anon/authenticated may select published rows only and hold no write grant. Owner/admin manage options only through service-only `admin_stone_availability_options(p_action, p_actor, p_role, p_request_id, p_option)` (list/create/rename/reorder/archive/restore, at most 24 published, audited as `stone.availability_option.<action>`). Archive removes the key from every `stone_groups.available_as` and private draft; restore does not re-add it. `public_stone_catalogue()` returns the published list as `availabilityOptions`.
 
 ### `stone_variants`
 Purpose: variants inside a stone group.

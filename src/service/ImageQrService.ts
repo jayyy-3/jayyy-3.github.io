@@ -13,7 +13,7 @@ export async function loadQrMaterial(selection: QrMaterialSelection): Promise<Qr
   const detail = await StoneLibraryService.getPublishedStoneDetail(selection.stoneGroupId, selection.stoneVariantId)
     || StoneLibraryService.getStoneDetail(selection.stoneGroupId, selection.stoneVariantId);
   // The general Stone Library may choose its first variant; a fixed QR must not.
-  if (!detail || detail.status !== 'active' || detail.activeVariantId !== selection.stoneVariantId) return null;
+  if (!detail || detail.activeVariantId !== selection.stoneVariantId) return null;
   const finish = detail.finishes.find((entry) => entry.finishKey === selection.finishKey);
   if (!finish || finish.capability !== 'yes' || !finish.imageUrl) return null;
   const staticImage = getStoneFinishImageResolution(selection.stoneVariantId, selection.finishKey);

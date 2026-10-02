@@ -106,7 +106,8 @@ Current launch removal model:
 
 | Area | Customer Editable | System Computed | Developer / Admin-Only |
 |---|---|---|---|
-| Stone group | display name, type display, origin fields, price source/tier, status, sort order, summary/notes | updated timestamps, public slug/key validation | source import keys, schema constraints |
+| Stone group | display name, type display, origin fields, price source/tier, Available as ticks, sort order, summary/notes | updated timestamps, public slug/key validation | source import keys, schema constraints |
+| Available as options | Owner/admin: add, rename, reorder, hide (removes from every stone), restore; editor/viewer: read-only summary | option key from the first name, published-option intersection, 24-option limit | option table and RPC contract |
 | Variants | display label, variant type, status, order | active variant fallback | source variant key migration |
 | Finishes | capability, behavior note, admin note, source list | finish key normalization | canonical finish dictionary changes |
 | Images | primary/secondary/detail/swatch media selection, preview, order, status, alt via media | image dimensions, missing-image health, selected-media publish state | storage policy and transformation presets |

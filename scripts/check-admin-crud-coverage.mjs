@@ -1453,6 +1453,15 @@ function checkAdminParentOwnershipSafety() {
   );
 
   for(const marker of ['stone_variant_mismatch','stone_image_mismatch','stone_parent_mismatch','stone_conflict'])requireIncludes(stones,marker,'Stone aggregate ownership and version contract');
+  // NOW-STONE-AVAILABLE-AS-001 redefines admin_stone_workspace: the latest definition must keep
+  // the same ownership/version markers, and option writes stay owner/admin-only and serialized.
+  const availableAs = readRequired('supabase/migrations/20261003120000_stone_available_as.sql');
+  for(const marker of ['stone_variant_mismatch','stone_image_mismatch','stone_parent_mismatch','stone_conflict','stone_availability_option_unavailable','stone_option_forbidden','pg_advisory_xact_lock(20260910,1)'])requireIncludes(availableAs,marker,'Stone Available as ownership, version and option-role contract');
+  requireIncludes(availableAs,'grant execute on function public.admin_stone_availability_options(text,uuid,text,uuid,jsonb) to service_role','Available as option RPC is service-role only');
+  const stonePage = readRequired('src/pages/admin/AdminStoneLibraryPage.tsx');
+  requireIncludes(stonePage,'<AvailableAsOptions','Stone Library list Available as options block');
+  requireIncludes(stonePage,'<legend className="text-sm font-semibold">Available as</legend>','Stone editor Available as checkbox group');
+  requireNotIncludes(stonePage,'Availability TBC','Retired stone availability badge');
 
 }
 

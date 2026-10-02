@@ -4,6 +4,7 @@ import { createHash, randomUUID } from 'node:crypto';
 import path from 'node:path';
 import { createClient } from '@supabase/supabase-js';
 import { normalizeAdoptionSnapshot as normal, reviewedStoneState } from './_lib/stone-adoption-snapshot.mjs';
+const DEFAULT_AVAILABLE_AS = ['blocks', 'pavers', 'cladding'];
 const args = process.argv.slice(2);
 const value = (flag, fallback) =>
   args.includes(flag) ? args[args.indexOf(flag) + 1] : fallback;
@@ -364,6 +365,9 @@ try {
       await checkOriginal(item);
       current = await api(`?stoneId=${item.id}`);
       const draft = structuredClone(item.draft);
+      // Plans written before NOW-STONE-AVAILABLE-AS-001 carry the retired availability field.
+      delete draft.stone.availability;
+      draft.stone.availableAs ??= DEFAULT_AVAILABLE_AS;
       for (const variant of draft.variants)
         for (const finish of variant.finishes)
           for (const image of finish.images) {
@@ -382,7 +386,8 @@ try {
     if (
       !live ||
       live.draft.stone.name !== item.newName ||
-      live.draft.stone.availability !== item.availability
+      JSON.stringify(live.draft.stone.availableAs) !==
+        JSON.stringify(item.availableAs ?? DEFAULT_AVAILABLE_AS)
     )
       throw new Error(`Public baseline readback failed for stone ${item.id}.`);
   }

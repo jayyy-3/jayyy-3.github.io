@@ -23,6 +23,11 @@ import {
   type StoneReference,
 } from '../../features/stone-library/stoneDraft';
 import StoneDialog from '../../features/stone-library/StoneDialog';
+import type {
+  StoneAvailabilityOption,
+  StoneAvailabilityOptionList,
+} from '../../features/stone-library/availableAs';
+import AvailableAsOptions from './stone-library/AvailableAsOptions';
 import StoneHistoryDialog from './stone-library/StoneHistoryDialog';
 import StoneMediaPicker from './stone-library/StoneMediaPicker';
 import StonePageView from '../StonePageView';
@@ -86,6 +91,9 @@ function StoneList() {
           Edit your stones, preview changes and publish when they are ready.
           Saved drafts leave the website unchanged.
         </p>
+        <AvailableAsOptions
+          canManage={profile?.role === 'owner' || profile?.role === 'admin'}
+        />
         <div className="mb-6 flex flex-wrap items-end gap-4">
           <label className="min-w-60 flex-1 font-semibold">
             Find a stone
@@ -153,9 +161,6 @@ function StoneList() {
                       Unpublished changes
                     </span>
                   )}
-                  {s.availability === 'tbc' && (
-                    <span className="stone-pill">Availability TBC</span>
-                  )}
                 </div>
                 <h2 className="mt-3 text-xl font-semibold">{s.name}</h2>
                 <p className="mt-1 text-sm text-black/55">
@@ -176,6 +181,7 @@ function StoneLoader({ id }: { id: string }) {
   const [loaded, setLoaded] = useState<{
     envelope: StoneEnvelope | null;
     finishes: StoneFinishDefinition[];
+    options: StoneAvailabilityOptionList;
   } | null>(null);
   const [error, setError] = useState('');
   const [retry, setRetry] = useState(0);
@@ -187,9 +193,11 @@ function StoneLoader({ id }: { id: string }) {
       id === 'new'
         ? Promise.resolve(null)
         : stoneApi<StoneEnvelope>(`?stoneId=${encodeURIComponent(id)}`),
+      // Loaded fresh on every open, so list-page option changes reach the editor.
+      stoneApi<StoneAvailabilityOptionList>('?view=availability-options'),
     ])
-      .then(([f, envelope]) => {
-        if (active) setLoaded({ envelope, finishes: f.finishes });
+      .then(([f, envelope, options]) => {
+        if (active) setLoaded({ envelope, finishes: f.finishes, options });
       })
       .catch((e: Error) => {
         if (active) setError(e.message);
@@ -219,15 +227,27 @@ function StoneLoader({ id }: { id: string }) {
         )}
       </AdminShell>
     );
-  return <StoneEditor initial={loaded.envelope} finishes={loaded.finishes} />;
+  return (
+    <StoneEditor
+      initial={loaded.envelope}
+      finishes={loaded.finishes}
+      options={loaded.options}
+    />
+  );
 }
 function StoneEditor({
   initial,
   finishes,
+  options,
 }: {
   initial: StoneEnvelope | null;
   finishes: StoneFinishDefinition[];
+  options: StoneAvailabilityOptionList;
 }) {
+  const availabilityOptions: StoneAvailabilityOption[] = options.published;
+  const optionNames = new Map(
+    [...options.published, ...options.archived].map((o) => [o.key, o.name]),
+  );
   const { profile } = useAdminAuth();
   const readOnly = profile?.role === 'viewer';
   const navigate = useNavigate();
@@ -243,7 +263,7 @@ function StoneEditor({
                   { ...emptyVariant(finishes), slug: initial.draft.stone.slug },
                 ],
               }
-            : emptyStone(finishes),
+            : emptyStone(finishes, options.published),
         initial,
         (body) => stoneApi('', body),
       ),
@@ -489,7 +509,19 @@ function StoneEditor({
     finishes,
     media,
     previewVariant,
+    availabilityOptions,
   );
+  const selectedForms = new Set(draft.stone.availableAs ?? []);
+  function toggleForm(key: string, offered: boolean) {
+    edit((d) => {
+      const next = new Set(d.stone.availableAs ?? []);
+      if (offered) next.add(key);
+      else next.delete(key);
+      d.stone.availableAs = availabilityOptions
+        .map((o) => o.key)
+        .filter((k) => next.has(k));
+    });
+  }
   const saveLabel =
     queue.state === 'saved'
       ? envelope
@@ -649,17 +681,36 @@ function StoneEditor({
                   onChange={(e) => stoneField('type', e.target.value)}
                 />
               </label>
-              <label>
-                Availability
-                <select
-                  className="stone-input"
-                  value={draft.stone.availability}
-                  onChange={(e) => stoneField('availability', e.target.value)}
-                >
-                  <option value="active">Available for project sourcing</option>
-                  <option value="tbc">Upcoming · to be confirmed</option>
-                </select>
-              </label>
+              <fieldset className="min-w-0 border-0 p-0">
+                <legend className="text-sm font-semibold">Available as</legend>
+                {availabilityOptions.length ? (
+                  <>
+                    <div className="mt-2 flex flex-wrap gap-x-5">
+                      {availabilityOptions.map((o) => (
+                        <label
+                          key={o.key}
+                          className="inline-flex min-h-11 items-center gap-2"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={selectedForms.has(o.key)}
+                            onChange={(e) => toggleForm(o.key, e.target.checked)}
+                          />
+                          {o.name}
+                        </label>
+                      ))}
+                    </div>
+                    <p className="mt-1 text-xs text-black/50">
+                      The website lists every option as Offered or Not offered.
+                    </p>
+                  </>
+                ) : (
+                  <p className="mt-2 text-sm text-black/60">
+                    No options yet. Owners and admins can add options at the top
+                    of the Stone Library list.
+                  </p>
+                )}
+              </fieldset>
               <div>
                 <p className="font-semibold">Website address</p>
                 <p className="mt-3 break-all text-sm text-black/60">
@@ -1087,6 +1138,7 @@ function StoneEditor({
           <StoneHistoryDialog
             stoneId={id}
             finishes={finishes}
+            optionNames={optionNames}
             onClose={() => setShowHistory(false)}
           />
         )}

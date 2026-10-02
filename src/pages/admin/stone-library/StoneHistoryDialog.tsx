@@ -14,10 +14,13 @@ interface Version {
 export default function StoneHistoryDialog({
   stoneId,
   finishes,
+  optionNames,
   onClose,
 }: {
   stoneId: number;
   finishes: StoneFinishDefinition[];
+  /** Option key → name, including hidden options, for older versions. */
+  optionNames: ReadonlyMap<string, string>;
   onClose: () => void;
 }) {
   const [versions, setVersions] = useState<Version[]>([]);
@@ -78,11 +81,16 @@ export default function StoneHistoryDialog({
             </summary>
             <div className="mt-4 space-y-3 text-sm">
               <h3 className="text-lg">{version.snapshot.stone.name}</h3>
+              <p>{version.snapshot.stone.type}</p>
               <p>
-                {version.snapshot.stone.type} ·{' '}
-                {version.snapshot.stone.availability === 'tbc'
-                  ? 'Availability to be confirmed'
-                  : 'Available for project sourcing'}
+                Available as:{' '}
+                {/* Versions saved before Available as existed have no list: show a dash. */}
+                {Array.isArray(version.snapshot.stone.availableAs) &&
+                version.snapshot.stone.availableAs.length
+                  ? version.snapshot.stone.availableAs
+                      .map((key) => optionNames.get(key) || key)
+                      .join(', ')
+                  : '—'}
               </p>
               <p>
                 {version.snapshot.stone.summary ||
