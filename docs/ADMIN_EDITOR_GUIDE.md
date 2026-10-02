@@ -18,6 +18,8 @@ Enter your email and password, then press **Sign in**. Forgotten it? Press **For
 
 Stone photos: open **Stone Library**, open the stone, press **Add or upload image**, wait for **All changes saved**, then press **Publish**.
 
+Stone forms: in the stone, tick each form under **Available as**, wait for **All changes saved**, then press **Publish**. Owners and admins add, rename or hide forms with **Manage** at the top of **Stone Library**.
+
 ## Add or update a project and mark materials
 1. In **Projects**, press **New project** or open an existing one, and fill in each section.
 2. Under a picture, press **Mark materials on this image**, click on the stone, then choose it under **Material**.
