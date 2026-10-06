@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "lastUpdated": "2026-10-03",
+  "lastUpdated": "2026-10-06",
   "currentTaskId": "NOW-ADMIN-STONE-WORKSPACE-001",
   "sourceOfTruth": {
     "currentState": "docs/agent/status.json",
@@ -10,12 +10,12 @@
     "adminHandoffEvidence": "docs/agent/admin-handoff-evidence.json"
   },
   "release": {
-    "observedAt": "2026-10-03",
-    "repositorySha": "f87d6027085a02f9169bae3668d33fe44f2f0e76",
-    "runtimeSha": "f87d6027085a02f9169bae3668d33fe44f2f0e76",
-    "verifiedRuntimeUrl": "https://9fac331f.urblo-site.pages.dev",
-    "ciRunId": 37039983513,
-    "note": "Stone Library \"Available as\" (#89) released 2026-10-03: migration 20261003120000_stone_available_as.sql applied to production as recorded version 20261002171852 with Jay's SHA approval, then merge f87d602 deployed as immutable 9fac331f. SQL readback: 18/18 published stones offer blocks/pavers/cladding, 20/20 private drafts in the new shape, 58 history rows unchanged, option RPC service-role only. Immutable/apex/www deployment-bound smoke, production admin auth gate (10 routes) and public detail/list/compare/QR readback passed. Jay acceptance open.",
+    "observedAt": "2026-10-06",
+    "repositorySha": "e5d727e4846d77aff8236889e4bba19a96a43c3b",
+    "runtimeSha": "e5d727e4846d77aff8236889e4bba19a96a43c3b",
+    "verifiedRuntimeUrl": "https://a7af621c.urblo-site.pages.dev",
+    "ciRunId": 37398768448,
+    "note": "Footer legal line and digits phone (#91) released 2026-10-06 for Instagram business verification: footer shows \"© 2026 Urban Block Australia Pty Ltd, trading as Urblo. ABN 35 675 426 561\" and Phone 1300 187 256 (tel:1300187256) from code constants; CTAs keep 1300 1URBLO. Immutable/apex/www deployment-bound smoke passed; production footer readback confirmed on urblo.com.au. Previous release (Available as, #89) remains deployed; Jay acceptance of Available as still open.",
     "evidenceRefs": [
       "docs/WORKLOG.md"
     ]
@@ -76,8 +76,8 @@
     ]
   },
   "lastCompletedTask": {
-    "id": "NOW-STONE-AVAILABLE-AS-001",
-    "summary": "Editable \"Available as\" option list (Blocks, Pavers, Cladding) replaced the retired Available / Upcoming state; migration applied and runtime released 2026-10-03; Jay acceptance open."
+    "id": "NOW-FOOTER-LEGAL-LINE-001",
+    "summary": "Footer legal entity/ABN line and digits phone released 2026-10-06 and read back on production."
   },
   "historicalObservations": "docs/archive/2026-09-26/manifest.json"
 }

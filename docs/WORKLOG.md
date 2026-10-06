@@ -657,3 +657,11 @@ Scope: Jay approved on 2026-10-06 (Instagram business verification) a one-line f
 - Verification on `8034021`: clean Node 20 `npm run gate` passed (container gate, verification graph all PASSED, 0 failed; run before commit on the identical tree); `npm run agent:check` passed; `git diff --check` clean. PR #91 CI run `37397166028` passed (verify-and-deploy, quality) and deployed immutable Preview `https://d72c7ed1.urblo-site.pages.dev`; workstation `npm run agent:cloudflare-preview-smoke -- --base-url https://d72c7ed1.urblo-site.pages.dev` passed.
 - Rendered readback on that Preview (Published CMS footer-column layout, production data, read-only): legal line `© 2026 Urban Block Australia Pty Ltd, trading as Urblo. ABN 35 675 426 561` on one line at 1440px and two lines at 390px; Contact column `Phone` → `1300 187 256` linking `tel:1300187256`; email `info@urblo.com.au`; document width equals viewport at both sizes. The static fallback layout (not served on Preview while CMS columns are Published) was rendered with an env-less local Vite server: legal line wraps inside the third column at 1440px and at 390px, `Phone` → `1300 187 256` (`tel:1300187256`), no horizontal overflow.
 - Not verified: production readback (not merged; merge needs Jay); Instagram's acceptance of the footer for business verification.
+
+## 2026-10-06 — Footer legal line release (NOW-FOOTER-LEGAL-LINE-001)
+
+Scope: reviewer acceptance and release of PR #91 (footer legal line and digits phone, requested by Nat for Instagram business verification, approved by Jay 2026-10-06).
+
+- Acceptance: diff reviewed (legal line and phone sourced from `src/data/siteChrome.ts` constants, CMS primaryPhone no longer read by the footer, CTAs unchanged); branch Preview `5f737709` footer readback: legal line present, old "All rights reserved / © Copyright 2026" absent, one `tel:1300187256` link reading `1300 187 256`.
+- Release: PR #91 merged as `e5d727e`; CI run 37398768448 passed and deployed immutable `https://a7af621c.urblo-site.pages.dev`. `agent:cloudflare-preview-smoke` passed on the immutable URL, on `urblo.com.au` bound with `--reference-url`, and on `www` (host redirects). Production browser readback on `urblo.com.au` confirmed the same footer content.
+- Not verified: Instagram's acceptance of the footer (external).
