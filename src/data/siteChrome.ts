@@ -16,7 +16,6 @@ export interface SiteFooterContact {
   address: [string, string];
   email: string;
   phone: string;
-  copyright: string;
 }
 
 export const siteLogoUrl = '/media/launch/identity/urblo-logo.png';
@@ -50,7 +49,8 @@ export const siteCtas = {
 
 /**
  * Direct contact channels as written in public copy (docs/DESIGN.md "Copy formats"). The phone
- * number is always displayed as the vanity `1300 1URBLO` and dialled as 1300 187 256.
+ * number is displayed as the vanity `1300 1URBLO` and dialled as 1300 187 256; the footer alone shows
+ * `phoneDigits` so the registered business number is visible for platform verification.
  */
 export const siteContact = {
   email: 'info@urblo.com.au',
@@ -99,5 +99,7 @@ export const siteFooterContact: SiteFooterContact = {
   address: [defaultCompanyLocations.office, defaultCompanyLocations.warehouse],
   email: 'info@urblo.com.au',
   phone: '1300 1URBLO',
-  copyright: '© Copyright 2026',
 };
+
+/** Footer legal line (Jay, 2026-10-06): registered entity and ABN, required for platform business verification. */
+export const siteFooterLegalLine = '© 2026 Urban Block Australia Pty Ltd, trading as Urblo. ABN 35 675 426 561';

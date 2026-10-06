@@ -533,7 +533,8 @@ CTA set (use these labels; the destination decides the verb):
 - Navigation and route-state recovery links keep the navigation names (`Contact Us`, `Projects`, `Articles`).
 
 Copy formats:
-- Phone: displayed `1300 1URBLO`, dialled `tel:1300187256`; where a label is read aloud it adds the digits (`1300 1URBLO (1300 187 256)`). Source of truth `siteContact` in `src/data/siteChrome.ts`. Legacy article HTML bodies keep their own wording until NOW-ARTICLE-STRUCTURE-CLAIMS-001.
+- Phone: displayed `1300 1URBLO`, dialled `tel:1300187256`; where a label is read aloud it adds the digits (`1300 1URBLO (1300 187 256)`). Source of truth `siteContact` in `src/data/siteChrome.ts`. Footer exception (Jay, 2026-10-06, NOW-FOOTER-LEGAL-LINE-001): the shared footer labels it `Phone` and shows the digits `1300 187 256` (`siteContact.phoneDigits`, `tel:1300187256`), not the CMS phone, so the registered business number is visible for platform verification; every `Call 1300 1URBLO` CTA keeps the vanity form.
+- Footer legal line: one line, `© 2026 Urban Block Australia Pty Ltd, trading as Urblo. ABN 35 675 426 561` (`siteFooterLegalLine`), in the existing muted footer type, in both footer layouts; it replaces `All rights reserved` / `© Copyright 2026`. Legacy article HTML bodies keep their own wording until NOW-ARTICLE-STRUCTURE-CLAIMS-001.
 - Dates: `formatPublicDate` (`src/components/ui/format.ts`) renders `10 Jun 2024` (day, three-letter month, year; UTC calendar day) regardless of the visitor's locale.
 - Counts agree with their noun: `1 finish`, `4 finishes`, `1 result`.
 

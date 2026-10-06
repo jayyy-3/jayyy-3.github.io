@@ -1,8 +1,49 @@
 {
   "version": 2,
-  "lastUpdated": "2026-10-03",
+  "lastUpdated": "2026-10-06",
   "archive": "docs/archive/2026-09-09/completed-tasks.json",
   "tasks": [
+    {
+      "id": "NOW-FOOTER-LEGAL-LINE-001",
+      "status": "now",
+      "phase": "release",
+      "priority": 0.25,
+      "summary": "Public footer shows the registered legal entity and ABN on one line and the footer phone as the digits 1300 187 256, for Instagram business verification.",
+      "modules": [
+        "public-ui"
+      ],
+      "files": [
+        "src/components/site/SiteFooter.tsx",
+        "src/data/siteChrome.ts",
+        "docs/DESIGN.md",
+        "docs/architecture/public-routes.md"
+      ],
+      "acceptance": [
+        "Both footer layouts (CMS columns and static fallback) replace \"All rights reserved\" / \"© Copyright 2026\" with exactly one line: \"© 2026 Urban Block Australia Pty Ltd, trading as Urblo. ABN 35 675 426 561\", in the existing muted footer typography, wrapping without horizontal overflow at 390px.",
+        "The footer phone is labelled Phone, displays 1300 187 256 and links to tel:1300187256 from siteContact, not from the CMS primaryPhone; footer email keeps its CMS source; every other Call 1300 1URBLO CTA is unchanged.",
+        "Branch Preview smoke passes and the PR is left unmerged for Jay."
+      ],
+      "verification": [
+        "npm run gate",
+        "npm run agent:check",
+        "git diff --check",
+        "npm run agent:cloudflare-preview-smoke -- --base-url <branch preview>"
+      ],
+      "evidenceRefs": [
+        "docs/WORKLOG.md"
+      ],
+      "authorization": {
+        "source": "Jay approved the footer legal line and digits phone on 2026-10-06 (needed for Instagram business verification).",
+        "included": [
+          "Branch implementation, npm run gate, git push, PR against main and branch Preview smoke."
+        ],
+        "excluded": [
+          "Merge without Jay, production data writes, email, DNS and credentials."
+        ]
+      },
+      "nextAction": "Jay reviews the PR and branch Preview footer, then approves merge and production readback.",
+      "notes": []
+    },
     {
       "id": "NOW-ADMIN-STONE-WORKSPACE-001",
       "status": "now",
