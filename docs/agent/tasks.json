@@ -6,7 +6,7 @@
     {
       "id": "NOW-FOOTER-LEGAL-LINE-001",
       "status": "now",
-      "phase": "release",
+      "phase": "awaiting_external",
       "priority": 0.25,
       "summary": "Public footer shows the registered legal entity and ABN on one line and the footer phone as the digits 1300 187 256, for Instagram business verification.",
       "modules": [
@@ -35,13 +35,14 @@
       "authorization": {
         "source": "Jay approved the footer legal line and digits phone on 2026-10-06 (needed for Instagram business verification).",
         "included": [
-          "Branch implementation, npm run gate, git push, PR against main and branch Preview smoke."
+          "Branch implementation, npm run gate, git push, PR against main and branch Preview smoke.",
+          "Merged as e5d727e on 2026-10-06 under Jay's standing approval for verified PRs; production readback recorded in docs/WORKLOG.md."
         ],
         "excluded": [
           "Merge without Jay, production data writes, email, DNS and credentials."
         ]
       },
-      "nextAction": "Jay reviews the PR and branch Preview footer, then approves merge and production readback.",
+      "nextAction": "Nat submits the Instagram business verification against the live footer; nothing further is pending in the repo.",
       "notes": [
         "2026-10-06: implemented on claude/footer-legal-line (8034021); gate, agent:check and branch Preview d72c7ed1 smoke passed; PR #91 open, not merged."
       ]
