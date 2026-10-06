@@ -42,7 +42,9 @@
         ]
       },
       "nextAction": "Jay reviews the PR and branch Preview footer, then approves merge and production readback.",
-      "notes": []
+      "notes": [
+        "2026-10-06: implemented on claude/footer-legal-line (8034021); gate, agent:check and branch Preview d72c7ed1 smoke passed; PR #91 open, not merged."
+      ]
     },
     {
       "id": "NOW-ADMIN-STONE-WORKSPACE-001",
