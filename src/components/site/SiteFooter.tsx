@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom';
 import {
   siteBrandStatement,
-  siteFooterContact,
+  siteContact,
+  siteFooterLegalLine,
   siteFooterLinks,
   type SiteSocialLink,
 } from '../../data/siteChrome';
@@ -25,7 +26,7 @@ export default function SiteFooter() {
             <SocialLinks links={settings.socialLinks} />
             <PrimaryContact
               email={contactCoverage.hasEmail ? null : settings.primaryEmail}
-              phone={contactCoverage.hasPhone ? null : settings.primaryPhone}
+              showPhone={!contactCoverage.hasPhone}
             />
           </div>
 
@@ -36,7 +37,6 @@ export default function SiteFooter() {
                   key={`${column.title}-${index}`}
                   column={column}
                   primaryEmail={settings.primaryEmail}
-                  primaryPhone={settings.primaryPhone}
                 />
               ))}
             </div>
@@ -58,7 +58,7 @@ export default function SiteFooter() {
         <div className="space-y-4 text-[18px] leading-[1.9] text-white/85">
           <div><p className="text-xs uppercase tracking-widest text-white/50">Office</p><p>{settings.locations.office}</p></div>
           <div><p className="text-xs uppercase tracking-widest text-white/50">Warehouse</p><p>{settings.locations.warehouse}</p></div>
-          <PrimaryContact email={settings.primaryEmail} phone={settings.primaryPhone} />
+          <PrimaryContact email={settings.primaryEmail} showPhone />
         </div>
 
         <div className="space-y-4 text-[18px] leading-[1.9] text-white/85">
@@ -121,8 +121,8 @@ function SocialLinks({ links }: { links: SiteSocialLink[] }) {
   );
 }
 
-function PrimaryContact({ email, phone }: { email: string | null; phone: string | null }) {
-  if (!email && !phone) {
+function PrimaryContact({ email, showPhone }: { email: string | null; showPhone: boolean }) {
+  if (!email && !showPhone) {
     return null;
   }
 
@@ -135,19 +135,32 @@ function PrimaryContact({ email, phone }: { email: string | null; phone: string 
           </a>
         </p>
       ) : null}
-      {phone ? <p className="font-semibold text-white">{phone}</p> : null}
+      {showPhone ? (
+        <div>
+          <p className="text-xs uppercase tracking-widest text-white/50">Phone</p>
+          <p className="font-semibold text-white">
+            <FooterPhoneLink />
+          </p>
+        </div>
+      ) : null}
     </div>
+  );
+}
+
+function FooterPhoneLink() {
+  return (
+    <a href={siteContact.phoneHref} className="transition-colors hover:text-[var(--urblo-lime)]">
+      {siteContact.phoneDigits}
+    </a>
   );
 }
 
 function CmsFooterColumn({
   column,
   primaryEmail,
-  primaryPhone,
 }: {
   column: PublicFooterColumn;
   primaryEmail: string | null;
-  primaryPhone: string | null;
 }) {
   return (
     <section>
@@ -158,7 +171,6 @@ function CmsFooterColumn({
             key={`${item.label}-${index}`}
             item={item}
             primaryEmail={primaryEmail}
-            primaryPhone={primaryPhone}
           />
         ))}
       </div>
@@ -169,11 +181,9 @@ function CmsFooterColumn({
 function CmsFooterItem({
   item,
   primaryEmail,
-  primaryPhone,
 }: {
   item: PublicFooterItem;
   primaryEmail: string | null;
-  primaryPhone: string | null;
 }) {
   const className = 'block transition-colors hover:text-[var(--urblo-lime)]';
 
@@ -194,19 +204,15 @@ function CmsFooterItem({
   }
 
   const normalizedLabel = item.label.trim().toLowerCase();
-  const value =
-    normalizedLabel === 'email'
-      ? primaryEmail || item.value
-      : normalizedLabel === 'phone'
-        ? primaryPhone || item.value
-        : item.value;
+  const isPhone = normalizedLabel === 'phone';
+  const value = normalizedLabel === 'email' ? primaryEmail || item.value : item.value;
 
   return (
     <p>
       <span className="block text-[11px] font-bold uppercase tracking-[0.13em] text-white/42">
         {item.label}
       </span>
-      <span className="mt-1 block">{value}</span>
+      <span className="mt-1 block">{isPhone ? <FooterPhoneLink /> : value}</span>
     </p>
   );
 }
@@ -233,8 +239,7 @@ function getFooterContactCoverage(columns: PublicFooterColumn[]) {
 function Copyright({ compact = false }: { compact?: boolean }) {
   return (
     <div className={compact ? 'pt-2 text-[16px] text-white/55' : 'mt-10 text-[15px] text-white/48'}>
-      <p>All rights reserved</p>
-      <p>{siteFooterContact.copyright}</p>
+      <p>{siteFooterLegalLine}</p>
     </div>
   );
 }

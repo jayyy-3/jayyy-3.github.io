@@ -52,6 +52,7 @@ Route state contract:
 - Homepage proof-section CTA: `/capabilities`
 - Shared footer links: `/capabilities`, `/contact?intent=sample-request`, `/contact`
 - Shared footer social links: Instagram and LinkedIn use external links with `target="_blank"` plus `rel="noopener noreferrer"`; Facebook and YouTube are hidden until real destinations are available.
+- Shared footer contact and legal line (both the CMS-column and static fallback layouts): email follows Published `site_settings.primary_email`; the phone is always `siteContact.phoneDigits` with `siteContact.phoneHref` from `src/data/siteChrome.ts` and does not read `site_settings.primary_phone` (a CMS footer text item labelled `Phone` renders the same link); the copyright/legal line is the single constant `siteFooterLegalLine`.
 
 ### Gaps
 - Current implementation gap: basic live Contact and Sample Request persistence, real SMTP2GO notification delivery, and private-row browser-key denial are verified, but Turnstile, admin-visible lead workflow, and the Capability-specific download lead path still require production verification.
