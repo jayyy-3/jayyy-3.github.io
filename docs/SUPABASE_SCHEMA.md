@@ -454,6 +454,8 @@ Fields:
 
 Behavior: RLS on; anon/authenticated may select published rows only and hold no write grant. Owner/admin manage options only through service-only `admin_stone_availability_options(p_action, p_actor, p_role, p_request_id, p_option)` (list/create/rename/reorder/archive/restore, at most 24 published, audited as `stone.availability_option.<action>`). Archive removes the key from every `stone_groups.available_as` and private draft; restore does not re-add it. `public_stone_catalogue()` returns the published list as `availabilityOptions`.
 
+`public_stone_catalogue()` (latest definition `20261008120000_stone_australian_badge.sql`, NOW-STONE-AUSTRALIAN-BADGE-001) also adds boolean `australianStone` to each `stones[].draft.stone`, computed from the published `stone_groups.origin_country` as `lower(btrim(coalesce(origin_country,'')))='australia'`. `originCountry`, `originRegion`, `sourceName` and `internalNote` stay blank on the public shape; no column was added. Client mapping (`src/features/stone-library/stoneDraft.ts`): `StoneCardVM`/`StoneDetailVM.australianStone`; when the boolean is absent (admin preview of a private draft, pre-migration catalogue) `isAustralianOrigin(originCountry)` derives it the same way, and the static fallback uses `origin.countryDisplay`. `AustralianStoneBadge` renders on the detail stage and list cards only, never compare or QR.
+
 ### `stone_variants`
 Purpose: variants inside a stone group.
 

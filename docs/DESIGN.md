@@ -220,7 +220,7 @@ Priorities:
 - direct path to sample/contact behavior
 
 Public display rule:
-- Origin remains an internal sourcing/admin field but is intentionally omitted from public Stone Library cards, detail specifications, search matching, and route metadata.
+- Origin remains an internal sourcing/admin field but is intentionally omitted from public Stone Library cards, detail specifications, search matching, and route metadata. Single exception (Jay, 2026-10-08): stones whose origin country is Australia show the `AUSTRALIAN STONE` badge; only that computed boolean is public, never the country string.
 - Public pages no longer express a stone-level Available / Upcoming state (retired 2026-10-03). List cards, the detail hero, variant buttons and compare column heads carry no status pill.
 - `Available as` lists every published option (Blocks, Pavers, Cladding, …, in the admin order) and marks each one explicitly: a light lime `Offered` pill or a muted `Not offered` pill on the detail page; a lime dot or a dash plus visible `Not offered` text in compare; a lime dot or a muted dash on the QR page. Never list only the offered forms and never rely on colour alone.
 - Finish capability (`Available / Upcoming / No`), the compare finish legend (`Available / To be confirmed / Not offered`) and Cut options (`Available / No`) are finish- and cut-level states and keep their wording.
@@ -572,3 +572,16 @@ Jay's decisions:
 Implementation: the detail specs grid keeps four cards; the second card lists one row per option with the existing StatusPill (`Offered` uses the light lime wash, `Not offered` the neutral pill and a muted name). Compare adds an `Available as` row after Type using the finish-capability dot language plus visible `Not offered` text; Differences only compares the offered state per option. The QR grid keeps two columns; its cell lists the options with a small lime dot or a muted dash. Admin: a summary line with `Manage`; managing shows Up / Down, Rename, Hide (inline confirmation explaining it removes the option from every stone) and a `Hidden options` disclosure with Restore. The stone editor's Basic information uses an `Available as` checkbox group.
 
 Remember: forms are facts about supply, not marketing badges. Lime marks the offered state only; text always carries the state.
+
+## Stone Library "Australian stone" badge — 2026-10-08
+
+Review: Jay approved (NOW-STONE-AUSTRALIAN-BADGE-001) a badge marking Stone Library stones whose CMS origin country is Australia, from supplied artwork.
+
+Decision:
+- `AustralianStoneBadge` (`src/components/stone-library/AustralianStoneBadge.tsx`) is a fully rounded pill: 1.5px `lime` outline, lime uppercase `AUSTRALIAN STONE` in the site sans with `tracking-caps`, centred, on a subtle `bg-black/35` + `backdrop-blur-sm` backing so it reads on light and dark stone. Sizes: `md` (detail) and `sm` (cards, tighter padding), both `text-micro`.
+- Detail: bottom-right of the active finish panel with the stage's 8px overlay inset (`bottom-2 right-2`), clear of the top-right Zoom control and the top-left provenance label; it follows the active panel across finish and variant changes and appears in the admin live preview (shared `StonePageView`).
+- List card: bottom-right of the card image (`bottom-3 right-3`). Nothing returns to the top-left corner.
+- Not on compare or QR pages, and not a filter facet (later candidate).
+- This is the one deliberate exception to the image-overlay rule above (white text on dark backplates, lime for small signals): the badge is a small, approved provenance signal, so lime text and outline are allowed here only.
+
+Remember: the badge marks Australian origin only; the origin string itself stays private.

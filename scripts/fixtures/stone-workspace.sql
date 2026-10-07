@@ -1,5 +1,5 @@
 -- Local fixture only. Run against a disposable database with every Stone migration applied
--- (workspace, reference lockdown and Available as).
+-- (workspace, reference lockdown, Available as and Australian stone badge).
 -- Every fixture row is rolled back. Never run this against production.
 \set ON_ERROR_STOP on
 begin;
@@ -45,6 +45,7 @@ begin
  perform pg_temp.check((select available_as='{pavers}' from public.stone_groups where id=sid),'publication writes the canonical Available as column');
  perform pg_temp.check(jsonb_array_length(live->'availabilityOptions')=3 and live->'availabilityOptions'->0->>'key'='blocks','catalogue lists published options in order');
  perform pg_temp.check(live->'stones'->0->'draft'->'variants'->0->'finishes'->0->'images'->0->>'mediaAssetId'=mid::text,'published finish uses its exact image');
+ perform pg_temp.check(live->'stones'->0->'draft'->'stone'->'australianStone'='false'::jsonb and live->'stones'->0->'draft'->'stone'->>'originCountry'='','non-Australian origin publishes australianStone false with a blank origin');
  d:=jsonb_set(e->'draft','{stone,name}','"Unpublished changed name"');original:=e;e:=pg_temp.write_stone('save',e,d);
  perform pg_temp.check((select display_name='Fixture Stone' from public.stone_groups where id=sid),'editing a live stone remains isolated in private draft');
  perform pg_temp.check(public.public_stone_catalogue()=live,'public catalogue unchanged after draft save');
@@ -128,6 +129,15 @@ begin
  replay:=public.admin_stone_availability_options('restore','00000000-0000-4000-8000-000000000091','owner',gen_random_uuid(),jsonb_build_object('id',aid));
  perform pg_temp.check(jsonb_array_length(replay->'published')=4 and (select available_as='{blocks}' from public.stone_groups where id=sid),'restore does not re-add the option to stones');
  perform pg_temp.check((select count(*)=5 from public.admin_audit_events where entity_type='stone_availability_options'),'option writes are audited');
+ -- Australian stone badge: only the computed boolean is public, never the country string.
+ e:=private.stone_envelope(sid);
+ d:=jsonb_set(e->'draft','{stone,originCountry}','" AUSTRALIA "');e:=pg_temp.write_stone('save',e,d);
+ perform pg_temp.check(public.public_stone_catalogue()->'stones'->0->'draft'->'stone'->'australianStone'='false'::jsonb,'unpublished origin change does not reach the badge');
+ e:=pg_temp.write_stone('publish',e,e->'draft');
+ live:=public.public_stone_catalogue();
+ perform pg_temp.check(live->'stones'->0->'draft'->'stone'->'australianStone'='true'::jsonb,'published Australia origin (trimmed, any case) sets australianStone');
+ perform pg_temp.check(live->'stones'->0->'draft'->'stone'->>'originCountry'='' and live::text not like '%AUSTRALIA%' and live::text not like '%PRIVATE%','catalogue still blanks the origin string');
+ perform pg_temp.check(jsonb_typeof(live->'stones'->0->'draft'->'stone'->'australianStone')='boolean','australianStone is a boolean');
  for n in 1..20 loop perform public.admin_stone_availability_options('create','00000000-0000-4000-8000-000000000091','owner',gen_random_uuid(),jsonb_build_object('name','Fixture option '||n)); end loop;
  denied:=false;begin perform public.admin_stone_availability_options('create','00000000-0000-4000-8000-000000000091','owner',gen_random_uuid(),'{"name":"One too many"}');exception when check_violation then denied:=true;end;
  perform pg_temp.check(denied,'published options are limited to 24');

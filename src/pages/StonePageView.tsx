@@ -123,6 +123,7 @@ export default function StonePageView({
                 centerRequestToken={centerRequestToken}
                 onSelect={handleFinishSelect}
                 onOpenLightbox={handleOpenLightbox}
+                australianStone={detail.australianStone}
               />
 
               <section
