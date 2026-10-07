@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "lastUpdated": "2026-10-06",
+  "lastUpdated": "2026-10-08",
   "archive": "docs/archive/2026-09-09/completed-tasks.json",
   "tasks": [
     {
@@ -106,7 +106,7 @@
     {
       "id": "NOW-STONE-AUSTRALIAN-BADGE-001",
       "status": "now",
-      "phase": "release",
+      "phase": "awaiting_external",
       "priority": 1,
       "summary": "Show an AUSTRALIAN STONE badge on Stone Library detail and list-card images for stones whose CMS origin country is Australia, exposed publicly only as a computed boolean.",
       "modules": [
@@ -146,14 +146,15 @@
       "authorization": {
         "source": "Jay approved the AUSTRALIAN STONE badge for origin=Australia stones on 2026-10-08 (decisions final).",
         "included": [
-          "Branch implementation, isolated local tests, npm run gate, git push, PR against main and branch Preview smoke."
+          "Branch implementation, isolated local tests, npm run gate, git push, PR against main and branch Preview smoke.",
+          "Reviewer applied the migration to production (recorded version 20261007144021) and merged PR #93 as fdadeaa on 2026-10-08 under Jay's approval; readback in docs/WORKLOG.md."
         ],
         "excluded": [
           "Production migration apply and merge (reviewer).",
           "Production data writes, email, DNS, credentials."
         ]
       },
-      "nextAction": "Reviewer applies supabase/migrations/20261008120000_stone_australian_badge.sql to production, merges the PR, records production readback; Jay then accepts the live badge.",
+      "nextAction": "Jay reviews the live badge on Stone detail and list pages; filter by Australian origin remains a later candidate.",
       "notes": [
         "2026-10-08: Later candidate (not in scope): an Australian-stone filter facet on the Stone Library list."
       ]
