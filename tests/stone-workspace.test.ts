@@ -256,6 +256,9 @@ test('preview uses exact finish photography and never fills Sawn with Flamed', (
     ],
   );
   assert.equal(vm.originLabel, '');
+  assert.equal(vm.australianStone, false);
+  d.stone.originCountry = ' Australia ';
+  assert.equal(stoneDraftToDetail(d, definitions, []).australianStone, true);
   d.variants[0].enabled = false;
   assert.deepEqual(publishedMediaIds(d), []);
 });
@@ -546,7 +549,7 @@ test('failed copy and failed commit compensate only public copies; uncertain com
   }
 });
 test('source retains protected boundary, parent ownership, reference serialization and tombstones', async () => {
-  const [sql, lock, api, editor, service, availableAs] = await Promise.all(
+  const [sql, lock, api, editor, service, availableAs, australian] = await Promise.all(
     [
       'supabase/migrations/20260910064551_stone_library_workspace.sql',
       'supabase/migrations/20260910065803_stone_library_reference_lockdown.sql',
@@ -554,6 +557,7 @@ test('source retains protected boundary, parent ownership, reference serializati
       'src/pages/admin/AdminStoneLibraryPage.tsx',
       'src/service/StoneLibraryService.ts',
       'supabase/migrations/20261003120000_stone_available_as.sql',
+      'supabase/migrations/20261008120000_stone_australian_badge.sql',
     ].map((f) => readFile(f, 'utf8')),
   );
   for (const needle of [
@@ -581,6 +585,27 @@ test('source retains protected boundary, parent ownership, reference serializati
     assert.ok(availableAs.includes(needle), `latest ${needle}`);
   assert.ok(!/drop\s+column/i.test(availableAs), 'Available as migration drops no column');
   assert.ok(!/update\s+private\.stone_history/i.test(availableAs), 'history snapshots are not rewritten');
+  // The Australian badge migration replaces public_stone_catalogue() only: it adds the computed
+  // boolean, still blanks every origin field, and writes no table or data.
+  assert.ok(
+    australian.includes("- array['sourceName','originRegion','originCountry','internalNote']") &&
+      australian.includes("'originCountry',''"),
+    'latest catalogue still blanks the origin string',
+  );
+  assert.ok(
+    australian.includes("'australianStone',lower(btrim(coalesce(g.origin_country,'')))='australia'"),
+    'latest catalogue exposes only the computed Australian boolean',
+  );
+  assert.ok(australian.includes("where g.status='published'"), 'latest catalogue published-parent boundary');
+  assert.ok(
+    !/(alter|create|drop)\s+table|\b(insert\s+into|update\s+public|update\s+private|delete\s+from)\b/i.test(australian),
+    'Australian badge migration changes no table and writes no data',
+  );
+  assert.ok(
+    (australian.match(/create or replace function/gi) || []).length === 1 &&
+      australian.includes('create or replace function public.public_stone_catalogue()'),
+    'Australian badge migration replaces only the public catalogue',
+  );
   assert.match(
     lock,
     /before insert or update or delete[\s\S]+for each statement/,

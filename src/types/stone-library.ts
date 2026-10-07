@@ -128,6 +128,8 @@ export interface StoneCardVM {
     name: string;
     stoneType: string;
     originLabel: string;
+    /** Origin country is Australia; the only public trace of origin (badge). */
+    australianStone: boolean;
     finishCount: number;
     availableFinishKeys: FinishKey[];
     coverImageUrl?: string;
@@ -141,6 +143,8 @@ export interface StoneDetailVM {
     name: string;
     stoneType: string;
     originLabel: string;
+    /** Origin country is Australia; the only public trace of origin (badge). */
+    australianStone: boolean;
     rawBlockLabel: string;
     dlName: string | null;
     priceRange: string;

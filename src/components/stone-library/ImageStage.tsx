@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 import type { FinishVM } from '../../types/stone-library';
+import AustralianStoneBadge from './AustralianStoneBadge';
 import StoneResponsiveImage from './StoneResponsiveImage';
 
 interface ImageStageProps {
@@ -10,6 +11,8 @@ interface ImageStageProps {
     centerRequestToken: number;
     onSelect: (finishKey: string) => void;
     onOpenLightbox: (finishKey: string, frameIndex?: number) => void;
+    /** Shows the AUSTRALIAN STONE badge on the active finish panel. */
+    australianStone?: boolean;
 }
 
 function imageRoleLabel(finish: FinishVM): string {
@@ -43,6 +46,7 @@ export default function ImageStage({
     centerRequestToken,
     onSelect,
     onOpenLightbox,
+    australianStone = false,
 }: ImageStageProps) {
     const trackRef = useRef<HTMLDivElement | null>(null);
     const panelRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -396,6 +400,10 @@ export default function ImageStage({
                                         />
                                         <span>{imageRoleLabel(finish)}</span>
                                     </div>
+                                ) : null}
+
+                                {isActive && australianStone ? (
+                                    <AustralianStoneBadge size="md" className="absolute bottom-2 right-2" />
                                 ) : null}
 
                                 <div

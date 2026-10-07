@@ -103,8 +103,15 @@ export interface StoneListItem {
   cover: string | null;
   updatedAt: string;
 }
+/**
+ * The public catalogue blanks every origin field and adds only the computed
+ * `australianStone` boolean (absent in a catalogue read before that migration).
+ */
+export type PublicStoneDraft = StoneDraft & {
+  stone: StoneDraft['stone'] & { australianStone?: boolean };
+};
 export interface PublicStoneRecord {
-  draft: StoneDraft;
+  draft: PublicStoneDraft;
   media: StoneMedia[];
 }
 export interface StoneCatalogue {
@@ -176,9 +183,24 @@ export function emptyStone(
   };
 }
 
+/** Same rule as public_stone_catalogue(): origin country is Australia (trimmed, any case). */
+export function isAustralianOrigin(country: string | null | undefined): boolean {
+  return (country ?? '').trim().toLowerCase() === 'australia';
+}
+
+/**
+ * Public records carry the catalogue boolean; the admin preview has only the
+ * private origin country, so derive it the same way to match the published page.
+ */
+export function stoneIsAustralian(stone: PublicStoneDraft['stone']): boolean {
+  return typeof stone.australianStone === 'boolean'
+    ? stone.australianStone
+    : isAustralianOrigin(stone.originCountry);
+}
+
 /** A single mapper drives both the real page and the current unsaved preview. */
 export function stoneDraftToDetail(
-  draft: StoneDraft,
+  draft: PublicStoneDraft,
   definitions: StoneFinishDefinition[],
   media: readonly StoneMedia[],
   variantSlug?: string,
@@ -241,6 +263,7 @@ export function stoneDraftToDetail(
     name: s.name,
     stoneType: s.type,
     originLabel: '',
+    australianStone: stoneIsAustralian(s),
     rawBlockLabel: [s.blockLength, s.blockWidth, s.blockHeight].every(Boolean)
       ? `${s.blockLength} × ${s.blockWidth} × ${s.blockHeight} mm`
       : 'Confirm for your project',
@@ -288,6 +311,7 @@ export function stoneRecordToCard(
     name: record.draft.stone.name,
     stoneType: record.draft.stone.type,
     originLabel: '',
+    australianStone: stoneIsAustralian(record.draft.stone),
     finishCount: keys.length,
     availableFinishKeys: keys,
     coverImageUrl: cover?.imageUrl,

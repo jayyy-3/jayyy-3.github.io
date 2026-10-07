@@ -6,6 +6,7 @@ Stone detail interaction and Stone Library data contract. Admin workspace: `docs
 - Public disclosure boundary:
   - Origin remains in the source, typed view models, Supabase records, and Admin editor for internal sourcing use.
   - Public Stone Library cards, detail specifications, free-text matching, and route metadata must not render or disclose origin.
+  - Exception: only the boolean `australianStone` is public (badge; `docs/SUPABASE_SCHEMA.md`).
 - State composition:
   - Effective active finish resolves by precedence: `lockedFinishKey` -> `defaultFinishKey`.
   - Each finish selection click increments a center-request token used by left media for one-shot visibility-check scroll handling.

@@ -561,6 +561,22 @@ function checkPublicRuntimeBoundary() {
   requireIncludes(stoneAvailableAsSql, "where g.status='published'", 'Latest catalogue published-parent boundary');
   requireIncludes(stoneAvailableAsSql, "'availabilityOptions'", 'Catalogue Available as option list');
   requireIncludes(stoneAvailableAsSql, "from public.stone_availability_options where status='published'", 'Catalogue lists published options only');
+  // NOW-STONE-AUSTRALIAN-BADGE-001 redefines public_stone_catalogue() again: it keeps the
+  // published-parent boundary and blanked origin, and adds only the computed Australian boolean.
+  const stoneAustralianSql = readRequired('supabase/migrations/20261008120000_stone_australian_badge.sql');
+  requireIncludes(stoneAustralianSql, "where g.status='published'", 'Latest catalogue published-parent boundary (Australian badge)');
+  requireIncludes(stoneAustralianSql, "'availabilityOptions'", 'Latest catalogue keeps the Available as option list');
+  requireIncludes(stoneAustralianSql, "- array['sourceName','originRegion','originCountry','internalNote']", 'Latest catalogue strips private origin fields');
+  requireIncludes(stoneAustralianSql, "'originCountry',''", 'Latest catalogue blanks the origin string');
+  requireIncludes(stoneAustralianSql, "'australianStone',lower(btrim(coalesce(g.origin_country,'')))='australia'", 'Latest catalogue exposes only the computed Australian boolean');
+  requireNotIncludes(stoneAustralianSql, "'originCountry',g.origin_country", 'Latest catalogue origin string disclosure');
+  requireNotIncludes(stoneAustralianSql, "'originCountry',coalesce(g.origin_country", 'Latest catalogue origin string disclosure');
+  const australianBadge = readRequired('src/components/stone-library/AustralianStoneBadge.tsx');
+  for (const marker of ['originLabel', 'originCountry', 'countryDisplay']) requireNotIncludes(australianBadge, marker, 'Australian badge renders no origin string');
+  requireIncludes(stoneCard, '{stone.australianStone ? (', 'Stone list card Australian badge is driven by the boolean only');
+  for (const file of ['src/components/stone-library/StoneCompareView.tsx', 'src/components/image-qr/ImageQrPageView.tsx']) {
+    requireNotIncludes(readRequired(file), 'AustralianStoneBadge', `${file} carries no Australian badge`);
+  }
   requireNotIncludes(stoneSpecs, 'availabilityLabel', 'Retired stone-level availability label');
   requireIncludes(stoneSpecs, 'Available as', 'Stone specs Available as card');
   requireNotIncludes(stoneCard, 'StatusPill', 'Stone list card status badge removed');

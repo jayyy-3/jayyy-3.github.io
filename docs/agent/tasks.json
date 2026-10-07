@@ -104,6 +104,61 @@
       "blocker": "Jay usability acceptance; automatic review requires specific approval to temporarily change QA Editor b0af7050-2565-4da5-ab26-3f2d5b2efc96 to Viewer and restore Editor."
     },
     {
+      "id": "NOW-STONE-AUSTRALIAN-BADGE-001",
+      "status": "now",
+      "phase": "release",
+      "priority": 1,
+      "summary": "Show an AUSTRALIAN STONE badge on Stone Library detail and list-card images for stones whose CMS origin country is Australia, exposed publicly only as a computed boolean.",
+      "modules": [
+        "stone-library"
+      ],
+      "files": [
+        "supabase/migrations/20261008120000_stone_australian_badge.sql",
+        "src/components/stone-library/AustralianStoneBadge.tsx",
+        "src/components/stone-library/StoneCard.tsx",
+        "src/pages/StonePageView.tsx",
+        "src/features/stone-library/stoneDraft.ts",
+        "src/service/StoneLibraryService.ts",
+        "src/types/stone-library.ts",
+        "scripts/fixtures/stone-workspace.sql"
+      ],
+      "acceptance": [
+        "Stones whose origin country is Australia (trimmed, case-insensitive) show an AUSTRALIAN STONE pill at the bottom-right of the detail main image and list-card image; other stones show nothing.",
+        "public_stone_catalogue() exposes only the boolean australianStone; the origin country string remains blank on every public surface.",
+        "Badge stays visible across finish/variant changes, does not cover the zoom control, and causes no overlap or horizontal overflow at 1440 and 390.",
+        "Not shown on compare or QR pages; admin live preview matches publish.",
+        "Jay accepts the result (not self-certified)."
+      ],
+      "verification": [
+        "npm run gate",
+        "npm run agent:check",
+        "npm run agent:stone-workspace",
+        "npm run agent:admin-crud-coverage",
+        "npm run agent:public-supabase-readiness",
+        "npm run agent:stone-library-detail",
+        "npx vitest run",
+        "scripts/fixtures/stone-workspace.sql on a disposable database (manual)"
+      ],
+      "evidenceRefs": [
+        "docs/WORKLOG.md",
+        "supabase/migrations/README.md"
+      ],
+      "authorization": {
+        "source": "Jay approved the AUSTRALIAN STONE badge for origin=Australia stones on 2026-10-08 (decisions final).",
+        "included": [
+          "Branch implementation, isolated local tests, npm run gate, git push, PR against main and branch Preview smoke."
+        ],
+        "excluded": [
+          "Production migration apply and merge (reviewer).",
+          "Production data writes, email, DNS, credentials."
+        ]
+      },
+      "nextAction": "Reviewer applies supabase/migrations/20261008120000_stone_australian_badge.sql to production, merges the PR, records production readback; Jay then accepts the live badge.",
+      "notes": [
+        "2026-10-08: Later candidate (not in scope): an Australian-stone filter facet on the Stone Library list."
+      ]
+    },
+    {
       "id": "NOW-STONE-AVAILABLE-AS-001",
       "status": "now",
       "phase": "awaiting_external",

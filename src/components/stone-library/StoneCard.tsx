@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import type { StoneCardVM } from '../../types/stone-library';
+import AustralianStoneBadge from './AustralianStoneBadge';
 import CompareToggle from './CompareToggle';
 import StoneResponsiveImage from './StoneResponsiveImage';
 
@@ -35,6 +36,9 @@ export default function StoneCard({ stone, compareSelected = false, onCompareTog
               <p className="urblo-meta text-black/60">Image coming soon</p>
             </div>
           )}
+          {stone.australianStone ? (
+            <AustralianStoneBadge size="sm" className="absolute bottom-3 right-3" />
+          ) : null}
         </div>
 
         <div className="space-y-2.5 p-4">

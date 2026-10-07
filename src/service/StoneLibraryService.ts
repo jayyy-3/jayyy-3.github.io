@@ -6,7 +6,7 @@ import {
 } from '../data/stoneFinishImages';
 import { getPublicContentClient, isPublicContentConfigured } from '../lib/publicContentClient';
 import { resolvePublicMediaUrl } from '../lib/publicMediaUrl';
-import { stoneDraftToDetail, stoneRecordToCard, type StoneCatalogue } from '../features/stone-library/stoneDraft';
+import { isAustralianOrigin, stoneDraftToDetail, stoneRecordToCard, type StoneCatalogue } from '../features/stone-library/stoneDraft';
 import { STATIC_AVAILABILITY_OPTIONS, expandAvailableAs } from '../features/stone-library/availableAs';
 import type { OptionItem } from '../types/product';
 import type {
@@ -272,6 +272,7 @@ function mapStoneCard(stone: StoneGroupRaw): StoneCardVM {
         name: stone.displayName,
         stoneType: stone.type.display,
         originLabel: toOriginLabel(stone),
+        australianStone: isAustralianOrigin(stone.origin.countryDisplay),
         finishCount: availableFinishKeys.length,
         availableFinishKeys,
         coverImageUrl: cover.coverImageUrl,
@@ -587,6 +588,7 @@ class StoneLibraryService {
             name: stone.displayName,
             stoneType: stone.type.display,
             originLabel: toOriginLabel(stone),
+            australianStone: isAustralianOrigin(stone.origin.countryDisplay),
             rawBlockLabel: toRawBlockLabel(stone),
             dlName: stone.dlName,
             priceRange: pricePresentation.priceRange,
