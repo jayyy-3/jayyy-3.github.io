@@ -66,7 +66,7 @@ const apiContract = readRequired(apiContractPath);
 const editorSectionPaths = [
   "src/pages/admin/projects/sections/editorContext.ts",
   "src/pages/admin/projects/sections/EditorControls.tsx",
-  "src/pages/admin/projects/sections/MediaSection.tsx",
+  "src/pages/admin/projects/sections/BodySection.tsx",
   "src/pages/admin/projects/sections/MaterialsSection.tsx",
 ];
 const editor = [editorPath, ...editorSectionPaths].map(readRequired).join("\n");
@@ -842,6 +842,38 @@ for (const [path, needle, label] of [
 }
 forbidMatches(service, /\.from\(['"]project_media['"]\)/, servicePath, "public body read from project_media");
 forbidMatches(server, /\.from\(["']project_media["']\)|mediaBlocks:/, functionPath, "Function read or write of the retired media blocks");
+
+// Body block editor (NOW-PROJECT-BLOCKS-001 PR 1B): one shared form per type, an Add block
+// panel, collapsible cards with move/duplicate/remove, and points kept on image blocks.
+const blockFormDir = "src/components/admin/blocks";
+const blockFormPath = `${blockFormDir}/BlockForm.tsx`;
+const blockForm = readRequired(blockFormPath);
+for (const [type, name] of Object.entries(rendererNames)) {
+  const formName = name.replace(/Block$/, "Form");
+  const formSource = readRequired(`${blockFormDir}/${formName}.tsx`);
+  requireIncludes(blockForm, `case '${type}':`, blockFormPath, `${type} form dispatch`);
+  requireIncludes(blockForm, `<${formName} `, blockFormPath, `${formName} form`);
+  forbidMatches(formSource, /from ['"][./]*pages\//, `${blockFormDir}/${formName}.tsx`, "shared block form importing a page module");
+}
+const bodySectionPath = "src/pages/admin/projects/sections/BodySection.tsx";
+const bodySection = readRequired(bodySectionPath);
+for (const [needle, label] of [
+  ["<AddBlockPanel", "Add block panel"],
+  ["<BlockForm", "shared block forms"],
+  ["duplicateBlock(", "Duplicate block"],
+  ["insertBlocks(", "insert at a chosen position"],
+  ["hidden={!isOpen}", "collapsed cards stay mounted so pending media survives"],
+  ["aria-expanded={isOpen}", "accessible card toggle"],
+  ['moveItem("blocks"', "block reordering"],
+  ["Mark materials on this image", "material points on image blocks"],
+  ["already has its one video", "one video per Project explained in the panel"],
+]) {
+  requireIncludes(bodySection, needle, bodySectionPath, label);
+}
+requireIncludes(editor, '{ id: "body", title: "Body" }', editorPath, "Body section in the editor");
+forbidMatches(editor, /Page images and video/, editorPath, "retired Page images and video section");
+readRequired(`${blockFormDir}/AddBlockPanel.tsx`).includes("CONTENT_BLOCK_DEFINITIONS") ||
+  failures.push(`${blockFormDir}/AddBlockPanel.tsx: missing shared block definitions`);
 
 // The block migration is expand-only and never alters or deletes project_media.
 forbidMatches(

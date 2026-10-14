@@ -76,8 +76,11 @@ export async function projectJourney({ page, context, check, id, directory }) {
   await check('Projects material points on a page image survive Save/refresh and turn off cleanly', async () => {
     // The isolated database seeds no Stone Library records, so a point can only reach a
     // new, incomplete material here; Publish must stay blocked until it is complete.
-    await page.getByRole('button', { name: 'Add image', exact: true }).click()
-    const block = page.locator('article').filter({ has: page.getByRole('heading', { name: 'Block 1 · Image', exact: true }) })
+    await page.getByRole('button', { name: 'Add block', exact: true }).click()
+    await page.getByRole('button', { name: /^Image One full-width image/ }).click()
+    // The card keeps its id while its type changes from Image to Image with material points.
+    const blockId = await page.locator('article').filter({ has: page.getByRole('heading', { name: 'Block 1 · Image', exact: true }) }).getAttribute('id')
+    const block = page.locator(`[id="${blockId}"]`)
     await block.getByRole('button', { name: 'Choose image', exact: true }).click()
     await block.getByTestId('project-inline-media-thumbnail-grid').getByRole('button').first().click()
     await block.getByRole('button', { name: 'Mark materials on this image', exact: true }).click()
@@ -98,17 +101,30 @@ export async function projectJourney({ page, context, check, id, directory }) {
     assert.equal(envelope.draft.blocks[0]?.type, 'hotspot_image', JSON.stringify(envelope.draft.blocks))
     assert.equal(envelope.draft.hotspots.length, 1)
     assert.equal(envelope.draft.hotspots[0].application, 'Synthetic entry paving')
-    await expect(block.getByText('1 material point', { exact: true })).toBeVisible()
+    const pointsBlock = block
+    await expect(pointsBlock.getByRole('heading', { name: 'Block 1 · Image with material points', exact: true })).toBeVisible()
+    await expect(pointsBlock.getByText('1 material point', { exact: true })).toBeVisible()
     await expect(page.getByText('All changes saved', { exact: true })).toBeVisible()
+    // Saved cards start closed after a reload; opening one reveals its form and points.
+    await pointsBlock.getByRole('button', { expanded: false }).first().click()
     await page.screenshot({ path: `${directory}/project-points.png`, fullPage: true })
-    await block.getByRole('button', { name: 'Turn off material points', exact: true }).click()
-    await block.getByRole('button', { name: 'Delete points', exact: true }).click()
+    await pointsBlock.getByRole('button', { name: 'Turn off material points', exact: true }).click()
+    await pointsBlock.getByRole('button', { name: 'Delete points', exact: true }).click()
     await expect(block.getByRole('button', { name: 'Mark materials on this image', exact: true })).toBeVisible()
     await page.getByRole('button', { name: 'Remove material', exact: true }).click()
     const cleared = await action('Save')
     assert.equal(cleared.draft.blocks[0]?.type, 'image')
     assert.ok(cleared.draft.blocks[0]?.content.mediaAssetId, 'Turning points off keeps the image')
     assert.deepEqual([cleared.draft.maps.length, cleared.draft.hotspots.length, cleared.draft.materials.length], [0, 0, 0])
+  })
+  await check('Projects body blocks: add a Heading above the image, fill it in and Save', async () => {
+    await page.getByRole('button', { name: 'Add block here', exact: true }).first().click()
+    await page.getByRole('button', { name: /^Heading A section title/ }).click()
+    const heading = page.locator('article').filter({ has: page.getByRole('heading', { name: 'Block 1 · Heading', exact: true }) })
+    await heading.getByRole('textbox', { name: 'Heading', exact: true }).fill('Synthetic body heading')
+    const saved = await action('Save')
+    assert.deepEqual(saved.draft.blocks.map(block => block.type), ['heading', 'image'])
+    assert.equal(saved.draft.blocks[0].content.title, 'Synthetic body heading')
   })
   await check('Projects Publish exposes approved parent and Hide removes it', async () => {
     await expect(page.getByRole('button', { name: 'Publish', exact: true })).toBeEnabled()
@@ -118,6 +134,7 @@ export async function projectJourney({ page, context, check, id, directory }) {
     const publicPage = await context.newPage()
     await publicPage.goto(`${LOCAL_APP}/projects/${published.draft.project.slug}`)
     await expect(publicPage.getByRole('heading', { name: title, exact: true })).toBeVisible()
+    await expect(publicPage.getByRole('heading', { name: 'Synthetic body heading', exact: true })).toBeVisible()
     await publicPage.screenshot({ path: `${directory}/project-public.png`, fullPage: true })
     await publicPage.close()
     // NOW-OPT-ADMIN-SAFETY-001: saving a newer private draft of a live Project keeps the public

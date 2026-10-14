@@ -7,6 +7,7 @@ import {
 import {
     blockMediaAssetIds,
     blockStoneGroupIds,
+    createDefaultBlockContent,
     normalizeYouTubeId,
     validateContentBlock,
     type ContentBlock,
@@ -20,7 +21,7 @@ import { blockViewImageUrls, type ContentBlockView } from '../blocks/view.ts';
 export type ProjectLifecycleStatus = 'draft' | 'published' | 'archived';
 export type ProjectClaimStatus = 'needs_review' | 'approved' | 'deferred';
 export type ProjectCarbonStatus = '' | 'yes' | 'no' | 'not_available' | 'tbc';
-export type ProjectEditorSection = 'overview' | 'facts' | 'media' | 'materials';
+export type ProjectEditorSection = 'overview' | 'facts' | 'body' | 'materials';
 
 /** Public fallback title for an image with material points when its block has no title. */
 export const defaultMaterialPointImageTitle = 'Stone and finish placement';
@@ -536,6 +537,74 @@ export function updateBlockContent<T extends ContentBlockType>(
     };
 }
 
+/** Inserts new blocks at a position in the body (0 = top). */
+export function insertBlocks(
+    draft: ProjectAggregateDraft,
+    index: number,
+    blocks: readonly ProjectBlockDraft[],
+): ProjectAggregateDraft {
+    const next = [...draft.blocks];
+    next.splice(Math.max(0, Math.min(index, next.length)), 0, ...blocks);
+    return normalizeProjectDraftOrder({ ...draft, blocks: next });
+}
+
+/** A new, empty block of one type. */
+export function createBlock(type: ContentBlockType): ProjectBlockDraft {
+    return {
+        key: createProjectDraftKey('block'),
+        id: null,
+        type,
+        content: createDefaultBlockContent(type),
+        sortOrder: 0,
+    } as ProjectBlockDraft;
+}
+
+/**
+ * Inserts a new block of one type and returns its key. An image with material points is
+ * created together with its hidden map, so its image field and points work immediately.
+ */
+export function addBlock(
+    draft: ProjectAggregateDraft,
+    type: ContentBlockType,
+    index: number,
+): { draft: ProjectAggregateDraft; key: string } {
+    if (type === 'hotspot_image') {
+        const image = createBlock('image');
+        return { draft: enableBlockPoints(insertBlocks(draft, index, [image]), image.key), key: image.key };
+    }
+    const block = createBlock(type);
+    return { draft: insertBlocks(draft, index, [block]), key: block.key };
+}
+
+/**
+ * A copy of a block to place below it: new key, no row ID, no former-media provenance. A
+ * points image is copied as a plain image of the same picture, because points belong to one
+ * image; its description is supplied by the caller (the media item's own).
+ */
+export function duplicateBlock(draft: ProjectAggregateDraft, blockKey: string, imageAlt = ''): ProjectBlockDraft | null {
+    const block = draft.blocks.find((entry) => entry.key === blockKey);
+    if (!block) return null;
+    const key = createProjectDraftKey('block');
+    if (block.type === 'hotspot_image') {
+        return {
+            key,
+            id: null,
+            type: 'image',
+            sortOrder: block.sortOrder + 1,
+            content: {
+                mediaAssetId: blockImageId(draft, block),
+                alt: imageAlt,
+                title: block.content.title ?? '',
+                label: block.content.label ?? '',
+                caption: block.content.caption ?? '',
+            },
+        };
+    }
+    const content = structuredClone(block.content) as unknown as Record<string, unknown>;
+    delete content.legacyProjectMediaId;
+    return { key, id: null, type: block.type, sortOrder: block.sortOrder + 1, content } as unknown as ProjectBlockDraft;
+}
+
 /** Removes a block; a points block also removes its map and points. */
 export function removeBlock(draft: ProjectAggregateDraft, blockKey: string): ProjectAggregateDraft {
     if (!draft.blocks.some((block) => block.key === blockKey)) return draft;
@@ -957,7 +1026,7 @@ function collectProjectPublishBlockers(
     const mapKeys = new Set(draft.maps.map((map) => map.key));
     const youtubeVideoCount = draft.blocks.filter((block) => block.type === 'video').length;
     if (youtubeVideoCount > 1) {
-        add({ id: 'media-video-limit', section: 'media', message: 'Keep one YouTube video in this project.' });
+        add({ id: 'media-video-limit', section: 'body', message: 'Keep one YouTube video in this project.' });
     }
 
     // Image descriptions left empty are filled from the chosen media item on Publish.
@@ -997,7 +1066,7 @@ function collectProjectPublishBlockers(
     if (incompleteMedia || incompleteMap) {
         add({
             id: incompleteMedia ? `media-${incompleteMedia.key}` : `media-map-${incompleteMap?.key}`,
-            section: 'media',
+            section: 'body',
             message: incompleteMedia?.type === 'video'
                 ? 'Add a YouTube link to every video block.'
                 : 'Choose a described image for every media block.',
@@ -1007,13 +1076,13 @@ function collectProjectPublishBlockers(
     const incompleteBlock = draft.blocks.find((block) =>
         block !== incompleteMedia && validateContentBlock(withMediaAlt(block), 'publish').length > 0);
     if (incompleteBlock) {
-        add({ id: `block-${incompleteBlock.key}`, section: 'media', message: 'Complete every required field in the page body.' });
+        add({ id: `block-${incompleteBlock.key}`, section: 'body', message: 'Complete every required field in the page body.' });
     }
 
     const unpublishedStoneBlock = draft.blocks.find((block) =>
         blockStoneGroupIds(block).some((stoneId) => stoneById.get(stoneId)?.status !== 'published'));
     if (unpublishedStoneBlock) {
-        add({ id: `block-stone-${unpublishedStoneBlock.key}`, section: 'media', message: 'Use only Live Stone Library stones in stone cards.' });
+        add({ id: `block-stone-${unpublishedStoneBlock.key}`, section: 'body', message: 'Use only Live Stone Library stones in stone cards.' });
     }
 
     const materialByKey = new Map(draft.materials.map((material) => [material.key, material]));
@@ -1024,7 +1093,7 @@ function collectProjectPublishBlockers(
             || (!hotspot.application.trim() && !material.application.trim());
     });
     if (incompleteHotspot) {
-        add({ id: `hotspot-${incompleteHotspot.key}`, section: 'media', message: 'Connect every point to a material and say where it is used.' });
+        add({ id: `hotspot-${incompleteHotspot.key}`, section: 'body', message: 'Connect every point to a material and say where it is used.' });
     }
 
     return blockers;

@@ -9,13 +9,14 @@ import { cwd, exit } from 'node:process'
 
 const root = cwd()
 const guidePath = 'docs/ADMIN_EDITOR_GUIDE.md'
-const sourceRoots = ['src/pages/admin', 'src/features/stone-library']
+const sourceRoots = ['src/pages/admin', 'src/features/stone-library', 'src/components/admin/blocks', 'src/features/blocks']
 const limits = { maxLines: 45, maxContentLines: 32, maxCharacters: 3600 }
 const requiredHeadings = [
   'Sign in',
   'Save, Publish and Update live page',
   'Change an image on a project page',
   'Add or update a project and mark materials',
+  'Body blocks',
   'Edit a product',
   'Handle an enquiry or sample request',
   'Update company addresses and contact details',

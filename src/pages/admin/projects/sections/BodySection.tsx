@@ -1,19 +1,22 @@
-import { useContext, useState } from "react";
-import type { KeyboardEvent as ReactKeyboardEvent } from "react";
-import { MapPin, MapPinOff, Video } from "lucide-react";
+import { useContext, useEffect, useMemo, useState } from "react";
+import type { KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
+import { ChevronDown, Copy, MapPin, MapPinOff, Plus } from "lucide-react";
 import {
+  addBlock,
   blockImageId,
   createProjectDraftKey,
   defaultMaterialPointImageTitle,
   disableBlockPoints,
   enableBlockPoints,
+  duplicateBlock,
   hotspotsForBlock,
+  insertBlocks,
   removeBlock,
   setBlockImage,
   updateBlockContent,
   type ProjectAggregateDraft,
-  type ProjectBlockDraft,
   type ProjectAggregateMappingContext,
+  type ProjectBlockDraft,
   type ProjectFinishOption,
   type ProjectHotspotDraft,
   type ProjectMaterialDraft,
@@ -25,13 +28,22 @@ import {
   type ProjectStoneVariantOption,
 } from "../../../../features/projects/projectAggregate";
 import {
+  BLOCK_TEXT_LIMITS,
   contentBlockDefinition,
   summarizeContentBlock,
+  type ContentBlockType,
 } from "../../../../features/blocks/schema";
+import AddBlockPanel from "../../../../components/admin/blocks/AddBlockPanel";
+import BlockForm from "../../../../components/admin/blocks/BlockForm";
+import { BlockTextField } from "../../../../components/admin/blocks/BlockFormControls";
+import BlockTypeIcon from "../../../../components/admin/blocks/BlockTypeIcon";
+import {
+  BlockFormContext,
+  type BlockFormHost,
+} from "../../../../components/admin/blocks/blockFormContext";
 import InlineMediaField from "../InlineMediaField";
 import VisualHotspotEditor from "../VisualHotspotEditor";
 import {
-  AddButton,
   EmptyCopy,
   InlineConfirm,
   MaterialFields,
@@ -55,7 +67,7 @@ type PendingRemoval = { kind: "points" | "block"; key: string; count: number };
 
 const newMaterialOptionValue = "__new_material__";
 
-interface MediaSectionProps {
+interface BodySectionProps {
   draft: ProjectAggregateDraft;
   context: ProjectAggregateMappingContext;
   media: readonly ProjectMediaOption[];
@@ -70,9 +82,10 @@ interface MediaSectionProps {
   showReload: boolean;
   hasPendingMedia: boolean;
   open: boolean;
+  /** Block to open and bring into view (a publish blocker was chosen). */
+  revealBlock: { key: string } | null;
   onToggle: () => void;
   onChange: (draft: ProjectAggregateDraft) => void;
-  onAddBlock: (type: "image" | "video") => void;
   buildMaterial: () => ProjectMaterialDraft;
   mediaFieldDisabled: (instanceKey: string) => boolean;
   onMediaPendingChange: (instanceKey: string, pending: boolean) => void;
@@ -86,8 +99,11 @@ interface MediaSectionProps {
   updateCollection: UpdateProjectCollection;
 }
 
-/** Page images and video, including material points placed directly on any image. */
-export default function MediaSection({
+/**
+ * The page body: ordered content blocks with an Add block panel, collapsible block cards and
+ * one form per block type. Material points are placed directly on image blocks.
+ */
+export default function BodySection({
   draft,
   context,
   media,
@@ -102,9 +118,9 @@ export default function MediaSection({
   showReload,
   hasPendingMedia,
   open,
+  revealBlock,
   onToggle,
   onChange,
-  onAddBlock,
   buildMaterial,
   mediaFieldDisabled,
   onMediaPendingChange,
@@ -112,7 +128,7 @@ export default function MediaSection({
   onAssetCreated,
   moveItem,
   updateCollection,
-}: MediaSectionProps) {
+}: BodySectionProps) {
   const editorFieldsDisabled = useContext(ProjectMutationDisabledContext);
   const [selectedPointKeys, setSelectedPointKeys] = useState<
     Record<string, string>
@@ -127,6 +143,79 @@ export default function MediaSection({
     null,
   );
   const hasYoutubeVideo = draft.blocks.some((block) => block.type === "video");
+  const [openBlockKeys, setOpenBlockKeys] = useState<Set<string>>(() => new Set());
+  const [insertAt, setInsertAt] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!revealBlock) return;
+    setOpenBlockKeys((current) => new Set(current).add(revealBlock.key));
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() =>
+        document.getElementById(mediaBlockId(revealBlock.key))?.scrollIntoView({ behavior: "smooth", block: "start" }),
+      ),
+    );
+  }, [revealBlock]);
+
+  const formHost = useMemo<BlockFormHost>(
+    () => ({
+      disabled: editorFieldsDisabled,
+      stones: stones.map((stone) => ({ id: stone.id, label: stone.label, status: stone.status })),
+      finishes: finishes
+        .filter((finish) => finish.status !== "archived")
+        .map((finish) => ({ key: finish.key, label: finish.label })),
+      renderImageField: (request) => (
+        <InlineMediaField
+          key={request.instanceKey}
+          label={request.label}
+          value={request.value}
+          assets={media}
+          userId={userId}
+          canCleanUpStorage={canCleanUpStorage}
+          disabled={mediaFieldDisabled(request.instanceKey)}
+          instanceKey={request.instanceKey}
+          onPendingChange={onMediaPendingChange}
+          onBusyChange={onMediaBusyChange}
+          onChange={(value) => request.onChange(value, describedAlt(value))}
+          onAssetCreated={onAssetCreated}
+        />
+      ),
+    }),
+    // describedAlt reads the same media list.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [editorFieldsDisabled, stones, finishes, media, userId, canCleanUpStorage, mediaFieldDisabled, onMediaPendingChange, onMediaBusyChange, onAssetCreated],
+  );
+
+  function describedAlt(mediaAssetId: number | null) {
+    return mediaAssetId ? media.find((asset) => asset.id === mediaAssetId)?.alt?.trim() ?? "" : "";
+  }
+
+  function toggleBlock(key: string) {
+    setOpenBlockKeys((current) => {
+      const next = new Set(current);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  }
+
+  function showNewBlock(nextDraft: ProjectAggregateDraft, key: string) {
+    onChange(nextDraft);
+    setOpenBlockKeys((current) => new Set(current).add(key));
+    setInsertAt(null);
+    requestAnimationFrame(() =>
+      document.getElementById(mediaBlockId(key))?.scrollIntoView({ behavior: "smooth", block: "start" }),
+    );
+  }
+
+  function addNewBlock(type: ContentBlockType, index: number) {
+    const added = addBlock(draft, type, index);
+    showNewBlock(added.draft, added.key);
+  }
+
+  function copyBlock(block: ProjectBlockDraft, index: number) {
+    const copy = duplicateBlock(draft, block.key, describedAlt(blockImageId(draft, block)));
+    if (copy) showNewBlock(insertBlocks(draft, index + 1, [copy]), copy.key);
+  }
 
   function updateContent(block: ProjectBlockDraft, changes: Record<string, unknown>) {
     onChange(updateBlockContent(draft, block.key, { ...block.content, ...changes } as ProjectBlockDraft["content"]));
@@ -174,8 +263,7 @@ export default function MediaSection({
     const hasPoints =
       block.type === "hotspot_image" &&
       hotspotsForBlock(draft, block.key).length > 0;
-    const alt = value ? media.find((asset) => asset.id === value)?.alt?.trim() ?? "" : "";
-    onChange(setBlockImage(draft, block.key, value, alt));
+    onChange(setBlockImage(draft, block.key, value, describedAlt(value)));
     if (hasPoints && value !== blockImageId(draft, block)) {
       setReplacedImageBlockKeys((current) => new Set(current).add(block.key));
     }
@@ -516,191 +604,227 @@ export default function MediaSection({
     );
   }
 
+  function renderInsertPoint(index: number, last: boolean) {
+    if (insertAt === index) {
+      return (
+        <AddBlockPanel
+          heading={last ? "Add a block at the end" : `Add a block before block ${index + 1}`}
+          unavailable={hasYoutubeVideo ? { video: "This project already has its one video." } : undefined}
+          onAdd={(type) => addNewBlock(type, index)}
+          onClose={() => setInsertAt(null)}
+        />
+      );
+    }
+    return (
+      <div className={last ? "pt-1" : "flex justify-center"}>
+        <button
+          type="button"
+          onClick={() => setInsertAt(index)}
+          disabled={editorFieldsDisabled}
+          className={last ? secondaryButtonClass : "inline-flex min-h-8 items-center gap-1 rounded px-2 text-[11px] font-bold uppercase tracking-[0.12em] text-black/45 transition hover:bg-black/[0.04] hover:text-black disabled:cursor-not-allowed disabled:text-black/25"}
+        >
+          <Plus className="h-4 w-4" />
+          {last ? "Add block" : "Add block here"}
+        </button>
+      </div>
+    );
+  }
+
+  function renderImageBlockBody(block: ProjectBlockDraft, index: number) {
+    const hasPoints = block.type === "hotspot_image";
+    const pointCount = hasPoints ? hotspotsForBlock(draft, block.key).length : 0;
+    const imageId = blockImageId(draft, block);
+    return (
+      <>
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:items-start">
+          <InlineMediaField
+            key={`media-${block.key}`}
+            label={hasPoints ? "Image with material points" : "Image"}
+            value={imageId}
+            assets={media}
+            userId={userId}
+            canCleanUpStorage={canCleanUpStorage}
+            disabled={mediaFieldDisabled(`media-${block.key}`)}
+            instanceKey={`media-${block.key}`}
+            onPendingChange={onMediaPendingChange}
+            onBusyChange={onMediaBusyChange}
+            onChange={(value) => changeBlockImage(block, value)}
+            onAssetCreated={onAssetCreated}
+          />
+          <div className="grid gap-4">
+            {hasPoints ? (
+              <TextField
+                label="Title above the image"
+                value={contentText(block, "title")}
+                onChange={(value) => updateContent(block, { title: value })}
+                placeholder={defaultMaterialPointImageTitle}
+              />
+            ) : (
+              <>
+                <BlockTextField
+                  label="Image description"
+                  value={contentText(block, "alt")}
+                  maxLength={BLOCK_TEXT_LIMITS.short}
+                  hint="Read aloud to visitors who cannot see the picture."
+                  onChange={(value) => updateContent(block, { alt: value })}
+                />
+                <TextField
+                  label="Small label"
+                  value={contentText(block, "label")}
+                  onChange={(value) => updateContent(block, { label: value })}
+                  placeholder="Detail"
+                />
+              </>
+            )}
+            <TextField
+              label="Caption"
+              value={contentText(block, "caption")}
+              onChange={(value) => updateContent(block, { caption: value })}
+            />
+          </div>
+        </div>
+        {hasPoints && pointCount > 0 && replacedImageBlockKeys.has(block.key) ? (
+          <p
+            className="mt-3 border border-amber-300 bg-amber-50 p-3 text-sm font-medium leading-6 text-amber-900"
+            role="status"
+          >
+            Points keep their positions. Check they still
+            sit on the right materials.
+          </p>
+        ) : null}
+        {hasPoints ? (
+          renderPointsArea(block, index)
+        ) : (
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={() => enablePoints(block)}
+              disabled={editorFieldsDisabled || !imageId}
+              className={secondaryButtonClass}
+            >
+              <MapPin className="h-4 w-4" />
+              Mark materials on this image
+            </button>
+            {!imageId ? (
+              <span className="text-xs font-semibold text-black/45">
+                Choose the image first.
+              </span>
+            ) : null}
+          </div>
+        )}
+      </>
+    );
+  }
+
+  function renderBlock(block: ProjectBlockDraft, index: number): ReactNode {
+    const definition = contentBlockDefinition(block.type);
+    const isImage = block.type === "image" || block.type === "hotspot_image";
+    const pointCount = block.type === "hotspot_image" ? hotspotsForBlock(draft, block.key).length : 0;
+    const isOpen = openBlockKeys.has(block.key);
+    const summary = summarizeContentBlock(block);
+    const bodyId = `${mediaBlockId(block.key)}-form`;
+    return (
+      <article
+        key={block.key}
+        id={mediaBlockId(block.key)}
+        className="scroll-mt-28 border border-black/10 bg-[#f8f9f5] p-4"
+      >
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <button
+            type="button"
+            onClick={() => toggleBlock(block.key)}
+            aria-expanded={isOpen}
+            aria-controls={bodyId}
+            className="flex min-w-0 flex-1 items-start gap-3 text-left"
+          >
+            <span className="grid h-9 w-9 shrink-0 place-items-center rounded border border-black/10 bg-white">
+              <BlockTypeIcon type={block.type} className="h-4 w-4 text-black/70" />
+            </span>
+            <span className="min-w-0">
+              <h3 className="text-[11px] font-bold uppercase tracking-[0.13em] text-black/52">
+                Block {index + 1} · {definition.label}
+              </h3>
+              <span className="mt-1 block truncate text-sm font-semibold text-black/80">
+                {summary || "Not filled in yet"}
+              </span>
+            </span>
+            <ChevronDown className={`mt-2 h-4 w-4 shrink-0 text-black/50 transition ${isOpen ? "rotate-180" : ""}`} />
+          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            {pointCount > 0 ? (
+              <span className="inline-flex min-h-6 items-center gap-1 rounded border border-[var(--urblo-lime)] bg-[rgba(0,255,25,0.12)] px-2 text-[10px] font-bold uppercase tracking-[0.12em] text-black">
+                <MapPin className="h-3 w-3" />
+                {pointCount} material{" "}
+                {pointCount === 1 ? "point" : "points"}
+              </span>
+            ) : null}
+            <OrderControls
+              itemLabel={`block ${index + 1}`}
+              isFirst={index === 0}
+              isLast={index === draft.blocks.length - 1}
+              onMoveUp={() => moveItem("blocks", block.key, "up")}
+              onMoveDown={() => moveItem("blocks", block.key, "down")}
+            />
+            <button
+              type="button"
+              onClick={() => copyBlock(block, index)}
+              disabled={editorFieldsDisabled || (block.type === "video")}
+              className="inline-flex h-9 items-center gap-1 rounded border border-black/15 bg-white px-2 text-[11px] font-bold uppercase tracking-[0.12em] text-black/58 transition hover:border-black hover:text-black disabled:cursor-not-allowed disabled:text-black/25"
+              title={block.type === "video" ? "A project has one video" : undefined}
+            >
+              <Copy className="h-4 w-4" />
+              Duplicate
+            </button>
+            <RemoveButton
+              label="Remove block"
+              onClick={() => requestBlockRemoval(block)}
+            />
+          </div>
+        </div>
+        {renderPendingRemoval("block", block.key)}
+        <div id={bodyId} hidden={!isOpen} className="mt-4 border-t border-black/10 pt-4">
+          {isImage ? (
+            renderImageBlockBody(block, index)
+          ) : (
+            <BlockForm
+              block={block}
+              instanceKey={`media-${block.key}`}
+              onChange={(content) => onChange(updateBlockContent(draft, block.key, content))}
+            />
+          )}
+        </div>
+      </article>
+    );
+  }
+
   return (
     <ProjectSection
-      id="project-media"
-      title="Page images and video"
-      summary="Images and video in public-page order. Mark materials directly on any image."
-      action={
-        <div className="flex flex-wrap gap-2">
-          <AddButton
-            label="Add image"
-            onClick={() => onAddBlock("image")}
-            icon="image"
-          />
-          <AddButton
-            label="Add video"
-            onClick={() => onAddBlock("video")}
-            disabled={hasYoutubeVideo}
-          />
-        </div>
-      }
+      id="project-body"
+      title="Body"
+      summary="The page story in blocks: headings, text, numbers, steps, tables, stones, images and video, in public-page order."
       open={open}
       onToggle={onToggle}
     >
-      {draft.blocks.length ? (
-        <div className="space-y-4">
-          {draft.blocks.map((block, index) => {
-            const isVideo = block.type === "video";
-            const hasPoints = block.type === "hotspot_image";
-            const isImage = block.type === "image" || hasPoints;
-            const pointCount = hasPoints
-              ? hotspotsForBlock(draft, block.key).length
-              : 0;
-            const imageId = isImage ? blockImageId(draft, block) : null;
-
-            return (
-              <article
-                key={block.key}
-                id={mediaBlockId(block.key)}
-                className="scroll-mt-28 border border-black/10 bg-[#f8f9f5] p-4"
-              >
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="text-[11px] font-bold uppercase tracking-[0.13em] text-black/52">
-                      Block {index + 1} ·{" "}
-                      {isVideo ? "Video" : isImage ? "Image" : contentBlockDefinition(block.type).label}
-                    </h3>
-                    {hasPoints ? (
-                      <span className="inline-flex min-h-6 items-center gap-1 rounded border border-[var(--urblo-lime)] bg-[rgba(0,255,25,0.12)] px-2 text-[10px] font-bold uppercase tracking-[0.12em] text-black">
-                        <MapPin className="h-3 w-3" />
-                        {pointCount} material{" "}
-                        {pointCount === 1 ? "point" : "points"}
-                      </span>
-                    ) : null}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <OrderControls
-                      itemLabel={`media block ${index + 1}`}
-                      isFirst={index === 0}
-                      isLast={index === draft.blocks.length - 1}
-                      onMoveUp={() =>
-                        moveItem("blocks", block.key, "up")
-                      }
-                      onMoveDown={() =>
-                        moveItem("blocks", block.key, "down")
-                      }
-                    />
-                    <RemoveButton
-                      label="Remove block"
-                      onClick={() => requestBlockRemoval(block)}
-                    />
-                  </div>
-                </div>
-                {renderPendingRemoval("block", block.key)}
-
-                {isVideo ? (
-                  <div className="mt-4 grid gap-4 md:grid-cols-[72px_minmax(0,1fr)_minmax(0,1fr)] md:items-end">
-                    <div
-                      className="hidden aspect-square place-items-center border border-black/10 bg-white text-black/45 md:grid"
-                      aria-hidden="true"
-                    >
-                      <Video className="h-6 w-6" />
-                    </div>
-                    <TextField
-                      label="Video title"
-                      value={contentText(block, "title")}
-                      onChange={(value) => updateContent(block, { title: value })}
-                    />
-                    <TextField
-                      label="YouTube link"
-                      value={contentText(block, "youtubeUrl")}
-                      onChange={(value) => updateContent(block, { youtubeUrl: value })}
-                    />
-                    <div className="md:col-span-3">
-                      <TextField
-                        label="Caption"
-                        value={contentText(block, "caption")}
-                        onChange={(value) => updateContent(block, { caption: value })}
-                      />
-                    </div>
-                  </div>
-                ) : !isImage ? (
-                  <p className="mt-3 text-sm leading-6 text-black/60">
-                    {summarizeContentBlock(block) || contentBlockDefinition(block.type).description}
-                  </p>
-                ) : (
-                  <>
-                    <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:items-start">
-                      <InlineMediaField
-                        key={`media-${block.key}`}
-                        label={hasPoints ? "Image with material points" : "Image"}
-                        value={imageId}
-                        assets={media}
-                        userId={userId}
-                        canCleanUpStorage={canCleanUpStorage}
-                        disabled={mediaFieldDisabled(`media-${block.key}`)}
-                        instanceKey={`media-${block.key}`}
-                        onPendingChange={onMediaPendingChange}
-                        onBusyChange={onMediaBusyChange}
-                        onChange={(value) => changeBlockImage(block, value)}
-                        onAssetCreated={onAssetCreated}
-                      />
-                      <div className="grid gap-4">
-                        {hasPoints ? (
-                          <TextField
-                            label="Title above the image"
-                            value={contentText(block, "title")}
-                            onChange={(value) => updateContent(block, { title: value })}
-                            placeholder={defaultMaterialPointImageTitle}
-                          />
-                        ) : (
-                          <TextField
-                            label="Small label"
-                            value={contentText(block, "label")}
-                            onChange={(value) => updateContent(block, { label: value })}
-                            placeholder="Detail"
-                          />
-                        )}
-                        <TextField
-                          label="Caption"
-                          value={contentText(block, "caption")}
-                          onChange={(value) => updateContent(block, { caption: value })}
-                        />
-                      </div>
-                    </div>
-                    {hasPoints &&
-                    pointCount > 0 &&
-                    replacedImageBlockKeys.has(block.key) ? (
-                      <p
-                        className="mt-3 border border-amber-300 bg-amber-50 p-3 text-sm font-medium leading-6 text-amber-900"
-                        role="status"
-                      >
-                        Points keep their positions. Check they still
-                        sit on the right materials.
-                      </p>
-                    ) : null}
-                    {hasPoints ? (
-                      renderPointsArea(block, index)
-                    ) : (
-                      <div className="mt-4 flex flex-wrap items-center gap-3">
-                        <button
-                          type="button"
-                          onClick={() => enablePoints(block)}
-                          disabled={editorFieldsDisabled || !imageId}
-                          className={secondaryButtonClass}
-                        >
-                          <MapPin className="h-4 w-4" />
-                          Mark materials on this image
-                        </button>
-                        {!imageId ? (
-                          <span className="text-xs font-semibold text-black/45">
-                            Choose the image first.
-                          </span>
-                        ) : null}
-                      </div>
-                    )}
-                  </>
-                )}
-              </article>
-            );
-          })}
-        </div>
-      ) : (
-        <EmptyCopy>
-          Add images or video in the order they should appear.
-        </EmptyCopy>
-      )}
+      <BlockFormContext.Provider value={formHost}>
+        {draft.blocks.length ? (
+          <div className="space-y-2">
+            {draft.blocks.map((block, index) => (
+              <div key={block.key} className="space-y-2">
+                {renderInsertPoint(index, false)}
+                {renderBlock(block, index)}
+              </div>
+            ))}
+            {renderInsertPoint(draft.blocks.length, true)}
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <EmptyCopy>
+              Add blocks in the order they should appear on the page.
+            </EmptyCopy>
+            {renderInsertPoint(0, true)}
+          </div>
+        )}
+      </BlockFormContext.Provider>
     </ProjectSection>
   );
 }

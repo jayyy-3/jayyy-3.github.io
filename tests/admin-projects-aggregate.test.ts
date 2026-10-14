@@ -1,10 +1,13 @@
 import { test } from "vitest";
 import assert from "node:assert/strict";
 import {
+  addBlock,
   adoptLegacyMaterialMaps,
   collectProjectMediaAssetIds,
   countHotspotsForMaterial,
+  createBlock,
   createEmptyProjectAggregateDraft,
+  duplicateBlock,
   disableBlockPoints,
   draftToProjectData,
   enableBlockPoints,
@@ -12,6 +15,7 @@ import {
   getProjectPublishBlockers,
   hotspotsForBlock,
   blockImageId,
+  insertBlocks,
   mergeProjectMediaOptions,
   moveProjectDraftItem,
   normalizeProjectDraftForSave,
@@ -765,7 +769,7 @@ test("draft editing keeps order, preview parity, material points on images and l
   brokenReferenceDraft.hotspots[0].projectMaterialKey = "material:new:missing";
   assert.ok(
     getProjectPublishBlockers(brokenReferenceDraft, behaviorContext).some(
-      (blocker) => blocker.section === "media",
+      (blocker) => blocker.section === "body",
     ),
     "Missing child references must become a plain-language publish blocker on the image",
   );
@@ -887,7 +891,7 @@ test("draft editing keeps order, preview parity, material points on images and l
   const unplacedPoint = structuredClone(withPoint);
   unplacedPoint.hotspots[0].projectMaterialKey = null;
   assert.equal(
-    getProjectBlockerSections(unplacedPoint, behaviorContext).has("media"),
+    getProjectBlockerSections(unplacedPoint, behaviorContext).has("body"),
     true,
     "A point without a material must mark the media section",
   );
@@ -1337,7 +1341,7 @@ test("body blocks map to the shared preview, block publication and validate on t
   assert.deepEqual([preview.blocks[5].primary, preview.blocks[5].secondary], [undefined, { label: "Contact", href: "/contact" }]);
   assert.equal(preview.blocks[6].title, "Material placement", "An untitled points block keeps its map title");
   assert.equal(
-    getProjectPublishBlockers(draft, behaviorContext).some((blocker) => blocker.section === "media"),
+    getProjectPublishBlockers(draft, behaviorContext).some((blocker) => blocker.section === "body"),
     true,
     "The unsafe CTA link blocks publishing",
   );
@@ -1378,4 +1382,46 @@ test("body blocks map to the shared preview, block publication and validate on t
   ]);
   assert.equal(filled.blocks[2].content.alt, "Hero alt");
   assert.deepEqual(filled.blocks[3].content.items.map((item) => item.alt), ["Hero alt", "Own words"]);
+});
+
+test("body editing: insert, duplicate and remove blocks keep order and points ownership", () => {
+  const draft = structuredClone(behaviorDraft);
+  draft.blocks = [imageBlock("block:new:a", 1, { label: "A" }, 0)];
+  const heading = createBlock("heading");
+  assert.equal(heading.type, "heading");
+  assert.match(heading.key, /^block:new:/);
+  let next = insertBlocks(draft, 0, [heading]);
+  assert.deepEqual(next.blocks.map((block) => [block.type, block.sortOrder]), [["heading", 0], ["image", 1]]);
+  next = insertBlocks(next, 99, [createBlock("cta")]);
+  assert.deepEqual(next.blocks.map((block) => block.type), ["heading", "image", "cta"], "An out-of-range position appends");
+
+  const withPoints = enableBlockPoints(next, "block:new:a");
+  withPoints.blocks[1].id = 44;
+  withPoints.blocks[1].content.legacyProjectMediaId = 9;
+  const copy = duplicateBlock(withPoints, "block:new:a", "Map alt");
+  assert.deepEqual(
+    { type: copy.type, id: copy.id, content: copy.content },
+    { type: "image", id: null, content: { mediaAssetId: 1, alt: "Map alt", title: "", label: "A", caption: "" } },
+    "A points image is duplicated as a plain image of the same picture without points or provenance",
+  );
+  assert.notEqual(copy.key, "block:new:a");
+  const textCopy = duplicateBlock({ ...draft, blocks: [{ key: "block:9", id: 9, type: "text", sortOrder: 0, content: { body: "Hi" } }] }, "block:9");
+  assert.deepEqual([textCopy.type, textCopy.id, textCopy.content], ["text", null, { body: "Hi" }]);
+  assert.equal(duplicateBlock(draft, "block:missing"), null);
+  const removed = removeBlock(withPoints, "block:new:a");
+  assert.deepEqual(removed.blocks.map((block) => [block.type, block.sortOrder]), [["heading", 0], ["cta", 1]]);
+});
+
+test("adding an image with material points creates its hidden map so the image and points work at once", () => {
+  const draft = createEmptyProjectAggregateDraft();
+  const added = addBlock(draft, "hotspot_image", 0);
+  const block = added.draft.blocks[0];
+  assert.equal(block.key, added.key);
+  assert.equal(block.type, "hotspot_image");
+  assert.equal(added.draft.maps.length, 1);
+  assert.equal(block.content.projectMaterialMapKey, added.draft.maps[0].key);
+  const withImage = setBlockImage(added.draft, added.key, 7);
+  assert.equal(blockImageId(withImage, withImage.blocks[0]), 7);
+  const text = addBlock(withImage, "text", 0);
+  assert.deepEqual(text.draft.blocks.map((entry) => entry.type), ["text", "hotspot_image"]);
 });

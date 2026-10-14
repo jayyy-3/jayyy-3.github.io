@@ -13,7 +13,7 @@ Enter your email and password, then press **Sign in**. Forgotten it? Press **For
 
 ## Change an image on a project page
 1. Open **Projects**, search for the project and open it.
-2. In **Page images and video**, press **Replace image**. Pick a picture, or press **Choose file**, write an **Image description** and press **Upload original**.
+2. In **Body**, open the image block and press **Replace image**. Pick a picture, or press **Choose file**, write an **Image description** and press **Upload original**.
 3. Press **Save**, check with **Open preview**, then press **Publish** and **Open live page**.
 
 Stone photos: open **Stone Library**, open the stone, press **Add or upload image**, wait for **All changes saved**, then press **Publish**.
@@ -24,6 +24,9 @@ Stone forms: in the stone, tick each form under **Available as**, wait for **All
 1. In **Projects**, press **New project** or open an existing one, and fill in each section.
 2. Under a picture, press **Mark materials on this image**, click on the stone, then choose it under **Material**.
 3. Press **Save**, then **Publish**.
+
+## Body blocks
+The project story is built from blocks in **Body**. Press **Add block**, choose a type such as **Heading**, **Text**, **Key numbers**, **Steps** or **Stone cards**, then fill in its fields. Use the arrows to move a block, **Duplicate** to copy it and the bin to remove it. Press a block's title to open or close it.
 
 ## Edit a product
 Open **Products** and choose the product. Press **Save product** (not live yet) or **Update live page** (already live). **Publish product** puts a new product on the website. New pictures go into **Media** first with **Upload media**; then choose them as **Hero image**.
