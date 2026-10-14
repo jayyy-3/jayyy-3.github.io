@@ -1,4 +1,5 @@
 import type { PublicEntitySeo } from '../lib/publicEntitySeo';
+import type { BlockHotspot, ContentBlockView } from '../features/blocks/view.ts';
 
 export interface ProjectData {
     slug: string;
@@ -10,7 +11,8 @@ export interface ProjectData {
     lead?: string;
     story?: string[];
     materialMap?: ProjectMaterialMap;
-    mediaBlocks?: ProjectMediaBlock[];
+    /** Ordered page body (shared content blocks). */
+    blocks?: ContentBlockView[];
     materials?: ProjectMaterial[];
     gallery?: ProjectGalleryImage[];
     cta?: ProjectCta;
@@ -38,20 +40,7 @@ export interface ProjectHero {
     caption?: string;
 }
 
-export interface ProjectHotspot {
-    id: string;
-    x: number;
-    y: number;
-    title?: string;
-    description?: string;
-    stoneGroupId: string;
-    stoneVariantId?: string;
-    finishKey: string;
-    application: string;
-    note: string;
-    image?: string;
-    imageAlt?: string;
-}
+export type ProjectHotspot = BlockHotspot;
 
 export interface ProjectMaterialMap {
     image: string;
@@ -76,40 +65,6 @@ export interface ProjectGalleryImage {
     alt: string;
     label: string;
     caption: string;
-}
-
-export type ProjectMediaBlock =
-    | ProjectNormalImageBlock
-    | ProjectHotspotImageBlock
-    | ProjectYoutubeVideoBlock;
-
-export interface ProjectNormalImageBlock {
-    id: string;
-    type: 'normal_image';
-    src: string;
-    alt: string;
-    title?: string;
-    label?: string;
-    caption?: string;
-}
-
-export interface ProjectHotspotImageBlock {
-    id: string;
-    type: 'hotspot_image';
-    image: string;
-    imageAlt: string;
-    title: string;
-    intro?: string;
-    caption?: string;
-    hotspots: ProjectHotspot[];
-}
-
-export interface ProjectYoutubeVideoBlock {
-    id: string;
-    type: 'youtube_video';
-    youtubeId: string;
-    title: string;
-    caption?: string;
 }
 
 export interface ProjectCta {
@@ -161,10 +116,10 @@ export const projects: ProjectData[] = [
             Date: 'May 2023 (completed)',
             Address: '115B Victoria Parade, Fitzroy, VIC 3065',
         },
-        mediaBlocks: [
+        blocks: [
             {
                 id: 'acu-detail-1',
-                type: 'normal_image',
+                type: 'image',
                 src: `${legacyProjectAssetRoot}/australian-catholic-university/detail-1.jpg`,
                 alt: 'Australian Catholic University bluestone landscape detail',
                 label: 'Built detail',
@@ -172,7 +127,7 @@ export const projects: ProjectData[] = [
             },
             {
                 id: 'acu-detail-2',
-                type: 'normal_image',
+                type: 'image',
                 src: `${legacyProjectAssetRoot}/australian-catholic-university/detail-2.jpg`,
                 alt: 'Australian Catholic University stone seating and paving context',
                 label: 'Site context',
@@ -219,10 +174,10 @@ export const projects: ProjectData[] = [
             Date: '2023 (completed)',
             Address: '250 Spencer St, Melbourne, VIC 3000',
         },
-        mediaBlocks: [
+        blocks: [
             {
                 id: 'west-side-place-cover',
-                type: 'normal_image',
+                type: 'image',
                 src: `${legacyProjectAssetRoot}/west-side-place/cover.jpg`,
                 alt: 'West Side Place plaza stone works in an urban public realm',
                 label: 'Precinct scale',
@@ -230,7 +185,7 @@ export const projects: ProjectData[] = [
             },
             {
                 id: 'west-side-place-detail-1',
-                type: 'normal_image',
+                type: 'image',
                 src: `${legacyProjectAssetRoot}/west-side-place/detail-1.jpg`,
                 alt: 'West Side Place stone detail and planting interface',
                 label: 'Finish coordination',
@@ -238,7 +193,7 @@ export const projects: ProjectData[] = [
             },
             {
                 id: 'west-side-place-detail-2',
-                type: 'normal_image',
+                type: 'image',
                 src: `${legacyProjectAssetRoot}/west-side-place/detail-2.jpg`,
                 alt: 'West Side Place stone seating and paving detail',
                 label: 'Built interface',
@@ -282,10 +237,10 @@ export const projects: ProjectData[] = [
             Date: '2023 (completed)',
             Address: '135 Barkers Rd, Kew, VIC 3101',
         },
-        mediaBlocks: [
+        blocks: [
             {
                 id: 'xavier-cover',
-                type: 'normal_image',
+                type: 'image',
                 src: `${legacyProjectAssetRoot}/xavier-college/cover.jpg`,
                 alt: 'Xavier College sandstone landscape context',
                 label: 'Campus context',
@@ -293,7 +248,7 @@ export const projects: ProjectData[] = [
             },
             {
                 id: 'xavier-detail-1',
-                type: 'normal_image',
+                type: 'image',
                 src: `${legacyProjectAssetRoot}/xavier-college/detail-1.jpg`,
                 alt: 'Xavier College sandstone detail in the landscape',
                 label: 'Material tone',
@@ -301,7 +256,7 @@ export const projects: ProjectData[] = [
             },
             {
                 id: 'xavier-detail-2',
-                type: 'normal_image',
+                type: 'image',
                 src: `${legacyProjectAssetRoot}/xavier-college/detail-2.jpg`,
                 alt: 'Xavier College sandstone edge and paving detail',
                 label: 'Built edge',
@@ -345,10 +300,10 @@ export const projects: ProjectData[] = [
             Date: 'April 2024 (completed)',
             Address: '55 Parkview Rd, Alphington, VIC 3078',
         },
-        mediaBlocks: [
+        blocks: [
             {
                 id: 'artisan-cover',
-                type: 'normal_image',
+                type: 'image',
                 src: `${legacyProjectAssetRoot}/artisan-park-yarrabend/cover.png`,
                 alt: 'Artisan Park stone blocks and landscape planting',
                 label: 'Park sequence',
@@ -356,7 +311,7 @@ export const projects: ProjectData[] = [
             },
             {
                 id: 'artisan-detail-1',
-                type: 'normal_image',
+                type: 'image',
                 src: `${legacyProjectAssetRoot}/artisan-park-yarrabend/detail-1.jpg`,
                 alt: 'Artisan Park New Grey stone block detail',
                 label: 'Tactile finish',
@@ -364,7 +319,7 @@ export const projects: ProjectData[] = [
             },
             {
                 id: 'artisan-detail-2',
-                type: 'normal_image',
+                type: 'image',
                 src: `${legacyProjectAssetRoot}/artisan-park-yarrabend/detail-2.png`,
                 alt: 'Artisan Park stone seating and planting detail',
                 label: 'Landscape interface',
@@ -451,10 +406,10 @@ export const projects: ProjectData[] = [
                 },
             ],
         },
-        mediaBlocks: [
+        blocks: [
             {
                 id: 'moon-gate-threshold',
-                type: 'normal_image',
+                type: 'image',
                 src: `${moonGateAssetRoot}/moon-gate-landscape-threshold.jpg`,
                 alt: 'Moon gate stone elements set among trees and seating in Woolley Street',
                 label: 'Context',
@@ -504,7 +459,7 @@ export const projects: ProjectData[] = [
             },
             {
                 id: 'moon-gate-front-alignment',
-                type: 'normal_image',
+                type: 'image',
                 src: `${moonGateAssetRoot}/moon-gate-front-alignment.jpg`,
                 alt: 'Front alignment through repeated circular moon gate openings',
                 label: 'Alignment',
@@ -512,7 +467,7 @@ export const projects: ProjectData[] = [
             },
             {
                 id: 'moon-gate-seat-detail',
-                type: 'normal_image',
+                type: 'image',
                 src: `${moonGateAssetRoot}/moon-gate-seat-detail.jpg`,
                 alt: 'Close view of grey stone seat battens on a black polished stone base',
                 label: 'Detail',

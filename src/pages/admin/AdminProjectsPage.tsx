@@ -22,6 +22,7 @@ import {
   isProjectApiResponse,
   type ProjectApiResponse,
 } from "../../features/projects/projectApiContract";
+import { upgradeLegacyProjectDraft } from "../../features/blocks/upgrade";
 import { useAdminAuth } from "../../lib/adminAuthHooks";
 import { supabase } from "../../lib/supabaseClient";
 import AdminShell from "./AdminShell";
@@ -1022,6 +1023,11 @@ async function readProjectApiResponse(
     );
   }
 
+  // A response from a runtime that predates body blocks still carries `mediaBlocks`.
+  if (isRecord(payload) && isRecord(payload.draft)) {
+    payload = { ...payload, draft: upgradeLegacyProjectDraft(payload.draft) };
+  }
+
   if (!isProjectApiResponse(payload, options)) {
     throw new Error(
       "The project service returned an incomplete response. Reload before continuing.",
@@ -1089,6 +1095,10 @@ function withResponseStatus(
     ...draft,
     project: { ...draft.project, id: projectId, status },
   });
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
 function objectString(value: unknown, key: string) {

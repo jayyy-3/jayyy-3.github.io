@@ -223,12 +223,15 @@ const publishedProjectRow = {
   hero_media: null,
 };
 
-function createQueryBuilder(result) {
+const projectQueryFilters = [];
+
+function createQueryBuilder(result, table = '') {
   const builder = {
     select() {
       return builder;
     },
-    eq() {
+    eq(column, value) {
+      projectQueryFilters.push([table, column, value]);
       return builder;
     },
     in() {
@@ -252,7 +255,7 @@ function createProjectClient(
   return {
     from(table) {
       assert.ok(table in resultsByTable, `Unexpected public project query: ${table}`);
-      return createQueryBuilder(resultsByTable[table]);
+      return createQueryBuilder(resultsByTable[table], table);
     },
     rpc(functionName, args, options) {
       assert.equal(functionName, 'get_archived_project_slugs');
@@ -266,17 +269,14 @@ function createProjectClient(
 const successfulProjectClient = createProjectClient({
   projects: { data: [publishedProjectRow], error: null },
   project_facts: { data: [], error: null },
-  project_media: {
+  project_blocks: {
     data: [
       {
         id: 31,
         project_id: 1,
         project_material_map_id: 21,
-        media_role: 'hotspot_image',
-        label: null,
-        caption: null,
-        block_title: 'First map view',
-        youtube_url: null,
+        block_type: 'hotspot_image',
+        content: { title: 'First map view', label: '', caption: '', legacyProjectMediaId: 7 },
         sort_order: 0,
         media_assets: null,
       },
@@ -284,17 +284,53 @@ const successfulProjectClient = createProjectClient({
         id: 32,
         project_id: 1,
         project_material_map_id: 21,
-        media_role: 'hotspot_image',
-        label: null,
-        caption: null,
-        block_title: 'Second map view',
-        youtube_url: null,
+        block_type: 'hotspot_image',
+        content: { title: 'Second map view', label: '', caption: '' },
         sort_order: 1,
+        media_assets: null,
+      },
+      {
+        id: 33,
+        project_id: 1,
+        project_material_map_id: null,
+        block_type: 'gallery',
+        content: { items: [
+          { mediaAssetId: 501, alt: 'Gallery one', caption: 'First' },
+          { mediaAssetId: 502, alt: '', caption: '' },
+          { mediaAssetId: 999, alt: 'Hidden media', caption: '' },
+        ] },
+        sort_order: 2,
+        media_assets: null,
+      },
+      {
+        id: 34,
+        project_id: 1,
+        project_material_map_id: null,
+        block_type: 'stone_cards',
+        content: { title: 'Stones', items: [{ stoneGroupId: 61, finishKey: 'sawn' }, { stoneGroupId: 62 }] },
+        sort_order: 3,
+        media_assets: null,
+      },
+      {
+        id: 35,
+        project_id: 1,
+        project_material_map_id: null,
+        block_type: 'cta',
+        content: { title: 'Ask us', primary: { label: 'Unsafe', href: 'javascript:alert(1)' }, secondary: { label: 'Contact', href: '/contact' } },
+        sort_order: 4,
         media_assets: null,
       },
     ],
     error: null,
   },
+  media_assets: {
+    data: [
+      { id: 501, status: 'published', source_kind: 'external_legacy', source_url: '/media/g1.jpg', bucket: null, object_path: null, alt: 'Media one' },
+      { id: 502, status: 'published', source_kind: 'external_legacy', source_url: '/media/g2.jpg', bucket: null, object_path: null, alt: 'Media two' },
+    ],
+    error: null,
+  },
+  stone_groups: { data: [{ id: 61, stone_group_key: 'bluestone' }], error: null },
   project_materials: {
     data: [{
       id: 11,
@@ -350,12 +386,46 @@ test('Published CMS Projects map, overlay static fallbacks, honour tombstones an
   assert.equal(mappedPublishedProjects[0].contentSource, 'cms');
   assert.equal(mappedPublishedProjects[0].materials?.[0]?.application, 'CMS paving');
   assert.equal(mappedPublishedProjects[0].materialMap?.hotspots[0]?.id, 'cms-hotspot');
-  assert.equal(mappedPublishedProjects[0].mediaBlocks?.[0]?.type, 'hotspot_image');
+  const blocks = mappedPublishedProjects[0].blocks ?? [];
+  assert.deepEqual(blocks.map((block) => block.type), ['hotspot_image', 'hotspot_image', 'gallery', 'stone_cards', 'cta']);
   assert.equal(
-    new Set(mappedPublishedProjects[0].mediaBlocks?.map((block) => block.id)).size,
-    mappedPublishedProjects[0].mediaBlocks?.length,
-    'Multiple media blocks linked to one map must retain unique React keys',
+    new Set(blocks.map((block) => block.id)).size,
+    blocks.length,
+    'Multiple blocks linked to one map must retain unique React keys',
   );
+  assert.deepEqual(
+    blocks.slice(0, 2).map((block) => block.id),
+    ['moon-gate-woolley-street-media-7', 'moon-gate-woolley-street-block-32'],
+    'A block copied from a former media row keeps that row\'s public anchor',
+  );
+  assert.equal(blocks[0].type === 'hotspot_image' && blocks[0].title, 'First map view');
+  assert.deepEqual(
+    blocks[2],
+    {
+      id: 'moon-gate-woolley-street-block-33',
+      type: 'gallery',
+      items: [
+        { src: '/media/g1.jpg', alt: 'Gallery one', caption: 'First' },
+        { src: '/media/g2.jpg', alt: 'Media two', caption: undefined },
+      ],
+    },
+    'Gallery items resolve Published media only; an empty description falls back to the media description',
+  );
+  assert.deepEqual(
+    blocks[3].type === 'stone_cards' && blocks[3].items.map((item) => item.stoneGroupId),
+    ['bluestone', null],
+    'Stone cards resolve Published Stone Library keys; an unavailable stone becomes a pending card',
+  );
+  assert.deepEqual(
+    blocks[4].type === 'cta' && [blocks[4].primary, blocks[4].secondary],
+    [undefined, { label: 'Contact', href: '/contact' }],
+    'Unsafe block links are dropped before rendering',
+  );
+  assert.ok(
+    projectQueryFilters.some(([table, column, value]) => table === 'project_blocks' && column === 'status' && value === 'published'),
+    'The public body query reads Published blocks only',
+  );
+  assert.deepEqual(mappedPublishedProjects[0].images, ['/media/example-map.jpg', '/media/example-map.jpg']);
   assert.deepEqual(mappedPublishedProjects[0].seo, {
     title: 'CMS project search title',
     description: 'CMS project search description',
@@ -423,8 +493,8 @@ test('Published CMS Projects map, overlay static fallbacks, honour tombstones an
     { slug: 'material-only', materials: [{ stoneGroupId: 'zen-grey', finishKey: 'honed', application: 'Paving', note: '' }] },
     {
       slug: 'point-only',
-      mediaBlocks: [
-        { id: 'plain', type: 'normal_image', src: '/a.jpg', alt: 'a' },
+      blocks: [
+        { id: 'plain', type: 'image', src: '/a.jpg', alt: 'a' },
         {
           id: 'map',
           type: 'hotspot_image',
@@ -470,7 +540,7 @@ test('tombstone or child-table read failures keep static Project fallbacks intac
 
   for (const failingTable of [
     'project_facts',
-    'project_media',
+    'project_blocks',
     'project_materials',
     'project_material_maps',
     'project_hotspots',
@@ -478,7 +548,7 @@ test('tombstone or child-table read failures keep static Project fallbacks intac
     const resultsByTable = {
       projects: { data: [publishedProjectRow], error: null },
       project_facts: { data: [], error: null },
-      project_media: { data: [], error: null },
+      project_blocks: { data: [], error: null },
       project_materials: { data: [], error: null },
       project_material_maps: {
         data: failingTable === 'project_hotspots'
@@ -504,6 +574,31 @@ test('tombstone or child-table read failures keep static Project fallbacks intac
       `${failingTable} errors must reject the CMS overlay so static projects remain intact`,
     );
   }
+
+  const bodyReferenceFailure = await getPublishedProjects(createProjectClient({
+    projects: { data: [publishedProjectRow], error: null },
+    project_facts: { data: [], error: null },
+    project_blocks: {
+      data: [{ id: 41, project_id: 1, project_material_map_id: null, block_type: 'gallery', content: { items: [{ mediaAssetId: 9, alt: 'x' }] }, sort_order: 0, media_assets: null }],
+      error: null,
+    },
+    project_materials: { data: [], error: null },
+    project_material_maps: { data: [], error: null },
+    media_assets: { data: null, error: { message: 'media read failed' } },
+  }));
+  assert.deepEqual(bodyReferenceFailure, [], 'A failed body media read keeps the complete static fallback');
+
+  // Before the body-block migration the table does not exist yet: Projects keep their facts and
+  // materials and render no body instead of falling back to the static collection.
+  const beforeMigration = await getPublishedProjects(createProjectClient({
+    projects: { data: [publishedProjectRow], error: null },
+    project_facts: { data: [], error: null },
+    project_blocks: { data: null, error: { code: 'PGRST205', message: 'Could not find the table public.project_blocks' } },
+    project_materials: { data: [], error: null },
+    project_material_maps: { data: [], error: null },
+  }));
+  assert.equal(beforeMigration.length, 1);
+  assert.deepEqual(beforeMigration[0].blocks, []);
 });
 
 test('Published site settings normalize consistently and internal footer links stay same-origin', () => {

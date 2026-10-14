@@ -608,8 +608,22 @@ Fields:
 - `archived_at timestamptz`
 - shared audit fields
 
+### `project_blocks`
+Purpose: the ordered Project page body (NOW-PROJECT-BLOCKS-001, `20261014120000_project_blocks.sql`, not yet applied to production at authoring). Written only by `admin_project_aggregate`; browser roles read Published blocks of Published, approved Projects.
+
+Fields:
+- `id bigint identity primary key`
+- `project_id bigint not null references projects(id) on delete cascade`
+- `block_key text not null`; the draft's stable key (`block:<id>` or `block:new:<uuid>`), unique per Project among non-archived rows
+- `block_type text not null` in `heading`, `text`, `quote`, `callout`, `stats`, `steps`, `spec_table`, `comparison_table`, `stone_cards`, `image`, `gallery`, `hotspot_image`, `video`, `cta`
+- `content jsonb not null default '{}'` (object); per-type schema in `src/features/blocks/schema.ts`; copied rows carry `legacyProjectMediaId`
+- `media_asset_id bigint references media_assets(id) on delete set null`; the `image` picture or the `hotspot_image` map picture
+- `project_material_map_id bigint references project_material_maps(id) on delete set null`; `hotspot_image` only
+- `linked_stone_group_ids bigint[] not null default '{}'`; `stone_cards` only, included in `private.stone_usage` and the Stone reference guard
+- `sort_order`, `status` (`draft`/`published`/`archived`), `published_at`, `archived_at`, shared audit fields
+
 ### `project_media`
-Purpose: ordered project detail media blocks plus legacy cover/hero/gallery/supporting references.
+Purpose: ordered project detail media blocks plus legacy cover/hero/gallery/supporting references. Since `20261014120000_project_blocks.sql` it is history only: its body rows were copied one to one into `project_blocks` and the runtime neither reads nor writes it. It is not altered or deleted.
 
 Fields:
 - `id bigint identity primary key`

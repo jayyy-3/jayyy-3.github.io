@@ -1,0 +1,1288 @@
+{
+ "_comment": "Shared content-block validation fixture. Both src/features/blocks/schema.ts and functions/_lib/blocks.js must return exactly these issues. \"@repeat:<char>:<n>\" expands to a string of n characters.",
+ "cases": [
+  {
+   "name": "heading complete",
+   "mode": "publish",
+   "block": {
+    "type": "heading",
+    "content": {
+     "eyebrow": "Background",
+     "title": "Why stone",
+     "intro": "Short intro"
+    }
+   },
+   "issues": []
+  },
+  {
+   "name": "heading default draft",
+   "mode": "draft",
+   "block": {
+    "type": "heading",
+    "content": {
+     "eyebrow": "",
+     "title": "",
+     "intro": ""
+    }
+   },
+   "issues": []
+  },
+  {
+   "name": "heading missing title",
+   "mode": "publish",
+   "block": {
+    "type": "heading",
+    "content": {
+     "eyebrow": "Background",
+     "title": "  "
+    }
+   },
+   "issues": [
+    {
+     "path": "content.title",
+     "code": "required"
+    }
+   ]
+  },
+  {
+   "name": "heading title too long",
+   "mode": "draft",
+   "block": {
+    "type": "heading",
+    "content": {
+     "title": "@repeat:x:201"
+    }
+   },
+   "issues": [
+    {
+     "path": "content.title",
+     "code": "too_long"
+    }
+   ]
+  },
+  {
+   "name": "heading unknown field and wrong type",
+   "mode": "draft",
+   "block": {
+    "type": "heading",
+    "content": {
+     "title": 5,
+     "subtitle": "x",
+     "html": "<b>x</b>"
+    }
+   },
+   "issues": [
+    {
+     "path": "content.html",
+     "code": "unknown_field"
+    },
+    {
+     "path": "content.subtitle",
+     "code": "unknown_field"
+    },
+    {
+     "path": "content.title",
+     "code": "invalid_type"
+    }
+   ]
+  },
+  {
+   "name": "text complete",
+   "mode": "publish",
+   "block": {
+    "type": "text",
+    "content": {
+     "body": "First paragraph with **bold** and [a link](/contact).\n\n- one\n- two"
+    }
+   },
+   "issues": []
+  },
+  {
+   "name": "text empty body",
+   "mode": "publish",
+   "block": {
+    "type": "text",
+    "content": {
+     "body": ""
+    }
+   },
+   "issues": [
+    {
+     "path": "content.body",
+     "code": "required"
+    }
+   ]
+  },
+  {
+   "name": "text body too long",
+   "mode": "draft",
+   "block": {
+    "type": "text",
+    "content": {
+     "body": "@repeat:x:5001"
+    }
+   },
+   "issues": [
+    {
+     "path": "content.body",
+     "code": "too_long"
+    }
+   ]
+  },
+  {
+   "name": "text content not an object",
+   "mode": "draft",
+   "block": {
+    "type": "text",
+    "content": [
+     "body"
+    ]
+   },
+   "issues": [
+    {
+     "path": "content",
+     "code": "invalid_type"
+    }
+   ]
+  },
+  {
+   "name": "unknown block type",
+   "mode": "draft",
+   "block": {
+    "type": "newsletter_banner",
+    "content": {}
+   },
+   "issues": [
+    {
+     "path": "type",
+     "code": "invalid_value"
+    }
+   ]
+  },
+  {
+   "name": "quote complete",
+   "mode": "publish",
+   "block": {
+    "type": "quote",
+    "content": {
+     "quote": "Stone made the scheme buildable.",
+     "attribution": "A. Designer",
+     "role": "Landscape architect"
+    }
+   },
+   "issues": []
+  },
+  {
+   "name": "quote missing quote",
+   "mode": "publish",
+   "block": {
+    "type": "quote",
+    "content": {
+     "attribution": "A. Designer"
+    }
+   },
+   "issues": [
+    {
+     "path": "content.quote",
+     "code": "required"
+    }
+   ]
+  },
+  {
+   "name": "quote too long",
+   "mode": "draft",
+   "block": {
+    "type": "quote",
+    "content": {
+     "quote": "@repeat:x:401"
+    }
+   },
+   "issues": [
+    {
+     "path": "content.quote",
+     "code": "too_long"
+    }
+   ]
+  },
+  {
+   "name": "callout lime",
+   "mode": "publish",
+   "block": {
+    "type": "callout",
+    "content": {
+     "title": "Note",
+     "body": "Check the lead time.",
+     "tone": "lime"
+    }
+   },
+   "issues": []
+  },
+  {
+   "name": "callout bad tone",
+   "mode": "draft",
+   "block": {
+    "type": "callout",
+    "content": {
+     "body": "x",
+     "tone": "green"
+    }
+   },
+   "issues": [
+    {
+     "path": "content.tone",
+     "code": "invalid_value"
+    }
+   ]
+  },
+  {
+   "name": "callout missing tone",
+   "mode": "draft",
+   "block": {
+    "type": "callout",
+    "content": {
+     "body": "x"
+    }
+   },
+   "issues": [
+    {
+     "path": "content.tone",
+     "code": "invalid_type"
+    }
+   ]
+  },
+  {
+   "name": "stats complete",
+   "mode": "publish",
+   "block": {
+    "type": "stats",
+    "content": {
+     "items": [
+      {
+       "value": "1,200",
+       "unit": "m²",
+       "label": "Paving"
+      },
+      {
+       "value": "14",
+       "label": "Weeks"
+      }
+     ],
+     "caption": "Approximate"
+    }
+   },
+   "issues": []
+  },
+  {
+   "name": "stats empty items at publish",
+   "mode": "publish",
+   "block": {
+    "type": "stats",
+    "content": {
+     "items": []
+    }
+   },
+   "issues": [
+    {
+     "path": "content.items",
+     "code": "too_few"
+    }
+   ]
+  },
+  {
+   "name": "stats empty items in draft",
+   "mode": "draft",
+   "block": {
+    "type": "stats",
+    "content": {
+     "items": []
+    }
+   },
+   "issues": []
+  },
+  {
+   "name": "stats five items",
+   "mode": "draft",
+   "block": {
+    "type": "stats",
+    "content": {
+     "items": [
+      {
+       "value": "1",
+       "label": "a"
+      },
+      {
+       "value": "2",
+       "label": "b"
+      },
+      {
+       "value": "3",
+       "label": "c"
+      },
+      {
+       "value": "4",
+       "label": "d"
+      },
+      {
+       "value": "5",
+       "label": "e"
+      }
+     ]
+    }
+   },
+   "issues": [
+    {
+     "path": "content.items",
+     "code": "too_many"
+    }
+   ]
+  },
+  {
+   "name": "stats item missing label",
+   "mode": "publish",
+   "block": {
+    "type": "stats",
+    "content": {
+     "items": [
+      {
+       "value": "1",
+       "label": ""
+      }
+     ]
+    }
+   },
+   "issues": [
+    {
+     "path": "content.items[0].label",
+     "code": "required"
+    }
+   ]
+  },
+  {
+   "name": "stats item not an object",
+   "mode": "draft",
+   "block": {
+    "type": "stats",
+    "content": {
+     "items": [
+      "1"
+     ]
+    }
+   },
+   "issues": [
+    {
+     "path": "content.items[0]",
+     "code": "invalid_type"
+    }
+   ]
+  },
+  {
+   "name": "steps complete with image",
+   "mode": "publish",
+   "block": {
+    "type": "steps",
+    "content": {
+     "intro": "From intent to fabrication",
+     "items": [
+      {
+       "title": "Survey",
+       "body": "Measure site",
+       "mediaAssetId": 12,
+       "alt": "Survey crew"
+      },
+      {
+       "title": "Cut",
+       "body": "Cut blocks",
+       "mediaAssetId": null,
+       "alt": ""
+      }
+     ]
+    }
+   },
+   "issues": []
+  },
+  {
+   "name": "steps image without description",
+   "mode": "publish",
+   "block": {
+    "type": "steps",
+    "content": {
+     "items": [
+      {
+       "title": "Survey",
+       "body": "Measure site",
+       "mediaAssetId": 12,
+       "alt": ""
+      }
+     ]
+    }
+   },
+   "issues": [
+    {
+     "path": "content.items[0].alt",
+     "code": "required"
+    }
+   ]
+  },
+  {
+   "name": "steps nine items",
+   "mode": "draft",
+   "block": {
+    "type": "steps",
+    "content": {
+     "items": [
+      {
+       "title": "1",
+       "body": ""
+      },
+      {
+       "title": "2",
+       "body": ""
+      },
+      {
+       "title": "3",
+       "body": ""
+      },
+      {
+       "title": "4",
+       "body": ""
+      },
+      {
+       "title": "5",
+       "body": ""
+      },
+      {
+       "title": "6",
+       "body": ""
+      },
+      {
+       "title": "7",
+       "body": ""
+      },
+      {
+       "title": "8",
+       "body": ""
+      },
+      {
+       "title": "9",
+       "body": ""
+      }
+     ]
+    }
+   },
+   "issues": [
+    {
+     "path": "content.items",
+     "code": "too_many"
+    }
+   ]
+  },
+  {
+   "name": "steps bad media id",
+   "mode": "draft",
+   "block": {
+    "type": "steps",
+    "content": {
+     "items": [
+      {
+       "title": "1",
+       "body": "x",
+       "mediaAssetId": -4
+      }
+     ]
+    }
+   },
+   "issues": [
+    {
+     "path": "content.items[0].mediaAssetId",
+     "code": "invalid_type"
+    }
+   ]
+  },
+  {
+   "name": "spec table complete",
+   "mode": "publish",
+   "block": {
+    "type": "spec_table",
+    "content": {
+     "title": "Specification",
+     "rows": [
+      {
+       "label": "Finish",
+       "value": "Flamed"
+      },
+      {
+       "label": "Thickness",
+       "value": "50 mm"
+      }
+     ]
+    }
+   },
+   "issues": []
+  },
+  {
+   "name": "spec table missing value",
+   "mode": "publish",
+   "block": {
+    "type": "spec_table",
+    "content": {
+     "rows": [
+      {
+       "label": "Finish",
+       "value": ""
+      }
+     ]
+    }
+   },
+   "issues": [
+    {
+     "path": "content.rows[0].value",
+     "code": "required"
+    }
+   ]
+  },
+  {
+   "name": "spec table thirteen rows",
+   "mode": "draft",
+   "block": {
+    "type": "spec_table",
+    "content": {
+     "rows": [
+      {
+       "label": "1",
+       "value": "1"
+      },
+      {
+       "label": "2",
+       "value": "2"
+      },
+      {
+       "label": "3",
+       "value": "3"
+      },
+      {
+       "label": "4",
+       "value": "4"
+      },
+      {
+       "label": "5",
+       "value": "5"
+      },
+      {
+       "label": "6",
+       "value": "6"
+      },
+      {
+       "label": "7",
+       "value": "7"
+      },
+      {
+       "label": "8",
+       "value": "8"
+      },
+      {
+       "label": "9",
+       "value": "9"
+      },
+      {
+       "label": "10",
+       "value": "10"
+      },
+      {
+       "label": "11",
+       "value": "11"
+      },
+      {
+       "label": "12",
+       "value": "12"
+      },
+      {
+       "label": "13",
+       "value": "13"
+      }
+     ]
+    }
+   },
+   "issues": [
+    {
+     "path": "content.rows",
+     "code": "too_many"
+    }
+   ]
+  },
+  {
+   "name": "comparison complete",
+   "mode": "publish",
+   "block": {
+    "type": "comparison_table",
+    "content": {
+     "title": "Options",
+     "columns": [
+      "Granite",
+      "Bluestone"
+     ],
+     "rows": [
+      {
+       "label": "Slip",
+       "cells": [
+        "P5",
+        "P4"
+       ]
+      },
+      {
+       "label": "Cost",
+       "cells": [
+        "$$",
+        "$"
+       ]
+      }
+     ]
+    }
+   },
+   "issues": []
+  },
+  {
+   "name": "comparison one column",
+   "mode": "publish",
+   "block": {
+    "type": "comparison_table",
+    "content": {
+     "columns": [
+      "Granite"
+     ],
+     "rows": [
+      {
+       "label": "Slip",
+       "cells": [
+        "P5"
+       ]
+      }
+     ]
+    }
+   },
+   "issues": [
+    {
+     "path": "content.columns",
+     "code": "too_few"
+    }
+   ]
+  },
+  {
+   "name": "comparison cells mismatch",
+   "mode": "publish",
+   "block": {
+    "type": "comparison_table",
+    "content": {
+     "columns": [
+      "A",
+      "B",
+      "C"
+     ],
+     "rows": [
+      {
+       "label": "Slip",
+       "cells": [
+        "P5",
+        "P4"
+       ]
+      }
+     ]
+    }
+   },
+   "issues": [
+    {
+     "path": "content.rows[0].cells",
+     "code": "invalid_value"
+    }
+   ]
+  },
+  {
+   "name": "comparison empty column header",
+   "mode": "publish",
+   "block": {
+    "type": "comparison_table",
+    "content": {
+     "columns": [
+      "A",
+      ""
+     ],
+     "rows": [
+      {
+       "label": "Slip",
+       "cells": [
+        "1",
+        "2"
+       ]
+      }
+     ]
+    }
+   },
+   "issues": [
+    {
+     "path": "content.columns[1]",
+     "code": "required"
+    }
+   ]
+  },
+  {
+   "name": "comparison five columns",
+   "mode": "draft",
+   "block": {
+    "type": "comparison_table",
+    "content": {
+     "columns": [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E"
+     ],
+     "rows": []
+    }
+   },
+   "issues": [
+    {
+     "path": "content.columns",
+     "code": "too_many"
+    }
+   ]
+  },
+  {
+   "name": "comparison cells not array",
+   "mode": "draft",
+   "block": {
+    "type": "comparison_table",
+    "content": {
+     "columns": [
+      "A",
+      "B"
+     ],
+     "rows": [
+      {
+       "label": "x",
+       "cells": "1,2"
+      }
+     ]
+    }
+   },
+   "issues": [
+    {
+     "path": "content.rows[0].cells",
+     "code": "invalid_type"
+    }
+   ]
+  },
+  {
+   "name": "stone cards complete",
+   "mode": "publish",
+   "block": {
+    "type": "stone_cards",
+    "content": {
+     "title": "Stones used",
+     "items": [
+      {
+       "stoneGroupId": 4,
+       "finishKey": "flamed",
+       "note": "Paving"
+      },
+      {
+       "stoneGroupId": 7
+      }
+     ]
+    }
+   },
+   "issues": []
+  },
+  {
+   "name": "stone cards missing stone",
+   "mode": "publish",
+   "block": {
+    "type": "stone_cards",
+    "content": {
+     "items": [
+      {
+       "stoneGroupId": null,
+       "finishKey": ""
+      }
+     ]
+    }
+   },
+   "issues": [
+    {
+     "path": "content.items[0].stoneGroupId",
+     "code": "required"
+    }
+   ]
+  },
+  {
+   "name": "stone cards missing stone in draft",
+   "mode": "draft",
+   "block": {
+    "type": "stone_cards",
+    "content": {
+     "items": [
+      {
+       "stoneGroupId": null,
+       "finishKey": ""
+      }
+     ]
+    }
+   },
+   "issues": []
+  },
+  {
+   "name": "stone cards key instead of id",
+   "mode": "draft",
+   "block": {
+    "type": "stone_cards",
+    "content": {
+     "items": [
+      {
+       "stoneGroupId": "zen-grey"
+      }
+     ]
+    }
+   },
+   "issues": [
+    {
+     "path": "content.items[0].stoneGroupId",
+     "code": "invalid_type"
+    }
+   ]
+  },
+  {
+   "name": "image complete",
+   "mode": "publish",
+   "block": {
+    "type": "image",
+    "content": {
+     "mediaAssetId": 42,
+     "alt": "Granite paving at dusk",
+     "caption": "Entry",
+     "label": "Context",
+     "title": "",
+     "legacyProjectMediaId": 9
+    }
+   },
+   "issues": []
+  },
+  {
+   "name": "image without picture",
+   "mode": "publish",
+   "block": {
+    "type": "image",
+    "content": {
+     "mediaAssetId": null,
+     "alt": ""
+    }
+   },
+   "issues": [
+    {
+     "path": "content.mediaAssetId",
+     "code": "required"
+    },
+    {
+     "path": "content.alt",
+     "code": "required"
+    }
+   ]
+  },
+  {
+   "name": "image without description",
+   "mode": "publish",
+   "block": {
+    "type": "image",
+    "content": {
+     "mediaAssetId": 42,
+     "alt": " "
+    }
+   },
+   "issues": [
+    {
+     "path": "content.alt",
+     "code": "required"
+    }
+   ]
+  },
+  {
+   "name": "image fractional legacy id",
+   "mode": "draft",
+   "block": {
+    "type": "image",
+    "content": {
+     "mediaAssetId": 42,
+     "alt": "x",
+     "legacyProjectMediaId": 1.5
+    }
+   },
+   "issues": [
+    {
+     "path": "content.legacyProjectMediaId",
+     "code": "invalid_type"
+    }
+   ]
+  },
+  {
+   "name": "gallery complete",
+   "mode": "publish",
+   "block": {
+    "type": "gallery",
+    "content": {
+     "items": [
+      {
+       "mediaAssetId": 1,
+       "alt": "One"
+      },
+      {
+       "mediaAssetId": 2,
+       "alt": "Two",
+       "caption": "Second"
+      }
+     ]
+    }
+   },
+   "issues": []
+  },
+  {
+   "name": "gallery single image",
+   "mode": "publish",
+   "block": {
+    "type": "gallery",
+    "content": {
+     "items": [
+      {
+       "mediaAssetId": 1,
+       "alt": "One"
+      }
+     ]
+    }
+   },
+   "issues": [
+    {
+     "path": "content.items",
+     "code": "too_few"
+    }
+   ]
+  },
+  {
+   "name": "gallery thirteen images",
+   "mode": "draft",
+   "block": {
+    "type": "gallery",
+    "content": {
+     "items": [
+      {
+       "mediaAssetId": 1,
+       "alt": "a"
+      },
+      {
+       "mediaAssetId": 2,
+       "alt": "a"
+      },
+      {
+       "mediaAssetId": 3,
+       "alt": "a"
+      },
+      {
+       "mediaAssetId": 4,
+       "alt": "a"
+      },
+      {
+       "mediaAssetId": 5,
+       "alt": "a"
+      },
+      {
+       "mediaAssetId": 6,
+       "alt": "a"
+      },
+      {
+       "mediaAssetId": 7,
+       "alt": "a"
+      },
+      {
+       "mediaAssetId": 8,
+       "alt": "a"
+      },
+      {
+       "mediaAssetId": 9,
+       "alt": "a"
+      },
+      {
+       "mediaAssetId": 10,
+       "alt": "a"
+      },
+      {
+       "mediaAssetId": 11,
+       "alt": "a"
+      },
+      {
+       "mediaAssetId": 12,
+       "alt": "a"
+      },
+      {
+       "mediaAssetId": 13,
+       "alt": "a"
+      }
+     ]
+    }
+   },
+   "issues": [
+    {
+     "path": "content.items",
+     "code": "too_many"
+    }
+   ]
+  },
+  {
+   "name": "hotspot image complete",
+   "mode": "publish",
+   "block": {
+    "type": "hotspot_image",
+    "content": {
+     "projectMaterialMapKey": "map:12",
+     "title": "Stone and finish placement",
+     "label": "",
+     "caption": "Where each stone is used"
+    }
+   },
+   "issues": []
+  },
+  {
+   "name": "hotspot image without map",
+   "mode": "publish",
+   "block": {
+    "type": "hotspot_image",
+    "content": {
+     "projectMaterialMapKey": null
+    }
+   },
+   "issues": [
+    {
+     "path": "content.projectMaterialMapKey",
+     "code": "required"
+    }
+   ]
+  },
+  {
+   "name": "hotspot image blank map key",
+   "mode": "draft",
+   "block": {
+    "type": "hotspot_image",
+    "content": {
+     "projectMaterialMapKey": "  "
+    }
+   },
+   "issues": [
+    {
+     "path": "content.projectMaterialMapKey",
+     "code": "invalid_value"
+    }
+   ]
+  },
+  {
+   "name": "video complete",
+   "mode": "publish",
+   "block": {
+    "type": "video",
+    "content": {
+     "youtubeUrl": "https://www.youtube.com/watch?v=abcdefghijk",
+     "title": "Installation"
+    }
+   },
+   "issues": []
+  },
+  {
+   "name": "video short link",
+   "mode": "publish",
+   "block": {
+    "type": "video",
+    "content": {
+     "youtubeUrl": "https://youtu.be/abcdefghijk"
+    }
+   },
+   "issues": []
+  },
+  {
+   "name": "video not youtube",
+   "mode": "publish",
+   "block": {
+    "type": "video",
+    "content": {
+     "youtubeUrl": "https://vimeo.com/123456789"
+    }
+   },
+   "issues": [
+    {
+     "path": "content.youtubeUrl",
+     "code": "invalid_value"
+    }
+   ]
+  },
+  {
+   "name": "video http link",
+   "mode": "publish",
+   "block": {
+    "type": "video",
+    "content": {
+     "youtubeUrl": "http://youtu.be/abcdefghijk"
+    }
+   },
+   "issues": [
+    {
+     "path": "content.youtubeUrl",
+     "code": "invalid_value"
+    }
+   ]
+  },
+  {
+   "name": "video empty in draft",
+   "mode": "draft",
+   "block": {
+    "type": "video",
+    "content": {
+     "youtubeUrl": ""
+    }
+   },
+   "issues": []
+  },
+  {
+   "name": "cta complete",
+   "mode": "publish",
+   "block": {
+    "type": "cta",
+    "content": {
+     "title": "Planning a similar project?",
+     "body": "Talk to us early.",
+     "primary": {
+      "label": "Discuss a project",
+      "href": "/contact"
+     },
+     "secondary": {
+      "label": "Stone Library",
+      "href": "https://urblo.com.au/stone-library"
+     }
+    }
+   },
+   "issues": []
+  },
+  {
+   "name": "cta unsafe link",
+   "mode": "publish",
+   "block": {
+    "type": "cta",
+    "content": {
+     "title": "x",
+     "primary": {
+      "label": "Go",
+      "href": "javascript:alert(1)"
+     }
+    }
+   },
+   "issues": [
+    {
+     "path": "content.primary.href",
+     "code": "invalid_value"
+    }
+   ]
+  },
+  {
+   "name": "cta protocol-relative link",
+   "mode": "publish",
+   "block": {
+    "type": "cta",
+    "content": {
+     "title": "x",
+     "primary": {
+      "label": "Go",
+      "href": "//evil.example"
+     }
+    }
+   },
+   "issues": [
+    {
+     "path": "content.primary.href",
+     "code": "invalid_value"
+    }
+   ]
+  },
+  {
+   "name": "cta empty optional secondary",
+   "mode": "publish",
+   "block": {
+    "type": "cta",
+    "content": {
+     "title": "x",
+     "primary": {
+      "label": "Go",
+      "href": "/contact"
+     },
+     "secondary": {
+      "label": "",
+      "href": ""
+     }
+    }
+   },
+   "issues": []
+  },
+  {
+   "name": "cta half secondary",
+   "mode": "publish",
+   "block": {
+    "type": "cta",
+    "content": {
+     "title": "x",
+     "primary": {
+      "label": "Go",
+      "href": "/contact"
+     },
+     "secondary": {
+      "label": "More",
+      "href": ""
+     }
+    }
+   },
+   "issues": [
+    {
+     "path": "content.secondary.href",
+     "code": "required"
+    }
+   ]
+  },
+  {
+   "name": "cta missing primary",
+   "mode": "publish",
+   "block": {
+    "type": "cta",
+    "content": {
+     "title": "x"
+    }
+   },
+   "issues": [
+    {
+     "path": "content.primary",
+     "code": "required"
+    }
+   ]
+  },
+  {
+   "name": "cta link with extra field",
+   "mode": "draft",
+   "block": {
+    "type": "cta",
+    "content": {
+     "title": "x",
+     "primary": {
+      "label": "Go",
+      "href": "/contact",
+      "target": "_blank"
+     }
+    }
+   },
+   "issues": [
+    {
+     "path": "content.primary.target",
+     "code": "unknown_field"
+    }
+   ]
+  }
+ ]
+}

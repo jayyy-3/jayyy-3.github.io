@@ -3,22 +3,23 @@ import {
     type ProjectData,
     type ProjectHotspot,
     type ProjectMaterialMap,
-    type ProjectMediaBlock,
 } from '../../data/projectData.ts';
+import {
+    blockMediaAssetIds,
+    blockStoneGroupIds,
+    normalizeYouTubeId,
+    validateContentBlock,
+    type ContentBlock,
+    type ContentBlockContentByType,
+    type ContentBlockType,
+} from '../blocks/schema.ts';
+import { PROJECT_DRAFT_SCHEMA_VERSION } from '../blocks/upgrade.ts';
+import { resolveBlockView } from '../blocks/resolve.ts';
+import { blockViewImageUrls, type ContentBlockView } from '../blocks/view.ts';
 
 export type ProjectLifecycleStatus = 'draft' | 'published' | 'archived';
 export type ProjectClaimStatus = 'needs_review' | 'approved' | 'deferred';
 export type ProjectCarbonStatus = '' | 'yes' | 'no' | 'not_available' | 'tbc';
-export type ProjectMediaRole =
-    | 'cover'
-    | 'hero'
-    | 'gallery'
-    | 'material_map'
-    | 'supporting'
-    | 'normal_image'
-    | 'hotspot_image'
-    | 'youtube_video';
-
 export type ProjectEditorSection = 'overview' | 'facts' | 'media' | 'materials';
 
 /** Public fallback title for an image with material points when its block has no title. */
@@ -79,18 +80,8 @@ export interface ProjectMaterialMapDraft {
     sortOrder: number;
 }
 
-export interface ProjectMediaBlockDraft {
-    key: string;
-    id: number | null;
-    mediaRole: ProjectMediaRole;
-    mediaAssetId: number | null;
-    projectMaterialMapKey: string | null;
-    blockTitle: string;
-    youtubeUrl: string;
-    label: string;
-    caption: string;
-    sortOrder: number;
-}
+/** One page-body block: stable key, `project_blocks` row ID once published, type and content. */
+export type ProjectBlockDraft = ContentBlock;
 
 export interface ProjectHotspotDraft {
     key: string;
@@ -107,15 +98,16 @@ export interface ProjectHotspotDraft {
 }
 
 export interface ProjectAggregateDraft {
+    schemaVersion: typeof PROJECT_DRAFT_SCHEMA_VERSION;
     project: ProjectDraftRecord;
     facts: ProjectFactDraft[];
     materials: ProjectMaterialDraft[];
     maps: ProjectMaterialMapDraft[];
-    mediaBlocks: ProjectMediaBlockDraft[];
+    blocks: ProjectBlockDraft[];
     hotspots: ProjectHotspotDraft[];
 }
 
-export type ProjectOrderedCollection = 'facts' | 'materials' | 'maps' | 'mediaBlocks' | 'hotspots';
+export type ProjectOrderedCollection = 'facts' | 'materials' | 'maps' | 'blocks' | 'hotspots';
 export type ProjectMoveDirection = 'up' | 'down';
 
 export interface ProjectRowSource {
@@ -173,16 +165,14 @@ export interface ProjectMaterialMapRowSource {
     sort_order: number;
 }
 
-export interface ProjectMediaRowSource {
+export interface ProjectBlockRowSource {
     id: number;
     project_id: number;
+    block_key: string;
+    block_type: ContentBlockType;
+    content: unknown;
     media_asset_id: number | null;
     project_material_map_id: number | null;
-    media_role: ProjectMediaRole;
-    block_title: string | null;
-    youtube_url: string | null;
-    label: string | null;
-    caption: string | null;
     sort_order: number;
 }
 
@@ -204,7 +194,7 @@ export interface ProjectAggregateSourceRows {
     facts: readonly ProjectFactRowSource[];
     materials: readonly ProjectMaterialRowSource[];
     maps: readonly ProjectMaterialMapRowSource[];
-    mediaBlocks: readonly ProjectMediaRowSource[];
+    blocks: readonly ProjectBlockRowSource[];
     hotspots: readonly ProjectHotspotRowSource[];
 }
 
@@ -300,7 +290,7 @@ const emptyProject: ProjectDraftRecord = {
 
 let fallbackKeyCounter = 0;
 
-export function createProjectDraftKey(kind: 'fact' | 'material' | 'map' | 'media' | 'hotspot') {
+export function createProjectDraftKey(kind: 'fact' | 'material' | 'map' | 'block' | 'hotspot') {
     const randomId = globalThis.crypto?.randomUUID?.();
     if (randomId) return `${kind}:new:${randomId}`;
     fallbackKeyCounter += 1;
@@ -309,11 +299,12 @@ export function createProjectDraftKey(kind: 'fact' | 'material' | 'map' | 'media
 
 export function createEmptyProjectAggregateDraft(): ProjectAggregateDraft {
     return {
+        schemaVersion: PROJECT_DRAFT_SCHEMA_VERSION,
         project: { ...emptyProject },
         facts: [],
         materials: [],
         maps: [],
-        mediaBlocks: [],
+        blocks: [],
         hotspots: [],
     };
 }
@@ -327,7 +318,7 @@ export function collectProjectMediaAssetIds(draft: ProjectAggregateDraft): numbe
     add(draft.project.heroMediaId);
     add(draft.project.coverMediaId);
     draft.maps.forEach((map) => add(map.mediaAssetId));
-    draft.mediaBlocks.forEach((block) => add(block.mediaAssetId));
+    draft.blocks.forEach((block) => blockMediaAssetIds(block).forEach(add));
 
     return [...mediaIds].sort((left, right) => left - right);
 }
@@ -357,7 +348,7 @@ export function normalizeProjectDraftOrder(draft: ProjectAggregateDraft): Projec
         facts: draft.facts.map((fact, index) => ({ ...fact, sortOrder: index })),
         materials: draft.materials.map((material, index) => ({ ...material, sortOrder: index })),
         maps: draft.maps.map((map, index) => ({ ...map, sortOrder: index })),
-        mediaBlocks: draft.mediaBlocks.map((mediaBlock, index) => ({ ...mediaBlock, sortOrder: index })),
+        blocks: draft.blocks.map((block, index) => ({ ...block, sortOrder: index })),
         hotspots: draft.hotspots.map((hotspot) => {
             const sortOrder = hotspotOrderByMap.get(hotspot.projectMaterialMapKey) ?? 0;
             hotspotOrderByMap.set(hotspot.projectMaterialMapKey, sortOrder + 1);
@@ -366,16 +357,24 @@ export function normalizeProjectDraftOrder(draft: ProjectAggregateDraft): Projec
     };
 }
 
+type HotspotImageBlock = ContentBlock<'hotspot_image'>;
+type ImageBlock = ContentBlock<'image'>;
+
+function isHotspotImageBlock(block: ProjectBlockDraft): block is HotspotImageBlock {
+    return block.type === 'hotspot_image';
+}
+
 export function normalizeProjectDraftForSave(draft: ProjectAggregateDraft): ProjectAggregateDraft {
     const pointBlockByMapKey = new Map(
-        draft.mediaBlocks.flatMap((block) =>
-            block.mediaRole === 'hotspot_image' && block.projectMaterialMapKey
-                ? [[block.projectMaterialMapKey, block] as const]
+        draft.blocks.flatMap((block) =>
+            isHotspotImageBlock(block) && block.content.projectMaterialMapKey
+                ? [[block.content.projectMaterialMapKey, block] as const]
                 : []),
     );
     const materialByKey = new Map(draft.materials.map((material) => [material.key, material]));
     return normalizeProjectDraftOrder({
         ...draft,
+        schemaVersion: PROJECT_DRAFT_SCHEMA_VERSION,
         project: { ...draft.project, claimReviewStatus: 'approved' },
         facts: draft.facts.map((fact) => ({ ...fact, claimStatus: 'approved' })),
         materials: draft.materials.map((material) => ({
@@ -390,7 +389,7 @@ export function normalizeProjectDraftForSave(draft: ProjectAggregateDraft): Proj
             if (!block) return map;
             return {
                 ...map,
-                title: block.blockTitle.trim() || defaultMaterialPointImageTitle,
+                title: (block.content.title ?? '').trim() || defaultMaterialPointImageTitle,
                 intro: '',
             };
         }),
@@ -406,21 +405,22 @@ export function normalizeProjectDraftForSave(draft: ProjectAggregateDraft): Proj
     });
 }
 
-/** Image shown by a media block: a points block uses its map's image. */
-export function mediaBlockImageId(draft: ProjectAggregateDraft, block: ProjectMediaBlockDraft): number | null {
-    if (block.mediaRole === 'hotspot_image') {
-        return draft.maps.find((map) => map.key === block.projectMaterialMapKey)?.mediaAssetId ?? null;
+/** Image shown by an image block: a points block uses its map's image. */
+export function blockImageId(draft: ProjectAggregateDraft, block: ProjectBlockDraft): number | null {
+    if (isHotspotImageBlock(block)) {
+        return draft.maps.find((map) => map.key === block.content.projectMaterialMapKey)?.mediaAssetId ?? null;
     }
-    return block.mediaAssetId;
+    if (block.type === 'image') return block.content.mediaAssetId ?? null;
+    return null;
 }
 
 function pointMapKeyForBlock(draft: ProjectAggregateDraft, blockKey: string): string | null {
-    const block = draft.mediaBlocks.find((entry) => entry.key === blockKey);
-    return block?.mediaRole === 'hotspot_image' ? block.projectMaterialMapKey : null;
+    const block = draft.blocks.find((entry) => entry.key === blockKey);
+    return block && isHotspotImageBlock(block) ? block.content.projectMaterialMapKey : null;
 }
 
 /**
- * Points on one media block in legend order. Draft array order is authoritative: reordering
+ * Points on one image block in legend order. Draft array order is authoritative: reordering
  * swaps array positions and Save derives each point's sortOrder from it.
  */
 export function hotspotsForBlock(draft: ProjectAggregateDraft, blockKey: string): ProjectHotspotDraft[] {
@@ -433,49 +433,79 @@ export function countHotspotsForMaterial(draft: ProjectAggregateDraft, materialK
     return draft.hotspots.filter((hotspot) => hotspot.projectMaterialKey === materialKey).length;
 }
 
+function legacyProvenance(content: { legacyProjectMediaId?: number }) {
+    return content.legacyProjectMediaId ? { legacyProjectMediaId: content.legacyProjectMediaId } : {};
+}
+
 /** Turns an image block into a points block backed by a new map using the same image. */
-export function enableMediaBlockPoints(draft: ProjectAggregateDraft, blockKey: string): ProjectAggregateDraft {
-    const block = draft.mediaBlocks.find((entry) => entry.key === blockKey);
-    if (!block || block.mediaRole === 'hotspot_image' || block.mediaRole === 'youtube_video') return draft;
+export function enableBlockPoints(draft: ProjectAggregateDraft, blockKey: string): ProjectAggregateDraft {
+    const block = draft.blocks.find((entry) => entry.key === blockKey);
+    if (!block || block.type !== 'image') return draft;
     const map: ProjectMaterialMapDraft = {
         key: createProjectDraftKey('map'),
         id: null,
-        mediaAssetId: block.mediaAssetId,
-        title: block.blockTitle,
+        mediaAssetId: block.content.mediaAssetId,
+        title: block.content.title ?? '',
         intro: '',
         sortOrder: draft.maps.length,
+    };
+    const pointsBlock: HotspotImageBlock = {
+        key: block.key,
+        id: block.id,
+        type: 'hotspot_image',
+        sortOrder: block.sortOrder,
+        content: {
+            projectMaterialMapKey: map.key,
+            title: block.content.title ?? '',
+            label: block.content.label ?? '',
+            caption: block.content.caption ?? '',
+            ...legacyProvenance(block.content),
+        },
     };
     return {
         ...draft,
         maps: [...draft.maps, map],
-        mediaBlocks: draft.mediaBlocks.map((entry) =>
-            entry.key === blockKey
-                ? { ...entry, mediaRole: 'hotspot_image', mediaAssetId: null, projectMaterialMapKey: map.key }
-                : entry),
+        blocks: draft.blocks.map((entry) => (entry.key === blockKey ? pointsBlock : entry)),
     };
 }
 
 /** Deletes a block's points and map, returning it to a plain image with the same picture. */
-export function disableMediaBlockPoints(draft: ProjectAggregateDraft, blockKey: string): ProjectAggregateDraft {
-    const mapKey = pointMapKeyForBlock(draft, blockKey);
-    if (!mapKey) return draft;
+export function disableBlockPoints(draft: ProjectAggregateDraft, blockKey: string): ProjectAggregateDraft {
+    const block = draft.blocks.find((entry) => entry.key === blockKey);
+    if (!block || !isHotspotImageBlock(block) || !block.content.projectMaterialMapKey) return draft;
+    const mapKey = block.content.projectMaterialMapKey;
     const map = draft.maps.find((entry) => entry.key === mapKey);
+    const imageBlock: ImageBlock = {
+        key: block.key,
+        id: block.id,
+        type: 'image',
+        sortOrder: block.sortOrder,
+        content: {
+            mediaAssetId: map?.mediaAssetId ?? null,
+            alt: '',
+            title: block.content.title ?? '',
+            label: block.content.label ?? '',
+            caption: block.content.caption ?? '',
+            ...legacyProvenance(block.content),
+        },
+    };
     return normalizeProjectDraftOrder({
         ...draft,
         maps: draft.maps.filter((entry) => entry.key !== mapKey),
         hotspots: draft.hotspots.filter((hotspot) => hotspot.projectMaterialMapKey !== mapKey),
-        mediaBlocks: draft.mediaBlocks.map((entry) =>
-            entry.key === blockKey
-                ? { ...entry, mediaRole: 'normal_image', mediaAssetId: map?.mediaAssetId ?? null, projectMaterialMapKey: null }
-                : entry),
+        blocks: draft.blocks.map((entry) => (entry.key === blockKey ? imageBlock : entry)),
     });
 }
 
-/** Replaces a block's image; points keep their percentage positions. */
-export function setMediaBlockImage(
+/**
+ * Replaces an image block's picture; points keep their percentage positions. A plain image's
+ * description is cleared because it described the previous picture.
+ */
+export function setBlockImage(
     draft: ProjectAggregateDraft,
     blockKey: string,
     mediaAssetId: number | null,
+    alt = '',
 ): ProjectAggregateDraft {
     const mapKey = pointMapKeyForBlock(draft, blockKey);
     if (mapKey) {
@@ -486,17 +516,33 @@ export function setMediaBlockImage(
     }
     return {
         ...draft,
-        mediaBlocks: draft.mediaBlocks.map((block) => (block.key === blockKey ? { ...block, mediaAssetId } : block)),
+        blocks: draft.blocks.map((block) =>
+            block.key === blockKey && block.type === 'image'
+                ? { ...block, content: { ...block.content, mediaAssetId, alt } }
+                : block),
     };
 }
 
-/** Removes a media block; a points block also removes its map and points. */
-export function removeMediaBlock(draft: ProjectAggregateDraft, blockKey: string): ProjectAggregateDraft {
-    if (!draft.mediaBlocks.some((block) => block.key === blockKey)) return draft;
+/** Replaces one block's content (type-checked by the caller's block). */
+export function updateBlockContent<T extends ContentBlockType>(
+    draft: ProjectAggregateDraft,
+    blockKey: string,
+    content: ContentBlockContentByType[T],
+): ProjectAggregateDraft {
+    return {
+        ...draft,
+        blocks: draft.blocks.map((block) =>
+            block.key === blockKey ? ({ ...block, content } as ProjectBlockDraft) : block),
+    };
+}
+
+/** Removes a block; a points block also removes its map and points. */
+export function removeBlock(draft: ProjectAggregateDraft, blockKey: string): ProjectAggregateDraft {
+    if (!draft.blocks.some((block) => block.key === blockKey)) return draft;
     const mapKey = pointMapKeyForBlock(draft, blockKey);
     return normalizeProjectDraftOrder({
         ...draft,
-        mediaBlocks: draft.mediaBlocks.filter((block) => block.key !== blockKey),
+        blocks: draft.blocks.filter((block) => block.key !== blockKey),
         maps: mapKey ? draft.maps.filter((map) => map.key !== mapKey) : draft.maps,
         hotspots: mapKey ? draft.hotspots.filter((hotspot) => hotspot.projectMaterialMapKey !== mapKey) : draft.hotspots,
     });
@@ -512,33 +558,28 @@ export function adoptLegacyMaterialMaps(draft: ProjectAggregateDraft): ProjectAg
     const mapByKey = new Map(draft.maps.map((map) => [map.key, map]));
     const linkedMapKeys = new Set<string>();
     let changed = false;
-    const mediaBlocks = draft.mediaBlocks.map((block) => {
-        if (block.mediaRole !== 'hotspot_image' || !block.projectMaterialMapKey) return block;
-        const map = mapByKey.get(block.projectMaterialMapKey);
+    const blocks = draft.blocks.map((block): ProjectBlockDraft => {
+        if (!isHotspotImageBlock(block) || !block.content.projectMaterialMapKey) return block;
+        const map = mapByKey.get(block.content.projectMaterialMapKey);
         if (!map) return block;
         linkedMapKeys.add(map.key);
-        if (block.blockTitle.trim() || !map.title.trim()) return block;
+        if ((block.content.title ?? '').trim() || !map.title.trim()) return block;
         changed = true;
-        return { ...block, blockTitle: map.title };
+        return { ...block, content: { ...block.content, title: map.title } };
     });
     for (const map of draft.maps) {
         if (linkedMapKeys.has(map.key)) continue;
         changed = true;
         linkedMapKeys.add(map.key);
-        mediaBlocks.push({
-            key: createProjectDraftKey('media'),
+        blocks.push({
+            key: createProjectDraftKey('block'),
             id: null,
-            mediaRole: 'hotspot_image',
-            mediaAssetId: null,
-            projectMaterialMapKey: map.key,
-            blockTitle: map.title,
-            youtubeUrl: '',
-            label: '',
-            caption: '',
-            sortOrder: mediaBlocks.length,
+            type: 'hotspot_image',
+            sortOrder: blocks.length,
+            content: { projectMaterialMapKey: map.key, title: map.title, label: '', caption: '' },
         });
     }
-    return changed ? { ...draft, mediaBlocks } : draft;
+    return changed ? { ...draft, blocks } : draft;
 }
 
 export function moveProjectDraftItem(
@@ -580,8 +621,8 @@ export function moveProjectDraftItem(
             return normalizeProjectDraftOrder({ ...draft, materials: nextRows as ProjectMaterialDraft[] });
         case 'maps':
             return normalizeProjectDraftOrder({ ...draft, maps: nextRows as ProjectMaterialMapDraft[] });
-        case 'mediaBlocks':
-            return normalizeProjectDraftOrder({ ...draft, mediaBlocks: nextRows as ProjectMediaBlockDraft[] });
+        case 'blocks':
+            return normalizeProjectDraftOrder({ ...draft, blocks: nextRows as ProjectBlockDraft[] });
     }
 }
 
@@ -592,6 +633,7 @@ export function rowsToProjectAggregateDraft(rows: ProjectAggregateSourceRows): P
     );
 
     return {
+        schemaVersion: PROJECT_DRAFT_SCHEMA_VERSION,
         project: {
             id: rows.project.id,
             status: rows.project.status,
@@ -643,20 +685,7 @@ export function rowsToProjectAggregateDraft(rows: ProjectAggregateSourceRows): P
             intro: map.intro ?? '',
             sortOrder: map.sort_order,
         })),
-        mediaBlocks: rows.mediaBlocks.map((mediaBlock) => ({
-            key: persistedKey('media', mediaBlock.id),
-            id: mediaBlock.id,
-            mediaRole: mediaBlock.media_role,
-            mediaAssetId: mediaBlock.media_asset_id,
-            projectMaterialMapKey: mediaBlock.project_material_map_id
-                ? (mapKeyById.get(mediaBlock.project_material_map_id) ?? null)
-                : null,
-            blockTitle: mediaBlock.block_title ?? '',
-            youtubeUrl: mediaBlock.youtube_url ?? '',
-            label: mediaBlock.label ?? '',
-            caption: mediaBlock.caption ?? '',
-            sortOrder: mediaBlock.sort_order,
-        })),
+        blocks: rows.blocks.map((row) => canonicalBlockDraft(row, mapKeyById)),
         hotspots: rows.hotspots.flatMap((hotspot) => {
             const projectMaterialMapKey = mapKeyById.get(hotspot.project_material_map_id);
             if (!projectMaterialMapKey) return [];
@@ -692,7 +721,7 @@ export function draftToProjectData(
         draft.materials.map((material) => [material.key, material]),
     );
     const mapByKey = new Map(draft.maps.map((map) => [map.key, map]));
-    const mediaUrl = (mediaId: number | null) => {
+    const mediaUrl = (mediaId: number | null | undefined) => {
         if (!mediaId) return '';
         const media = mediaById.get(mediaId);
         return media?.previewUrl || media?.sourceUrl || '';
@@ -756,21 +785,11 @@ export function draftToProjectData(
     }));
 
     const linkedMapKeys = new Set<string>();
-    const mediaBlocks = draft.mediaBlocks.flatMap((block): ProjectMediaBlock[] => {
-        if (block.mediaRole === 'youtube_video') {
-            const youtubeId = normalizeYouTubeId(block.youtubeUrl);
-            if (!youtubeId) return [];
-            return [{
-                id: block.key,
-                type: 'youtube_video',
-                youtubeId,
-                title: block.blockTitle.trim() || block.label.trim() || 'Project video',
-                caption: block.caption.trim() || undefined,
-            }];
-        }
-
-        if (block.mediaRole === 'hotspot_image' && block.projectMaterialMapKey) {
-            const linkedMap = mapByKey.get(block.projectMaterialMapKey);
+    const blocks = draft.blocks.flatMap((block): ContentBlockView[] => {
+        if (isHotspotImageBlock(block)) {
+            const linkedMap = block.content.projectMaterialMapKey
+                ? mapByKey.get(block.content.projectMaterialMapKey)
+                : undefined;
             if (!linkedMap) return [];
             const imageId = linkedMap.mediaAssetId;
             const image = mediaUrl(imageId);
@@ -781,29 +800,24 @@ export function draftToProjectData(
                 type: 'hotspot_image',
                 image,
                 imageAlt: mediaAlt(imageId, `${projectTitle} material placement`),
-                title: block.blockTitle.trim() || linkedMap.title.trim() || defaultMaterialPointImageTitle,
-                caption: block.caption.trim() || undefined,
+                title: (block.content.title ?? '').trim() || linkedMap.title.trim() || defaultMaterialPointImageTitle,
+                caption: (block.content.caption ?? '').trim() || undefined,
                 hotspots: mapHotspots(linkedMap.key),
             }];
         }
-
-        const image = mediaUrl(block.mediaAssetId);
-        if (!image) return [];
-        return [{
-            id: block.key,
-            type: 'normal_image',
-            src: image,
-            alt: mediaAlt(block.mediaAssetId, `${projectTitle} project image`),
-            title: block.blockTitle.trim() || undefined,
-            label: block.label.trim() || undefined,
-            caption: block.caption.trim() || undefined,
-        }];
+        const view = resolveBlockView(block, block.key, {
+            fallbackAlt: `${projectTitle} project image`,
+            mediaUrl,
+            mediaAlt: (mediaId) => (mediaId ? mediaById.get(mediaId)?.alt?.trim() ?? '' : ''),
+            stoneKey: (stoneGroupId) => stoneById.get(stoneGroupId)?.key ?? null,
+        });
+        return view ? [view] : [];
     });
 
     for (const map of materialMaps) {
         const sourceMap = draft.maps[materialMaps.indexOf(map)];
         if (!sourceMap || linkedMapKeys.has(sourceMap.key) || !map.image) continue;
-        mediaBlocks.push({
+        blocks.push({
             id: `${sourceMap.key}:automatic`,
             type: 'hotspot_image',
             image: map.image,
@@ -829,11 +843,8 @@ export function draftToProjectData(
         }];
     });
 
-    const imageUrls = mediaBlocks.flatMap((block) => {
-        if (block.type === 'normal_image') return [block.src];
-        if (block.type === 'hotspot_image') return [block.image];
-        return [];
-    }).filter((value, index, values): value is string => Boolean(value) && values.indexOf(value) === index);
+    const imageUrls = blockViewImageUrls(blocks)
+        .filter((value, index, values) => Boolean(value) && values.indexOf(value) === index);
     const dateLabel = draft.project.projectDateLabel.trim() || draft.project.completedOn.trim();
 
     return {
@@ -862,7 +873,7 @@ export function draftToProjectData(
         lead: draft.project.lead.trim() || draft.project.summary.trim() || undefined,
         story: draft.project.summary.trim() ? [draft.project.summary.trim()] : undefined,
         materialMap: materialMaps.find((map) => Boolean(map.image)) ?? undefined,
-        mediaBlocks,
+        blocks,
         materials,
         cta: staticFallback?.cta,
         contentSource: 'cms',
@@ -944,23 +955,42 @@ function collectProjectPublishBlockers(
     }
 
     const mapKeys = new Set(draft.maps.map((map) => map.key));
-    const youtubeVideoCount = draft.mediaBlocks.filter((block) => block.mediaRole === 'youtube_video').length;
+    const youtubeVideoCount = draft.blocks.filter((block) => block.type === 'video').length;
     if (youtubeVideoCount > 1) {
         add({ id: 'media-video-limit', section: 'media', message: 'Keep one YouTube video in this project.' });
     }
 
-    const incompleteMedia = draft.mediaBlocks.find((block) => {
-        if (block.mediaRole === 'youtube_video') return !normalizeYouTubeId(block.youtubeUrl);
-        if (block.mediaRole === 'hotspot_image' && (!block.projectMaterialMapKey || !mapKeys.has(block.projectMaterialMapKey))) {
-            return true;
+    // Image descriptions left empty are filled from the chosen media item on Publish.
+    const withMediaAlt = (block: ProjectBlockDraft): ProjectBlockDraft => {
+        const fill = <T extends { mediaAssetId?: number | null; alt?: string }>(item: T): T =>
+            item.mediaAssetId && !(item.alt ?? '').trim()
+                ? { ...item, alt: mediaById.get(item.mediaAssetId)?.alt?.trim() ?? '' }
+                : item;
+        if (block.type === 'image') return { ...block, content: fill(block.content) };
+        if (block.type === 'gallery') return { ...block, content: { ...block.content, items: block.content.items.map(fill) } };
+        if (block.type === 'steps') return { ...block, content: { ...block.content, items: block.content.items.map(fill) } };
+        return block;
+    };
+    const described = (mediaId: number | null | undefined) =>
+        Boolean(mediaId && mediaById.get(mediaId)?.alt?.trim());
+    const incompleteMedia = draft.blocks.find((block) => {
+        switch (block.type) {
+            case 'hotspot_image': {
+                const mapKey = block.content.projectMaterialMapKey;
+                if (!mapKey || !mapKeys.has(mapKey)) return true;
+                return !described(draft.maps.find((map) => map.key === mapKey)?.mediaAssetId);
+            }
+            case 'video':
+                return !normalizeYouTubeId(block.content.youtubeUrl);
+            case 'image':
+                return !described(block.content.mediaAssetId);
+            case 'gallery':
+                return block.content.items.length < 2 || block.content.items.some((item) => !described(item.mediaAssetId));
+            case 'steps':
+                return block.content.items.some((item) => item.mediaAssetId && !described(item.mediaAssetId));
+            default:
+                return false;
         }
-        const mediaId = block.mediaRole === 'hotspot_image' && block.projectMaterialMapKey
-            ? draft.maps.find((map) => map.key === block.projectMaterialMapKey)?.mediaAssetId ?? null
-            : block.mediaAssetId
-              ?? (block.projectMaterialMapKey
-                ? draft.maps.find((map) => map.key === block.projectMaterialMapKey)?.mediaAssetId ?? null
-                : null);
-        return !mediaId || !mediaById.get(mediaId)?.alt?.trim();
     });
     // Maps are hidden children of image blocks; one without an image is the same gap.
     const incompleteMap = incompleteMedia ? undefined : draft.maps.find((map) => !map.mediaAssetId);
@@ -968,8 +998,22 @@ function collectProjectPublishBlockers(
         add({
             id: incompleteMedia ? `media-${incompleteMedia.key}` : `media-map-${incompleteMap?.key}`,
             section: 'media',
-            message: 'Choose a described image for every media block.',
+            message: incompleteMedia?.type === 'video'
+                ? 'Add a YouTube link to every video block.'
+                : 'Choose a described image for every media block.',
         });
+    }
+
+    const incompleteBlock = draft.blocks.find((block) =>
+        block !== incompleteMedia && validateContentBlock(withMediaAlt(block), 'publish').length > 0);
+    if (incompleteBlock) {
+        add({ id: `block-${incompleteBlock.key}`, section: 'media', message: 'Complete every required field in the page body.' });
+    }
+
+    const unpublishedStoneBlock = draft.blocks.find((block) =>
+        blockStoneGroupIds(block).some((stoneId) => stoneById.get(stoneId)?.status !== 'published'));
+    if (unpublishedStoneBlock) {
+        add({ id: `block-stone-${unpublishedStoneBlock.key}`, section: 'media', message: 'Use only Live Stone Library stones in stone cards.' });
     }
 
     const materialByKey = new Map(draft.materials.map((material) => [material.key, material]));
@@ -996,7 +1040,7 @@ export function slugify(value: string) {
         .replace(/-{2,}/g, '-');
 }
 
-function persistedKey(kind: 'fact' | 'material' | 'map' | 'media' | 'hotspot', id: number) {
+function persistedKey(kind: 'fact' | 'material' | 'map' | 'block' | 'hotspot', id: number) {
     return `${kind}:${id}`;
 }
 
@@ -1055,20 +1099,24 @@ function deriveState(location: string) {
     return match?.[1] ?? '';
 }
 
-function normalizeYouTubeId(value: string) {
-    const trimmed = value.trim();
-    if (!trimmed) return null;
-    if (/^[a-zA-Z0-9_-]{6,}$/.test(trimmed) && !trimmed.includes('/')) return trimmed;
-
-    try {
-        const url = new URL(trimmed);
-        if (url.hostname.includes('youtu.be')) return url.pathname.replace(/^\//, '') || null;
-        if (url.hostname.includes('youtube.com') || url.hostname.includes('youtube-nocookie.com')) {
-            const id = url.searchParams.get('v') || url.pathname.split('/').filter(Boolean).pop();
-            return id && /^[a-zA-Z0-9_-]{6,}$/.test(id) ? id : null;
-        }
-    } catch {
-        return null;
+/**
+ * A published `project_blocks` row as a draft block. The row's stored key is kept; a points
+ * block takes its map key from the row's map column, which is authoritative.
+ */
+function canonicalBlockDraft(row: ProjectBlockRowSource, mapKeyById: ReadonlyMap<number, string>): ProjectBlockDraft {
+    const content = (typeof row.content === 'object' && row.content !== null && !Array.isArray(row.content)
+        ? { ...(row.content as Record<string, unknown>) }
+        : {}) as Record<string, unknown>;
+    if (row.block_type === 'hotspot_image') {
+        content.projectMaterialMapKey = row.project_material_map_id
+            ? mapKeyById.get(row.project_material_map_id) ?? null
+            : null;
     }
-    return null;
+    return {
+        key: row.block_key || persistedKey('block', row.id),
+        id: row.id,
+        type: row.block_type,
+        content,
+        sortOrder: row.sort_order,
+    } as unknown as ProjectBlockDraft;
 }

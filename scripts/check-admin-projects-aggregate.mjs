@@ -55,6 +55,7 @@ const lockdownMigrationPath =
   "supabase/migrations/20260802105537_project_aggregate_write_lockdown.sql";
 const stoneLibrarySourceMigrationPath =
   "supabase/migrations/20260812053204_project_materials_stone_library_source.sql";
+const blocksMigrationPath = "supabase/migrations/20261014120000_project_blocks.sql";
 
 const page = readRequired(pagePath);
 const shell = readRequired(shellPath);
@@ -91,6 +92,7 @@ const migration = readRequired(migrationPath);
 const tombstoneMigration = readRequired(tombstoneMigrationPath);
 const lockdownMigration = readRequired(lockdownMigrationPath);
 const stoneLibrarySourceMigration = readRequired(stoneLibrarySourceMigrationPath);
+const blocksMigration = readRequired(blocksMigrationPath);
 const browserProjectsSource = [
   page,
   shell,
@@ -422,11 +424,12 @@ forbidMatches(
 );
 
 for (const field of [
+  "schemaVersion:",
   "project:",
   "facts:",
   "materials:",
   "maps:",
-  "mediaBlocks:",
+  "blocks:",
   "hotspots:",
 ]) {
   requireIncludes(aggregate, field, aggregatePath, `aggregate field ${field}`);
@@ -773,13 +776,98 @@ requireIncludes(
   publicViewPath,
   "shared responsive Project imagery",
 );
-for (const profile of ['hero', 'detail']) {
-  requireIncludes(
-    publicView,
-    `profile=\"${profile}\"`,
-    publicViewPath,
-    `${profile} image delivery profile`,
-  );
+// The hero stays in the page view; body images moved to the shared block renderers
+// (NOW-PROJECT-BLOCKS-001) and keep the same detail delivery profile.
+requireIncludes(publicView, 'profile="hero"', publicViewPath, "hero image delivery profile");
+for (const blockImagePath of [
+  "src/components/blocks/ImageBlock.tsx",
+  "src/components/blocks/StepsBlock.tsx",
+  "src/components/blocks/GalleryBlock.tsx",
+]) {
+  requireIncludes(readRequired(blockImagePath), 'profile="detail"', blockImagePath, "detail image delivery profile");
+}
+
+// Shared content blocks (NOW-PROJECT-BLOCKS-001): one shared module, one renderer per type,
+// one server validator held to the same fixture, and no block rendering inside the page view.
+const blockSchemaPath = "src/features/blocks/schema.ts";
+const blockSchema = readRequired(blockSchemaPath);
+const serverBlocksPath = "functions/_lib/blocks.js";
+const serverBlocks = readRequired(serverBlocksPath);
+const blockTypes = [
+  "heading", "text", "quote", "callout", "stats", "steps", "spec_table",
+  "comparison_table", "stone_cards", "image", "gallery", "hotspot_image", "video", "cta",
+];
+const declaredTypes = (source) =>
+  [...(/CONTENT_BLOCK_TYPES = \[([\s\S]*?)\]/.exec(source)?.[1] ?? "").matchAll(/['"]([a-z_]+)['"]/g)].map((match) => match[1]);
+if (JSON.stringify(declaredTypes(blockSchema)) !== JSON.stringify(blockTypes)) {
+  failures.push(`${blockSchemaPath}: block types must be exactly the 14 approved types in order`);
+}
+if (JSON.stringify(declaredTypes(serverBlocks)) !== JSON.stringify(blockTypes)) {
+  failures.push(`${serverBlocksPath}: server block types must match the shared contract`);
+}
+const rendererNames = {
+  heading: "HeadingBlock", text: "TextBlock", quote: "QuoteBlock", callout: "CalloutBlock",
+  stats: "StatsBlock", steps: "StepsBlock", spec_table: "SpecTableBlock",
+  comparison_table: "ComparisonTableBlock", stone_cards: "StoneCardsBlock", image: "ImageBlock",
+  gallery: "GalleryBlock", hotspot_image: "HotspotImageBlock", video: "VideoBlock", cta: "CtaBlock",
+};
+const blockListPath = "src/components/blocks/BlockList.tsx";
+const blockList = readRequired(blockListPath);
+for (const [type, name] of Object.entries(rendererNames)) {
+  readRequired(`src/components/blocks/${name}.tsx`);
+  requireIncludes(blockList, `case '${type}':`, blockListPath, `${type} renderer dispatch`);
+  requireIncludes(blockList, `<${name} `, blockListPath, `${name} renderer`);
+}
+requireIncludes(publicView, "<BlockList", publicViewPath, "shared block renderer for the Project body");
+forbidMatches(
+  publicView,
+  /ProjectHotspotImage|youtube-nocookie|aspect-\[16\/9\]/,
+  publicViewPath,
+  "block rendering inlined in the Project page view",
+);
+for (const [path, needle, label] of [
+  [serverBlocksPath, "export function validateContentBlock", "server block validator"],
+  [serverBlocksPath, "export function upgradeLegacyProjectDraft", "server legacy draft upgrade"],
+  [functionPath, "upgradeLegacyProjectDraft(body.draft)", "legacy draft upgrade before validation"],
+  [functionPath, 'validateContentBlock(row, "draft")', "server block validation on Save"],
+  [functionPath, "fillDraftAltText(input.draft, media)", "media descriptions filled after the media check"],
+  [functionPath, "Use only Live Stone Library stones in stone cards.", "stone-card Live stone gate"],
+  [aggregatePath, "validateContentBlock(", "client block publish blockers"],
+  [servicePath, ".from('project_blocks')", "public body read from project_blocks"],
+  ["tests/functions-contract.test.ts", "./fixtures/content-blocks.json", "shared validator fixture"],
+  ["tests/functions-contract.test.ts", "serverBlocks.validateContentBlock", "server validator held to the fixture"],
+  ["tests/functions-contract.test.ts", "clientBlocks.validateContentBlock", "client validator held to the fixture"],
+]) {
+  requireIncludes(readRequired(path), needle, path, label);
+}
+forbidMatches(service, /\.from\(['"]project_media['"]\)/, servicePath, "public body read from project_media");
+forbidMatches(server, /\.from\(["']project_media["']\)|mediaBlocks:/, functionPath, "Function read or write of the retired media blocks");
+
+// The block migration is expand-only and never alters or deletes project_media.
+forbidMatches(
+  blocksMigration,
+  /alter\s+table\s+(?:if\s+exists\s+)?public\.project_media\b|drop\s+(?:table|column)[^;]*project_media|delete\s+from\s+public\.project_media|update\s+public\.project_media\b|truncate[^;]*project_media/i,
+  blocksMigrationPath,
+  "project_media alteration or deletion",
+);
+forbidMatches(blocksMigration, /\bdrop\s+(?:table|column)\b/i, blocksMigrationPath, "destructive drop in the expand-only migration");
+for (const [needle, label] of [
+  ["create table public.project_blocks", "project_blocks table"],
+  ["alter table public.project_blocks enable row level security", "project_blocks RLS"],
+  ["create policy project_blocks_public_select", "published-parent public read policy"],
+  ["projects.claim_review_status = 'approved'", "approved-project public boundary"],
+  ["revoke all on table public.project_blocks from public, anon, authenticated", "browser DML revoked"],
+  ["grant select on table public.project_blocks to anon, authenticated", "browser read-only grant"],
+  ["p_draft := private.project_upgrade_draft(p_draft)", "RPC upgrades older drafts"],
+  ["legacyProjectMediaId", "copied rows record their source media row"],
+  ["project_blocks_check: project_media row count changed", "self-check: project_media unchanged"],
+  ["project_blocks_check: a private draft keeps the pre-block shape", "self-check: drafts reshaped"],
+  ["project_blocks_check: % project/status groups differ", "self-check: per-project copy counts"],
+  ["on public.project_blocks\n  for each statement execute function private.stone_reference_mutex()", "Stone reference mutex on project_blocks"],
+  ["execute function private.stone_reference_guard()", "Stone reference guard on project_blocks"],
+  ["p_id=any(b.linked_stone_group_ids)", "stone usage includes stone cards"],
+]) {
+  requireIncludes(blocksMigration, needle, blocksMigrationPath, label);
 }
 requireIncludes(
   responsiveImage,
@@ -984,155 +1072,220 @@ requireIncludes(
   "client-side tombstone allowlist defence",
 );
 
-for (const contract of [
-  "create table private.project_drafts",
-  "revision bigint",
-  "base_updated_at",
-  "alter table public.project_facts",
-  "alter table public.project_materials",
-  "admin_project_aggregate",
-  "p_action not in ('list', 'get', 'save', 'publish', 'archive')",
-  "p_base_revision",
-  "p_base_updated_at",
-  "p_expected_actor_role",
-  "p_promotions",
-  "security definer",
-  "set search_path = ''",
-  "admin_audit_events",
-  "revoke execute",
-  "service_role",
-]) {
-  requireIncludes(
-    migration.toLowerCase(),
-    contract.toLowerCase(),
+// Security and integrity properties of admin_project_aggregate. The original definition and the
+// NOW-PROJECT-BLOCKS-001 replacement (the live one after that migration) must both satisfy them.
+function checkAggregateRpcSource(migration, migrationPath, original) {
+  for (const contract of [
+    ...(original
+      ? [
+          "create table private.project_drafts",
+          "revision bigint",
+          "base_updated_at",
+          "alter table public.project_facts",
+          "alter table public.project_materials",
+        ]
+      : []),
+    "admin_project_aggregate",
+    "p_action not in ('list', 'get', 'save', 'publish', 'archive')",
+    "p_base_revision",
+    "p_base_updated_at",
+    "p_expected_actor_role",
+    "p_promotions",
+    "security definer",
+    "set search_path = ''",
+    "admin_audit_events",
+    "revoke execute",
+    "service_role",
+  ]) {
+    requireIncludes(
+      migration.toLowerCase(),
+      contract.toLowerCase(),
+      migrationPath,
+      `migration contract ${contract}`,
+    );
+  }
+  requireMatches(
+    migration,
+    /from public\.admin_profiles profiles[\s\S]{0,260}limit\s+1\s+for share;/i,
     migrationPath,
-    `migration contract ${contract}`,
+    "transaction-held active profile role lock",
   );
-}
-requireMatches(
-  migration,
-  /from public\.admin_profiles profiles[\s\S]{0,260}limit\s+1\s+for share;/i,
-  migrationPath,
-  "transaction-held active profile role lock",
-);
-requireMatches(
-  migration,
-  /v_actor_role\s+is\s+distinct\s+from\s+p_expected_actor_role[\s\S]{0,420}actor_role_changed[\s\S]{0,420}['"]headers['"]\s*,\s*jsonb_build_object\(\)/i,
-  migrationPath,
-  "fail-closed actor role consistency check",
-);
-requireMatches(
-  migration,
-  /admin_project_aggregate\(text, bigint, bigint, timestamptz, jsonb, uuid, text, jsonb\)[\s\S]{0,420}service_role;/i,
-  migrationPath,
-  "service-role-only expected-role RPC signature",
-);
-requireMatches(
-  migration,
-  /if v_project_exists[\s\S]{0,180}p_base_updated_at is null[\s\S]{0,120}p_base_updated_at is distinct from v_project\.updated_at[\s\S]{0,260}revision_conflict/i,
-  migrationPath,
-  "existing canonical first-adoption mismatch and null rejection",
-);
-requireMatches(
-  migration,
-  /if v_draft_exists[\s\S]{0,100}p_base_updated_at is distinct from v_saved_draft\.base_updated_at[\s\S]{0,260}revision_conflict/i,
-  migrationPath,
-  "private-draft canonical baseline token consistency",
-);
-requireMatches(
-  migration,
-  /p_action not in \(['"]save['"], ['"]publish['"]\)[\s\S]{0,100}p_base_revision <> 0[\s\S]{0,100}p_base_updated_at is not null/i,
-  migrationPath,
-  "new Project null canonical token boundary",
-);
-const baseTokenResponseCount = (
-  migration.match(/['"]baseUpdatedAt['"]/g) ?? []
-).length;
-if (baseTokenResponseCount < 4) {
-  failures.push(
-    `${migrationPath}: GET, Save, Publish, and Archive must return the canonical base token`,
+  requireMatches(
+    migration,
+    /v_actor_role\s+is\s+distinct\s+from\s+p_expected_actor_role[\s\S]{0,420}actor_role_changed[\s\S]{0,420}['"]headers['"]\s*,\s*jsonb_build_object\(\)/i,
+    migrationPath,
+    "fail-closed actor role consistency check",
   );
-}
-requireMatches(
-  migration,
-  /p_action\s+in\s*\(\s*['"]publish['"]\s*,\s*['"]archive['"]\s*\)[\s\S]{0,220}v_saved_draft\.base_updated_at\s+is\s+distinct\s+from\s+v_project\.updated_at/i,
-  migrationPath,
-  "publish-and-archive canonical revision conflict boundary",
-);
-requireMatches(
-  migration,
-  /select projects\.\* into v_project[\s\S]{0,180}where projects\.id = v_project_id[\s\S]{0,40}for update;/i,
-  migrationPath,
-  "canonical Project lock before revision comparison",
-);
-const canonicalConflictPosition = migration.indexOf(
-  "v_saved_draft.base_updated_at is distinct from v_project.updated_at",
-);
-const canonicalLockPosition = migration.indexOf(
-  "select projects.* into v_project",
-);
-const firstAdoptionConflictPosition = migration.indexOf(
-  "if v_project_exists\n     and (\n       p_base_updated_at is null",
-);
-const firstDraftWritePosition = migration.indexOf("if p_action = 'save' then");
-const archiveMutationPosition = migration.indexOf("if p_action = 'archive' then");
-if (
-  canonicalLockPosition < 0 ||
-  firstAdoptionConflictPosition < 0 ||
-  firstDraftWritePosition < 0 ||
-  canonicalConflictPosition < 0 ||
-  archiveMutationPosition < 0 ||
-  canonicalLockPosition > firstAdoptionConflictPosition ||
-  firstAdoptionConflictPosition > firstDraftWritePosition ||
-  canonicalLockPosition > canonicalConflictPosition ||
-  canonicalConflictPosition > archiveMutationPosition
-) {
-  failures.push(
-    `${migrationPath}: locked canonical revision check must precede every archive mutation`,
+  requireMatches(
+    migration,
+    /admin_project_aggregate\(text, bigint, bigint, timestamptz, jsonb, uuid, text, jsonb\)[\s\S]{0,420}service_role;/i,
+    migrationPath,
+    "service-role-only expected-role RPC signature",
   );
+  requireMatches(
+    migration,
+    /if v_project_exists[\s\S]{0,180}p_base_updated_at is null[\s\S]{0,120}p_base_updated_at is distinct from v_project\.updated_at[\s\S]{0,260}revision_conflict/i,
+    migrationPath,
+    "existing canonical first-adoption mismatch and null rejection",
+  );
+  requireMatches(
+    migration,
+    /if v_draft_exists[\s\S]{0,100}p_base_updated_at is distinct from v_saved_draft\.base_updated_at[\s\S]{0,260}revision_conflict/i,
+    migrationPath,
+    "private-draft canonical baseline token consistency",
+  );
+  requireMatches(
+    migration,
+    /p_action not in \(['"]save['"], ['"]publish['"]\)[\s\S]{0,100}p_base_revision <> 0[\s\S]{0,100}p_base_updated_at is not null/i,
+    migrationPath,
+    "new Project null canonical token boundary",
+  );
+  const baseTokenResponseCount = (
+    migration.match(/['"]baseUpdatedAt['"]/g) ?? []
+  ).length;
+  if (baseTokenResponseCount < 4) {
+    failures.push(
+      `${migrationPath}: GET, Save, Publish, and Archive must return the canonical base token`,
+    );
+  }
+  requireMatches(
+    migration,
+    /p_action\s+in\s*\(\s*['"]publish['"]\s*,\s*['"]archive['"]\s*\)[\s\S]{0,220}v_saved_draft\.base_updated_at\s+is\s+distinct\s+from\s+v_project\.updated_at/i,
+    migrationPath,
+    "publish-and-archive canonical revision conflict boundary",
+  );
+  requireMatches(
+    migration,
+    /select projects\.\* into v_project[\s\S]{0,180}where projects\.id = v_project_id[\s\S]{0,40}for update;/i,
+    migrationPath,
+    "canonical Project lock before revision comparison",
+  );
+  const canonicalConflictPosition = migration.indexOf(
+    "v_saved_draft.base_updated_at is distinct from v_project.updated_at",
+  );
+  const canonicalLockPosition = migration.indexOf(
+    "select projects.* into v_project",
+  );
+  const firstAdoptionConflictPosition = migration.indexOf(
+    "if v_project_exists\n     and (\n       p_base_updated_at is null",
+  );
+  const firstDraftWritePosition = migration.indexOf("if p_action = 'save' then");
+  const archiveMutationPosition = migration.indexOf("if p_action = 'archive' then");
+  if (
+    canonicalLockPosition < 0 ||
+    firstAdoptionConflictPosition < 0 ||
+    firstDraftWritePosition < 0 ||
+    canonicalConflictPosition < 0 ||
+    archiveMutationPosition < 0 ||
+    canonicalLockPosition > firstAdoptionConflictPosition ||
+    firstAdoptionConflictPosition > firstDraftWritePosition ||
+    canonicalLockPosition > canonicalConflictPosition ||
+    canonicalConflictPosition > archiveMutationPosition
+  ) {
+    failures.push(
+      `${migrationPath}: locked canonical revision check must precede every archive mutation`,
+    );
+  }
+  forbidMatches(
+    migration,
+    /delete\s+from\s+public\.project_(?:facts|materials|media|material_maps|hotspots)/i,
+    migrationPath,
+    "destructive child deletion",
+  );
+  requireMatches(
+    migration,
+    /p_action\s+not\s+in\s*\(\s*['"]save['"]\s*,\s*['"]publish['"]\s*\)/i,
+    migrationPath,
+    "new-project direct publish from revision zero",
+  );
+  requireMatches(
+    migration,
+    /publish[\s\S]{0,900}?jsonb_set\(\s*jsonb_set\(p_draft/i,
+    migrationPath,
+    "publish consumes the current request draft",
+  );
+  requireIncludes(
+    migration,
+    "v_item->>'claimStatus'",
+    migrationPath,
+    "per-child claim decisions",
+  );
+  requireIncludes(
+    migration,
+    "v_map_media_id",
+    migrationPath,
+    "hotspot block map-image normalization",
+  );
+  forbidMatches(
+    migration,
+    /claim_status\s*=\s*v_claim_status/i,
+    migrationPath,
+    "project claim status copied onto child rows",
+  );
+  forbidMatches(
+    migration,
+    /->>\s*'hotspotKey'/i,
+    migrationPath,
+    "non-contract hotspotKey field",
+  );
+  requireMatches(
+    migration,
+    /from public\.stone_groups[\s\S]{0,180}status\s*=\s*['"]published['"][\s\S]{0,80}for share/i,
+    migrationPath,
+    "transaction-local published stone lock",
+  );
+  forbidMatches(
+    migration,
+    /drop policy if exists projects_admin_insert/i,
+    migrationPath,
+    "contract-phase policy drop in additive migration",
+  );
+  forbidMatches(
+    migration,
+    /revoke insert, update, delete/i,
+    migrationPath,
+    "contract-phase table revoke in additive migration",
+  );
+  requireMatches(
+    migration,
+    /from public\.finish_definitions[\s\S]{0,180}status\s*=\s*['"]published['"][\s\S]{0,80}for share/i,
+    migrationPath,
+    "transaction-local published finish lock",
+  );
+  const pgrstBlocks = [
+    ...migration.matchAll(
+      /raise sqlstate 'PGRST' using[\s\S]*?detail\s*=\s*(jsonb_build_object\([^;]+\))::text;/gi,
+    ),
+  ];
+  const pgrstRaiseCount = (migration.match(/raise sqlstate 'PGRST'/gi) || [])
+    .length;
+  if (!pgrstBlocks.length || pgrstBlocks.length !== pgrstRaiseCount) {
+    failures.push(
+      `${migrationPath}: every custom PGRST raise must have a structured detail object`,
+    );
+  }
+  pgrstBlocks.forEach((match, index) => {
+    if (!/['"]headers['"]\s*,\s*jsonb_build_object\(\)/i.test(match[1])) {
+      failures.push(
+        `${migrationPath}: PGRST response ${index + 1} is missing an empty headers object`,
+      );
+    }
+  });
+
+  const pgrstRaiseSegments = migration
+    .split(/raise\s+sqlstate\s+['"]PGRST['"]\s+using/i)
+    .slice(1)
+    .map((segment) => segment.split(";", 1)[0]);
+  for (const [index, segment] of pgrstRaiseSegments.entries()) {
+    if (!/['"]headers['"]\s*,\s*jsonb?_build_object\s*\(\s*\)/i.test(segment)) {
+      failures.push(
+        `${migrationPath}: PGRST raise ${index + 1} is missing the required headers object`,
+      );
+    }
+  }
 }
-forbidMatches(
-  migration,
-  /delete\s+from\s+public\.project_(?:facts|materials|media|material_maps|hotspots)/i,
-  migrationPath,
-  "destructive child deletion",
-);
-requireMatches(
-  migration,
-  /p_action\s+not\s+in\s*\(\s*['"]save['"]\s*,\s*['"]publish['"]\s*\)/i,
-  migrationPath,
-  "new-project direct publish from revision zero",
-);
-requireMatches(
-  migration,
-  /publish[\s\S]{0,900}?jsonb_set\(\s*jsonb_set\(p_draft/i,
-  migrationPath,
-  "publish consumes the current request draft",
-);
-requireIncludes(
-  migration,
-  "v_item->>'claimStatus'",
-  migrationPath,
-  "per-child claim decisions",
-);
-requireIncludes(
-  migration,
-  "v_map_media_id",
-  migrationPath,
-  "hotspot block map-image normalization",
-);
-forbidMatches(
-  migration,
-  /claim_status\s*=\s*v_claim_status/i,
-  migrationPath,
-  "project claim status copied onto child rows",
-);
-forbidMatches(
-  migration,
-  /->>\s*'hotspotKey'/i,
-  migrationPath,
-  "non-contract hotspotKey field",
-);
+checkAggregateRpcSource(migration, migrationPath, true);
+checkAggregateRpcSource(blocksMigration, blocksMigrationPath, false);
 requireIncludes(
   server,
   "normalizeAutomaticClaimStatuses",
@@ -1244,24 +1397,6 @@ requireMatches(
   functionPath,
   "reference-aware private source cleanup",
 );
-requireMatches(
-  migration,
-  /from public\.stone_groups[\s\S]{0,180}status\s*=\s*['"]published['"][\s\S]{0,80}for share/i,
-  migrationPath,
-  "transaction-local published stone lock",
-);
-forbidMatches(
-  migration,
-  /drop policy if exists projects_admin_insert/i,
-  migrationPath,
-  "contract-phase policy drop in additive migration",
-);
-forbidMatches(
-  migration,
-  /revoke insert, update, delete/i,
-  migrationPath,
-  "contract-phase table revoke in additive migration",
-);
 
 for (const table of [
   "projects",
@@ -1319,44 +1454,6 @@ requireIncludes(
   lockdownMigrationPath,
   "contract schema reload",
 );
-requireMatches(
-  migration,
-  /from public\.finish_definitions[\s\S]{0,180}status\s*=\s*['"]published['"][\s\S]{0,80}for share/i,
-  migrationPath,
-  "transaction-local published finish lock",
-);
-const pgrstBlocks = [
-  ...migration.matchAll(
-    /raise sqlstate 'PGRST' using[\s\S]*?detail\s*=\s*(jsonb_build_object\([^;]+\))::text;/gi,
-  ),
-];
-const pgrstRaiseCount = (migration.match(/raise sqlstate 'PGRST'/gi) || [])
-  .length;
-if (!pgrstBlocks.length || pgrstBlocks.length !== pgrstRaiseCount) {
-  failures.push(
-    `${migrationPath}: every custom PGRST raise must have a structured detail object`,
-  );
-}
-pgrstBlocks.forEach((match, index) => {
-  if (!/['"]headers['"]\s*,\s*jsonb_build_object\(\)/i.test(match[1])) {
-    failures.push(
-      `${migrationPath}: PGRST response ${index + 1} is missing an empty headers object`,
-    );
-  }
-});
-
-const pgrstRaiseSegments = migration
-  .split(/raise\s+sqlstate\s+['"]PGRST['"]\s+using/i)
-  .slice(1)
-  .map((segment) => segment.split(";", 1)[0]);
-for (const [index, segment] of pgrstRaiseSegments.entries()) {
-  if (!/['"]headers['"]\s*,\s*jsonb?_build_object\s*\(\s*\)/i.test(segment)) {
-    failures.push(
-      `${migrationPath}: PGRST raise ${index + 1} is missing the required headers object`,
-    );
-  }
-}
-
 if (
   !argv.includes("--source-only") &&
   runVitest(["tests/admin-projects-aggregate.test.ts"]) !== 0

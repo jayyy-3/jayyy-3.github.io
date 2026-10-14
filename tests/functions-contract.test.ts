@@ -12,6 +12,10 @@ import { onRequest as adminStones } from '../functions/api/admin/stone-library.j
 import { onRequest as adminInvite } from '../functions/api/admin/invite-user.js'
 import { onRequest as publicImageQrData } from '../functions/api/image-qr/[slug].js'
 import { onRequest as publicImageQrPage } from '../functions/image/[slug].js'
+import * as serverBlocks from '../functions/_lib/blocks.js'
+import * as clientBlocks from '../src/features/blocks/schema.ts'
+import * as clientUpgrade from '../src/features/blocks/upgrade.ts'
+import blockFixture from './fixtures/content-blocks.json'
 
 type Handler = (context: {
   request: Request
@@ -204,5 +208,69 @@ describe('public Image QR Functions', () => {
     }
     expect(results.dataUnconfigured.upstream).toEqual([])
     expect(results).toMatchSnapshot()
+  })
+})
+
+// The Projects Function keeps its own copy of the shared content-block validator. Both copies
+// must return exactly the issues recorded in the shared fixture, so neither can drift.
+describe('content-block validators agree on the shared fixture', () => {
+  const expand = (value: unknown): unknown => {
+    if (typeof value === 'string') {
+      const match = /^@repeat:(.):(\d+)$/.exec(value)
+      return match ? match[1].repeat(Number(match[2])) : value
+    }
+    if (Array.isArray(value)) return value.map(expand)
+    if (value && typeof value === 'object') {
+      return Object.fromEntries(Object.entries(value).map(([key, entry]) => [key, expand(entry)]))
+    }
+    return value
+  }
+
+  test('fixture covers every block type in both modes', () => {
+    const types = new Set(blockFixture.cases.map((entry) => entry.block.type))
+    for (const type of clientBlocks.CONTENT_BLOCK_TYPES) expect(types.has(type)).toBe(true)
+    expect(new Set(blockFixture.cases.map((entry) => entry.mode))).toEqual(new Set(['draft', 'publish']))
+    expect(serverBlocks.CONTENT_BLOCK_TYPES).toEqual([...clientBlocks.CONTENT_BLOCK_TYPES])
+  })
+
+  for (const entry of blockFixture.cases) {
+    test(`${entry.mode}: ${entry.name}`, () => {
+      const block = expand(entry.block) as { type: unknown; content: unknown }
+      const mode = entry.mode as 'draft' | 'publish'
+      expect(clientBlocks.validateContentBlock(block, mode)).toEqual(entry.issues)
+      expect(serverBlocks.validateContentBlock(block, mode)).toEqual(entry.issues)
+    })
+  }
+
+  test('default content of every type is a valid draft in both copies', () => {
+    for (const type of clientBlocks.CONTENT_BLOCK_TYPES) {
+      const block = { type, content: clientBlocks.createDefaultBlockContent(type) }
+      expect(clientBlocks.validateContentBlock(block, 'draft')).toEqual([])
+      expect(serverBlocks.validateContentBlock(block, 'draft')).toEqual([])
+    }
+  })
+
+  test('legacy draft upgrade is identical in both copies', () => {
+    const legacy = {
+      project: { title: 'Legacy' },
+      mediaBlocks: [
+        { key: 'media:12', id: 12, mediaRole: 'normal_image', mediaAssetId: 4, projectMaterialMapKey: null, blockTitle: 'T', youtubeUrl: '', label: 'L', caption: 'C', sortOrder: 0 },
+        { key: 'media:13', id: 13, mediaRole: 'hotspot_image', mediaAssetId: null, projectMaterialMapKey: 'map:3', blockTitle: 'Placement', youtubeUrl: '', label: '', caption: '', sortOrder: 1 },
+        { key: 'media:new:a', id: null, mediaRole: 'youtube_video', mediaAssetId: null, projectMaterialMapKey: null, blockTitle: 'Film', youtubeUrl: 'https://youtu.be/abcdefghijk', label: '', caption: '', sortOrder: 2 },
+        { key: 'media:14', id: 14, mediaRole: 'supporting', mediaAssetId: 9, projectMaterialMapKey: null, blockTitle: '', youtubeUrl: '', label: '', caption: '', sortOrder: 3.5 },
+      ],
+    }
+    const client = clientUpgrade.upgradeLegacyProjectDraft(structuredClone(legacy))
+    const server = serverBlocks.upgradeLegacyProjectDraft(structuredClone(legacy))
+    expect(server).toEqual(client)
+    expect(client).not.toHaveProperty('mediaBlocks')
+    expect(client.schemaVersion).toBe(2)
+    expect((client.blocks as Array<{ type: string }>).map((block) => block.type)).toEqual(['image', 'hotspot_image', 'video', 'image'])
+    for (const block of client.blocks as Array<{ type: string; content: unknown }>) {
+      expect(serverBlocks.validateContentBlock(block, 'draft')).toEqual([])
+    }
+    const current = { schemaVersion: 2, blocks: [] }
+    expect(serverBlocks.upgradeLegacyProjectDraft(current)).toBe(current)
+    expect(clientUpgrade.upgradeLegacyProjectDraft(current)).toBe(current)
   })
 })

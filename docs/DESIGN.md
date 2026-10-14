@@ -263,7 +263,7 @@ Current archive/detail rhythm:
 - Detail media is full-width and responsive. Do not use the old half-width/offset detail image treatment for project case studies.
 - Project photography uses a quality-first responsive delivery contract. Preserve the uploaded original as the visual master; public archive cards, list thumbnails, detail blocks, heroes, and hotspot maps request distinct Supabase-rendered WebP sizes instead of downloading that master everywhere. Card/list profiles may be lighter, while hero/detail/map profiles retain higher quality and up to the platform's 2500px transform limit for large and high-density screens. Do not present aggressive byte reduction as the editor outcome: reassure the uploader that the original is retained and that high-quality website versions are prepared automatically.
 - Material points on `hotspot_image` blocks follow the Project Material Map pattern below: quiet points with per-point cards and a legend, not a sticky material inspector. The Featured Materials schedule remains the complete material list.
-- Project detail media blocks are ordered proof modules: `normal_image`, `hotspot_image`, and optional `youtube_video`. A project may have no YouTube video; do not add unrelated or placeholder video content just to fill the module.
+- The Project body is an ordered list of shared content blocks (see Content blocks below); the former `normal_image`, `hotspot_image` and `youtube_video` media modules are now its `image`, `hotspot_image` and `video` blocks. A project may have no video; do not add unrelated or placeholder video content just to fill the module.
 - YouTube blocks should render near the end of the ordered media sequence when configured, use privacy-friendly `youtube-nocookie` embeds, and keep captions/facts outside the iframe.
 
 ### Capabilities
@@ -585,3 +585,29 @@ Decision:
 - This is the one deliberate exception to the image-overlay rule above (white text on dark backplates, lime for small signals): the badge is a small, approved provenance signal, so lime text and outline are allowed here only.
 
 Remember: the badge marks Australian origin only; the origin string itself stays private.
+
+## Content blocks — 2026-10-14
+
+Review: Project pages could only show a fixed facts header and a sequence of images, points images and one video. The content team's Claude Design newsletter for Greenline told the project as a story (background, a five-step design-to-fabrication sequence with numbers and images, stone cards, a specification table, a closing prompt) that the CMS could not express. Jay approved a block-based Project body (NOW-PROJECT-BLOCKS-001).
+
+Jay's decisions:
+- The body is made of semantic blocks, not free layout: editors choose blocks, never fonts or spacing.
+- The header stays structured: title, location, date, client, designer, contractor, quantity, carbon, the material schedule and material points. Home cards, Stone `Used in projects` and comparison rely on them.
+- Exactly 14 blocks, shared with the newsletter and later Articles: Heading, Text, Quote, Callout (narrative); Key numbers, Steps, Specification table, Comparison table, Stone cards (evidence); Image, Gallery, Image with material points, Video, Call to action (media and action).
+- Existing published Projects must look exactly the same after the change.
+
+Rules (bold in scale, restrained in ingredients):
+- Order: Opening → Hero → Project information → Body → Featured materials → closing CTA. The body keeps the `Project media / Built evidence, ordered.` heading unless it opens with the editor's own Heading block. Summary and lead stay in the opening and information band, not in the body.
+- Rhythm: the body is one `urblo-section` inside the page container; blocks are separated by the existing 48px media rhythm. No block invents its own outer spacing. The body uses the shared page gutter (24px at 390, which satisfies the 16px minimum the plan named) so it stays aligned with the header and facts; changing it would have moved every existing Project page.
+- Heading: the section-heading pattern (top ink hairline, muted eyebrow, Avenir semibold H2, optional lead intro).
+- Text: restricted Markdown only (paragraphs, bold, links, `- ` lists), 16px body copy at a 3xl measure; HTML is shown as text, external links get `rel="noopener"`.
+- Quote: light 24/34px quote behind a left ink hairline, attribution as uppercase meta.
+- Callout: hairline box with a 2px left edge, ink for neutral and lime for the lime tone. Lime is never a fill.
+- Key numbers: one to four light display figures (34 → 44 → 64) with a hairline under each and a plain label below; 2 × 2 on mobile.
+- Steps: `01` meta label beside a card title and copy, optional full-width 16:9 image under each step, ink hairline above the list.
+- Tables: hairlines only, no zebra striping; row labels are uppercase meta row headers. The comparison table scrolls inside its own labelled, focusable region with a sticky first column; it is the only horizontal scroll on the page.
+- Stone cards: Stone Library photograph (4:3), type · finish meta, stone name, note and `View stone`. A stone that is not Live shows a dashed `Stone to be confirmed` placeholder and blocks Publish; `Photo pending` when the finish has no photograph.
+- Image, points image and video keep the former media module markup exactly. Gallery: an even 2/3-column grid of 4:3 frames (no masonry); each opens a full-screen viewer with visible `Close`, `Previous` and `Next` labels, Esc and arrow keys.
+- Call to action: ink hairlines above and below, card title, short copy and one or two buttons (primary black, secondary ghost). The page's closing CTA still follows.
+
+Remember: blocks carry meaning, not decoration. Photographs and facts lead; a block that has nothing visible to show renders nothing.

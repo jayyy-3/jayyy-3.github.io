@@ -1,4 +1,12 @@
 import { corsHeaders, createJsonResponder, createServiceClient, readServiceConfig, readBearerToken, readAdminIdentity } from './admin-runtime.js';
+import {
+  PROJECT_DRAFT_SCHEMA_VERSION,
+  blockMediaAssetIds,
+  blockStoneGroupIds,
+  fillBlockAltText,
+  upgradeLegacyProjectDraft,
+  validateContentBlock,
+} from './blocks.js';
 
 const PRIVATE_MEDIA_BUCKET = "urblo-admin-media";
 const PUBLIC_MEDIA_BUCKET = "urblo-public-media";
@@ -13,16 +21,6 @@ const BASE_UPDATED_AT_PATTERN =
 const CLAIM_STATUSES = new Set(["needs_review", "approved", "deferred"]);
 const LIFECYCLE_STATUSES = new Set(["draft", "published", "archived"]);
 const CARBON_STATUSES = new Set(["", "yes", "no", "not_available", "tbc"]);
-const MEDIA_ROLES = new Set([
-  "cover",
-  "hero",
-  "gallery",
-  "material_map",
-  "supporting",
-  "normal_image",
-  "hotspot_image",
-  "youtube_video",
-]);
 const PROJECT_IMAGE_MIME_TYPES = new Set([
   "image/jpeg",
   "image/png",
@@ -99,6 +97,7 @@ export async function handleAdminProjectsRequest(request, env) {
       await assertPublishedReferenceRows(supabase, input.draft);
       const media = await loadReferencedMedia(supabase, input.draft);
       assertPublishableMedia(media);
+      input.draft = fillDraftAltText(input.draft, media);
       return jsonResponse(
         await publishAggregate(
           supabase,
@@ -216,7 +215,7 @@ async function loadCanonicalAggregate(supabase, projectId) {
       "The project was not found.",
     );
 
-  const [factsResult, materialsResult, mapsResult, mediaResult] =
+  const [factsResult, materialsResult, mapsResult, blocksResult] =
     await Promise.all([
       supabase
         .from("project_facts")
@@ -237,7 +236,7 @@ async function loadCanonicalAggregate(supabase, projectId) {
         .order("sort_order")
         .order("id"),
       supabase
-        .from("project_media")
+        .from("project_blocks")
         .select("*")
         .eq("project_id", projectId)
         .order("sort_order")
@@ -248,7 +247,7 @@ async function loadCanonicalAggregate(supabase, projectId) {
     factsResult,
     materialsResult,
     mapsResult,
-    mediaResult,
+    blocksResult,
   ]) {
     if (result.error)
       throw upstreamError(
@@ -262,7 +261,7 @@ async function loadCanonicalAggregate(supabase, projectId) {
   const facts = (factsResult.data || []).filter(includeRow);
   const materials = (materialsResult.data || []).filter(includeRow);
   const maps = (mapsResult.data || []).filter(includeRow);
-  const mediaBlocks = (mediaResult.data || []).filter(includeRow);
+  const blocks = (blocksResult.data || []).filter(includeRow);
   const mapIds = maps.map((map) => map.id);
   let hotspots = [];
 
@@ -294,6 +293,7 @@ async function loadCanonicalAggregate(supabase, projectId) {
     baseUpdatedAt: project.updated_at,
     status: project.status,
     draft: {
+      schemaVersion: PROJECT_DRAFT_SCHEMA_VERSION,
       project: {
         id: project.id,
         status: project.status,
@@ -346,18 +346,21 @@ async function loadCanonicalAggregate(supabase, projectId) {
         intro: row.intro || "",
         sortOrder: row.sort_order,
       })),
-      mediaBlocks: mediaBlocks.map((row) => ({
-        key: persistedKey("media", row.id),
+      blocks: blocks.map((row) => ({
+        key: row.block_key || persistedKey("block", row.id),
         id: row.id,
-        mediaRole: row.media_role,
-        mediaAssetId: row.media_asset_id,
-        projectMaterialMapKey: row.project_material_map_id
-          ? mapKeyById.get(row.project_material_map_id) || null
-          : null,
-        blockTitle: row.block_title || "",
-        youtubeUrl: row.youtube_url || "",
-        label: row.label || "",
-        caption: row.caption || "",
+        type: row.block_type,
+        content:
+          row.block_type === "hotspot_image"
+            ? {
+                ...(isObject(row.content) ? row.content : {}),
+                projectMaterialMapKey: row.project_material_map_id
+                  ? mapKeyById.get(row.project_material_map_id) || null
+                  : null,
+              }
+            : isObject(row.content)
+              ? row.content
+              : {},
         sortOrder: row.sort_order,
       })),
       hotspots: hotspots.flatMap((row) => {
@@ -455,7 +458,8 @@ async function parsePostInput(request) {
       "A new project cannot have an existing page version.",
     );
   }
-  const draft = body.draft;
+  // A cached older editor may still send the pre-block shape.
+  const draft = upgradeLegacyProjectDraft(body.draft);
   validateDraftShape(draft);
 
   if (body.action === "archive" && projectId === null) {
@@ -502,7 +506,7 @@ export function validateDraftShape(draft) {
     facts: 100,
     materials: 100,
     maps: 30,
-    mediaBlocks: 100,
+    blocks: 100,
     hotspots: 300,
   };
   for (const [collection, limit] of Object.entries(limits)) {
@@ -520,9 +524,7 @@ export function validateDraftShape(draft) {
   draft.facts.forEach((row, index) => validateFactFields(row, index));
   draft.materials.forEach((row, index) => validateMaterialFields(row, index));
   draft.maps.forEach((row, index) => validateMapFields(row, index));
-  draft.mediaBlocks.forEach((row, index) =>
-    validateMediaBlockFields(row, index),
-  );
+  draft.blocks.forEach((row, index) => validateBlockFields(row, index));
   draft.hotspots.forEach((row, index) => validateHotspotFields(row, index));
 }
 
@@ -622,38 +624,17 @@ function validateMapFields(row, index) {
   validateSortOrder(row.sortOrder, `maps[${index}].sortOrder`);
 }
 
-function validateMediaBlockFields(row, index) {
-  if (!MEDIA_ROLES.has(row.mediaRole)) {
+function validateBlockFields(row, index) {
+  const issues = validateContentBlock(row, "draft");
+  if (issues.length) {
     throw new AdminProjectsError(
       400,
-      "invalid_media_role",
-      "A project media block is invalid.",
+      "invalid_block",
+      "A page body block is invalid.",
+      { field: `blocks[${index}].${issues[0].path}`, issue: issues[0].code },
     );
   }
-  validateOptionalId(row.mediaAssetId, `mediaBlocks[${index}].mediaAssetId`);
-  validateOptionalKey(
-    row.projectMaterialMapKey,
-    `mediaBlocks[${index}].projectMaterialMapKey`,
-  );
-  if (row.mediaRole === "youtube_video") {
-    if (row.mediaAssetId !== null || row.projectMaterialMapKey !== null) {
-      invalidField(`mediaBlocks[${index}]`);
-    }
-  } else if (row.mediaRole === "hotspot_image") {
-    if (
-      row.mediaAssetId !== null ||
-      typeof row.projectMaterialMapKey !== "string" ||
-      !row.projectMaterialMapKey.trim()
-    ) {
-      invalidField(`mediaBlocks[${index}]`);
-    }
-  } else if (row.projectMaterialMapKey !== null) {
-    invalidField(`mediaBlocks[${index}].projectMaterialMapKey`);
-  }
-  for (const field of ["blockTitle", "youtubeUrl", "label", "caption"]) {
-    validateString(row[field], `mediaBlocks[${index}].${field}`);
-  }
-  validateSortOrder(row.sortOrder, `mediaBlocks[${index}].sortOrder`);
+  validateSortOrder(row.sortOrder, `blocks[${index}].sortOrder`);
 }
 
 function validateHotspotFields(row, index) {
@@ -799,13 +780,32 @@ export function assertPublishDraft(draft) {
   ) {
     add("Connect every map point to a material and place it on the image.");
   }
-  if (draft.mediaBlocks.some((row) => !validMediaBlock(row, mapKeys))) {
+  // Image descriptions left empty are filled from their media items after those are loaded
+  // (fillDraftAltText); assertPublishableMedia already requires each media description.
+  const blockIssues = draft.blocks.map((row) =>
+    validateContentBlock(fillBlockAltText(row, PENDING_MEDIA_ALT), "publish"),
+  );
+  const isMediaBlock = (row) =>
+    ["image", "gallery", "hotspot_image", "video"].includes(row.type);
+  if (
+    draft.blocks.some(
+      (row, index) =>
+        isMediaBlock(row) &&
+        (blockIssues[index].length > 0 ||
+          (row.type === "hotspot_image" &&
+            !mapKeys.has(row.content.projectMaterialMapKey))),
+    )
+  ) {
     add("Complete every project media block.");
   }
   if (
-    draft.mediaBlocks.filter((row) => row.mediaRole === "youtube_video")
-      .length > 1
+    draft.blocks.some(
+      (row, index) => !isMediaBlock(row) && blockIssues[index].length > 0,
+    )
   ) {
+    add("Complete every required field in the page body.");
+  }
+  if (draft.blocks.filter((row) => row.type === "video").length > 1) {
     add("Keep one YouTube video on each project page.");
   }
 
@@ -817,9 +817,11 @@ export function assertPublishDraft(draft) {
 }
 
 async function assertPublishedReferenceRows(supabase, draft) {
-  const stoneIds = uniquePositiveIds(
-    draft.materials.map((row) => row.stoneGroupId),
-  );
+  const cardStoneIds = uniquePositiveIds(draft.blocks.flatMap(blockStoneGroupIds));
+  const stoneIds = uniquePositiveIds([
+    ...draft.materials.map((row) => row.stoneGroupId),
+    ...cardStoneIds,
+  ]);
   const finishIds = uniquePositiveIds(
     draft.materials.map((row) => row.finishDefinitionId),
   );
@@ -831,6 +833,14 @@ async function assertPublishedReferenceRows(supabase, draft) {
     loadStatuses(supabase, "stone_variants", variantIds),
     loadStatuses(supabase, "finish_definitions", finishIds),
   ]);
+  if (cardStoneIds.some((id) => stones.get(id) !== "published")) {
+    throw new AdminProjectsError(
+      409,
+      "publish_blocked",
+      "Use only Live Stone Library stones in stone cards.",
+      { blockers: ["Use only Live Stone Library stones in stone cards."] },
+    );
+  }
   if (
     stoneIds.some((id) => stones.get(id) !== "published") ||
     variantIds.some((id) => variants.get(id) !== "published") ||
@@ -939,9 +949,7 @@ async function loadReferencedMedia(supabase, draft) {
     draft.project.heroMediaId,
     draft.project.coverMediaId,
     ...draft.maps.map((row) => row.mediaAssetId),
-    ...draft.mediaBlocks
-      .filter((row) => usesDirectMediaAsset(row.mediaRole))
-      .map((row) => row.mediaAssetId),
+    ...draft.blocks.flatMap(blockMediaAssetIds),
   ]);
   if (!ids.length) return [];
 
@@ -1533,64 +1541,20 @@ const jsonResponse = createJsonResponder({
   ...corsHeaders("GET, POST, OPTIONS"),
 });
 
-function validMediaBlock(block, mapKeys) {
-  if (!MEDIA_ROLES.has(block.mediaRole)) return false;
-  if (block.mediaRole === "youtube_video") {
-    return (
-      block.mediaAssetId === null &&
-      block.projectMaterialMapKey === null &&
-      validYouTubeUrl(block.youtubeUrl)
-    );
-  }
-  if (block.mediaRole === "hotspot_image") {
-    return (
-      block.mediaAssetId === null &&
-      Boolean(
-        block.projectMaterialMapKey && mapKeys.has(block.projectMaterialMapKey),
-      )
-    );
-  }
-  return (
-    block.projectMaterialMapKey === null &&
-    positiveIntegerOrNull(block.mediaAssetId)
+/** Stand-in description so the pre-load publish check accepts media-backed images. */
+const PENDING_MEDIA_ALT = { get: () => "media description" };
+
+/** Fills empty block image descriptions from the loaded media rows (Publish only). */
+export function fillDraftAltText(draft, media) {
+  const altById = new Map(
+    media
+      .filter((asset) => stringValue(asset.alt))
+      .map((asset) => [Number(asset.id), stringValue(asset.alt)]),
   );
-}
-
-function usesDirectMediaAsset(mediaRole) {
-  return mediaRole !== "youtube_video" && mediaRole !== "hotspot_image";
-}
-
-function validYouTubeUrl(value) {
-  return Boolean(normalizeYouTubeId(value));
-}
-
-function normalizeYouTubeId(value) {
-  const source = stringValue(value);
-  if (/^[A-Za-z0-9_-]{6,}$/.test(source)) return source;
-  try {
-    const url = new URL(source);
-    if (url.protocol !== "https:" || url.username || url.password) return null;
-    let id = null;
-    if (url.hostname === "youtu.be") {
-      id = url.pathname.split("/").filter(Boolean)[0] || null;
-    } else if (
-      [
-        "youtube.com",
-        "www.youtube.com",
-        "m.youtube.com",
-        "youtube-nocookie.com",
-        "www.youtube-nocookie.com",
-      ].includes(url.hostname)
-    ) {
-      id =
-        url.searchParams.get("v") ||
-        url.pathname.split("/").filter(Boolean).pop() ||
-        null;
-    }
-    return id && /^[A-Za-z0-9_-]{6,}$/.test(id) ? id : null;
-  } catch {
-    return null;
-  }
+  return {
+    ...draft,
+    blocks: draft.blocks.map((row) => fillBlockAltText(row, altById)),
+  };
 }
 
 function safePublicSourceUrl(value) {

@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "lastUpdated": "2026-10-08",
+  "lastUpdated": "2026-10-14",
   "archive": "docs/archive/2026-09-09/completed-tasks.json",
   "tasks": [
     {
@@ -217,6 +217,66 @@
       "nextAction": "Jay reviews the live result (Stone detail Available as card, compare row, QR cell, admin options block and editor checkbox group); if accepted, the task is complete and the form filter remains a later candidate.",
       "notes": [
         "2026-10-03: Phases 1-3 implemented on claude/stone-available-as; isolated database fixture and synthetic local browser journey passed. Production database and main unchanged."
+      ]
+    },
+    {
+      "id": "NOW-PROJECT-BLOCKS-001",
+      "status": "now",
+      "phase": "release",
+      "priority": 0.5,
+      "summary": "Replace the Project page's fixed media sequence with a block-based body built from the 14 shared content blocks, keeping the Project header, materials and points structured (Phase 1 of docs/plans/TMP-project-blocks.md).",
+      "modules": [
+        "projects"
+      ],
+      "files": [
+        "supabase/migrations/20261014120000_project_blocks.sql",
+        "src/features/blocks",
+        "src/components/blocks",
+        "src/lib/richText.ts",
+        "functions/_lib/blocks.js",
+        "functions/_lib/admin-projects.js",
+        "src/features/projects/projectAggregate.ts",
+        "src/service/ProjectService.ts",
+        "src/components/projects/ProjectPageView.tsx",
+        "src/pages/admin/projects",
+        "scripts/fixtures/project-blocks.sql",
+        "tests/fixtures/content-blocks.json"
+      ],
+      "acceptance": [
+        "14 block types with shared schema, validation (client and Function held to one fixture), renderers and admin forms; no new npm dependency.",
+        "Expand-only single-transaction migration with read-back self-check; project_media neither altered nor deleted; private drafts reshaped; older editors' mediaBlocks drafts upgraded by Function and RPC.",
+        "Every existing published Project renders identically after the migration (before/after ProjectData and rendered HTML evidence in docs/WORKLOG.md).",
+        "Editor adds, moves, duplicates and removes blocks with per-type forms, preview, autosave, publish blockers and role boundaries proven on the local stack with 1440 and 390 screenshots.",
+        "Jay and Claude accept the result (not self-certified)."
+      ],
+      "verification": [
+        "npm run gate",
+        "npm run agent:check",
+        "git diff --check",
+        "npx vitest run",
+        "npm run agent:admin-crud-coverage",
+        "npm run agent:public-supabase-readiness",
+        "npm run agent:admin-projects-aggregate",
+        "scripts/fixtures/project-blocks.sql on a disposable pre-migration database (manual)",
+        "npm run agent:cloudflare-preview-smoke -- --base-url <immutable Preview>",
+        "PR 1B: npm run agent:admin-cms-predeploy and npm run agent:admin-config-gate"
+      ],
+      "evidenceRefs": [
+        "docs/WORKLOG.md",
+        "docs/plans/TMP-project-blocks.md"
+      ],
+      "authorization": {
+        "source": "Jay approved the block-based Project body on 2026-10-14 (docs/plans/TMP-project-blocks.md §0.2 decisions are final).",
+        "included": [
+          "Task branches claude/project-blocks-1a/1b, isolated local tests including disposable database fixtures, git push, pull requests and branch Preview smoke (read-only on Preview)."
+        ],
+        "excluded": [
+          "Merge to main, production migration apply, production data or Storage writes, email, DNS and credentials (Claude applies the migration and merges after acceptance)."
+        ]
+      },
+      "nextAction": "Claude reviews PR 1A and 1B, reports the migration SHA-256 to Jay, applies the migration to production, then merges and reads back production.",
+      "notes": [
+        "2026-10-14: Production snapshot at implementation time had 17 published Projects (the plan said 15) with 86 body media rows; equality evidence covers all 17."
       ]
     },
     {

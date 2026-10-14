@@ -10,7 +10,7 @@ export const textareaClass = `${fieldClass} min-h-28 py-3 leading-6`;
 export const secondaryButtonClass =
   "inline-flex min-h-9 items-center gap-2 rounded border border-black/15 bg-white px-3 text-[11px] font-bold uppercase tracking-[0.12em] text-black transition hover:border-black disabled:cursor-not-allowed disabled:bg-black/[0.04] disabled:text-black/30";
 
-export type ProjectDraftCollection = "facts" | "materials" | "mediaBlocks" | "hotspots";
+export type ProjectDraftCollection = "facts" | "materials" | "hotspots";
 export type UpdateProjectCollection = <Collection extends ProjectDraftCollection>(
   collection: Collection,
   key: string,

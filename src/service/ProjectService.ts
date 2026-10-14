@@ -6,8 +6,10 @@ import {
   type ProjectHotspot,
   type ProjectMaterial,
   type ProjectMaterialMap,
-  type ProjectMediaBlock,
 } from '../data/projectData.ts';
+import { blockMediaAssetIds, blockStoneGroupIds, isContentBlockType, type ContentBlockType } from '../features/blocks/schema.ts';
+import { resolveBlockView } from '../features/blocks/resolve.ts';
+import { blockViewImageUrls, type ContentBlockView } from '../features/blocks/view.ts';
 import { getPublicContentClient } from '../lib/publicContentClient.ts';
 import { parsePublicEntitySeo } from '../lib/publicEntitySeo.ts';
 import { normalizePublicProjectFactValue } from '../lib/projectFactValue.ts';
@@ -47,19 +49,24 @@ type ProjectFactRow = Pick<
   'fact_label' | 'fact_value' | 'fact_value_json' | 'sort_order' | 'status'
 >;
 
-type ProjectMediaRow = Pick<
-  Tables<'project_media'>,
+type ProjectBlockRow = Pick<
+  Tables<'project_blocks'>,
   | 'id'
+  | 'block_type'
+  | 'content'
   | 'project_material_map_id'
-  | 'media_role'
-  | 'label'
-  | 'caption'
-  | 'block_title'
-  | 'youtube_url'
   | 'sort_order'
 > & {
   media_assets?: Relation<MediaRef>;
 };
+
+/** Media and Stone Library keys referenced inside block content, read once per collection. */
+interface BlockReferences {
+  mediaById: ReadonlyMap<number, MediaRef>;
+  stoneKeyById: ReadonlyMap<number, string>;
+}
+
+const emptyBlockReferences: BlockReferences = { mediaById: new Map(), stoneKeyById: new Map() };
 
 type ProjectMaterialRow = Pick<
   Tables<'project_materials'>,
@@ -180,29 +187,24 @@ function mapProjectMaterialMap(
   };
 }
 
-function extractYouTubeId(value: string): string {
-  const trimmed = value.trim();
-  if (!trimmed.includes('/')) return trimmed;
-
-  try {
-    const url = new URL(trimmed);
-    if (url.hostname.includes('youtu.be')) {
-      return url.pathname.replace(/^\//, '') || trimmed;
-    }
-    return url.searchParams.get('v') || url.pathname.split('/').filter(Boolean).pop() || trimmed;
-  } catch {
-    return trimmed.split('/').filter(Boolean).pop() || trimmed;
-  }
+/** Public block ID: a block copied from a former media row keeps that row's anchor. */
+function publicBlockId(slug: string, row: ProjectBlockRow): string {
+  const content = row.content as { legacyProjectMediaId?: unknown } | null;
+  const legacyId = content && typeof content === 'object' ? content.legacyProjectMediaId : undefined;
+  return typeof legacyId === 'number' && Number.isSafeInteger(legacyId) && legacyId > 0
+    ? `${slug}-media-${legacyId}`
+    : `${slug}-block-${row.id}`;
 }
 
 function mapProjectRow(
   row: ProjectRow,
   supabase: PublicClient,
   facts: ProjectFactRow[] = [],
-  media: ProjectMediaRow[] = [],
+  blockRows: ProjectBlockRow[] = [],
   materials: ProjectMaterialRow[] = [],
   materialMaps: ProjectMaterialMapRow[] = [],
   hotspots: ProjectHotspotRow[] = [],
+  references: BlockReferences = emptyBlockReferences,
 ): ProjectData {
   const coverMedia = firstRelation(row.cover_media);
   const heroMedia = firstRelation(row.hero_media);
@@ -276,60 +278,64 @@ function mapProjectRow(
 
   const materialMapById = new Map(mappedMaterialMaps.map((entry) => [entry.row.id, entry.value]));
   const linkedMaterialMapIds = new Set<number>();
-  const mediaBlocks: ProjectMediaBlock[] = [];
+  const blocks: ContentBlockView[] = [];
+  const resolveContext = {
+    fallbackAlt: row.title,
+    mediaUrl: (mediaId: number | null | undefined) =>
+      resolvePublicMediaUrl(mediaId ? references.mediaById.get(mediaId) ?? null : null, supabase) || '',
+    mediaAlt: (mediaId: number | null | undefined) =>
+      (mediaId ? references.mediaById.get(mediaId)?.alt : null) || '',
+    stoneKey: (stoneGroupId: number) => references.stoneKeyById.get(stoneGroupId) ?? null,
+  };
 
-  for (const entry of media
+  for (const entry of blockRows
     .slice()
     .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))) {
-    if (entry.media_role === 'youtube_video' && entry.youtube_url) {
-      mediaBlocks.push({
-        id: `${row.slug}-media-${entry.id}`,
-        type: 'youtube_video',
-        youtubeId: extractYouTubeId(entry.youtube_url),
-        title: entry.block_title || entry.label || 'Project video',
-        caption: entry.caption || undefined,
-      });
-      continue;
-    }
+    if (!isContentBlockType(entry.block_type)) continue;
+    const id = publicBlockId(row.slug, entry);
+    const content = (entry.content ?? {}) as Record<string, unknown>;
 
-    if (entry.media_role === 'hotspot_image' && entry.project_material_map_id) {
+    if (entry.block_type === 'hotspot_image') {
+      if (!entry.project_material_map_id) continue;
       const linkedMap = materialMapById.get(entry.project_material_map_id);
       if (!linkedMap) continue;
 
       const entryMedia = firstRelation(entry.media_assets);
       const entryImage = resolvePublicMediaUrl(entryMedia, supabase);
       linkedMaterialMapIds.add(entry.project_material_map_id);
-      mediaBlocks.push({
-        id: `${row.slug}-media-${entry.id}`,
+      const text = (value: unknown) => (typeof value === 'string' ? value.trim() : '');
+      blocks.push({
+        id,
         type: 'hotspot_image',
         image: entryImage || linkedMap.image,
         imageAlt: entryMedia?.alt || linkedMap.imageAlt,
-        title: entry.block_title || linkedMap.title,
+        title: text(content.title) || linkedMap.title,
         intro: linkedMap.intro || undefined,
-        caption: entry.caption || undefined,
+        caption: text(content.caption) || undefined,
         hotspots: linkedMap.hotspots,
       });
       continue;
     }
 
+    // A plain image carries its media in the row's own relation; content IDs cover the rest.
     const entryMedia = firstRelation(entry.media_assets);
-    const source = resolvePublicMediaUrl(entryMedia, supabase);
-    if (!source) continue;
-
-    mediaBlocks.push({
-      id: `${row.slug}-media-${entry.id}`,
-      type: 'normal_image',
-      src: source,
-      alt: entryMedia?.alt || entry.label || row.title,
-      title: entry.block_title || undefined,
-      label: entry.label || undefined,
-      caption: entry.caption || undefined,
-    });
+    const view = resolveBlockView(
+      { type: entry.block_type, content },
+      id,
+      entry.block_type === 'image' && entryMedia
+        ? {
+            ...resolveContext,
+            mediaUrl: () => resolvePublicMediaUrl(entryMedia, supabase) || '',
+            mediaAlt: () => entryMedia.alt || '',
+          }
+        : resolveContext,
+    );
+    if (view) blocks.push(view);
   }
 
   for (const entry of mappedMaterialMaps) {
     if (linkedMaterialMapIds.has(entry.row.id)) continue;
-    mediaBlocks.push({
+    blocks.push({
       id: `${row.slug}-hotspot-${entry.row.id}`,
       type: 'hotspot_image',
       image: entry.value.image,
@@ -340,11 +346,7 @@ function mapProjectRow(
     });
   }
 
-  const images = mediaBlocks.flatMap((block) => {
-    if (block.type === 'normal_image') return [block.src];
-    if (block.type === 'hotspot_image') return [block.image];
-    return [];
-  });
+  const images = blockViewImageUrls(blocks);
 
   return {
     slug: row.slug,
@@ -373,7 +375,7 @@ function mapProjectRow(
     details,
     materialMap: mappedMaterialMaps[0]?.value,
     materials: mappedMaterials,
-    mediaBlocks,
+    blocks,
   };
 }
 
@@ -430,12 +432,12 @@ export async function getPublishedProjects(
   const projectRows: ProjectRow[] = data;
   const ids = projectRows.map((row) => row.id);
   const factsByProject = new Map<number, ProjectFactRow[]>();
-  const mediaByProject = new Map<number, ProjectMediaRow[]>();
+  const blocksByProject = new Map<number, ProjectBlockRow[]>();
   const materialsByProject = new Map<number, ProjectMaterialRow[]>();
   const materialMapsByProject = new Map<number, ProjectMaterialMapRow[]>();
   const hotspotsByProject = new Map<number, ProjectHotspotRow[]>();
 
-  const [factsResult, mediaResult, materialsResult, materialMapsResult] = await Promise.all([
+  const [factsResult, blocksResult, materialsResult, materialMapsResult] = await Promise.all([
     supabase
       .from('project_facts')
       .select('project_id, fact_label, fact_value, fact_value_json, sort_order, status')
@@ -444,18 +446,15 @@ export async function getPublishedProjects(
       .eq('claim_status', 'approved')
       .order('sort_order', { ascending: true }),
     supabase
-      .from('project_media')
+      .from('project_blocks')
       .select(`
         project_id,
         id,
+        block_type,
+        content,
         project_material_map_id,
-        media_role,
-        label,
-        caption,
-        block_title,
-        youtube_url,
         sort_order,
-        media_assets (
+        media_assets!project_blocks_media_asset_id_fkey (
           status,
           source_kind,
           source_url,
@@ -518,12 +517,17 @@ export async function getPublishedProjects(
   // caller receives the complete static project set rather than a partial CMS page.
   if (
     factsResult.error ||
-    mediaResult.error ||
+    (blocksResult.error && !isMissingRelationError(blocksResult.error)) ||
     materialsResult.error ||
     materialMapsResult.error
   ) {
     return [];
   }
+  // Before the body-block migration is applied the table does not exist: pages keep their
+  // facts and materials and simply show no body. Any other failure keeps the static fallback.
+  const blockRows = blocksResult.error ? [] : blocksResult.data ?? [];
+  const references = await loadBlockReferences(supabase, blockRows);
+  if (!references) return [];
 
   const materialMapRows = materialMapsResult.data ?? [];
   const materialMapIds = materialMapRows.map((materialMap) => materialMap.id);
@@ -554,8 +558,8 @@ export async function getPublishedProjects(
     factsByProject.set(fact.project_id, [...(factsByProject.get(fact.project_id) ?? []), fact]);
   }
 
-  for (const item of mediaResult.data ?? []) {
-    mediaByProject.set(item.project_id, [...(mediaByProject.get(item.project_id) ?? []), item]);
+  for (const item of blockRows) {
+    blocksByProject.set(item.project_id, [...(blocksByProject.get(item.project_id) ?? []), item]);
   }
 
   for (const material of materialsResult.data ?? []) {
@@ -585,12 +589,49 @@ export async function getPublishedProjects(
       row,
       supabase,
       factsByProject.get(row.id),
-      mediaByProject.get(row.id),
+      blocksByProject.get(row.id),
       materialsByProject.get(row.id),
       materialMapsByProject.get(row.id),
       hotspotsByProject.get(row.id),
+      references,
     ),
   );
+}
+
+function isMissingRelationError(error: { code?: string | null }): boolean {
+  return error.code === 'PGRST205' || error.code === '42P01';
+}
+
+/**
+ * Reads the Published media and Stone Library keys that gallery, steps and stone-card blocks
+ * reference by ID. Unpublished references are simply absent (RLS) and render as missing.
+ * Returns null when a read fails, so the caller keeps the complete static fallback.
+ */
+async function loadBlockReferences(
+  supabase: PublicClient,
+  rows: readonly ProjectBlockRow[],
+): Promise<BlockReferences | null> {
+  const typed = rows.flatMap((row) =>
+    isContentBlockType(row.block_type) ? [{ type: row.block_type as ContentBlockType, content: row.content }] : []);
+  const mediaIds = [...new Set(typed.flatMap((block) => (block.type === 'image' ? [] : blockMediaAssetIds(block))))];
+  const stoneIds = [...new Set(typed.flatMap((block) => blockStoneGroupIds(block)))];
+  const [mediaResult, stoneResult] = await Promise.all([
+    mediaIds.length
+      ? supabase
+          .from('media_assets')
+          .select('id,status,source_kind,source_url,bucket,object_path,alt')
+          .in('id', mediaIds)
+          .eq('status', 'published')
+      : Promise.resolve({ data: [], error: null }),
+    stoneIds.length
+      ? supabase.from('stone_groups').select('id,stone_group_key').in('id', stoneIds).eq('status', 'published')
+      : Promise.resolve({ data: [], error: null }),
+  ]);
+  if (mediaResult.error || stoneResult.error) return null;
+  return {
+    mediaById: new Map((mediaResult.data ?? []).map((media) => [Number(media.id), media as MediaRef])),
+    stoneKeyById: new Map((stoneResult.data ?? []).map((stone) => [Number(stone.id), stone.stone_group_key])),
+  };
 }
 
 // Admin Projects keeps editing in a private draft, so its envelope reports "draft" for a live
@@ -736,7 +777,7 @@ export function findStoneProjectUsages(
       pushUnique(applications, material.application);
     }
 
-    for (const block of project.mediaBlocks ?? []) {
+    for (const block of project.blocks ?? []) {
       if (block.type !== 'hotspot_image') continue;
       for (const hotspot of block.hotspots) {
         if (!matches(hotspot.stoneGroupId)) continue;

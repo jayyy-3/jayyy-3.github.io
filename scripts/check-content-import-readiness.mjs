@@ -1952,14 +1952,17 @@ projects.forEach((project, projectIndex) => {
         });
     });
 
-    const mediaBlocks = Array.isArray(project.mediaBlocks) ? project.mediaBlocks : [];
+    // Static fallback bodies use the shared block names since NOW-PROJECT-BLOCKS-001; this
+    // historical planner still maps their image, points-image and video blocks one to one.
+    const mediaBlocks = (Array.isArray(project.blocks) ? project.blocks : [])
+        .filter((block) => ['image', 'hotspot_image', 'video'].includes(block.type));
     const hotspotBlocks = mediaBlocks.filter((block) => block.type === 'hotspot_image');
 
     if (mediaBlocks.length) {
         let youtubeBlockCount = 0;
 
         mediaBlocks.forEach((block, blockIndex) => {
-            if (block.type === 'normal_image') {
+            if (block.type === 'image') {
                 addMediaCandidate(block.src, `project media block ${project.slug}/${block.id}`, block.alt);
                 projectMedia.push({
                     project_slug: project.slug,
