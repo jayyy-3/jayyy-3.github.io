@@ -6,11 +6,11 @@ Last updated: 2026-10-15
 
 ## 正在执行
 
-**NOW-ADMIN-STONE-WORKSPACE-001** — Deliver the page-shaped Stone Library workspace and approved current-public-baseline adoption.
+**NOW-PROJECT-IMPORT-001** — Import a Project content package (one project.json, or a zip with project.json and images/) exported from Claude Design as a Draft Project in the admin, plus the colleague-facing package format docs and the Claude Design prompt (Phase 2 of the Project blocks plan).
 
-阶段：awaiting_external。状态：now。
+阶段：verification。状态：now。
 
-下一步：Jay performs the five-minute image replacement/publish acceptance in production. Complete live Viewer proof only after explicit approval for the named QA account role change; broader CMS handoff remains separate.
+下一步：Claude reviews the PR and its branch Preview; Jay tries an import with a real Claude Design package. Merge only after review.
 
 ## 已观察的发布状态
 

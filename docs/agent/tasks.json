@@ -4,6 +4,63 @@
   "archive": "docs/archive/2026-09-09/completed-tasks.json",
   "tasks": [
     {
+      "id": "NOW-PROJECT-IMPORT-001",
+      "status": "now",
+      "phase": "verification",
+      "priority": 0.4,
+      "summary": "Import a Project content package (one project.json, or a zip with project.json and images/) exported from Claude Design as a Draft Project in the admin, plus the colleague-facing package format docs and the Claude Design prompt (Phase 2 of the Project blocks plan).",
+      "modules": [
+        "projects"
+      ],
+      "files": [
+        "docs/plans/TMP-project-import.md",
+        "src/features/blocks/importPackage.ts",
+        "src/features/blocks/importZip.ts",
+        "src/pages/admin/projects/ImportProjectDialog.tsx",
+        "src/pages/admin/media/uploadPickerFile.ts",
+        "src/pages/admin/media/AdminMediaPicker.tsx",
+        "src/pages/admin/AdminProjectsPage.tsx",
+        "scripts/check-project-package.mjs",
+        "docs/content-import"
+      ],
+      "acceptance": [
+        "Format docs, JSON Schema, example package and Claude Design prompt are complete and consistent with src/features/blocks/schema.ts and the live finish keys.",
+        "Parsing is a pure function with path-addressed errors; hotspot_image is rejected; missing images and unresolved stones are warnings, not errors.",
+        "Upload logic is shared with AdminMediaPicker; fflate is loaded only in the admin chunk and is absent from the public entry.",
+        "Local stack: owner imports a zip and a JSON-only package, both publish and read back publicly; editor can import; viewer sees no entry.",
+        "No database migration and no new Function endpoint; all gates and guards pass; PR left unmerged."
+      ],
+      "verification": [
+        "npm run gate",
+        "npm run agent:check",
+        "git diff --check",
+        "npx vitest run",
+        "npm run agent:admin-crud-coverage",
+        "npm run agent:admin-projects-aggregate",
+        "npm run agent:admin-cms-predeploy",
+        "npm run agent:admin-config-gate",
+        "npm run agent:project-package -- docs/content-import/examples/greenline/project.json",
+        "npm run agent:cloudflare-preview-smoke -- --base-url <immutable Preview>"
+      ],
+      "evidenceRefs": [
+        "docs/WORKLOG.md",
+        "docs/content-import/README.md"
+      ],
+      "authorization": {
+        "source": "Jay approved Phase 2 (Project package import) on 2026-10-15 (docs/plans/TMP-project-import.md §0.2, §0.3, §0.5).",
+        "included": [
+          "Task branch claude/project-import, isolated local tests and local-stack walkthrough with synthetic accounts, git push, one pull request against main and branch Preview smoke (read-only on Preview)."
+        ],
+        "excluded": [
+          "Merge to main, database migrations, new Function endpoints, production data or Storage writes, email, DNS and credentials."
+        ]
+      },
+      "nextAction": "Claude reviews the PR and its branch Preview; Jay tries an import with a real Claude Design package. Merge only after review.",
+      "notes": [
+        "2026-10-15: Implemented on claude/project-import; gate, unit tests, guards and local zip/JSON walkthroughs passed (docs/WORKLOG.md). PR open, not merged."
+      ]
+    },
+    {
       "id": "NOW-FOOTER-LEGAL-LINE-001",
       "status": "now",
       "phase": "awaiting_external",

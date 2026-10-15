@@ -6,7 +6,6 @@ import { recordAdminAuditEvent } from '../../../lib/adminAudit';
 import { PUBLIC_MEDIA_BUCKET, toSafePublicMediaSourceUrl } from '../../../lib/publicMediaUrl';
 import { supabase } from '../../../lib/supabaseClient';
 import {
-    buildPickerObjectPath,
     describePickerUploadLimits,
     describePreparedUpload,
     isFileNameDescription,
@@ -17,6 +16,7 @@ import {
     type AdminMediaUploadPolicy,
     type PreparedPickerUpload,
 } from './mediaPickerFiles';
+import { pickerColumns, privateMediaBucket, rowToAsset, uploadPickerFile, type MediaPickerRow } from './uploadPickerFile';
 
 // Shared admin image picker (generalised from the Projects inline media field). Colleagues
 // search existing images by description, or upload a new one in place: the accepted types and
@@ -24,21 +24,7 @@ import {
 // guidance, and the description (alt text) starts empty and is required. Every upload lands as
 // a Draft in the private library; the website only shows it once it is published.
 
-const privateMediaBucket = 'urblo-admin-media';
-const pickerColumns = 'id,bucket,alt,caption,object_path,source_url,source_kind,media_type,status';
 const pickerLibraryPageSize = 24;
-
-interface MediaPickerRow {
-    id: number;
-    bucket: string | null;
-    alt: string | null;
-    caption: string | null;
-    object_path: string | null;
-    source_url: string | null;
-    source_kind: string;
-    media_type: string;
-    status: string;
-}
 
 export interface AdminMediaPickerProps {
     label: string;
@@ -290,135 +276,31 @@ export default function AdminMediaPicker({
             return;
         }
 
-        const uploadFile = prepared.file;
         setIsUploading(true);
         setPickerError(null);
         setWarning(null);
         try {
-            const objectPath = buildPickerObjectPath(uploadFile, objectPathPrefix);
-            const dimensions =
-                prepared.width && prepared.height
-                    ? { width: prepared.width, height: prepared.height }
-                    : await readImageDimensions(uploadFile);
-            const upload = await supabase.storage.from(privateMediaBucket).upload(objectPath, uploadFile, {
-                cacheControl: '31536000',
-                upsert: false,
-                contentType: uploadFile.type,
+            const result = await uploadPickerFile({
+                client: supabase,
+                userId,
+                prepared,
+                alt,
+                objectPathPrefix,
+                auditSource,
+                canCleanUpStorage,
             });
-
-            if (upload.error) {
-                console.error('Admin media picker upload failed.', upload.error);
-                setPickerError('The image could not be uploaded. Check your connection and try again.');
+            if (!result.ok) {
+                setPickerError(result.error);
                 return;
             }
-
-            const metadata = await supabase
-                .from('media_assets')
-                .insert({
-                    status: 'draft',
-                    bucket: privateMediaBucket,
-                    object_path: objectPath,
-                    source_url: null,
-                    source_kind: 'storage',
-                    media_type: 'image',
-                    mime_type: uploadFile.type,
-                    width_px: dimensions?.width ?? null,
-                    height_px: dimensions?.height ?? null,
-                    size_bytes: uploadFile.size,
-                    alt,
-                    caption: null,
-                    credit: null,
-                    usage_notes: null,
-                    created_by: userId,
-                    updated_by: userId,
-                })
-                .select(pickerColumns)
-                .single<MediaPickerRow>();
-
-            let uploadedRow = metadata.data;
-            let metadataConfirmedByReadback = false;
-            if (metadata.error || !uploadedRow) {
-                if (metadata.error) console.error('Admin media picker metadata insert failed.', metadata.error);
-                const readback = await supabase
-                    .from('media_assets')
-                    .select(pickerColumns)
-                    .eq('bucket', privateMediaBucket)
-                    .eq('object_path', objectPath)
-                    .maybeSingle<MediaPickerRow>();
-                uploadedRow = readback.data;
-
-                if (!uploadedRow) {
-                    if (readback.error) {
-                        console.error('Admin media picker metadata readback failed.', readback.error);
-                        setPickerError(
-                            'The image was uploaded, but the media library could not confirm it was added. Reload the page to check before uploading it again.',
-                        );
-                        return;
-                    }
-                    if (!canCleanUpStorage) {
-                        setPickerError(
-                            'The image could not be added to the media library. Nothing is on the website. Ask a Website owner or CMS manager to tidy up the leftover copy, then try again.',
-                        );
-                        return;
-                    }
-                    const cleanup = await supabase.storage.from(privateMediaBucket).remove([objectPath]);
-                    if (cleanup.error) console.error('Admin media picker cleanup failed.', cleanup.error);
-                    setPickerError(
-                        cleanup.error
-                            ? 'The image could not be added to the media library, and its leftover copy could not be removed. Ask a Website owner or CMS manager to check it.'
-                            : 'The image could not be added to the media library. Nothing was kept; try again.',
-                    );
-                    return;
-                }
-                metadataConfirmedByReadback = true;
-            }
-
-            const signedPreview = await supabase.storage.from(privateMediaBucket).createSignedUrl(objectPath, 3600);
-            const asset: AdminMediaPickerAsset = {
-                ...rowToAsset(uploadedRow),
-                previewUrl: signedPreview.data?.signedUrl ?? null,
-            };
-
+            const { asset } = result;
             remember([asset]);
             if (selfLoading) setLibraryAssets((current) => [asset, ...current.filter((item) => item.id !== asset.id)]);
             onAssetCreatedRef.current?.(asset);
             onChangeRef.current(asset.id, asset);
             clearPending();
             setIsPickerOpen(false);
-            if (signedPreview.error || !signedPreview.data?.signedUrl) {
-                setWarning('The image was uploaded and selected, but its preview needs a page reload.');
-            }
-
-            try {
-                const auditError = await recordAdminAuditEvent(supabase, {
-                    actorUserId: userId,
-                    action: 'media_asset.upload',
-                    entityType: 'media_assets',
-                    entityId: asset.id,
-                    metadata: {
-                        source: auditSource,
-                        storagePosture: 'private-first',
-                        metadataConfirmedByReadback,
-                        bucket: uploadedRow.bucket,
-                        objectPath: uploadedRow.object_path,
-                        mediaType: uploadedRow.media_type,
-                        originalBytes: prepared.originalBytes,
-                        uploadBytes: prepared.uploadBytes,
-                        resizedInBrowser: prepared.resized,
-                    },
-                });
-                if (auditError) {
-                    console.error('Admin media picker upload audit failed.', auditError);
-                    setWarning(
-                        'The image was uploaded and selected, but Change history could not be updated. Ask a Website owner or CMS manager to review it.',
-                    );
-                }
-            } catch (auditError) {
-                console.error('Admin media picker upload audit failed.', auditError);
-                setWarning(
-                    'The image was uploaded and selected, but Change history could not be updated. Ask a Website owner or CMS manager to review it.',
-                );
-            }
+            if (result.warning) setWarning(result.warning);
         } catch (uploadError) {
             console.error('Admin media picker upload failed.', uploadError);
             setPickerError('The image could not be uploaded. Check your connection and try again.');
@@ -810,20 +692,6 @@ function MediaThumb({ asset, className }: { asset: AdminMediaPickerAsset; classN
     return <img className={`${className} block object-cover`} src={source} alt={asset.alt || ''} loading="lazy" />;
 }
 
-function rowToAsset(row: MediaPickerRow): AdminMediaPickerAsset {
-    return {
-        id: row.id,
-        bucket: row.bucket,
-        alt: row.alt,
-        caption: row.caption,
-        objectPath: row.object_path,
-        sourceUrl: row.source_url,
-        sourceKind: row.source_kind,
-        mediaType: row.media_type,
-        status: row.status,
-    };
-}
-
 async function searchMediaLibrary(client: SupabaseClient, rawSearch: string, selectable: 'any' | 'published') {
     const images = client.from('media_assets').select(pickerColumns).eq('media_type', 'image');
     let query = selectable === 'published' ? images.eq('status', 'published') : images.neq('status', 'archived');
@@ -861,18 +729,4 @@ function pickerPreviewUrl(client: SupabaseClient, asset: AdminMediaPickerAsset, 
         return signed.get(asset.objectPath) ?? null;
     }
     return toSafePublicMediaSourceUrl(asset.sourceUrl) ?? null;
-}
-
-async function readImageDimensions(file: File) {
-    const objectUrl = URL.createObjectURL(file);
-    try {
-        return await new Promise<{ width: number; height: number } | null>((resolve) => {
-            const image = new Image();
-            image.onload = () => resolve({ width: image.naturalWidth, height: image.naturalHeight });
-            image.onerror = () => resolve(null);
-            image.src = objectUrl;
-        });
-    } finally {
-        URL.revokeObjectURL(objectUrl);
-    }
 }

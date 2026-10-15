@@ -1,0 +1,677 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://urblo.com.au/schemas/urblo-project-package-v1.json",
+  "title": "Urblo project package, version 1",
+  "description": "One Urblo Project as exported from Claude Design. Mirrors src/features/blocks/schema.ts: block fields are the same, except images are {file, alt} objects and stones are Stone Library slugs. The importer re-checks every rule (and a few this schema cannot express, such as one video per project and at most 50 different image files).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "version",
+    "project",
+    "blocks"
+  ],
+  "properties": {
+    "format": {
+      "const": "urblo-project-package"
+    },
+    "version": {
+      "const": 1
+    },
+    "project": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "title"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "maxLength": 200,
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "slug": {
+          "type": "string",
+          "maxLength": 200,
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "location": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "projectDateLabel": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "completedOn": {
+          "type": "string",
+          "pattern": "^(\\d{4}-\\d{2}-\\d{2})?$",
+          "description": "ISO date (YYYY-MM-DD), empty or omitted."
+        },
+        "summary": {
+          "type": "string",
+          "maxLength": 400
+        },
+        "lead": {
+          "type": "string",
+          "maxLength": 5000
+        },
+        "client": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "landscapeArchitect": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "contractor": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "address": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "quantityLabel": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "facts": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "label",
+              "value"
+            ],
+            "properties": {
+              "label": {
+                "type": "string",
+                "maxLength": 200,
+                "minLength": 1,
+                "pattern": "\\S"
+              },
+              "value": {
+                "type": "string",
+                "maxLength": 400,
+                "minLength": 1,
+                "pattern": "\\S"
+              }
+            }
+          }
+        },
+        "materials": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "stone",
+              "finish",
+              "application"
+            ],
+            "properties": {
+              "stone": {
+                "$ref": "#/$defs/stoneSlug"
+              },
+              "finish": {
+                "$ref": "#/$defs/finishKey"
+              },
+              "application": {
+                "type": "string",
+                "maxLength": 200,
+                "minLength": 1,
+                "pattern": "\\S"
+              },
+              "note": {
+                "type": "string",
+                "maxLength": 400
+              }
+            }
+          }
+        },
+        "hero": {
+          "$ref": "#/$defs/image"
+        },
+        "cover": {
+          "$ref": "#/$defs/image"
+        }
+      }
+    },
+    "blocks": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "title"
+            ],
+            "properties": {
+              "type": {
+                "const": "heading"
+              },
+              "eyebrow": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "title": {
+                "type": "string",
+                "maxLength": 200,
+                "minLength": 1,
+                "pattern": "\\S"
+              },
+              "intro": {
+                "type": "string",
+                "maxLength": 400
+              }
+            },
+            "description": "Section title with optional small label and introduction."
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "body"
+            ],
+            "properties": {
+              "type": {
+                "const": "text"
+              },
+              "body": {
+                "type": "string",
+                "maxLength": 5000,
+                "minLength": 1,
+                "pattern": "\\S"
+              }
+            },
+            "description": "Paragraphs. Restricted Markdown: **bold**, [links](/path or https://...), \"- \" lists. No HTML, no headings."
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "quote"
+            ],
+            "properties": {
+              "type": {
+                "const": "quote"
+              },
+              "quote": {
+                "type": "string",
+                "maxLength": 400,
+                "minLength": 1,
+                "pattern": "\\S"
+              },
+              "attribution": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "role": {
+                "type": "string",
+                "maxLength": 200
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "body"
+            ],
+            "properties": {
+              "type": {
+                "const": "callout"
+              },
+              "title": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "body": {
+                "type": "string",
+                "maxLength": 400,
+                "minLength": 1,
+                "pattern": "\\S"
+              },
+              "tone": {
+                "enum": [
+                  "neutral",
+                  "lime"
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "items"
+            ],
+            "properties": {
+              "type": {
+                "const": "stats"
+              },
+              "items": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 4,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "value",
+                    "label"
+                  ],
+                  "properties": {
+                    "value": {
+                      "type": "string",
+                      "maxLength": 200,
+                      "minLength": 1,
+                      "pattern": "\\S"
+                    },
+                    "unit": {
+                      "type": "string",
+                      "maxLength": 200
+                    },
+                    "label": {
+                      "type": "string",
+                      "maxLength": 400,
+                      "minLength": 1,
+                      "pattern": "\\S"
+                    }
+                  }
+                }
+              },
+              "caption": {
+                "type": "string",
+                "maxLength": 400
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "items"
+            ],
+            "properties": {
+              "type": {
+                "const": "steps"
+              },
+              "intro": {
+                "type": "string",
+                "maxLength": 400
+              },
+              "items": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 8,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "title",
+                    "body"
+                  ],
+                  "properties": {
+                    "title": {
+                      "type": "string",
+                      "maxLength": 200,
+                      "minLength": 1,
+                      "pattern": "\\S"
+                    },
+                    "body": {
+                      "type": "string",
+                      "maxLength": 5000,
+                      "minLength": 1,
+                      "pattern": "\\S"
+                    },
+                    "image": {
+                      "$ref": "#/$defs/image"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "rows"
+            ],
+            "properties": {
+              "type": {
+                "const": "spec_table"
+              },
+              "title": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "rows": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 12,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "label",
+                    "value"
+                  ],
+                  "properties": {
+                    "label": {
+                      "type": "string",
+                      "maxLength": 200,
+                      "minLength": 1,
+                      "pattern": "\\S"
+                    },
+                    "value": {
+                      "type": "string",
+                      "maxLength": 400,
+                      "minLength": 1,
+                      "pattern": "\\S"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "columns",
+              "rows"
+            ],
+            "properties": {
+              "type": {
+                "const": "comparison_table"
+              },
+              "title": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "columns": {
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 4,
+                "items": {
+                  "type": "string",
+                  "maxLength": 200,
+                  "minLength": 1,
+                  "pattern": "\\S"
+                }
+              },
+              "rows": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 20,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "label",
+                    "cells"
+                  ],
+                  "properties": {
+                    "label": {
+                      "type": "string",
+                      "maxLength": 200,
+                      "minLength": 1,
+                      "pattern": "\\S"
+                    },
+                    "cells": {
+                      "type": "array",
+                      "maxItems": 4,
+                      "items": {
+                        "type": "string",
+                        "maxLength": 400
+                      },
+                      "description": "One cell per column, in column order."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "items"
+            ],
+            "properties": {
+              "type": {
+                "const": "stone_cards"
+              },
+              "title": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "items": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 6,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "stone"
+                  ],
+                  "properties": {
+                    "stone": {
+                      "$ref": "#/$defs/stoneSlug"
+                    },
+                    "finish": {
+                      "$ref": "#/$defs/finishKey"
+                    },
+                    "note": {
+                      "type": "string",
+                      "maxLength": 400
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "image"
+            ],
+            "properties": {
+              "type": {
+                "const": "image"
+              },
+              "image": {
+                "$ref": "#/$defs/image"
+              },
+              "caption": {
+                "type": "string",
+                "maxLength": 400
+              },
+              "label": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "title": {
+                "type": "string",
+                "maxLength": 200
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "items"
+            ],
+            "properties": {
+              "type": {
+                "const": "gallery"
+              },
+              "items": {
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 12,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "image"
+                  ],
+                  "properties": {
+                    "image": {
+                      "$ref": "#/$defs/image"
+                    },
+                    "caption": {
+                      "type": "string",
+                      "maxLength": 400
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "youtubeUrl"
+            ],
+            "properties": {
+              "type": {
+                "const": "video"
+              },
+              "youtubeUrl": {
+                "type": "string",
+                "maxLength": 400,
+                "minLength": 1,
+                "description": "A https YouTube link or video ID. At most one video per project."
+              },
+              "label": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "caption": {
+                "type": "string",
+                "maxLength": 400
+              },
+              "title": {
+                "type": "string",
+                "maxLength": 200
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "title",
+              "primary"
+            ],
+            "properties": {
+              "type": {
+                "const": "cta"
+              },
+              "title": {
+                "type": "string",
+                "maxLength": 200,
+                "minLength": 1,
+                "pattern": "\\S"
+              },
+              "body": {
+                "type": "string",
+                "maxLength": 400
+              },
+              "primary": {
+                "$ref": "#/$defs/link"
+              },
+              "secondary": {
+                "$ref": "#/$defs/link"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "$defs": {
+    "image": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "alt"
+      ],
+      "properties": {
+        "file": {
+          "type": "string",
+          "pattern": "^images/[^/\\\\]+\\.(?:[jJ][pP][eE]?[gG]|[pP][nN][gG]|[wW][eE][bB][pP])$",
+          "description": "Image inside the zip, e.g. images/hero.jpg. Omit when the image will be added in the editor."
+        },
+        "alt": {
+          "type": "string",
+          "maxLength": 400,
+          "minLength": 1,
+          "pattern": "\\S",
+          "description": "What the image shows, for people who cannot see it. Not the file name."
+        }
+      }
+    },
+    "stoneSlug": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+      "maxLength": 200,
+      "description": "The <slug> in https://urblo.com.au/stone-library/<slug>."
+    },
+    "finishKey": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "Lower-case finish key, e.g. flamed, sawn, honed, polished, bush_hammered."
+    },
+    "link": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "label",
+        "href"
+      ],
+      "properties": {
+        "label": {
+          "type": "string",
+          "maxLength": 200,
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "href": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048,
+          "pattern": "^(/(?!/)|https?://)",
+          "description": "A site path such as /contact, or an http(s) address."
+        }
+      }
+    }
+  }
+}

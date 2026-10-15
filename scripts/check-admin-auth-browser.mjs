@@ -403,7 +403,16 @@ function assertConfiguredBundleBoundary(outDir) {
     throw new Error('Configured build eagerly module-preloads the Supabase vendor chunk.');
   }
 
-  console.log(`Configured entry bundle boundary passed (${entryBytes} bytes; Supabase is not module-preloaded).`);
+  // NOW-PROJECT-IMPORT-001: the zip reader for the admin Project package import stays out of
+  // the public entry and is never preloaded.
+  if (/rel="modulepreload"[^>]+fflate-|fflate-[^>]+rel="modulepreload"/.test(html)) {
+    throw new Error('Configured build eagerly module-preloads the fflate zip chunk.');
+  }
+  if (readFileSync(join(outDir, entryMatch[1]), 'utf8').includes('invalid zip data')) {
+    throw new Error('Configured public entry bundle contains the fflate zip reader.');
+  }
+
+  console.log(`Configured entry bundle boundary passed (${entryBytes} bytes; Supabase and fflate are not in the entry or module-preloaded).`);
   return entryMatch[1];
 }
 
