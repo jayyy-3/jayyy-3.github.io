@@ -224,7 +224,7 @@
       "status": "now",
       "phase": "awaiting_external",
       "priority": 0.5,
-      "summary": "Replace the Project page's fixed media sequence with a block-based body built from the 14 shared content blocks, keeping the Project header, materials and points structured (Phase 1 of docs/plans/TMP-project-blocks.md).",
+      "summary": "Replace the Project page's fixed media sequence with a block-based body built from the 14 shared content blocks, keeping the Project header, materials and points structured (Phase 1 of the Project blocks plan, delivered 2026-10-15).",
       "modules": [
         "projects"
       ],
@@ -266,7 +266,7 @@
         "supabase/migrations/README.md"
       ],
       "authorization": {
-        "source": "Jay approved the block-based Project body on 2026-10-14 (docs/plans/TMP-project-blocks.md §0.2 decisions are final).",
+        "source": "Jay approved the block-based Project body on 2026-10-14 (the temporary plan §0.2 decisions, recorded in docs/WORKLOG.md 2026-10-14).",
         "included": [
           "Task branches claude/project-blocks-1a/1b, isolated local tests including disposable database fixtures, git push, pull requests and branch Preview smoke (read-only on Preview).",
           "Reviewer applied the migration to production (recorded version 20261015005017) and merged PR #95 then #96 on 2026-10-15 after Jay confirmed the SHA-256; readback in docs/WORKLOG.md."
