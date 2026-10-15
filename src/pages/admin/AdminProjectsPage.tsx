@@ -1,7 +1,7 @@
 import { loadStoneCatalogueOptions } from '../../service/stoneCatalogueOptions';
 import { getLiveProjectAddresses } from '../../service/ProjectService';
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { FileText, Plus, Search } from "lucide-react";
+import { FileText, FileUp, Plus, Search } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   adoptLegacyMaterialMaps,
@@ -30,6 +30,10 @@ import ProjectEditor, {
   type ProjectEditorAction,
 } from "./projects/ProjectEditor";
 import RequireAdmin from "./RequireAdmin";
+import ImportProjectDialog, {
+  type ImportedProject,
+} from "./projects/ImportProjectDialog";
+import { projects as staticProjects } from "../../data/projectData";
 
 type ProjectListFilter = ProjectLifecycleStatus | "projects";
 
@@ -126,6 +130,8 @@ function AdminProjectsContent() {
   const [pendingNavigationLabel, setPendingNavigationLabel] = useState<
     string | null
   >(null);
+  const [isImportOpen, setIsImportOpen] = useState(false);
+  const pendingImportNoticeRef = useRef<string | null>(null);
   const indexReadyRef = useRef(false);
   const draftLoadGenerationRef = useRef(0);
   const mediaRef = useRef<readonly ProjectMediaOption[]>([]);
@@ -585,7 +591,9 @@ function AdminProjectsContent() {
       setBaseRevision(payload.revision);
       setBaseUpdatedAt(payload.baseUpdatedAt);
       setEditorSession((current) => current + 1);
-      setNotice(payload.message || null);
+      const importNotice = pendingImportNoticeRef.current;
+      pendingImportNoticeRef.current = null;
+      setNotice(importNotice || payload.message || null);
     } catch (error) {
       if (generation !== draftLoadGenerationRef.current) return;
       setEditorError(
@@ -718,6 +726,57 @@ function AdminProjectsContent() {
     navigate(`/admin/projects/${project.id}`);
   }
 
+  function openImport() {
+    if (!canEdit || isSaving || isMediaBusy) return;
+    if (hasUnsavedWork) {
+      queueDiscardNavigation("Import a project package", () =>
+        setIsImportOpen(true),
+      );
+      return;
+    }
+    setIsImportOpen(true);
+  }
+
+  // A package import saves one new Draft through the same Projects Save action as the editor.
+  async function saveImportedDraft(importedDraft: ProjectAggregateDraft) {
+    const accessToken = await getAccessToken();
+    const response = await fetch(projectEndpoint, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        action: "save",
+        projectId: null,
+        baseRevision: 0,
+        baseUpdatedAt: null,
+        draft: normalizeProjectDraftForSave(importedDraft),
+      }),
+    });
+    const payload = await readProjectApiResponse(response, {
+      requireMessage: true,
+    });
+    return {
+      projectId: payload.projectId,
+      draft: withResponseStatus(payload.draft, payload.status, payload.projectId),
+    };
+  }
+
+  function handleImported({ projectId, draft: importedDraft, assets, notice: importNotice }: ImportedProject) {
+    setMedia((current) => mergeProjectMediaOptions(current, assets));
+    setProjects((current) => {
+      const nextProjects = upsertProjectListRow(current, importedDraft);
+      projectsRef.current = nextProjects;
+      return nextProjects;
+    });
+    pendingImportNoticeRef.current = importNotice;
+    setIsImportOpen(false);
+    setFilter("projects");
+    navigate(`/admin/projects/${projectId}`);
+  }
+
   function startNewProject() {
     if (!canEdit || isSaving || isMediaBusy) return;
     if (hasUnsavedWork) {
@@ -770,17 +829,46 @@ function AdminProjectsContent() {
       title="Projects"
       eyebrow="Website pages"
       actions={
-        <button
-          type="button"
-          onClick={startNewProject}
-          disabled={!canEdit || isSaving || isMediaBusy}
-          className="inline-flex min-h-10 items-center gap-2 rounded bg-[var(--urblo-lime)] px-3 text-xs font-bold uppercase tracking-[0.12em] text-black transition hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:bg-black/10 disabled:text-black/35"
-        >
-          <Plus className="h-4 w-4" />
-          New project
-        </button>
+        <div className="flex flex-wrap gap-2">
+          {canEdit ? (
+            <button
+              type="button"
+              onClick={openImport}
+              disabled={isSaving || isMediaBusy || isIndexLoading || Boolean(indexError)}
+              aria-haspopup="dialog"
+              className="inline-flex min-h-10 items-center gap-2 rounded border border-black/15 bg-white px-3 text-xs font-bold uppercase tracking-[0.12em] text-black transition hover:border-black disabled:cursor-not-allowed disabled:text-black/35"
+              data-testid="project-import-open"
+            >
+              <FileUp className="h-4 w-4" />
+              Import package
+            </button>
+          ) : null}
+          <button
+            type="button"
+            onClick={startNewProject}
+            disabled={!canEdit || isSaving || isMediaBusy}
+            className="inline-flex min-h-10 items-center gap-2 rounded bg-[var(--urblo-lime)] px-3 text-xs font-bold uppercase tracking-[0.12em] text-black transition hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:bg-black/10 disabled:text-black/35"
+          >
+            <Plus className="h-4 w-4" />
+            New project
+          </button>
+        </div>
       }
     >
+      {isImportOpen && canEdit && user?.id ? (
+        <ImportProjectDialog
+          userId={user.id}
+          canCleanUpStorage={canCleanUpStorage}
+          catalogue={{ stones, variants: stoneVariants, finishes, capabilities: finishCapabilities }}
+          existingSlugs={[
+            ...projects.map((project) => project.slug),
+            ...staticProjects.map((project) => project.slug),
+          ]}
+          saveDraft={saveImportedDraft}
+          onImported={handleImported}
+          onClose={() => setIsImportOpen(false)}
+        />
+      ) : null}
       {pendingNavigationLabel ? (
         <div
           className="mb-5 flex flex-col gap-3 border border-amber-300 bg-amber-50 p-4 sm:flex-row sm:items-center sm:justify-between"

@@ -77,6 +77,8 @@ const media = [
   mediaPath,
   "src/pages/admin/media/AdminMediaPicker.tsx",
   "src/pages/admin/media/mediaPickerFiles.ts",
+  // NOW-PROJECT-IMPORT-001: the private upload itself is shared with the package import.
+  "src/pages/admin/media/uploadPickerFile.ts",
 ]
   .map(readRequired)
   .join("\n");
@@ -1486,6 +1488,57 @@ requireIncludes(
   lockdownMigrationPath,
   "contract schema reload",
 );
+// NOW-PROJECT-IMPORT-001: Project package import. Browser-only (no new endpoint), one shared
+// private upload, three single-step dialog stages, editors and above only, and the zip reader
+// loaded on demand so it never reaches the public entry.
+{
+  const importDialogPath = "src/pages/admin/projects/ImportProjectDialog.tsx";
+  const importPackagePath = "src/features/blocks/importPackage.ts";
+  const importZipPath = "src/features/blocks/importZip.ts";
+  const uploadPath = "src/pages/admin/media/uploadPickerFile.ts";
+  const pickerPath = "src/pages/admin/media/AdminMediaPicker.tsx";
+  const dialog = readRequired(importDialogPath);
+  const importPackage = readRequired(importPackagePath);
+  const importZip = readRequired(importZipPath);
+  const upload = readRequired(uploadPath);
+  const picker = readRequired(pickerPath);
+  requireMatches(page, /\{canEdit \? \(\s*<button[\s\S]{0,600}Import package/, pagePath, "Import package entry shown to owner/admin/editor only");
+  requireIncludes(page, "<ImportProjectDialog", pagePath, "package import dialog");
+  requireMatches(page, /action: "save",\s*projectId: null,\s*baseRevision: 0/, pagePath, "import saves one new Draft through the Projects Save action");
+  requireIncludes(page, "existingSlugs={[", pagePath, "import slug conflicts include every existing project address");
+  for (const step of ['step === "choose"', 'step === "review"', 'step === "importing"']) {
+    requireIncludes(dialog, step, importDialogPath, `one-at-a-time ${step} stage`);
+  }
+  for (const label of ["Choose file", "Package format", "Create draft", "Retry", "Skip this image", "Saving draft"]) {
+    requireIncludes(dialog, label, importDialogPath, `"${label}" control or status`);
+  }
+  requireIncludes(dialog, "Imported as a draft. Review each block, add any missing images, then Publish.", importDialogPath, "post-import editor notice");
+  requireMatches(dialog, /action:\s*"project\.import"/, importDialogPath, "project.import audit event");
+  requireIncludes(dialog, "reportError(", importDialogPath, "errors through the admin translation layer");
+  requireIncludes(dialog, 'preparePickerUpload(new File([blob], name, { type: blob.type }), "original")', importDialogPath, "Projects original-upload policy");
+  requireIncludes(dialog, "uploadPickerFile(", importDialogPath, "shared private upload");
+  requireIncludes(picker, "uploadPickerFile(", pickerPath, "shared private upload");
+  forbidMatches(dialog + picker, /\.storage\s*\.from\([^)]*\)\s*\.upload\(/, importDialogPath, "a second copy of the private upload");
+  requireMatches(upload, /\.upload\(objectPath, uploadFile, \{[\s\S]{0,120}upsert: false/, uploadPath, "create-only private upload");
+  const dialogCopy = dialog.replace(/^import[^;]*;$/gm, "").replace(/\$\{[^}]*\}/g, "");
+  forbidMatches(dialogCopy, /(?:>|["'`])[^<"'`{}]*\b(?:bucket|schema|database|table|storage|slug|endpoint)\b/i, importDialogPath, "implementation words in editor-facing import copy");
+  forbidMatches(dialog + importPackage, /fetch\(\s*["'`]\/api\//, importDialogPath, "a new import endpoint");
+  requireIncludes(importPackage, "validateContentBlock(", importPackagePath, "block content validated by the shared schema");
+  requireIncludes(importPackage, "hotspot_image", importPackagePath, "image-with-points blocks refused");
+  requireIncludes(importZip, "await import('fflate')", importZipPath, "zip reader loaded on demand");
+  for (const [path, text] of [
+    [pagePath, page],
+    [importDialogPath, dialog],
+    [importPackagePath, importPackage],
+    [importZipPath, importZip],
+    [uploadPath, upload],
+  ]) {
+    forbidMatches(text, /^import[^;]*from\s*["']fflate["']/m, path, "static fflate import");
+  }
+  requireMatches(readRequired("vite.config.ts"), /node_modules\/fflate\/[\s\S]{0,40}return 'fflate'/, "vite.config.ts", "separate on-demand fflate chunk");
+  requireMatches(readRequired("scripts/check-admin-config-gate.mjs"), /assertPublicEntryBoundary\(/, "scripts/check-admin-config-gate.mjs", "public entry boundary that excludes fflate");
+}
+
 if (
   !argv.includes("--source-only") &&
   runVitest(["tests/admin-projects-aggregate.test.ts"]) !== 0

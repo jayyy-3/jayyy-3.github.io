@@ -1390,8 +1390,13 @@ function checkMediaPlainLanguage() {
 function checkSharedMediaPicker() {
   const pickerPath = 'src/pages/admin/media/AdminMediaPicker.tsx';
   const filesPath = 'src/pages/admin/media/mediaPickerFiles.ts';
-  const picker = readRequired(pickerPath);
+  const uploadPath = 'src/pages/admin/media/uploadPickerFile.ts';
+  // NOW-PROJECT-IMPORT-001: the private upload lives in one shared module used by the picker
+  // and the Projects package import; the picker contracts apply to both files together.
+  const picker = `${readRequired(pickerPath)}\n${readRequired(uploadPath)}`;
   const files = readRequired(filesPath);
+  requireIncludes(readRequired(pickerPath), "from './uploadPickerFile'", `${pickerPath} shared private upload`);
+  requireIncludes(readRequired('src/pages/admin/projects/ImportProjectDialog.tsx'), 'from "../media/uploadPickerFile"', 'src/pages/admin/projects/ImportProjectDialog.tsx shared private upload');
   for (const needle of [
     ".from('media_assets')",
     "action: 'media_asset.upload'",

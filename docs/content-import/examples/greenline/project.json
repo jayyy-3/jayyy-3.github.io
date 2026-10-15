@@ -1,0 +1,77 @@
+{
+  "format": "urblo-project-package",
+  "version": 1,
+  "project": {
+    "title": "The Greenline Project, Birrarung Marr Site 1",
+    "slug": "greenline-birrarung-marr",
+    "location": "Melbourne, VIC",
+    "projectDateLabel": "2026",
+    "completedOn": "2026-03-01",
+    "summary": "Tiered stone seating along the river edge.",
+    "lead": "Congratulations to City of Melbourne and Tract on a landmark civic landscape.",
+    "client": "City of Melbourne",
+    "landscapeArchitect": "Tract",
+    "contractor": "Symal",
+    "address": "",
+    "quantityLabel": "",
+    "facts": [
+      { "label": "Award", "value": "2026 AILA VIC Landscape Architecture Award, Civic Landscape" }
+    ],
+    "materials": [
+      { "stone": "blueocean", "finish": "sawn", "application": "Tiered seating steps", "note": "" }
+    ],
+    "hero": { "file": "images/hero.jpg", "alt": "Tiered bluestone seating steps on the Yarra riverbank" },
+    "cover": { "file": "images/hero.jpg", "alt": "Tiered bluestone seating steps on the Yarra riverbank" }
+  },
+  "blocks": [
+    {
+      "type": "heading",
+      "eyebrow": "Signature project",
+      "title": "From design intent to fabrication reality",
+      "intro": "Here is how the Greenline stone went from drawing to riverfront."
+    },
+    {
+      "type": "stats",
+      "items": [
+        { "value": "1398 + 1000", "unit": "mm", "label": "Staggered module lengths across a 3800 mm stair width" },
+        { "value": "2", "unit": "mm", "label": "Joints, set out and dimensioned on the drawing" }
+      ]
+    },
+    {
+      "type": "steps",
+      "items": [
+        {
+          "title": "Shop drawing",
+          "body": "Every stair began as a coordinated shop drawing, with module lengths, joints and set-out agreed before any stone was cut.",
+          "image": { "file": "images/step-1.jpg", "alt": "Shop drawing of the stair setting-out" }
+        }
+      ]
+    },
+    {
+      "type": "image",
+      "image": { "file": "images/as-built.jpg", "alt": "As built: staggered joints and a crisp arris" },
+      "caption": "As built: staggered joints, a crisp arris, and Alpine White granite strips set into Steel Blue."
+    },
+    {
+      "type": "stone_cards",
+      "title": "The stone",
+      "items": [
+        { "stone": "blueocean", "finish": "sawn" },
+        { "stone": "alpine-white", "finish": "flamed" }
+      ]
+    },
+    {
+      "type": "spec_table",
+      "rows": [
+        { "label": "Application", "value": "Tiered seating steps and transition elements" },
+        { "label": "Slip rating", "value": "P5" }
+      ]
+    },
+    {
+      "type": "cta",
+      "title": "Talk to us early",
+      "body": "The best outcomes come when fabrication is part of the conversation during design development.",
+      "primary": { "label": "Discuss a project", "href": "/contact" }
+    }
+  ]
+}

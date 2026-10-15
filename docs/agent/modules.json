@@ -78,7 +78,8 @@
       "references": [
         "docs/ADMIN_IA_ACCESS.md",
         "docs/architecture/content-data.md",
-        "docs/SUPABASE_SCHEMA.md"
+        "docs/SUPABASE_SCHEMA.md",
+        "docs/architecture/projects-import.md"
       ],
       "checks": [
         "agent:admin-projects-aggregate",

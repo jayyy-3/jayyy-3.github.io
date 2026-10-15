@@ -17,6 +17,7 @@ const requiredHeadings = [
   'Change an image on a project page',
   'Add or update a project and mark materials',
   'Body blocks',
+  'Import a project package',
   'Edit a product',
   'Handle an enquiry or sample request',
   'Update company addresses and contact details',

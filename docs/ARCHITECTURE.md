@@ -14,6 +14,7 @@ This is the index. Stable technical contracts (routes, data, side effects and in
 | `docs/architecture/content-data.md` | Published overlay with static fallback, content import readiness, access control, storage and side effects | content modules (on demand) |
 | `docs/architecture/projects.md` | Project data contract, public rendering, media blocks, hotspots | projects |
 | `docs/architecture/projects-admin.md` | Projects admin editor, aggregate endpoint/RPC, migrations | projects |
+| `docs/architecture/projects-import.md` | Project content package import (Claude Design → Draft) | projects (on demand) |
 | `docs/architecture/stone-library.md` | Stone Library detail interaction and data contract | stone-library |
 | `docs/architecture/stone-library-admin.md` | Stone aggregate/workspace contract | stone-library |
 | `docs/architecture/products.md` | Product data, product store, Products admin | products |

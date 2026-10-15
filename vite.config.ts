@@ -57,6 +57,10 @@ export default defineConfig({
           if (id.includes('/node_modules/@supabase/')) {
             return 'supabase'
           }
+          // Zip reading for the admin Project package import only; loaded on demand.
+          if (id.includes('/node_modules/fflate/')) {
+            return 'fflate'
+          }
         },
       },
     },

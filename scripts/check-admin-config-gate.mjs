@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { readFileSync, statSync } from 'node:fs';
 import { mkdir, rm, writeFile } from 'node:fs/promises';
 import { spawn } from 'node:child_process';
 import { cwd, env, exit } from 'node:process';
@@ -59,6 +60,27 @@ main().catch((error) => {
   exit(1);
 });
 
+// Public entry boundary (NOW-PROJECT-IMPORT-001): the entry script stays under 500 KB, and
+// neither the Supabase SDK nor the fflate zip reader of the admin Project package import is in
+// the entry or module-preloaded by index.html.
+function assertPublicEntryBoundary(distDir) {
+  const html = readFileSync(join(distDir, 'index.html'), 'utf8');
+  const entry = /<script[^>]+src="\/(assets\/index-[^"]+\.js)"/.exec(html)?.[1];
+  if (!entry) throw new Error('Public build did not expose the expected hashed entry script.');
+  const entryBytes = statSync(join(distDir, entry)).size;
+  if (entryBytes > 500_000) throw new Error(`Public entry bundle exceeds 500000 bytes: ${entryBytes}.`);
+  for (const chunk of ['supabase', 'fflate']) {
+    if (new RegExp(`rel="modulepreload"[^>]+${chunk}-|${chunk}-[^>]+rel="modulepreload"`).test(html)) {
+      throw new Error(`Public build eagerly module-preloads the ${chunk} chunk.`);
+    }
+  }
+  const entrySource = readFileSync(join(distDir, entry), 'utf8');
+  if (entrySource.includes('invalid zip data') || /from\s*["']\.\/fflate-/.test(entrySource)) {
+    throw new Error('Public entry bundle contains or statically imports the fflate zip reader.');
+  }
+  console.log(`Public entry boundary passed (${entryBytes} bytes; Supabase and fflate stay out of the entry).`);
+}
+
 async function main() {
   const screenshotsDir = args.screenshotsDir ?? defaultScreenshotsDir;
   const baseUrl = args.baseUrl ?? `http://${host}:${port}`;
@@ -73,6 +95,7 @@ async function main() {
     await mkdir(join(root, screenshotsDir), { recursive: true });
 
     if (!args.baseUrl && env.URBLO_VERIFIED_ENVLESS_DIST === '1') {
+      assertPublicEntryBoundary(join(root, 'dist'));
       serverProcess = startPreview(join(root, 'dist'));
       await waitForServer(baseUrl);
     } else if (!args.baseUrl) {
@@ -88,6 +111,7 @@ async function main() {
       if (buildResult !== 0) {
         throw new Error(`Admin config gate isolated build failed with exit code ${buildResult}.`);
       }
+      assertPublicEntryBoundary(isolatedDistDir);
       serverProcess = startPreview(isolatedDistDir);
       await waitForServer(baseUrl);
     } else {
