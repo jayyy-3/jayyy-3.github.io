@@ -35,7 +35,8 @@
         "docs/CLOUDFLARE_DEPLOYMENT.md",
         "docs/LOCAL_DEVELOPMENT.md",
         "docs/agent/live-verification.md",
-        "docs/architecture/platform.md"
+        "docs/architecture/platform.md",
+        "docs/architecture/delivery-readiness.md"
       ],
       "checks": [
         "agent:cloudflare-readiness",

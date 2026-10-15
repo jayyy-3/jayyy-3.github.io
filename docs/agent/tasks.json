@@ -13,7 +13,6 @@
         "projects"
       ],
       "files": [
-        "the temporary Phase 2 plan (deleted after acceptance)",
         "src/features/blocks/importPackage.ts",
         "src/features/blocks/importZip.ts",
         "src/pages/admin/projects/ImportProjectDialog.tsx",
@@ -58,7 +57,8 @@
       },
       "nextAction": "Jay tries one real import (a colleague's Claude Design package) on production and reviews the result; then decide Phase 3 (newsletter output) and Phase 4 (Articles on the shared blocks).",
       "notes": [
-        "2026-10-15: Implemented on claude/project-import; gate, unit tests, guards and local zip/JSON walkthroughs passed (docs/WORKLOG.md). PR open, not merged."
+        "2026-10-15: Implemented on claude/project-import; gate, unit tests, guards and local zip/JSON walkthroughs passed (docs/WORKLOG.md). PR open, not merged.",
+        "2026-10-15: Release follow-up on claude/deploy-page-readiness: the CI immutable smoke now also waits for / and /projects to serve the SPA shell three times in a row after Function readiness (docs/WORKLOG.md). PR open, not merged."
       ]
     },
     {

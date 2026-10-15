@@ -7,6 +7,7 @@ This is the index. Stable technical contracts (routes, data, side effects and in
 | `docs/architecture/platform.md` | System boundary, runtime and launch stack, known architecture risks, brand/design linkage rule | all (on demand) |
 | `docs/architecture/harness.md` | Agent harness contract, where release evidence lives | harness |
 | `docs/architecture/delivery.md` | Deployment and build contract, Pages Functions routing and source, static Cloudflare config, isolated verification environment | delivery |
+| `docs/architecture/delivery-readiness.md` | Post-deploy Function and page readiness waits before the immutable smoke, historical runtime note | delivery (on demand) |
 | `docs/architecture/public-routes.md` | Route interface (`src/App.tsx`), route state, UI motion, navigation surfaces | public-ui |
 | `docs/architecture/public-metadata.md` | Metadata/SEO contract, public slugs and redirects | public-ui |
 | `docs/architecture/homepage.md` | Homepage contract | public-ui (on demand) |
