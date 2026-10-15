@@ -1,3 +1,5 @@
+import { isContentBlockType, validateContentBlock } from "../blocks/schema";
+import { PROJECT_DRAFT_SCHEMA_VERSION } from "../blocks/upgrade";
 import type {
   ProjectAggregateDraft,
   ProjectLifecycleStatus,
@@ -113,26 +115,13 @@ function isProjectDraft(value: unknown): value is ProjectAggregateDraft {
         typeof row.title === "string" &&
         typeof row.intro === "string",
     ) &&
+    value.schemaVersion === PROJECT_DRAFT_SCHEMA_VERSION &&
     isArrayOf(
-      value.mediaBlocks,
+      value.blocks,
       (row) =>
         isDraftRow(row) &&
-        [
-          "cover",
-          "hero",
-          "gallery",
-          "material_map",
-          "supporting",
-          "normal_image",
-          "hotspot_image",
-          "youtube_video",
-        ].includes(String(row.mediaRole)) &&
-        isOptionalPositiveInteger(row.mediaAssetId) &&
-        (row.projectMaterialMapKey === null ||
-          typeof row.projectMaterialMapKey === "string") &&
-        ["blockTitle", "youtubeUrl", "label", "caption"].every(
-          (field) => typeof row[field] === "string",
-        ),
+        isContentBlockType(row.type) &&
+        validateContentBlock({ type: row.type, content: row.content }, "draft").length === 0,
     ) &&
     isArrayOf(
       value.hotspots,

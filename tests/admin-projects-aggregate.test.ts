@@ -5,22 +5,23 @@ import {
   collectProjectMediaAssetIds,
   countHotspotsForMaterial,
   createEmptyProjectAggregateDraft,
-  disableMediaBlockPoints,
+  disableBlockPoints,
   draftToProjectData,
-  enableMediaBlockPoints,
+  enableBlockPoints,
   getProjectBlockerSections,
   getProjectPublishBlockers,
   hotspotsForBlock,
-  mediaBlockImageId,
+  blockImageId,
   mergeProjectMediaOptions,
   moveProjectDraftItem,
   normalizeProjectDraftForSave,
-  removeMediaBlock,
-  setMediaBlockImage,
+  removeBlock,
+  setBlockImage,
 } from "../src/features/projects/projectAggregate.ts";
 import {
   assertPublishDraft,
   assertPublishableMedia,
+  fillDraftAltText,
   mapRpcError,
   normalizeAutomaticClaimStatuses,
   summarizePublishCompensation,
@@ -51,6 +52,26 @@ async function withAdminProjectsFetchMock(mock, run) {
   } finally {
     globalThis.fetch = originalFetch;
   }
+}
+
+function imageBlock(key, mediaAssetId, fields = {}, sortOrder = 0) {
+  return {
+    key,
+    id: null,
+    type: "image",
+    content: { mediaAssetId, alt: "", title: "", label: "", caption: "", ...fields },
+    sortOrder,
+  };
+}
+
+function videoBlock(key, youtubeUrl, title = "", sortOrder = 0) {
+  return {
+    key,
+    id: null,
+    type: "video",
+    content: { youtubeUrl, title, label: "", caption: "" },
+    sortOrder,
+  };
 }
 
 const mockAdminUserId = "11111111-1111-4111-8111-111111111111";
@@ -361,15 +382,30 @@ test("media references are collected from every draft section and picker options
   referencedMediaDraft.project.coverMediaId = 702;
   referencedMediaDraft.materials = [{ mediaAssetId: 703 }];
   referencedMediaDraft.maps = [{ mediaAssetId: 704 }];
-  referencedMediaDraft.mediaBlocks = [
-    { mediaAssetId: 705 },
-    { mediaAssetId: 701 },
+  referencedMediaDraft.blocks = [
+    { key: "block:new:a", id: null, type: "image", sortOrder: 0, content: { mediaAssetId: 705, alt: "" } },
+    { key: "block:new:b", id: null, type: "image", sortOrder: 1, content: { mediaAssetId: 701, alt: "" } },
+    {
+      key: "block:new:c",
+      id: null,
+      type: "gallery",
+      sortOrder: 2,
+      content: { items: [{ mediaAssetId: 707, alt: "" }, { mediaAssetId: 705, alt: "" }] },
+    },
+    {
+      key: "block:new:d",
+      id: null,
+      type: "steps",
+      sortOrder: 3,
+      content: { items: [{ title: "One", body: "", mediaAssetId: 708, alt: "" }, { title: "Two", body: "" }] },
+    },
+    { key: "block:new:e", id: null, type: "hotspot_image", sortOrder: 4, content: { projectMaterialMapKey: "map:new:x" } },
   ];
   referencedMediaDraft.hotspots = [{ previewMediaId: 706 }];
   assert.deepEqual(
     collectProjectMediaAssetIds(referencedMediaDraft),
-    [701, 702, 704, 705],
-    "Project media fetches must ignore retired material and hotspot image overrides",
+    [701, 702, 704, 705, 707, 708],
+    "Project media fetches include image, gallery and step images and ignore retired material and hotspot image overrides",
   );
 
   const currentMediaOptions = [
@@ -582,31 +618,9 @@ test("draft editing keeps order, preview parity, material points on images and l
     title: "Second map",
     sortOrder: 9,
   });
-  orderDraft.mediaBlocks = [
-    {
-      key: "media:new:first",
-      id: null,
-      mediaRole: "normal_image",
-      mediaAssetId: 1,
-      projectMaterialMapKey: null,
-      blockTitle: "First image",
-      youtubeUrl: "",
-      label: "",
-      caption: "",
-      sortOrder: 4,
-    },
-    {
-      key: "media:new:second",
-      id: null,
-      mediaRole: "normal_image",
-      mediaAssetId: 2,
-      projectMaterialMapKey: null,
-      blockTitle: "Second image",
-      youtubeUrl: "",
-      label: "",
-      caption: "",
-      sortOrder: 9,
-    },
+  orderDraft.blocks = [
+    imageBlock("block:new:first", 1, { title: "First image", label: "First" }, 4),
+    imageBlock("block:new:second", 2, { title: "Second image", label: "Second" }, 9),
   ];
   orderDraft.hotspots = [
     orderDraft.hotspots[0],
@@ -644,8 +658,8 @@ test("draft editing keeps order, preview parity, material points on images and l
   );
   reorderedDraft = moveProjectDraftItem(
     reorderedDraft,
-    "mediaBlocks",
-    "media:new:second",
+    "blocks",
+    "block:new:second",
     "up",
   );
   reorderedDraft = moveProjectDraftItem(
@@ -657,7 +671,7 @@ test("draft editing keeps order, preview parity, material points on images and l
   assert.equal(reorderedDraft.facts[0].key, "fact:new:second");
   assert.equal(reorderedDraft.materials[0].key, "material:new:second");
   assert.equal(reorderedDraft.maps[0].key, "map:new:second");
-  assert.equal(reorderedDraft.mediaBlocks[0].key, "media:new:second");
+  assert.equal(reorderedDraft.blocks[0].key, "block:new:second");
   assert.deepEqual(
     reorderedDraft.hotspots
       .filter(
@@ -671,7 +685,7 @@ test("draft editing keeps order, preview parity, material points on images and l
     reorderedDraft.facts,
     reorderedDraft.materials,
     reorderedDraft.maps,
-    reorderedDraft.mediaBlocks,
+    reorderedDraft.blocks,
   ]) {
     assert.deepEqual(
       rows.map((row) => row.sortOrder),
@@ -695,9 +709,9 @@ test("draft editing keeps order, preview parity, material points on images and l
   );
   const reorderedPreview = draftToProjectData(reorderedDraft, behaviorContext);
   assert.equal(
-    reorderedPreview.mediaBlocks?.[0]?.title,
-    "Second image",
-    "Draft preview must follow the same normalized media order saved publicly",
+    reorderedPreview.blocks?.[0]?.type === "image" && reorderedPreview.blocks[0].label,
+    "Second",
+    "Draft preview must follow the same normalized block order saved publicly",
   );
 
   const behaviorPreview = draftToProjectData(behaviorDraft, behaviorContext);
@@ -716,7 +730,7 @@ test("draft editing keeps order, preview parity, material points on images and l
     "Hero/cover must not become duplicate media blocks",
   );
   assert.equal(
-    behaviorPreview.mediaBlocks?.[0]?.type,
+    behaviorPreview.blocks?.[0]?.type,
     "hotspot_image",
     "Unlinked material maps must render like the public adapter",
   );
@@ -737,31 +751,9 @@ test("draft editing keeps order, preview parity, material points on images and l
     "Blank hotspot labels must use the same stone-name fallback as the public renderer",
   );
   const duplicateVideoDraft = structuredClone(behaviorDraft);
-  duplicateVideoDraft.mediaBlocks.push(
-    {
-      key: "media:new:video-one",
-      id: null,
-      mediaRole: "youtube_video",
-      mediaAssetId: null,
-      projectMaterialMapKey: null,
-      blockTitle: "One",
-      youtubeUrl: "https://youtu.be/abcdefghijk",
-      label: "",
-      caption: "",
-      sortOrder: 0,
-    },
-    {
-      key: "media:new:video-two",
-      id: null,
-      mediaRole: "youtube_video",
-      mediaAssetId: null,
-      projectMaterialMapKey: null,
-      blockTitle: "Two",
-      youtubeUrl: "https://youtu.be/lmnopqrstuv",
-      label: "",
-      caption: "",
-      sortOrder: 1,
-    },
+  duplicateVideoDraft.blocks.push(
+    videoBlock("block:new:video-one", "https://youtu.be/abcdefghijk", "One", 0),
+    videoBlock("block:new:video-two", "https://youtu.be/lmnopqrstuv", "Two", 1),
   );
   assert.ok(
     getProjectPublishBlockers(duplicateVideoDraft, behaviorContext).some(
@@ -781,29 +773,20 @@ test("draft editing keeps order, preview parity, material points on images and l
   // Points live on media images: the map is a hidden child of its image block.
   const pointsDraft = createEmptyProjectAggregateDraft();
   pointsDraft.materials.push(structuredClone(behaviorDraft.materials[0]));
-  pointsDraft.mediaBlocks.push({
-    key: "media:new:plain",
-    id: null,
-    mediaRole: "normal_image",
-    mediaAssetId: 2,
-    projectMaterialMapKey: null,
-    blockTitle: "Entry view",
-    youtubeUrl: "",
-    label: "Context",
-    caption: "Caption",
-    sortOrder: 0,
-  });
-  const enabledPoints = enableMediaBlockPoints(pointsDraft, "media:new:plain");
-  const enabledBlock = enabledPoints.mediaBlocks[0];
-  assert.equal(enabledBlock.mediaRole, "hotspot_image");
-  assert.equal(enabledBlock.mediaAssetId, null, "A points block must read its image from its map");
+  pointsDraft.blocks.push(
+    imageBlock("block:new:plain", 2, { title: "Entry view", label: "Context", caption: "Caption" }, 0),
+  );
+  const enabledPoints = enableBlockPoints(pointsDraft, "block:new:plain");
+  const enabledBlock = enabledPoints.blocks[0];
+  assert.equal(enabledBlock.type, "hotspot_image");
+  assert.equal("mediaAssetId" in enabledBlock.content, false, "A points block must read its image from its map");
   assert.equal(enabledPoints.maps.length, 1);
   assert.equal(enabledPoints.maps[0].mediaAssetId, 2);
   assert.equal(enabledPoints.maps[0].title, "Entry view");
-  assert.equal(enabledBlock.projectMaterialMapKey, enabledPoints.maps[0].key);
-  assert.equal(mediaBlockImageId(enabledPoints, enabledBlock), 2);
+  assert.equal(enabledBlock.content.projectMaterialMapKey, enabledPoints.maps[0].key);
+  assert.equal(blockImageId(enabledPoints, enabledBlock), 2);
   assert.equal(
-    enableMediaBlockPoints(enabledPoints, "media:new:plain"),
+    enableBlockPoints(enabledPoints, "block:new:plain"),
     enabledPoints,
     "Enabling points twice must be a no-op",
   );
@@ -827,10 +810,10 @@ test("draft editing keeps order, preview parity, material points on images and l
       sortOrder: 0,
     }],
   };
-  assert.deepEqual(hotspotsForBlock(withPoint, "media:new:plain").map((point) => point.key), ["hotspot:new:on-image"]);
+  assert.deepEqual(hotspotsForBlock(withPoint, "block:new:plain").map((point) => point.key), ["hotspot:new:on-image"]);
   assert.equal(countHotspotsForMaterial(withPoint, "material:new:proof"), 1);
   assert.equal(countHotspotsForMaterial(withPoint, "material:new:missing"), 0);
-  const replacedImage = setMediaBlockImage(withPoint, "media:new:plain", 1);
+  const replacedImage = setBlockImage(withPoint, "block:new:plain", 1);
   assert.equal(replacedImage.maps[0].mediaAssetId, 1, "Replacing a points image must change the map image");
   assert.deepEqual(
     [replacedImage.hotspots[0].xPercent, replacedImage.hotspots[0].yPercent],
@@ -838,33 +821,43 @@ test("draft editing keeps order, preview parity, material points on images and l
     "Replacing a points image must keep point positions",
   );
   assert.equal(
-    setMediaBlockImage(pointsDraft, "media:new:plain", 1).mediaBlocks[0].mediaAssetId,
+    setBlockImage(pointsDraft, "block:new:plain", 1).blocks[0].content.mediaAssetId,
     1,
     "Replacing a plain image must change the block image",
   );
-  const disabledPoints = disableMediaBlockPoints(withPoint, "media:new:plain");
+  assert.equal(
+    setBlockImage(
+      { ...pointsDraft, blocks: [imageBlock("block:new:plain", 2, { alt: "Old picture" }, 0)] },
+      "block:new:plain",
+      1,
+      "New picture",
+    ).blocks[0].content.alt,
+    "New picture",
+    "Replacing a plain image must replace the description that described the previous picture",
+  );
+  const disabledPoints = disableBlockPoints(withPoint, "block:new:plain");
   assert.deepEqual(
-    disabledPoints.mediaBlocks,
-    pointsDraft.mediaBlocks,
+    disabledPoints.blocks,
+    pointsDraft.blocks,
     "Turning points off must restore the original plain image block",
   );
   assert.equal(disabledPoints.maps.length, 0, "Turning points off must remove the hidden map");
   assert.equal(disabledPoints.hotspots.length, 0, "Turning points off must delete its points");
-  const removedPointsBlock = removeMediaBlock(withPoint, "media:new:plain");
+  const removedPointsBlock = removeBlock(withPoint, "block:new:plain");
   assert.deepEqual(
-    [removedPointsBlock.mediaBlocks.length, removedPointsBlock.maps.length, removedPointsBlock.hotspots.length],
+    [removedPointsBlock.blocks.length, removedPointsBlock.maps.length, removedPointsBlock.hotspots.length],
     [0, 0, 0],
     "Removing a points block must cascade to its map and points",
   );
   assert.equal(
-    removeMediaBlock(pointsDraft, "media:new:plain").mediaBlocks.length,
+    removeBlock(pointsDraft, "block:new:plain").blocks.length,
     0,
     "Removing a plain image block removes only that block",
   );
   const savedPoints = normalizeProjectDraftForSave({
     ...withPoint,
     maps: [{ ...withPoint.maps[0], title: "Old map title", intro: "Retired introduction" }],
-    mediaBlocks: [{ ...withPoint.mediaBlocks[0], blockTitle: "" }],
+    blocks: [{ ...withPoint.blocks[0], content: { ...withPoint.blocks[0].content, title: "" } }],
   });
   assert.equal(savedPoints.maps[0].title, "Stone and finish placement", "An untitled points image must save the public fallback title");
   assert.equal(savedPoints.maps[0].intro, "", "Save must clear the retired map introduction");
@@ -908,21 +901,16 @@ test("draft editing keeps order, preview parity, material points on images and l
     intro: "",
     sortOrder: 1,
   });
-  legacyMapDraft.mediaBlocks.push({
-    key: "media:new:linked",
+  legacyMapDraft.blocks.push({
+    key: "block:new:linked",
     id: null,
-    mediaRole: "hotspot_image",
-    mediaAssetId: null,
-    projectMaterialMapKey: "map:new:linked",
-    blockTitle: "",
-    youtubeUrl: "",
-    label: "",
-    caption: "",
+    type: "hotspot_image",
+    content: { projectMaterialMapKey: "map:new:linked", title: "", label: "", caption: "" },
     sortOrder: 0,
   });
   const adoptedDraft = adoptLegacyMaterialMaps(legacyMapDraft);
   assert.deepEqual(
-    adoptedDraft.mediaBlocks.map((block) => [block.mediaRole, block.projectMaterialMapKey, block.blockTitle]),
+    adoptedDraft.blocks.map((block) => [block.type, block.content.projectMaterialMapKey, block.content.title]),
     [
       ["hotspot_image", "map:new:linked", "Linked map title"],
       ["hotspot_image", "map:new:proof", "Material placement"],
@@ -935,8 +923,8 @@ test("draft editing keeps order, preview parity, material points on images and l
     "Adopting already linked maps must not change the draft",
   );
   assert.deepEqual(
-    draftToProjectData(adoptedDraft, behaviorContext).mediaBlocks?.map((block) => block.type === "hotspot_image" ? block.title : block.type),
-    draftToProjectData(legacyMapDraft, behaviorContext).mediaBlocks?.map((block) => block.type === "hotspot_image" ? block.title : block.type),
+    draftToProjectData(adoptedDraft, behaviorContext).blocks?.map((block) => block.type === "hotspot_image" ? block.title : block.type),
+    draftToProjectData(legacyMapDraft, behaviorContext).blocks?.map((block) => block.type === "hotspot_image" ? block.title : block.type),
     "Adoption must not change the public media sequence or titles",
   );
   for (const draftUnderTest of [behaviorDraft, brokenReferenceDraft, unplacedPoint, legacyMapDraft]) {
@@ -1021,22 +1009,23 @@ test("Save normalization, server draft validation and the read envelope contract
     "Different browser keys must not update the same child id twice",
   );
   const semanticExtraDraft = structuredClone(validServerDraft);
-  semanticExtraDraft.mediaBlocks.push({
-    key: "media:new:semantic-extra",
-    id: null,
-    mediaRole: "youtube_video",
-    mediaAssetId: 999,
-    projectMaterialMapKey: null,
-    blockTitle: "Video",
-    youtubeUrl: "abcdefghijk",
-    label: "",
-    caption: "",
-    sortOrder: 0,
+  semanticExtraDraft.blocks.push({
+    ...videoBlock("block:new:semantic-extra", "abcdefghijk", "Video"),
+    content: { youtubeUrl: "abcdefghijk", title: "Video", mediaAssetId: 999 },
   });
   assert.throws(
     () => validateDraftShape(semanticExtraDraft),
-    (error) => error?.status === 400 && error?.code === "invalid_draft_field",
-    "Unused YouTube media ids must be rejected instead of promoted",
+    (error) => error?.status === 400 && error?.code === "invalid_block",
+    "Unused media ids on a video block must be rejected instead of promoted",
+  );
+  const legacyShapeDraft = structuredClone(validServerDraft);
+  delete legacyShapeDraft.schemaVersion;
+  delete legacyShapeDraft.blocks;
+  legacyShapeDraft.mediaBlocks = [];
+  assert.throws(
+    () => validateDraftShape(legacyShapeDraft),
+    (error) => error?.status === 400 && error?.code === "invalid_draft",
+    "validateDraftShape itself requires the block shape; parsePostInput upgrades older drafts first",
   );
   assert.throws(
     () =>
@@ -1185,7 +1174,8 @@ test("Save normalization, server draft validation and the read envelope contract
         facts: [null],
         materials: [],
         maps: [],
-        mediaBlocks: [],
+        schemaVersion: 2,
+        blocks: [],
         hotspots: [],
       },
     }),
@@ -1254,4 +1244,138 @@ test("publish compensation disclosure and RPC error mapping", async () => {
   assert.equal(mappedActorRoleChange.status, 403);
   assert.equal(mappedActorRoleChange.code, "actor_role_changed");
   assert.match(mappedActorRoleChange.message, /access changed/i);
+});
+
+test("an older editor's mediaBlocks draft is upgraded before validation and reaches the RPC as blocks", async () => {
+  const legacyDraft = createEmptyProjectAggregateDraft();
+  delete legacyDraft.schemaVersion;
+  delete legacyDraft.blocks;
+  Object.assign(legacyDraft.project, { id: 12, title: "Legacy editor", slug: "legacy-editor" });
+  legacyDraft.mediaBlocks = [{
+    key: "media:31",
+    id: 31,
+    mediaRole: "normal_image",
+    mediaAssetId: 4,
+    projectMaterialMapKey: null,
+    blockTitle: "",
+    youtubeUrl: "",
+    label: "Detail",
+    caption: "Caption",
+    sortOrder: 0,
+  }];
+  await withAdminProjectsFetchMock(
+    (call) => {
+      const identityResponse = mockAdminIdentity(call);
+      if (identityResponse) return identityResponse;
+      if (new URL(call.url).pathname === "/rest/v1/rpc/admin_project_aggregate") {
+        return revisionConflictResponse("Reload before saving.");
+      }
+      throw new Error(`Unexpected mocked Projects request: ${call.method} ${call.url}`);
+    },
+    async (calls) => {
+      await handleAdminProjectsRequest(
+        adminProjectMutationRequest({
+          action: "save",
+          projectId: 12,
+          baseRevision: 1,
+          baseUpdatedAt: "2026-07-19T00:00:00.000000+00:00",
+          draft: legacyDraft,
+        }),
+        mockAdminEnvironment,
+      );
+      const rpc = calls.find((call) => new URL(call.url).pathname === "/rest/v1/rpc/admin_project_aggregate");
+      const sent = JSON.parse(rpc.body).p_draft;
+      assert.equal(sent.schemaVersion, 2);
+      assert.equal("mediaBlocks" in sent, false);
+      assert.deepEqual(sent.blocks, [{
+        key: "block:legacy:media:31",
+        id: null,
+        type: "image",
+        sortOrder: 0,
+        content: { mediaAssetId: 4, alt: "", title: "", label: "Detail", caption: "Caption", legacyProjectMediaId: 31 },
+      }]);
+    },
+  );
+});
+
+test("body blocks map to the shared preview, block publication and validate on the server", () => {
+  const draft = structuredClone(behaviorDraft);
+  draft.blocks = [
+    { key: "block:new:h", id: null, type: "heading", sortOrder: 0, content: { eyebrow: "Background", title: "Why stone", intro: "" } },
+    { key: "block:new:t", id: null, type: "text", sortOrder: 1, content: { body: "Body copy" } },
+    imageBlock("block:new:i", 1, { label: "Entry" }, 2),
+    {
+      key: "block:new:g",
+      id: null,
+      type: "gallery",
+      sortOrder: 3,
+      content: { items: [{ mediaAssetId: 1, alt: "" }, { mediaAssetId: 2, alt: "Own words" }] },
+    },
+    {
+      key: "block:new:sc",
+      id: null,
+      type: "stone_cards",
+      sortOrder: 4,
+      content: { title: "", items: [{ stoneGroupId: 1, finishKey: "sawn", note: "" }] },
+    },
+    {
+      key: "block:new:cta",
+      id: null,
+      type: "cta",
+      sortOrder: 5,
+      content: { title: "Ask", body: "", primary: { label: "Go", href: "javascript:alert(1)" }, secondary: { label: "Contact", href: "/contact" } },
+    },
+    { key: "block:new:hs", id: null, type: "hotspot_image", sortOrder: 6, content: { projectMaterialMapKey: "map:new:proof", title: "", label: "", caption: "" } },
+  ];
+  const preview = draftToProjectData(draft, behaviorContext);
+  assert.deepEqual(preview.blocks.map((block) => block.type), ["heading", "text", "image", "gallery", "stone_cards", "cta", "hotspot_image"]);
+  assert.deepEqual(preview.blocks[2], {
+    id: "block:new:i", type: "image", src: "/hero.jpg", alt: "Hero alt", title: undefined, label: "Entry", caption: undefined,
+  }, "An image without its own description shows the media description");
+  assert.deepEqual(preview.blocks[3].items.map((item) => item.alt), ["Hero alt", "Own words"]);
+  assert.deepEqual(preview.blocks[4].items, [{ stoneGroupId: "bluestone", finishKey: "sawn", note: undefined }]);
+  assert.deepEqual([preview.blocks[5].primary, preview.blocks[5].secondary], [undefined, { label: "Contact", href: "/contact" }]);
+  assert.equal(preview.blocks[6].title, "Material placement", "An untitled points block keeps its map title");
+  assert.equal(
+    getProjectPublishBlockers(draft, behaviorContext).some((blocker) => blocker.section === "media"),
+    true,
+    "The unsafe CTA link blocks publishing",
+  );
+  draft.blocks[5].content.primary.href = "/contact";
+  assert.deepEqual(getProjectPublishBlockers(draft, behaviorContext), [], "A complete body is publish-ready");
+  assert.doesNotThrow(() => validateDraftShape(normalizeProjectDraftForSave(draft)));
+  assert.doesNotThrow(() => assertPublishDraft(normalizeProjectDraftForSave(draft)), "Media-backed empty descriptions wait for the media check");
+
+  const emptyText = structuredClone(draft);
+  emptyText.blocks[1].content.body = " ";
+  assert.equal(
+    getProjectPublishBlockers(emptyText, behaviorContext)[0]?.message,
+    "Complete every required field in the page body.",
+  );
+  assert.throws(
+    () => assertPublishDraft(normalizeProjectDraftForSave(emptyText)),
+    (error) => error?.code === "publish_blocked" && error?.message === "Complete every required field in the page body.",
+    "The server repeats the body completeness check",
+  );
+
+  const draftStone = structuredClone(draft);
+  const draftStoneContext = { ...behaviorContext, stones: [{ id: 1, key: "bluestone", label: "Bluestone", status: "draft" }] };
+  assert.ok(
+    getProjectPublishBlockers(draftStone, draftStoneContext).some((blocker) => blocker.message === "Use only Live Stone Library stones in stone cards."),
+  );
+
+  const oversized = structuredClone(draft);
+  oversized.blocks[1].content.body = "x".repeat(5001);
+  assert.throws(
+    () => validateDraftShape(normalizeProjectDraftForSave(oversized)),
+    (error) => error?.status === 400 && error?.code === "invalid_block" && error?.details?.field === "blocks[1].content.body",
+    "Block limits are enforced on Save",
+  );
+
+  const filled = fillDraftAltText(normalizeProjectDraftForSave(draft), [
+    { id: 1, alt: "Hero alt" },
+    { id: 2, alt: "Map alt" },
+  ]);
+  assert.equal(filled.blocks[2].content.alt, "Hero alt");
+  assert.deepEqual(filled.blocks[3].content.items.map((item) => item.alt), ["Hero alt", "Own words"]);
 });

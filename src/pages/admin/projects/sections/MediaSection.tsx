@@ -2,20 +2,21 @@ import { useContext, useState } from "react";
 import type { KeyboardEvent as ReactKeyboardEvent } from "react";
 import { MapPin, MapPinOff, Video } from "lucide-react";
 import {
+  blockImageId,
   createProjectDraftKey,
   defaultMaterialPointImageTitle,
-  disableMediaBlockPoints,
-  enableMediaBlockPoints,
+  disableBlockPoints,
+  enableBlockPoints,
   hotspotsForBlock,
-  mediaBlockImageId,
-  removeMediaBlock,
-  setMediaBlockImage,
+  removeBlock,
+  setBlockImage,
+  updateBlockContent,
   type ProjectAggregateDraft,
+  type ProjectBlockDraft,
   type ProjectAggregateMappingContext,
   type ProjectFinishOption,
   type ProjectHotspotDraft,
   type ProjectMaterialDraft,
-  type ProjectMediaBlockDraft,
   type ProjectMediaOption,
   type ProjectMoveDirection,
   type ProjectOrderedCollection,
@@ -23,6 +24,10 @@ import {
   type ProjectStoneOption,
   type ProjectStoneVariantOption,
 } from "../../../../features/projects/projectAggregate";
+import {
+  contentBlockDefinition,
+  summarizeContentBlock,
+} from "../../../../features/blocks/schema";
 import InlineMediaField from "../InlineMediaField";
 import VisualHotspotEditor from "../VisualHotspotEditor";
 import {
@@ -67,7 +72,7 @@ interface MediaSectionProps {
   open: boolean;
   onToggle: () => void;
   onChange: (draft: ProjectAggregateDraft) => void;
-  onAddBlock: (role: "normal_image" | "youtube_video") => void;
+  onAddBlock: (type: "image" | "video") => void;
   buildMaterial: () => ProjectMaterialDraft;
   mediaFieldDisabled: (instanceKey: string) => boolean;
   onMediaPendingChange: (instanceKey: string, pending: boolean) => void;
@@ -121,25 +126,32 @@ export default function MediaSection({
   const [pendingRemoval, setPendingRemoval] = useState<PendingRemoval | null>(
     null,
   );
-  const hasYoutubeVideo = draft.mediaBlocks.some(
-    (block) => block.mediaRole === "youtube_video",
-  );
+  const hasYoutubeVideo = draft.blocks.some((block) => block.type === "video");
 
-  function requestBlockRemoval(block: ProjectMediaBlockDraft) {
+  function updateContent(block: ProjectBlockDraft, changes: Record<string, unknown>) {
+    onChange(updateBlockContent(draft, block.key, { ...block.content, ...changes } as ProjectBlockDraft["content"]));
+  }
+
+  function contentText(block: ProjectBlockDraft, field: string) {
+    const value = (block.content as unknown as Record<string, unknown>)[field];
+    return typeof value === "string" ? value : "";
+  }
+
+  function requestBlockRemoval(block: ProjectBlockDraft) {
     const count = hotspotsForBlock(draft, block.key).length;
     if (count === 0) {
       setPendingRemoval(null);
-      onChange(removeMediaBlock(draft, block.key));
+      onChange(removeBlock(draft, block.key));
     } else {
       setPendingRemoval({ kind: "block", key: block.key, count });
     }
   }
 
-  function requestPointsRemoval(block: ProjectMediaBlockDraft) {
+  function requestPointsRemoval(block: ProjectBlockDraft) {
     const count = hotspotsForBlock(draft, block.key).length;
     if (count === 0) {
       setPendingRemoval(null);
-      onChange(disableMediaBlockPoints(draft, block.key));
+      onChange(disableBlockPoints(draft, block.key));
     } else {
       setPendingRemoval({ kind: "points", key: block.key, count });
     }
@@ -149,21 +161,22 @@ export default function MediaSection({
     if (!pendingRemoval) return;
     const { kind, key } = pendingRemoval;
     setPendingRemoval(null);
-    if (kind === "block") onChange(removeMediaBlock(draft, key));
-    else onChange(disableMediaBlockPoints(draft, key));
+    if (kind === "block") onChange(removeBlock(draft, key));
+    else onChange(disableBlockPoints(draft, key));
   }
 
-  function enablePoints(block: ProjectMediaBlockDraft) {
+  function enablePoints(block: ProjectBlockDraft) {
     setPendingRemoval(null);
-    onChange(enableMediaBlockPoints(draft, block.key));
+    onChange(enableBlockPoints(draft, block.key));
   }
 
-  function changeBlockImage(block: ProjectMediaBlockDraft, value: number | null) {
+  function changeBlockImage(block: ProjectBlockDraft, value: number | null) {
     const hasPoints =
-      block.mediaRole === "hotspot_image" &&
+      block.type === "hotspot_image" &&
       hotspotsForBlock(draft, block.key).length > 0;
-    onChange(setMediaBlockImage(draft, block.key, value));
-    if (hasPoints && value !== mediaBlockImageId(draft, block)) {
+    const alt = value ? media.find((asset) => asset.id === value)?.alt?.trim() ?? "" : "";
+    onChange(setBlockImage(draft, block.key, value, alt));
+    if (hasPoints && value !== blockImageId(draft, block)) {
       setReplacedImageBlockKeys((current) => new Set(current).add(block.key));
     }
   }
@@ -173,16 +186,16 @@ export default function MediaSection({
   }
 
   function addHotspot(
-    block: ProjectMediaBlockDraft,
+    block: ProjectBlockDraft,
     position: { xPercent: number; yPercent: number },
   ) {
-    if (block.mediaRole !== "hotspot_image" || !block.projectMaterialMapKey) return;
+    if (block.type !== "hotspot_image" || !block.content.projectMaterialMapKey) return;
     const onlyMaterial = draft.materials.length === 1 ? draft.materials[0] : null;
     const key = createProjectDraftKey("hotspot");
     const next: ProjectHotspotDraft = {
       key,
       id: null,
-      projectMaterialMapKey: block.projectMaterialMapKey,
+      projectMaterialMapKey: block.content.projectMaterialMapKey,
       projectMaterialKey: onlyMaterial?.key ?? null,
       xPercent: position.xPercent,
       yPercent: position.yPercent,
@@ -290,7 +303,7 @@ export default function MediaSection({
     );
   }
 
-  function renderPointsArea(block: ProjectMediaBlockDraft, blockIndex: number) {
+  function renderPointsArea(block: ProjectBlockDraft, blockIndex: number) {
     const points = hotspotsForBlock(draft, block.key);
     const selected =
       points.find((point) => point.key === selectedPointKeys[block.key]) ??
@@ -302,7 +315,7 @@ export default function MediaSection({
     const selectedMaterial = selected?.projectMaterialKey
       ? draft.materials.find((material) => material.key === selected.projectMaterialKey) ?? null
       : null;
-    const imageId = mediaBlockImageId(draft, block);
+    const imageId = blockImageId(draft, block);
     const image = media.find((asset) => asset.id === imageId) ?? null;
     const materialEditorOpen =
       Boolean(selected && selectedMaterial) &&
@@ -512,12 +525,12 @@ export default function MediaSection({
         <div className="flex flex-wrap gap-2">
           <AddButton
             label="Add image"
-            onClick={() => onAddBlock("normal_image")}
+            onClick={() => onAddBlock("image")}
             icon="image"
           />
           <AddButton
             label="Add video"
-            onClick={() => onAddBlock("youtube_video")}
+            onClick={() => onAddBlock("video")}
             disabled={hasYoutubeVideo}
           />
         </div>
@@ -525,15 +538,16 @@ export default function MediaSection({
       open={open}
       onToggle={onToggle}
     >
-      {draft.mediaBlocks.length ? (
+      {draft.blocks.length ? (
         <div className="space-y-4">
-          {draft.mediaBlocks.map((block, index) => {
-            const isVideo = block.mediaRole === "youtube_video";
-            const hasPoints = block.mediaRole === "hotspot_image";
+          {draft.blocks.map((block, index) => {
+            const isVideo = block.type === "video";
+            const hasPoints = block.type === "hotspot_image";
+            const isImage = block.type === "image" || hasPoints;
             const pointCount = hasPoints
               ? hotspotsForBlock(draft, block.key).length
               : 0;
-            const imageId = isVideo ? null : mediaBlockImageId(draft, block);
+            const imageId = isImage ? blockImageId(draft, block) : null;
 
             return (
               <article
@@ -544,7 +558,8 @@ export default function MediaSection({
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="flex flex-wrap items-center gap-2">
                     <h3 className="text-[11px] font-bold uppercase tracking-[0.13em] text-black/52">
-                      Block {index + 1} · {isVideo ? "Video" : "Image"}
+                      Block {index + 1} ·{" "}
+                      {isVideo ? "Video" : isImage ? "Image" : contentBlockDefinition(block.type).label}
                     </h3>
                     {hasPoints ? (
                       <span className="inline-flex min-h-6 items-center gap-1 rounded border border-[var(--urblo-lime)] bg-[rgba(0,255,25,0.12)] px-2 text-[10px] font-bold uppercase tracking-[0.12em] text-black">
@@ -558,12 +573,12 @@ export default function MediaSection({
                     <OrderControls
                       itemLabel={`media block ${index + 1}`}
                       isFirst={index === 0}
-                      isLast={index === draft.mediaBlocks.length - 1}
+                      isLast={index === draft.blocks.length - 1}
                       onMoveUp={() =>
-                        moveItem("mediaBlocks", block.key, "up")
+                        moveItem("blocks", block.key, "up")
                       }
                       onMoveDown={() =>
-                        moveItem("mediaBlocks", block.key, "down")
+                        moveItem("blocks", block.key, "down")
                       }
                     />
                     <RemoveButton
@@ -584,34 +599,26 @@ export default function MediaSection({
                     </div>
                     <TextField
                       label="Video title"
-                      value={block.blockTitle}
-                      onChange={(value) =>
-                        updateCollection("mediaBlocks", block.key, {
-                          blockTitle: value,
-                        })
-                      }
+                      value={contentText(block, "title")}
+                      onChange={(value) => updateContent(block, { title: value })}
                     />
                     <TextField
                       label="YouTube link"
-                      value={block.youtubeUrl}
-                      onChange={(value) =>
-                        updateCollection("mediaBlocks", block.key, {
-                          youtubeUrl: value,
-                        })
-                      }
+                      value={contentText(block, "youtubeUrl")}
+                      onChange={(value) => updateContent(block, { youtubeUrl: value })}
                     />
                     <div className="md:col-span-3">
                       <TextField
                         label="Caption"
-                        value={block.caption}
-                        onChange={(value) =>
-                          updateCollection("mediaBlocks", block.key, {
-                            caption: value,
-                          })
-                        }
+                        value={contentText(block, "caption")}
+                        onChange={(value) => updateContent(block, { caption: value })}
                       />
                     </div>
                   </div>
+                ) : !isImage ? (
+                  <p className="mt-3 text-sm leading-6 text-black/60">
+                    {summarizeContentBlock(block) || contentBlockDefinition(block.type).description}
+                  </p>
                 ) : (
                   <>
                     <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:items-start">
@@ -633,34 +640,22 @@ export default function MediaSection({
                         {hasPoints ? (
                           <TextField
                             label="Title above the image"
-                            value={block.blockTitle}
-                            onChange={(value) =>
-                              updateCollection("mediaBlocks", block.key, {
-                                blockTitle: value,
-                              })
-                            }
+                            value={contentText(block, "title")}
+                            onChange={(value) => updateContent(block, { title: value })}
                             placeholder={defaultMaterialPointImageTitle}
                           />
                         ) : (
                           <TextField
                             label="Small label"
-                            value={block.label}
-                            onChange={(value) =>
-                              updateCollection("mediaBlocks", block.key, {
-                                label: value,
-                              })
-                            }
+                            value={contentText(block, "label")}
+                            onChange={(value) => updateContent(block, { label: value })}
                             placeholder="Detail"
                           />
                         )}
                         <TextField
                           label="Caption"
-                          value={block.caption}
-                          onChange={(value) =>
-                            updateCollection("mediaBlocks", block.key, {
-                              caption: value,
-                            })
-                          }
+                          value={contentText(block, "caption")}
+                          onChange={(value) => updateContent(block, { caption: value })}
                         />
                       </div>
                     </div>

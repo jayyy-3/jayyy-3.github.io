@@ -21,6 +21,7 @@ import {
   slugify,
   type ProjectAggregateDraft,
   type ProjectAggregateMappingContext,
+  type ProjectBlockDraft,
   type ProjectEditorSection,
   type ProjectFinishOption,
   type ProjectLifecycleStatus,
@@ -34,6 +35,7 @@ import {
   type ProjectStoneFinishCapabilityOption,
   type ProjectStoneFinishImageOption,
 } from "../../../features/projects/projectAggregate";
+import { createDefaultBlockContent } from "../../../features/blocks/schema";
 import InlineMediaField from "./InlineMediaField";
 import ProjectDraftPreview from "./ProjectDraftPreview";
 import {
@@ -153,7 +155,7 @@ export default function ProjectEditor({
   const sectionCounts: Record<ProjectEditorSection, number | null> = {
     overview: null,
     facts: draft.facts.length,
-    media: draft.mediaBlocks.length,
+    media: draft.blocks.length,
     materials: draft.materials.length,
   };
 
@@ -251,7 +253,7 @@ export default function ProjectEditor({
   }
 
   function updateCollection<
-    Collection extends "facts" | "materials" | "mediaBlocks" | "hotspots",
+    Collection extends "facts" | "materials" | "hotspots",
   >(
     collection: Collection,
     key: string,
@@ -320,27 +322,17 @@ export default function ProjectEditor({
     scrollAfterRender("project-materials");
   }
 
-  function addMediaBlock(role: "normal_image" | "youtube_video") {
+  function addMediaBlock(type: "image" | "video") {
     expandSection("media");
-    const key = createProjectDraftKey("media");
-    onChange({
-      ...draft,
-      mediaBlocks: [
-        ...draft.mediaBlocks,
-        {
-          key,
-          id: null,
-          mediaRole: role,
-          mediaAssetId: null,
-          projectMaterialMapKey: null,
-          blockTitle: "",
-          youtubeUrl: "",
-          label: "",
-          caption: "",
-          sortOrder: draft.mediaBlocks.length,
-        },
-      ],
-    });
+    const key = createProjectDraftKey("block");
+    const block = {
+      key,
+      id: null,
+      type,
+      content: createDefaultBlockContent(type),
+      sortOrder: draft.blocks.length,
+    } as ProjectBlockDraft;
+    onChange({ ...draft, blocks: [...draft.blocks, block] });
     scrollAfterRender(mediaBlockId(key));
   }
 

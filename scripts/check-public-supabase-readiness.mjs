@@ -522,12 +522,45 @@ function checkPublicRuntimeBoundary() {
   const projectService = readRequired('src/service/ProjectService.ts');
   requireIncludes(projectService, 'mergeProjectsWithPublishedOverlay', 'ProjectService per-record Published overlay');
   requireIncludes(projectService, 'sector: fallback.listing.sector', 'ProjectService static taxonomy preservation');
+  // NOW-PROJECT-BLOCKS-001: the body is read from project_blocks. Only a not-yet-migrated
+  // (missing) table is tolerated; every other dependent-read failure keeps the static fallback.
   requireRegex(
     projectService,
-    /factsResult\.error\s*\|\|\s*mediaResult\.error\s*\|\|\s*materialsResult\.error\s*\|\|\s*materialMapsResult\.error/,
+    /factsResult\.error\s*\|\|\s*\(blocksResult\.error && !isMissingRelationError\(blocksResult\.error\)\)\s*\|\|\s*materialsResult\.error\s*\|\|\s*materialMapsResult\.error/,
     'src/service/ProjectService.ts',
     'ProjectService dependent-read failure fallback',
   );
+  requireRegex(
+    projectService,
+    /function isMissingRelationError[\s\S]{0,120}=== 'PGRST205' \|\| error\.code === '42P01'/,
+    'src/service/ProjectService.ts',
+    'ProjectService tolerates only a missing body table',
+  );
+  requireRegex(
+    projectService,
+    /\.from\('project_blocks'\)[\s\S]{0,700}\.eq\('status', 'published'\)/,
+    'src/service/ProjectService.ts',
+    'ProjectService reads Published body blocks only',
+  );
+  requireIncludes(projectService, 'if (!references) return [];', 'ProjectService body reference read failure fallback');
+  requireRegex(
+    projectService,
+    /\.from\('media_assets'\)[\s\S]{0,160}\.eq\('status', 'published'\)/,
+    'src/service/ProjectService.ts',
+    'ProjectService reads Published body media only',
+  );
+  if (/\.from\('project_media'\)/.test(projectService)) {
+    failures.push('src/service/ProjectService.ts: public body must not read the retired project_media blocks');
+  }
+  const projectBlocksSql = readRequired('supabase/migrations/20261014120000_project_blocks.sql');
+  requireRegex(
+    projectBlocksSql,
+    /create policy project_blocks_public_select on public\.project_blocks\s+for select to anon, authenticated\s+using \(\s+status = 'published'\s+and exists \([\s\S]{0,200}projects\.status = 'published'\s+and projects\.claim_review_status = 'approved'/,
+    'supabase/migrations/20261014120000_project_blocks.sql',
+    'project_blocks public read limited to Published blocks of Published, approved Projects',
+  );
+  requireIncludes(projectBlocksSql, 'revoke all on table public.project_blocks from public, anon, authenticated;', 'project_blocks browser write revoke');
+  requireIncludes(projectBlocksSql, 'grant select on table public.project_blocks to anon, authenticated;', 'project_blocks browser read grant');
   requireIncludes(projectService, 'const projects = await ProjectService.getAll()', 'ProjectService detail reads the merged public collection');
 
   const publicSettings = readRequired('src/lib/publicSiteSettings.ts');

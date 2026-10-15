@@ -1,14 +1,11 @@
 import { useEffect, useState, type MouseEvent as ReactMouseEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, ArrowUpRight } from 'lucide-react';
-import type {
-  ProjectData,
-  ProjectMaterial,
-  ProjectMediaBlock,
-} from '../../data/projectData';
+import type { ProjectData, ProjectMaterial } from '../../data/projectData';
+import type { ContentBlockView } from '../../features/blocks/view';
 import StoneLibraryService from '../../service/StoneLibraryService';
 import type { StoneDetailVM } from '../../types/stone-library';
-import ProjectHotspotImage from './ProjectHotspotImage';
+import BlockList from '../blocks/BlockList';
 import ProjectResponsiveImage from './ProjectResponsiveImage';
 import StoneResponsiveImage from '../stone-library/StoneResponsiveImage';
 import Button from '../ui/Button';
@@ -79,14 +76,14 @@ function getProjectNeighbour(project: ProjectData, allProjects: ProjectData[], d
   return allProjects[nextIndex];
 }
 
-function defaultMediaBlocks(project: ProjectData): ProjectMediaBlock[] {
-  if (project.mediaBlocks?.length) {
-    return project.mediaBlocks;
+function defaultBodyBlocks(project: ProjectData): ContentBlockView[] {
+  if (project.blocks?.length) {
+    return project.blocks;
   }
 
   return project.images.map((image, index) => ({
     id: `${project.slug}-image-${index + 1}`,
-    type: 'normal_image',
+    type: 'image',
     src: image,
     alt: `${project.name} project image ${index + 1}`,
   }));
@@ -215,67 +212,18 @@ function ProjectInformation({ project }: { project: ProjectData }) {
   );
 }
 
-function NormalImageBlock({ block }: { block: Extract<ProjectMediaBlock, { type: 'normal_image' }> }) {
-  return (
-    <figure>
-      <div className="overflow-hidden bg-black">
-        <ProjectResponsiveImage
-          src={block.src}
-          profile="detail"
-          alt={block.alt}
-          className="aspect-[16/9] w-full object-cover"
-          loading="lazy"
-        />
-      </div>
-      {block.label || block.caption ? (
-        <figcaption className="grid gap-3 border-b border-line py-5 md:grid-cols-[0.28fr_1fr]">
-          <p className={metaLabelClassName}>{block.label || 'Project media'}</p>
-          <p className="text-copy text-body">{block.caption}</p>
-        </figcaption>
-      ) : null}
-    </figure>
-  );
-}
-
-function YoutubeVideoBlock({ block }: { block: Extract<ProjectMediaBlock, { type: 'youtube_video' }> }) {
-  return (
-    <figure>
-      <div className="aspect-video overflow-hidden bg-black">
-        <iframe
-          className="h-full w-full"
-          src={`https://www.youtube-nocookie.com/embed/${block.youtubeId}`}
-          title={block.title}
-          loading="lazy"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowFullScreen
-        />
-      </div>
-      <figcaption className="grid gap-3 border-b border-line py-5 md:grid-cols-[0.28fr_1fr]">
-        <p className={metaLabelClassName}>Video</p>
-        <div>
-          <h3 className={cardTitleClassName()}>{block.title}</h3>
-          {block.caption ? <p className="mt-2 text-copy text-body">{block.caption}</p> : null}
-        </div>
-      </figcaption>
-    </figure>
-  );
-}
-
-function ProjectMedia({
+/**
+ * The ordered page body (shared content blocks). Its generic section heading stays unless the
+ * editor opens the body with their own Heading block.
+ */
+function ProjectBody({
   project,
   focusHotspotId,
 }: {
   project: ProjectData;
   focusHotspotId: string | null;
 }) {
-  const blocks = defaultMediaBlocks(project);
-  const focusBlockId = focusHotspotId
-    ? blocks.find(
-        (block) =>
-          block.type === 'hotspot_image' &&
-          block.hotspots.some((hotspot) => hotspot.id === focusHotspotId),
-      )?.id ?? null
-    : null;
+  const blocks = defaultBodyBlocks(project);
 
   if (!blocks.length) {
     return null;
@@ -284,38 +232,15 @@ function ProjectMedia({
   return (
     <section className="urblo-section bg-white">
       <div className="urblo-page-container">
-        <SectionHeading
-          eyebrow="Project media"
-          title="Built evidence, ordered."
-          className="mb-10 border-t border-ink pt-5"
-        />
+        {blocks[0].type === 'heading' ? null : (
+          <SectionHeading
+            eyebrow="Project media"
+            title="Built evidence, ordered."
+            className="mb-10 border-t border-ink pt-5"
+          />
+        )}
 
-        <div className="space-y-12">
-          {blocks.map((block) => {
-            if (block.type === 'normal_image') {
-              return <NormalImageBlock key={block.id} block={block} />;
-            }
-
-            if (block.type === 'hotspot_image') {
-              return (
-                <div key={block.id} className="border-b border-line pb-8">
-                  <ProjectHotspotImage
-                    image={block.image}
-                    imageAlt={block.imageAlt}
-                    title={block.title}
-                    intro={block.intro}
-                    caption={block.caption}
-                    hotspots={block.hotspots}
-                    anchorId={`project-media-${block.id}`}
-                    focusHotspotId={block.id === focusBlockId ? focusHotspotId : null}
-                  />
-                </div>
-              );
-            }
-
-            return <YoutubeVideoBlock key={block.id} block={block} />;
-          })}
-        </div>
+        <BlockList blocks={blocks} focusHotspotId={focusHotspotId} />
       </div>
     </section>
   );
@@ -462,7 +387,7 @@ export default function ProjectPageView({
       <ProjectOpening project={project} allProjects={allProjects} />
       <ProjectHero project={project} />
       <ProjectInformation project={project} />
-      <ProjectMedia project={project} focusHotspotId={previewMode ? null : focusHotspotId} />
+      <ProjectBody project={project} focusHotspotId={previewMode ? null : focusHotspotId} />
       <FeaturedMaterials project={project} />
       <ProjectCta project={project} />
     </div>

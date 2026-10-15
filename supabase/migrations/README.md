@@ -46,6 +46,10 @@ Applied production migrations:
 
 - `20261008120000_stone_australian_badge.sql` — applied/read back on 2026-10-08 as recorded version `20261007144021` (connector timestamp; source SHA-256 `be77f51f502948537d407078207ab0f83569a5301400c3819f554f5472ad8c75`) after Jay's approval, immediately followed by runtime merge of PR #93. Replaces `public_stone_catalogue()` only, adding the boolean `australianStone` per stone while the origin strings stay blank; no table change, no data write. Readback: exactly five published stones flagged, zero origin leaks, grants unchanged.
 
+Authored, not applied to production:
+
+- `20261014120000_project_blocks.sql` (NOW-PROJECT-BLOCKS-001) — expand-only, one transaction with a read-back self-check. Adds `project_blocks` (RLS, browser read-only, Stone reference guard), copies every `normal_image`/`hotspot_image`/`youtube_video` `project_media` row one to one (`project_media` untouched), reshapes private drafts to `blocks` / schemaVersion 2, replaces `admin_project_aggregate` (blocks; upgrades cached `mediaBlocks` drafts) and extends `private.stone_usage` with stone cards. Proven on a disposable database with `scripts/fixtures/project-blocks.sql` and on a snapshot of the published Projects; production apply belongs to the reviewer after Jay confirms the SHA-256.
+
 Migration A is already applied and remains byte-for-byte immutable. Its historical comment names the originally planned contract step; production-history alignment inserted C at recorded version `20260802103337`, and contract B was applied/read back at recorded version `20260802105537` after the aggregate runtime reached production.
 
 Do not commit Supabase service role keys, database passwords, Turnstile secrets, or email provider secrets here.
