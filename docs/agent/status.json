@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "lastUpdated": "2026-10-08",
+  "lastUpdated": "2026-10-15",
   "currentTaskId": "NOW-ADMIN-STONE-WORKSPACE-001",
   "sourceOfTruth": {
     "currentState": "docs/agent/status.json",
@@ -10,12 +10,12 @@
     "adminHandoffEvidence": "docs/agent/admin-handoff-evidence.json"
   },
   "release": {
-    "observedAt": "2026-10-08",
-    "repositorySha": "fdadeaa19f2987d384baecb8e79e0a971bd1030f",
-    "runtimeSha": "fdadeaa19f2987d384baecb8e79e0a971bd1030f",
-    "verifiedRuntimeUrl": "https://c9830dab.urblo-site.pages.dev",
-    "ciRunId": 37638746443,
-    "note": "Australian stone badge (#93) released 2026-10-08: function-only migration 20261008120000_stone_australian_badge.sql applied to production as recorded version 20261007144021 (adds boolean australianStone to public_stone_catalogue, origin string stays blank), then merge fdadeaa deployed as immutable c9830dab. Readback: catalogue flags exactly AusDream, AusRed, Minos Grey, Tanier Pink, Verdant Grey; zero origin leaks; production detail and list show 5 badges, Zen Grey none; immutable/apex/www bound smoke passed. Jay acceptance open (also still open for Available as).",
+    "observedAt": "2026-10-15",
+    "repositorySha": "628233c49c764b2d48ad8db02b908a385add2f0b",
+    "runtimeSha": "628233c49c764b2d48ad8db02b908a385add2f0b",
+    "verifiedRuntimeUrl": "https://c9fb3973.urblo-site.pages.dev",
+    "ciRunId": 38662353667,
+    "note": "Project body blocks Phase 1 (#95 data layer/renderers/public page, #96 admin Body editor) released 2026-10-15: migration 20261014120000_project_blocks.sql applied to production as recorded version 20261015005017 after Jay confirmed SHA-256 0e38da86…; all six function bodies match the file by md5; 91 project_media body rows copied to project_blocks (86 published), 17 drafts reshaped, project_media unchanged; merges 628233c deployed as immutable c9fb3973. Readback: all 17 published project pages render exactly the block sequence stored in project_blocks; Stone page Used in projects links intact; production admin gate passed 10 routes; immutable/apex/www bound smoke passed. Jay acceptance open.",
     "evidenceRefs": [
       "docs/WORKLOG.md"
     ]
@@ -76,8 +76,8 @@
     ]
   },
   "lastCompletedTask": {
-    "id": "NOW-STONE-AUSTRALIAN-BADGE-001",
-    "summary": "AUSTRALIAN STONE badge for origin=Australia stones released 2026-10-08 and read back on production."
+    "id": "NOW-PROJECT-BLOCKS-001",
+    "summary": "Block-based Project body (14 shared content blocks, Body editor) released 2026-10-15; Phase 2 import and Phase 3 newsletter not started."
   },
   "historicalObservations": "docs/archive/2026-09-26/manifest.json"
 }
