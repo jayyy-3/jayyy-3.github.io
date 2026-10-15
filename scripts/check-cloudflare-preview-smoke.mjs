@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { exit } from 'node:process';
 import { normalizeBaseUrlOrigin } from './_lib/live-input-validation.mjs';
-import { responseDiagnostic, waitForDeploymentFunctions } from './_lib/deployment-readiness.mjs';
+import { responseDiagnostic, waitForDeploymentFunctions, waitForDeploymentPages } from './_lib/deployment-readiness.mjs';
 
 const publicRoutes = [
   '/',
@@ -688,6 +688,9 @@ async function run() {
   if (options.waitForFunctions) {
     assert(!options.skipFunctions, '--wait-for-functions cannot be combined with --skip-functions');
     await waitForDeploymentFunctions(options.baseUrl);
+    // Functions readiness alone let the first page GET return 404 (runs 38679742624 and the
+    // PR #95/#96 first attempts); the page wait must also hold before the smoke starts.
+    await waitForDeploymentPages(options.baseUrl);
   }
 
   console.log('Cloudflare preview smoke starting.');

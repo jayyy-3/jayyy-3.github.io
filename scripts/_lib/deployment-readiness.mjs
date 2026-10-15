@@ -59,6 +59,73 @@ export async function waitForDeploymentFunctions(baseUrl, {
   throw new Error(`Function readiness timed out after ${budgetMs}ms; all ${attempt} attempts retained above`)
 }
 
+// Functions can be ready while the first page request still answers 404: PR #95 and
+// #96 first attempts and production run 38679742624 (2026-10-15, main eff2b17) each
+// failed "/ returned 404, expected 200" seconds after Function readiness, and a re-run
+// passed. This waits, with the same bounded attempt/backoff loop, until every page path
+// returns 200 HTML carrying the SPA root shell and a Vite asset reference for three
+// consecutive attempts. It never follows redirects and never replaces the full smoke,
+// whose route assertions still run unchanged afterwards.
+export const readinessPagePaths = Object.freeze(['/', '/projects'])
+
+export function pageShellReady(response, text) {
+  return response.status === 200
+    && (response.headers.get('content-type') || '').includes('text/html')
+    && text.includes('<div id="root"></div>')
+    && /\/assets\/[^"']+\.js/.test(text)
+}
+
+export async function waitForDeploymentPages(baseUrl, {
+  paths = readinessPagePaths,
+  budgetMs = 120_000,
+  fetchImpl = fetch,
+  now = Date.now,
+  sleep = ms => new Promise(resolve => setTimeout(resolve, ms)),
+  log = console.log,
+} = {}) {
+  if (!immutableOrigin.test(baseUrl)) throw new Error('Page readiness requires an immutable Pages origin')
+  if (!Number.isInteger(budgetMs) || budgetMs < 1 || budgetMs > 120_000) throw new Error('Invalid readiness budget')
+  if (!Array.isArray(paths) || !paths.length || paths.some(path => typeof path !== 'string' || !path.startsWith('/'))) throw new Error('Page readiness paths must be root-relative')
+  const deadline = now() + budgetMs
+  let attempt = 0, consecutiveReady = 0
+  while (now() < deadline) {
+    attempt++
+    let retryable = false
+    let diagnostic = null
+    for (const path of paths) {
+      try {
+        const response = await fetchImpl(`${baseUrl}${path}`, {
+          method: 'GET', redirect: 'manual', signal: AbortSignal.timeout(Math.min(12_000, deadline - now())),
+        })
+        const text = await response.text()
+        if (pageShellReady(response, text)) continue
+        diagnostic = `${path} ${responseDiagnostic(response, text)}`
+        // The edge may briefly answer a fresh deployment with 404 or an error page; 200
+        // without the shell can be a stale cached body. Redirects and access denials fail now.
+        retryable = [200, 404, 500, 502, 503, 504, 520, 522, 523, 524, 530].includes(response.status)
+      } catch (error) {
+        retryable = error instanceof TypeError || ['TimeoutError', 'AbortError'].includes(error.name)
+        diagnostic = `${path} transport=${error.name}`
+      }
+      break
+    }
+    if (diagnostic === null) {
+      consecutiveReady++
+      log(`Page readiness attempt ${attempt}: ready ${consecutiveReady}/3; ${paths.join(' ')} status=200 body=spa-shell`)
+      if (consecutiveReady === 3) return
+      await sleep(Math.min(5_000, Math.max(0, deadline - now())))
+      continue
+    }
+    consecutiveReady = 0
+    log(`Page readiness attempt ${attempt}: not ready; ${diagnostic}`)
+    if (!retryable) throw new Error(`Page readiness failed: ${diagnostic}`)
+    const remaining = deadline - now()
+    if (remaining <= 0) break
+    await sleep(Math.min(5_000, remaining))
+  }
+  throw new Error(`Page readiness timed out after ${budgetMs}ms; all ${attempt} attempts retained above`)
+}
+
 // Production domains can lag a new immutable deployment at the edge. CI run
 // 36153157216 (2026-09-26) failed its apex readback because /assets/Projects-*.js
 // still returned the SPA shell; the same smoke passed minutes later. This waits,
