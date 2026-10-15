@@ -6,14 +6,14 @@
     {
       "id": "NOW-PROJECT-IMPORT-001",
       "status": "now",
-      "phase": "verification",
+      "phase": "awaiting_external",
       "priority": 0.4,
       "summary": "Import a Project content package (one project.json, or a zip with project.json and images/) exported from Claude Design as a Draft Project in the admin, plus the colleague-facing package format docs and the Claude Design prompt (Phase 2 of the Project blocks plan).",
       "modules": [
         "projects"
       ],
       "files": [
-        "docs/plans/TMP-project-import.md",
+        "the temporary Phase 2 plan (deleted after acceptance)",
         "src/features/blocks/importPackage.ts",
         "src/features/blocks/importZip.ts",
         "src/pages/admin/projects/ImportProjectDialog.tsx",
@@ -47,15 +47,16 @@
         "docs/content-import/README.md"
       ],
       "authorization": {
-        "source": "Jay approved Phase 2 (Project package import) on 2026-10-15 (docs/plans/TMP-project-import.md §0.2, §0.3, §0.5).",
+        "source": "Jay approved Phase 2 (Project package import) on 2026-10-15 (the temporary Phase 2 plan (deleted after acceptance) §0.2, §0.3, §0.5).",
         "included": [
-          "Task branch claude/project-import, isolated local tests and local-stack walkthrough with synthetic accounts, git push, one pull request against main and branch Preview smoke (read-only on Preview)."
+          "Task branch claude/project-import, isolated local tests and local-stack walkthrough with synthetic accounts, git push, one pull request against main and branch Preview smoke (read-only on Preview).",
+          "Reviewer merged PR #98 as eff2b17 on 2026-10-15 under Jay's \"搞phase2\" go-ahead; production readback in docs/WORKLOG.md."
         ],
         "excluded": [
           "Merge to main, database migrations, new Function endpoints, production data or Storage writes, email, DNS and credentials."
         ]
       },
-      "nextAction": "Claude reviews the PR and its branch Preview; Jay tries an import with a real Claude Design package. Merge only after review.",
+      "nextAction": "Jay tries one real import (a colleague's Claude Design package) on production and reviews the result; then decide Phase 3 (newsletter output) and Phase 4 (Articles on the shared blocks).",
       "notes": [
         "2026-10-15: Implemented on claude/project-import; gate, unit tests, guards and local zip/JSON walkthroughs passed (docs/WORKLOG.md). PR open, not merged."
       ]

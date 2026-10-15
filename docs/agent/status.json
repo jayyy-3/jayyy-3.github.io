@@ -11,11 +11,11 @@
   },
   "release": {
     "observedAt": "2026-10-15",
-    "repositorySha": "628233c49c764b2d48ad8db02b908a385add2f0b",
-    "runtimeSha": "628233c49c764b2d48ad8db02b908a385add2f0b",
-    "verifiedRuntimeUrl": "https://c9fb3973.urblo-site.pages.dev",
-    "ciRunId": 38662353667,
-    "note": "Project body blocks Phase 1 (#95 data layer/renderers/public page, #96 admin Body editor) released 2026-10-15: migration 20261014120000_project_blocks.sql applied to production as recorded version 20261015005017 after Jay confirmed SHA-256 0e38da86…; all six function bodies match the file by md5; 91 project_media body rows copied to project_blocks (86 published), 17 drafts reshaped, project_media unchanged; merges 628233c deployed as immutable c9fb3973. Readback: all 17 published project pages render exactly the block sequence stored in project_blocks; Stone page Used in projects links intact; production admin gate passed 10 routes; immutable/apex/www bound smoke passed. Jay acceptance open.",
+    "repositorySha": "eff2b179377c655acb55d4cafd328de04e0bad83",
+    "runtimeSha": "eff2b179377c655acb55d4cafd328de04e0bad83",
+    "verifiedRuntimeUrl": "https://7a3e185c.urblo-site.pages.dev",
+    "ciRunId": 38679742624,
+    "note": "Project package import Phase 2 (#98) released 2026-10-15: urblo-project-package v1 JSON/zip contract, browser-side parse/upload/save through the existing Projects save action (no migration, no new endpoint), Import package entry for owner/admin/editor, colleague docs plus Claude Design prompt under docs/content-import. Merge eff2b17 deployed as immutable 7a3e185c; the first CI smoke attempt hit the post-deploy \"/ returned 404\" convergence flake and the re-run of the same run passed. Immutable/apex/www bound smoke, production admin gate (10 routes, Import package button visible) passed. No production import exercised; Jay acceptance open for Phase 1 and 2.",
     "evidenceRefs": [
       "docs/WORKLOG.md"
     ]
@@ -76,8 +76,8 @@
     ]
   },
   "lastCompletedTask": {
-    "id": "NOW-PROJECT-BLOCKS-001",
-    "summary": "Block-based Project body (14 shared content blocks, Body editor) released 2026-10-15; Phase 2 import and Phase 3 newsletter not started."
+    "id": "NOW-PROJECT-IMPORT-001",
+    "summary": "Project package import (JSON/zip, Claude Design prompt) released 2026-10-15; Phase 3 newsletter and Phase 4 Articles adoption not started."
   },
   "historicalObservations": "docs/archive/2026-09-26/manifest.json"
 }

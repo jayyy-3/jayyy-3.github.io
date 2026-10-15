@@ -8,17 +8,17 @@ Last updated: 2026-10-15
 
 **NOW-PROJECT-IMPORT-001** — Import a Project content package (one project.json, or a zip with project.json and images/) exported from Claude Design as a Draft Project in the admin, plus the colleague-facing package format docs and the Claude Design prompt (Phase 2 of the Project blocks plan).
 
-阶段：verification。状态：now。
+阶段：awaiting_external。状态：now。
 
-下一步：Claude reviews the PR and its branch Preview; Jay tries an import with a real Claude Design package. Merge only after review.
+下一步：Jay tries one real import (a colleague's Claude Design package) on production and reviews the result; then decide Phase 3 (newsletter output) and Phase 4 (Articles on the shared blocks).
 
 ## 已观察的发布状态
 
-观察日期：2026-10-15。仓库版本：`628233c49c764b2d48ad8db02b908a385add2f0b`。已验证运行时代码：`628233c49c764b2d48ad8db02b908a385add2f0b`。
+观察日期：2026-10-15。仓库版本：`eff2b179377c655acb55d4cafd328de04e0bad83`。已验证运行时代码：`eff2b179377c655acb55d4cafd328de04e0bad83`。
 
-验证地址：https://c9fb3973.urblo-site.pages.dev
+验证地址：https://7a3e185c.urblo-site.pages.dev
 
-Project body blocks Phase 1 (#95 data layer/renderers/public page, #96 admin Body editor) released 2026-10-15: migration 20261014120000_project_blocks.sql applied to production as recorded version 20261015005017 after Jay confirmed SHA-256 0e38da86…; all six function bodies match the file by md5; 91 project_media body rows copied to project_blocks (86 published), 17 drafts reshaped, project_media unchanged; merges 628233c deployed as immutable c9fb3973. Readback: all 17 published project pages render exactly the block sequence stored in project_blocks; Stone page Used in projects links intact; production admin gate passed 10 routes; immutable/apex/www bound smoke passed. Jay acceptance open.
+Project package import Phase 2 (#98) released 2026-10-15: urblo-project-package v1 JSON/zip contract, browser-side parse/upload/save through the existing Projects save action (no migration, no new endpoint), Import package entry for owner/admin/editor, colleague docs plus Claude Design prompt under docs/content-import. Merge eff2b17 deployed as immutable 7a3e185c; the first CI smoke attempt hit the post-deploy "/ returned 404" convergence flake and the re-run of the same run passed. Immutable/apex/www bound smoke, production admin gate (10 routes, Import package button visible) passed. No production import exercised; Jay acceptance open for Phase 1 and 2.
 
 CMS handoff: **revalidation_required**。QR: material_page_deployed。
 
