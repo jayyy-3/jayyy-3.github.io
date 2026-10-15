@@ -29,6 +29,7 @@ describe('admin quick guide parser', () => {
             'Save, Publish and Update live page',
             'Change an image on a project page',
             'Add or update a project and mark materials',
+            'Body blocks',
             'Edit a product',
             'Handle an enquiry or sample request',
             'Update company addresses and contact details',

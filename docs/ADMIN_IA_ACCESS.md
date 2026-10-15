@@ -116,9 +116,9 @@ Current launch removal model:
 
 | Area | Customer Editable | System Computed | Developer / Admin-Only |
 |---|---|---|---|
-| Project aggregate | title, summary, lead, location, date labels, collaborators, cover/hero media, facts, materials, ordered media, maps, hotspots, SEO, order | one private draft revision, slug uniqueness, timestamps, plain-language publish blockers | aggregate RPC, legacy migration source fields |
+| Project aggregate | title, summary, lead, location, date labels, collaborators, cover/hero media, facts, materials, ordered body blocks, maps, hotspots, SEO, order | one private draft revision, slug uniqueness, timestamps, plain-language publish blockers | aggregate RPC, legacy migration source fields |
 | Facts and claims | fact labels/values and display order | Required-content validation; no separate approval UI or review queue | claim taxonomy if later formalized |
-| Media blocks | cover/hero media, block type, selected media, hotspot map link, optional YouTube ID, block title, label, caption, and order | thumbnail preview, alt readiness, public-copy verification, usage records | Storage policy, create-only promotion/compensation, one-active-YouTube constraint |
+| Body blocks | cover/hero media; the 14 body block types (Heading, Text, Quote, Callout, Key numbers, Steps, Specification table, Comparison table, Stone cards, Image, Gallery, Image with material points, Video, Call to action): add at any position, fill in each block's fields, move, duplicate, remove | field limits and publish blockers from the shared block contract, image descriptions filled from the media item, Live-stone check for stone cards, thumbnail preview, public-copy verification | block contract and limits, Storage policy, create-only promotion/compensation, one video per Project |
 | Material points on an image | Mark materials on this image, linked or newly added material, where it is used, point note, direct point placement and dragging | validated x/y percentage coordinates derived from the image; the hidden map record follows its image block | raw coordinate storage, map records and calibration rules |
 
 ### Products

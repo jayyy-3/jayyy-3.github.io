@@ -490,7 +490,7 @@ Remember: assess this flow by an editor replacing a finish photograph and publis
 Review: Project material maps paired small hover labels with a sticky right-side inspector, which competed with the photograph and hid the Stone Library relationship in one direction only. Editors also had to build a separate map before it could appear as a page image.
 
 Jay's decisions:
-- Only Page images and video (Media sequence) images carry material points; the Hero image does not.
+- Only Page images and video (Media sequence) images carry material points; the Hero image does not. (Since 2026-10-14 these are the image blocks of the Body.)
 - Turning points off for an image deletes its points after a confirmation.
 - Stone pages order and highlight `Used in projects` cards by the currently selected finish.
 - The separate `Material maps and points` admin section is removed completely, without a read-only legacy list. No database migration is part of this change.
@@ -611,3 +611,5 @@ Rules (bold in scale, restrained in ingredients):
 - Call to action: ink hairlines above and below, card title, short copy and one or two buttons (primary black, secondary ghost). The page's closing CTA still follows.
 
 Remember: blocks carry meaning, not decoration. Photographs and facts lead; a block that has nothing visible to show renders nothing.
+
+Admin Body editor (PR 1B): the Projects editor's third section is **Body**. Each block is a collapsible card (type icon, `Block N · Type`, a one-line summary, move up/down, `Duplicate`, remove); new and duplicated blocks open, others start closed but stay mounted. `Add block` (end) and `Add block here` (between cards) open one panel listing the 14 types in Narrative, Evidence and Media and action groups with a one-line description; an unavailable type stays visible with its reason (one video per Project). Every field has a visible label and a character limit; repeating items (numbers, steps, rows, stones, gallery images) have visible move and `Remove` controls and an `N of up to M` count. Image blocks keep the image field, `Mark materials on this image` and the point editor; duplicating a points image creates a plain image of the same picture. A publish blocker opens and scrolls to the block that needs work.

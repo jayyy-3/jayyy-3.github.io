@@ -21,7 +21,6 @@ import {
   slugify,
   type ProjectAggregateDraft,
   type ProjectAggregateMappingContext,
-  type ProjectBlockDraft,
   type ProjectEditorSection,
   type ProjectFinishOption,
   type ProjectLifecycleStatus,
@@ -35,7 +34,6 @@ import {
   type ProjectStoneFinishCapabilityOption,
   type ProjectStoneFinishImageOption,
 } from "../../../features/projects/projectAggregate";
-import { createDefaultBlockContent } from "../../../features/blocks/schema";
 import InlineMediaField from "./InlineMediaField";
 import ProjectDraftPreview from "./ProjectDraftPreview";
 import {
@@ -46,11 +44,10 @@ import {
   TextField,
 } from "./sections/EditorControls";
 import MaterialsSection from "./sections/MaterialsSection";
-import MediaSection from "./sections/MediaSection";
+import BodySection from "./sections/BodySection";
 import {
   ProjectMutationDisabledContext,
   fieldClass,
-  mediaBlockId,
   textareaClass,
 } from "./sections/editorContext";
 
@@ -92,7 +89,7 @@ const editorSections: readonly {
 }[] = [
   { id: "overview", title: "Hero and overview" },
   { id: "facts", title: "Project information" },
-  { id: "media", title: "Page images and video" },
+  { id: "body", title: "Body" },
   { id: "materials", title: "Material schedule" },
 ];
 
@@ -122,6 +119,8 @@ export default function ProjectEditor({
   showReload,
 }: ProjectEditorProps) {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  // A new object on every blocker jump, so choosing the same block again still reveals it.
+  const [revealBlock, setRevealBlock] = useState<{ key: string } | null>(null);
   const [collapsedSections, setCollapsedSections] = useState<
     Set<ProjectEditorSection>
   >(() => new Set());
@@ -155,7 +154,7 @@ export default function ProjectEditor({
   const sectionCounts: Record<ProjectEditorSection, number | null> = {
     overview: null,
     facts: draft.facts.length,
-    media: draft.blocks.length,
+    body: draft.blocks.length,
     materials: draft.materials.length,
   };
 
@@ -322,22 +321,14 @@ export default function ProjectEditor({
     scrollAfterRender("project-materials");
   }
 
-  function addMediaBlock(type: "image" | "video") {
-    expandSection("media");
-    const key = createProjectDraftKey("block");
-    const block = {
-      key,
-      id: null,
-      type,
-      content: createDefaultBlockContent(type),
-      sortOrder: draft.blocks.length,
-    } as ProjectBlockDraft;
-    onChange({ ...draft, blocks: [...draft.blocks, block] });
-    scrollAfterRender(mediaBlockId(key));
-  }
-
   function jumpToBlocker(blocker: ProjectPublishBlocker) {
     setIsPreviewOpen(false);
+    const blockKey = blocker.section === "body" ? blockerBlockKey(blocker.id, draft) : null;
+    if (blockKey) {
+      expandSection("body");
+      setRevealBlock({ key: blockKey });
+      return;
+    }
     openAndScroll(blocker.section);
   }
 
@@ -661,7 +652,7 @@ export default function ProjectEditor({
               </div>
             </ProjectSection>
 
-            <MediaSection
+            <BodySection
               draft={draft}
               context={context}
               media={media}
@@ -675,10 +666,10 @@ export default function ProjectEditor({
               isSaving={isSaving}
               showReload={showReload}
               hasPendingMedia={hasPendingMedia}
-              open={!collapsedSections.has("media")}
-              onToggle={() => toggleSection("media")}
+              open={!collapsedSections.has("body")}
+              revealBlock={revealBlock}
+              onToggle={() => toggleSection("body")}
               onChange={onChange}
-              onAddBlock={addMediaBlock}
               buildMaterial={buildMaterial}
               mediaFieldDisabled={mediaFieldDisabled}
               onMediaPendingChange={handleMediaPendingChange}
@@ -955,6 +946,12 @@ function LifecycleLabel({
       {meta[status].label}
     </span>
   );
+}
+
+/** The body block a publish blocker names (`media-<key>`, `block-<key>`, `block-stone-<key>`). */
+function blockerBlockKey(blockerId: string, draft: ProjectAggregateDraft): string | null {
+  const match = /^(?:media|block|block-stone)-(.+)$/.exec(blockerId);
+  return match && draft.blocks.some((block) => block.key === match[1]) ? match[1] : null;
 }
 
 function sectionId(section: ProjectEditorSection) {
