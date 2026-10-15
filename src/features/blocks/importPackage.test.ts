@@ -367,6 +367,26 @@ describe('colleague documents stay in step with the format', () => {
             return variantId ? `${finishId}__${variantId}` : finishId;
         });
 
+    test('both list the dated live Stone Library catalogue from its single committed source', () => {
+        const catalogue = JSON.parse(readFileSync(resolve(root, 'docs/content-import/stone-catalogue-2026-10-15.json'), 'utf8')) as {
+            observedAt: string;
+            stones: { slug: string; name: string; finishes: string[] }[];
+        };
+        expect(catalogue.observedAt).toBe('2026-10-15');
+        expect(catalogue.stones).toHaveLength(18);
+        for (const doc of [readme, prompt]) {
+            expect(doc).toContain('Live Stone Library on 2026-10-15');
+            expect(doc).toMatch(/copy (?:the|its) slug from/);
+        }
+        for (const stone of catalogue.stones) {
+            expect(readme).toContain(`| \`${stone.slug}\` | ${stone.name} | ${stone.finishes.map((finish) => `\`${finish}\``).join(', ')} |`);
+            expect(prompt).toContain(`  - \`${stone.slug}\` (${stone.name}): ${stone.finishes.join(', ')}`);
+        }
+        const listed = (doc: string) => [...doc.slice(doc.indexOf('Live Stone Library on 2026-10-15')).split(/\n#{2,3} /)[0].matchAll(/^(?:\| `| {2}- `)([a-z0-9-]+)` (?:\| [^|]+ \| `|\()/gm)].map((match) => match[1]);
+        expect(listed(readme)).toEqual(catalogue.stones.map((stone) => stone.slug));
+        expect(listed(prompt)).toEqual(catalogue.stones.map((stone) => stone.slug));
+    });
+
     test('both embed the complete example package', () => {
         expect(readme).toContain(exampleText.trim());
         expect(prompt).toContain(exampleText.trim());

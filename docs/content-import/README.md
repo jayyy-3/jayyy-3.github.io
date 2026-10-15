@@ -152,7 +152,7 @@ Not in the package on purpose: carbon details, Live/Draft status, review states 
 - `stone` is the Stone Library address: the `<slug>` in `https://urblo.com.au/stone-library/<slug>`, e.g. `blueocean` or `alpine-white`.
 - `finish` is a finish key from the table below. The importer also accepts the finish name ("Bush Hammered") and ignores case, spaces and hyphens.
 - Only stones that are Live in the Stone Library are linked. Anything else is imported as "stone to choose" and stops Publish until an editor picks the stone.
-- For a stone with several variants (Golden Crust Light/Dark, Tuscany Vein Cut/Cross Cut) the first variant that offers the finish is chosen; the editor can change it.
+- For a stone with several variants (for example Golden Crust Light/Dark or Tuscany Vein Cut/Cross Cut) the first variant that offers the finish is chosen; the editor can change it.
 
 Finish keys (from the finish definitions, 2026-10-15):
 
@@ -171,22 +171,28 @@ Finish keys (from the finish definitions, 2026-10-15):
 | `sparrow_peck` | Sparrow Peck |
 | `sandblasted` | Sandblasted |
 
-Stones in the Stone Library catalogue snapshot bundled with the website (the Live Stone Library may have more; always copy the slug from the stone's page):
+Live Stone Library on 2026-10-15 (18 published stones; source: [`stone-catalogue-2026-10-15.json`](stone-catalogue-2026-10-15.json)). For any stone added after this date, copy the slug from the stone's page on the live Stone Library. Note that some slugs differ from the stone's name (Steel Blue is `blueocean`, Mica Grey is `harcourt`, Verdant Grey is `v-erdant-grey`).
 
-| Slug | Stone | Type | Finishes offered |
-| --- | --- | --- | --- |
-| `alpine-white` | Alpine White | Granite | `flamed`, `sawn`, `honed`, `polished` |
-| `angola-black` | Angola Black | Granite | `flamed`, `sawn`, `honed`, `polished`, `bush_hammered` |
-| `blueocean` | BlueOcean | Bluestone | `sawn`, `honed`, `bush_hammered`, `combed`, `rock_face`, `rippling__fine`, `rippling__rough` |
-| `golden-crust` | Golden Crust (Light, Dark) | Granite | `flamed`, `sawn`, `honed`, `polished` |
-| `harcourt` | Harcourt | Granite | `flamed`, `sawn`, `honed`, `polished`, `bush_hammered`, `combed`, `rippling`, `rock_face`, `sparrow_peck`, `sandblasted` |
-| `honey-comb` | Honey Comb | Bluestone | `sawn`, `honed` |
-| `ivory-sand` | Ivory Sand | Sandstone | `honed`, `bush_hammered`, `sparrow_peck` |
-| `juparana` | Juparana | Granite | `flamed`, `sawn`, `honed`, `polished` |
-| `new-grey` | New Grey | Granite | `flamed`, `sawn`, `honed`, `polished` |
-| `tan-brown` | Tan Brown | Granite | `flamed`, `sawn`, `honed`, `polished` |
-| `tuscany` | Tuscany (Vein Cut, Cross Cut) | Travertine | `honed` |
-| `zen-grey` | Zen Grey | Granite | `flamed`, `sawn`, `honed`, `polished` |
+| Slug | Stone | Finishes offered |
+| --- | --- | --- |
+| `alpine-white` | Alpine White | `flamed`, `honed`, `polished`, `sawn` |
+| `angola-black` | Angola Black | `bush_hammered`, `flamed`, `honed`, `polished`, `sawn` |
+| `ausdream` | Ausdream | `honed` |
+| `ausred` | Ausred | `honed` |
+| `golden-crust` | Golden Crust | `flamed`, `honed`, `polished`, `sawn` |
+| `honey-comb` | Honey Comb | `honed`, `sawn` |
+| `ivory-sand` | Ivory Sand | `bush_hammered`, `honed`, `sparrow_peck` |
+| `juparana` | Juparana | `flamed`, `honed`, `polished`, `sawn` |
+| `harcourt` | Mica Grey | `bush_hammered`, `combed`, `flamed`, `honed`, `polished`, `rippling`, `rock_face`, `sandblasted`, `sawn`, `sparrow_peck` |
+| `minos-grey` | Minos Grey | `honed` |
+| `new-grey` | New Grey | `flamed`, `honed`, `polished`, `sawn` |
+| `blueocean` | Steel Blue | `bush_hammered`, `combed`, `honed`, `rippling__fine`, `rippling__rough`, `rock_face`, `sawn` |
+| `tan-brown` | Tan Brown | `flamed`, `honed`, `polished`, `sawn` |
+| `tanier-pink` | Tanier Pink | `honed` |
+| `tuscany` | Tuscany | `honed` |
+| `v-erdant-grey` | Verdant Grey | `flamed`, `honed` |
+| `viscount` | Viscount | `flamed`, `honed` |
+| `zen-grey` | Zen Grey | `flamed`, `honed`, `polished`, `sawn` |
 
 ## Blocks
 

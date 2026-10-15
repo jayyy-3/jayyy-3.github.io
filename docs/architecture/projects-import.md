@@ -22,4 +22,4 @@ Project content package import (NOW-PROJECT-IMPORT-001, 2026-10-15). Format and 
 
 ## Offline check
 
-`npm run agent:project-package -- <file.json|file.zip>` runs the same parser and zip reader under `tsx`, maps with the bundled `data/clean/stone_library.json` snapshot and runs `functions/_lib/blocks.js` on every block. No network or writes.
+`npm run agent:project-package -- <file.json|file.zip>` runs the same parser and zip reader under `tsx`, maps with the bundled `data/clean/stone_library.json` snapshot plus the dated live list `docs/content-import/stone-catalogue-2026-10-15.json` (the single source of the stone list in the README and Claude Design prompt) and runs `functions/_lib/blocks.js` on every block. No network or writes.

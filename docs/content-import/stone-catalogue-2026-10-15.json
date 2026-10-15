@@ -1,0 +1,174 @@
+{
+  "observedAt": "2026-10-15",
+  "source": "Live Stone Library read from production on 2026-10-15 (18 published stones). Newer stones: copy the slug from the stone's page on https://urblo.com.au/stone-library.",
+  "stones": [
+    {
+      "slug": "alpine-white",
+      "name": "Alpine White",
+      "finishes": [
+        "flamed",
+        "honed",
+        "polished",
+        "sawn"
+      ]
+    },
+    {
+      "slug": "angola-black",
+      "name": "Angola Black",
+      "finishes": [
+        "bush_hammered",
+        "flamed",
+        "honed",
+        "polished",
+        "sawn"
+      ]
+    },
+    {
+      "slug": "ausdream",
+      "name": "Ausdream",
+      "finishes": [
+        "honed"
+      ]
+    },
+    {
+      "slug": "ausred",
+      "name": "Ausred",
+      "finishes": [
+        "honed"
+      ]
+    },
+    {
+      "slug": "golden-crust",
+      "name": "Golden Crust",
+      "finishes": [
+        "flamed",
+        "honed",
+        "polished",
+        "sawn"
+      ]
+    },
+    {
+      "slug": "honey-comb",
+      "name": "Honey Comb",
+      "finishes": [
+        "honed",
+        "sawn"
+      ]
+    },
+    {
+      "slug": "ivory-sand",
+      "name": "Ivory Sand",
+      "finishes": [
+        "bush_hammered",
+        "honed",
+        "sparrow_peck"
+      ]
+    },
+    {
+      "slug": "juparana",
+      "name": "Juparana",
+      "finishes": [
+        "flamed",
+        "honed",
+        "polished",
+        "sawn"
+      ]
+    },
+    {
+      "slug": "harcourt",
+      "name": "Mica Grey",
+      "finishes": [
+        "bush_hammered",
+        "combed",
+        "flamed",
+        "honed",
+        "polished",
+        "rippling",
+        "rock_face",
+        "sandblasted",
+        "sawn",
+        "sparrow_peck"
+      ]
+    },
+    {
+      "slug": "minos-grey",
+      "name": "Minos Grey",
+      "finishes": [
+        "honed"
+      ]
+    },
+    {
+      "slug": "new-grey",
+      "name": "New Grey",
+      "finishes": [
+        "flamed",
+        "honed",
+        "polished",
+        "sawn"
+      ]
+    },
+    {
+      "slug": "blueocean",
+      "name": "Steel Blue",
+      "finishes": [
+        "bush_hammered",
+        "combed",
+        "honed",
+        "rippling__fine",
+        "rippling__rough",
+        "rock_face",
+        "sawn"
+      ]
+    },
+    {
+      "slug": "tan-brown",
+      "name": "Tan Brown",
+      "finishes": [
+        "flamed",
+        "honed",
+        "polished",
+        "sawn"
+      ]
+    },
+    {
+      "slug": "tanier-pink",
+      "name": "Tanier Pink",
+      "finishes": [
+        "honed"
+      ]
+    },
+    {
+      "slug": "tuscany",
+      "name": "Tuscany",
+      "finishes": [
+        "honed"
+      ]
+    },
+    {
+      "slug": "v-erdant-grey",
+      "name": "Verdant Grey",
+      "finishes": [
+        "flamed",
+        "honed"
+      ]
+    },
+    {
+      "slug": "viscount",
+      "name": "Viscount",
+      "finishes": [
+        "flamed",
+        "honed"
+      ]
+    },
+    {
+      "slug": "zen-grey",
+      "name": "Zen Grey",
+      "finishes": [
+        "flamed",
+        "honed",
+        "polished",
+        "sawn"
+      ]
+    }
+  ]
+}

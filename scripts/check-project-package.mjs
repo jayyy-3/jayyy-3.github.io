@@ -4,8 +4,9 @@
 //   npm run agent:project-package -- <project.json | package.zip>
 // Runs the same parser and zip reader as the admin import, then the protected Function's own
 // block validator (functions/_lib/blocks.js) on every mapped block. Stones and finishes resolve
-// against the bundled Stone Library snapshot (data/clean/stone_library.json); the Live Stone
-// Library in the admin is authoritative. No network, no credentials, no writes.
+// against the bundled snapshot (data/clean/stone_library.json) plus the dated live list in
+// docs/content-import/stone-catalogue-2026-10-15.json; the Live Stone Library in the admin is
+// authoritative. No network, no credentials, no writes.
 import { readFileSync, statSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { argv, exit } from 'node:process'
@@ -46,6 +47,20 @@ function offlineCatalogue() {
       }
     })
   })
+  // The dated live Stone Library list the colleague docs publish: a live stone missing from the
+  // older bundled snapshot still resolves, with one variant offering its listed finishes.
+  const live = JSON.parse(readFileSync(resolve(root, 'docs/content-import/stone-catalogue-2026-10-15.json'), 'utf8'))
+  for (const stone of live.stones) {
+    if (stones.some((entry) => entry.key === stone.slug)) continue
+    const stoneId = stones.length + 1
+    const variantId = stoneId * 100
+    stones.push({ id: stoneId, key: stone.slug, label: stone.name, status: 'published' })
+    variants.push({ id: variantId, stoneGroupId: stoneId, status: 'published', sortOrder: 0 })
+    for (const key of stone.finishes) {
+      const finishDefinitionId = finishIdByKey.get(key)
+      if (finishDefinitionId) capabilities.push({ stoneVariantId: variantId, finishDefinitionId, capability: 'yes' })
+    }
+  }
   return { stones, variants, finishes, capabilities }
 }
 
@@ -90,8 +105,8 @@ if (parsed) {
   lines.push(`Page address: /projects/${draft.project.slug}`)
   lines.push(`Blocks: ${draft.blocks.map((block) => block.type).join(', ') || 'none'}`)
   lines.push(`Images: ${imageFiles.filter((image) => files.has(image.file)).length} in package, ${new Set(pendingImages.map((use) => use.file ?? use.path)).size} to add later`)
-  lines.push(`Stones: ${parsed.stones.length - unresolvedStones.length} found in the bundled Stone Library snapshot, ${unresolvedStones.length} to check`)
-  for (const use of unresolvedStones) warnings.push({ path: use.path, message: use.reason === 'stone' ? `"${use.stone}" is not in the bundled Stone Library snapshot; check it on the website.` : `"${use.finish}" is not a known finish key.` })
+  lines.push(`Stones: ${parsed.stones.length - unresolvedStones.length} found in the Stone Library list, ${unresolvedStones.length} to check`)
+  for (const use of unresolvedStones) warnings.push({ path: use.path, message: use.reason === 'stone' ? `"${use.stone}" is not in the Stone Library list of 2026-10-15; check it on the website.` : `"${use.finish}" is not a known finish key.` })
 }
 for (const issue of issues) lines.push(`ERROR ${issue.path}: ${issue.message}`)
 for (const warning of warnings) lines.push(`WARNING ${warning.path}: ${warning.message}`)

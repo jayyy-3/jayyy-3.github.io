@@ -177,20 +177,26 @@ Do not repeat the title, summary, lead, client, designer or contractor inside bl
 
 - `stone` is the Stone Library address: the `<slug>` in `https://urblo.com.au/stone-library/<slug>`. Use only stones named in the material; never guess one from a photo.
 - `finish` is one of these keys: `flamed`, `sawn`, `honed`, `polished`, `bush_hammered`, `combed`, `rippling`, `rippling__fine`, `rippling__rough`, `rock_face`, `sparrow_peck`, `sandblasted`.
-- Known stones (slug: finishes offered). The website may have newer stones; for a stone not listed, copy its slug from its Stone Library page.
-  - `alpine-white`: flamed, sawn, honed, polished
-  - `angola-black`: flamed, sawn, honed, polished, bush_hammered
-  - `blueocean`: sawn, honed, bush_hammered, combed, rock_face, rippling__fine, rippling__rough
-  - `golden-crust`: flamed, sawn, honed, polished
-  - `harcourt`: flamed, sawn, honed, polished, bush_hammered, combed, rippling, rock_face, sparrow_peck, sandblasted
-  - `honey-comb`: sawn, honed
-  - `ivory-sand`: honed, bush_hammered, sparrow_peck
-  - `juparana`: flamed, sawn, honed, polished
-  - `new-grey`: flamed, sawn, honed, polished
-  - `tan-brown`: flamed, sawn, honed, polished
-  - `tuscany`: honed
-  - `zen-grey`: flamed, sawn, honed, polished
-- If the material uses a trade or project name for a stone (for example "Steel Blue") and you cannot match it to a slug with certainty, still use your best slug in `stone` and say nothing else; the website flags stones it cannot find so an editor chooses them.
+- Live Stone Library on 2026-10-15, 18 stones (slug (name): finishes offered). For any stone added after this date, copy its slug from its page on the live Stone Library. Some slugs differ from the name: Steel Blue is `blueocean`, Mica Grey is `harcourt`, Verdant Grey is `v-erdant-grey`.
+  - `alpine-white` (Alpine White): flamed, honed, polished, sawn
+  - `angola-black` (Angola Black): bush_hammered, flamed, honed, polished, sawn
+  - `ausdream` (Ausdream): honed
+  - `ausred` (Ausred): honed
+  - `golden-crust` (Golden Crust): flamed, honed, polished, sawn
+  - `honey-comb` (Honey Comb): honed, sawn
+  - `ivory-sand` (Ivory Sand): bush_hammered, honed, sparrow_peck
+  - `juparana` (Juparana): flamed, honed, polished, sawn
+  - `harcourt` (Mica Grey): bush_hammered, combed, flamed, honed, polished, rippling, rock_face, sandblasted, sawn, sparrow_peck
+  - `minos-grey` (Minos Grey): honed
+  - `new-grey` (New Grey): flamed, honed, polished, sawn
+  - `blueocean` (Steel Blue): bush_hammered, combed, honed, rippling__fine, rippling__rough, rock_face, sawn
+  - `tan-brown` (Tan Brown): flamed, honed, polished, sawn
+  - `tanier-pink` (Tanier Pink): honed
+  - `tuscany` (Tuscany): honed
+  - `v-erdant-grey` (Verdant Grey): flamed, honed
+  - `viscount` (Viscount): flamed, honed
+  - `zen-grey` (Zen Grey): flamed, honed, polished, sawn
+- If the material uses a trade or project name for a stone (for example a supplier code) and you cannot match it to a slug with certainty, still use your best slug in `stone` and say nothing else; the website flags stones it cannot find so an editor chooses them.
 
 ## Self-check before you export
 
