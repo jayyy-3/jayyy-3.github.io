@@ -1023,11 +1023,19 @@ forbidMatches(
   functionPath,
   "browser key in server Function",
 );
+// NOW-PUBLISH-COPY-BUDGET-001: the public copy is a create-only server-side Storage copy
+// (no x-upsert header), so an existing destination is never overwritten.
 requireMatches(
   server,
-  /upsert:\s*false/,
+  /\.from\(PRIVATE_MEDIA_BUCKET\)\s*\.copy\(sourcePath, destinationPath, \{\s*destinationBucket: PUBLIC_MEDIA_BUCKET,?\s*\}\)/,
   functionPath,
-  "create-only public media copy",
+  "create-only server-side public media copy",
+);
+forbidMatches(
+  server,
+  /upsert:\s*true|x-upsert/i,
+  functionPath,
+  "overwriting public media copy",
 );
 requireMatches(
   server,
@@ -1368,11 +1376,75 @@ requireIncludes(
   functionPath,
   "aggregate byte budget",
 );
+// The bytes no longer pass through the Function, so the magic-byte sniff is replaced by
+// the stored content type: declared type before the copy, stored type of the copy after.
+requireMatches(
+  server,
+  /declaredMime !== null && !PROJECT_IMAGE_MIME_TYPES\.has\(declaredMime\)/,
+  functionPath,
+  "declared image type check before copying",
+);
+requireMatches(
+  server,
+  /!PROJECT_IMAGE_MIME_TYPES\.has\(storedMime\)[\s\S]{0,400}storedMime !== copy\.declaredMime/,
+  functionPath,
+  "stored copy type must be a supported image and equal the declared type",
+);
+requireMatches(
+  server,
+  /storedBytes !== copy\.declaredBytes/,
+  functionPath,
+  "stored copy size must equal the declared size",
+);
+requireMatches(
+  server,
+  /storedBytes > MAX_PROJECT_IMAGE_BYTES/,
+  functionPath,
+  "stored copy per-image size limit",
+);
+requireMatches(
+  server,
+  /storedBytesTotal > MAX_PROJECT_MEDIA_TOTAL_BYTES/,
+  functionPath,
+  "stored copy total size limit",
+);
+requireMatches(
+  server,
+  /\.from\(PUBLIC_MEDIA_BUCKET\)\s*\.list\(destinationFolder,/,
+  functionPath,
+  "single nonce-folder listing verifies every copy",
+);
+forbidMatches(
+  server,
+  /\.download\(|\.upload\(|digestBlob/,
+  functionPath,
+  "image bytes passing through the Projects Function",
+);
+// Subrequest budget: a named constant derived from the platform limit, checked before
+// any Storage write.
 requireIncludes(
   server,
-  "isSupportedImageBlob",
+  "const FUNCTION_SUBREQUEST_LIMIT = 50;",
   functionPath,
-  "downloaded image signature validation",
+  "Cloudflare subrequest limit constant",
+);
+requireIncludes(
+  server,
+  "const PUBLISH_FIXED_SUBREQUESTS = 15;",
+  functionPath,
+  "worst-case fixed Publish subrequests",
+);
+requireMatches(
+  server,
+  /PUBLISH_STORAGE_COPY_BUDGET =\s*FUNCTION_SUBREQUEST_LIMIT - PUBLISH_FIXED_SUBREQUESTS - PUBLISH_SUBREQUEST_MARGIN/,
+  functionPath,
+  "derived storage copy budget",
+);
+requireMatches(
+  server,
+  /assertPublishableMedia\(media\);\s*assertPublishCopyBudget\(media\);[\s\S]{0,400}publishAggregate\(/,
+  functionPath,
+  "pre-flight copy budget before Publish writes",
 );
 requireMatches(
   server,
@@ -1390,7 +1462,7 @@ const attemptedRegistrationPosition = server.indexOf(
   "newlyCreated.push(attemptedCopy)",
 );
 const publicUploadPosition = server.indexOf(
-  "const upload = await supabase.storage",
+  "const copy = await supabase.storage",
 );
 if (
   attemptedRegistrationPosition < 0 ||
@@ -1398,14 +1470,20 @@ if (
   attemptedRegistrationPosition > publicUploadPosition
 ) {
   failures.push(
-    `${functionPath}: attempted destination must be registered before Storage upload`,
+    `${functionPath}: attempted destination must be registered before Storage copy`,
   );
 }
 requireIncludes(
   server,
-  "${nonce}-${fileName}",
+  "return `${destinationPrefix}/${nonce}`;",
   functionPath,
-  "nonce-bound public destination path",
+  "nonce-scoped public destination folder",
+);
+requireIncludes(
+  server,
+  "return `${destinationFolder}/${asset.id}-${version}-${fileName}`;",
+  functionPath,
+  "media- and version-bound public destination name",
 );
 requireIncludes(
   server,
@@ -1427,10 +1505,74 @@ requireIncludes(
 );
 requireMatches(
   server,
-  /\.eq\(['"]bucket['"],\s*PRIVATE_MEDIA_BUCKET\)[\s\S]{0,160}\.eq\(['"]object_path['"],\s*source\.sourcePath\)/,
+  /\.eq\(['"]bucket['"],\s*PRIVATE_MEDIA_BUCKET\)[\s\S]{0,160}\.in\(['"]object_path['"],\s*sourcePaths\)/,
   functionPath,
-  "reference-aware private source cleanup",
+  "reference-aware batched private source cleanup",
 );
+requireMatches(
+  server,
+  /\.eq\(['"]bucket['"],\s*PUBLIC_MEDIA_BUCKET\)[\s\S]{0,160}\.in\(['"]object_path['"],\s*paths\)/,
+  functionPath,
+  "reference-aware batched public copy compensation",
+);
+// Cleanup and compensation cost must not grow with the number of images: no awaited call
+// inside any loop of either function.
+function functionBody(source, signature) {
+  const start = source.indexOf(signature);
+  if (start < 0) return "";
+  let depth = 0;
+  for (let index = source.indexOf("{", source.indexOf(")", start)); index < source.length; index += 1) {
+    if (source[index] === "{") depth += 1;
+    if (source[index] === "}" && --depth === 0) return source.slice(start, index + 1);
+  }
+  return "";
+}
+function loopBodies(body) {
+  const loops = [];
+  for (const match of body.matchAll(/\b(?:for|while)\s*\(/g)) {
+    let depth = 0;
+    let index = match.index;
+    for (; index < body.length; index += 1) {
+      if (body[index] === "(") depth += 1;
+      if (body[index] === ")" && --depth === 0) break;
+    }
+    const rest = body.slice(index + 1);
+    const statement = rest.trimStart().startsWith("{")
+      ? functionBody(rest, "")
+      : rest.slice(0, rest.indexOf(";") + 1);
+    loops.push(statement);
+  }
+  return loops;
+}
+for (const signature of [
+  "async function cleanupPublishedPrivateSources(",
+  "export async function compensatePublicCopies(",
+]) {
+  const body = functionBody(server, signature);
+  if (!body) failures.push(`${functionPath}: missing ${signature}`);
+  if ((body.match(/await supabase/g) || []).length !== 2) {
+    failures.push(`${functionPath}: ${signature} must make exactly one reference query and one removal`);
+  }
+  if (loopBodies(body).some((loop) => /\bawait\b/.test(loop))) {
+    failures.push(`${functionPath}: ${signature} must not make per-image subrequests`);
+  }
+}
+// The audit record precedes cleanup work, so it survives a request that runs out of
+// subrequests while cleaning up.
+const cleanupBody = server.slice(server.indexOf("async function cleanupPublishedPrivateSources("));
+if (
+  !/phase: "planned"[\s\S]*?\.from\("media_assets"\)/.test(cleanupBody.slice(0, cleanupBody.indexOf("export async function prepareMediaPromotions(")))
+) {
+  failures.push(`${functionPath}: the media_cleanup audit must be recorded before the cleanup reference query`);
+}
+const compensationBody = server.slice(server.indexOf("} catch (error) {\n    if (!newlyCreated.length) throw error;"));
+if (
+  compensationBody.indexOf('phase: "planned"') < 0 ||
+  compensationBody.indexOf("compensatePublicCopies(supabase, newlyCreated)") < 0 ||
+  compensationBody.indexOf('phase: "planned"') > compensationBody.indexOf("compensatePublicCopies(supabase, newlyCreated)")
+) {
+  failures.push(`${functionPath}: the publish_compensation audit must be recorded before compensation`);
+}
 
 for (const table of [
   "projects",
