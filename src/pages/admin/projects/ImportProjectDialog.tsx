@@ -18,6 +18,7 @@ import {
   type ParsedProjectPackage,
 } from "../../../features/blocks/importPackage";
 import { readPackageZip } from "../../../features/blocks/importZip";
+import { PUBLISH_NEW_IMAGE_BUDGET, packagePublishBudgetMessage } from "../../../features/blocks/publishBudget";
 import type {
   ProjectAggregateDraft,
   ProjectMediaOption,
@@ -200,6 +201,9 @@ export default function ImportProjectDialog({
           ? [{ path: "images", message: `No images came with this file. Add ${plural(missingFiles.length, "image")} in the editor after importing.` }]
           : []),
       ...unusedFiles.map((file) => ({ path: file, message: "This image is not used by any block, so it will not be imported." })),
+      ...(imageFiles.length + withoutFile.length > PUBLISH_NEW_IMAGE_BUDGET
+        ? [{ path: "images", message: packagePublishBudgetMessage(imageFiles.length + withoutFile.length) }]
+        : []),
       ...unresolved.map((use) => ({
         path: use.path,
         message:

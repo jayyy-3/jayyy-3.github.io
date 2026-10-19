@@ -145,6 +145,7 @@ Not in the package on purpose: carbon details, Live/Draft status, review states 
 - Leave `file` out (or export JSON only) when the photo is not ready. The block is imported with its description and the image is listed as "to add later".
 - A file used in several places is uploaded once; each place keeps its own `alt`.
 - Each image up to 10 MB, long edge at least 1600 px. Up to 50 different images and 100 MB per zip.
+- The website publishes up to 30 new images at a time: a package with more imports fine, but publish with up to 30 images first, then add the rest and publish again.
 - Original photos are kept at full quality; the website prepares screen sizes automatically.
 
 ### Stones: `{ "stone", "finish" }`

@@ -1557,6 +1557,20 @@ for (const signature of [
     failures.push(`${functionPath}: ${signature} must not make per-image subrequests`);
   }
 }
+// The editor and the import dialog warn about the copy budget before Publish, using one
+// shared constant (mirrored by the Function; tests/publish-budget.test.ts asserts equality).
+{
+  const budgetPath = "src/features/blocks/publishBudget.ts";
+  const budget = readRequired(budgetPath);
+  requireIncludes(budget, "export const PUBLISH_NEW_IMAGE_BUDGET = 30;", budgetPath, "shared publish image budget");
+  const dialogPath = "src/pages/admin/projects/ImportProjectDialog.tsx";
+  const dialog = readRequired(dialogPath);
+  requireMatches(dialog, />\s*PUBLISH_NEW_IMAGE_BUDGET[\s\S]{0,160}packagePublishBudgetMessage\(/, dialogPath, "import review copy-budget warning");
+  const aggregatePath = "src/features/projects/projectAggregate.ts";
+  const aggregate = readRequired(aggregatePath);
+  requireMatches(aggregate, /newImageCount > PUBLISH_NEW_IMAGE_BUDGET[\s\S]{0,160}projectPublishBudgetMessage\(newImageCount\)/, aggregatePath, "editor publish note for the copy budget");
+  forbidMatches(dialog + aggregate, /\b30 new images\b/, `${dialogPath} / ${aggregatePath}`, "hard-coded publish image budget in editor copy");
+}
 // The audit record precedes cleanup work, so it survives a request that runs out of
 // subrequests while cleaning up.
 const cleanupBody = server.slice(server.indexOf("async function cleanupPublishedPrivateSources("));
