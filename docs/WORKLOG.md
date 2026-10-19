@@ -1,6 +1,6 @@
 # WORKLOG — current execution evidence
 
-Last updated: 2026-10-01
+Last updated: 2026-10-15
 
 Historical evidence is immutable and is not current task state. Current state is generated from `docs/agent/status.json` and `docs/agent/tasks.json`.
 
@@ -762,6 +762,18 @@ Scope: reviewer acceptance and release of PR #98 (Phase 2 of the Project blocks 
 - Follow-up flagged: extend the post-deploy readiness wait to page routes so the merge pipeline stops flaking on the first page request.
 - Not verified: no import was run on production (isolated database only); Jay's acceptance of Phase 1 and Phase 2 remains open.
 - Cleanup: the temporary plan TMP-project-import was deleted after acceptance review.
+
+## 2026-10-15 — Post-deploy page readiness wait (NOW-PROJECT-IMPORT-001 release follow-up)
+
+Scope: Jay asked on 2026-10-15 to extend the CI readiness wait so the "Verify immutable deployment" step stops failing on the first page request; tooling change on `claude/deploy-page-readiness`, PR against `main`, no merge, no deployment, no production write.
+
+- Cause: `scripts/check-cloudflare-preview-smoke.mjs --wait-for-functions` waited only for `/api/enquiries` (`waitForDeploymentFunctions`). On the PR #95 and #96 first attempts and production run `38679742624` (main `eff2b17`) the Functions were ready but the first `GET /` answered 404 for a few seconds, failing "/ returned 404, expected 200"; each manual re-run passed.
+- Change: `scripts/_lib/deployment-readiness.mjs` adds `waitForDeploymentPages` (`readinessPagePaths` = `/` and `/projects`, `pageShellReady`), the same bounded loop as the Function wait: 120 s budget, 5 s backoff, 12 s request timeout, immutable origin only, GET with `redirect: 'manual'`, no headers or body; ready means every path returns 200 `text/html` with `<div id="root"></div>` and a `/assets/*.js` reference on three consecutive attempts; HTML 200-without-shell/404/5xx/edge-error and transport errors retry and reset the window, redirects and 401/403/429 fail immediately, diagnostics come from the existing `responseDiagnostic` (no body text). The smoke calls it right after the Function wait and then runs every existing assertion unchanged (`assertHtmlShell`, edge head, asset graph, redirects, Functions). `.github/workflows/deploy.yml` is unchanged.
+- Guards: `scripts/check-deployment-readiness.mjs` (graph node `deployment-readiness`) now also reproduces run 38679742624 (`/` 404 twice, then ready: 8 fetches, 5 logged attempts, ready 3/3), `/projects` lagging alone (PR 1A Preview `25f121b5`), persistent 404 timeout at the budget (6 attempts), a 503 and a stale non-shell 200 resetting the stability window, immediate failure for 301/302/401/403/429, a transport error retried without leaking its message, non-immutable origins rejected before any fetch, and a non-root-relative path rejected. `tests/domain-convergence.test.ts` is untouched and passes (7 tests).
+- Docs: `docs/architecture/delivery.md` keeps a one-line pointer (the rule file was 8,164 of 8,192 bytes); the readiness contract and the historical PR #6 runtime bullet (moved verbatim) live in the new on-demand reference `docs/architecture/delivery-readiness.md`, indexed in `docs/ARCHITECTURE.md` and the `delivery` module references.
+- Checks on this tree: `node scripts/check-deployment-readiness.mjs`, `npx vitest run tests/domain-convergence.test.ts`, `npx eslint` on the three scripts, `git diff --check`, `agent:check`, `agent:state`; read-only workstation `agent:cloudflare-preview-smoke -- --base-url https://7a3e185c.urblo-site.pages.dev --wait-for-functions` (the current production immutable deployment) passed, logging Function readiness 3/3 then `Page readiness attempt 1..3: ready n/3; / /projects status=200 body=spa-shell`; clean Node 20 `npm run gate` PASSED all checks on this tree first time (`deployment-readiness` 37 ms).
+- Harness repair found on the way: `agent:check` failed on `main` `a16cb56` because NOW-PROJECT-IMPORT-001 `files` listed the deleted temporary Phase 2 plan as a path (the first entry in `docs/agent/tasks.json`); the entry was removed (the authorization prose still cites the plan), nothing else in that task changed.
+- Not verified: an in-CI run of the new wait on a fresh deployment (this branch's PR CI run is the first); the flake itself is timing-dependent and cannot be forced.
 
 ## 2026-10-19 — Publish copy subrequest budget (NOW-PUBLISH-COPY-BUDGET-001)
 
