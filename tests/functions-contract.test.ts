@@ -16,6 +16,7 @@ import * as serverBlocks from '../functions/_lib/blocks.js'
 import * as clientBlocks from '../src/features/blocks/schema.ts'
 import * as clientUpgrade from '../src/features/blocks/upgrade.ts'
 import blockFixture from './fixtures/content-blocks.json'
+import { createEmptyProjectAggregateDraft } from '../src/features/projects/projectAggregate.ts'
 
 type Handler = (context: {
   request: Request
@@ -208,6 +209,84 @@ describe('public Image QR Functions', () => {
     }
     expect(results.dataUnconfigured.upstream).toEqual([])
     expect(results).toMatchSnapshot()
+  })
+})
+
+// NOW-PUBLISH-COPY-BUDGET-001: the exact upstream sequence of a Projects Publish with two
+// private images. Each private image costs one server-side Storage copy; verification is
+// one listing; cleanup is one audit, one reference query, one removal and one result audit.
+// No image bytes are downloaded or uploaded by the Function.
+describe('Projects publish upstream contract', () => {
+  test('two private images: copy, one listing, RPC and batched cleanup', async () => {
+    const media = [1, 2].map((id) => ({
+      id,
+      status: 'draft',
+      bucket: 'urblo-admin-media',
+      object_path: `project-editor/${USER_ID}/photo-${id}.jpg`,
+      source_url: null,
+      source_kind: 'storage',
+      media_type: 'image',
+      mime_type: 'image/jpeg',
+      size_bytes: 2048 + id,
+      alt: `Synthetic photo ${id}`,
+      updated_at: '2026-10-19T00:00:00.000000+00:00',
+    }))
+    const copied = new Map<string, number>()
+    const fallback = globalThis.fetch
+    globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = new URL(input instanceof Request ? input.url : String(input))
+      const method = (init?.method ?? 'GET').toUpperCase()
+      const body = typeof init?.body === 'string' ? JSON.parse(init.body) : null
+      if (url.pathname === '/rest/v1/media_assets' && method === 'GET') {
+        requests.push(`${method} ${url.pathname}?select=${url.searchParams.get('select')?.split(',')[0]}`)
+        return Response.json(url.searchParams.get('select')?.startsWith('id,status') ? media : [])
+      }
+      if (url.pathname === '/storage/v1/object/copy') {
+        requests.push(`${method} ${url.pathname} ${body.bucketId}->${body.destinationBucket}`)
+        copied.set(body.destinationKey, media.find((row) => row.object_path === body.sourceKey)!.size_bytes)
+        return Response.json({ Key: body.destinationKey })
+      }
+      if (url.pathname === '/storage/v1/object/list/urblo-public-media') {
+        requests.push(`${method} ${url.pathname}`)
+        return Response.json([...copied].map(([key, size]) => ({ name: key.slice(body.prefix.length + 1), metadata: { size, mimetype: 'image/jpeg' } })))
+      }
+      if (url.pathname === '/rest/v1/rpc/admin_project_aggregate') {
+        requests.push(`${method} ${url.pathname}`)
+        return Response.json({ projectId: 12, revision: 2 })
+      }
+      if (url.pathname === '/rest/v1/admin_audit_events') {
+        requests.push(`${method} ${url.pathname} ${body.action}:${body.metadata.phase}`)
+        return new Response(null, { status: 201 })
+      }
+      if (url.pathname === '/storage/v1/object/urblo-admin-media' && method === 'DELETE') {
+        requests.push(`${method} ${url.pathname} ${body.prefixes.length}`)
+        return Response.json(body.prefixes.map((name: string) => ({ name })))
+      }
+      return fallback(input, init)
+    }) as typeof fetch
+    const draft = createEmptyProjectAggregateDraft()
+    Object.assign(draft.project, { id: 12, title: 'Contract project', slug: 'contract-project', summary: 'Synthetic.', heroMediaId: 1, coverMediaId: 1 })
+    draft.blocks.push({ key: 'block:new:2', id: null, type: 'image', content: { mediaAssetId: 2, alt: '', title: '', label: '', caption: '' }, sortOrder: 0 } as (typeof draft.blocks)[number])
+    identity = 'owner'
+    const result = await call(adminProjects as Handler, '/api/admin/projects', {
+      method: 'POST',
+      token: 'synthetic-session',
+      body: { action: 'publish', projectId: 12, baseRevision: 1, baseUpdatedAt: '2026-10-19T00:00:00.000000+00:00', draft },
+    })
+    expect(result.status, JSON.stringify(result.body)).toBe(200)
+    expect(result.upstream).toEqual([
+      'GET /auth/v1/user',
+      'GET /rest/v1/admin_profiles',
+      'GET /rest/v1/media_assets?select=id',
+      'POST /storage/v1/object/copy urblo-admin-media->urblo-public-media',
+      'POST /storage/v1/object/copy urblo-admin-media->urblo-public-media',
+      'POST /storage/v1/object/list/urblo-public-media',
+      'POST /rest/v1/rpc/admin_project_aggregate',
+      'POST /rest/v1/admin_audit_events project.aggregate.media_cleanup:planned',
+      'GET /rest/v1/media_assets?select=object_path',
+      'DELETE /storage/v1/object/urblo-admin-media 2',
+      'POST /rest/v1/admin_audit_events project.aggregate.media_cleanup:result',
+    ])
   })
 })
 

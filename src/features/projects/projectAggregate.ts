@@ -15,6 +15,7 @@ import {
     type ContentBlockType,
 } from '../blocks/schema.ts';
 import { PROJECT_DRAFT_SCHEMA_VERSION } from '../blocks/upgrade.ts';
+import { PUBLISH_NEW_IMAGE_BUDGET, projectPublishBudgetMessage } from '../blocks/publishBudget.ts';
 import { resolveBlockView } from '../blocks/resolve.ts';
 import { blockViewImageUrls, type ContentBlockView } from '../blocks/view.ts';
 
@@ -1096,7 +1097,28 @@ function collectProjectPublishBlockers(
         add({ id: `hotspot-${incompleteHotspot.key}`, section: 'body', message: 'Connect every point to a material and say where it is used.' });
     }
 
+    // NOW-PUBLISH-COPY-BUDGET-001: the server refuses a Publish that would make more than the
+    // budget of private uploads public, so say so before Publish is pressed.
+    const newImageCount = countNewProjectImages(draft, context);
+    if (newImageCount > PUBLISH_NEW_IMAGE_BUDGET) {
+        add({ id: 'publish-image-budget', section: 'body', message: projectPublishBudgetMessage(newImageCount) });
+    }
+
     return blockers;
+}
+
+/** Referenced uploads that are not public yet; each needs one copy when the project is published. */
+export function countNewProjectImages(
+    draft: ProjectAggregateDraft,
+    context: Pick<ProjectAggregateMappingContext, 'media'>,
+): number {
+    const mediaById = new Map(context.media.map((asset) => [asset.id, asset]));
+    return collectProjectMediaAssetIds(draft).filter((id) => {
+        const asset = mediaById.get(id);
+        return Boolean(asset)
+            && asset!.sourceKind === 'storage'
+            && !(asset!.bucket === 'urblo-public-media' && asset!.status === 'published');
+    }).length;
 }
 
 export function slugify(value: string) {
