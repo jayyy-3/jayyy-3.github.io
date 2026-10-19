@@ -52,7 +52,8 @@
       },
       "nextAction": "Reviewer reviews the PR and Preview evidence; after merge, the incident's leftover public copies (if any) and the failed project need a separately authorized production review, then the editor retries Publish.",
       "notes": [
-        "2026-10-19: Implemented on claude/publish-copy-subrequests; tests, guards and local 16/30-image publishes passed (docs/WORKLOG.md). PR open, not merged."
+        "2026-10-19: Implemented on claude/publish-copy-subrequests; tests, guards and local 16/30-image publishes passed (docs/WORKLOG.md). PR open, not merged.",
+        "2026-10-19: PR #101 open; branch Preview https://ff724f00.urblo-site.pages.dev smoke passed (read-only). Awaiting review and merge decision."
       ]
     },
     {
