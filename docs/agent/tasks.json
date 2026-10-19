@@ -6,7 +6,7 @@
     {
       "id": "NOW-PUBLISH-COPY-BUDGET-001",
       "status": "now",
-      "phase": "release",
+      "phase": "awaiting_external",
       "priority": 0.1,
       "summary": "Make Projects Publish promotion subrequest-frugal after the 2026-10-19 production incident (16 private images exceeded the 50-subrequest Cloudflare limit): server-side Storage copy with one metadata listing, batched cleanup/compensation with the audit first, and a documented pre-flight copy budget.",
       "modules": [
@@ -44,13 +44,14 @@
       "authorization": {
         "source": "Jay-reported production incident on 2026-10-19 (16-image Project Publish failed with media_copy_mismatch); reviewer-initiated fix.",
         "included": [
-          "Task branch claude/publish-copy-subrequests, isolated tests and local-stack proof with synthetic data, git push, one pull request against main and branch Preview smoke (read-only on Preview)."
+          "Task branch claude/publish-copy-subrequests, isolated tests and local-stack proof with synthetic data, git push, one pull request against main and branch Preview smoke (read-only on Preview).",
+          "Reviewer merged PR #101 as 94e9886 on 2026-10-19 under Jay's instruction to fix the incident completely; production readback in docs/WORKLOG.md."
         ],
         "excluded": [
           "Merge to main, production data or Storage writes (including cleanup of the incident's orphaned public copies), migrations, RPC/RLS/draft-model changes, email, DNS and credentials."
         ]
       },
-      "nextAction": "Reviewer reviews the PR and Preview evidence; after merge, the incident's leftover public copies (if any) and the failed project need a separately authorized production review, then the editor retries Publish.",
+      "nextAction": "The editor retries Publish on the imported project (16 images, within the 30-image budget); Jay reviews the public page. Later option: raise the budget by moving to a Cloudflare plan with a higher subrequest limit or splitting promotion across requests.",
       "notes": [
         "2026-10-19: Implemented on claude/publish-copy-subrequests; tests, guards and local 16/30-image publishes passed (docs/WORKLOG.md). PR open, not merged.",
         "2026-10-19: PR #101 open; branch Preview https://ff724f00.urblo-site.pages.dev smoke passed (read-only). Awaiting review and merge decision."

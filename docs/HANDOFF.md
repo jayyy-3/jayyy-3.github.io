@@ -8,17 +8,17 @@ Last updated: 2026-10-19
 
 **NOW-PUBLISH-COPY-BUDGET-001** — Make Projects Publish promotion subrequest-frugal after the 2026-10-19 production incident (16 private images exceeded the 50-subrequest Cloudflare limit): server-side Storage copy with one metadata listing, batched cleanup/compensation with the audit first, and a documented pre-flight copy budget.
 
-阶段：release。状态：now。
+阶段：awaiting_external。状态：now。
 
-下一步：Reviewer reviews the PR and Preview evidence; after merge, the incident's leftover public copies (if any) and the failed project need a separately authorized production review, then the editor retries Publish.
+下一步：The editor retries Publish on the imported project (16 images, within the 30-image budget); Jay reviews the public page. Later option: raise the budget by moving to a Cloudflare plan with a higher subrequest limit or splitting promotion across requests.
 
 ## 已观察的发布状态
 
-观察日期：2026-10-15。仓库版本：`eff2b179377c655acb55d4cafd328de04e0bad83`。已验证运行时代码：`eff2b179377c655acb55d4cafd328de04e0bad83`。
+观察日期：2026-10-19。仓库版本：`94e9886af49a887c3c55245401b8458f4a5d357b`。已验证运行时代码：`94e9886af49a887c3c55245401b8458f4a5d357b`。
 
-验证地址：https://7a3e185c.urblo-site.pages.dev
+验证地址：https://446c9338.urblo-site.pages.dev
 
-Project package import Phase 2 (#98) released 2026-10-15: urblo-project-package v1 JSON/zip contract, browser-side parse/upload/save through the existing Projects save action (no migration, no new endpoint), Import package entry for owner/admin/editor, colleague docs plus Claude Design prompt under docs/content-import. Merge eff2b17 deployed as immutable 7a3e185c; the first CI smoke attempt hit the post-deploy "/ returned 404" convergence flake and the re-run of the same run passed. Immutable/apex/www bound smoke, production admin gate (10 routes, Import package button visible) passed. No production import exercised; Jay acceptance open for Phase 1 and 2.
+Publish copy budget fix (#101) released 2026-10-19 after the production incident where a 16-image Publish exceeded the Cloudflare 50-subrequest limit: promotion now uses one server-side Storage copy per image plus one listing to verify size/type, batched compensation, planned/result audit rows, and a pre-flight budget of 30 new images per Publish surfaced in the import dialog, the editor action bar and the colleague docs. Merge 94e9886 deployed as immutable 446c9338; immutable/apex/www bound smoke and the production admin gate (10 routes) passed. The 14 orphan public copies from the incident were deleted by Jay in the Supabase dashboard and read back as zero. Project 23 remains a complete draft awaiting the editor's retry.
 
 CMS handoff: **revalidation_required**。QR: material_page_deployed。
 
