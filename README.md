@@ -7,7 +7,7 @@ Urblo web communicates a design-led, engineering-backed natural stone system for
 
 Observed 2026-10-15: public site **live**, QR **material_page_deployed**, CMS handoff **revalidation_required**.
 
-Current task: **NOW-PROJECT-IMPORT-001**. See [handoff](docs/HANDOFF.md), [task overview](docs/NEXT_STEPS.md) and [project map](docs/PROJECT_MAP.md). These summaries are generated from repository-owned state.
+Current task: **NOW-PUBLISH-COPY-BUDGET-001**. See [handoff](docs/HANDOFF.md), [task overview](docs/NEXT_STEPS.md) and [project map](docs/PROJECT_MAP.md). These summaries are generated from repository-owned state.
 <!-- agent:status:end -->
 
 ## Agent Entry Points

@@ -170,6 +170,7 @@ Do not repeat the title, summary, lead, client, designer or contractor inside bl
 - `alt` is required: one sentence describing what is visible, e.g. "Tiered bluestone seating steps on the Yarra riverbank". Never the file name.
 - `file` names: lowercase, hyphens, ending `.jpg`, `.jpeg`, `.png` or `.webp`, inside `images/`, e.g. `images/hero.jpg`, `images/step-1.jpg`.
 - Each file at most 10 MB, long edge at least 1600 px. At most 50 different images; the zip at most 100 MB.
+- Prefer 30 images or fewer: the website publishes up to 30 new images at a time, so a larger project has to be published in two steps.
 - The same file may be used more than once (e.g. `hero` and `cover`).
 - If a photo is not available yet, keep the image object with its `alt` and leave out `file`.
 

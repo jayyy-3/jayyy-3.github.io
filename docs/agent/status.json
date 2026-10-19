@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "lastUpdated": "2026-10-15",
-  "currentTaskId": "NOW-PROJECT-IMPORT-001",
+  "lastUpdated": "2026-10-19",
+  "currentTaskId": "NOW-PUBLISH-COPY-BUDGET-001",
   "sourceOfTruth": {
     "currentState": "docs/agent/status.json",
     "taskQueue": "docs/agent/tasks.json",

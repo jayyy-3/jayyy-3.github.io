@@ -477,16 +477,27 @@ test('failed copy and failed commit compensate only public copies; uncertain com
     client.storage = {
       from(bucket) {
         return {
-          download: async (path) => ({
-            data: bucket === 'urblo-admin-media' ? png : objects.get(path),
-            error: null,
-          }),
-          upload: async (path, blob) => {
+          // Server-side copy from the private bucket into the public bucket.
+          copy: async (_source, path, options) => {
+            assert.equal(bucket, 'urblo-admin-media');
+            assert.equal(options?.destinationBucket, 'urblo-public-media');
             uploads++;
             if (mode === 'copy_failure' && uploads === 2)
-              return { error: { message: 'fixture upload failure' } };
-            objects.set(path, blob);
-            return { error: null };
+              return { error: { message: 'fixture copy failure' } };
+            objects.set(path, png);
+            return { data: { path }, error: null };
+          },
+          list: async (folder) => {
+            assert.equal(bucket, 'urblo-public-media');
+            return {
+              data: [...objects.entries()]
+                .filter(([path]) => path.startsWith(`${folder}/`))
+                .map(([path, blob]) => ({
+                  name: path.slice(folder.length + 1),
+                  metadata: { size: blob.size, mimetype: blob.type },
+                })),
+              error: null,
+            };
           },
           remove: async (paths) => {
             assert.equal(bucket, 'urblo-public-media');

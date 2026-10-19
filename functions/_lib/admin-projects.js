@@ -14,6 +14,25 @@ const MAX_BODY_BYTES = 1_100_000;
 const MAX_PROJECT_IMAGE_BYTES = 10 * 1024 * 1024;
 const MAX_PROJECT_MEDIA_ASSETS = 50;
 const MAX_PROJECT_MEDIA_TOTAL_BYTES = 100 * 1024 * 1024;
+// Publish subrequest budget (NOW-PUBLISH-COPY-BUDGET-001). Cloudflare Pages Functions
+// allow 50 subrequests per request on the current plan; every Supabase Auth, REST, RPC
+// and Storage call is one. The worst-case fixed cost of one Publish, excluding the
+// per-image Storage copies, is:
+//   2  identity (Auth user + active admin profile)
+//   6  reference checks (stone/variant/finish statuses, finish capabilities,
+//      variant ownership, finish images)
+//   1  referenced media rows
+//   1  copy verification (one listing of the nonce-scoped destination folder)
+//   1  aggregate RPC
+//   4  post-publish source cleanup or failed-publish compensation (audit record,
+//      batched reference query, batched remove, result audit record)
+// = 15. Each private image then costs exactly one server-side Storage copy. A margin of
+// 5 absorbs a retried call, leaving 50 - 15 - 5 = 30 copies per Publish.
+const FUNCTION_SUBREQUEST_LIMIT = 50;
+const PUBLISH_FIXED_SUBREQUESTS = 15;
+const PUBLISH_SUBREQUEST_MARGIN = 5;
+export const PUBLISH_STORAGE_COPY_BUDGET =
+  FUNCTION_SUBREQUEST_LIMIT - PUBLISH_FIXED_SUBREQUESTS - PUBLISH_SUBREQUEST_MARGIN;
 const POSTGRES_INTEGER_MIN = -2_147_483_648;
 const POSTGRES_INTEGER_MAX = 2_147_483_647;
 const BASE_UPDATED_AT_PATTERN =
@@ -97,6 +116,7 @@ export async function handleAdminProjectsRequest(request, env) {
       await assertPublishedReferenceRows(supabase, input.draft);
       const media = await loadReferencedMedia(supabase, input.draft);
       assertPublishableMedia(media);
+      assertPublishCopyBudget(media);
       input.draft = fillDraftAltText(input.draft, media);
       return jsonResponse(
         await publishAggregate(
@@ -1034,6 +1054,32 @@ export function assertPublishableMedia(media) {
   }
 }
 
+/** Number of private uploads a Publish must copy into the public library. */
+export function countPublishStorageCopies(media) {
+  return media.filter(
+    (asset) =>
+      asset.source_kind === "storage" &&
+      !(asset.bucket === PUBLIC_MEDIA_BUCKET && asset.status === "published"),
+  ).length;
+}
+
+/**
+ * Pre-flight guard: fail before any Storage write when the copies would not fit in the
+ * request's subrequest budget (see PUBLISH_STORAGE_COPY_BUDGET).
+ */
+export function assertPublishCopyBudget(media) {
+  const copyCount = countPublishStorageCopies(media);
+  if (copyCount <= PUBLISH_STORAGE_COPY_BUDGET) return;
+  const message =
+    `This project has ${copyCount} new images. Up to ${PUBLISH_STORAGE_COPY_BUDGET} new images can go live in one publish. ` +
+    "Publish it with fewer new images first, then add the rest and publish again.";
+  throw new AdminProjectsError(409, "publish_blocked", message, {
+    blockers: [message],
+    copyCount,
+    copyBudget: PUBLISH_STORAGE_COPY_BUDGET,
+  });
+}
+
 async function publishAggregate(
   supabase,
   actorUserId,
@@ -1061,6 +1107,21 @@ async function publishAggregate(
     );
   } catch (error) {
     if (!newlyCreated.length) throw error;
+    // The audit record is written before any cleanup work, so it survives even when the
+    // request runs out of subrequests while compensating.
+    const plannedRecorded = await recordPublishCompensationAudit(
+      supabase,
+      actorUserId,
+      input.projectId,
+      error,
+      {
+        phase: "planned",
+        candidates: newlyCreated.map((copy) => ({
+          path: copy.path,
+          ownership: copy.ownership,
+        })),
+      },
+    );
     let cleanup;
     try {
       cleanup = await compensatePublicCopies(supabase, newlyCreated);
@@ -1073,14 +1134,17 @@ async function publishAggregate(
         })),
       };
     }
-    const auditRecorded = await recordPublishCompensationAudit(
+    const resultRecorded = await recordPublishCompensationAudit(
       supabase,
       actorUserId,
       input.projectId,
       error,
-      cleanup,
+      { phase: "result", removed: cleanup.removed, retained: cleanup.retained },
     );
-    const disclosure = summarizePublishCompensation(cleanup, auditRecorded);
+    const disclosure = summarizePublishCompensation(
+      cleanup,
+      plannedRecorded && resultRecorded,
+    );
     if (error instanceof AdminProjectsError) {
       throw new AdminProjectsError(
         error.status,
@@ -1144,7 +1208,7 @@ async function recordPublishCompensationAudit(
   actorUserId,
   projectId,
   originalError,
-  cleanup,
+  details,
 ) {
   try {
     const { error } = await supabase.from("admin_audit_events").insert({
@@ -1157,10 +1221,24 @@ async function recordPublishCompensationAudit(
           originalError instanceof AdminProjectsError
             ? { code: originalError.code, status: originalError.status }
             : { code: "publish_failed", status: 502 },
-        removed: cleanup.removed,
-        retained: cleanup.retained,
+        ...details,
         source: "functions/api/admin/projects.js",
       },
+    });
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
+async function insertMediaCleanupAudit(supabase, actorUserId, projectId, details) {
+  try {
+    const { error } = await supabase.from("admin_audit_events").insert({
+      actor_user_id: actorUserId,
+      action: "project.aggregate.media_cleanup",
+      entity_type: "projects",
+      entity_id: projectId,
+      metadata: { ...details, source: "functions/api/admin/projects.js" },
     });
     return !error;
   } catch {
@@ -1174,61 +1252,78 @@ async function cleanupPublishedPrivateSources(
   projectId,
   promotions,
 ) {
-  const sources = [
-    ...new Map(
+  const sourcePaths = [
+    ...new Set(
       promotions
         .filter((promotion) => promotion.promotionKind === "storage_copy")
-        .map((promotion) => [promotion.sourcePath, promotion]),
-    ).values(),
+        .map((promotion) => promotion.sourcePath),
+    ),
   ];
-  if (!sources.length) return { warnings: [] };
+  if (!sourcePaths.length) return { warnings: [] };
+
+  // Record the planned cleanup before touching Storage. Without a durable record the
+  // private sources are kept: they are private, so retaining them is always safe.
+  const plannedRecorded = await insertMediaCleanupAudit(
+    supabase,
+    actorUserId,
+    projectId,
+    { phase: "planned", candidates: sourcePaths },
+  );
+  if (!plannedRecorded) {
+    return {
+      warnings: [
+        "The project is live, but its cleanup record could not be saved.",
+      ],
+    };
+  }
 
   const removed = [];
   const retained = [];
-  for (const source of sources) {
-    try {
-      const { data: references, error: referenceError } = await supabase
-        .from("media_assets")
-        .select("id")
-        .eq("bucket", PRIVATE_MEDIA_BUCKET)
-        .eq("object_path", source.sourcePath)
-        .limit(1);
-      if (referenceError) {
-        retained.push({
-          path: source.sourcePath,
-          reason: "reference_check_failed",
-        });
-        continue;
+  try {
+    // One reference query and one removal for every source, so cleanup cost does not
+    // grow with the number of images.
+    const { data: references, error: referenceError } = await supabase
+      .from("media_assets")
+      .select("object_path")
+      .eq("bucket", PRIVATE_MEDIA_BUCKET)
+      .in("object_path", sourcePaths);
+    if (referenceError) {
+      for (const path of sourcePaths)
+        retained.push({ path, reason: "reference_check_failed" });
+    } else {
+      const referenced = new Set(
+        (references || []).map((row) => row.object_path),
+      );
+      const removable = [];
+      for (const path of sourcePaths) {
+        if (referenced.has(path))
+          retained.push({ path, reason: "still_referenced" });
+        else removable.push(path);
       }
-      if ((references || []).length) {
-        retained.push({ path: source.sourcePath, reason: "still_referenced" });
-        continue;
+      if (removable.length) {
+        const { error: removeError } = await supabase.storage
+          .from(PRIVATE_MEDIA_BUCKET)
+          .remove(removable);
+        if (removeError) {
+          for (const path of removable)
+            retained.push({ path, reason: "remove_failed" });
+        } else {
+          removed.push(...removable);
+        }
       }
-
-      const { error: removeError } = await supabase.storage
-        .from(PRIVATE_MEDIA_BUCKET)
-        .remove([source.sourcePath]);
-      if (removeError)
-        retained.push({ path: source.sourcePath, reason: "remove_failed" });
-      else removed.push(source.sourcePath);
-    } catch {
-      retained.push({ path: source.sourcePath, reason: "cleanup_failed" });
     }
+  } catch {
+    const settled = new Set([...removed, ...retained.map((item) => item.path)]);
+    for (const path of sourcePaths)
+      if (!settled.has(path)) retained.push({ path, reason: "cleanup_failed" });
   }
 
-  const { error: auditError } = await supabase
-    .from("admin_audit_events")
-    .insert({
-      actor_user_id: actorUserId,
-      action: "project.aggregate.media_cleanup",
-      entity_type: "projects",
-      entity_id: projectId,
-      metadata: {
-        removed,
-        retained,
-        source: "functions/api/admin/projects.js",
-      },
-    });
+  const resultRecorded = await insertMediaCleanupAudit(
+    supabase,
+    actorUserId,
+    projectId,
+    { phase: "result", removed, retained },
+  );
 
   const warnings = [];
   if (retained.some((item) => item.reason === "still_referenced")) {
@@ -1241,7 +1336,7 @@ async function cleanupPublishedPrivateSources(
       "The project is live, but some source-file cleanup needs manual review.",
     );
   }
-  if (auditError) {
+  if (!resultRecorded) {
     warnings.push(
       "The project is live, but its cleanup record could not be saved.",
     );
@@ -1249,6 +1344,19 @@ async function cleanupPublishedPrivateSources(
   return { warnings };
 }
 
+/**
+ * Create-only, server-side copies of private uploads into the public library.
+ *
+ * Subrequests: one Storage copy per private image plus one listing of the nonce-scoped
+ * destination folder for all copies. The bytes never pass through the Function: Storage
+ * copies the object (and its stored size/content type) itself, so the former download,
+ * digest and re-download are replaced by a metadata readback. The magic-byte sniff that
+ * needed the downloaded bytes is replaced by the stored content type: the media row's
+ * `mime_type` must be a supported image type before copying, and the copy's stored
+ * content type (inherited from the private object, whose bucket only accepts listed
+ * types) must equal it. Size limits are checked on the declared size before copying and
+ * on the copy's stored size afterwards.
+ */
 export async function prepareMediaPromotions(
   supabase,
   media,
@@ -1257,7 +1365,9 @@ export async function prepareMediaPromotions(
   destinationPrefix = "project-assets",
 ) {
   const promotions = [];
-  let downloadedBytes = 0;
+  const copies = [];
+  let declaredBytesTotal = 0;
+  const destinationFolder = destinationFolderFor(publishNonce, destinationPrefix);
   for (const asset of media) {
     if (asset.source_kind !== "storage") {
       promotions.push({
@@ -1278,40 +1388,41 @@ export async function prepareMediaPromotions(
         "A referenced upload is unavailable.",
       );
     }
-    const { data: sourceBlob, error: sourceError } = await supabase.storage
-      .from(PRIVATE_MEDIA_BUCKET)
-      .download(sourcePath);
-    if (sourceError || !sourceBlob) {
-      throw upstreamError(
-        "media_copy_failed",
-        "A referenced upload could not be read.",
-      );
-    }
-    if (sourceBlob.size > MAX_PROJECT_IMAGE_BYTES) {
-      throw new AdminProjectsError(
-        409,
-        "media_too_large",
-        "Project images must be 10 MB or smaller.",
-      );
-    }
-    downloadedBytes += sourceBlob.size;
-    if (downloadedBytes > MAX_PROJECT_MEDIA_TOTAL_BYTES) {
-      throw new AdminProjectsError(
-        409,
-        "media_budget_exceeded",
-        "Keep the total project image payload at 100 MB or less.",
-      );
-    }
-    if (!(await isSupportedImageBlob(sourceBlob))) {
+    const declaredMime = declaredMimeType(asset);
+    if (declaredMime !== null && !PROJECT_IMAGE_MIME_TYPES.has(declaredMime)) {
       throw new AdminProjectsError(
         409,
         "media_type_mismatch",
         "A referenced upload is not a supported image file.",
       );
     }
+    const declaredBytes = declaredSize(asset);
+    if (asset.size_bytes != null && declaredBytes === null) {
+      throw new AdminProjectsError(
+        409,
+        "publish_blocked",
+        "A referenced upload has no reliable file size.",
+      );
+    }
+    if (declaredBytes !== null) {
+      if (declaredBytes > MAX_PROJECT_IMAGE_BYTES) {
+        throw new AdminProjectsError(
+          409,
+          "media_too_large",
+          "Project images must be 10 MB or smaller.",
+        );
+      }
+      declaredBytesTotal += declaredBytes;
+      if (declaredBytesTotal > MAX_PROJECT_MEDIA_TOTAL_BYTES) {
+        throw new AdminProjectsError(
+          409,
+          "media_budget_exceeded",
+          "Keep the total project image payload at 100 MB or less.",
+        );
+      }
+    }
 
-    const destinationPath = destinationFor(asset, sourcePath, publishNonce, destinationPrefix);
-    const sourceDigest = await digestBlob(sourceBlob);
+    const destinationPath = destinationFor(asset, sourcePath, destinationFolder);
     const attemptedCopy = {
       mediaAssetId: asset.id,
       path: destinationPath,
@@ -1321,45 +1432,30 @@ export async function prepareMediaPromotions(
     // object was created but before Storage returns, compensation still knows
     // which nonce-scoped destination to inspect and remove.
     newlyCreated.push(attemptedCopy);
-    const upload = await supabase.storage
-      .from(PUBLIC_MEDIA_BUCKET)
-      .upload(destinationPath, sourceBlob, {
-        cacheControl: "31536000",
-        contentType:
-          asset.mime_type || sourceBlob.type || "application/octet-stream",
-        upsert: false,
+    // Storage copy is create-only: without an upsert header an existing destination
+    // is a conflict and is never overwritten (the former upload's upsert: false).
+    const copy = await supabase.storage
+      .from(PRIVATE_MEDIA_BUCKET)
+      .copy(sourcePath, destinationPath, {
+        destinationBucket: PUBLIC_MEDIA_BUCKET,
       });
 
-    const alreadyExists = upload.error && isAlreadyExistsError(upload.error);
+    const alreadyExists = copy.error && isAlreadyExistsError(copy.error);
     if (alreadyExists) {
       // A definite conflict proves this request did not create the object.
       newlyCreated.splice(newlyCreated.indexOf(attemptedCopy), 1);
       attemptedCopy.ownership = "not_owned";
     }
-    if (upload.error && !alreadyExists) {
+    if (copy.error && !alreadyExists) {
       throw upstreamError(
         "media_copy_failed",
         "A referenced upload could not be copied for publishing.",
       );
     }
-    const createdByRequest = !upload.error;
+    const createdByRequest = !copy.error;
     if (createdByRequest) attemptedCopy.ownership = "created";
 
-    const { data: publicBlob, error: publicError } = await supabase.storage
-      .from(PUBLIC_MEDIA_BUCKET)
-      .download(destinationPath);
-    if (
-      publicError ||
-      !publicBlob ||
-      (await digestBlob(publicBlob)) !== sourceDigest
-    ) {
-      throw new AdminProjectsError(
-        409,
-        "media_copy_mismatch",
-        "A public media copy could not be verified, so the project was not published.",
-      );
-    }
-
+    copies.push({ destinationPath, declaredBytes, declaredMime });
     promotions.push({
       promotionKind: "storage_copy",
       mediaAssetId: asset.id,
@@ -1371,33 +1467,108 @@ export async function prepareMediaPromotions(
       createdByRequest,
     });
   }
+  if (copies.length) {
+    await verifyPublicCopies(supabase, destinationFolder, copies);
+  }
   return promotions;
 }
 
-export async function compensatePublicCopies(supabase, copies) {
-  const removed = [];
-  const retained = [];
+/**
+ * One listing of the nonce-scoped destination folder verifies every copy: each must
+ * exist with the declared size and content type, within the per-image and total limits.
+ */
+async function verifyPublicCopies(supabase, destinationFolder, copies) {
+  const mismatch = () =>
+    new AdminProjectsError(
+      409,
+      "media_copy_mismatch",
+      "A public media copy could not be verified, so the project was not published.",
+    );
+  const { data: listing, error: listError } = await supabase.storage
+    .from(PUBLIC_MEDIA_BUCKET)
+    .list(destinationFolder, {
+      limit: Math.max(100, copies.length + 1),
+      offset: 0,
+      sortBy: { column: "name", order: "asc" },
+    });
+  if (listError || !Array.isArray(listing)) throw mismatch();
+  const objectsByName = new Map(
+    listing.map((entry) => [String(entry?.name || ""), entry]),
+  );
+  let storedBytesTotal = 0;
   for (const copy of copies) {
-    const { data: references, error: referenceError } = await supabase
-      .from("media_assets")
-      .select("id")
-      .eq("bucket", PUBLIC_MEDIA_BUCKET)
-      .eq("object_path", copy.path)
-      .limit(1);
-    if (referenceError || (references || []).length) {
-      retained.push({
-        path: copy.path,
-        reason: referenceError ? "reference_check_failed" : "referenced",
-      });
-      continue;
+    const name = copy.destinationPath.slice(destinationFolder.length + 1);
+    const metadata = objectsByName.get(name)?.metadata;
+    if (!metadata) throw mismatch();
+    const storedBytes = Number(metadata.size ?? metadata.contentLength);
+    const storedMime = String(metadata.mimetype || "").toLowerCase();
+    if (!Number.isSafeInteger(storedBytes) || storedBytes < 0) throw mismatch();
+    if (copy.declaredBytes !== null && storedBytes !== copy.declaredBytes)
+      throw mismatch();
+    if (!PROJECT_IMAGE_MIME_TYPES.has(storedMime)) {
+      throw new AdminProjectsError(
+        409,
+        "media_type_mismatch",
+        "A referenced upload is not a supported image file.",
+      );
     }
-    const { error } = await supabase.storage
-      .from(PUBLIC_MEDIA_BUCKET)
-      .remove([copy.path]);
-    if (error) retained.push({ path: copy.path, reason: "remove_failed" });
-    else removed.push(copy.path);
+    if (copy.declaredMime !== null && storedMime !== copy.declaredMime)
+      throw mismatch();
+    if (storedBytes > MAX_PROJECT_IMAGE_BYTES) {
+      throw new AdminProjectsError(
+        409,
+        "media_too_large",
+        "Project images must be 10 MB or smaller.",
+      );
+    }
+    storedBytesTotal += storedBytes;
+    if (storedBytesTotal > MAX_PROJECT_MEDIA_TOTAL_BYTES) {
+      throw new AdminProjectsError(
+        409,
+        "media_budget_exceeded",
+        "Keep the total project image payload at 100 MB or less.",
+      );
+    }
   }
-  return { removed, retained };
+}
+
+/**
+ * Reference-aware compensation with one batched reference query and one batched
+ * removal, so its cost does not grow with the number of copies.
+ */
+export async function compensatePublicCopies(supabase, copies) {
+  const paths = [...new Set(copies.map((copy) => copy.path))];
+  if (!paths.length) return { removed: [], retained: [] };
+  const { data: references, error: referenceError } = await supabase
+    .from("media_assets")
+    .select("object_path")
+    .eq("bucket", PUBLIC_MEDIA_BUCKET)
+    .in("object_path", paths);
+  if (referenceError) {
+    return {
+      removed: [],
+      retained: paths.map((path) => ({ path, reason: "reference_check_failed" })),
+    };
+  }
+  const referenced = new Set((references || []).map((row) => row.object_path));
+  const retained = paths
+    .filter((path) => referenced.has(path))
+    .map((path) => ({ path, reason: "referenced" }));
+  const removable = paths.filter((path) => !referenced.has(path));
+  if (!removable.length) return { removed: [], retained };
+  const { error } = await supabase.storage
+    .from(PUBLIC_MEDIA_BUCKET)
+    .remove(removable);
+  if (error) {
+    return {
+      removed: [],
+      retained: [
+        ...retained,
+        ...removable.map((path) => ({ path, reason: "remove_failed" })),
+      ],
+    };
+  }
+  return { removed: removable, retained };
 }
 
 async function callAggregateRpc(
@@ -1581,38 +1752,35 @@ function safePublicSourceUrl(value) {
   }
 }
 
-function destinationFor(asset, sourcePath, publishNonce, destinationPrefix = "project-assets") {
-  const version = String(asset.updated_at || "unknown")
-    .replace(/[^0-9A-Za-z]/g, "")
-    .slice(0, 32);
+function destinationFolderFor(publishNonce, destinationPrefix = "project-assets") {
   const nonce = String(publishNonce)
     .replace(/[^0-9A-Za-z-]/g, "")
     .slice(0, 48);
+  return `${destinationPrefix}/${nonce}`;
+}
+
+// Every copy of one Publish shares the nonce-scoped folder, so one listing verifies all
+// of them. The file name keeps the media ID and source version.
+function destinationFor(asset, sourcePath, destinationFolder) {
+  const version = String(asset.updated_at || "unknown")
+    .replace(/[^0-9A-Za-z]/g, "")
+    .slice(0, 32);
   const rawName = sourcePath.split("/").pop() || `asset-${asset.id}`;
   const fileName =
     rawName.replace(/[^0-9A-Za-z._-]/g, "-").replace(/^-+/, "") ||
     `asset-${asset.id}`;
-  return `${destinationPrefix}/${asset.id}/${version}/${nonce}-${fileName}`;
+  return `${destinationFolder}/${asset.id}-${version}-${fileName}`;
 }
 
-async function digestBlob(blob) {
-  const digest = await crypto.subtle.digest(
-    "SHA-256",
-    await blob.arrayBuffer(),
-  );
-  return Array.from(new Uint8Array(digest), (byte) =>
-    byte.toString(16).padStart(2, "0"),
-  ).join("");
+function declaredSize(asset) {
+  if (asset.size_bytes == null) return null;
+  const bytes = Number(asset.size_bytes);
+  return Number.isSafeInteger(bytes) && bytes >= 0 ? bytes : null;
 }
 
-async function isSupportedImageBlob(blob) {
-  const bytes = new Uint8Array(await blob.slice(0, 16).arrayBuffer());
-  const ascii = (start, end) => String.fromCharCode(...bytes.slice(start, end));
-  if (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) return true;
-  if (bytes[0] === 0x89 && ascii(1, 4) === "PNG") return true;
-  if (ascii(0, 6) === "GIF87a" || ascii(0, 6) === "GIF89a") return true;
-  if (ascii(0, 4) === "RIFF" && ascii(8, 12) === "WEBP") return true;
-  return ascii(4, 8) === "ftyp" && ["avif", "avis"].includes(ascii(8, 12));
+function declaredMimeType(asset) {
+  const value = stringValue(asset.mime_type).toLowerCase();
+  return value || null;
 }
 
 function isAlreadyExistsError(error) {

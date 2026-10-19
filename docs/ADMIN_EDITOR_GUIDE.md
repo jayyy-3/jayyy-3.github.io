@@ -26,7 +26,7 @@ Stone forms: in the stone, tick each form under **Available as**, wait for **All
 3. Press **Save**, then **Publish**.
 
 ## Import a project package
-In **Projects**, press **Import package** and choose the file from Claude Design. Check the report, then press **Create draft**. Add any missing images or stones, then **Save** and **Publish**. **Package format** explains what the file must contain.
+In **Projects**, press **Import package** and choose the file from Claude Design. Check the report, then press **Create draft**. Add any missing images or stones, then **Save** and **Publish**. **Package format** explains what the file must contain. One **Publish** puts up to 30 new images live; for a bigger project, publish with up to 30 images first, then add the rest and publish again.
 
 ## Body blocks
 The project story is built from blocks in **Body**. Press **Add block**, choose a type such as **Heading**, **Text**, **Key numbers**, **Steps** or **Stone cards**, then fill in its fields. Use the arrows to move a block, **Duplicate** to copy it and the bin to remove it. Press a block's title to open or close it.

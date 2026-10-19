@@ -1,8 +1,61 @@
 {
   "version": 2,
-  "lastUpdated": "2026-10-15",
+  "lastUpdated": "2026-10-19",
   "archive": "docs/archive/2026-09-09/completed-tasks.json",
   "tasks": [
+    {
+      "id": "NOW-PUBLISH-COPY-BUDGET-001",
+      "status": "now",
+      "phase": "release",
+      "priority": 0.1,
+      "summary": "Make Projects Publish promotion subrequest-frugal after the 2026-10-19 production incident (16 private images exceeded the 50-subrequest Cloudflare limit): server-side Storage copy with one metadata listing, batched cleanup/compensation with the audit first, and a documented pre-flight copy budget.",
+      "modules": [
+        "projects",
+        "media"
+      ],
+      "files": [
+        "functions/_lib/admin-projects.js",
+        "tests/admin-projects-aggregate.test.ts",
+        "tests/functions-contract.test.ts",
+        "tests/stone-workspace.test.ts",
+        "scripts/check-admin-projects-aggregate.mjs",
+        "docs/architecture/projects-admin.md",
+        "docs/architecture/media.md"
+      ],
+      "acceptance": [
+        "Each private image costs one server-side Storage copy; one listing of the nonce-scoped folder verifies size and type of every copy; create-only semantics, nonce-scoped paths and pre-write ownership registration are kept; no image bytes pass through the Function.",
+        "Post-publish cleanup and failed-Publish compensation use one reference query and one removal for all paths, and their audit record is written before any cleanup call.",
+        "A named PUBLISH_STORAGE_COPY_BUDGET derived from the subrequest limit, the counted fixed calls and a margin is enforced before any Storage write with a plain editor message, and documented.",
+        "Counting tests show 7, 16 and 30 private images publish within the limit and 31/50 fail fast; local isolated stack publishes 16 and 30 images with no public orphans; no migration, RPC, RLS or draft-model change; PR left unmerged."
+      ],
+      "verification": [
+        "npm run gate",
+        "npx vitest run",
+        "npm run agent:check",
+        "git diff --check",
+        "npm run agent:admin-projects-aggregate",
+        "npm run agent:admin-crud-coverage",
+        "npm run agent:cloudflare-preview-smoke -- --base-url <immutable Preview>"
+      ],
+      "evidenceRefs": [
+        "docs/WORKLOG.md",
+        "docs/architecture/media.md"
+      ],
+      "authorization": {
+        "source": "Jay-reported production incident on 2026-10-19 (16-image Project Publish failed with media_copy_mismatch); reviewer-initiated fix.",
+        "included": [
+          "Task branch claude/publish-copy-subrequests, isolated tests and local-stack proof with synthetic data, git push, one pull request against main and branch Preview smoke (read-only on Preview)."
+        ],
+        "excluded": [
+          "Merge to main, production data or Storage writes (including cleanup of the incident's orphaned public copies), migrations, RPC/RLS/draft-model changes, email, DNS and credentials."
+        ]
+      },
+      "nextAction": "Reviewer reviews the PR and Preview evidence; after merge, the incident's leftover public copies (if any) and the failed project need a separately authorized production review, then the editor retries Publish.",
+      "notes": [
+        "2026-10-19: Implemented on claude/publish-copy-subrequests; tests, guards and local 16/30-image publishes passed (docs/WORKLOG.md). PR open, not merged.",
+        "2026-10-19: PR #101 open; branch Preview https://ff724f00.urblo-site.pages.dev smoke passed (read-only). Awaiting review and merge decision."
+      ]
+    },
     {
       "id": "NOW-PROJECT-IMPORT-001",
       "status": "now",
@@ -13,7 +66,6 @@
         "projects"
       ],
       "files": [
-        "the temporary Phase 2 plan (deleted after acceptance)",
         "src/features/blocks/importPackage.ts",
         "src/features/blocks/importZip.ts",
         "src/pages/admin/projects/ImportProjectDialog.tsx",

@@ -28,6 +28,7 @@ import {
   fillDraftAltText,
   mapRpcError,
   normalizeAutomaticClaimStatuses,
+  PUBLISH_STORAGE_COPY_BUDGET,
   summarizePublishCompensation,
   validateDraftShape,
 } from "../functions/_lib/admin-projects.js";
@@ -238,7 +239,7 @@ test("a failed Publish compensates public copies and audits the original error",
   };
 
   await withAdminProjectsFetchMock(
-    (call) => {
+    (call, calls) => {
       const identityResponse = mockAdminIdentity(call);
       if (identityResponse) return identityResponse;
 
@@ -249,41 +250,30 @@ test("a failed Publish compensates public copies and audits the original error",
       ) {
         return Response.json([compensationMediaRow], { status: 200 });
       }
-      if (
-        url.pathname ===
-          "/storage/v1/object/urblo-admin-media/project-editor/compensation-proof.jpg" &&
-        call.method === "GET"
-      ) {
-        return new Response(compensationSourceBlob, {
-          status: 200,
-          headers: { "Content-Type": "image/jpeg" },
-        });
+      if (url.pathname === "/storage/v1/object/copy" && call.method === "POST") {
+        const copyBody = JSON.parse(String(call.body));
+        return Response.json({ Key: `${copyBody.destinationBucket}/${copyBody.destinationKey}` }, { status: 200 });
       }
       if (
-        url.pathname.startsWith(
-          "/storage/v1/object/urblo-public-media/project-assets/7/",
-        ) &&
+        url.pathname === "/storage/v1/object/list/urblo-public-media" &&
         call.method === "POST"
       ) {
-        return Response.json({ Key: url.pathname }, { status: 200 });
-      }
-      if (
-        url.pathname.startsWith(
-          "/storage/v1/object/urblo-public-media/project-assets/7/",
-        ) &&
-        call.method === "GET"
-      ) {
-        return new Response(compensationSourceBlob, {
-          status: 200,
-          headers: { "Content-Type": "image/jpeg" },
-        });
+        const copyCall = calls.find((entry) => new URL(entry.url).pathname === "/storage/v1/object/copy");
+        const destinationKey = JSON.parse(String(copyCall.body)).destinationKey;
+        const listBody = JSON.parse(String(call.body));
+        return Response.json([
+          {
+            name: destinationKey.slice(listBody.prefix.length + 1),
+            metadata: { size: compensationSourceBlob.size, mimetype: "image/jpeg" },
+          },
+        ], { status: 200 });
       }
       if (url.pathname === "/rest/v1/rpc/admin_project_aggregate") {
         return revisionConflictResponse("Reload before publishing.");
       }
       if (
         url.pathname === "/rest/v1/media_assets" &&
-        url.searchParams.get("select") === "id"
+        url.searchParams.get("select") === "object_path"
       ) {
         return Response.json([], { status: 200 });
       }
@@ -321,12 +311,10 @@ test("a failed Publish compensates public copies and audits the original error",
         auditRecorded: true,
       });
 
-      const publicUpload = calls.find(
+      const publicCopy = calls.find(
         (call) =>
           call.method === "POST" &&
-          new URL(call.url).pathname.startsWith(
-            "/storage/v1/object/urblo-public-media/project-assets/7/",
-          ),
+          new URL(call.url).pathname === "/storage/v1/object/copy",
       );
       const aggregateRpc = calls.find(
         (call) =>
@@ -339,42 +327,58 @@ test("a failed Publish compensates public copies and audits the original error",
           new URL(call.url).pathname ===
             "/storage/v1/object/urblo-public-media",
       );
-      const compensationAudit = calls.find(
+      const compensationAudits = calls.filter(
         (call) =>
           call.method === "POST" &&
           new URL(call.url).pathname === "/rest/v1/admin_audit_events",
       );
-      assert.ok(publicUpload, "Publish must create the mocked public copy first");
+      assert.ok(publicCopy, "Publish must create the mocked public copy first");
       assert.ok(aggregateRpc, "Publish must call the aggregate RPC");
       assert.ok(publicRemoval, "A failed RPC must remove its mocked public copy");
+      assert.equal(
+        compensationAudits.length,
+        2,
+        "A failed publish must record its planned and resulting compensation audit",
+      );
+      assert.equal(
+        calls.filter((call) => /^\/storage\/v1\/object\/urblo-(?:admin|public)-media\//.test(new URL(call.url).pathname) && ["GET", "POST"].includes(call.method)).length,
+        0,
+        "Publish must not download or upload image bytes through the Function",
+      );
+      assert.ok(calls.indexOf(publicCopy) < calls.indexOf(aggregateRpc));
+      assert.ok(calls.indexOf(aggregateRpc) < calls.indexOf(compensationAudits[0]));
       assert.ok(
-        compensationAudit,
-        "A failed publish must record its mocked compensation audit",
+        calls.indexOf(compensationAudits[0]) < calls.indexOf(publicRemoval),
+        "The compensation audit must be written before any cleanup work",
       );
-      assert.ok(calls.indexOf(publicUpload) < calls.indexOf(aggregateRpc));
-      assert.ok(calls.indexOf(aggregateRpc) < calls.indexOf(publicRemoval));
-      assert.ok(calls.indexOf(publicRemoval) < calls.indexOf(compensationAudit));
+      assert.ok(calls.indexOf(publicRemoval) < calls.indexOf(compensationAudits[1]));
 
-      const publicPathPrefix =
-        "/storage/v1/object/urblo-public-media/";
-      const uploadedPath = decodeURIComponent(
-        new URL(publicUpload.url).pathname.slice(publicPathPrefix.length),
-      );
+      const copyBody = JSON.parse(String(publicCopy.body));
+      assert.equal(copyBody.bucketId, "urblo-admin-media");
+      assert.equal(copyBody.sourceKey, "project-editor/compensation-proof.jpg");
+      assert.equal(copyBody.destinationBucket, "urblo-public-media");
+      const copiedPath = copyBody.destinationKey;
+      assert.match(copiedPath, /^project-assets\/[0-9a-f-]{36}\/7-[0-9A-Za-z]+-compensation-proof\.jpg$/);
       const removalBody = JSON.parse(String(publicRemoval.body));
       const rpcBody = JSON.parse(String(aggregateRpc.body));
-      const auditBody = JSON.parse(String(compensationAudit.body));
-      assert.deepEqual(removalBody.prefixes, [uploadedPath]);
+      const plannedAudit = JSON.parse(String(compensationAudits[0].body));
+      const resultAudit = JSON.parse(String(compensationAudits[1].body));
+      assert.deepEqual(removalBody.prefixes, [copiedPath]);
       assert.equal(
         rpcBody.p_promotions[0].destinationPath,
-        uploadedPath,
+        copiedPath,
         "The compensated path must be the exact request-owned promotion path",
       );
-      assert.equal(
-        auditBody.action,
-        "project.aggregate.publish_compensation",
-      );
-      assert.deepEqual(auditBody.metadata.removed, [uploadedPath]);
-      assert.equal(auditBody.metadata.originalError.code, "revision_conflict");
+      for (const audit of [plannedAudit, resultAudit]) {
+        assert.equal(audit.action, "project.aggregate.publish_compensation");
+        assert.equal(audit.metadata.originalError.code, "revision_conflict");
+      }
+      assert.equal(plannedAudit.metadata.phase, "planned");
+      assert.deepEqual(plannedAudit.metadata.candidates, [
+        { path: copiedPath, ownership: "created" },
+      ]);
+      assert.equal(resultAudit.metadata.phase, "result");
+      assert.deepEqual(resultAudit.metadata.removed, [copiedPath]);
     },
   );
 
@@ -1424,4 +1428,256 @@ test("adding an image with material points creates its hidden map so the image a
   assert.equal(blockImageId(withImage, withImage.blocks[0]), 7);
   const text = addBlock(withImage, "text", 0);
   assert.deepEqual(text.draft.blocks.map((entry) => entry.type), ["text", "hotspot_image"]);
+});
+
+// NOW-PUBLISH-COPY-BUDGET-001: an in-memory Supabase over fetch that counts every upstream
+// call (each one is a Cloudflare subrequest) and refuses calls past the platform limit,
+// the way the production incident on 2026-10-19 failed at the 51st subrequest.
+const CLOUDFLARE_SUBREQUEST_LIMIT = 50;
+
+function createSubrequestCountingSupabase(imageCount, { rpcFails = false, corruptCopy = null } = {}) {
+  const updatedAt = "2026-10-19T00:00:00.000000+00:00";
+  const mediaRows = Array.from({ length: imageCount }, (_, index) => ({
+    id: index + 1,
+    status: "draft",
+    bucket: "urblo-admin-media",
+    object_path: `project-editor/owner/import-${index + 1}.jpg`,
+    source_url: null,
+    source_kind: "storage",
+    media_type: "image",
+    mime_type: "image/jpeg",
+    size_bytes: 1000 + index,
+    alt: `Synthetic image ${index + 1}`,
+    updated_at: updatedAt,
+  }));
+  const buckets = {
+    "urblo-admin-media": new Map(
+      mediaRows.map((row) => [row.object_path, { size: row.size_bytes, mimetype: row.mime_type }]),
+    ),
+    "urblo-public-media": new Map(),
+  };
+  const calls = [];
+  const audits = [];
+  let refused = 0;
+  const json = (body, status = 200) => Response.json(body, { status });
+  const fetchMock = async (input, init = {}) => {
+    const url = new URL(input instanceof Request ? input.url : String(input));
+    const method = (init.method || "GET").toUpperCase();
+    const body = init.body ? JSON.parse(String(init.body)) : null;
+    if (calls.length >= CLOUDFLARE_SUBREQUEST_LIMIT) {
+      refused += 1;
+      throw new TypeError("Too many subrequests.");
+    }
+    calls.push({ method, path: url.pathname, body, search: url.searchParams });
+    const path = url.pathname;
+    if (path === "/auth/v1/user") return json({ id: mockAdminUserId, email: "owner@example.test" });
+    if (path === "/rest/v1/admin_profiles") return json({ user_id: mockAdminUserId, role: "owner", is_active: true });
+    if (["/rest/v1/stone_groups", "/rest/v1/finish_definitions"].includes(path)) return json([{ id: 1, status: "published" }]);
+    if (path === "/rest/v1/stone_variants") {
+      return url.searchParams.get("select") === "id,status"
+        ? json([{ id: 11, status: "published" }])
+        : json([{ id: 11, stone_group_id: 1 }]);
+    }
+    if (path === "/rest/v1/stone_finish_capabilities") {
+      return json([{ stone_variant_id: 11, finish_definition_id: 1, capability: "yes" }]);
+    }
+    if (path === "/rest/v1/stone_finish_images") {
+      return json([{ stone_group_id: 1, stone_variant_id: 11, finish_definition_id: 1, status: "published", media_assets: { status: "published" } }]);
+    }
+    if (path === "/rest/v1/media_assets" && method === "GET") {
+      const select = url.searchParams.get("select") || "";
+      if (select.startsWith("id,status")) return json(mediaRows);
+      if (select === "object_path") {
+        const bucket = url.searchParams.get("bucket")?.replace(/^eq\./, "");
+        const wanted = new Set(
+          (url.searchParams.get("object_path") || "")
+            .replace(/^in\.\(/, "")
+            .replace(/\)$/, "")
+            .split(",")
+            .map((value) => value.replace(/^"|"$/g, "")),
+        );
+        return json(
+          mediaRows
+            .filter((row) => row.bucket === bucket && wanted.has(row.object_path))
+            .map((row) => ({ object_path: row.object_path })),
+        );
+      }
+    }
+    if (path === "/rest/v1/admin_audit_events" && method === "POST") {
+      audits.push(body);
+      return new Response(null, { status: 201 });
+    }
+    if (path === "/rest/v1/rpc/admin_project_aggregate") {
+      if (rpcFails) return revisionConflictResponse("Reload before publishing.");
+      for (const promotion of body.p_promotions) {
+        const row = mediaRows.find((candidate) => candidate.id === promotion.mediaAssetId);
+        Object.assign(row, { status: "published", bucket: promotion.destinationBucket, object_path: promotion.destinationPath });
+      }
+      return json({ projectId: 12, revision: 2, status: "published" });
+    }
+    if (path === "/storage/v1/object/copy" && method === "POST") {
+      const source = buckets[body.bucketId].get(body.sourceKey);
+      const destination = buckets[body.destinationBucket];
+      if (!source) return json({ statusCode: "404", error: "not_found", message: "Object not found" }, 400);
+      if (destination.has(body.destinationKey)) {
+        return json({ statusCode: "409", error: "Duplicate", message: "The resource already exists" }, 400);
+      }
+      const copied = { ...source };
+      if (corruptCopy && body.destinationKey.includes(corruptCopy)) copied.size += 1;
+      destination.set(body.destinationKey, copied);
+      return json({ Key: `${body.destinationBucket}/${body.destinationKey}` });
+    }
+    const listMatch = path.match(/^\/storage\/v1\/object\/list\/([^/]+)$/);
+    if (listMatch && method === "POST") {
+      const prefix = `${body.prefix}/`;
+      return json(
+        [...buckets[listMatch[1]].entries()]
+          .filter(([key]) => key.startsWith(prefix) && !key.slice(prefix.length).includes("/"))
+          .slice(body.offset, body.offset + body.limit)
+          .map(([key, metadata]) => ({ name: key.slice(prefix.length), id: key, metadata })),
+      );
+    }
+    const removeMatch = path.match(/^\/storage\/v1\/object\/([^/]+)$/);
+    if (removeMatch && method === "DELETE") {
+      const removed = body.prefixes.filter((key) => buckets[removeMatch[1]].delete(key));
+      return json(removed.map((name) => ({ name })));
+    }
+    throw new Error(`Unexpected subrequest ${method} ${url.pathname}`);
+  };
+  return { fetchMock, calls, audits, buckets, mediaRows, refused: () => refused };
+}
+
+function budgetDraft(imageCount) {
+  const draft = createEmptyProjectAggregateDraft();
+  Object.assign(draft.project, {
+    id: 12,
+    title: "Copy budget proof",
+    slug: "copy-budget-proof",
+    summary: "A synthetic publish with many private images.",
+    claimReviewStatus: "approved",
+    heroMediaId: 1,
+    coverMediaId: 1,
+  });
+  // One material keeps every reference check in the path, so the count is the worst case.
+  draft.materials.push({
+    key: "material:new:budget",
+    id: null,
+    stoneGroupId: 1,
+    stoneVariantId: 11,
+    finishDefinitionId: 1,
+    application: "Paving",
+    note: "",
+    mediaAssetId: null,
+    claimStatus: "approved",
+    sortOrder: 0,
+  });
+  for (let id = 2; id <= imageCount; id += 1) {
+    draft.blocks.push(imageBlock(`block:new:${id}`, id, {}, id - 2));
+  }
+  return draft;
+}
+
+async function publishWithCountingSupabase(imageCount, options) {
+  const fake = createSubrequestCountingSupabase(imageCount, options);
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = fake.fetchMock;
+  try {
+    const response = await handleAdminProjectsRequest(
+      adminProjectMutationRequest({
+        action: "publish",
+        projectId: 12,
+        baseRevision: 1,
+        baseUpdatedAt: "2026-10-19T00:00:00.000000+00:00",
+        draft: budgetDraft(imageCount),
+      }),
+      mockAdminEnvironment,
+    );
+    return { response, body: await response.json(), ...fake };
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+}
+
+test("the copy budget is the subrequest limit minus the worst-case fixed calls and a margin", () => {
+  assert.equal(PUBLISH_STORAGE_COPY_BUDGET, 30);
+  assert.equal(PUBLISH_STORAGE_COPY_BUDGET, 50 - 15 - 5);
+});
+
+test("Publish copies 7, 16 and 30 private images within the subrequest limit", async () => {
+  for (const imageCount of [7, 16, PUBLISH_STORAGE_COPY_BUDGET]) {
+    const run = await publishWithCountingSupabase(imageCount);
+    assert.equal(run.response.status, 200, `${imageCount} images: ${JSON.stringify(run.body)}`);
+    assert.equal(run.body.warnings, undefined, `${imageCount} images must publish without cleanup warnings`);
+    assert.equal(run.refused(), 0);
+    // One copy per image plus 15 fixed calls, never more.
+    assert.equal(run.calls.length, imageCount + 15, `${imageCount} images used ${run.calls.length} subrequests`);
+    assert.ok(run.calls.length <= CLOUDFLARE_SUBREQUEST_LIMIT - 5);
+    const count = (method, path) => run.calls.filter((call) => call.method === method && call.path === path).length;
+    assert.equal(count("POST", "/storage/v1/object/copy"), imageCount);
+    assert.equal(count("POST", "/storage/v1/object/list/urblo-public-media"), 1);
+    assert.equal(count("DELETE", "/storage/v1/object/urblo-admin-media"), 1);
+    assert.equal(count("DELETE", "/storage/v1/object/urblo-public-media"), 0);
+    assert.equal(
+      run.calls.filter((call) => /^\/storage\/v1\/object\/urblo-/.test(call.path) && call.method !== "DELETE").length,
+      0,
+      "no image bytes are downloaded or uploaded through the Function",
+    );
+    // The public bucket holds exactly the referenced copies; every private source is gone.
+    const referenced = run.mediaRows.map((row) => row.object_path).sort();
+    assert.deepEqual([...run.buckets["urblo-public-media"].keys()].sort(), referenced);
+    assert.equal(run.buckets["urblo-admin-media"].size, 0);
+    assert.ok(run.mediaRows.every((row) => row.bucket === "urblo-public-media" && row.status === "published"));
+    assert.equal(new Set(referenced.map((key) => key.split("/").slice(0, 2).join("/"))).size, 1, "one nonce folder per Publish");
+    const cleanupAudits = run.audits.filter((audit) => audit.action === "project.aggregate.media_cleanup");
+    assert.deepEqual(cleanupAudits.map((audit) => audit.metadata.phase), ["planned", "result"]);
+    const plannedIndex = run.calls.findIndex((call) => call.path === "/rest/v1/admin_audit_events");
+    const removeIndex = run.calls.findIndex((call) => call.method === "DELETE");
+    assert.ok(plannedIndex < removeIndex, "the cleanup audit precedes the private removal");
+    assert.equal(cleanupAudits[1].metadata.removed.length, imageCount);
+  }
+});
+
+test("Publish over the copy budget fails before any Storage call with a plain message", async () => {
+  for (const imageCount of [PUBLISH_STORAGE_COPY_BUDGET + 1, 50]) {
+    const run = await publishWithCountingSupabase(imageCount);
+    assert.equal(run.response.status, 409);
+    assert.equal(run.body.error, "publish_blocked");
+    assert.equal(run.body.copyCount, imageCount);
+    assert.equal(run.body.copyBudget, PUBLISH_STORAGE_COPY_BUDGET);
+    assert.match(run.body.message, new RegExp(`${imageCount} new images`));
+    assert.match(run.body.message, /publish it with fewer new images first/i);
+    assert.doesNotMatch(run.body.message, /bucket|storage|subrequest|request limit|copy|promot/i);
+    assert.equal(run.calls.filter((call) => call.path.startsWith("/storage/")).length, 0);
+    assert.equal(run.calls.filter((call) => call.path === "/rest/v1/rpc/admin_project_aggregate").length, 0);
+    assert.equal(run.calls.length, 9, "identity 2 + references 6 + media 1");
+    assert.equal(run.buckets["urblo-public-media"].size, 0);
+  }
+});
+
+test("a failed 30-image Publish compensates with batched calls inside the limit", async () => {
+  const run = await publishWithCountingSupabase(PUBLISH_STORAGE_COPY_BUDGET, { rpcFails: true });
+  assert.equal(run.response.status, 409);
+  assert.equal(run.body.error, "revision_conflict");
+  assert.deepEqual(run.body.cleanup, { removedCount: PUBLISH_STORAGE_COPY_BUDGET, retainedCount: 0, auditRecorded: true });
+  assert.equal(run.refused(), 0);
+  assert.equal(run.calls.length, PUBLISH_STORAGE_COPY_BUDGET + 15);
+  assert.equal(run.calls.filter((call) => call.path === "/rest/v1/media_assets" && call.search.get("select") === "object_path").length, 1);
+  assert.equal(run.calls.filter((call) => call.method === "DELETE").length, 1);
+  assert.equal(run.buckets["urblo-public-media"].size, 0, "no public orphans remain");
+  assert.equal(run.buckets["urblo-admin-media"].size, PUBLISH_STORAGE_COPY_BUDGET, "private sources are kept");
+  const auditIndexes = run.calls.flatMap((call, index) => (call.path === "/rest/v1/admin_audit_events" ? [index] : []));
+  const removeIndex = run.calls.findIndex((call) => call.method === "DELETE");
+  assert.equal(auditIndexes.length, 2);
+  assert.ok(auditIndexes[0] < removeIndex && removeIndex < auditIndexes[1]);
+  assert.equal(run.audits[0].metadata.candidates.length, PUBLISH_STORAGE_COPY_BUDGET);
+});
+
+test("a copy whose stored size differs from its source record blocks Publish and is removed", async () => {
+  const run = await publishWithCountingSupabase(16, { corruptCopy: "-import-9.jpg" });
+  assert.equal(run.response.status, 409);
+  assert.equal(run.body.error, "media_copy_mismatch");
+  assert.equal(run.calls.filter((call) => call.path === "/rest/v1/rpc/admin_project_aggregate").length, 0);
+  assert.equal(run.buckets["urblo-public-media"].size, 0);
+  assert.equal(run.body.cleanup.removedCount, 16);
+  assert.ok(run.calls.length <= CLOUDFLARE_SUBREQUEST_LIMIT - 5);
 });
