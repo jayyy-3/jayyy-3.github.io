@@ -617,6 +617,8 @@ function checkPublicRuntimeBoundary() {
   requireNotIncludes(stoneSpecs, "return 'No';", 'Finish capability no longer reads as unavailable');
   requireIncludes(readRequired('src/components/stone-library/FinishAccordion.tsx'), "'Upcoming' : 'Samples In Stock'", 'Finish selector rail wording');
   requireIncludes(readRequired('src/components/stone-library/StoneCompareView.tsx'), 'Tailored sample on request', 'Compare finish legend wording');
+  requireIncludes(readRequired('src/components/stone-library/StoneCompareView.tsx'), '{finishName} tailored on request', 'Compare finish image panel for a tailored finish');
+  requireNotIncludes(readRequired('src/components/stone-library/StoneCompareView.tsx'), 'Not offered in', 'Compare finish image panel no longer says not offered');
   requireNotIncludes(stoneSpecs, 'availabilityLabel', 'Retired stone-level availability label');
   requireIncludes(stoneSpecs, 'Available as', 'Stone specs Available as card');
   requireNotIncludes(stoneCard, 'StatusPill', 'Stone list card status badge removed');

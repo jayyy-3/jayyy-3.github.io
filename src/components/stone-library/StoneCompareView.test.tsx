@@ -109,6 +109,7 @@ describe('StoneCompareView', () => {
         expect(html).toContain('Tailored sample on request');
         expect(html).toContain('To be confirmed');
         expect(html).not.toMatch(/>Available<\/span>/);
+        expect(html).not.toContain('Not offered in');
     });
 
     it('links the sample request CTA with the stones prefilled', () => {

@@ -187,7 +187,7 @@ function ImageCell({ cell, stoneName, finishName }: { cell: CompareCellOf<'image
     } else {
         media = (
             <span className="flex h-full items-center justify-center border border-dashed border-black/15 bg-surface px-4 text-center text-small text-muted">
-                Not offered in {finishName}
+                {finishName} tailored on request
             </span>
         );
     }
@@ -358,7 +358,7 @@ export default function StoneCompareView({
     ) - visibleRows.reduce((count, row) => count + (row.matrixRows ? row.matrixRows.length : 1), 0);
     const ids = stones.map((stone) => stone.detail.stoneGroupId);
     const names = stones.map((stone) => stone.detail.name);
-    const finishName = finishKey ? finishLabel(finishKey, ctx) : 'this finish';
+    const finishName = finishKey ? finishLabel(finishKey, ctx) : 'This finish';
     const tableMinWidth = LABEL_COLUMN_MIN_PX + stones.length * STONE_COLUMN_MIN_PX;
 
     const notices: string[] = [];
