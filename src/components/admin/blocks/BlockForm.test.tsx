@@ -27,7 +27,7 @@ const expectedLabels: Record<string, string[]> = {
   spec_table: ['Table title', 'Row 1', 'Label', 'Value', 'Add row'],
   comparison_table: ['Columns', 'Column 1', 'Column 2', 'Add column', 'Row label', 'Add row'],
   stone_cards: ['Title above the cards', 'Stone 1', 'Choose a stone', 'Angola Black (Live)', 'Finish shown', 'Polished', 'Where it is used'],
-  image: ['Image', 'Image description', 'Small label', 'Caption'],
+  image: ['Image', 'Image description', 'Small label', 'Caption', 'Show as', 'Photo', 'Drawing or document'],
   gallery: ['Gallery image 1', 'Gallery image 2', 'Image description', 'Add gallery image', '2 of up to 12'],
   hotspot_image: ['Title above the image', 'Caption'],
   video: ['Video title', 'YouTube link', 'Caption'],

@@ -132,7 +132,7 @@ const PACKAGE_BLOCK_FIELDS: Record<Exclude<ContentBlockType, 'hotspot_image'>, r
     spec_table: ['title', 'rows'],
     comparison_table: ['title', 'columns', 'rows'],
     stone_cards: ['title', 'items'],
-    image: ['image', 'caption', 'label', 'title'],
+    image: ['image', 'caption', 'label', 'title', 'presentation'],
     gallery: ['items'],
     video: ['youtubeUrl', 'label', 'caption', 'title'],
     cta: ['title', 'body', 'primary', 'secondary'],

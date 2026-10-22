@@ -10,7 +10,7 @@ import { buildPickerObjectPath, type AdminMediaPickerAsset, type PreparedPickerU
 // public library on Publish.
 
 export const privateMediaBucket = 'urblo-admin-media';
-export const pickerColumns = 'id,bucket,alt,caption,object_path,source_url,source_kind,media_type,status';
+export const pickerColumns = 'id,bucket,alt,caption,object_path,source_url,source_kind,media_type,status,width_px,height_px';
 
 export interface MediaPickerRow {
     id: number;
@@ -22,6 +22,8 @@ export interface MediaPickerRow {
     source_kind: string;
     media_type: string;
     status: string;
+    width_px?: number | null;
+    height_px?: number | null;
 }
 
 export function rowToAsset(row: MediaPickerRow): AdminMediaPickerAsset {
@@ -35,6 +37,8 @@ export function rowToAsset(row: MediaPickerRow): AdminMediaPickerAsset {
         sourceKind: row.source_kind,
         mediaType: row.media_type,
         status: row.status,
+        widthPx: row.width_px ?? null,
+        heightPx: row.height_px ?? null,
     };
 }
 

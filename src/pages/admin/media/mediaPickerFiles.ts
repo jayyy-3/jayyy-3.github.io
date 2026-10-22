@@ -85,6 +85,19 @@ export interface PreparedPickerUpload {
     resized: boolean;
 }
 
+/** The decoded pixel size of an image file, or null when the browser cannot read it. */
+export async function readImageSize(file: Blob): Promise<{ width: number; height: number } | null> {
+    if (typeof createImageBitmap !== 'function') return null;
+    try {
+        const bitmap = await createImageBitmap(file);
+        const size = { width: bitmap.width, height: bitmap.height };
+        bitmap.close();
+        return size.width > 0 && size.height > 0 ? size : null;
+    } catch {
+        return null;
+    }
+}
+
 /**
  * Turns the chosen file into the file that will be uploaded. Throws an Error with a plain-English
  * message when the file cannot be used. `optimize` is injectable for tests.
@@ -98,7 +111,10 @@ export async function preparePickerUpload(
     if (problem) throw new Error(problem);
 
     if (policy === 'original' || !optimizableTypes.has(file.type)) {
-        return { file, width: null, height: null, originalBytes: file.size, uploadBytes: file.size, resized: false };
+        // The original is kept as uploaded; its pixel size is still recorded so public pages can
+        // reserve the right box and choose the image's presentation (2026-10-22).
+        const size = await readImageSize(file);
+        return { file, width: size?.width ?? null, height: size?.height ?? null, originalBytes: file.size, uploadBytes: file.size, resized: false };
     }
 
     let optimized: OptimizedQrImage;
@@ -191,6 +207,8 @@ export interface AdminMediaPickerAsset {
     mediaType: string;
     status: string;
     previewUrl?: string | null;
+    widthPx?: number | null;
+    heightPx?: number | null;
 }
 
 /** Public website address of a published picker image (null for Drafts and private uploads). */

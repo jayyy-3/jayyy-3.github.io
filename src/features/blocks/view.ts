@@ -16,9 +16,18 @@ export interface BlockHotspot {
     imageAlt?: string;
 }
 
+/** Intrinsic pixel size of a media asset (`media_assets.width_px/height_px`), when recorded. */
+export interface BlockImageSize {
+    width: number;
+    height: number;
+}
+
 export interface BlockImageView {
     src: string;
     alt: string;
+    /** Intrinsic size; absent for older media without recorded dimensions. */
+    width?: number;
+    height?: number;
 }
 
 export interface BlockLinkView {
@@ -104,6 +113,11 @@ export interface ImageBlockView {
     type: 'image';
     src: string;
     alt: string;
+    /** Intrinsic size; absent for older media without recorded dimensions. */
+    width?: number;
+    height?: number;
+    /** `drawing` shows the image on a light framed surface; absent means `photo`. */
+    presentation?: 'photo' | 'drawing';
     title?: string;
     label?: string;
     caption?: string;

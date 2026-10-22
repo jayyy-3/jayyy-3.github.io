@@ -71,12 +71,14 @@ interface MediaOptionRow {
   source_kind: string;
   media_type: string;
   status: string;
+  width_px: number | null;
+  height_px: number | null;
 }
 
 const projectEndpoint = "/api/admin/projects";
 const publicMediaBucket = "urblo-public-media";
 const mediaOptionSelect =
-  "id,bucket,alt,caption,object_path,source_url,source_kind,media_type,status";
+  "id,bucket,alt,caption,object_path,source_url,source_kind,media_type,status,width_px,height_px";
 const mediaPickerLimit = 500;
 const referencedMediaBatchSize = 100;
 const signedPreviewLifetimeSeconds = 60 * 60;
@@ -1217,6 +1219,8 @@ function rowToMediaOption(row: MediaOptionRow): ProjectMediaOption {
     mediaType: row.media_type,
     status: row.status,
     previewUrl: row.source_kind === "storage" ? null : row.source_url,
+    widthPx: row.width_px,
+    heightPx: row.height_px,
   };
 }
 

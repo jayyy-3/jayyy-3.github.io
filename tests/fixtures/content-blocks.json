@@ -922,6 +922,94 @@
    ]
   },
   {
+   "name": "image drawing presentation",
+   "mode": "publish",
+   "block": {
+    "type": "image",
+    "content": {
+     "mediaAssetId": 42,
+     "alt": "Setting-out drawing",
+     "presentation": "drawing"
+    }
+   },
+   "issues": []
+  },
+  {
+   "name": "image photo presentation",
+   "mode": "publish",
+   "block": {
+    "type": "image",
+    "content": {
+     "mediaAssetId": 42,
+     "alt": "Granite paving",
+     "presentation": "photo"
+    }
+   },
+   "issues": []
+  },
+  {
+   "name": "image unknown presentation",
+   "mode": "draft",
+   "block": {
+    "type": "image",
+    "content": {
+     "mediaAssetId": 42,
+     "alt": "x",
+     "presentation": "diagram"
+    }
+   },
+   "issues": [
+    {
+     "path": "content.presentation",
+     "code": "invalid_value"
+    }
+   ]
+  },
+  {
+   "name": "image null presentation",
+   "mode": "draft",
+   "block": {
+    "type": "image",
+    "content": {
+     "mediaAssetId": 42,
+     "alt": "x",
+     "presentation": null
+    }
+   },
+   "issues": [
+    {
+     "path": "content.presentation",
+     "code": "invalid_type"
+    }
+   ]
+  },
+  {
+   "name": "gallery item presentation is not a field",
+   "mode": "draft",
+   "block": {
+    "type": "gallery",
+    "content": {
+     "items": [
+      {
+       "mediaAssetId": 1,
+       "alt": "a",
+       "presentation": "drawing"
+      },
+      {
+       "mediaAssetId": 2,
+       "alt": "b"
+      }
+     ]
+    }
+   },
+   "issues": [
+    {
+     "path": "content.items[0].presentation",
+     "code": "unknown_field"
+    }
+   ]
+  },
+  {
    "name": "gallery complete",
    "mode": "publish",
    "block": {

@@ -23,6 +23,7 @@ Public Project data, listing/detail rendering, body blocks and hotspots. Admin a
   - Uses `blocks` when present and falls back to `images` as image blocks for older records.
 - Project body contract (NOW-PROJECT-BLOCKS-001): the body is an ordered list of the 14 shared content blocks (`src/features/blocks/` schema, validation, defaults, legacy upgrade and resolver; `src/components/blocks/` renderers and `BlockList`). The page view never renders blocks inline. The header (facts, materials, points) stays structured.
   - `image`, `hotspot_image` and `video` replace the former `normal_image`, `hotspot_image` and `youtube_video` media blocks one to one; at most one video per Project; `youtube-nocookie` embeds only.
+  - Body image size and presentation: `docs/DESIGN.md` Body images.
   - A block copied from a former `project_media` row keeps that row's public ID (`{slug}-media-{id}`) and so its `?point=` anchors; other blocks use `{slug}-block-{id}`.
   - Stone cards resolve stones through the Published Stone Library; an unavailable stone renders as a pending card and blocks Publish.
 - Project hotspot component: `src/components/projects/ProjectHotspotImage.tsx`

@@ -6,11 +6,11 @@ Last updated: 2026-10-22
 
 ## 正在执行
 
-**NOW-PUBLISH-COPY-BUDGET-001** — Make Projects Publish promotion subrequest-frugal after the 2026-10-19 production incident (16 private images exceeded the 50-subrequest Cloudflare limit): server-side Storage copy with one metadata listing, batched cleanup/compensation with the audit first, and a documented pre-flight copy budget.
+**NOW-PROJECT-IMAGE-PRESENTATION-001** — Present every Project body image to suit its shape instead of a fixed 16:9 crop: landscape full width at natural ratio, square/portrait centred in a narrower measure (80svh cap) and paired when two are consecutive, drawings on a light hairline-framed surface via an optional image presentation field, one caption style; step images follow the same rules.
 
-阶段：awaiting_external。状态：now。
+阶段：verification。状态：now。
 
-下一步：The editor retries Publish on the imported project (16 images, within the 30-image budget); Jay reviews the public page. Later option: raise the budget by moving to a Cloudflare plan with a higher subrequest limit or splitting promotion across requests.
+下一步：Review PR and merge decision; after release, Jay checks a Claude Design imported project. Optional follow-up needing separate authorization: backfill recorded sizes for existing production media so older portrait images pair without measuring on load.
 
 ## 已观察的发布状态
 

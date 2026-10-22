@@ -75,7 +75,8 @@ Importing never changes an existing project. If the page address is already used
     {
       "type": "image",
       "image": { "file": "images/as-built.jpg", "alt": "As built: staggered joints and a crisp arris" },
-      "caption": "As built: staggered joints, a crisp arris, and Alpine White granite strips set into Steel Blue."
+      "caption": "As built: staggered joints, a crisp arris, and Alpine White granite strips set into Steel Blue.",
+      "presentation": "photo"
     },
     {
       "type": "stone_cards",
@@ -147,6 +148,8 @@ Not in the package on purpose: carbon details, Live/Draft status, review states 
 - Each image up to 10 MB, long edge at least 1600 px. Up to 50 different images and 100 MB per zip.
 - The website publishes up to 30 new images at a time: a package with more imports fine, but publish with up to 30 images first, then add the rest and publish again.
 - Original photos are kept at full quality; the website prepares screen sizes automatically.
+- Images are never cropped on the page. Landscape images run full width; square and portrait images sit in a narrower centred column, and two square or portrait `image` blocks in a row are shown side by side. Export images at their real proportions; do not pad or crop them to 16:9.
+- For a shop drawing, plan, section or other light-background document in an `image` block, add `"presentation": "drawing"`: it is shown on a light framed surface instead of as a photo.
 
 ### Stones: `{ "stone", "finish" }`
 
@@ -210,7 +213,7 @@ Every block is an object with `"type"` plus the fields below. Text limits: title
 | `spec_table` | Label and value rows: finish, thickness, slip rating, supply. | `rows` (1–12): `label` (required, 200), `value` (required, 400); `title` (200) |
 | `comparison_table` | Two to four options compared row by row. | `columns` (2–4 names, 200 each), `rows` (1–20): `label` (required, 200), `cells` (one per column, 400 each); `title` (200) |
 | `stone_cards` | The stones used, with their Stone Library photo. | `items` (1–6): `stone` (required), `finish`, `note` (400); `title` (200) |
-| `image` | One full-width photo. | `image` (required image), `caption` (400), `label` (200), `title` (200) |
+| `image` | One photo, drawing or document page. | `image` (required image), `caption` (400), `label` (200), `title` (200), `presentation` (`photo` default, or `drawing` for drawings and light-background documents) |
 | `gallery` | Two to twelve photos in an even grid. | `items` (2–12): `image` (required image), `caption` (400) |
 | `video` | A YouTube video. At most one per project. | `youtubeUrl` (required: https YouTube link or video ID), `title` (200), `label` (200), `caption` (400) |
 | `cta` | A closing prompt with one or two buttons. | `title` (required, 200), `body` (400), `primary` (required), `secondary`: each `{ "label", "href" }`, where `href` is a site path such as `/contact` or an `https://` address |

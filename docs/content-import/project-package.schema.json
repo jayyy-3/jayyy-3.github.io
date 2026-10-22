@@ -515,6 +515,13 @@
               "title": {
                 "type": "string",
                 "maxLength": 200
+              },
+              "presentation": {
+                "description": "How the image is shown: photo (default) or drawing, for drawings and light-background documents shown on a light framed surface.",
+                "enum": [
+                  "photo",
+                  "drawing"
+                ]
               }
             }
           },

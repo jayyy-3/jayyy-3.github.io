@@ -1,9 +1,9 @@
 import type { StepsBlockView } from '../../features/blocks/view';
-import ProjectResponsiveImage from '../projects/ProjectResponsiveImage';
+import BodyImage from './BodyImage';
 import { cardTitleClassName } from '../ui/styles';
 import { blockMetaClassName } from './blockStyles';
 
-/** Numbered process: `01` label, step title and copy, then an optional full-width image. */
+/** Numbered process: `01` label, step title and copy, then an optional image presented to suit its shape. */
 export default function StepsBlock({ block }: { block: StepsBlockView }) {
   return (
     <div>
@@ -21,15 +21,13 @@ export default function StepsBlock({ block }: { block: StepsBlockView }) {
               </div>
             </div>
             {item.image ? (
-              <div className="overflow-hidden bg-black">
-                <ProjectResponsiveImage
-                  src={item.image.src}
-                  profile="detail"
-                  alt={item.image.alt}
-                  className="aspect-[16/9] w-full object-cover"
-                  loading="lazy"
-                />
-              </div>
+              <BodyImage
+                as="div"
+                src={item.image.src}
+                alt={item.image.alt}
+                width={item.image.width}
+                height={item.image.height}
+              />
             ) : null}
           </li>
         ))}

@@ -16,7 +16,7 @@ import {
 } from '../blocks/schema.ts';
 import { PROJECT_DRAFT_SCHEMA_VERSION } from '../blocks/upgrade.ts';
 import { PUBLISH_NEW_IMAGE_BUDGET, projectPublishBudgetMessage } from '../blocks/publishBudget.ts';
-import { resolveBlockView } from '../blocks/resolve.ts';
+import { resolveBlockView, toBlockImageSize } from '../blocks/resolve.ts';
 import { blockViewImageUrls, type ContentBlockView } from '../blocks/view.ts';
 
 export type ProjectLifecycleStatus = 'draft' | 'published' | 'archived';
@@ -211,6 +211,9 @@ export interface ProjectMediaOption {
     mediaType: string;
     status: string;
     previewUrl?: string | null;
+    /** Recorded intrinsic size (`media_assets.width_px/height_px`), when known. */
+    widthPx?: number | null;
+    heightPx?: number | null;
 }
 
 export interface ProjectStoneOption {
@@ -880,6 +883,10 @@ export function draftToProjectData(
             mediaUrl,
             mediaAlt: (mediaId) => (mediaId ? mediaById.get(mediaId)?.alt?.trim() ?? '' : ''),
             stoneKey: (stoneGroupId) => stoneById.get(stoneGroupId)?.key ?? null,
+            mediaSize: (mediaId) => {
+                const media = mediaId ? mediaById.get(mediaId) : undefined;
+                return media ? toBlockImageSize(media.widthPx, media.heightPx) : null;
+            },
         });
         return view ? [view] : [];
     });
