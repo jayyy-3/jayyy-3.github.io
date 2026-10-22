@@ -6,7 +6,7 @@
     {
       "id": "NOW-PROJECT-IMAGE-PRESENTATION-001",
       "status": "now",
-      "phase": "verification",
+      "phase": "awaiting_external",
       "priority": 0.05,
       "summary": "Present every Project body image to suit its shape instead of a fixed 16:9 crop: landscape full width at natural ratio, square/portrait centred in a narrower measure (80svh cap) and paired when two are consecutive, drawings on a light hairline-framed surface via an optional image presentation field, one caption style; step images follow the same rules.",
       "modules": [
@@ -69,7 +69,8 @@
       },
       "nextAction": "Review PR and merge decision; after release, Jay checks a Claude Design imported project. Optional follow-up needing separate authorization: backfill recorded sizes for existing production media so older portrait images pair without measuring on load.",
       "notes": [
-        "2026-10-22: Registered and implemented on claude/project-image-presentation (docs/WORKLOG.md). PR open, not merged."
+        "2026-10-22: Registered and implemented on claude/project-image-presentation (docs/WORKLOG.md). PR open, not merged.",
+        "2026-10-22: PR #106 open; CI run 39714826387 passed and deployed Preview https://4eec5a8e.urblo-site.pages.dev; smoke and read-only checks of greenline, west-side-place and officer-specialist-school at 1440/390 passed (docs/WORKLOG.md). Awaiting review and merge decision."
       ]
     },
     {
