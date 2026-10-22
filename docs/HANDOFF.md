@@ -10,15 +10,15 @@ Last updated: 2026-10-22
 
 阶段：awaiting_external。状态：now。
 
-下一步：Review PR and merge decision; after release, Jay checks a Claude Design imported project. Optional follow-up needing separate authorization: backfill recorded sizes for existing production media so older portrait images pair without measuring on load.
+下一步：Jay and Alvin review live project pages; optional follow-up (needs production-write approval): backfill width/height for older media rows that lack a stored size so they lay out before loading.
 
 ## 已观察的发布状态
 
-观察日期：2026-10-22。仓库版本：`21798d035819f9e6cfbd16dc5f85e8e029b3949d`。已验证运行时代码：`21798d035819f9e6cfbd16dc5f85e8e029b3949d`。
+观察日期：2026-10-22。仓库版本：`a1244e326414f9c547ddf96ec16ea8c914034561`。已验证运行时代码：`a1244e326414f9c547ddf96ec16ea8c914034561`。
 
-验证地址：https://7d04ec6e.urblo-site.pages.dev
+验证地址：https://516fc6ac.urblo-site.pages.dev
 
-Finish capability wording (#104) released 2026-10-22: finish capability yes reads "Samples In Stock", no reads "Request a Tailored Sample" linking to the sample request form with the stone and finish prefilled, tbc stays "Upcoming"; compare legend/sr text and the compare image panel use the same meaning; Available as, cut options and admin copy unchanged. Merge 21798d0 deployed as immutable 7d04ec6e; apex bound smoke passed; production alpine-white readback shows 8 in-stock pills and 8 tailored links, the only remaining "Available" being the Available as card title. Earlier on 2026-10-19/20: publish copy budget #101, startup budget trim #103 and deploy page readiness #100 released; stale PR #8 closed.
+Project body image presentation (#106) released 2026-10-22: body images and step images no longer crop to 16:9; landscape full width at natural ratio with stored sizes, square/portrait centred in a two-thirds measure (80svh cap) and paired when consecutive, optional presentation=drawing frame in admin, import contract and docs; hero, gallery and points images unchanged. Merge a1244e3 deployed as immutable 516fc6ac; apex/www bound smoke passed; production West Side Place readback shows the 4:3 photo at 1252x939 and 16:9 photos at 1252x704 with no overflow. Jay acceptance open; Alvin project 23 still an unpublished draft.
 
 CMS handoff: **revalidation_required**。QR: material_page_deployed。
 
