@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "lastUpdated": "2026-10-19",
+  "lastUpdated": "2026-10-22",
   "currentTaskId": "NOW-PUBLISH-COPY-BUDGET-001",
   "sourceOfTruth": {
     "currentState": "docs/agent/status.json",
@@ -10,12 +10,12 @@
     "adminHandoffEvidence": "docs/agent/admin-handoff-evidence.json"
   },
   "release": {
-    "observedAt": "2026-10-19",
-    "repositorySha": "94e9886af49a887c3c55245401b8458f4a5d357b",
-    "runtimeSha": "94e9886af49a887c3c55245401b8458f4a5d357b",
-    "verifiedRuntimeUrl": "https://446c9338.urblo-site.pages.dev",
-    "ciRunId": 39199161268,
-    "note": "Publish copy budget fix (#101) released 2026-10-19 after the production incident where a 16-image Publish exceeded the Cloudflare 50-subrequest limit: promotion now uses one server-side Storage copy per image plus one listing to verify size/type, batched compensation, planned/result audit rows, and a pre-flight budget of 30 new images per Publish surfaced in the import dialog, the editor action bar and the colleague docs. Merge 94e9886 deployed as immutable 446c9338; immutable/apex/www bound smoke and the production admin gate (10 routes) passed. The 14 orphan public copies from the incident were deleted by Jay in the Supabase dashboard and read back as zero. Project 23 remains a complete draft awaiting the editor's retry.",
+    "observedAt": "2026-10-22",
+    "repositorySha": "21798d035819f9e6cfbd16dc5f85e8e029b3949d",
+    "runtimeSha": "21798d035819f9e6cfbd16dc5f85e8e029b3949d",
+    "verifiedRuntimeUrl": "https://7d04ec6e.urblo-site.pages.dev",
+    "ciRunId": 39705088653,
+    "note": "Finish capability wording (#104) released 2026-10-22: finish capability yes reads \"Samples In Stock\", no reads \"Request a Tailored Sample\" linking to the sample request form with the stone and finish prefilled, tbc stays \"Upcoming\"; compare legend/sr text and the compare image panel use the same meaning; Available as, cut options and admin copy unchanged. Merge 21798d0 deployed as immutable 7d04ec6e; apex bound smoke passed; production alpine-white readback shows 8 in-stock pills and 8 tailored links, the only remaining \"Available\" being the Available as card title. Earlier on 2026-10-19/20: publish copy budget #101, startup budget trim #103 and deploy page readiness #100 released; stale PR #8 closed.",
     "evidenceRefs": [
       "docs/WORKLOG.md"
     ]
@@ -76,8 +76,8 @@
     ]
   },
   "lastCompletedTask": {
-    "id": "NOW-PUBLISH-COPY-BUDGET-001",
-    "summary": "Publish promotion made subrequest-frugal (server-side copy, 30-image budget) and released 2026-10-19 after the import publish incident."
+    "id": "NOW-FINISH-WORDING-001",
+    "summary": "Finish capability copy changed to Samples In Stock / Request a Tailored Sample (linked), released 2026-10-22."
   },
   "historicalObservations": "docs/archive/2026-09-26/manifest.json"
 }
