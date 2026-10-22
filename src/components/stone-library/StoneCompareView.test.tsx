@@ -103,6 +103,14 @@ describe('StoneCompareView', () => {
         expect(head).not.toMatch(/Available|Upcoming/);
     });
 
+    it('words the finish capability matrix as samples in stock and tailored on request', () => {
+        const html = render({ stones: [staticSubject('juparana'), staticSubject('zen-grey')] });
+        expect(html).toContain('Samples in stock');
+        expect(html).toContain('Tailored sample on request');
+        expect(html).toContain('To be confirmed');
+        expect(html).not.toMatch(/>Available<\/span>/);
+    });
+
     it('links the sample request CTA with the stones prefilled', () => {
         const html = render({ stones: [staticSubject('juparana'), staticSubject('zen-grey')] });
         expect(html).toContain('Request samples');
