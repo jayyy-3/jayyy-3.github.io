@@ -35,6 +35,13 @@ export const BLOCK_URL_LIMIT = 2048;
 
 export type CalloutTone = 'neutral' | 'lime';
 
+/**
+ * How a body image is presented: `photo` (default when absent) or `drawing`, a drawing or
+ * light-background document shown on a light surface with a hairline frame (2026-10-22).
+ */
+export const IMAGE_PRESENTATIONS = ['photo', 'drawing'] as const;
+export type ImagePresentation = (typeof IMAGE_PRESENTATIONS)[number];
+
 export interface HeadingContent {
     eyebrow?: string;
     title: string;
@@ -126,6 +133,8 @@ export interface ImageContent extends LegacyProvenance {
     label?: string;
     /** Carried from the former media block title; not rendered on plain images. */
     title?: string;
+    /** Optional; absent means `photo`. */
+    presentation?: ImagePresentation;
 }
 
 export interface GalleryItem {
@@ -224,7 +233,7 @@ export const CONTENT_BLOCK_DEFINITIONS: readonly ContentBlockDefinition[] = [
     { type: 'spec_table', group: 'evidence', label: 'Specification table', description: 'Label and value rows, such as finish, thickness or supply.' },
     { type: 'comparison_table', group: 'evidence', label: 'Comparison table', description: 'Two to four columns compared row by row.' },
     { type: 'stone_cards', group: 'evidence', label: 'Stone cards', description: 'Stones from the Stone Library with their photo and finish.' },
-    { type: 'image', group: 'media_action', label: 'Image', description: 'One full-width image. Materials can be marked on it.' },
+    { type: 'image', group: 'media_action', label: 'Image', description: 'One photo or drawing, shown to suit its shape. Materials can be marked on it.' },
     { type: 'gallery', group: 'media_action', label: 'Gallery', description: 'Two to twelve images in an even grid.' },
     { type: 'hotspot_image', group: 'media_action', label: 'Image with material points', description: 'A full-width image with stone points visitors can open.' },
     { type: 'video', group: 'media_action', label: 'Video', description: 'A YouTube video.' },
@@ -304,7 +313,7 @@ type FieldSpec =
     | { kind: 'id'; required?: boolean }
     | { kind: 'legacy_id' }
     | { kind: 'key'; required?: boolean }
-    | { kind: 'enum'; values: readonly string[] }
+    | { kind: 'enum'; values: readonly string[]; optional?: boolean }
     | { kind: 'youtube' }
     | { kind: 'link'; optional?: boolean }
     | { kind: 'strings'; limit: BlockTextLimit; min: number; max: number }
@@ -378,6 +387,7 @@ const BLOCK_SPECS: Record<ContentBlockType, Record<string, FieldSpec>> = {
         caption: t('short'),
         label: t('title'),
         title: t('title'),
+        presentation: { kind: 'enum', values: IMAGE_PRESENTATIONS, optional: true },
         legacyProjectMediaId: { kind: 'legacy_id' },
     },
     gallery: {
@@ -512,6 +522,7 @@ function validateField(value: unknown, spec: FieldSpec, path: string, mode: Bloc
             }
             return;
         case 'enum':
+            if (value === undefined && spec.optional) return;
             if (typeof value !== 'string') issues.push({ path, code: 'invalid_type' });
             else if (!spec.values.includes(value)) issues.push({ path, code: 'invalid_value' });
             return;

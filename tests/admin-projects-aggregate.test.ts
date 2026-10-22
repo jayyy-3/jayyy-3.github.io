@@ -1338,8 +1338,13 @@ test("body blocks map to the shared preview, block publication and validate on t
   const preview = draftToProjectData(draft, behaviorContext);
   assert.deepEqual(preview.blocks.map((block) => block.type), ["heading", "text", "image", "gallery", "stone_cards", "cta", "hotspot_image"]);
   assert.deepEqual(preview.blocks[2], {
-    id: "block:new:i", type: "image", src: "/hero.jpg", alt: "Hero alt", title: undefined, label: "Entry", caption: undefined,
+    id: "block:new:i", type: "image", src: "/hero.jpg", alt: "Hero alt", presentation: "photo", title: undefined, label: "Entry", caption: undefined,
   }, "An image without its own description shows the media description");
+  const sizedPreview = draftToProjectData(draft, {
+    ...behaviorContext,
+    media: behaviorContext.media.map((asset) => ({ ...asset, widthPx: 1200, heightPx: 1800 })),
+  });
+  assert.deepEqual([sizedPreview.blocks[2].width, sizedPreview.blocks[2].height], [1200, 1800], "The preview carries the recorded image size");
   assert.deepEqual(preview.blocks[3].items.map((item) => item.alt), ["Hero alt", "Own words"]);
   assert.deepEqual(preview.blocks[4].items, [{ stoneGroupId: "bluestone", finishKey: "sawn", note: undefined }]);
   assert.deepEqual([preview.blocks[5].primary, preview.blocks[5].secondary], [undefined, { label: "Contact", href: "/contact" }]);

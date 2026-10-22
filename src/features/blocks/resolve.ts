@@ -4,7 +4,7 @@
 // `hotspot_image` needs the project's material maps and points and is resolved by the caller.
 import { toSafePublicContentDestination } from '../../lib/publicContentLink.ts';
 import { normalizeYouTubeId, type ContentBlockContentByType, type ContentBlockType } from './schema.ts';
-import type { BlockImageView, BlockLinkView, ContentBlockView } from './view.ts';
+import type { BlockImageSize, BlockImageView, BlockLinkView, ContentBlockView } from './view.ts';
 
 export interface BlockResolveContext {
     /** Fallback text for images without any description (usually the project title). */
@@ -14,6 +14,14 @@ export interface BlockResolveContext {
     mediaAlt: (mediaAssetId: number | null | undefined) => string;
     /** Stone Library key for a stone ID, or null when it is not available. */
     stoneKey: (stoneGroupId: number) => string | null;
+    /** Recorded intrinsic size of a media item, or null when unknown. */
+    mediaSize?: (mediaAssetId: number | null | undefined) => BlockImageSize | null;
+}
+
+/** A recorded media size, or null unless both values are positive whole numbers. */
+export function toBlockImageSize(width: unknown, height: unknown): BlockImageSize | null {
+    const valid = (value: unknown): value is number => typeof value === 'number' && Number.isFinite(value) && value > 0;
+    return valid(width) && valid(height) ? { width: Math.round(width), height: Math.round(height) } : null;
 }
 
 function clean(value: unknown): string {
@@ -32,7 +40,8 @@ function image(
 ): BlockImageView | null {
     const src = context.mediaUrl(mediaAssetId);
     if (!src) return null;
-    return { src, alt: clean(alt) || context.mediaAlt(mediaAssetId) || fallback };
+    const size = context.mediaSize?.(mediaAssetId) ?? null;
+    return { src, alt: clean(alt) || context.mediaAlt(mediaAssetId) || fallback, ...(size ?? {}) };
 }
 
 function link(value: { label?: unknown; href?: unknown } | null | undefined): BlockLinkView | undefined {
@@ -124,6 +133,8 @@ export function resolveBlockView(
                 type,
                 src: picture.src,
                 alt: picture.alt,
+                ...(picture.width && picture.height ? { width: picture.width, height: picture.height } : {}),
+                presentation: content.presentation === 'drawing' ? 'drawing' : 'photo',
                 title: optional(content.title),
                 label: optional(content.label),
                 caption: optional(content.caption),
@@ -133,7 +144,7 @@ export function resolveBlockView(
             const content = block.content as ContentBlockContentByType['gallery'];
             const items = (content.items ?? []).flatMap((item, index) => {
                 const picture = image(item.mediaAssetId, item.alt, context, `${context.fallbackAlt} image ${index + 1}`);
-                return picture ? [{ ...picture, caption: optional(item.caption) }] : [];
+                return picture ? [{ src: picture.src, alt: picture.alt, caption: optional(item.caption) }] : [];
             });
             return items.length ? { id, type, items } : null;
         }

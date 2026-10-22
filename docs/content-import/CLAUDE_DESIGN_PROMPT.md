@@ -80,7 +80,8 @@ The file must look exactly like this example (the Greenline project), with your 
     {
       "type": "image",
       "image": { "file": "images/as-built.jpg", "alt": "As built: staggered joints and a crisp arris" },
-      "caption": "As built: staggered joints, a crisp arris, and Alpine White granite strips set into Steel Blue."
+      "caption": "As built: staggered joints, a crisp arris, and Alpine White granite strips set into Steel Blue.",
+      "presentation": "photo"
     },
     {
       "type": "stone_cards",
@@ -149,7 +150,7 @@ Rules for the whole file:
 | `spec_table` | Specification rows: application, finish, thickness, slip rating, supply. | `rows` 1–12 of `{ "label" (required, 200), "value" (required, 400) }`, `title` (200) |
 | `comparison_table` | Two to four options compared row by row. | `columns` 2–4 names (200 each), `rows` 1–20 of `{ "label" (required, 200), "cells": [one per column, 400 each] }`, `title` (200) |
 | `stone_cards` | The stones used; the website shows each stone's own photo. | `items` 1–6 of `{ "stone" (required), "finish", "note" (400) }`, `title` (200) |
-| `image` | One full-width photo. | `image` (required), `caption` (400), `label` (200), `title` (200) |
+| `image` | One photo, drawing or document page. | `image` (required), `caption` (400), `label` (200), `title` (200), `presentation` (`photo` default, or `drawing`) |
 | `gallery` | Two to twelve photos shown in an even grid. | `items` 2–12 of `{ "image" (required), "caption" (400) }` |
 | `video` | A YouTube video, at most one per project. | `youtubeUrl` (required, https YouTube link), `title` (200), `label` (200), `caption` (400) |
 | `cta` | A closing prompt with one or two buttons. | `title` (required, 200), `body` (400), `primary` (required) and optional `secondary`, each `{ "label" (200), "href" }`; `href` is a site path like `/contact` or an `https://` address |
@@ -173,6 +174,8 @@ Do not repeat the title, summary, lead, client, designer or contractor inside bl
 - Prefer 30 images or fewer: the website publishes up to 30 new images at a time, so a larger project has to be published in two steps.
 - The same file may be used more than once (e.g. `hero` and `cover`).
 - If a photo is not available yet, keep the image object with its `alt` and leave out `file`.
+- Keep every image at its real proportions; never crop or pad to 16:9. The website shows landscape images full width, square and portrait images in a narrower centred column, and two square or portrait `image` blocks in a row side by side.
+- For a drawing, plan, section or light-background document in an `image` block, add `"presentation": "drawing"`. Leave it out for photographs.
 
 ### Stones and finishes
 

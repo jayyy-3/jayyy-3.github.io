@@ -8,7 +8,7 @@ import {
   type ProjectMaterialMap,
 } from '../data/projectData.ts';
 import { blockMediaAssetIds, blockStoneGroupIds, isContentBlockType, type ContentBlockType } from '../features/blocks/schema.ts';
-import { resolveBlockView } from '../features/blocks/resolve.ts';
+import { resolveBlockView, toBlockImageSize } from '../features/blocks/resolve.ts';
 import { blockViewImageUrls, type ContentBlockView } from '../features/blocks/view.ts';
 import { getPublicContentClient } from '../lib/publicContentClient.ts';
 import { parsePublicEntitySeo } from '../lib/publicEntitySeo.ts';
@@ -16,7 +16,7 @@ import { normalizePublicProjectFactValue } from '../lib/projectFactValue.ts';
 import { resolvePublicMediaUrl, type PublicMediaLocation } from '../lib/publicMediaUrl.ts';
 import { overlayPublishedContent, toCanonicalContentKey } from './publicContentOverlay.ts';
 
-type MediaRef = PublicMediaLocation & { alt: string | null };
+type MediaRef = PublicMediaLocation & { alt: string | null; width_px?: number | null; height_px?: number | null };
 type Relation<T> = T | T[] | null;
 type PublicClient = SupabaseClient<Database>;
 
@@ -286,6 +286,10 @@ function mapProjectRow(
     mediaAlt: (mediaId: number | null | undefined) =>
       (mediaId ? references.mediaById.get(mediaId)?.alt : null) || '',
     stoneKey: (stoneGroupId: number) => references.stoneKeyById.get(stoneGroupId) ?? null,
+    mediaSize: (mediaId: number | null | undefined) => {
+      const media = mediaId ? references.mediaById.get(mediaId) : null;
+      return media ? toBlockImageSize(media.width_px, media.height_px) : null;
+    },
   };
 
   for (const entry of blockRows
@@ -327,6 +331,7 @@ function mapProjectRow(
             ...resolveContext,
             mediaUrl: () => resolvePublicMediaUrl(entryMedia, supabase) || '',
             mediaAlt: () => entryMedia.alt || '',
+            mediaSize: () => toBlockImageSize(entryMedia.width_px, entryMedia.height_px),
           }
         : resolveContext,
     );
@@ -460,7 +465,9 @@ export async function getPublishedProjects(
           source_url,
           bucket,
           object_path,
-          alt
+          alt,
+          width_px,
+          height_px
         )
       `)
       .in('project_id', ids)
@@ -619,7 +626,7 @@ async function loadBlockReferences(
     mediaIds.length
       ? supabase
           .from('media_assets')
-          .select('id,status,source_kind,source_url,bucket,object_path,alt')
+          .select('id,status,source_kind,source_url,bucket,object_path,alt,width_px,height_px')
           .in('id', mediaIds)
           .eq('status', 'published')
       : Promise.resolve({ data: [], error: null }),

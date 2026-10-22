@@ -74,7 +74,7 @@ describe('project package parsing', () => {
         expect(draft.blocks.map((block) => block.sortOrder)).toEqual([0, 1, 2, 3, 4, 5, 6]);
         expect(new Set(draft.blocks.map((block) => block.key)).size).toBe(7);
         expect(draft.blocks[2].content).toMatchObject({ items: [{ title: 'Shop drawing', mediaAssetId: 102, alt: 'Shop drawing of the stair setting-out' }] });
-        expect(draft.blocks[3].content).toMatchObject({ mediaAssetId: 103, alt: 'As built: staggered joints and a crisp arris' });
+        expect(draft.blocks[3].content).toMatchObject({ mediaAssetId: 103, alt: 'As built: staggered joints and a crisp arris', presentation: 'photo' });
         expect(draft.blocks[4].content).toEqual({
             title: 'The stone',
             items: [
@@ -89,6 +89,28 @@ describe('project package parsing', () => {
             expect(validateServerBlock(block, 'draft')).toEqual([]);
             expect(validateServerBlock(block, 'publish')).toEqual([]);
         }
+    });
+
+    test('image presentation is optional: drawing passes through, an unknown value is refused', () => {
+        const drawing = example();
+        drawing.blocks[3].presentation = 'drawing';
+        const { draft } = packageToDraft(parsed(drawing), context());
+        expect(draft.blocks[3].content).toMatchObject({ presentation: 'drawing' });
+        expect(validateServerBlock(draft.blocks[3], 'publish')).toEqual([]);
+
+        const absent = example();
+        delete absent.blocks[3].presentation;
+        expect(packageToDraft(parsed(absent), context()).draft.blocks[3].content).not.toHaveProperty('presentation');
+
+        const wrong = example();
+        wrong.blocks[3].presentation = 'diagram';
+        expect(parseProjectPackage(wrong).errors).toEqual([
+            { path: 'blocks[3].presentation', message: 'Image presentation is not an accepted value.' },
+        ]);
+        expect(schemaErrors(packageSchema, wrong)).not.toEqual([]);
+        const onGallery = example();
+        onGallery.blocks.splice(4, 0, { type: 'gallery', items: [{ image: { alt: 'a' } }, { image: { alt: 'b' } }], presentation: 'drawing' });
+        expect(errorPaths(onGallery)).toContain('blocks[4].presentation');
     });
 
     test('format and version must match exactly', () => {

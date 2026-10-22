@@ -781,9 +781,12 @@ requireIncludes(
 // The hero stays in the page view; body images moved to the shared block renderers
 // (NOW-PROJECT-BLOCKS-001) and keep the same detail delivery profile.
 requireIncludes(publicView, 'profile="hero"', publicViewPath, "hero image delivery profile");
+// Image and step images render through the one BodyImage (2026-10-22), which owns the profile.
+for (const blockImagePath of ["src/components/blocks/ImageBlock.tsx", "src/components/blocks/StepsBlock.tsx"]) {
+  requireIncludes(readRequired(blockImagePath), "<BodyImage", blockImagePath, "shared body image renderer");
+}
 for (const blockImagePath of [
-  "src/components/blocks/ImageBlock.tsx",
-  "src/components/blocks/StepsBlock.tsx",
+  "src/components/blocks/BodyImage.tsx",
   "src/components/blocks/GalleryBlock.tsx",
 ]) {
   requireIncludes(readRequired(blockImagePath), 'profile="detail"', blockImagePath, "detail image delivery profile");
@@ -839,6 +842,25 @@ for (const [path, needle, label] of [
   ["tests/functions-contract.test.ts", "./fixtures/content-blocks.json", "shared validator fixture"],
   ["tests/functions-contract.test.ts", "serverBlocks.validateContentBlock", "server validator held to the fixture"],
   ["tests/functions-contract.test.ts", "clientBlocks.validateContentBlock", "client validator held to the fixture"],
+]) {
+  requireIncludes(readRequired(path), needle, path, label);
+}
+// Body image presentation (NOW-PROJECT-IMAGE-PRESENTATION-001): body images keep their natural
+// ratio (no fixed 16:9 crop), carry their recorded size, and the drawing option is shared by
+// both validators, the admin form and the package import.
+for (const path of ["src/components/blocks/ImageBlock.tsx", "src/components/blocks/StepsBlock.tsx", "src/components/blocks/BodyImage.tsx"]) {
+  forbidMatches(readRequired(path), /aspect-\[16\/9\]|object-cover/, path, "cropped fixed-ratio body image");
+}
+for (const [path, needle, label] of [
+  ["src/components/blocks/BodyImage.tsx", "width={size?.width}", "body image width attribute from the recorded size"],
+  ["src/components/blocks/BodyImage.tsx", "80svh", "portrait height cap"],
+  ["src/components/blocks/BlockList.tsx", "groupBodyBlocks(", "portrait pairs"],
+  [servicePath, "width_px", "public body reads the recorded media size"],
+  ["src/features/blocks/schema.ts", "presentation: { kind: 'enum', values: IMAGE_PRESENTATIONS, optional: true }", "client image presentation field"],
+  [serverBlocksPath, 'presentation: { kind: "enum", values: ["photo", "drawing"], optional: true }', "server image presentation field"],
+  ["src/components/admin/blocks/ImageForm.tsx", "Drawing or document", "admin image presentation choice"],
+  ["src/features/blocks/importPackage.ts", "'title', 'presentation']", "package image presentation field"],
+  ["docs/content-import/project-package.schema.json", '"presentation"', "package schema image presentation"],
 ]) {
   requireIncludes(readRequired(path), needle, path, label);
 }

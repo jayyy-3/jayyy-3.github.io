@@ -77,7 +77,7 @@ export async function projectJourney({ page, context, check, id, directory }) {
     // The isolated database seeds no Stone Library records, so a point can only reach a
     // new, incomplete material here; Publish must stay blocked until it is complete.
     await page.getByRole('button', { name: 'Add block', exact: true }).click()
-    await page.getByRole('button', { name: /^Image One full-width image/ }).click()
+    await page.getByRole('button', { name: /^Image One photo or drawing/ }).click()
     // The card keeps its id while its type changes from Image to Image with material points.
     const blockId = await page.locator('article').filter({ has: page.getByRole('heading', { name: 'Block 1 · Image', exact: true }) }).getAttribute('id')
     const block = page.locator(`[id="${blockId}"]`)

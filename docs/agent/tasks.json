@@ -1,8 +1,78 @@
 {
   "version": 2,
-  "lastUpdated": "2026-10-19",
+  "lastUpdated": "2026-10-22",
   "archive": "docs/archive/2026-09-09/completed-tasks.json",
   "tasks": [
+    {
+      "id": "NOW-PROJECT-IMAGE-PRESENTATION-001",
+      "status": "now",
+      "phase": "awaiting_external",
+      "priority": 0.05,
+      "summary": "Present every Project body image to suit its shape instead of a fixed 16:9 crop: landscape full width at natural ratio, square/portrait centred in a narrower measure (80svh cap) and paired when two are consecutive, drawings on a light hairline-framed surface via an optional image presentation field, one caption style; step images follow the same rules.",
+      "modules": [
+        "projects",
+        "media",
+        "public-ui"
+      ],
+      "files": [
+        "src/components/blocks/BodyImage.tsx",
+        "src/components/blocks/ImageBlock.tsx",
+        "src/components/blocks/StepsBlock.tsx",
+        "src/components/blocks/BlockList.tsx",
+        "src/components/blocks/blockStyles.ts",
+        "src/features/blocks/imageLayout.ts",
+        "src/features/blocks/schema.ts",
+        "src/features/blocks/resolve.ts",
+        "src/features/blocks/view.ts",
+        "src/features/blocks/importPackage.ts",
+        "functions/_lib/blocks.js",
+        "tests/fixtures/content-blocks.json",
+        "src/components/admin/blocks/ImageForm.tsx",
+        "src/service/ProjectService.ts",
+        "src/pages/admin/media/mediaPickerFiles.ts",
+        "docs/DESIGN.md",
+        "docs/content-import/README.md",
+        "docs/content-import/CLAUDE_DESIGN_PROMPT.md",
+        "docs/content-import/project-package.schema.json",
+        "docs/architecture/projects.md",
+        "docs/architecture/projects-import.md"
+      ],
+      "acceptance": [
+        "Landscape body images (width/height >= 1.3) render full width at their natural ratio with width/height attributes from the recorded media size; nothing in the body is cropped to 16:9.",
+        "Square/portrait images are centred in a two-thirds measure from md (full width on mobile), capped at 80svh; two consecutive square/portrait photo image blocks render as one equal-height pair with their own captions; step images follow the same rules.",
+        "Image blocks accept an optional presentation ('photo' default | 'drawing') in both validators, the shared fixture, the admin Image form ('Photo' / 'Drawing or document') and the backward-compatible package import contract; drawings render on a light hairline-framed surface.",
+        "Hero, gallery grid and points images are unchanged; DESIGN.md Content blocks records the rules; existing Preview projects show no horizontal overflow or landscape regression; one PR left unmerged."
+      ],
+      "verification": [
+        "npm run gate",
+        "npx vitest run",
+        "npm run agent:check",
+        "git diff --check",
+        "npm run agent:admin-projects-aggregate",
+        "npm run agent:admin-crud-coverage",
+        "npm run agent:public-supabase-readiness",
+        "npm run agent:project-package -- docs/content-import/examples/greenline/project.json",
+        "npm run agent:cloudflare-preview-smoke -- --base-url <immutable Preview>"
+      ],
+      "evidenceRefs": [
+        "docs/WORKLOG.md",
+        "docs/DESIGN.md"
+      ],
+      "authorization": {
+        "source": "Jay, 2026-10-22: project body images imported from Claude Design packages are cropped; present each image the way that suits it (reviewer decisions final).",
+        "included": [
+          "Task branch claude/project-image-presentation, isolated tests and local-stack proof with synthetic data, git push, one pull request against main and branch Preview smoke (read-only on Preview, production data)."
+        ],
+        "excluded": [
+          "Merge to main, production data or Storage writes (including any backfill of media_assets width_px/height_px), migrations, email, DNS and credentials."
+        ]
+      },
+      "nextAction": "Review PR and merge decision; after release, Jay checks a Claude Design imported project. Optional follow-up needing separate authorization: backfill recorded sizes for existing production media so older portrait images pair without measuring on load.",
+      "notes": [
+        "2026-10-22: Registered and implemented on claude/project-image-presentation (docs/WORKLOG.md). PR open, not merged.",
+        "2026-10-22: PR #106 open; CI run 39714826387 passed and deployed Preview https://4eec5a8e.urblo-site.pages.dev; smoke and read-only checks of greenline, west-side-place and officer-specialist-school at 1440/390 passed (docs/WORKLOG.md). Awaiting review and merge decision."
+      ]
+    },
     {
       "id": "NOW-PUBLISH-COPY-BUDGET-001",
       "status": "now",

@@ -102,6 +102,7 @@ const BLOCK_SPECS = {
     caption: text("short"),
     label: text("title"),
     title: text("title"),
+    presentation: { kind: "enum", values: ["photo", "drawing"], optional: true },
     legacyProjectMediaId: { kind: "legacy_id" },
   },
   gallery: {
@@ -252,6 +253,7 @@ function validateField(value, spec, path, mode, issues) {
       }
       return;
     case "enum":
+      if (value === undefined && spec.optional) return;
       if (typeof value !== "string") issues.push({ path, code: "invalid_type" });
       else if (!spec.values.includes(value)) issues.push({ path, code: "invalid_value" });
       return;
