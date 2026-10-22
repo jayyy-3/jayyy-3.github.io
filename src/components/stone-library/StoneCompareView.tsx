@@ -67,7 +67,7 @@ function CapabilityMark({ value }: { value: FinishCapability }) {
                 >
                     <span className="h-1.5 w-1.5 rounded-full bg-lime" />
                 </span>
-                <span className="sr-only">Available</span>
+                <span className="sr-only">Samples in stock</span>
             </span>
         );
     }
@@ -90,7 +90,7 @@ function CapabilityMark({ value }: { value: FinishCapability }) {
             <span aria-hidden="true" className="inline-flex h-5 w-5 items-center justify-center text-black/30">
                 –
             </span>
-            <span className="sr-only">Not offered</span>
+            <span className="sr-only">Tailored sample on request</span>
         </span>
     );
 }
@@ -100,7 +100,7 @@ function CapabilityLegend() {
         <span className="flex flex-wrap items-center gap-x-4 gap-y-1 text-meta font-normal normal-case tracking-normal text-muted">
             <span className="inline-flex items-center gap-1.5">
                 <span aria-hidden="true" className="h-2 w-2 rounded-full bg-lime ring-1 ring-[rgba(0,255,25,0.55)] ring-offset-1" />
-                Available
+                Samples in stock
             </span>
             <span className="inline-flex items-center gap-1.5">
                 <span aria-hidden="true" className="h-2 w-2 rounded-full border border-black/40 bg-white" />
@@ -108,7 +108,7 @@ function CapabilityLegend() {
             </span>
             <span className="inline-flex items-center gap-1.5">
                 <span aria-hidden="true" className="text-black/30">–</span>
-                Not offered
+                Tailored sample on request
             </span>
         </span>
     );
@@ -187,7 +187,7 @@ function ImageCell({ cell, stoneName, finishName }: { cell: CompareCellOf<'image
     } else {
         media = (
             <span className="flex h-full items-center justify-center border border-dashed border-black/15 bg-surface px-4 text-center text-small text-muted">
-                Not offered in {finishName}
+                {finishName} tailored on request
             </span>
         );
     }
@@ -358,7 +358,7 @@ export default function StoneCompareView({
     ) - visibleRows.reduce((count, row) => count + (row.matrixRows ? row.matrixRows.length : 1), 0);
     const ids = stones.map((stone) => stone.detail.stoneGroupId);
     const names = stones.map((stone) => stone.detail.name);
-    const finishName = finishKey ? finishLabel(finishKey, ctx) : 'this finish';
+    const finishName = finishKey ? finishLabel(finishKey, ctx) : 'This finish';
     const tableMinWidth = LABEL_COLUMN_MIN_PX + stones.length * STONE_COLUMN_MIN_PX;
 
     const notices: string[] = [];

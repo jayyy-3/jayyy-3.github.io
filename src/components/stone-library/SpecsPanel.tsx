@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import type {
     FinishCapabilityVM,
     StoneAvailableAsVM,
@@ -7,9 +8,11 @@ import type {
 } from '../../types/stone-library';
 import StatusPill from './StatusPill';
 import { cardTitleClassName } from '../ui/styles';
+import { sampleRequestHref } from '../../lib/stoneCompareSelection';
 import type { StatusPillTone } from './StatusPill';
 
 interface SpecsPanelProps {
+    stoneName: string;
     stoneType: string;
     rawBlockLabel: string;
     availableAs: StoneAvailableAsVM[];
@@ -23,12 +26,12 @@ interface SpecsPanelProps {
 
 function capabilityBadge(capability: FinishCapabilityVM['capability']): string {
     if (capability === 'yes') {
-        return 'Available';
+        return 'Samples In Stock';
     }
     if (capability === 'tbc') {
         return 'Upcoming';
     }
-    return 'No';
+    return 'Request a Tailored Sample';
 }
 
 function capabilityTone(capability: FinishCapabilityVM['capability']): StatusPillTone {
@@ -48,6 +51,7 @@ function cutOrientationLabel(value: string): string {
 }
 
 export default function SpecsPanel({
+    stoneName,
     stoneType,
     rawBlockLabel,
     availableAs,
@@ -148,10 +152,24 @@ export default function SpecsPanel({
                             className="flex items-center justify-between gap-3 px-4 py-3 text-sm"
                         >
                             <span className="text-black">{finish.label}</span>
-                            <StatusPill
-                                label={capabilityBadge(finish.capability)}
-                                tone={capabilityTone(finish.capability)}
-                            />
+                            {finish.capability === 'no' ? (
+                                <Link
+                                    to={sampleRequestHref([`${stoneName} - ${finish.label}`])}
+                                    className="min-w-0 max-w-[60%] rounded-[4px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+                                    data-tailored-sample-link="true"
+                                >
+                                    <StatusPill
+                                        label={capabilityBadge(finish.capability)}
+                                        tone={capabilityTone(finish.capability)}
+                                        className="hover:border-black/30 hover:text-black [&>span:last-child]:leading-snug"
+                                    />
+                                </Link>
+                            ) : (
+                                <StatusPill
+                                    label={capabilityBadge(finish.capability)}
+                                    tone={capabilityTone(finish.capability)}
+                                />
+                            )}
                         </div>
                     ))}
                 </div>

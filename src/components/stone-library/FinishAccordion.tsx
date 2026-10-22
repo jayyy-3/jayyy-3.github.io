@@ -8,7 +8,7 @@ interface FinishAccordionProps {
 }
 
 function capabilityLabel(capability: FinishVM['capability']): string {
-    return capability === 'tbc' ? 'Upcoming' : 'Available';
+    return capability === 'tbc' ? 'Upcoming' : 'Samples In Stock';
 }
 
 function imageSourceLabel(finish: FinishVM): string {

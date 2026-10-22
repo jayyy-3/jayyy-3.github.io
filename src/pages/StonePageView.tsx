@@ -157,6 +157,7 @@ export default function StonePageView({
             </div>
 
             <SpecsPanel
+              stoneName={detail.name}
               stoneType={detail.stoneType}
               rawBlockLabel={detail.rawBlockLabel}
               availableAs={detail.availableAs}

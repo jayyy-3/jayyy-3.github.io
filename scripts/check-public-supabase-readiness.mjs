@@ -610,6 +610,15 @@ function checkPublicRuntimeBoundary() {
   for (const file of ['src/components/stone-library/StoneCompareView.tsx', 'src/components/image-qr/ImageQrPageView.tsx']) {
     requireNotIncludes(readRequired(file), 'AustralianStoneBadge', `${file} carries no Australian badge`);
   }
+  // Finish capability wording (Jay, 2026-10-22): yes = standard finish with samples in stock; no = tailored on request.
+  requireIncludes(stoneSpecs, "return 'Samples In Stock';", 'Finish capability yes label');
+  requireIncludes(stoneSpecs, "return 'Request a Tailored Sample';", 'Finish capability no label');
+  requireIncludes(stoneSpecs, 'sampleRequestHref(', 'Tailored sample pill links to the sample request form');
+  requireNotIncludes(stoneSpecs, "return 'No';", 'Finish capability no longer reads as unavailable');
+  requireIncludes(readRequired('src/components/stone-library/FinishAccordion.tsx'), "'Upcoming' : 'Samples In Stock'", 'Finish selector rail wording');
+  requireIncludes(readRequired('src/components/stone-library/StoneCompareView.tsx'), 'Tailored sample on request', 'Compare finish legend wording');
+  requireIncludes(readRequired('src/components/stone-library/StoneCompareView.tsx'), '{finishName} tailored on request', 'Compare finish image panel for a tailored finish');
+  requireNotIncludes(readRequired('src/components/stone-library/StoneCompareView.tsx'), 'Not offered in', 'Compare finish image panel no longer says not offered');
   requireNotIncludes(stoneSpecs, 'availabilityLabel', 'Retired stone-level availability label');
   requireIncludes(stoneSpecs, 'Available as', 'Stone specs Available as card');
   requireNotIncludes(stoneCard, 'StatusPill', 'Stone list card status badge removed');
