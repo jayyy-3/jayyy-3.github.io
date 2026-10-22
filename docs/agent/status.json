@@ -11,11 +11,11 @@
   },
   "release": {
     "observedAt": "2026-10-22",
-    "repositorySha": "21798d035819f9e6cfbd16dc5f85e8e029b3949d",
-    "runtimeSha": "21798d035819f9e6cfbd16dc5f85e8e029b3949d",
-    "verifiedRuntimeUrl": "https://7d04ec6e.urblo-site.pages.dev",
-    "ciRunId": 39705088653,
-    "note": "Finish capability wording (#104) released 2026-10-22: finish capability yes reads \"Samples In Stock\", no reads \"Request a Tailored Sample\" linking to the sample request form with the stone and finish prefilled, tbc stays \"Upcoming\"; compare legend/sr text and the compare image panel use the same meaning; Available as, cut options and admin copy unchanged. Merge 21798d0 deployed as immutable 7d04ec6e; apex bound smoke passed; production alpine-white readback shows 8 in-stock pills and 8 tailored links, the only remaining \"Available\" being the Available as card title. Earlier on 2026-10-19/20: publish copy budget #101, startup budget trim #103 and deploy page readiness #100 released; stale PR #8 closed.",
+    "repositorySha": "a1244e326414f9c547ddf96ec16ea8c914034561",
+    "runtimeSha": "a1244e326414f9c547ddf96ec16ea8c914034561",
+    "verifiedRuntimeUrl": "https://516fc6ac.urblo-site.pages.dev",
+    "ciRunId": 39716828766,
+    "note": "Project body image presentation (#106) released 2026-10-22: body images and step images no longer crop to 16:9; landscape full width at natural ratio with stored sizes, square/portrait centred in a two-thirds measure (80svh cap) and paired when consecutive, optional presentation=drawing frame in admin, import contract and docs; hero, gallery and points images unchanged. Merge a1244e3 deployed as immutable 516fc6ac; apex/www bound smoke passed; production West Side Place readback shows the 4:3 photo at 1252x939 and 16:9 photos at 1252x704 with no overflow. Jay acceptance open; Alvin project 23 still an unpublished draft.",
     "evidenceRefs": [
       "docs/WORKLOG.md"
     ]
@@ -76,8 +76,8 @@
     ]
   },
   "lastCompletedTask": {
-    "id": "NOW-FINISH-WORDING-001",
-    "summary": "Finish capability copy changed to Samples In Stock / Request a Tailored Sample (linked), released 2026-10-22."
+    "id": "NOW-PROJECT-IMAGE-PRESENTATION-001",
+    "summary": "Shape-aware body image presentation released 2026-10-22."
   },
   "historicalObservations": "docs/archive/2026-09-26/manifest.json"
 }
