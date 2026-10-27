@@ -853,3 +853,11 @@ Scope: Jay (2026-10-22), reviewer decisions final. Body `image` and step images 
 - PR #108 (Sonnet) added the behaviour copy, `data/clean/finish_options.csv` row, colleague docs and schema note; PR #109 (reviewer) pinned both workflow jobs to `ubuntu-24.04` after `ubuntu-latest` moved to 26.04 and Playwright 1.60 could not install chromium, which had blocked every branch CI run.
 - Release: merged as `d88571e`; CI run 40447486236 passed and deployed immutable `https://7dd20026.urblo-site.pages.dev`; bound smoke on `urblo.com.au` passed.
 - Not verified: per-stone Leather "samples in stock" (none set yet; editors set it in the Stone editor); Jay's acceptance.
+
+## 2026-10-27 — Stone editor shows newly published finishes (claude/stone-draft-new-finishes)
+
+- Origin: Jay reported that Leather (`finish_definitions` id 25) showed on the public Stone pages but not in the admin Stone editor. `private.stone_envelope` returns the saved `private.stone_drafts.draft`, whose `variants[].finishes` was captured at the last save (12 finishes), and the editor rendered only those.
+- Fix (client only, no migration, no data write): `withPublishedFinishes(draft, definitions)` in `src/features/stone-library/stoneDraft.ts` appends a default entry (`capability: 'no'`, empty notes/sources/images) for every published definition a variant lacks and orders by `sortOrder`; entries whose definition is unpublished stay untouched after the known ones; it returns the same object when nothing is missing. `StoneSaveQueue` takes an optional `normalize` hook applied to the initial draft, save responses and `accept` (publish/archive); `StoneEditor` passes `withPublishedFinishes(d, finishes)`. `StoneHistoryDialog` already uses optional chaining for a missing definition, so it is unchanged.
+- Unsaved-change behaviour: the merge never marks the queue dirty (no autosave on open, no leave-site prompt, viewers unaffected). The added `no` rows are in the editor draft, preview and every later save/publish body, so they persist with the next edit, save or publish.
+- Docs: finish-list note in `docs/SUPABASE_SCHEMA.md` (the Stone admin contract file is at its startup-budget limit).
+- Guards strengthened only: `tests/stone-workspace.test.ts` (queue merge test, source assertion) and `scripts/check-admin-crud-coverage.mjs`.

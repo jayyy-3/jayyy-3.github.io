@@ -143,14 +143,52 @@ export function emptyVariant(
     label: '',
     type,
     enabled: true,
-    finishes: finishes.map((f) => ({
-      definitionId: f.id,
-      capability: 'no',
-      behaviorNote: '',
-      sources: [],
-      internalNote: '',
-      images: [],
-    })),
+    finishes: finishes.map((f) => emptyFinish(f.id)),
+  };
+}
+
+function emptyFinish(definitionId: number): StoneFinishDraft {
+  return {
+    definitionId,
+    capability: 'no',
+    behaviorNote: '',
+    sources: [],
+    internalNote: '',
+    images: [],
+  };
+}
+
+/**
+ * A saved draft only lists the finishes that existed when it was last saved.
+ * Adds a default "no" entry for every published definition a variant lacks and
+ * orders the variant by definition sortOrder (entries without a published
+ * definition keep their relative order after the known ones). Returns the same
+ * object when nothing is missing, so callers can detect a real addition.
+ */
+export function withPublishedFinishes(
+  draft: StoneDraft,
+  definitions: StoneFinishDefinition[],
+): StoneDraft {
+  const order = new Map(definitions.map((d) => [d.id, d.sortOrder]));
+  const missing = (v: StoneVariantDraft) =>
+    definitions.filter(
+      (d) => !v.finishes.some((f) => f.definitionId === d.id),
+    );
+  if (!draft.variants.some((v) => missing(v).length)) return draft;
+  return {
+    ...draft,
+    variants: draft.variants.map((v) => {
+      const added = missing(v);
+      if (!added.length) return v;
+      const rank = (f: StoneFinishDraft) =>
+        order.get(f.definitionId) ?? Number.POSITIVE_INFINITY;
+      return {
+        ...v,
+        finishes: [...v.finishes, ...added.map((d) => emptyFinish(d.id))].sort(
+          (a, b) => (rank(a) === rank(b) ? 0 : rank(a) < rank(b) ? -1 : 1),
+        ),
+      };
+    }),
   };
 }
 

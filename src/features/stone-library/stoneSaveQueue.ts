@@ -36,12 +36,19 @@ export class StoneSaveQueue {
   private timer: ReturnType<typeof setTimeout> | null = null;
   onChange: () => void = () => {};
   private send: (body: StoneWrite) => Promise<StoneEnvelope>;
+  /**
+   * Applied to every draft the server hands back (first load, save response,
+   * publish/archive). Never counts as an edit: it does not mark the queue dirty.
+   */
+  private normalize: (draft: StoneDraft) => StoneDraft;
   constructor(
     draft: StoneDraft,
     envelope: StoneEnvelope | null,
     send: (body: StoneWrite) => Promise<StoneEnvelope>,
+    normalize: (draft: StoneDraft) => StoneDraft = (d) => d,
   ) {
-    this.draft = draft;
+    this.normalize = normalize;
+    this.draft = normalize(draft);
     this.envelope = envelope;
     this.send = send;
   }
@@ -93,7 +100,7 @@ export class StoneSaveQueue {
         // Server assigns the first parent ID. Never replace newer text with an older response.
         this.draft =
           this.generation === attempt.generation
-            ? next.draft
+            ? this.normalize(next.draft)
             : {
                 ...this.draft,
                 stone: { ...this.draft.stone, id: next.stoneId },
@@ -120,7 +127,7 @@ export class StoneSaveQueue {
   }
   accept(envelope: StoneEnvelope) {
     this.envelope = envelope;
-    this.draft = envelope.draft;
+    this.draft = this.normalize(envelope.draft);
     this.savedGeneration = this.generation;
     this.pending = null;
     this.error = null;

@@ -15,6 +15,7 @@ import {
   stoneDraftToDetail,
   stoneMediaIds,
   stoneSlug,
+  withPublishedFinishes,
   type StoneDraft,
   type StoneEnvelope,
   type StoneFinishDefinition,
@@ -266,6 +267,8 @@ function StoneEditor({
             : emptyStone(finishes, options.published),
         initial,
         (body) => stoneApi('', body),
+        // Saved drafts predate later finish definitions; show every published one.
+        (d) => withPublishedFinishes(d, finishes),
       ),
   );
   const [, render] = useState(0);

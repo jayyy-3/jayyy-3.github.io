@@ -8,6 +8,7 @@ import {
 import {
   emptyStone,
   stoneDraftToDetail,
+  withPublishedFinishes,
 } from '../src/features/stone-library/stoneDraft.ts';
 import {
   validateStoneDraft,
@@ -626,9 +627,27 @@ test('source retains protected boundary, parent ownership, reference serializati
   assert.ok(api.includes('commitAttempted'));
   assert.ok(api.includes('compensatePublicCopies'));
   assert.ok(editor.includes('queue.flush()'));
+  assert.ok(editor.includes('withPublishedFinishes(d, finishes)'));
   assert.ok(!editor.includes(".from('stone_groups')"));
   assert.ok(
     service.includes('catalogue.managedKeys.includes(stoneGroupId) ? null'),
   );
   assert.ok(!service.includes(".from('stone_finish_images')"));
+});
+
+test('save queue merges newly published finishes without marking the draft dirty', async () => {
+  const added = [...definitions, { id: 3, key: 'leather', name: 'Leather', sortOrder: 3 }];
+  const merge = (d) => withPublishedFinishes(d, added);
+  const saved = envelope(draft());
+  const queue = new StoneSaveQueue(saved.draft, saved, async () => envelope(draft(), 2), merge);
+  assert.deepEqual(queue.draft.variants[0].finishes.map((f) => f.definitionId), [1, 2, 3]);
+  assert.equal(queue.dirty, false);
+  assert.equal(queue.state, 'saved');
+  // Server responses (save, publish) are merged the same way.
+  queue.accept(envelope(draft(), 3));
+  assert.deepEqual(queue.draft.variants[0].finishes.map((f) => f.definitionId), [1, 2, 3]);
+  assert.equal(queue.dirty, false);
+  queue.change(structuredClone(queue.draft));
+  await queue.flush();
+  assert.deepEqual(queue.draft.variants[0].finishes.map((f) => f.definitionId), [1, 2, 3]);
 });
