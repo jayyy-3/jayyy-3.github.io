@@ -14,11 +14,11 @@ Last updated: 2026-10-27
 
 ## 已观察的发布状态
 
-观察日期：2026-10-27。仓库版本：`d88571e21fa264868040fd1f42334824da398e5d`。已验证运行时代码：`d88571e21fa264868040fd1f42334824da398e5d`。
+观察日期：2026-10-27。仓库版本：`32f800e5fb7dce81f58f62244e6acf76840a98c2`。已验证运行时代码：`32f800e5fb7dce81f58f62244e6acf76840a98c2`。
 
-验证地址：https://7dd20026.urblo-site.pages.dev
+验证地址：https://731a5f35.urblo-site.pages.dev
 
-Leather finish added 2026-10-27: production finish_definitions row id 25 (leather, sort 35 between Honed and Polished, published) inserted with Jay's approval, all stones default to tailored on request; PR #108 adds the behaviour copy, static finish list and colleague docs. PR #109 pinned GitHub Actions runners to ubuntu-24.04 because ubuntu-latest (26.04) cannot install Playwright chromium. Merge d88571e deployed as immutable 7dd20026; apex bound smoke passed; production alpine-white lists Flamed, Sawn, Honed, Leather, Polished in order.
+Stone editor now merges newly published finish definitions into saved drafts on load (#111), so Leather appears in every stone editor as tailored on request without marking the draft dirty; persisted on the next save or publish. Merge 32f800e deployed as immutable 731a5f35; apex bound smoke passed; admin gate reached all routes but flagged a "corrupt or truncated" console error for the 5.3 MB Minos Grey honed original (media 340, uploaded 2026-10-27 03:33): the file is a valid 5541x3693 progressive JPEG and renders on the public page through the resized variant, so the error is the gate navigating away mid-download, not a broken asset.
 
 CMS handoff: **revalidation_required**。QR: material_page_deployed。
 
