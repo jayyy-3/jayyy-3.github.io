@@ -846,3 +846,10 @@ Scope: Jay (2026-10-22), reviewer decisions final. Body `image` and step images 
 - Changes: `finishBehaviorMeta.ts` gains a `leather` entry (Honed → Leather → Polished order); `data/clean/finish_options.csv` gains `leather,,Leather|Leathered,Leather,35` after honed; `docs/content-import/README.md` and `CLAUDE_DESIGN_PROMPT.md` list `leather` in order; `docs/SUPABASE_SCHEMA.md` notes the 13th finish added by direct insert.
 - Deliberately unchanged: `data/clean/stone_library.json`, `stone_finish_capabilities.csv` and `docs/content-import/stone-catalogue-2026-10-15.json` list per-stone finish capability, not the finish set, and no stone offers leather as standard; every stone shows it as the default capability (tailored on request). No generator was run because none derives from `finish_options.csv`.
 - Not verified: the live Stone Library rendering of Leather on Preview or production, and Jay's acceptance.
+
+## 2026-10-27 — Leather finish release and CI runner pin (reviewer record)
+
+- Jay approved the Leather finish (display "Leather", after Honed, all stones default to tailored on request). Reviewer inserted `finish_definitions` id 25 (`leather`, sort_order 35, published) through the Supabase connector; `public_stone_catalogue()` readback lists 13 finishes in order and the production Alpine White page shows Flamed, Sawn, Honed, Leather, Polished.
+- PR #108 (Sonnet) added the behaviour copy, `data/clean/finish_options.csv` row, colleague docs and schema note; PR #109 (reviewer) pinned both workflow jobs to `ubuntu-24.04` after `ubuntu-latest` moved to 26.04 and Playwright 1.60 could not install chromium, which had blocked every branch CI run.
+- Release: merged as `d88571e`; CI run 40447486236 passed and deployed immutable `https://7dd20026.urblo-site.pages.dev`; bound smoke on `urblo.com.au` passed.
+- Not verified: per-stone Leather "samples in stock" (none set yet; editors set it in the Stone editor); Jay's acceptance.
