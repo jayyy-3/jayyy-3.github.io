@@ -11,11 +11,11 @@
   },
   "release": {
     "observedAt": "2026-10-27",
-    "repositorySha": "d88571e21fa264868040fd1f42334824da398e5d",
-    "runtimeSha": "d88571e21fa264868040fd1f42334824da398e5d",
-    "verifiedRuntimeUrl": "https://7dd20026.urblo-site.pages.dev",
-    "ciRunId": 40447486236,
-    "note": "Leather finish added 2026-10-27: production finish_definitions row id 25 (leather, sort 35 between Honed and Polished, published) inserted with Jay's approval, all stones default to tailored on request; PR #108 adds the behaviour copy, static finish list and colleague docs. PR #109 pinned GitHub Actions runners to ubuntu-24.04 because ubuntu-latest (26.04) cannot install Playwright chromium. Merge d88571e deployed as immutable 7dd20026; apex bound smoke passed; production alpine-white lists Flamed, Sawn, Honed, Leather, Polished in order.",
+    "repositorySha": "32f800e5fb7dce81f58f62244e6acf76840a98c2",
+    "runtimeSha": "32f800e5fb7dce81f58f62244e6acf76840a98c2",
+    "verifiedRuntimeUrl": "https://731a5f35.urblo-site.pages.dev",
+    "ciRunId": 40450877973,
+    "note": "Stone editor now merges newly published finish definitions into saved drafts on load (#111), so Leather appears in every stone editor as tailored on request without marking the draft dirty; persisted on the next save or publish. Merge 32f800e deployed as immutable 731a5f35; apex bound smoke passed; admin gate reached all routes but flagged a \"corrupt or truncated\" console error for the 5.3 MB Minos Grey honed original (media 340, uploaded 2026-10-27 03:33): the file is a valid 5541x3693 progressive JPEG and renders on the public page through the resized variant, so the error is the gate navigating away mid-download, not a broken asset.",
     "evidenceRefs": [
       "docs/WORKLOG.md"
     ]
@@ -76,8 +76,8 @@
     ]
   },
   "lastCompletedTask": {
-    "id": "NOW-LEATHER-FINISH-001",
-    "summary": "Leather finish added to the live finish list (db row 25) with copy and docs, released 2026-10-27."
+    "id": "NOW-STONE-DRAFT-FINISHES-001",
+    "summary": "Saved stone drafts gain new published finishes on load (#111), released 2026-10-27."
   },
   "historicalObservations": "docs/archive/2026-09-26/manifest.json"
 }
