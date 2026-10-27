@@ -1467,6 +1467,8 @@ function checkAdminParentOwnershipSafety() {
   requireIncludes(stonePage,'<AvailableAsOptions','Stone Library list Available as options block');
   requireIncludes(stonePage,'<legend className="text-sm font-semibold">Available as</legend>','Stone editor Available as checkbox group');
   requireNotIncludes(stonePage,'Availability TBC','Retired stone availability badge');
+  requireIncludes(stonePage,'withPublishedFinishes(d, finishes)','Stone editor merges newly published finishes into saved drafts on load');
+  requireIncludes(readRequired('src/features/stone-library/stoneSaveQueue.ts'),'this.normalize(next.draft)','Stone save queue merges newly published finishes into save responses');
 
 }
 

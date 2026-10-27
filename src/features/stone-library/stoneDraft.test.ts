@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { emptyStone, stoneDraftToDetail, type StoneFinishDefinition } from './stoneDraft';
+import { emptyStone, stoneDraftToDetail, withPublishedFinishes, type StoneFinishDefinition } from './stoneDraft';
 import { STATIC_AVAILABILITY_OPTIONS, expandAvailableAs, type StoneAvailabilityOption } from './availableAs';
 
 const finishes: StoneFinishDefinition[] = [{ id: 1, key: 'flamed', name: 'Flamed', sortOrder: 1 }];
@@ -55,5 +55,59 @@ describe('Available as mapping', () => {
         expect(detail).not.toHaveProperty('status');
         expect(detail).not.toHaveProperty('availabilityLabel');
         expect(detail.variants[0]).not.toHaveProperty('status');
+    });
+});
+
+describe('withPublishedFinishes', () => {
+    const defs: StoneFinishDefinition[] = [
+        { id: 1, key: 'flamed', name: 'Flamed', sortOrder: 10 },
+        { id: 2, key: 'sawn', name: 'Sawn', sortOrder: 20 },
+        { id: 3, key: 'honed', name: 'Honed', sortOrder: 15 },
+        { id: 4, key: 'leather', name: 'Leather', sortOrder: 30 },
+    ];
+    const saved = () => {
+        const d = emptyStone([defs[0], defs[1]], options);
+        d.variants[0].finishes[0].capability = 'yes';
+        d.variants[0].finishes[0].behaviorNote = 'kept';
+        d.variants.push({ ...structuredClone(d.variants[0]), key: 'second' });
+        return d;
+    };
+
+    it('adds every missing published finish to every variant as not offered', () => {
+        const merged = withPublishedFinishes(saved(), defs);
+        for (const v of merged.variants) {
+            expect(v.finishes.map((f) => f.definitionId)).toEqual([1, 3, 2, 4]);
+            expect(v.finishes[3]).toEqual({
+                definitionId: 4, capability: 'no', behaviorNote: '', sources: [], internalNote: '', images: [],
+            });
+        }
+    });
+
+    it('keeps existing entries untouched and sorts by definition sortOrder', () => {
+        const merged = withPublishedFinishes(saved(), defs);
+        expect(merged.variants[0].finishes[0]).toMatchObject({ definitionId: 1, capability: 'yes', behaviorNote: 'kept' });
+        expect(merged.variants[0].finishes.map((f) => f.definitionId)).toEqual([1, 3, 2, 4]);
+    });
+
+    it('keeps entries whose definition is no longer published, after the known ones', () => {
+        const d = saved();
+        d.variants[0].finishes.unshift({ definitionId: 99, capability: 'yes', behaviorNote: '', sources: [], internalNote: '', images: [] });
+        const merged = withPublishedFinishes(d, defs);
+        expect(merged.variants[0].finishes.map((f) => f.definitionId)).toEqual([1, 3, 2, 4, 99]);
+        expect(merged.variants[0].finishes[4].capability).toBe('yes');
+    });
+
+    it('is idempotent and returns the same draft when nothing is missing', () => {
+        const once = withPublishedFinishes(saved(), defs);
+        expect(withPublishedFinishes(once, defs)).toBe(once);
+        const complete = emptyStone(defs, options);
+        expect(withPublishedFinishes(complete, defs)).toBe(complete);
+    });
+
+    it('does not mutate its input', () => {
+        const d = saved();
+        const copy = structuredClone(d);
+        withPublishedFinishes(d, defs);
+        expect(d).toEqual(copy);
     });
 });

@@ -75,6 +75,7 @@ Scope:
 
 Acceptance:
 - Complete on 2026-05-27. `finish_definitions` contains 12 distinct published finish keys from the current Stone Library dictionary.
+- Finish list note (2026-10-27): published definitions have grown beyond the seed 12 (Leather is id 25). A saved `private.stone_drafts.draft` lists only the finishes that existed at its last save, so the Stone editor passes every draft it receives through `withPublishedFinishes` (`src/features/stone-library/stoneDraft.ts`), adding a default `no` entry per missing published definition ordered by `sort_order`. It never marks the draft dirty; the rows persist with the next save or publish.
 - `site_settings` contains one published `default` row with Urblo contact, social, footer, and SEO baseline values.
 - Seed script is idempotent: rerunning the seed upsert did not duplicate rows.
 - `npm run agent:supabase-foundation-readiness` source-checks the 12 expected finish seed rows and the published default `site_settings` upsert contract.
