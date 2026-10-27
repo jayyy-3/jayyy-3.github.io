@@ -1,3 +1,5 @@
 
 # Lossless evidence archives retain historical EOF spacing; integrity is SHA-256 checked.
 docs/archive/** whitespace=-blank-at-eof
+# CRLF-terminated CSV exports keep their line endings.
+data/clean/finish_options.csv whitespace=cr-at-eol

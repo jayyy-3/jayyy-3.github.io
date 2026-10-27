@@ -839,3 +839,10 @@ Scope: Jay (2026-10-22), reviewer decisions final. Body `image` and step images 
 - Acceptance: reviewed the isolated-stack proof page at 1440 and 390 (landscape full width, 1:1 + 2:3 pair at equal height, single portrait centred, drawings framed, portrait step image, mobile single column without overflow) and the Preview of West Side Place on production data.
 - Release: PR #106 merged as `a1244e3`; CI run 39716828766 passed and deployed immutable `https://516fc6ac.urblo-site.pages.dev`; bound smoke passed on `urblo.com.au` and `www`. Production readback of `/projects/west-side-place` at 1440: stored-size images render at their own ratio (4:3 at 1252×939, 16:9 at 1252×704), no horizontal overflow.
 - Not verified: Jay's and Alvin's acceptance; editors choosing "Drawing or document" on production. Follow-up needing production-write approval: backfill stored sizes for the older media rows that lack them.
+
+## 2026-10-27 — Leather finish (code and docs side)
+
+- Scope: Jay approved a new finish. The production row already exists (`finish_definitions` id 25, `finish_key = 'leather'`, `display_name = 'Leather'`, `sort_order = 35`, published; inserted directly, outside this task). This branch (`claude/leather-finish`) is repository code and docs only; no database, Storage or production change was made.
+- Changes: `finishBehaviorMeta.ts` gains a `leather` entry (Honed → Leather → Polished order); `data/clean/finish_options.csv` gains `leather,,Leather|Leathered,Leather,35` after honed; `docs/content-import/README.md` and `CLAUDE_DESIGN_PROMPT.md` list `leather` in order; `docs/SUPABASE_SCHEMA.md` notes the 13th finish added by direct insert.
+- Deliberately unchanged: `data/clean/stone_library.json`, `stone_finish_capabilities.csv` and `docs/content-import/stone-catalogue-2026-10-15.json` list per-stone finish capability, not the finish set, and no stone offers leather as standard; every stone shows it as the default capability (tailored on request). No generator was run because none derives from `finish_options.csv`.
+- Not verified: the live Stone Library rendering of Leather on Preview or production, and Jay's acceptance.

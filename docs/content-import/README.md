@@ -158,13 +158,14 @@ Not in the package on purpose: carbon details, Live/Draft status, review states 
 - Only stones that are Live in the Stone Library are linked. Anything else is imported as "stone to choose" and stops Publish until an editor picks the stone.
 - For a stone with several variants (for example Golden Crust Light/Dark or Tuscany Vein Cut/Cross Cut) the first variant that offers the finish is chosen; the editor can change it.
 
-Finish keys (from the finish definitions, 2026-10-15):
+Finish keys (from the finish definitions, 2026-10-15; `leather` added 2026-10-27, not yet offered as standard by any stone):
 
 | Key | Name |
 | --- | --- |
 | `flamed` | Flamed |
 | `sawn` | Sawn |
 | `honed` | Honed |
+| `leather` | Leather |
 | `polished` | Polished |
 | `bush_hammered` | Bush Hammered |
 | `combed` | Combed |

@@ -26,6 +26,12 @@ const finishBehaviorByKey: Record<string, FinishBehaviorMeta> = {
         glare: 'Low reflectance',
         maintenance: 'Easy day-to-day cleaning and periodic sealing',
     },
+    leather: {
+        summary: "Brushed matte finish with a soft, tactile surface that keeps the stone's colour depth.",
+        slip: 'Good grip; suited to external paving and steps subject to design review',
+        glare: 'Low reflectance',
+        maintenance: 'Routine wash-down and periodic reseal',
+    },
     polished: {
         summary: 'Reflective finish suited for low-slip-risk feature areas.',
         slip: 'Low to medium grip; not preferred for wet traffic paths',
