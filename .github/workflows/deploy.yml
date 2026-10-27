@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   verify-and-deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       deploy: ${{ steps.plan.outputs.deploy }}
     steps:
@@ -128,7 +128,7 @@ jobs:
     name: quality
     if: always()
     needs: verify-and-deploy
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Require checks and applicable deployment smoke
         env:
