@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "lastUpdated": "2026-10-22",
+  "lastUpdated": "2026-10-27",
   "currentTaskId": "NOW-PROJECT-IMAGE-PRESENTATION-001",
   "sourceOfTruth": {
     "currentState": "docs/agent/status.json",
@@ -10,12 +10,12 @@
     "adminHandoffEvidence": "docs/agent/admin-handoff-evidence.json"
   },
   "release": {
-    "observedAt": "2026-10-22",
-    "repositorySha": "a1244e326414f9c547ddf96ec16ea8c914034561",
-    "runtimeSha": "a1244e326414f9c547ddf96ec16ea8c914034561",
-    "verifiedRuntimeUrl": "https://516fc6ac.urblo-site.pages.dev",
-    "ciRunId": 39716828766,
-    "note": "Project body image presentation (#106) released 2026-10-22: body images and step images no longer crop to 16:9; landscape full width at natural ratio with stored sizes, square/portrait centred in a two-thirds measure (80svh cap) and paired when consecutive, optional presentation=drawing frame in admin, import contract and docs; hero, gallery and points images unchanged. Merge a1244e3 deployed as immutable 516fc6ac; apex/www bound smoke passed; production West Side Place readback shows the 4:3 photo at 1252x939 and 16:9 photos at 1252x704 with no overflow. Jay acceptance open; Alvin project 23 still an unpublished draft.",
+    "observedAt": "2026-10-27",
+    "repositorySha": "d88571e21fa264868040fd1f42334824da398e5d",
+    "runtimeSha": "d88571e21fa264868040fd1f42334824da398e5d",
+    "verifiedRuntimeUrl": "https://7dd20026.urblo-site.pages.dev",
+    "ciRunId": 40447486236,
+    "note": "Leather finish added 2026-10-27: production finish_definitions row id 25 (leather, sort 35 between Honed and Polished, published) inserted with Jay's approval, all stones default to tailored on request; PR #108 adds the behaviour copy, static finish list and colleague docs. PR #109 pinned GitHub Actions runners to ubuntu-24.04 because ubuntu-latest (26.04) cannot install Playwright chromium. Merge d88571e deployed as immutable 7dd20026; apex bound smoke passed; production alpine-white lists Flamed, Sawn, Honed, Leather, Polished in order.",
     "evidenceRefs": [
       "docs/WORKLOG.md"
     ]
@@ -76,8 +76,8 @@
     ]
   },
   "lastCompletedTask": {
-    "id": "NOW-PROJECT-IMAGE-PRESENTATION-001",
-    "summary": "Shape-aware body image presentation released 2026-10-22."
+    "id": "NOW-LEATHER-FINISH-001",
+    "summary": "Leather finish added to the live finish list (db row 25) with copy and docs, released 2026-10-27."
   },
   "historicalObservations": "docs/archive/2026-09-26/manifest.json"
 }
