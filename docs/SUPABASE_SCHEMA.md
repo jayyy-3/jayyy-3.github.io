@@ -404,6 +404,7 @@ Initial examples:
 - `flamed`
 - `sawn`
 - `honed`
+- `leather`
 - `polished`
 - `bush_hammered`
 - `combed`
@@ -411,6 +412,8 @@ Initial examples:
 - `rock_face`
 - `sparrow_peck`
 - `sandblasted`
+
+The 13th finish, `leather` (id 25, sort_order 35, published), was added on 2026-10-27 by direct insert, not by a migration. It is not yet in any stone's `finishes offered` list; every stone shows it as the default capability (tailored on request) until a stone offers it as standard.
 
 ### `stone_groups`
 Purpose: public stone family records.

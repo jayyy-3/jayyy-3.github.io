@@ -180,7 +180,7 @@ Do not repeat the title, summary, lead, client, designer or contractor inside bl
 ### Stones and finishes
 
 - `stone` is the Stone Library address: the `<slug>` in `https://urblo.com.au/stone-library/<slug>`. Use only stones named in the material; never guess one from a photo.
-- `finish` is one of these keys: `flamed`, `sawn`, `honed`, `polished`, `bush_hammered`, `combed`, `rippling`, `rippling__fine`, `rippling__rough`, `rock_face`, `sparrow_peck`, `sandblasted`.
+- `finish` is one of these keys: `flamed`, `sawn`, `honed`, `leather`, `polished`, `bush_hammered`, `combed`, `rippling`, `rippling__fine`, `rippling__rough`, `rock_face`, `sparrow_peck`, `sandblasted`.
 - Live Stone Library on 2026-10-15, 18 stones (slug (name): finishes offered). For any stone added after this date, copy its slug from its page on the live Stone Library. Some slugs differ from the name: Steel Blue is `blueocean`, Mica Grey is `harcourt`, Verdant Grey is `v-erdant-grey`.
   - `alpine-white` (Alpine White): flamed, honed, polished, sawn
   - `angola-black` (Angola Black): bush_hammered, flamed, honed, polished, sawn

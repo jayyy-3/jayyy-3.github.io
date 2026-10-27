@@ -2,6 +2,7 @@ finish_id,finish_variant_id,source_names,display_name,sort_order
 flamed,,Flamed,Flamed,10
 sawn,,Sawn|Diamond Sawn,Sawn,20
 honed,,Honed,Honed,30
+leather,,Leather|Leathered,Leather,35
 polished,,Polished,Polished,40
 bush_hammered,,Bush Hammered|Bush Hammer (___),Bush Hammered,50
 combed,,Combed,Combed,60
