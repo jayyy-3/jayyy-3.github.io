@@ -288,7 +288,7 @@ Current source state:
 - Selected proof should include project facts as a ledger, not only decorative project cards.
 - PDF-derived imagery must be visually audited before use; incorrectly rotated or low-information crops should be corrected or replaced before shipping.
 - Capability-module imagery should depict that module's operating scope and remain independently replaceable from repeated proof imagery elsewhere on the page.
-- The email-gated download CTA should feel like a project lead capture, not a newsletter widget; it must stay clear about the form endpoint and live credential dependency in Harness docs.
+- The email-and-phone-gated download CTA (button `Get the download`; the PDF is revealed on the page, not emailed) should feel like a project lead capture, not a newsletter widget; it must stay clear about the form endpoint and live credential dependency in Harness docs.
 
 Project Material Map pattern:
 - Use real project photography as an inspection surface, not a decorative gimmick.
@@ -330,6 +330,8 @@ Current source state:
 Contact should be direct and low-friction.
 
 The main Contact form now targets the Pages Function form endpoints rather than a local email draft. Keep the experience operational and honest: success/error states should be visible inline, direct email and phone should remain available, and production copy must not imply delivery of a sample until the submission is stored successfully.
+
+Every lead form asks for a phone number and it is required (Jay, 2026-11-20): Contact, Sample request, the Capability Statement download and any future CTA form. Label it `Phone`, use the placeholder `04xx xxx xxx`, and keep the shared rule in `src/lib/leadPhone.ts`.
 
 Until live Supabase write verification is complete in the Cloudflare environment, keep fallback direct contact channels visible and document the environment gap in Harness docs.
 

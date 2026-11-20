@@ -19,6 +19,7 @@ export async function formsJourney({ page, context, check, id, directory }) {
         await formPage.goto(`${LOCAL_APP}/contact${sample ? '?intent=sample-request' : ''}`)
         await formPage.getByLabel('Name', { exact: true }).fill(`Local ${kind} ${id}`)
         await formPage.getByLabel('Email', { exact: true }).fill(email)
+        await formPage.getByLabel('Phone', { exact: true }).fill('0400 000 000')
         if (sample) {
           await formPage.getByLabel('Stone or sample preference', { exact: true }).fill('Synthetic test stone')
           await formPage.getByLabel('Shipping address', { exact: true }).fill('1 Synthetic Street, Testville')
@@ -29,8 +30,9 @@ export async function formsJourney({ page, context, check, id, directory }) {
         ])
         assert.ok(response.ok(), JSON.stringify(await response.json()))
         await expect(formPage.getByText(sample ? 'Sample request received. Urblo will confirm availability and next steps.' : 'Project enquiry received. Urblo will review the brief and respond with practical next steps.', { exact: true })).toBeVisible()
-        const rows = await read(`${table}?email=eq.${email}&select=id,email,notification_status`)
+        const rows = await read(`${table}?email=eq.${email}&select=id,email,phone,notification_status`)
         assert.equal(rows.length, 1)
+        assert.equal(rows[0].phone, '0400 000 000', 'Required phone is stored with the lead')
         assert.equal(rows[0].notification_status, 'not_required', 'Local app has no external notification credentials')
         if (sample) assert.equal((await read(`sample_request_items?sample_request_id=eq.${rows[0].id}&select=id`)).length, 1)
         const anonymous = await localFetch(`${credentials.apiUrl}/rest/v1/${table}?email=eq.${email}&select=id`, { headers: { apikey: credentials.anonKey } })

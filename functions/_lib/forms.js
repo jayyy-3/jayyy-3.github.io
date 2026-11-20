@@ -97,6 +97,23 @@ function isEmail(value) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value);
 }
 
+// Every public lead form requires a contactable phone number (Jay, 2026-11-20).
+// Loose on purpose: mobiles, landlines and international numbers all pass.
+// Keep in sync with src/lib/leadPhone.ts.
+function isPhone(value) {
+  if (!/^[+\d\s().-]+$/.test(value)) return false;
+  const digits = value.replace(/\D/g, '').length;
+  return digits >= 8 && digits <= 15;
+}
+
+function validatePhone(fields, phone) {
+  if (!phone) {
+    fields.phone = 'Phone is required.';
+  } else if (!isPhone(phone)) {
+    fields.phone = 'Enter a valid phone number.';
+  }
+}
+
 function requireString(fields, key, value, label, minimumLength = 1) {
   if (value.length < minimumLength) {
     fields[key] = `${label} is required.`;
@@ -164,10 +181,12 @@ function validateEnquiryPayload(payload) {
   const fields = {};
   const name = normalizeLine(payload.name, 120);
   const email = normalizeLine(payload.email, 254).toLowerCase();
+  const phone = normalizeLine(payload.phone, 60);
   const message = normalizeText(payload.message, 4000);
 
   requireString(fields, 'name', name, 'Name', 2);
   requireString(fields, 'email', email, 'Email');
+  validatePhone(fields, phone);
   requireString(fields, 'message', message, 'Project notes', 10);
 
   if (email && !isEmail(email)) {
@@ -181,7 +200,7 @@ function validateEnquiryPayload(payload) {
   return {
     name,
     email,
-    phone: nullable(normalizeLine(payload.phone, 60)),
+    phone,
     company: nullable(normalizeLine(payload.company, 160)),
     projectType: normalizeLine(payload.projectType || payload.project_type || 'Project enquiry', 120),
     message,
@@ -194,12 +213,14 @@ function validateSampleRequestPayload(payload) {
   const fields = {};
   const name = normalizeLine(payload.name, 120);
   const email = normalizeLine(payload.email, 254).toLowerCase();
+  const phone = normalizeLine(payload.phone, 60);
   const shippingAddress = normalizeText(payload.shippingAddress || payload.shipping_address, 700);
   const sampleStone = normalizeLine(payload.sampleStone || payload.stone, 160);
   const quantity = Number.parseInt(payload.sampleQuantity || payload.quantity || '1', 10);
 
   requireString(fields, 'name', name, 'Name', 2);
   requireString(fields, 'email', email, 'Email');
+  validatePhone(fields, phone);
   requireString(fields, 'shippingAddress', shippingAddress, 'Shipping address', 8);
   requireString(fields, 'sampleStone', sampleStone, 'Stone or sample preference', 2);
 
@@ -222,7 +243,7 @@ function validateSampleRequestPayload(payload) {
   return {
     name,
     email,
-    phone: nullable(normalizeLine(payload.phone, 60)),
+    phone,
     company: nullable(normalizeLine(payload.company, 160)),
     shippingAddress,
     projectName: nullable(projectName),

@@ -177,8 +177,8 @@ describe('public form Functions', () => {
   ] as Array<[string, Handler, string]>) {
     test(`${name}: method, validation and configuration contracts`, async () => {
       const valid = name === 'enquiries'
-        ? { name: 'Contract Test', email: 'contract@example.com', message: 'Synthetic contract message for the enquiry form.', sourceRoute: '/contact' }
-        : { name: 'Contract Test', email: 'contract@example.com', shippingAddress: '5 Hamilton St, Oakleigh VIC 3166', sampleStone: 'Angola Black', sampleFinish: 'Honed', sampleQuantity: '2', message: 'Synthetic contract sample request.', sourceRoute: '/contact?intent=sample-request' }
+        ? { name: 'Contract Test', email: 'contract@example.com', phone: '+61 3 9000 0000', message: 'Synthetic contract message for the enquiry form.', sourceRoute: '/contact' }
+        : { name: 'Contract Test', email: 'contract@example.com', phone: '+61 3 9000 0000', shippingAddress: '5 Hamilton St, Oakleigh VIC 3166', sampleStone: 'Angola Black', sampleFinish: 'Honed', sampleQuantity: '2', message: 'Synthetic contract sample request.', sourceRoute: '/contact?intent=sample-request' }
       const results = {
         options: await call(handler, path, { method: 'OPTIONS' }),
         get: await call(handler, path),
