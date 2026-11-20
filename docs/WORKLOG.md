@@ -880,3 +880,10 @@ Scope: Jay (2026-10-22), reviewer decisions final. Body `image` and step images 
 - Capability submit button renamed "Email me the download" → "Get the download" (Jay, 2026-11-20): the PDF is revealed on the page and nothing is emailed to the visitor; source check guards the copy.
 - First branch CI run 44717933606 failed in `check-local-journeys.mjs`: the isolated-stack forms journey submitted Contact without a phone and was rejected by the new rule. `scripts/local-journeys/forms.mjs` now fills `Phone` and asserts the stored `phone` on the enquiry and sample request rows.
 - Not verified: Preview/production submit with the new rule (a live submit writes a production lead and sends email; not authorized here); Jay's acceptance.
+
+## 2026-11-20 — Required phone release (reviewer record)
+
+- PR #113 merged as `e4db9eb`. Branch CI run 44719251297 passed (Preview `https://369c5f2e.urblo-site.pages.dev`); release run 44720307454 passed and deployed immutable `https://51d5b8e5.urblo-site.pages.dev` with the bound apex/www smoke.
+- Production readback (no writes): `urblo.com.au/capabilities` phone input is `required` and the button reads "Get the download"; `/contact` phone input is `required` (www redirects to apex). `POST https://urblo.com.au/api/enquiries` without a phone returns `400 validation_failed` with `fields.phone = "Phone is required."`, before any database write.
+- Jay chose not to address three known pre-existing items: the Sample-mode whitespace-name error mentions project notes; the Capability PDF is a public static file (the form records interest, it does not lock the file); enquiry #14 predates the rule and has no phone.
+- Not verified: a real successful submission with a phone on production (writes a lead and sends email); Jay's acceptance.
