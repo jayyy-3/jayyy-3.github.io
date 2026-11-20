@@ -509,6 +509,7 @@ async function run() {
       {
         name: 'Urblo Live Check',
         email: enquiryEmail,
+        phone: '0400 000 000',
         company: 'Urblo Verification',
         projectType: 'Live persistence check',
         message: `Live Supabase form persistence verification marker ${marker}.`,
@@ -566,6 +567,7 @@ async function run() {
       {
         name: 'Urblo Sample Live Check',
         email: sampleEmail,
+        phone: '0400 000 000',
         company: 'Urblo Verification',
         shippingAddress: '1 Verification Street, Melbourne VIC 3000',
         projectName: 'Live Forms Check',

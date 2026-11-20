@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import TurnstileField from '../components/TurnstileField';
 import { turnstileSiteKey } from '../lib/turnstileConfig';
+import { leadPhoneError, leadPhonePlaceholder } from '../lib/leadPhone';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import PageIntro from '../components/ui/PageIntro';
@@ -117,8 +118,15 @@ export default function ContactPage() {
 
     if (!hasCoreFields || (!isSampleRequest && !hasProjectNotes)) {
       setFormError(
-        'Add your name, email, and project notes before sending the enquiry.',
+        'Add your name, email, phone, and project notes before sending the enquiry.',
       );
+      setSubmissionStatus('error');
+      return;
+    }
+
+    const phoneError = leadPhoneError(form.phone);
+    if (phoneError) {
+      setFormError(phoneError);
       setSubmissionStatus('error');
       return;
     }
@@ -316,8 +324,10 @@ export default function ContactPage() {
                     value={form.phone}
                     onChange={(event) => updateField('phone', event.target.value)}
                     className={inputClassName}
+                    type="tel"
                     autoComplete="tel"
-                    placeholder="Optional"
+                    placeholder={leadPhonePlaceholder}
+                    required
                   />
                 </div>
               </div>

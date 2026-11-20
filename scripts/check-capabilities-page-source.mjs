@@ -70,6 +70,9 @@ if (/mailto:|window\.location\.href|location\.href|location\.assign|location\.re
 }
 
 requireRegex('email validation before submit', /isEmail\(normalizedEmail\)/);
+requireRegex('required phone validation before submit', /leadPhoneError\(phone\)/);
+requireRegex('required phone sent with download lead', /phone: phone\.trim\(\)/);
+requireRegex('required phone input', /id="capability-download-phone"[^/]*?required\n/);
 requireRegex('source route included in payload', /const sourceRoute = `\$\{window\.location\.pathname\}\$\{window\.location\.search\}`/);
 requireRegex('Turnstile token included in submit payload', /turnstileToken:\s*turnstileToken\s*\|\|\s*undefined/);
 requireRegex(

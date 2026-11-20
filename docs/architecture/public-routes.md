@@ -17,7 +17,7 @@ Routing uses clean paths through `BrowserRouter`. Cloudflare Pages direct refres
 | `/projects` | `Projects` | Project listing page. |
 | `/projects/:slug` | `ProjectDetails` | Project detail page. White-start `PageIntro` (oversized title, previous/next aside) followed by the full-width project hero image. |
 | `/our-story` | `OurStory` | About page. |
-| `/capabilities` | `CapabilitiesPage` | Web-native 2026 Capability Statement page sourced from the Founder PDF, including a service-style capability hub, lifecycle support, national reach, selected proof ledger, and an email-gated PDF download form. |
+| `/capabilities` | `CapabilitiesPage` | Web-native 2026 Capability Statement page sourced from the Founder PDF, including a service-style capability hub, lifecycle support, national reach, selected proof ledger, and an email-and-phone-gated PDF download form. |
 | `/contact` | `ContactPage` | Contact surface with direct contact channels plus API-backed enquiry/sample-request submit flows. Sample mode is available at `/contact?intent=sample-request`; direct email and phone remain manual fallback channels. |
 | `/articles` | `ArticlesPage` | Article list page. |
 | `/articles/:slug` | `ArticlePage` | Article detail page. White-start `PageIntro` (breadcrumb, en-AU date, title) followed by the full-width cover image (2026-09-28; previously an overlay hero). |

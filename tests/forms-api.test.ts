@@ -183,6 +183,52 @@ test('empty enquiry fails validation before any Supabase call', async () => {
   });
 });
 
+test('enquiry without a valid phone fails validation before any Supabase call', async () => {
+  await withFetchMock(async (calls) => {
+    for (const [phone, expected] of [
+      [undefined, 'Phone is required.'],
+      ['   ', 'Phone is required.'],
+      ['call me', 'Enter a valid phone number.'],
+      ['12345', 'Enter a valid phone number.'],
+    ]) {
+      const response = await handleEnquiryRequest(
+        jsonRequest('/api/enquiries', {
+          name: 'Alex Designer',
+          email: 'alex@example.com',
+          phone,
+          message: 'We are reviewing stone seating for a civic streetscape project.',
+        }),
+        env,
+      );
+      const body = await readJson(response);
+
+      assert.equal(response.status, 400);
+      assert.equal(body.error.code, 'validation_failed');
+      assert.equal(body.error.fields.phone, expected);
+    }
+    assert.equal(calls.length, 0);
+  });
+});
+
+test('sample request without a phone fails validation before any Supabase call', async () => {
+  await withFetchMock(async (calls) => {
+    const response = await handleSampleRequest(
+      jsonRequest('/api/sample-requests', {
+        name: 'Mia Contractor',
+        email: 'mia@example.com',
+        shippingAddress: '5 Hamilton St, Oakleigh VIC 3166',
+        sampleStone: 'Angola Black',
+      }),
+      env,
+    );
+    const body = await readJson(response);
+
+    assert.equal(response.status, 400);
+    assert.equal(body.error.fields.phone, 'Phone is required.');
+    assert.equal(calls.length, 0);
+  });
+});
+
 test('invalid sample request fails validation before any Supabase call', async () => {
   await withFetchMock(async (calls) => {
     const response = await onSampleRequest({
@@ -229,6 +275,7 @@ test('valid enquiry inserts the row and records an audit event', async () => {
       jsonRequest('/api/enquiries', {
         name: 'Alex Designer',
         email: 'alex@example.com',
+        phone: '0400 000 000',
         company: 'Studio Example',
         projectType: 'Project enquiry',
         message: 'We are reviewing stone seating for a civic streetscape project.',
@@ -260,6 +307,7 @@ test('valid sample request uses the atomic RPC and records an audit event', asyn
       jsonRequest('/api/sample-requests', {
         name: 'Mia Contractor',
         email: 'mia@example.com',
+        phone: '0400 000 000',
         company: 'Builder Example',
         shippingAddress: '5 Hamilton St, Oakleigh VIC 3166',
         sampleStone: 'Angola Black',
@@ -302,6 +350,7 @@ test('Resend notification success marks the enquiry sent', async () => {
       jsonRequest('/api/enquiries', {
         name: 'Notify Success',
         email: 'notify@example.com',
+        phone: '0400 000 000',
         message: 'This should send a mocked Resend notification and mark the enquiry sent.',
         sourceRoute: '/contact',
       }),
@@ -335,6 +384,7 @@ test('SMTP2GO is preferred over Resend and marks the enquiry sent', async () => 
       jsonRequest('/api/enquiries', {
         name: 'SMTP2GO Success',
         email: 'smtp2go-success@example.com',
+        phone: '0400 000 000',
         message: 'This should send a mocked SMTP2GO notification and mark the enquiry sent.',
         sourceRoute: '/contact',
       }),
@@ -374,6 +424,7 @@ test('SMTP2GO rejection marks the sample request notification failed', async () 
       jsonRequest('/api/sample-requests', {
         name: 'SMTP2GO Failure',
         email: 'smtp2go-failure@example.com',
+        phone: '0400 000 000',
         shippingAddress: '12 Test Lane, Melbourne VIC 3000',
         sampleStone: 'Zen Grey',
         sampleQuantity: '1',
@@ -409,6 +460,7 @@ test('Resend failure marks the sample request notification failed', async () => 
       jsonRequest('/api/sample-requests', {
         name: 'Notify Failure',
         email: 'notify-failure@example.com',
+        phone: '0400 000 000',
         shippingAddress: '11 Test Lane, Melbourne VIC 3000',
         sampleStone: 'Zen Grey',
         sampleQuantity: '1',
@@ -444,6 +496,7 @@ test('audit logging failure does not fail the visitor response', async () => {
       jsonRequest('/api/enquiries', {
         name: 'Audit Resilient',
         email: 'audit@example.com',
+        phone: '0400 000 000',
         message: 'The visitor response should still succeed when audit logging fails.',
         sourceRoute: '/contact',
       }),
@@ -465,6 +518,7 @@ test('missing service-role configuration fails closed before any Supabase call',
       jsonRequest('/api/enquiries', {
         name: 'No Service Role',
         email: 'missing-service-role@example.com',
+        phone: '0400 000 000',
         message: 'This should fail closed before any Supabase call without server credentials.',
         sourceRoute: '/contact',
       }),
@@ -485,6 +539,7 @@ test('failed Turnstile verification rejects the enquiry before any insert', asyn
       jsonRequest('/api/enquiries', {
         name: 'Sam Reviewer',
         email: 'sam@example.com',
+        phone: '0400 000 000',
         message: 'This should be rejected when Turnstile fails.',
         turnstileToken: 'bad-token',
       }),

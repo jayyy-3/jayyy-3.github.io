@@ -25,6 +25,7 @@ import Reveal from '../components/ui/Reveal';
 import SectionHeading from '../components/ui/SectionHeading';
 import { siteCtas } from '../data/siteChrome';
 import { turnstileSiteKey } from '../lib/turnstileConfig';
+import { leadPhoneError, leadPhonePlaceholder } from '../lib/leadPhone';
 
 type SubmissionStatus = 'idle' | 'submitting' | 'success' | 'error';
 
@@ -335,6 +336,7 @@ function isEmail(value: string) {
 
 function CapabilityDownloadForm() {
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [status, setStatus] = useState<SubmissionStatus>('idle');
   const [message, setMessage] = useState<string | null>(null);
   const [turnstileError, setTurnstileError] = useState<string | null>(null);
@@ -349,12 +351,25 @@ function CapabilityDownloadForm() {
     setMessage(null);
   }
 
+  function updatePhone(value: string) {
+    setPhone(value);
+    setStatus('idle');
+    setMessage(null);
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (!isEmail(normalizedEmail)) {
       setStatus('error');
       setMessage('Enter a valid email address before downloading the statement.');
+      return;
+    }
+
+    const phoneError = leadPhoneError(phone);
+    if (phoneError) {
+      setStatus('error');
+      setMessage(phoneError);
       return;
     }
 
@@ -377,6 +392,7 @@ function CapabilityDownloadForm() {
         body: JSON.stringify({
           name: 'Capability statement download',
           email: normalizedEmail,
+          phone: phone.trim(),
           projectType: 'Capability statement download',
           message: 'Capability statement download requested from the Capabilities page.',
           sourceRoute,
@@ -393,7 +409,7 @@ function CapabilityDownloadForm() {
       }
 
       setStatus('success');
-      setMessage('Email captured. Download the 2026 Urblo Capability Statement below.');
+      setMessage('Details captured. Download the 2026 Urblo Capability Statement below.');
       setTurnstileToken('');
       setTurnstileResetSignal((current) => current + 1);
     } catch (error) {
@@ -422,6 +438,23 @@ function CapabilityDownloadForm() {
           className={inputClassName}
           autoComplete="email"
           placeholder="name@studio.com"
+          required
+          aria-describedby={message ? 'capability-download-message' : undefined}
+        />
+      </div>
+
+      <div>
+        <label htmlFor="capability-download-phone" className="urblo-meta mb-2 block text-inverse-muted">
+          Phone
+        </label>
+        <input
+          id="capability-download-phone"
+          type="tel"
+          value={phone}
+          onChange={(event) => updatePhone(event.target.value)}
+          className={inputClassName}
+          autoComplete="tel"
+          placeholder={leadPhonePlaceholder}
           required
           aria-describedby={message ? 'capability-download-message' : undefined}
         />
@@ -846,7 +879,7 @@ export default function CapabilitiesPage() {
               title="Download the full 2026 Capability Statement."
             />
             <p className="mt-6 max-w-[38rem] text-lead text-inverse-body">
-              Enter your email to record the request with Urblo, then download Natalie Ma's full
+              Enter your email and phone to record the request with Urblo, then download Natalie Ma's full
               capability statement as a PDF.
             </p>
             <CapabilityDownloadForm />

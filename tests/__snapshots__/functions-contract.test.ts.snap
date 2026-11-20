@@ -2813,6 +2813,7 @@ exports[`public form Functions > enquiries: method, validation and configuration
           "email": "Email is required.",
           "message": "Project notes is required.",
           "name": "Name is required.",
+          "phone": "Phone is required.",
         },
         "message": "Check the highlighted fields.",
       },
@@ -2910,6 +2911,7 @@ exports[`public form Functions > sample-requests: method, validation and configu
         "fields": {
           "email": "Email is required.",
           "name": "Name is required.",
+          "phone": "Phone is required.",
           "sampleStone": "Stone or sample preference is required.",
           "shippingAddress": "Shipping address is required.",
         },

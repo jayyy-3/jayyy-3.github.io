@@ -2,6 +2,12 @@
 
 Contact and Sample Request forms, form Functions, notifications, Turnstile and the Leads admin screen. Moved verbatim from `docs/ARCHITECTURE.md` (index) on 2026-09-26.
 
+### Required phone on every lead form (Jay, 2026-11-20)
+- Every public lead-capture form requires a phone number: Contact (Project enquiry), Sample request, the Capability Statement download, and any future CTA form that creates a lead.
+- One rule, enforced twice: `src/lib/leadPhone.ts` (`leadPhoneError`, placeholder `04xx xxx xxx`) in the browser and `validatePhone` in `functions/_lib/forms.js` on the server. Allowed characters are digits, spaces, `+`, `(`, `)`, `-`, `.`; 8–15 digits. Mobiles, landlines and international numbers pass; Australian format is not enforced.
+- Missing or invalid phone returns `400 validation_failed` with `fields.phone` before any Supabase call. The database `phone` columns stay nullable so older leads without a phone remain valid.
+- A new lead form must render a required `type="tel"` input, run `leadPhoneError` before submit and send `phone`; its source check should guard the required input.
+
 ### Contact Page Contract
 - Route: `/contact`
 - Page module: `src/pages/ContactPage.tsx`
@@ -9,6 +15,7 @@ Contact and Sample Request forms, form Functions, notifications, Turnstile and t
   - The main form submits through `/api/enquiries` by default.
   - Selecting `Sample request` or visiting `/contact?intent=sample-request` submits through `/api/sample-requests`.
   - `stone=<text>` prefills the sample preference field; the Stone Library compare CTA uses `/contact?intent=sample-request&stone=<comma-separated names>`.
+  - Name, email and phone are required for both modes; project notes are required for Project enquiry.
   - Sample Request mode shows sample preference, finish preference, quantity, project name, shipping address, and notes fields.
   - Visitor-facing success/failure states are rendered inline and no longer depend on opening a local email client.
   - Direct contact channels use `mailto:` and `tel:` links.

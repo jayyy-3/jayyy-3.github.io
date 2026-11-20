@@ -42,7 +42,7 @@ if (/mailto:|window\.location\.href|location\.href|location\.assign|location\.re
 
 requireIncludes(
   'project enquiry validation copy',
-  'Add your name, email, and project notes before sending the enquiry.',
+  'Add your name, email, phone, and project notes before sending the enquiry.',
 );
 requireIncludes(
   'sample request validation copy',
@@ -66,6 +66,8 @@ requireIncludes(
 );
 requireIncludes('direct email fallback channel', 'href="mailto:info@urblo.com.au?subject=Contact%20Us"');
 requireIncludes('direct phone fallback channel', 'href="tel:1300187256"');
+requireIncludes('required phone validation before submit', 'leadPhoneError(form.phone)', submitSource);
+requireRegex('required phone input', /id="contact-phone"[^/]*?required\n/);
 requireIncludes('public Turnstile site key env', 'import.meta.env.VITE_TURNSTILE_SITE_KEY', turnstileConfigSource);
 requireIncludes(
   'explicit Turnstile client script',
