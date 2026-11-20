@@ -35,6 +35,7 @@ requireIncludes('Founder statement headline', 'Urblo Capability Statement 2026')
 requireIncludes('reference-style capability map heading', 'A capability map for complex stone work.');
 requireIncludes('PDF download section anchor', 'id="capability-statement"');
 requireIncludes('download success CTA', 'Download PDF');
+requireIncludes('download submit CTA', "'Get the download'");
 requireIncludes('PDF download CTA data', 'capabilityStatementDownload', ctaSource);
 requireIncludes(
   'download PDF asset path',

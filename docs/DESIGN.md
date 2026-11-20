@@ -288,7 +288,7 @@ Current source state:
 - Selected proof should include project facts as a ledger, not only decorative project cards.
 - PDF-derived imagery must be visually audited before use; incorrectly rotated or low-information crops should be corrected or replaced before shipping.
 - Capability-module imagery should depict that module's operating scope and remain independently replaceable from repeated proof imagery elsewhere on the page.
-- The email-gated download CTA should feel like a project lead capture, not a newsletter widget; it must stay clear about the form endpoint and live credential dependency in Harness docs.
+- The email-and-phone-gated download CTA (button `Get the download`; the PDF is revealed on the page, not emailed) should feel like a project lead capture, not a newsletter widget; it must stay clear about the form endpoint and live credential dependency in Harness docs.
 
 Project Material Map pattern:
 - Use real project photography as an inspection surface, not a decorative gimmick.

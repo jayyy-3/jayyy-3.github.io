@@ -484,7 +484,7 @@ function CapabilityDownloadForm() {
 
       <div className="flex flex-col gap-3 sm:flex-row">
         <Button type="submit" variant="inverse" disabled={status === 'submitting'}>
-          {status === 'submitting' ? 'Capturing...' : 'Email me the download'}
+          {status === 'submitting' ? 'Capturing...' : 'Get the download'}
           <Send className="h-4 w-4" aria-hidden="true" />
         </Button>
 
